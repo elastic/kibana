@@ -1150,10 +1150,19 @@ const validateJoinCommand = (
   }
 
   let isIndexFound = false;
-  for (const { name } of joinIndices) {
+  for (const { name, aliases } of joinIndices) {
     if (index.name === name) {
       isIndexFound = true;
       break;
+    }
+
+    if (aliases) {
+      for (const aliasName of aliases) {
+        if (index.name === aliasName) {
+          isIndexFound = true;
+          break;
+        }
+      }
     }
   }
 

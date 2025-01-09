@@ -69,6 +69,36 @@ describe('autocomplete.suggest', () => {
           'join_index_alias_2',
         ]);
       });
+
+      test('discriminates between indices and aliases', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LEFT JOIN /');
+        const labels = suggestions.map((s) => s.label);
+      });
+    });
+
+    // describe('... = <alias> ...', () => {
+    //   test('suggests "ON" command option', async () => {
+    //     const { assertSuggestions } = await setup();
+
+    //     await assertSuggestions('FROM index | FROM join_index AS abc /', ['ON']);
+    //   });
+    // });
+
+    describe('... ON <condition>', () => {
+      test('shows "ON" keyword suggestion', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LEFT JOIN /');
+        const labels = suggestions.map((s) => s.label);
+      });
+
+      //   test('suggests comma after first condition was entered', async () => {
+      //     const { assertSuggestions } = await setup();
+
+      //     await assertSuggestions('FROM index | FROM join_index AS abc ON a = b/', [',']);
+      //   });
     });
 
     // describe('... <index> ...', () => {
@@ -91,22 +121,6 @@ describe('autocomplete.suggest', () => {
     //     const { assertSuggestions } = await setup();
 
     //     await assertSuggestions('FROM index | FROM join_index /', ['ON']);
-    //   });
-    // });
-
-    // describe('... = <alias> ...', () => {
-    //   test('suggests "ON" command option', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | FROM join_index AS abc /', ['ON']);
-    //   });
-    // });
-
-    // describe('... ON <condition>', () => {
-    //   test('suggests comma after first condition was entered', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | FROM join_index AS abc ON a = b/', [',']);
     //   });
     // });
   });

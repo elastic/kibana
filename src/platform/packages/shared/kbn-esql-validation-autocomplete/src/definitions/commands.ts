@@ -495,32 +495,33 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'join',
     types: [
-      {
-        name: 'left',
-        description: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.definitions.joinLeftDoc',
-          {
-            defaultMessage:
-              'Join index with another index, keep only matching documents from the right index',
-          }
-        ),
-      },
-      {
-        name: 'right',
-        description: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.definitions.joinRightDoc',
-          {
-            defaultMessage:
-              'Join index with another index, keep only matching documents from the left index',
-          }
-        ),
-      },
+      // TODO: uncomment, when in the future LEFT JOIN and RIGHT JOIN are supported.
+      // {
+      //   name: 'left',
+      //   description: i18n.translate(
+      //     'kbn-esql-validation-autocomplete.esql.definitions.joinLeftDoc',
+      //     {
+      //       defaultMessage:
+      //         'Join index with another index, keep only matching documents from the right index',
+      //     }
+      //   ),
+      // },
+      // {
+      //   name: 'right',
+      //   description: i18n.translate(
+      //     'kbn-esql-validation-autocomplete.esql.definitions.joinRightDoc',
+      //     {
+      //       defaultMessage:
+      //         'Join index with another index, keep only matching documents from the left index',
+      //     }
+      //   ),
+      // },
       {
         name: 'lookup',
         description: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.definitions.joinLookupDoc',
           {
-            defaultMessage: 'Join index with another "lookup" mode index',
+            defaultMessage: 'Join with a "lookup" mode index',
           }
         ),
       },

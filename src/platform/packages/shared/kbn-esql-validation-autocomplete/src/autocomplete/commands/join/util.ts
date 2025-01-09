@@ -8,6 +8,7 @@
  */
 
 import { ESQLCommand } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
 import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 import { SuggestionRawDefinition } from '../../types';
@@ -73,9 +74,14 @@ export const joinIndicesToSuggestions = (
   for (const index of indices) {
     mainSuggestions.push({
       label: index.name,
-      text: index.name,
-      detail: '',
-      kind: 'Keyword',
+      text: index.name + ' ',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.index',
+        {
+          defaultMessage: 'Index',
+        }
+      ),
       sortText: '0-INDEX-' + index.name,
     });
 
@@ -83,9 +89,14 @@ export const joinIndicesToSuggestions = (
       for (const alias of index.aliases) {
         aliasSuggestions.push({
           label: alias,
-          text: alias,
-          detail: '',
-          kind: 'Keyword',
+          text: alias + ' ',
+          kind: 'Issue',
+          detail: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.alias',
+            {
+              defaultMessage: 'Alias',
+            }
+          ),
           sortText: '1-ALIAS-' + alias,
         });
       }

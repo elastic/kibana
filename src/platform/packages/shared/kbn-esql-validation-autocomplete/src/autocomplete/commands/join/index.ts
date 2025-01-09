@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { type ESQLAstItem, ESQLAst } from '@kbn/esql-ast';
 import { ESQLCommand } from '@kbn/esql-ast/src/types';
 import type { ESQLCallbacks } from '../../../shared/types';
@@ -89,6 +90,23 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
       }
 
       return joinIndicesToSuggestions(joinIndices.indices);
+    }
+    case 'after_index': {
+      const suggestion: SuggestionRawDefinition = {
+        label: 'ON',
+        text: 'ON ',
+        detail: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.join.onKeyword',
+          {
+            defaultMessage: 'Specify JOIN field conditions',
+          }
+        ),
+        kind: 'Keyword',
+        sortText: '0-ON',
+        command: TRIGGER_SUGGESTION_COMMAND,
+      };
+
+      return [suggestion];
     }
   }
 

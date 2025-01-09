@@ -23,6 +23,7 @@ import {
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
+import { cacheNonParametrizedAsyncFunction } from './util/cache';
 
 interface EsqlPluginSetupDependencies {
   indexManagement: IndexManagementPluginSetup;
@@ -69,13 +70,17 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
 
-    const getJoinIndicesAutocomplete = async () => {
-      const result = await core.http.get<JoinIndicesAutocompleteResult>(
-        '/internal/esql/autocomplete/join/indices'
-      );
+    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
+      async () => {
+        const result = await core.http.get<JoinIndicesAutocompleteResult>(
+          '/internal/esql/autocomplete/join/indices'
+        );
 
-      return result;
-    };
+        return result;
+      },
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
 
     const start = {
       getJoinIndicesAutocomplete,
