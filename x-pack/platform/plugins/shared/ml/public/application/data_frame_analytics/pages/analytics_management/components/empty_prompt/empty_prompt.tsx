@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
@@ -43,34 +43,32 @@ export const AnalyticsEmptyPrompt: FC = () => {
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      hasBorder={false}
+      hasBorder={true}
       hasShadow={false}
       icon={
         <EuiImage
           size="fullWidth"
           src={dfaImage}
           alt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-            defaultMessage: 'Analyze your data with data frame analytics',
+            defaultMessage: 'Trained analysis of your data',
           })}
         />
       }
       title={
-        <h2>
+        <h4>
           <FormattedMessage
             id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-            defaultMessage="Analyze your data with data frame analytics"
+            defaultMessage="Trained analysis of your data"
           />
-        </h2>
+        </h4>
       }
       body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.overview.analyticsList.emptyPromptText"
-              defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
-            />
-          </p>
-        </>
+        <p>
+          <FormattedMessage
+            id="xpack.ml.overview.analyticsList.emptyPromptText"
+            defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
+          />
+        </p>
       }
       actions={[
         <EuiButton
@@ -83,13 +81,15 @@ export const AnalyticsEmptyPrompt: FC = () => {
             defaultMessage: 'Create data frame analytics job',
           })}
         </EuiButton>,
-        <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
-          <FormattedMessage
-            id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Read documentation"
-          />
-        </EuiLink>,
       ]}
+      // footer={
+      //   <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
+      //     <FormattedMessage
+      //       id="xpack.ml.common.readDocumentationLink"
+      //       defaultMessage="Read documentation"
+      //     />
+      //   </EuiLink>
+      // }
       data-test-subj="mlNoDataFrameAnalyticsFound"
     />
   );
