@@ -11,7 +11,7 @@ import type {
   LensConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 export const ItemTypeRT = rt.keyof({
   host: null,

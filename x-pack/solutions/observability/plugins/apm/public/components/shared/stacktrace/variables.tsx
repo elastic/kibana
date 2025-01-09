@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { KeyValueTable } from '../key_value_table';
 import { flattenObject } from '../../../../common/utils/flatten_object';
 

@@ -7,10 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ANNUAL_SECONDS,
-  CalculateImpactEstimates,
-} from '../../hooks/use_calculate_impact_estimates';
+import type { CalculateImpactEstimates } from '../../hooks/use_calculate_impact_estimates';
+import { ANNUAL_SECONDS } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
