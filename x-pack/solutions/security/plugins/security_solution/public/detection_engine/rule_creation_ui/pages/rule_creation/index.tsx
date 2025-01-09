@@ -206,7 +206,6 @@ const CreateRulePageComponent: React.FC = () => {
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
-  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -219,10 +218,14 @@ const CreateRulePageComponent: React.FC = () => {
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
+  const defineStepFormFields = defineStepForm.getFields();
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
     isQueryBarValid,
-    isThreatQueryBarValid,
+    isThreatQueryBarValid:
+      defineStepFormFields.threatIndex?.isValid &&
+      defineStepFormFields.threatQueryBar?.isValid &&
+      defineStepFormFields.threatMapping?.isValid,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
@@ -536,13 +539,11 @@ const CreateRulePageComponent: React.FC = () => {
           <StepDefineRule
             isLoading={isCreateRuleLoading || loading}
             indicesConfig={indicesConfig}
-            threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
-            setIsThreatQueryBarValid={setIsThreatQueryBarValid}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
             alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
@@ -550,7 +551,6 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
-            thresholdFields={defineStepData.threshold.field}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -574,7 +574,6 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      threatIndicesConfig,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
