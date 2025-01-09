@@ -76,12 +76,17 @@ var IGNORE_WARNINGS = [
     message:
       "Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.",
   },
-
-  // The `punycode` module is deprecated. Please use a userland alternative instead
-  // requires node-fetch >= 3, which requires esm, which requires webpack 5
+  // from node_modules/node-fetch, fix available that requires es modules, which requires webpack 5
   {
     name: 'DeprecationWarning',
     code: 'DEP0040',
+    message: 'The `punycode` module is deprecated. Please use a userland alternative instead.',
+  },
+  // from node_modules/http-proxy, no fix available
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0060',
+    message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
   },
 ];
 
