@@ -111,15 +111,19 @@ export class RuleMigrationsTaskClient {
         await Promise.all(
           ruleMigrations.map(async (ruleMigration) => {
             this.logger.debug(`Starting migration of rule "${ruleMigration.original_rule.title}"`);
+            if (ruleMigration.elastic_rule?.id) {
+              await this.data.rules.saveCompleted(ruleMigration);
+              return; // skip already installed rules
+            }
             try {
               const start = Date.now();
 
-              const invocation = agent.invoke(
-                { original_rule: ruleMigration.original_rule },
-                config
-              );
+              const invocationData = { original_rule: ruleMigration.original_rule };
+
               // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
-              const migrationResult = await withAbortRace<MigrateRuleState>(invocation);
+              const migrationResult = await withAbortRace<MigrateRuleState>(
+                agent.invoke(invocationData, config)
+              );
 
               const duration = (Date.now() - start) / 1000;
               this.logger.debug(
@@ -193,16 +197,16 @@ export class RuleMigrationsTaskClient {
       rules: rulesClient,
       savedObjects: soClient,
     });
+
     await ruleMigrationsRetriever.initialize();
 
-    const agent = getRuleMigrationAgent({
+    return getRuleMigrationAgent({
       connectorId,
       model,
       inferenceClient,
       ruleMigrationsRetriever,
       logger: this.logger,
     });
-    return agent;
   }
 
   /** Updates all the rules in a migration to be re-executed */
@@ -217,6 +221,7 @@ export class RuleMigrationsTaskClient {
     await this.data.rules.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
+    // await this.data.rules.updateRetry(migrationId);
     return { updated: true };
   }
 

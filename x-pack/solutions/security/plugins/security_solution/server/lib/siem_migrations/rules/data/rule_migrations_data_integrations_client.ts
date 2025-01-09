@@ -8,7 +8,7 @@
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PackageList } from '@kbn/fleet-plugin/common';
-import type { Integration } from '../types';
+import type { RuleMigrationIntegration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 /* This will be removed once the package registry changes is performed */
@@ -21,7 +21,7 @@ const MIN_SCORE = 40 as const;
 const RETURNED_INTEGRATIONS = 5 as const;
 
 /* This is a temp implementation to allow further development until https://github.com/elastic/package-registry/issues/1252 */
-const INTEGRATIONS = integrationsFile as Integration[];
+const INTEGRATIONS = integrationsFile as RuleMigrationIntegration[];
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
@@ -70,30 +70,18 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */
-  async retrieveIntegrations(semanticString: string): Promise<Integration[]> {
+  async retrieveIntegrations(semanticString: string): Promise<RuleMigrationIntegration[]> {
     const index = await this.getIndexName();
     const query = {
       bool: {
         should: [
-          {
-            semantic: {
-              query: semanticString,
-              field: 'elser_embedding',
-              boost: 1.5,
-            },
-          },
-          {
-            multi_match: {
-              query: semanticString,
-              fields: ['title^2', 'description'],
-              boost: 3,
-            },
-          },
+          { semantic: { query: semanticString, field: 'elser_embedding', boost: 1.5 } },
+          { multi_match: { query: semanticString, fields: ['title^2', 'description'], boost: 3 } },
         ],
       },
     };
     const results = await this.esClient
-      .search<Integration>({
+      .search<RuleMigrationIntegration>({
         index,
         query,
         size: RETURNED_INTEGRATIONS,
