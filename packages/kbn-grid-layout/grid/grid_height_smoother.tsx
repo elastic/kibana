@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
@@ -18,8 +18,6 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
-
-  const [globalCssVariables, setGlobalCssVariables] = useState<string>('');
 
   useEffect(() => {
     /**
@@ -71,7 +69,7 @@ export const GridHeightSmoother = ({
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
-        setGlobalCssVariables(`--kbnGridGutterSize: ${gutterSize};`);
+        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
       });
 
     return () => {
@@ -87,8 +85,6 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
-        ${globalCssVariables}
-
         margin: calc(var(--kbnGridGutterSize) * 1px);
         overflow-anchor: none;
         transition: height 500ms linear;
