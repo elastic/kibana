@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import {
   RuleTranslationResult,
@@ -21,6 +21,11 @@ import {
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
 
+const isModifiedEvent = (event: React.MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
+const isLeftClickEvent = (event: React.MouseEvent) => event.button === 0;
+
 interface ActionNameProps {
   disableActions?: boolean;
   migrationRule: RuleMigration;
@@ -34,20 +39,31 @@ const ActionName = ({
   openMigrationRuleDetails,
   installMigrationRule,
 }: ActionNameProps) => {
-  const { navigateToApp } = useKibana().services.application;
+  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+
+  const hrefRuleDetails = useMemo(
+    () =>
+      getUrlForApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(migrationRule.elastic_rule?.id ?? ''),
+      }),
+    [getUrlForApp, migrationRule.elastic_rule?.id]
+  );
+
+  const goToRuleDetails = useCallback(
+    (event: React.MouseEvent) => {
+      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
+        event.preventDefault();
+        navigateToUrl(hrefRuleDetails);
+      }
+    },
+    [hrefRuleDetails, navigateToUrl]
+  );
+
   if (migrationRule.elastic_rule?.id) {
-    const ruleId = migrationRule.elastic_rule.id;
     return (
-      <EuiLink
-        disabled={disableActions}
-        onClick={() => {
-          navigateToApp(APP_UI_ID, {
-            deepLinkId: SecurityPageName.rules,
-            path: getRuleDetailsUrl(ruleId),
-          });
-        }}
-        data-test-subj="viewRule"
-      >
+      // eslint-disable-next-line @elastic/eui/href-or-on-click
+      <EuiLink href={hrefRuleDetails} onClick={goToRuleDetails} data-test-subj="viewRule">
         {i18n.ACTIONS_VIEW_LABEL}
       </EuiLink>
     );
