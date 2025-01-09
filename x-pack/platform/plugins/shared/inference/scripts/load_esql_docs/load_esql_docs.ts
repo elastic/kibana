@@ -69,7 +69,7 @@ yargs(process.argv.slice(2))
           });
           log.info(`Using connector ${connector.connectorId}`);
 
-          const chatClient = kibanaClient.createInferenceClient({
+          const inferenceClient = kibanaClient.createInferenceClient({
             connectorId: connector.connectorId,
           });
 
@@ -84,14 +84,14 @@ yargs(process.argv.slice(2))
           log.info(`Retrieving and converting documentation from ${builtDocsDir}...`);
           const extraction = await extractDocEntries({
             builtDocsDir,
-            inferenceClient: chatClient,
+            inferenceClient,
             log,
           });
 
           log.info(`Rewriting documentation...`);
           const docFiles = await generateDoc({
             extraction,
-            inferenceClient: chatClient,
+            inferenceClient,
             log,
           });
 
