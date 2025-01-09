@@ -213,6 +213,7 @@ export function createQuery(
                 [semanticField]: {
                   type: SEMANTIC_FIELD_TYPE,
                   number_of_fragments: 2,
+                  order: 'score',
                 },
               },
             },
@@ -258,7 +259,16 @@ export function createQuery(
 
     const semanticFields = matches
       .filter((match) => match.semantic)
-      .map((match) => match.semantic.field);
+      .map((match) => match.semantic.field)
+      .filter((field) => {
+        let isSourceField = false;
+        indices.forEach((index) => {
+          if (sourceFields[index].includes(field)) {
+            isSourceField = true;
+          }
+        });
+        return isSourceField;
+      });
 
     return {
       retriever: {
@@ -273,6 +283,7 @@ export function createQuery(
                 acc[field] = {
                   type: SEMANTIC_FIELD_TYPE,
                   number_of_fragments: 2,
+                  order: 'score',
                 };
                 return acc;
               }, {}),
