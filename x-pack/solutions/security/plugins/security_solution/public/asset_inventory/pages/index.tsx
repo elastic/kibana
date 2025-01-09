@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useKibana } from '../../common/lib/kibana';
-import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
+
+const AssetInventoryLazy = lazy(() => import('../components/app'));
 
 export const AssetInventoryContainer = React.memo(() => {
-  const { assetInventory } = useKibana().services;
-
   return (
     <SecuritySolutionPageWrapper noPadding>
-      {assetInventory.getAssetInventoryPage({})}
-      <SpyRoute pageName={SecurityPageName.assetInventory} />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <AssetInventoryLazy />
+      </Suspense>
     </SecuritySolutionPageWrapper>
   );
 });
