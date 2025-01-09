@@ -92,7 +92,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         paddingSize="s"
         grow={false}
         css={css`
-          border-bottom: 1px solid ${euiTheme.border.thin};
+          border-bottom: ${euiTheme.border.thin};
         `}
       >
         <EuiFlexGroup
