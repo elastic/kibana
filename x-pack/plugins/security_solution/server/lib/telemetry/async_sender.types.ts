@@ -6,6 +6,7 @@
  */
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core-analytics-server';
 import { type TelemetryChannel } from './types';
 import type { ITelemetryReceiver } from './receiver';
 
@@ -20,7 +21,8 @@ export interface IAsyncTelemetryEventsSender {
     fallbackQueueConfig: QueueConfig,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
-    telemetryUsageCounter?: IUsageCounter
+    telemetryUsageCounter?: IUsageCounter,
+    analytics?: AnalyticsServiceSetup
   ) => void;
   start: (telemetryStart?: TelemetryPluginStart) => void;
   stop: () => Promise<void>;
@@ -28,6 +30,7 @@ export interface IAsyncTelemetryEventsSender {
   simulateSend: (channel: TelemetryChannel, events: unknown[]) => string[];
   updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
   updateDefaultQueueConfig: (config: QueueConfig) => void;
+  reportEBT: <T>(eventTypeOpts: EventTypeOpts<T>, eventData: T) => void;
 }
 
 /**
