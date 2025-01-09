@@ -20,7 +20,12 @@ export const createDetectionEngineMicrosoftDefenderRuleIfNeeded = async (
   const ruleName = 'Promote Microsoft Defender alerts';
   const tag = 'dev-script-run-microsoft-defend-host';
   const indexNamespace = namespace ? `-${namespace}` : '';
-  const index = [`logs-microsoft_defender_endpoint.log${indexNamespace}*`];
+  const index = [
+    `logs-microsoft_defender_endpoint.log${indexNamespace}*`,
+    `logs-m365_defender.alert${indexNamespace}*`,
+    `logs-m365_defender.incident${indexNamespace}*`,
+    `logs-m365_defender.log${indexNamespace}*`,
+  ];
   const ruleQueryValue = 'cloud.instance.id:*';
 
   const { data } = await findRules(kbnClient, {

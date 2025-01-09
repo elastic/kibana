@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const MICROSOFT_DEFENDER_INTEGRATION_PACKAGE_NAME = 'microsoft_defender_endpoint';
-
 export const DEFAULT_OAUTH_SERVER_URL = 'https://login.microsoftonline.com';
 export const DEFAULT_OAUTH_SCOPE =
   'https://securitycenter.onmicrosoft.com/windowsatpservice/.default';
