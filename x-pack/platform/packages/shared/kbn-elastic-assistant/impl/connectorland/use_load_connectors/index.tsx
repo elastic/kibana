@@ -25,7 +25,7 @@ const QUERY_KEY = ['elastic-assistant, load-connectors'];
 export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
-  inferenceEnabled: boolean;
+  inferenceEnabled?: boolean;
 }
 
 const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
@@ -33,7 +33,7 @@ const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 export const useLoadConnectors = ({
   http,
   toasts,
-  inferenceEnabled,
+  inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
   if (inferenceEnabled) {
     actionTypes.push('.inference');
