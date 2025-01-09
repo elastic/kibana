@@ -18,6 +18,7 @@ export {
   timeUnitRT,
   timeSizeRT,
   groupByRT,
+  ThresholdRT,
 } from './latest';
 export {
   Comparator as ComparatorV1,
@@ -30,12 +31,20 @@ export {
   timeUnitRT as timeUnitRTV1,
   timeSizeRT as timeSizeRTV1,
   groupByRT as groupByRTV1,
+  ThresholdRT as ThresholdRTV1,
 } from './v1';
 
-export type { LogThresholdParams, CountRuleParams, RatioRuleParams, TimeUnit } from './latest';
 export type {
-  LogThresholdParams as LogThresholdParamsV,
+  LogThresholdParams,
+  CountRuleParams,
+  RatioRuleParams,
+  TimeUnit,
+  Threshold,
+} from './latest';
+export type {
+  LogThresholdParams as LogThresholdParamsV1,
   CountRuleParams as CountRuleParamsV1,
   RatioRuleParams as RatioRuleParamsV1,
   TimeUnit as TimeUnitV1,
+  Threshold as ThresholdV1,
 } from './v1';

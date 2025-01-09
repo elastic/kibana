@@ -41,10 +41,9 @@ import {
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import type {
   PartialRuleParams,
-  Threshold,
   Criterion,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Comparator } from '../../../../../common/alerting/logs/log_threshold/types';
+import { Comparator, Threshold } from '@kbn/response-ops-rule-params/log_threshold';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
 import type { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../common/http_api';
 import { getLogAlertsChartPreviewDataAlertParamsSubsetRT } from '../../../../../common/http_api';

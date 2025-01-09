@@ -45,26 +45,6 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
-export const validateKQLStringFilter = (value: string) => {
-  if (value === '') {
-    // Allow clearing the filter.
-    return;
-  }
-
-  try {
-    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
-      allowLeadingWildcards: true,
-      queryStringOptions: {},
-      ignoreFilterIfFieldNotInIndex: false,
-    });
-  } catch (e) {
-    return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
-      values: { errorMessage: e?.message },
-    });
-  }
-};
-
 export const createScopedLogger = (
   logger: Logger,
   scope: string,
@@ -244,9 +224,9 @@ export const getFormattedGroupBy = (
       const groupSetKeys = group.split(',');
       groupByKeysObjectMapping[group] = Array.isArray(groupBy)
         ? groupBy.reduce((result: Group[], groupByItem, index) => {
-            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
-            return result;
-          }, [])
+          result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+          return result;
+        }, [])
         : [{ field: groupBy, value: group }];
     });
   }

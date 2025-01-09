@@ -10,12 +10,9 @@
 import { schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
+import { oneOfLiterals, validateKQLStringFilter, LEGACY_COMPARATORS } from '../common/utils';
 
-export enum LEGACY_COMPARATORS {
-  OUTSIDE_RANGE = 'outside',
-}
-
-export enum Aggregators {
+enum Aggregators {
   COUNT = 'count',
   AVERAGE = 'avg',
   SUM = 'sum',
@@ -27,20 +24,6 @@ export enum Aggregators {
   P99 = 'p99',
   LAST_VALUE = 'last_value',
 }
-
-// utils?
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: (value) =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
-
-export const validateKQLStringFilter = (value: string) => {
-  if (value === '') {
-    // Allow clearing the filter.
-    return;
-  }
-};
 
 const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 

@@ -9,6 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -31,6 +33,26 @@ export const validateIsStringElasticsearchJSONFilter = (value: string) => {
     return errorMessage;
   } catch (e) {
     return errorMessage;
+  }
+};
+
+export const validateKQLStringFilter = (value: string) => {
+  if (value === '') {
+    // Allow clearing the filter.
+    return;
+  }
+
+  try {
+    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+      ignoreFilterIfFieldNotInIndex: false,
+    });
+  } catch (e) {
+    return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
+      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
+      values: { errorMessage: e?.message },
+    });
   }
 };
 

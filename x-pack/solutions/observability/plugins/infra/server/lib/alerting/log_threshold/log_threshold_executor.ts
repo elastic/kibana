@@ -39,17 +39,14 @@ import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_thres
 import { logThresholdParamsRT } from '@kbn/response-ops-rule-params/log_threshold';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
-  CountRuleParams,
   CountCriteria,
   GroupedSearchQueryResponse,
-  RatioRuleParams,
   UngroupedSearchQueryResponse,
   ExecutionTimeRange,
   Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
 import {
   AlertStates,
-  Comparator,
   getDenominator,
   getNumerator,
   GroupedSearchQueryResponseRT,
@@ -59,6 +56,7 @@ import {
   isRatioRuleParams,
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
+import { Comparator, type CountRuleParams, type RatioRuleParams } from '@kbn/response-ops-rule-params/log_threshold';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import type { InfraBackendLibs } from '../../infra_types';
 import type { AdditionalContext } from '../common/utils';
@@ -121,141 +119,141 @@ const checkValueAgainstComparatorMap: {
 
 export const createLogThresholdExecutor =
   (libs: InfraBackendLibs) =>
-  async (
-    options: RuleExecutorOptions<
-      LogThresholdRuleTypeParams,
-      LogThresholdRuleTypeState,
-      LogThresholdAlertState,
-      LogThresholdAlertContext,
-      LogThresholdActionGroups,
-      LogThresholdAlert
-    >
-  ) => {
-    const { services, params, spaceId, startedAt } = options;
-    const { basePath } = libs;
-    const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
-    if (!alertsClient) {
-      throw new AlertsClientError();
-    }
-
-    const alertReporter: LogThresholdAlertReporter = async (
-      id,
-      reason,
-      value,
-      threshold,
-      actions,
-      rootLevelContext
+    async (
+      options: RuleExecutorOptions<
+        LogThresholdRuleTypeParams,
+        LogThresholdRuleTypeState,
+        LogThresholdAlertState,
+        LogThresholdAlertContext,
+        LogThresholdActionGroups,
+        LogThresholdAlert
+      >
     ) => {
-      const alertContext =
-        actions != null
-          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
-          : {};
+      const { services, params, spaceId, startedAt } = options;
+      const { basePath } = libs;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
-      if (actions && actions.length > 0) {
-        actions.forEach((actionSet) => {
-          const { actionGroup, context: actionContext } = actionSet;
-          const alertInstanceId = (actionContext.group || id) as string;
-          const { uuid, start } = alertsClient.report({
-            id: alertInstanceId,
-            actionGroup,
-            state: {
-              alertState: AlertStates.ALERT,
-            },
-          });
-          const indexedStartedAt = start ?? startedAt.toISOString();
-          const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-          const viewInAppUrl = addSpaceIdToPath(
-            basePath.publicBaseUrl,
-            spaceId,
-            relativeViewInAppUrl
-          );
+      const alertReporter: LogThresholdAlertReporter = async (
+        id,
+        reason,
+        value,
+        threshold,
+        actions,
+        rootLevelContext
+      ) => {
+        const alertContext =
+          actions != null
+            ? actions.reduce((next, action) => Object.assign(next, action.context), {})
+            : {};
 
-          const context = {
-            ...actionContext,
-            timestamp: startedAt.toISOString(),
-            viewInAppUrl,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
-          };
+        if (actions && actions.length > 0) {
+          actions.forEach((actionSet) => {
+            const { actionGroup, context: actionContext } = actionSet;
+            const alertInstanceId = (actionContext.group || id) as string;
+            const { uuid, start } = alertsClient.report({
+              id: alertInstanceId,
+              actionGroup,
+              state: {
+                alertState: AlertStates.ALERT,
+              },
+            });
+            const indexedStartedAt = start ?? startedAt.toISOString();
+            const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
 
-          const instances = alertInstanceId.split(',');
-          const groups =
-            alertInstanceId !== '*'
-              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
+            const context = {
+              ...actionContext,
+              timestamp: startedAt.toISOString(),
+              viewInAppUrl,
+              alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+            };
+
+            const instances = alertInstanceId.split(',');
+            const groups =
+              alertInstanceId !== '*'
+                ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
                   resultGroups.push({ field: groupByItem, value: instances[index].trim() });
                   return resultGroups;
                 }, [])
-              : undefined;
+                : undefined;
 
-          const payload = {
-            [ALERT_EVALUATION_THRESHOLD]: threshold,
-            [ALERT_EVALUATION_VALUE]: value,
-            [ALERT_REASON]: reason,
-            [ALERT_CONTEXT]: alertContext,
-            [ALERT_GROUP]: groups,
-            ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroups(groups),
-          };
+            const payload = {
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_EVALUATION_VALUE]: value,
+              [ALERT_REASON]: reason,
+              [ALERT_CONTEXT]: alertContext,
+              [ALERT_GROUP]: groups,
+              ...flattenAdditionalContext(rootLevelContext),
+              ...getEcsGroups(groups),
+            };
 
-          alertsClient.setAlertData({
-            id: alertInstanceId,
-            payload,
-            context,
+            alertsClient.setAlertData({
+              id: alertInstanceId,
+              payload,
+              context,
+            });
           });
+        }
+      };
+
+      const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
+
+      try {
+        const validatedParams = decodeOrThrow(logThresholdParamsRT)(params);
+
+        const logSourcesService =
+          logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
+        const { indices, timestampField, runtimeMappings } = await logsShared.logViews
+          .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
+          .getResolvedLogView(validatedParams.logView);
+
+        if (!isRatioRuleParams(validatedParams)) {
+          await executeAlert(
+            validatedParams,
+            timestampField,
+            indices,
+            runtimeMappings,
+            scopedClusterClient.asCurrentUser,
+            alertReporter,
+            alertsClient,
+            startedAt.valueOf()
+          );
+        } else {
+          await executeRatioAlert(
+            validatedParams,
+            timestampField,
+            indices,
+            runtimeMappings,
+            scopedClusterClient.asCurrentUser,
+            alertReporter,
+            alertsClient,
+            startedAt.valueOf()
+          );
+        }
+
+        const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+        processRecoveredAlerts({
+          alertsClient,
+          basePath,
+          recoveredAlerts,
+          spaceId,
+          startedAt,
+          validatedParams,
         });
+      } catch (e) {
+        throw new Error(e);
       }
+
+      return { state: {} };
     };
-
-    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
-
-    try {
-      const validatedParams = decodeOrThrow(logThresholdParamsRT)(params);
-
-      const logSourcesService =
-        logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
-
-      const { indices, timestampField, runtimeMappings } = await logsShared.logViews
-        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
-        .getResolvedLogView(validatedParams.logView);
-
-      if (!isRatioRuleParams(validatedParams)) {
-        await executeAlert(
-          validatedParams,
-          timestampField,
-          indices,
-          runtimeMappings,
-          scopedClusterClient.asCurrentUser,
-          alertReporter,
-          alertsClient,
-          startedAt.valueOf()
-        );
-      } else {
-        await executeRatioAlert(
-          validatedParams,
-          timestampField,
-          indices,
-          runtimeMappings,
-          scopedClusterClient.asCurrentUser,
-          alertReporter,
-          alertsClient,
-          startedAt.valueOf()
-        );
-      }
-
-      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
-      processRecoveredAlerts({
-        alertsClient,
-        basePath,
-        recoveredAlerts,
-        spaceId,
-        startedAt,
-        validatedParams,
-      });
-    } catch (e) {
-      throw new Error(e);
-    }
-
-    return { state: {} };
-  };
 
 export async function executeAlert(
   ruleParams: CountRuleParams,
@@ -385,19 +383,19 @@ const getESQuery = (
   };
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(
-        alertParams,
-        timestampField,
-        indexPattern,
-        runtimeMappings,
-        executionTimeRange
-      )
+      alertParams,
+      timestampField,
+      indexPattern,
+      runtimeMappings,
+      executionTimeRange
+    )
     : getUngroupedESQuery(
-        alertParams,
-        timestampField,
-        indexPattern,
-        runtimeMappings,
-        executionTimeRange
-      );
+      alertParams,
+      timestampField,
+      indexPattern,
+      runtimeMappings,
+      executionTimeRange
+    );
 };
 
 export const processUngroupedResults = (
@@ -987,14 +985,14 @@ const getContextAggregation = (
   const additionalContextAgg =
     fieldsList.length > 0
       ? {
-          additionalContext: {
-            top_hits: {
-              size: 1,
-              fields: fieldsList,
-              _source: false,
-            },
+        additionalContext: {
+          top_hits: {
+            size: 1,
+            fields: fieldsList,
+            _source: false,
           },
-        }
+        },
+      }
       : null;
 
   return additionalContextAgg;

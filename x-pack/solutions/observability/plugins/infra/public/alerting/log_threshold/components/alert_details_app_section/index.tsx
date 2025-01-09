@@ -23,12 +23,12 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
-  Comparator,
   ComparatorToi18nMap,
   ComparatorToi18nSymbolsMap,
   isRatioRule,
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
+import { Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
