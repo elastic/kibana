@@ -382,6 +382,39 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isRootStream",
+        "type": "Function",
+        "tags": [],
+        "label": "isRootStream",
+        "description": [],
+        "signature": [
+          "(subject: any) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isRootStream.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "subject",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isSchema",
         "type": "Function",
         "tags": [],

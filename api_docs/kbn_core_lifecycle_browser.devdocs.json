@@ -475,11 +475,11 @@
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/public/types.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/plugin.ts"
+                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -507,11 +507,11 @@
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/public/types.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
+                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
               },
               {
                 "plugin": "dataVisualizer",
