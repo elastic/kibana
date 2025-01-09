@@ -221,7 +221,7 @@ export async function getNativeConnectorDeprecations(
           content: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
             defaultMessage:
               '"Native Connectors" are managed services in Elastic-managed environments such as Elastic Cloud Hosted and ' +
-              'Elastic Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
+              'Elastic Cloud Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
               'before this upgrade can proceed.',
           }),
         },
