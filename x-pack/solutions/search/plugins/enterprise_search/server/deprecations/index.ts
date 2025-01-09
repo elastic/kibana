@@ -61,7 +61,8 @@ export function getEnterpriseSearchNodeDeprecation(
         ...[
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.gotocloud', {
             values: { baseUrl: cloud.baseUrl },
-            defaultMessage: 'Go to {baseUrl} and select this deployment. Or click the link above to go straight there.',
+            defaultMessage:
+              'Go to {baseUrl} and select this deployment. Or click the link above to go straight there.',
           }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.clickedit', {
             defaultMessage: "Click the 'Edit' tab",
@@ -364,7 +365,8 @@ export async function getNativeConnectorDeprecations(
                 'xpack.enterpriseSearch.deprecations.missingIntegrationServer.gotocloud',
                 {
                   values: { baseUrl: cloud.baseUrl },
-                  defaultMessage: 'Go to {baseUrl} and select this deployment. Or click the link above to go straight there.',
+                  defaultMessage:
+                    'Go to {baseUrl} and select this deployment. Or click the link above to go straight there.',
                 }
               ),
               i18n.translate(
