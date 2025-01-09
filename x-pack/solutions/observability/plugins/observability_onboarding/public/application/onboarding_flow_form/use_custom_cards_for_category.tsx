@@ -116,7 +116,6 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          release: 'preview',
         },
       ];
 
@@ -188,7 +187,6 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          release: 'preview',
         },
       ];
 
