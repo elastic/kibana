@@ -184,8 +184,6 @@ run(
 
           await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
         }
-      } else {
-        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([
