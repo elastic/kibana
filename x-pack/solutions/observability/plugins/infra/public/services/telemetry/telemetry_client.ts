@@ -7,7 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
+import type {
   AddMetricsCalloutEventParams,
   AssetDashboardLoadedParams,
   AssetDetailsFlyoutViewedParams,
@@ -16,10 +16,10 @@ import {
   HostFlyoutFilterActionParams,
   HostsViewQueryHostsCountRetrievedParams,
   HostsViewQuerySubmittedParams,
-  InfraTelemetryEventTypes,
   ITelemetryClient,
   PerformanceMetricInnerEvents,
 } from './types';
+import { InfraTelemetryEventTypes } from './types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions

@@ -10,15 +10,12 @@ import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { offsetRt } from '../../../../common/comparison_rt';
-import {
-  getMobileCrashGroupMainStatistics,
-  MobileCrashGroupMainStatisticsResponse,
-} from './get_crash_groups/get_crash_group_main_statistics';
-import {
-  MobileCrashesGroupPeriodsResponse,
-  getMobileCrashesGroupPeriods,
-} from './get_mobile_crash_group_detailed_statistics';
-import { CrashDistributionResponse, getCrashDistribution } from './distribution/get_distribution';
+import type { MobileCrashGroupMainStatisticsResponse } from './get_crash_groups/get_crash_group_main_statistics';
+import { getMobileCrashGroupMainStatistics } from './get_crash_groups/get_crash_group_main_statistics';
+import type { MobileCrashesGroupPeriodsResponse } from './get_mobile_crash_group_detailed_statistics';
+import { getMobileCrashesGroupPeriods } from './get_mobile_crash_group_detailed_statistics';
+import type { CrashDistributionResponse } from './distribution/get_distribution';
+import { getCrashDistribution } from './distribution/get_distribution';
 
 const mobileCrashDistributionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',

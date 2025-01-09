@@ -29,7 +29,7 @@ import {
   isRatioRule,
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
-import { AlertDetailsAppSectionProps } from './types';
+import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';

@@ -6,12 +6,13 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { AgentConfigInstructions } from './agent_config_instructions';
-import { getPolicyOptions, PolicyOption } from './get_policy_options';
+import type { PolicyOption } from './get_policy_options';
+import { getPolicyOptions } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
 
 export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
