@@ -9,7 +9,7 @@ import type { EntityAnalyticsMigrationsParams } from '.';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../risk_score/tasks/helpers';
 
-const TASK_TYPE = 'security-solution-ea-asset-criticality-copy-timestamp-to-event-ingested';
+const TASK_TYPE = 'security-solution-ea-risk-score-copy-timestamp-to-event-ingested';
 const TASK_ID = `${TASK_TYPE}-task-id`;
 const TASK_TIMEOUT = '15m';
 const TASK_SCOPE = ['securitySolution'];
