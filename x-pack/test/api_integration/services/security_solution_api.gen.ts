@@ -146,6 +146,7 @@ import {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
+import { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -1449,6 +1450,17 @@ detection engine rules.
         .query(props.query);
     },
     /**
+     * Run a shell command on an endpoint.
+     */
+    runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/endpoint/action/runscript', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
      */
     scheduleRiskEngineNow(kibanaSpace: string = 'default') {
@@ -1912,6 +1924,9 @@ export interface RetryRuleMigrationProps {
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
+}
+export interface RunScriptActionProps {
+  body: RunScriptActionRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
