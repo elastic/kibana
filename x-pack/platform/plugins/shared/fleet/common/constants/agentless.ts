@@ -8,3 +8,6 @@
 export const AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION = 'organization';
 export const AGENTLESS_GLOBAL_TAG_NAME_DIVISION = 'division';
 export const AGENTLESS_GLOBAL_TAG_NAME_TEAM = 'team';
+
+// Input types to disable for agentless integrations
+export const AGENTLESS_DISABLED_INPUTS = ['tcp', 'udp', 'filestream', 'http_endpoint', 'winlog'];

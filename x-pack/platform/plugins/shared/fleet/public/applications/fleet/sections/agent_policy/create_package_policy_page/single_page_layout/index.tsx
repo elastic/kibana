@@ -421,6 +421,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
+              setupTechnology={selectedSetupTechnology}
             />
           )}
 

@@ -21,7 +21,12 @@ import {
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  SetupTechnology,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
@@ -38,6 +43,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
+  setupTechnology: SetupTechnology;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -47,6 +53,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
+  setupTechnology,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -82,6 +89,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               return packagePolicyInput ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
+                    setupTechnology={setupTechnology}
                     packageInput={packageInput}
                     packageInfo={packageInfo}
                     packageInputStreams={packageInputStreams}
