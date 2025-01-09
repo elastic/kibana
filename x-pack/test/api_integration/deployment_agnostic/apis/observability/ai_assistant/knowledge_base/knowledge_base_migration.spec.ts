@@ -28,7 +28,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
 
-  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', () => {
+  async function getKnowledgeBaseEntries() {
+    const res = (await es.search({
+      index: '.kibana-observability-ai-assistant-kb*',
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    })) as SearchResponse<
+      KnowledgeBaseEntry & {
+        semantic_text: {
+          text: string;
+          inference: { inference_id: string; chunks: Array<{ text: string; embeddings: any }> };
+        };
+      }
+    >;
+
+    return res.hits.hits;
+  }
+  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
@@ -51,26 +73,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
     });
-
-    async function getKnowledgeBaseEntries() {
-      const res = (await es.search({
-        index: '.kibana-observability-ai-assistant-kb*',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      })) as SearchResponse<
-        KnowledgeBaseEntry & {
-          semantic_text: {
-            text: string;
-            inference: { inference_id: string; chunks: Array<{ text: string; embeddings: any }> };
-          };
-        }
-      >;
-
-      return res.hits.hits;
-    }
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {

@@ -58,7 +58,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat/complete', () => {
+  describe('/internal/observability_ai_assistant/chat/complete', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
+    this.tags(['failsOnMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
 

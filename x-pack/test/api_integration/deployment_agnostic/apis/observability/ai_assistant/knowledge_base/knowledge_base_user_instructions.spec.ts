@@ -33,8 +33,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
 
   describe('Knowledge base user instructions', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192751
-    this.tags(['skipMKI']);
+    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
+    this.tags(['failsOnMKI']);
     before(async () => {
       await createKnowledgeBaseModel(ml);
       const { status } = await observabilityAIAssistantAPIClient.admin({

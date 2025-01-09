@@ -19,15 +19,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  const KNOWLEDGE_BASE_SETUP_API_URL = '/internal/observability_ai_assistant/kb/setup';
-
   describe('/internal/observability_ai_assistant/kb/setup', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192886 kb/setup error
-    this.tags(['skipMKI']);
+    before(async () => {
+      await deleteKnowledgeBaseModel(ml).catch(() => {});
+      await deleteInferenceEndpoint({ es }).catch(() => {});
+    });
+
     it('returns model info when successful', async () => {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient.admin({
-        endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         params: {
           query: {
             model_id: TINY_ELSER.id,
@@ -46,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     it('returns error message if model is not deployed', async () => {
       const res = await observabilityAIAssistantAPIClient.admin({
-        endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         params: {
           query: {
             model_id: TINY_ELSER.id,
@@ -68,7 +69,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
         const { status } = await observabilityAIAssistantAPIClient.viewer({
-          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
           params: {
             query: {
               model_id: TINY_ELSER.id,

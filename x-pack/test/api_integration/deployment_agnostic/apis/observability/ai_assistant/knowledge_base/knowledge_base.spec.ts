@@ -22,8 +22,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('Knowledge base', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192886 kb/setup error
-    this.tags(['skipMKI']);
+    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
+    this.tags(['failsOnMKI']);
     before(async () => {
       await createKnowledgeBaseModel(ml);
 

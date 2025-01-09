@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
@@ -19,9 +20,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
+  describe('/internal/observability_ai_assistant/kb/status', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/205677
+    this.tags(['failsOnMKI']);
 
-  describe('/internal/observability_ai_assistant/kb/status', () => {
     beforeEach(async () => {
       await createKnowledgeBaseModel(ml);
       const { status } = await observabilityAIAssistantAPIClient.admin({
@@ -38,12 +40,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     afterEach(async () => {
       await deleteKnowledgeBaseModel(ml).catch((e) => {});
-      await deleteInferenceEndpoint({ es }).catch((e) => {});
+      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID }).catch((err) => {});
     });
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+        endpoint: 'GET /internal/observability_ai_assistant/kb/status',
       });
 
       expect(res.status).to.be(200);
@@ -57,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteKnowledgeBaseModel(ml);
 
       const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+        endpoint: 'GET /internal/observability_ai_assistant/kb/status',
       });
 
       expect(res.status).to.be(200);
@@ -73,7 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteInferenceEndpoint({ es });
 
       const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+        endpoint: 'GET /internal/observability_ai_assistant/kb/status',
       });
 
       expect(res.status).to.be(200);
@@ -85,10 +87,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       );
     });
 
+    it('returns correct status after elser is stopped', async () => {
+      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID });
+
+      const res = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+      });
+
+      expect(res.status).to.be(200);
+
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.ready).to.be(false);
+    });
+
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
         const { status } = await observabilityAIAssistantAPIClient.viewer({
-          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         });
         expect(status).to.be(403);
       });
