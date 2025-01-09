@@ -42,7 +42,7 @@ const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};
 `;
 
-// TODO Are these inspect query being displayed?
+// This is not used by the inspect feature but required by the refresh button
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 const SERVICE_RISK_QUERY_ID = 'serviceRiskScoreKpiQuery';
