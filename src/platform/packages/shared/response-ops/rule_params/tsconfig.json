@@ -6,5 +6,9 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/config-schema", "@kbn/ml-anomaly-utils"]
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/alerting-comparators",
+  ]
 }
