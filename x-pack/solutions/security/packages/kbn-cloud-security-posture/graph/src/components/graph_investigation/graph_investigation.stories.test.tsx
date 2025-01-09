@@ -16,6 +16,8 @@ import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';
 import { GRAPH_INVESTIGATION_TEST_ID, GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
+import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
+import { USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from '../mock/constants';
 
 setProjectAnnotations(previewAnnotations);
 
@@ -78,7 +80,7 @@ describe('GraphInvestigation Component', () => {
   });
 
   it('shows error on bad kql syntax', async () => {
-    const mockDangerToast = action('notifications:addError');
+    const mockDangerToast = action(NOTIFICATIONS_ADD_ERROR_ACTION);
     const { getByTestId } = renderStory();
 
     // Act
@@ -92,7 +94,7 @@ describe('GraphInvestigation Component', () => {
   });
 
   it('calls refresh on submit button click', () => {
-    const mockRefresh = action('refresh');
+    const mockRefresh = action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION);
     const { getByTestId } = renderStory();
 
     // Act
