@@ -50,8 +50,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
 
-  const hasConditions =
-    (rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0) > 0 ? true : false;
+  const hasConditions = !!(rule?.params.criteria as any[])?.length;
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
   } = useLoadRuleTypesQuery({
