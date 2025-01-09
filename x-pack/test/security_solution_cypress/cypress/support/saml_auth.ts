@@ -11,7 +11,7 @@ import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
@@ -97,6 +97,31 @@ export const samlAuthentication = async (
 
       const apiKey = response.data.encoded;
       return apiKey;
+    },
+    setServerlessCustomRole: async ({
+      roleDescriptor,
+      roleName,
+    }: {
+      roleDescriptor: { kibana: any; elasticsearch: any };
+      roleName: string;
+    }): Promise<AxiosResponse<any, any>> => {
+      const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
+      const customRoleDescriptors = {
+        kibana: roleDescriptor.kibana,
+        elasticsearch: roleDescriptor.elasticsearch ?? [],
+      };
+
+      const response = await axios.put(
+        `${kbnHost}/api/security/role/${roleName}`,
+        customRoleDescriptors,
+        {
+          headers: {
+            ...INTERNAL_REQUEST_HEADERS,
+            ...adminCookieHeader,
+          },
+        }
+      );
+      return response;
     },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
