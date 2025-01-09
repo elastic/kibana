@@ -14,13 +14,7 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(parameters: GetDefinitionParams<T>) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -83,13 +77,7 @@
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>>, client: SettingsClient) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -99,13 +87,7 @@
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>[]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definitions.ts",
@@ -131,13 +113,7 @@
                 "text": "UiSettingMetadata"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definitions.ts",

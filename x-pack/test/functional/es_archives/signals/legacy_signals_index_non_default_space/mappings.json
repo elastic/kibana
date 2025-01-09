@@ -1,0 +1,29 @@
+{
+    "type": "index",
+    "value": {
+      "aliases": {
+        ".siem-signals-another-space": {
+          "is_write_index": false
+        }
+      },
+      "index": ".siem-signals-another-space-legacy",
+      "mappings": {
+        "_meta": {
+          "version": 1
+        },
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "signal": { "type": "object" }
+        }
+      },
+      "settings": {
+        "index": {
+          "lifecycle": {
+            "indexing_complete": true
+          }
+        }
+      }
+    }
+  }
