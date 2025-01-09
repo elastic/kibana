@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WelcomeImage } from '../welcome_image';
+import { AssetImage } from '../asset_image';
 import { AddProcessorButton } from './add_processor_button';
 
 interface EnrichmentEmptyPromptProps {
@@ -18,9 +18,8 @@ interface EnrichmentEmptyPromptProps {
 export const EnrichmentEmptyPrompt = ({ onAddProcessor }: EnrichmentEmptyPromptProps) => {
   return (
     <EuiEmptyPrompt
-      color="subdued"
       titleSize="xs"
-      icon={<WelcomeImage />}
+      icon={<AssetImage />}
       title={title}
       body={body}
       actions={[<AddProcessorButton onClick={onAddProcessor} />]}

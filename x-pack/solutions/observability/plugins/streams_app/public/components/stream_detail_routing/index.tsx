@@ -40,7 +40,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
-import { WelcomeImage } from '../welcome_image';
+import { AssetImage } from '../asset_image';
 
 function useRoutingState() {
   const [childUnderEdit, setChildUnderEdit] = React.useState<
@@ -462,7 +462,7 @@ function PreviewPanelIllustration({
           max-width: 350px;
         `}
       >
-        <WelcomeImage />
+        <AssetImage />
         {previewSampleFetch.loading ? (
           <EuiText size="xs" textAlign="center">
             <EuiLoadingSpinner size="s" />

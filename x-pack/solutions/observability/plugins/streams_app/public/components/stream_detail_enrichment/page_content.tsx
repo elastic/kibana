@@ -104,7 +104,7 @@ export function StreamDetailEnrichmentContent({
   const hasProcessors = processors.length > 0;
 
   if (isRootStream(definition)) {
-    return <RootStreamEmptyPrompt streamName={definition.name} />;
+    return <RootStreamEmptyPrompt />;
   }
 
   return (

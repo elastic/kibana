@@ -8,26 +8,18 @@
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WelcomeImage } from '../welcome_image';
+import { AssetImage } from '../asset_image';
 
-interface RootStreamEmptyPromptProps {
-  streamName: string;
-}
-
-export const RootStreamEmptyPrompt = ({ streamName }: RootStreamEmptyPromptProps) => {
+export const RootStreamEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
-      color="subdued"
       titleSize="xs"
-      icon={<WelcomeImage />}
+      icon={<AssetImage type="noResults" />}
       title={
         <h2>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.title',
-            {
-              defaultMessage: 'Processing data is not allowed for the "{streamName}" root stream',
-              values: { streamName },
-            }
+            { defaultMessage: 'Processing data is not allowed for root streams.' }
           )}
         </h2>
       }
