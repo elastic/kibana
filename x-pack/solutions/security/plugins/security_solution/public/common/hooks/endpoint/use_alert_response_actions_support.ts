@@ -106,7 +106,10 @@ export const useAlertResponseActionsSupport = (
       return 'crowdstrike';
     }
 
-    if (eventModuleValues.includes('microsoft_defender_endpoint')) {
+    if (
+      eventModuleValues.includes('microsoft_defender_endpoint') ||
+      eventModuleValues.includes('m365_defender')
+    ) {
       return 'microsoft_defender_endpoint';
     }
 
