@@ -186,6 +186,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
+  getSerializedFormat: (column, columnId, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
+    return field?.format ?? { id: 'number' };
+  },
   toESQL: (column, columnId, indexPattern) => {
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 

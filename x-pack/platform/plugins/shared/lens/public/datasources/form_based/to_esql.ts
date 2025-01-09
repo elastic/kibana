@@ -289,6 +289,8 @@ export function getESQLForLayer(
       });
 
     esql.push(`SORT ${sorts.join(', ')}`);
+  } else {
+    esql.push(stats);
   }
 
   return {
