@@ -13,6 +13,7 @@ import {
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
+  ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
 
 import {
@@ -24,7 +25,6 @@ import {
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
-import { inferenceManagerMock } from '../inference_endpoint/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
 
@@ -40,7 +40,6 @@ describe('PackageInstaller', () => {
   let logger: MockedLogger;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let productDocClient: ReturnType<typeof installClientMock.create>;
-  let endpointManager: ReturnType<typeof inferenceManagerMock.create>;
 
   let packageInstaller: PackageInstaller;
 
@@ -48,13 +47,11 @@ describe('PackageInstaller', () => {
     logger = loggerMock.create();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     productDocClient = installClientMock.create();
-    endpointManager = inferenceManagerMock.create();
     packageInstaller = new PackageInstaller({
       artifactsFolder,
       logger,
       esClient,
       productDocClient,
-      endpointManager,
       artifactRepositoryUrl,
       kibanaVersion,
     });
@@ -68,6 +65,7 @@ describe('PackageInstaller', () => {
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
+    ensureDefaultElserDeployedMock.mockReset();
   });
 
   describe('installPackage', () => {
@@ -87,7 +85,7 @@ describe('PackageInstaller', () => {
         productVersion: '8.16',
       });
       const indexName = getProductDocIndexName('kibana');
-      expect(endpointManager.ensureInternalElserInstalled).toHaveBeenCalledTimes(1);
+      expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
@@ -128,9 +126,7 @@ describe('PackageInstaller', () => {
     it('executes the steps in the right order', async () => {
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
-      expect(callOrder(endpointManager.ensureInternalElserInstalled)).toBeLessThan(
-        callOrder(downloadToDiskMock)
-      );
+      expect(callOrder(ensureDefaultElserDeployedMock)).toBeLessThan(callOrder(downloadToDiskMock));
       expect(callOrder(downloadToDiskMock)).toBeLessThan(callOrder(openZipArchiveMock));
       expect(callOrder(openZipArchiveMock)).toBeLessThan(callOrder(loadMappingFileMock));
       expect(callOrder(loadMappingFileMock)).toBeLessThan(callOrder(createIndexMock));
