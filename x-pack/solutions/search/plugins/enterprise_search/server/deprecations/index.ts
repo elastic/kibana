@@ -111,15 +111,15 @@ export function getEnterpriseSearchNodeDeprecation(
         message: {
           type: 'markdown',
           content: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
+            values: {addendum: addendum},
             defaultMessage:
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
               '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
               '- Once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Web Crawler ' +
               'will cease to operate.\n' +
-              '- Native Connectors will also stop running syncs until the 9.x upgrade is completed.\n\n' +
-              'For full details, see the documentation.' +
-              addendum,
+              '- Scheduled syncs for Elastic-managed connectors will automatically resume after the 9.x upgrade completes.\n\n' +
+              'For full details, see the documentation.{addendum}',
           }),
         },
         documentationUrl: docsUrl,
