@@ -140,6 +140,7 @@ export const RuleFlyout = (props: RuleFlyoutProps) => {
           <RuleFlyoutEditFooter
             onCancel={onCancel}
             onSave={onSaveInternal}
+            onShowRequest={() => {} /* TODO */}
             isSaving={isSaving}
             hasErrors={hasErrors}
           />
@@ -147,6 +148,7 @@ export const RuleFlyout = (props: RuleFlyoutProps) => {
           <RuleFlyoutCreateFooter
             onCancel={onCancel}
             onSave={onSaveInternal}
+            onShowRequest={() => {} /* TODO */}
             goToNextStep={goToNextStep}
             goToPreviousStep={goToPreviousStep}
             isSaving={isSaving}

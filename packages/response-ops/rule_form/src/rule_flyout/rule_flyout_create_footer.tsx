@@ -20,6 +20,7 @@ import {
   RULE_FLYOUT_FOOTER_CANCEL_TEXT,
   RULE_FLYOUT_FOOTER_CREATE_TEXT,
   RULE_FLYOUT_FOOTER_NEXT_TEXT,
+  RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
 } from '../translations';
 
 export interface RuleFlyoutCreateFooterProps {
@@ -27,6 +28,7 @@ export interface RuleFlyoutCreateFooterProps {
   hasErrors: boolean;
   onCancel: () => void;
   onSave: () => void;
+  onShowRequest: () => void;
   hasNextStep: boolean;
   hasPreviousStep: boolean;
   goToNextStep: () => void;
@@ -35,6 +37,7 @@ export interface RuleFlyoutCreateFooterProps {
 export const RuleFlyoutCreateFooter = ({
   onCancel,
   onSave,
+  onShowRequest,
   hasErrors,
   isSaving,
   hasNextStep,
@@ -62,20 +65,18 @@ export const RuleFlyoutCreateFooter = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
-            {/* <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="primary"
-                data-test-subj="showRequestButton"
-                isDisabled={loadingHealthCheck || !isRuleValid}
-                onClick={onShowRequest}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleAddFooter.showRequestButtonLabel"
-                  defaultMessage="Show API request"
-                />
-              </EuiButton>
-            </EuiFlexItem> */}
+            {!hasNextStep && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  data-test-subj="ruleFlyoutFooterShowRequestButton"
+                  isDisabled={isSaving || hasErrors}
+                  onClick={onShowRequest}
+                >
+                  {RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               {hasNextStep ? (
                 <EuiButton

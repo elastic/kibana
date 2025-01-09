@@ -15,17 +15,23 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import React from 'react';
-import { RULE_FLYOUT_FOOTER_CANCEL_TEXT, RULE_FLYOUT_FOOTER_SAVE_TEXT } from '../translations';
+import {
+  RULE_FLYOUT_FOOTER_CANCEL_TEXT,
+  RULE_FLYOUT_FOOTER_SAVE_TEXT,
+  RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
+} from '../translations';
 
 export interface RuleFlyoutEditFooterProps {
   isSaving: boolean;
   hasErrors: boolean;
   onCancel: () => void;
   onSave: () => void;
+  onShowRequest: () => void;
 }
 export const RuleFlyoutEditFooter = ({
   onCancel,
   onSave,
+  onShowRequest,
   hasErrors,
   isSaving,
 }: RuleFlyoutEditFooterProps) => {
@@ -40,20 +46,17 @@ export const RuleFlyoutEditFooter = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
-            {/* <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false}>
               <EuiButton
-                fill
                 color="primary"
-                data-test-subj="showRequestButton"
-                isDisabled={loadingHealthCheck || !isRuleValid}
+                data-test-subj="ruleFlyoutFooterShowRequestButton"
+                isDisabled={isSaving || hasErrors}
                 onClick={onShowRequest}
               >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleAddFooter.showRequestButtonLabel"
-                  defaultMessage="Show API request"
-                />
+                {RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT}
               </EuiButton>
-            </EuiFlexItem> */}
+            </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
