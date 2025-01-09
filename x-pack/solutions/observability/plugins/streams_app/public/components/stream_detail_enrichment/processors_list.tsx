@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getProcessorType, isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
+import { css } from '@emotion/react';
 import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
 import { ProcessorDefinition } from './types';
 
@@ -68,8 +69,13 @@ const ProcessorListItem = ({
         <EuiText component="span" size="s">
           {type.toUpperCase()}
         </EuiText>
-        <EuiFlexItem>
-          <EuiText component="span" size="s" color="subdued">
+        <EuiFlexItem
+          /* Allow text to overflow in flex child nodes */
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
             {description}
           </EuiText>
         </EuiFlexItem>
