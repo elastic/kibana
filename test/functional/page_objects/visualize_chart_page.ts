@@ -281,7 +281,7 @@ export class VisualizeChartPageObject extends FtrService {
 
       await this.waitForVisualizationRenderingStabilized();
       // arbitrary color chosen, any available would do
-      const arbitraryColor = '#ed6ba2';
+      const arbitraryColor = '#ee72a6';
       const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
       if (!isOpen) {
         throw new Error('legend color selector not open');
