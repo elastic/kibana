@@ -242,7 +242,7 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForIndexPattern: (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions | undefined
+    options?: Omit<GetFieldsOptions, 'allowNoIndex' | 'pattern'>
   ) => Promise<FieldSpec[]>;
   /**
    * Get fields for index pattern string
@@ -599,7 +599,7 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
+    options?: Omit<GetFieldsOptions, 'allowNoIndex' | 'pattern'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,

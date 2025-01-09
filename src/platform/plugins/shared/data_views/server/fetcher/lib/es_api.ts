@@ -50,6 +50,7 @@ interface FieldCapsApiParams {
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -77,6 +78,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    abortSignal,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -90,7 +92,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },
-      { meta: true }
+      { meta: true, signal: abortSignal }
     );
   } catch (error) {
     // return an empty set for closed indices

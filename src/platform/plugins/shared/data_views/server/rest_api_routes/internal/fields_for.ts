@@ -8,6 +8,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';
@@ -126,6 +127,7 @@ export const validate: VersionedRouteValidation<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
+    const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
     const uiSettings = core.uiSettings.client;
@@ -175,6 +177,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         allowHidden,
         includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
+        abortSignal,
       });
 
       const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = {

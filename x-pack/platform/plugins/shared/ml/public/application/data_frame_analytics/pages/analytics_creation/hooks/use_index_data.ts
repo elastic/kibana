@@ -11,6 +11,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import type { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
@@ -105,13 +106,12 @@ export const useIndexData = (
 
       try {
         const nonEmptyFields = await dataViewsService.getFieldsForIndexPattern(dataView, {
-          // filled in by data views service
-          pattern: '',
           includeEmptyFields: false,
           // dummy filter, if no filter was provided the function would return all fields.
           indexFilter: {
             bool: { must: { match_all: {} } },
           },
+          abortSignal: abortController.current.signal,
         });
 
         const populatedFields = nonEmptyFields.map((field) => field.name);
@@ -120,8 +120,10 @@ export const useIndexData = (
           setDataViewFields(getPopulatedFieldsFromKibanaDataView(dataView, populatedFields));
         }
       } catch (e) {
-        setErrorMessage(extractErrorMessage(e));
-        setStatus(INDEX_STATUS.ERROR);
+        if (!isRequestAbortedError(e)) {
+          setErrorMessage(extractErrorMessage(e));
+          setStatus(INDEX_STATUS.ERROR);
+        }
       }
     }
 

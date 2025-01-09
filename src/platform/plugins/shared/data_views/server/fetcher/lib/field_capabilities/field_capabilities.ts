@@ -30,6 +30,7 @@ interface FieldCapabilitiesParams {
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -54,6 +55,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    abortSignal,
   } = params;
 
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
@@ -66,6 +68,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    abortSignal,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

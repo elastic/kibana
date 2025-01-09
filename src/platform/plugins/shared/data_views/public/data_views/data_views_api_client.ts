@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isRequestAbortedError, CustomAbortError } from '@kbn/server-route-repository-client';
 import { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
@@ -49,7 +50,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     url: string,
     query?: {},
     body?: string,
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
+    abortSignal?: AbortSignal
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
     const cacheOptions: { cache?: RequestCache } = forceRefresh ? { cache: 'no-cache' } : {};
@@ -59,21 +61,33 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const headers = userHash ? { 'user-hash': userHash } : undefined;
 
     const request = body
-      ? this.http.post<T>(url, { query, body, version, asResponse })
+      ? this.http.post<T>(url, { query, body, version, asResponse, signal: abortSignal })
       : this.http.fetch<T>(url, {
           query,
           version,
           ...cacheOptions,
           asResponse,
           headers,
+          signal: abortSignal,
         });
 
     return request.catch((resp) => {
-      if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-        throw new DataViewMissingIndices(resp.body.message);
+      // Handle errors with a body
+      if (resp.body) {
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+          throw new DataViewMissingIndices(resp.body.message);
+        }
+
+        throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
       }
 
-      throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+      // If the request was cancelled, pass on the AbortError so it can be handled by the caller
+      if (isRequestAbortedError(resp)) {
+        throw new CustomAbortError(resp.message);
+      }
+
+      // Handle other errors
+      throw new Error(resp?.message ?? 'Unknown error');
     });
   }
 
@@ -99,6 +113,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       allowHidden,
       fieldTypes,
       includeEmptyFields,
+      abortSignal,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
     const versionQueryParam = indexFilter ? {} : { apiVersion: version };
@@ -120,7 +135,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
-      forceRefresh
+      forceRefresh,
+      abortSignal
     ).then((response) => {
       return {
         indices: response?.body?.indices || [],
