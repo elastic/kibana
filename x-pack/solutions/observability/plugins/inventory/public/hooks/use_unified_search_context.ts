@@ -5,13 +5,12 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { useAdHocDataView } from './use_adhoc_data_view';
 import { useInventoryDecodedQueryParams } from './use_inventory_decoded_query_params';
 import { useInventoryAbortableAsync } from './use_inventory_abortable_async';
 import { groupEntityTypesByStatus } from '../utils/group_entity_types_by_status';
-import { useFetchEntityDefinitionIndexPattern } from './use_fetch_entity_definition_index_patterns';
 import { useKibana } from './use_kibana';
 import { useInventoryParams } from './use_inventory_params';
 
@@ -41,20 +40,42 @@ function useUnifiedSearch() {
     [entityTypes, inventoryAPIClient, kuery]
   );
 
-  const entityTypeIds = (value?.entityTypes.map((entityType) => entityType.id) ?? []).join(',');
+  const entityTypeIds = useMemo(
+    () => (value?.entityTypes.map((entityType) => entityType.id) ?? []).join(','),
+    [value?.entityTypes]
+  );
 
-  const { definitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
-    useFetchEntityDefinitionIndexPattern(entityTypeIds);
+  const {
+    value: definitionIndexPatterns = { definitionIndexPatterns: {} },
+    loading: isEntityDefinitionIndexPatternsLoading,
+  } = useInventoryAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entity/definitions/sources', {
+        params: {
+          query: {
+            types: entityTypeIds,
+          },
+        },
+        signal,
+      });
+    },
+    [inventoryAPIClient, entityTypeIds]
+  );
 
-  const allDefinitionIndexPatterns = Object.values(definitionIndexPatterns)
-    .flatMap((pattern) => pattern)
-    .join(',');
+  const allDefinitionIndexPatterns = useMemo(
+    () =>
+      Object.values(definitionIndexPatterns.definitionIndexPatterns)
+        .flatMap((pattern) => pattern)
+        .join(','),
+    [definitionIndexPatterns]
+  );
 
   const { dataView } = useAdHocDataView(allDefinitionIndexPatterns ?? '');
   const [refreshSubject$] = useState<Subject<void>>(new Subject());
 
   return {
     dataView,
+    definitionIndexPatterns,
     refreshSubject$,
     loading: loading || isEntityDefinitionIndexPatternsLoading,
     refresh,

@@ -13,7 +13,14 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context'
 import { GroupBySelector } from '../../components/group_by_selector';
 
 export function InventoryPage() {
-  const { refreshSubject$, value, refresh, loading } = useUnifiedSearchContext();
+  const {
+    refreshSubject$,
+    value,
+    refresh,
+    loading,
+    definitionIndexPatterns,
+    loading: isEntityDefinitionIndexPatternsLoading,
+  } = useUnifiedSearchContext();
 
   useEffectOnce(() => {
     const refreshSubscription = refreshSubject$.subscribe(refresh);
@@ -42,6 +49,8 @@ export function InventoryPage() {
             groupLabel={entityType.display_name}
             groupCount={entityType.count}
             isLoading={loading}
+            definitionIndexPatterns={definitionIndexPatterns.definitionIndexPatterns[entityType.id]}
+            isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
           />
         );
       })}

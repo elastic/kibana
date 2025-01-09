@@ -28,7 +28,7 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
   onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
-  definitionIndexPatterns: Record<string, string[]>;
+  definitionIndexPatterns: string[];
   isEntityDefinitionIndexPatternsLoading: boolean;
 }
 
@@ -128,7 +128,7 @@ export function EntitiesGrid({
           ) : (
             <EntityActions
               entity={entity}
-              definitionIndexPatterns={definitionIndexPatterns[entity.entityType]}
+              definitionIndexPatterns={definitionIndexPatterns}
               isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
               setShowActions={setShowActions}
             />

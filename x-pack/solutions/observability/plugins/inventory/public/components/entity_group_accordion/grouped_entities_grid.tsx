@@ -21,13 +21,18 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { EntitiesGrid } from '../entities_grid';
-import { useFetchEntityDefinitionIndexPattern } from '../../hooks/use_fetch_entity_definition_index_patterns';
 
 interface Props {
   groupValue: string;
+  definitionIndexPatterns: string[];
+  isEntityDefinitionIndexPatternsLoading: boolean;
 }
 
-export function GroupedEntitiesGrid({ groupValue }: Props) {
+export function GroupedEntitiesGrid({
+  groupValue,
+  definitionIndexPatterns,
+  isEntityDefinitionIndexPatternsLoading,
+}: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery } = query;
   const { pagination, entityTypes } = useInventoryDecodedQueryParams();
@@ -38,8 +43,6 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { definitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
-    useFetchEntityDefinitionIndexPattern(groupValue);
 
   const {
     value = { entities: [] },

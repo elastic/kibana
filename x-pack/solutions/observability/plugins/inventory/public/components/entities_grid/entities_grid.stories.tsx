@@ -17,9 +17,11 @@ import { entitiesMock } from './mock/entities_mock';
 
 interface EntityGridStoriesArgs {
   entityType?: string;
+  isEntityDefinitionIndexPatternsLoading?: boolean;
 }
 
 const entityTypeOptions = ['host', 'container', 'service'];
+const definitionIndexPatterns = ['filebeat-*', 'logs-*', 'metrics-*', 'metricbeat-*'];
 
 const stories: Meta<EntityGridStoriesArgs> = {
   title: 'app/inventory/entities_grid',
@@ -31,6 +33,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
       control: {
         type: 'select',
       },
+      isEntityDefinitionIndexPatternsLoading: false,
     },
   },
   args: { entityType: undefined },
@@ -38,7 +41,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
 
 export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [{ entityType }, updateArgs] = useArgs();
+  const [{ entityType, isEntityDefinitionIndexPatternsLoading }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
@@ -79,6 +82,8 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
           onChangeSort={setSort}
           pageIndex={pageIndex}
           onFilterByType={() => {}}
+          definitionIndexPatterns={definitionIndexPatterns}
+          isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -91,6 +96,7 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
   });
+  const [{ isEntityDefinitionIndexPatternsLoading }] = useArgs();
 
   return (
     <EntitiesGrid
@@ -102,6 +108,8 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
       onChangeSort={setSort}
       pageIndex={pageIndex}
       onFilterByType={() => {}}
+      definitionIndexPatterns={definitionIndexPatterns}
+      isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
     />
   );
 };

@@ -26,24 +26,23 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
 
     const entityDefinitionIndexPatterns = await Promise.all(
-      (types.split(',') ?? []).map(async (type) => {
+      types.split(',').map(async (type) => {
         const entityDefinitionsSource = await entityManagerClient.v2.readSourceDefinitions({
           type,
         });
-        return {
-          [type]: entityDefinitionsSource.flatMap((definition) => definition.index_patterns, []),
-        };
+        return entityDefinitionsSource.reduce(
+          (acc, { ['type_id']: typeId, index_patterns: indexPatterns }) => (
+            (acc[typeId] = indexPatterns), acc
+          ),
+          {} as Record<string, string[]>
+        );
       })
     );
 
     return {
-      definitionIndexPatterns: entityDefinitionIndexPatterns?.reduce(
-        (prev, current) => ({
-          ...prev,
-          ...current,
-        }),
-        {}
-      ),
+      definitionIndexPatterns: {
+        ...Object.fromEntries(entityDefinitionIndexPatterns.flatMap(Object.entries)),
+      },
     };
   },
 });
