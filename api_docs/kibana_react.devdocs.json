@@ -2409,13 +2409,7 @@
             "text": "ChromeStart"
           },
           " | undefined; customBranding?: ",
-          {
-            "pluginId": "@kbn/core-custom-branding-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-            "section": "def-public.CustomBrandingStart",
-            "text": "CustomBrandingStart"
-          },
+          "CustomBrandingStart",
           " | undefined; docLinks?: ",
           "DocLinksStart",
           " | undefined; executionContext?: ",
@@ -2433,21 +2427,9 @@
           " | undefined; overlays?: ",
           "OverlayStart",
           " | undefined; uiSettings?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           " | undefined; settings?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.SettingsStart",
-            "text": "SettingsStart"
-          },
+          "SettingsStart",
           " | undefined; fatalErrors?: ",
           "FatalErrorsSetup",
           " | undefined; deprecations?: ",
