@@ -9,7 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../',
   projects: [
-    // '<rootDir>/x-pack/solutions/security/plugins/security_solution/common/*/jest.config.js',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/common/*/jest.config.js',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/*/jest.config.js',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/*/jest.config.js',
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/scripts/junit_transformer/*/jest.config.js',

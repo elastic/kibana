@@ -166,7 +166,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Get a list of all exception list containers.
+     * Get a list of all exception lists.
      */
     findExceptionLists(props: FindExceptionListsProps, kibanaSpace: string = 'default') {
       return supertest
