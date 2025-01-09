@@ -13,3 +13,8 @@ export interface RuleMigrationStats extends RuleMigrationTaskStats {
   /** The sequential number of the migration */
   number: number;
 }
+
+export interface RetryRuleMigrationFilter {
+  failed?: boolean;
+  notFullyTranslated?: boolean;
+}

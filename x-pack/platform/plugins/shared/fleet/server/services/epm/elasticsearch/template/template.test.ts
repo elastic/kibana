@@ -786,6 +786,84 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
+  it('tests processing object field with more specific properties without wildcard', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: labels
+  type: object
+  object_type: keyword
+  object_type_mapping_type: '*'
+- name: labels.count
+  type: long
+`;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          labels: {
+            path_match: 'labels.*',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        labels: {
+          dynamic: true,
+          type: 'object',
+          properties: {
+            count: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
+  it('tests processing object field with more specific properties with wildcard', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  object_type_mapping_type: '*'
+- name: labels.count
+  type: long
+`;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'labels.*': {
+            path_match: 'labels.*',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        labels: {
+          dynamic: true,
+          type: 'object',
+          properties: {
+            count: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
   it('tests processing object field with subobjects set to false (case B)', () => {
     const objectFieldWithPropertyReversedLiteralYml = `
 - name: b.labels.*
@@ -2126,6 +2204,60 @@ describe('EPM template', () => {
         })
       );
     });
+
+    it('should rollover on mapper exception that change enabled object mappings', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
+        throw new errors.ResponseError({
+          body: {
+            error: {
+              type: 'mapper_exception',
+              reason: `Mappings update for logs-cisco_ise.log-default failed due to ResponseError: mapper_exception
+ 	Root causes:
+		mapper_exception: the [enabled] parameter can't be updated for the object mapping [cisco_ise.log.cisco_av_pair]`,
+            },
+          },
+        } as any);
+      });
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
