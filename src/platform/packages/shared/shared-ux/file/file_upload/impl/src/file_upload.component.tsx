@@ -19,7 +19,6 @@ import {
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
-  mathWithUnits,
 } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
@@ -80,15 +79,12 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
     const id = useGeneratedHtmlId({ prefix: 'filesFileUpload' });
     const errorId = `${id}_error`;
 
-    // FIXME: add a token for this on euiTheme.components. https://github.com/elastic/eui/issues/8217
-    const formMaxWidth = mathWithUnits(euiTheme.size.base, (x) => x * 25);
-
     return (
       <div
         data-test-subj="filesFileUpload"
         css={[
           css`
-            max-width: ${fullWidth ? '100%' : formMaxWidth};
+            max-width: ${fullWidth ? '100%' : euiTheme.components.forms.maxWidth};
           `,
           fullWidth ? styles.fullWidth : undefined,
           compressed ? styles.horizontalContainer : undefined,
