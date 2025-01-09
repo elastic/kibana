@@ -40,6 +40,27 @@ paths:
             application/json:
               schema:
                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionList'
+              examples:
+                detectionExceptionList:
+                  value:
+                    id: b2f4a715-6ab1-444c-8b1e-3fa1b1049429
+                    list_id: d6390d60-bce3-4a48-9002-52db600f329c
+                    type: detection
+                    name: Sample Detection Exception List [Duplicate]
+                    description: This is a sample detection type exception
+                    immutable: false
+                    namespace_type: single
+                    os_types: []
+                    tags: [malware]
+                    version: 1
+                    _version: WzExNDY1LDFd
+                    tie_breaker_id: 6fa670bd-666d-4c9c-9f1e-d1dbc516e985
+                    created_at: |
+                      2025-01-09T16:19:50.280Z
+                    created_by: elastic
+                    updated_at: |
+                      2025-01-09T16:19:50.280Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -48,19 +69,26 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: |
+                      [request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      statusCode: 401
-                      error: Unauthorized
-                      message: |
-                        [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
         403:
           description: Not enough privileges response
           content:
@@ -90,3 +118,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

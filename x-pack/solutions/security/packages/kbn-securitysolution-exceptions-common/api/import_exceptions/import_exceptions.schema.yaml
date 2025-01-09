@@ -91,7 +91,7 @@ paths:
                   - success_exception_list_items
                   - success_count_exception_list_items
               examples:
-                summary:
+                withoutErrors:
                   value:
                     errors: []
                     success: true
@@ -100,6 +100,26 @@ paths:
                     success_count_exception_lists: 1
                     success_exception_list_items: true
                     success_count_exception_list_items: 1
+                withErrors:
+                  value:
+                    errors:
+                      - error:
+                          status_code: 400
+                          message: |
+                            Error found importing exception list: Invalid value \"4\" supplied to \"list_id\"
+                        list_id: (unknown list_id)
+                      - error:
+                          status_code: 409
+                          message: |
+                            Found that item_id: \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" already exists. Import of item_id: \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" skipped.
+                        list_id: 7d7cccb8-db72-4667-b1f3-648efad7c1ee
+                        item_id: f7fd00bb-dba8-4c93-9d59-6cbd427b6330
+                    success: false,
+                    success_count: 0,
+                    success_exception_lists: false,
+                    success_count_exception_lists: 0,
+                    success_exception_list_items: false,
+                    success_count_exception_list_items: 0
         400:
           description: Invalid input data response
           content:
@@ -114,13 +134,13 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      statusCode: 401
-                      error: Unauthorized
-                      message: |
-                        [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
         403:
           description: Not enough privileges response
           content:
@@ -133,6 +153,11 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

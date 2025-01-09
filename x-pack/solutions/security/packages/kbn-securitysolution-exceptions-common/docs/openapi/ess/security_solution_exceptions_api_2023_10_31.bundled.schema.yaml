@@ -66,39 +66,38 @@ paths:
           content:
             application/json:
               examples:
-                simpleList:
+                ruleExceptionItems:
                   value:
-                    ruleExceptionItems:
-                      - _version: WzQsMV0=
-                        comments: []
-                        created_at: |
-                          2025-01-07T20:07:33.119Z
-                        created_by: elastic
-                        description: This is a sample detection type exception item.
-                        entries:
-                          - field: actingProcess.file.signer
-                            operator: excluded
-                            type: exists
-                          - field: host.name
-                            operator: included
-                            type: match_any
-                            value:
-                              - saturn
-                              - jupiter
-                        id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
-                        item_id: simple_list_item
-                        list_id: simple_list
-                        name: Sample Exception List Item
-                        namespace_type: single
-                        os_types:
-                          - linux
-                        tags:
-                          - malware
-                        tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
-                        type: simple
-                        updated_at: |
-                          2025-01-07T20:07:33.119Z
-                        updated_by: elastic
+                    - _version: WzQsMV0=
+                      comments: []
+                      created_at: |
+                        2025-01-07T20:07:33.119Z
+                      created_by: elastic
+                      description: This is a sample detection type exception item.
+                      entries:
+                        - field: actingProcess.file.signer
+                          operator: excluded
+                          type: exists
+                        - field: host.name
+                          operator: included
+                          type: match_any
+                          value:
+                            - saturn
+                            - jupiter
+                      id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                      item_id: simple_list_item
+                      list_id: simple_list
+                      name: Sample Exception List Item
+                      namespace_type: single
+                      os_types:
+                        - linux
+                      tags:
+                        - malware
+                      tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                      type: simple
+                      updated_at: |
+                        2025-01-07T20:07:33.119Z
+                      updated_by: elastic
               schema:
                 items:
                   $ref: '#/components/schemas/ExceptionListItem'
@@ -107,6 +106,19 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badPayload:
+                  value:
+                    error: Bad Request
+                    message: |
+                      Invalid request payload JSON format
+                    statusCode: 400
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: |
+                      [request params]: id: Invalid uuid
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -115,19 +127,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -138,6 +150,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -201,13 +218,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -215,19 +234,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -250,6 +269,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -312,13 +336,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -326,19 +352,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -349,17 +375,22 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message": 'exception list id: "foo" does not exist'
+                    status_code": 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message": 'exception list id: "foo" does not exist'
-                      status_code": 404
           description: Exception list item not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -522,12 +553,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: |
+                      [request body]: list_id: Expected string, received number
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: |
-                    [request body]: list_id: Expected string, received number
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -535,19 +568,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  authenticationFailure:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -558,18 +591,23 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                alreadyExists:
+                  value:
+                    message: |
+                      exception list id: \simple_list\ already exists
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  alreadyExists:
-                    value:
-                      message: |
-                        exception list id: \simple_list\ already exists
-                      status_code: 409
           description: Exception list already exists response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -632,7 +670,8 @@ paths:
                 simpleList:
                   value:
                     _version: WzExLDFd
-                    created_at: 2025-01-07T20:43:55.264Z
+                    created_at: |
+                      2025-01-07T20:43:55.264Z
                     created_by: elastic
                     description: Different description
                     id: fa7f545f-191b-4d32-b1f0-c7cd62a79e55
@@ -645,7 +684,8 @@ paths:
                       - draft malware
                     tie_breaker_id: 319fe983-acdd-4806-b6c4-3098eae9392f
                     type: detection
-                    updated_at: 2025-01-07T21:32:03.726Z
+                    updated_at: |
+                      2025-01-07T21:32:03.726Z
                     updated_by: elastic
                     version: 2
               schema:
@@ -654,12 +694,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: |
+                      [request body]: list_id: Expected string, received number
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: |
-                    [request body]: list_id: Expected string, received number
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -667,19 +709,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -690,17 +732,22 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message": 'exception list id: "foo" does not exist'
+                    status_code": 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message": 'exception list id: "foo" does not exist'
-                      status_code": 404
           description: Exception list not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -742,12 +789,42 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                detectionExceptionList:
+                  value:
+                    _version: WzExNDY1LDFd
+                    created_at: |
+                      2025-01-09T16:19:50.280Z
+                    created_by: elastic
+                    description: This is a sample detection type exception
+                    id: b2f4a715-6ab1-444c-8b1e-3fa1b1049429
+                    immutable: false
+                    list_id: d6390d60-bce3-4a48-9002-52db600f329c
+                    name: Sample Detection Exception List [Duplicate]
+                    namespace_type: single
+                    os_types: []
+                    tags:
+                      - malware
+                    tie_breaker_id: 6fa670bd-666d-4c9c-9f1e-d1dbc516e985
+                    type: detection
+                    updated_at: |
+                      2025-01-09T16:19:50.280Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'foo'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -756,19 +833,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -796,6 +873,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -844,6 +926,28 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                exportSavedObjectsResponse:
+                  value: >
+                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This
+                    is a sample detection type
+                    exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample
+                    Detection Exception
+                    List","namespace_type":"single","os_types":[],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
+
+                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This
+                    is a sample endpoint type
+                    exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some
+                    host","another
+                    host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample
+                    Endpoint Exception
+                    List","namespace_type":"single","os_types":["linux"],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
+
+                    {"exported_exception_list_count":1,"exported_exception_list_item_count":1,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
               schema:
                 description: >-
                   A `.ndjson` file containing specified exception list and its
@@ -854,6 +958,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: list_id: Required, namespace_type:
+                      Required
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -862,19 +974,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -885,16 +997,22 @@ paths:
         '404':
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/SiemErrorResponse'
+              examples:
                 notFound:
                   value:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1026,13 +1144,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1040,19 +1160,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1063,6 +1183,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1132,7 +1257,31 @@ paths:
           content:
             application/json:
               examples:
-                summary:
+                withErrors:
+                  value:
+                    errors:
+                      - error:
+                          message: >
+                            Error found importing exception list: Invalid value
+                            \"4\" supplied to \"list_id\"
+                          status_code: 400
+                        list_id: (unknown list_id)
+                      - error:
+                          message: >
+                            Found that item_id:
+                            \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" already
+                            exists. Import of item_id:
+                            \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" skipped.
+                          status_code: 409
+                        item_id: f7fd00bb-dba8-4c93-9d59-6cbd427b6330
+                        list_id: 7d7cccb8-db72-4667-b1f3-648efad7c1ee
+                    success: false,
+                    success_count: 0,
+                    success_count_exception_list_items: 0
+                    success_count_exception_lists: 0,
+                    success_exception_list_items: false,
+                    success_exception_lists: false,
+                withoutErrors:
                   value:
                     errors: []
                     success: true
@@ -1181,19 +1330,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1204,6 +1353,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1293,19 +1447,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1316,18 +1470,23 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: |
+                      exception list item item_id: \"foo\" does not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message: |
-                        exception list item item_id: \"foo\" does not exist
-                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1370,7 +1529,8 @@ paths:
                   value:
                     _version: WzQsMV0=
                     comments: []
-                    created_at: 2025-01-07T20:07:33.119Z
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
                     created_by: elastic
                     description: This is a sample detection type exception item.
                     entries:
@@ -1394,7 +1554,8 @@ paths:
                       - malware
                     tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
                     type: simple
-                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
@@ -1402,13 +1563,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1416,19 +1579,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1439,18 +1602,23 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: |
+                      exception list item item_id: \"foo\" does not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message: |
-                        exception list item item_id: \"foo\" does not exist
-                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1738,12 +1906,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request,
+                    message: |
+                      [request body]: list_id: Expected string, received number
+                    statusCode: 400,
               schema:
-                example:
-                  error: Bad Request,
-                  message: |
-                    [request body]: list_id: Expected string, received number
-                  statusCode: 400,
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1751,19 +1921,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  cannotAuthenticate:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1774,19 +1944,24 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                alreadyExists:
+                  value:
+                    message: >
+                      exception list item id: \"simple_list_item\" already
+                      exists
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  alreadyExists:
-                    value:
-                      message: >
-                        exception list item id: \"simple_list_item\" already
-                        exists
-                      status_code: 409
           description: Exception list item already exists response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -1890,12 +2065,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: |
+                      [request body]: item_id: Expected string, received number
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: |
-                    [request body]: item_id: Expected string, received number
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1903,19 +2080,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1926,18 +2103,23 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: |
+                      exception list item item_id: \"foo\" does not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message: |
-                        exception list item item_id: \"foo\" does not exist
-                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -2094,13 +2276,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -2108,19 +2292,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -2143,6 +2327,11 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -2214,13 +2403,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -2228,19 +2419,19 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
-                examples:
-                  unauthorized:
-                    value:
-                      error: Unauthorized
-                      message: >
-                        [security_exception\n\tRoot
-                        causes:\n\t\tsecurity_exception: unable to authenticate
-                        user [elastic] for REST request
-                        [/_security/_authenticate]]: unable to authenticate user
-                        [elastic] for REST request [/_security/_authenticate]
-                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -2251,17 +2442,23 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message": |
+                      exception list id: "foo" does not exist
+                    status_code": 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
-                examples:
-                  notFound:
-                    value:
-                      message": 'exception list id: "foo" does not exist'
-                      status_code": 404
           description: Exception list not found response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
