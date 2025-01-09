@@ -178,8 +178,8 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
         data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
         onBlur={() =>
           !touchedSteps[stepId] &&
-          setTouchedSteps((steps) => ({
-            ...steps,
+          setTouchedSteps((prevTouchedSteps) => ({
+            ...prevTouchedSteps,
             [stepId]: true,
           }))
         }
@@ -231,32 +231,30 @@ export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
     currentStep,
   });
 
-  const hasNextStep = useMemo(() => {
-    if (currentStep) {
-      const currentIndex = stepOrder.indexOf(currentStep);
-      return currentIndex < stepOrder.length - 1;
-    }
-    return false;
-  }, [stepOrder, currentStep]);
-  const hasPreviousStep = useMemo(() => {
-    if (currentStep) {
-      const currentIndex = stepOrder.indexOf(currentStep);
-      return currentIndex > 0;
-    }
-    return false;
-  }, [stepOrder, currentStep]);
+  // Determine current navigation position
+  const currentStepIndex = useMemo(() => stepOrder.indexOf(currentStep), [currentStep, stepOrder]);
+  const hasNextStep = useMemo(
+    () => currentStep && currentStepIndex < stepOrder.length - 1,
+    [currentStepIndex, currentStep, stepOrder]
+  );
+  const hasPreviousStep = useMemo(
+    () => currentStep && currentStepIndex > 0,
+    [currentStepIndex, currentStep]
+  );
+
+  // Navigation functions
   const goToNextStep = useCallback(() => {
     if (currentStep && hasNextStep) {
       const currentIndex = stepOrder.indexOf(currentStep);
       const nextStep = stepOrder[currentIndex + 1];
 
-      setTouchedSteps({
-        ...touchedSteps,
+      setTouchedSteps((prevTouchedSteps) => ({
+        ...prevTouchedSteps,
         [currentStep]: true,
-      });
+      }));
       setCurrentStep(nextStep);
     }
-  }, [currentStep, stepOrder, touchedSteps, hasNextStep]);
+  }, [currentStep, stepOrder, hasNextStep]);
   const goToPreviousStep = useCallback(() => {
     if (currentStep && hasPreviousStep) {
       const currentIndex = stepOrder.indexOf(currentStep);
@@ -266,15 +264,16 @@ export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
   }, [currentStep, stepOrder, hasPreviousStep]);
   const jumpToStep = useCallback(
     (stepId: RuleFormStepId) => () => {
-      setTouchedSteps({
-        ...touchedSteps,
+      setTouchedSteps((prevTouchedSteps) => ({
+        ...prevTouchedSteps,
         [currentStep]: true,
-      });
+      }));
       setCurrentStep(stepId);
     },
-    [currentStep, touchedSteps]
+    [currentStep]
   );
 
+  // Add onClick handlers to each step, remove children component as horizontal steps don't render children
   const mappedSteps = useMemo(() => {
     return stepOrder
       .map((stepId) => {
@@ -291,6 +290,7 @@ export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
 
   return {
     steps: mappedSteps,
+    // Horizontal steps only render one step at a time, so pass the current step's children
     currentStepComponent: steps[currentStep]?.children,
     goToNextStep,
     goToPreviousStep,
