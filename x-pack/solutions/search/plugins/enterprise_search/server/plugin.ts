@@ -450,7 +450,9 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register deprecations
      */
     registerDeprecationRoutes(dependencies);
-    deprecations.registerDeprecations(getRegisteredDeprecations(config, cloud, docLinks.links.enterpriseSearch.upgrade9x));
+    deprecations.registerDeprecations(
+      getRegisteredDeprecations(config, cloud, docLinks.links.enterpriseSearch.upgrade9x)
+    );
   }
 
   public start() {}
