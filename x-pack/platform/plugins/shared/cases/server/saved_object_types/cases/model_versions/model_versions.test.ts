@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { modelVersion1, modelVersion2 } from './model_versions';
+import { modelVersion1, modelVersion2, modelVersion3 } from '.';
 
 describe('Model versions', () => {
-  describe('1', () => {
-    it('returns the model version correctly', () => {
+  describe('version 1', () => {
+    it('returns version 1 changes correctly', () => {
       expect(modelVersion1.changes).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -56,7 +56,6 @@ describe('Model versions', () => {
       `);
     });
   });
-
   describe('2', () => {
     expect(modelVersion2.changes).toMatchInlineSnapshot(`
       Array [
@@ -78,5 +77,45 @@ describe('Model versions', () => {
         },
       ]
     `);
+    describe('version 2', () => {
+      it('returns version 2 changes correctly', () => {
+        expect(modelVersion2.changes).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "addedMappings": Object {
+                "observables": Object {
+                  "properties": Object {
+                    "typeKey": Object {
+                      "type": "keyword",
+                    },
+                    "value": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+              },
+              "type": "mappings_addition",
+            },
+          ]
+        `);
+      });
+    });
+  });
+  describe('version 3', () => {
+    it('returns version 3 changes correctly', () => {
+      expect(modelVersion3.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "incremental_id": Object {
+                "type": "integer",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
   });
 });

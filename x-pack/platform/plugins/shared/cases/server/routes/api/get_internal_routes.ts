@@ -25,8 +25,13 @@ import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
+import type { CasesIdIncrementerTask } from '../../tasks/incremental_id';
+import { getInitCaseIdIncrementerRoute } from './internal/init_case_id_incrementer';
 
-export const getInternalRoutes = (userProfileService: UserProfileService) =>
+export const getInternalRoutes = (
+  userProfileService: UserProfileService,
+  incrementIdTask: CasesIdIncrementerTask
+) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -46,4 +51,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
+    getInitCaseIdIncrementerRoute(incrementIdTask),
   ] as CaseRoute[];

@@ -95,6 +95,10 @@ const CaseBaseFields = {
    * Observables
    */
   observables: rt.array(CaseObservableRt),
+  /**
+   * Incremental ID
+   */
+  incremental_id: rt.union([rt.number, rt.undefined]), // TODO: should this be string/keyword to account for shareable spaces (i.e. incremental_id: default-123?)
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(

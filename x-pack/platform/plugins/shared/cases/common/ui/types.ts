@@ -168,6 +168,7 @@ export interface SystemFilterOptions {
   reporters: User[];
   owner: string[];
   category: string[];
+  incremental_id: number;
 }
 
 export interface FilterOptions extends SystemFilterOptions {

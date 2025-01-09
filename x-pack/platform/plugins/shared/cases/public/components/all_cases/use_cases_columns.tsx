@@ -121,6 +121,18 @@ export const useCasesColumns = ({
         },
         width: !isSelectorView ? '17%' : '55%',
       },
+      incremental_id: {
+        field: casesColumnsConfig.incremental_id.field,
+        name: casesColumnsConfig.incremental_id.name,
+        sortable: true,
+        render: (incrementalId: string, theCase: CaseUI) => {
+          if (theCase.id != null && theCase.title != null) {
+            return incrementalId ?? theCase.incrementalId;
+          }
+          return getEmptyCellValue();
+        },
+        width: !isSelectorView ? '17%' : '55%',
+      },
       assignees: {
         field: casesColumnsConfig.assignees.field,
         name: casesColumnsConfig.assignees.name,
