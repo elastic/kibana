@@ -55,6 +55,23 @@ describe('Slider Control', () => {
     expect(input.value).toBe('0'); // index 0 of the values array
   });
 
+  it('should display accessible label when provided', () => {
+    render(
+      <I18nProvider>
+        <ControlSlider
+          values={values}
+          currentValue={0.00001}
+          onChange={jest.fn()}
+          data-test-subj="test-id"
+        />
+      </I18nProvider>
+    );
+    const input = screen.getByTestId('test-id') as HTMLInputElement;
+    expect(input.getAttribute('aria-valuetext')).toBe(
+      '0, (Point zero zero one percent, most performant)'
+    );
+  });
+
   it('should fallback to 1 when the provided value is not present within the values', () => {
     render(
       <I18nProvider>
