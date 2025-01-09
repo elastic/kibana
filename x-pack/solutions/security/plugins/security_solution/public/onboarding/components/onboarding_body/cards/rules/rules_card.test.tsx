@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { OnboardingContextProvider } from '../../../onboarding_context';
 import RulesCard from './rules_card';
