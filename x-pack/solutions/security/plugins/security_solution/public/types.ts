@@ -49,7 +49,6 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { AssetInventoryPluginStart } from '@kbn/asset-inventory-plugin/public';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -123,7 +122,6 @@ export interface SetupPlugins {
  * in the code.
  */
 export interface StartPlugins {
-  assetInventory: AssetInventoryPluginStart;
   cases: CasesPublicStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
