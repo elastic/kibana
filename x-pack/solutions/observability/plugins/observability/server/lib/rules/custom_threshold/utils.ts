@@ -244,9 +244,9 @@ export const getFormattedGroupBy = (
       const groupSetKeys = group.split(',');
       groupByKeysObjectMapping[group] = Array.isArray(groupBy)
         ? groupBy.reduce((result: Group[], groupByItem, index) => {
-          result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
-          return result;
-        }, [])
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
         : [{ field: groupBy, value: group }];
     });
   }
