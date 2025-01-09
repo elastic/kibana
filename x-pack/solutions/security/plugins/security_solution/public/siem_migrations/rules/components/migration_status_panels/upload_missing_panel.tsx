@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
-import type { RuleMigrationResourceData } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import * as i18n from './translations';
@@ -31,7 +31,7 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
   ({ migrationStats, spacerSizeTop }) => {
     const { euiTheme } = useEuiTheme();
     const { openFlyout } = useRuleMigrationDataInputContext();
-    const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceData[]>([]);
+    const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceBase[]>([]);
     const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
     useEffect(() => {
