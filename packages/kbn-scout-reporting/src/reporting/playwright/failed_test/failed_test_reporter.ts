@@ -98,7 +98,7 @@ export class ScoutFailedTestReporter implements Reporter {
         title: test.title,
         target: this.target,
         command: this.command,
-        location: test.location.file.replace(`${REPO_ROOT}/`, ''),
+        location: stripFilePath(test.location.file),
         owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
         plugin: this.plugin,
         duration: result.duration,
