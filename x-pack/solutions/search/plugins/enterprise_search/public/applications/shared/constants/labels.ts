@@ -31,6 +31,10 @@ export const TECH_PREVIEW_LABEL = i18n.translate('xpack.enterpriseSearch.techPre
   defaultMessage: 'Tech preview',
 });
 
+export const COMING_SOON_LABEL = i18n.translate('xpack.enterpriseSearch.comingSoonLabel', {
+  defaultMessage: 'Coming soon',
+});
+
 export const NATIVE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeLabel', {
   defaultMessage: 'Elastic managed',
 });

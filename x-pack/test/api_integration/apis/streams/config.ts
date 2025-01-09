@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
   return {
     ...baseIntegrationTestsConfig.getAll(),
+    kbnTestServer: {
+      ...baseIntegrationTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(baseIntegrationTestsConfig.get('kbnTestServer.serverArgs')),
+          {
+            name: 'plugins.streams',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
+      ],
+    },
     testFiles: [require.resolve('.')],
   };
 }
