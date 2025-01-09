@@ -29,7 +29,7 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   test('layer control is visible', async ({ page }) => {
     expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
-  test('displays reenMode();exit full screen logo button', async ({ page }) => {
+  test('displays exit full screen logo button', async ({ page }) => {
     await page.testSubj.click('mapsFullScreenMode');
     const sel = 'exitFullScreenModeButton';
     await expect(
