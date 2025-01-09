@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { ingestStreamDefinitonSchema } from '../streams';
-import { inheritedFieldDefinitionSchema } from '../common';
+import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
 
 export const ingestReadStreamDefinitonSchema = ingestStreamDefinitonSchema
   .extend({
     inherited_fields: inheritedFieldDefinitionSchema.default({}),
+    lifecycle: lifecycleSchema,
   })
   .strict();
 
