@@ -35,7 +35,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+        "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "\"\""
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +63,7 @@
             "signature": [
               "\"generateCsvReport\""
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +77,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,12 +86,12 @@
                 "id": "def-public.ReportingCsvPanelAction.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ core, csvConfig, apiClient, startServices$, usesUiCapabilities }",
+                "label": "{ core, apiClient, startServices$ }",
                 "description": [],
                 "signature": [
                   "Params"
                 ],
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,7 +109,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -125,7 +125,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -157,7 +157,7 @@
               },
               "; columns: string[]; }>"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,7 +177,7 @@
                     "text": "SavedSearch"
                   }
                 ],
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -203,7 +203,7 @@
               },
               ") => Promise<boolean>"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -223,7 +223,7 @@
                     "text": "EmbeddableApiContext"
                   }
                 ],
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -249,7 +249,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -269,7 +269,7 @@
                     "text": "EmbeddableApiContext"
                   }
                 ],
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

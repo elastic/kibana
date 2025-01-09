@@ -23,7 +23,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
                 "text": "ChangePointDetectionAppStateProps"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,7 +74,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
                 "text": "LogCategorizationAppStateProps"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,7 +147,7 @@
                 "text": "LogRateAnalysisAppStateProps"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -176,7 +176,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,7 +198,7 @@
                 "text": "LogRateAnalysisContentWrapperProps"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -218,7 +218,7 @@
         "description": [
           "\nAIOps app context value to be provided via React context."
         ],
-        "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+        "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,7 +240,7 @@
               "TelemetryCounter",
               ">; }"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,15 +254,9 @@
               "\nUsed to check capabilities for links to other plugins.\n`application.currentAppId$` is used to close the log pattern analysis flyout\nwhen user navigates out of the current plugin."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,7 +278,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,15 +292,9 @@
               "\nProvides execution context for data fetching."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,7 +319,7 @@
               "ActiveCursor",
               "; }"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,7 +351,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -377,15 +365,9 @@
               "\nUsed for data fetching."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -399,15 +381,9 @@
               "\nUsed for toast notifications."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,7 +406,7 @@
               },
               "<any, void>"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -444,15 +420,9 @@
               "\nTheme service."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,15 +436,9 @@
               "\nUI settings."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -496,7 +460,7 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -519,7 +483,23 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppContextValue.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nUser profile service."
+            ],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -542,7 +522,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,7 +544,7 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,7 +567,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -601,15 +581,9 @@
               "\nInternationalisation service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,7 +625,7 @@
               },
               ">; } | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -672,7 +646,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +667,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,7 +681,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,7 +694,7 @@
             "description": [
               "Identifier to indicate the plugin utilizing the component"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -743,7 +717,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -759,7 +733,7 @@
         "description": [
           "\nProps for the ChangePointDetectionAppState component."
         ],
-        "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -781,7 +755,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -804,7 +778,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,7 +800,7 @@
                 "text": "AiopsAppContextValue"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,7 +816,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -858,7 +832,7 @@
         "description": [
           "\nProps for the LogCategorizationAppState component."
         ],
-        "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -880,7 +854,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,7 +877,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -925,7 +899,7 @@
                 "text": "AiopsAppContextValue"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,7 +915,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -957,7 +931,7 @@
         "description": [
           "\nProps for the LogRateAnalysisAppState component."
         ],
-        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -979,7 +953,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1002,7 +976,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,7 +998,7 @@
                 "text": "AiopsAppContextValue"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1040,7 +1014,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1056,7 +1030,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1072,7 +1046,7 @@
         "description": [
           "\nProps for the LogRateAnalysisContentWrapper component."
         ],
-        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1094,7 +1068,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1116,7 +1090,7 @@
                 "text": "AiopsAppContextValue"
               }
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1140,7 +1114,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1156,7 +1130,7 @@
             "signature": [
               "{ min: moment.Moment; max: moment.Moment; } | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,7 +1147,7 @@
               "QueryDslQueryContainer",
               " | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1189,7 +1163,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1205,7 +1179,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1229,7 +1203,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1251,7 +1225,7 @@
                     "text": "LogRateAnalysisResultsData"
                   }
                 ],
-                "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+                "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1271,7 +1245,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1287,7 +1261,7 @@
         "description": [
           "\nInterface for log rate analysis results data."
         ],
-        "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+        "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1303,7 +1277,7 @@
             "signature": [
               "\"spike\" | \"dip\""
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1326,7 +1300,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1349,7 +1323,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
+            "path": "x-pack/platform/plugins/shared/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1367,7 +1341,7 @@
       "tags": [],
       "label": "AiopsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1389,7 +1363,7 @@
             },
             ") => Promise<boolean>>"
           ],
-          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1409,7 +1383,7 @@
             "LogCategorizationEmbeddableWrapperProps",
             ">"
           ],
-          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1425,7 +1399,7 @@
             "ChangePointDetectionProps",
             ">"
           ],
-          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1474,7 +1448,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1497,7 +1471,7 @@
       "description": [
         "\naiops plugin server setup contract"
       ],
-      "path": "x-pack/plugins/aiops/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/aiops/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1513,7 +1487,7 @@
       "description": [
         "\naiops plugin server start contract"
       ],
-      "path": "x-pack/plugins/aiops/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/aiops/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

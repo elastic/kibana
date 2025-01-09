@@ -10,7 +10,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-
+import { cloneDeep } from 'lodash';
+import { useEuiTheme } from '@elastic/eui';
 import {
   ActivePanel,
   GridAccessMode,
@@ -21,6 +22,7 @@ import {
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
@@ -38,6 +40,7 @@ export const useGridLayoutState = ({
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+  const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
     () => new BehaviorSubject<string | undefined>(expandedPanelId),
@@ -59,7 +62,12 @@ export const useGridLayoutState = ({
   }, [accessMode, accessMode$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
+    const resolvedLayout = cloneDeep(layout);
+    resolvedLayout.forEach((row, rowIndex) => {
+      resolvedLayout[rowIndex] = resolveGridRow(row);
+    });
+
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -77,11 +85,14 @@ export const useGridLayoutState = ({
       panelIds$,
       gridLayout$,
       activePanel$,
+      accessMode$,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
       expandedPanelId$,
-      isMobileView$: new BehaviorSubject<boolean>(shouldShowMobileView(accessMode)),
+      isMobileView$: new BehaviorSubject<boolean>(
+        shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
+      ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,7 +110,9 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-        gridLayoutStateManager.isMobileView$.next(shouldShowMobileView(currentAccessMode));
+        gridLayoutStateManager.isMobileView$.next(
+          shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
+        );
       });
 
     return () => {
