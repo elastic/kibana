@@ -18,7 +18,7 @@ import {
 } from '../../../../hooks';
 import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../../../../../../common/services';
@@ -69,7 +69,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     policyHasFleetServer(agentPolicy as AgentPolicy) ||
     policyHasSyntheticsIntegration(agentPolicy as AgentPolicy);
   const allowedOutputTypes = useMemo(
-    () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
+    () => getAllowedOutputTypesForAgentPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
   );
 

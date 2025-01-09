@@ -9,7 +9,7 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AgentPolicy, OutputType, ValueOf } from '../types';
+import type { AgentPolicy, PackagePolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -17,6 +17,7 @@ import {
   outputType,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
+  AGENTLESS_ALLOWED_OUTPUT_TYPES,
 } from '../constants';
 
 const sameClusterRestrictedPackages = [
@@ -25,11 +26,36 @@ const sameClusterRestrictedPackages = [
   FLEET_APM_PACKAGE,
 ];
 
+export function getAllowedOutputTypes(options: {
+  agentPolicy?: AgentPolicy;
+  packagePolicy?: Pick<PackagePolicy, 'supports_agentless'>;
+  packageName: string;
+}): string[] {
+  let allowedOutputTypes = Object.values(outputType);
+
+  if (options.agentPolicy) {
+    const forAgentPolicy = getAllowedOutputTypesForAgentPolicy(options.agentPolicy);
+    allowedOutputTypes = allowedOutputTypes.filter((type) => forAgentPolicy.includes(type));
+  }
+
+  if (options.packagePolicy) {
+    const forPackagePolicy = getAllowedOutputTypesForPackagePolicy(options.packagePolicy);
+    allowedOutputTypes = allowedOutputTypes.filter((type) => forPackagePolicy.includes(type));
+  }
+
+  if (options.packageName) {
+    const forIntegration = getAllowedOutputTypesForIntegration(options.packageName);
+    allowedOutputTypes = allowedOutputTypes.filter((type) => forIntegration.includes(type));
+  }
+
+  return allowedOutputTypes;
+}
+
 /**
  * Return allowed output type for a given agent policy,
  * Fleet Server and APM cannot use anything else than same cluster ES
  */
-export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy): string[] {
+export function getAllowedOutputTypesForAgentPolicy(agentPolicy: AgentPolicy): string[] {
   const isRestrictedToSameClusterES =
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
@@ -38,6 +64,19 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy): string[
 
   if (isRestrictedToSameClusterES) {
     return [outputType.Elasticsearch];
+  }
+
+  return Object.values(outputType);
+}
+
+/**
+ * Return allowed output type for a given package policy
+ */
+export function getAllowedOutputTypesForPackagePolicy(
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>
+): string[] {
+  if (packagePolicy.supports_agentless) {
+    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
   return Object.values(outputType);

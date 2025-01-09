@@ -88,7 +88,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packageInfo.name);
+    } = useOutputs(packagePolicy, packageInfo.name);
 
     // Managed policy
     const isManaged = packagePolicy.is_managed;

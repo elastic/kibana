@@ -8,13 +8,13 @@
 import { load } from 'js-yaml';
 
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   outputYmlIncludesReservedPerformanceKey,
 } from './output_helpers';
 
-describe('getAllowedOutputTypeForPolicy', () => {
+describe('getAllowedOutputTypesForAgentPolicy', () => {
   it('should return all available output type for an agent policy without APM and Fleet Server', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'nginx' },
@@ -27,7 +27,7 @@ describe('getAllowedOutputTypeForPolicy', () => {
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'apm' },
@@ -39,7 +39,7 @@ describe('getAllowedOutputTypeForPolicy', () => {
   });
 
   it('should return only elasticsearch for an agent policy with Fleet Server', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'fleet_server' },

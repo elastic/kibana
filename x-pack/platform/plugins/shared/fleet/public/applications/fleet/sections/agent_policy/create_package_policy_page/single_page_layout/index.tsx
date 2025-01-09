@@ -341,7 +341,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     () =>
       pliAuthBlockView?.Component && !isPackageInfoLoading
         ? pliAuthBlockView.Component
-        : ({ children }) => <>{children}</>, // when no UI Extension is registered, render children
+        : ({ children }: { children?: any }) => <>{children}</>, // when no UI Extension is registered, render children
     [isPackageInfoLoading, pliAuthBlockView?.Component]
   );
 
@@ -351,15 +351,34 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
   const { isAgentlessIntegration } = useAgentless();
-  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
-    newAgentPolicy,
-    setNewAgentPolicy,
-    updateAgentPolicies,
-    updatePackagePolicy,
-    setSelectedPolicyTab,
-    packageInfo,
-    packagePolicy,
-  });
+  const { handleSetupTechnologyChange: handleSetupTechnologyChangeFn, selectedSetupTechnology } =
+    useSetupTechnology({
+      newAgentPolicy,
+      setNewAgentPolicy,
+      updateAgentPolicies,
+      updatePackagePolicy,
+      setSelectedPolicyTab,
+      packageInfo,
+      packagePolicy,
+    });
+
+  const handleSetupTechnologyChange = useCallback(
+    (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
+      handleSetupTechnologyChangeFn(setupTechnology, policyTemplateName);
+      // agentless doesn't need system integration
+      setWithSysMonitoring(setupTechnology === SetupTechnology.AGENT_BASED);
+
+      // reset selected output if swtiching to agentless
+      // this is a quick fix to avoid retrieving outputs and comparing against
+      // allowed outputs
+      if (setupTechnology === SetupTechnology.AGENTLESS) {
+        updatePackagePolicy({
+          output_id: null,
+        });
+      }
+    },
+    [handleSetupTechnologyChangeFn, updatePackagePolicy]
+  );
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
