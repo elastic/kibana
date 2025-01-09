@@ -8,7 +8,7 @@
 import { getRangeFilter } from './get_range_filter';
 
 describe('getRangeFilter()', () => {
-  it('should return undefined when all arguments are undefined', () => {
+  it('should return a dummay match_all filter when all arguments are undefined', () => {
     expect(getRangeFilter()).toBe({
       bool: { must: { match_all: {} } },
     });
