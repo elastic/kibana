@@ -8,6 +8,7 @@
  */
 
 require('./polyfills');
+require('@kbn/security-hardening/prototype');
 
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
