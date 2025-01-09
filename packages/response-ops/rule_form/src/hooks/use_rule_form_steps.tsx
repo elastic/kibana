@@ -46,7 +46,7 @@ const getStepStatus = ({
   touchedSteps,
 }: {
   step: RuleFormStepId;
-  currentStep: RuleFormStepId;
+  currentStep?: RuleFormStepId;
   hasErrors: boolean;
   touchedSteps: Record<RuleFormStepId, boolean>;
 }) => {
