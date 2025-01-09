@@ -230,13 +230,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
 
-        const interceptPromises = [
-          proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
-          proxy
-            .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-            .completeAfterIntercept(),
-        ];
-
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),
@@ -281,8 +274,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        // wait for all interceptors to be settled
-        await Promise.all(interceptPromises);
+        await proxy
+          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .completeAfterIntercept();
 
         const conversation = res.body;
         return conversation;
