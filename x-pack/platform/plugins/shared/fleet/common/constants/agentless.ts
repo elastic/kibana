@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { outputType } from './output';
+
 export const AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION = 'organization';
 export const AGENTLESS_GLOBAL_TAG_NAME_DIVISION = 'division';
 export const AGENTLESS_GLOBAL_TAG_NAME_TEAM = 'team';
+
+export const AGENTLESS_ALLOWED_OUTPUT_TYPES = [outputType.Elasticsearch];
