@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { waitUntilModelDeployed } from './wait_until_model_deployed';
-export { getModelInstallStatus } from './get_model_install_status';
-export { installElser } from './install_elser';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { AppServicesContext } from '../types';
+
+export const useKibana = () => _useKibana<AppServicesContext>();
