@@ -1,0 +1,10 @@
+.lnsDataPanelWrapper {
+  flex: 1 0 100%;
+  overflow: hidden;
+}
+
+.lnsDataPanelWrapper__switchSource {
+  position: absolute;
+  right: $euiSize + $euiSizeXS;
+  top: $euiSize + $euiSizeXS;
+}
