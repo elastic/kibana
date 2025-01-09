@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
-import { ComponentType, useMemo } from 'react';
+import { useMemo } from 'react';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
@@ -21,7 +20,7 @@ type InferenceConnector = ActionConnector & { config: { provider: ServiceProvide
 const mapLlmToModels: Record<
   LLMs,
   {
-    icon: ComponentType | ((connector: InferenceConnector) => ComponentType | string);
+    icon: string | ((connector: InferenceConnector) => string);
     getModels: (
       connectorName: string,
       includeName: boolean
@@ -29,7 +28,7 @@ const mapLlmToModels: Record<
   }
 > = {
   [LLMs.openai]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName, includeName) =>
       MODELS.filter(({ provider }) => provider === LLMs.openai).map((model) => ({
         label: `${model.name} ${includeName ? `(${connectorName})` : ''}`,
@@ -38,7 +37,7 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.openai_azure]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.openAIAzureModel', {
@@ -49,7 +48,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.openai_other]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.otherOpenAIModel', {
@@ -60,7 +59,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.bedrock]: {
-    icon: BedrockLogo,
+    icon: SERVICE_PROVIDERS.amazonbedrock.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
         label: model.name,
@@ -69,7 +68,7 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.gemini]: {
-    icon: GeminiLogo,
+    icon: SERVICE_PROVIDERS.googlevertexai.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.gemini).map((model) => ({
         label: model.name,
