@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
 
@@ -48,8 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ]);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/205545
-  describe.skip('Dataset quality summary', () => {
+  describe('Dataset quality summary', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginAsViewer();
