@@ -14,12 +14,17 @@ import {
   EuiPortal,
   EuiStepsHorizontal,
   EuiTitle,
-  useEuiBackgroundColorCSS,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo } from 'react';
 import { useRuleFormHorizontalSteps, useRuleFormState } from '../hooks';
-import { RULE_FLYOUT_HEADER_CREATE_TITLE, RULE_FLYOUT_HEADER_EDIT_TITLE } from '../translations';
+import {
+  RULE_FLYOUT_HEADER_CREATE_TITLE,
+  RULE_FLYOUT_HEADER_EDIT_TITLE,
+  DISABLED_ACTIONS_WARNING_TITLE,
+} from '../translations';
 import type { RuleFormData } from '../types';
 import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
@@ -75,8 +80,6 @@ export const RuleFlyout = (props: RuleFlyoutProps) => {
 
   const { actions } = formData;
 
-  const styles = useEuiBackgroundColorCSS().transparent;
-
   const onSaveInternal = useCallback(() => {
     onSave({
       ...formData,
@@ -119,6 +122,18 @@ export const RuleFlyout = (props: RuleFlyoutProps) => {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {!isEdit && <EuiStepsHorizontal size="xs" steps={steps} />}
+          {hasActionsDisabled && (
+            <>
+              <EuiCallOut
+                size="s"
+                color="danger"
+                iconType="error"
+                data-test-subj="hasActionsDisabled"
+                title={DISABLED_ACTIONS_WARNING_TITLE}
+              />
+              <EuiSpacer />
+            </>
+          )}
           {currentStepComponent}
         </EuiFlyoutBody>
         {isEdit ? (
