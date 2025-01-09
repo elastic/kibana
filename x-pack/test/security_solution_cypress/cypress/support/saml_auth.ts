@@ -11,7 +11,7 @@ import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
@@ -67,13 +67,13 @@ export const samlAuthentication = async (
     cloudUsersFilePath,
   });
 
+  const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
+
   on('task', {
     getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     getApiKeyForRole: async (role: string | SecurityRoleName): Promise<string> => {
-      const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
-
       let roleDescriptor = {};
 
       const roleConfig = getRoleConfiguration(role, rolesPath);
@@ -104,8 +104,7 @@ export const samlAuthentication = async (
     }: {
       roleDescriptor: { kibana: any; elasticsearch: any };
       roleName: string;
-    }): Promise<AxiosResponse<any, any>> => {
-      const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
+    }): Promise<any> => {
       const customRoleDescriptors = {
         kibana: roleDescriptor.kibana,
         elasticsearch: roleDescriptor.elasticsearch ?? [],
@@ -121,7 +120,23 @@ export const samlAuthentication = async (
           },
         }
       );
-      return response;
+      return {
+        status: response.status,
+        data: response.data,
+      };
+    },
+    deleteServerlessCustomRole: async (roleName: string): Promise<any> => {
+      const response = await axios.delete(`${kbnHost}/api/security/role/${roleName}`, {
+        headers: {
+          ...INTERNAL_REQUEST_HEADERS,
+          ...adminCookieHeader,
+        },
+      });
+
+      return {
+        status: response.status,
+        data: response.data,
+      };
     },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
