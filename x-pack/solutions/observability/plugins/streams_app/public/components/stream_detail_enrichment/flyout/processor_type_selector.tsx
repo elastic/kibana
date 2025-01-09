@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getDefaultFormState } from '../utils';
 
 interface TAvailableProcessor {
   value: ProcessorType;
@@ -27,10 +28,15 @@ export const ProcessorTypeSelector = ({
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
-  const { control } = useFormContext();
+  const { control, reset } = useFormContext();
   const { field, fieldState } = useController({ name: 'type', control, rules: { required: true } });
 
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
+
+  const handleChange = (type: ProcessorType) => {
+    const formState = getDefaultFormState(type);
+    reset(formState);
+  };
 
   return (
     <EuiFormRow
@@ -46,7 +52,7 @@ export const ProcessorTypeSelector = ({
         options={processorTypeSelectorOptions}
         isInvalid={fieldState.invalid}
         valueOfSelected={field.value}
-        onChange={field.onChange}
+        onChange={handleChange}
         fullWidth
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorPlaceholder',

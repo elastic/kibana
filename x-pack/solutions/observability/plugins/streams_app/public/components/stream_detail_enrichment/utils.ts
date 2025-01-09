@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import {
   DissectProcessingDefinition,
   GrokProcessingDefinition,
   ProcessingDefinition,
+  ProcessorType,
   isCompleteCondition,
   isDissectProcessor,
   isGrokProcessor,
 } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
+import { DissectFormState, GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
 
 const defaultCondition: ProcessingDefinition['condition'] = {
   field: '',
@@ -24,19 +23,37 @@ const defaultCondition: ProcessingDefinition['condition'] = {
   value: '',
 };
 
-const defaultProcessorConfig: GrokFormState = {
+const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
   field: 'message',
   patterns: [{ value: '' }],
   pattern_definitions: {},
-  ignore_failure: false,
+  ignore_failure: true,
+  ignore_missing: true,
   condition: defaultCondition,
 };
 
-export const getDefaultFormState = (processor?: ProcessorDefinition): ProcessorFormState => {
-  if (!processor) return defaultProcessorConfig;
+const defaultDissectProcessorFormState: DissectFormState = {
+  type: 'dissect',
+  field: 'message',
+  pattern: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  condition: defaultCondition,
+};
 
-  let configValues: ProcessorFormState = defaultProcessorConfig;
+const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
+  dissect: defaultDissectProcessorFormState,
+  grok: defaultGrokProcessorFormState,
+};
+
+export const getDefaultFormState = (
+  type: ProcessorType,
+  processor?: ProcessorDefinition
+): ProcessorFormState => {
+  if (!processor) return defaultProcessorFormStateByType[type];
+
+  let configValues: ProcessorFormState = defaultProcessorFormStateByType[type];
 
   if (isGrokProcessor(processor.config)) {
     const { grok } = processor.config;
@@ -67,7 +84,7 @@ export const convertFormStateToProcessing = (
   formState: ProcessorFormState
 ): ProcessingDefinition => {
   if (formState.type === 'grok') {
-    const { condition, field, patterns, pattern_definitions, ignore_failure } = formState;
+    const { condition, patterns, ...grokConfig } = formState;
 
     return {
       condition: isCompleteCondition(condition) ? condition : undefined,
@@ -76,26 +93,19 @@ export const convertFormStateToProcessing = (
           patterns: patterns
             .filter(({ value }) => value.trim().length > 0)
             .map(({ value }) => value),
-          field,
-          pattern_definitions,
-          ignore_failure,
+          ...grokConfig,
         },
       },
     };
   }
 
   if (formState.type === 'dissect') {
-    const { condition, field, pattern, append_separator, ignore_failure } = formState;
+    const { condition, ...dissectConfig } = formState;
 
     return {
       condition: isCompleteCondition(condition) ? condition : undefined,
       config: {
-        dissect: {
-          field,
-          pattern,
-          append_separator,
-          ignore_failure,
-        },
+        dissect: dissectConfig,
       },
     };
   }

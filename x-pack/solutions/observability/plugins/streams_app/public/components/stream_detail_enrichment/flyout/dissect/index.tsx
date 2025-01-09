@@ -34,6 +34,17 @@ export const DissectProcessorForm = () => {
           { defaultMessage: 'Ignore failures for this processor' }
         )}
       />
+      <ToggleField
+        name="ignore_missing"
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreMissingLabel',
+          { defaultMessage: 'Ignore missing' }
+        )}
+        helpText={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreMissingHelpText',
+          { defaultMessage: 'Ignore documents with a missing field.' }
+        )}
+      />
     </>
   );
 };

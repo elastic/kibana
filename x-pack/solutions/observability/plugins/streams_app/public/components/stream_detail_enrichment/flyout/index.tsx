@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
+import { ProcessingDefinition, ReadStreamDefinition, getProcessorType } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ProcessorTypeSelector } from './processor_type_selector';
@@ -47,7 +47,7 @@ export function AddProcessorFlyout({
   onAddProcessor,
   onClose,
 }: AddProcessorFlyoutProps) {
-  const defaultValues = useMemo(() => getDefaultFormState(), []);
+  const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
   const methods = useForm<ProcessorFormState>({ defaultValues });
 
@@ -102,7 +102,10 @@ export function EditProcessorFlyout({
   onUpdateProcessor,
   processor,
 }: EditProcessorFlyoutProps) {
-  const defaultValues = useMemo(() => getDefaultFormState(processor), [processor]);
+  const defaultValues = useMemo(
+    () => getDefaultFormState(getProcessorType(processor), processor),
+    [processor]
+  );
 
   const methods = useForm<ProcessorFormState>({ defaultValues });
 

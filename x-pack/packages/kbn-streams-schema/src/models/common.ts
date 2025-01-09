@@ -53,6 +53,7 @@ export const grokProcessingDefinitionSchema = z.object({
     patterns: z.array(z.string()),
     pattern_definitions: z.optional(z.record(z.string())),
     ignore_failure: z.optional(z.boolean()),
+    ignore_missing: z.optional(z.boolean()),
   }),
 });
 
@@ -64,6 +65,7 @@ export const dissectProcessingDefinitionSchema = z.object({
     pattern: z.string(),
     append_separator: z.optional(z.string()),
     ignore_failure: z.optional(z.boolean()),
+    ignore_missing: z.optional(z.boolean()),
   }),
 });
 
