@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -18,13 +19,22 @@ import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
   const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
+  const {
+    actions: { setIsFieldCurrentlyEdited },
+  } = useUpgradePrebuiltRulesTableContext();
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
+            <EuiButtonEmpty
+              iconType="pencil"
+              onClick={() => {
+                setEditMode();
+                setIsFieldCurrentlyEdited(true);
+              }}
+            >
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
@@ -35,7 +45,13 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={() => {
+                setReadOnlyMode();
+                setIsFieldCurrentlyEdited(false);
+              }}
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>

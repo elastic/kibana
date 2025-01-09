@@ -97,6 +97,10 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
+  /**
+   * Sets a flag to indicate if any field is currently being edited in the rule upgrade flyout
+   */
+  setIsFieldCurrentlyEdited: (editing: boolean) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -130,6 +134,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     ruleSource: [],
   });
   const { addError } = useAppToasts();
+  const [isFieldCurrentlyEdited, setIsFieldCurrentlyEdited] = useState<boolean>(false);
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -283,7 +288,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange)
+            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            isFieldCurrentlyEdited
           }
           onClick={() => {
             if (hasRuleTypeChange) {
@@ -308,6 +314,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       isUpgradingSecurityPackages,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
+      isFieldCurrentlyEdited,
     ]
   );
   const extraTabsFactory = useCallback(
@@ -401,8 +408,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       openRulePreview,
+      setIsFieldCurrentlyEdited,
     }),
-    [refetch, upgradeRules, upgradeAllRules, openRulePreview]
+    [refetch, upgradeRules, upgradeAllRules, openRulePreview, setIsFieldCurrentlyEdited]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(

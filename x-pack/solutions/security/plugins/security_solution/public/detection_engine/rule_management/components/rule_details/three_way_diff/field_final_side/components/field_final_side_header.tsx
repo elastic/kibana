@@ -18,11 +18,15 @@ import {
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import * as i18n from './translations';
+import { useUpgradePrebuiltRulesTableContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 
 export function FieldFinalSideHeader(): JSX.Element {
   const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
     useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
+  const {
+    actions: { setIsFieldCurrentlyEdited },
+  } = useUpgradePrebuiltRulesTableContext();
 
   const handleAccept = useCallback(
     () =>
@@ -56,7 +60,10 @@ export function FieldFinalSideHeader(): JSX.Element {
               iconType="checkInCircleFilled"
               size="s"
               disabled={!form?.isValid}
-              onClick={handleSave}
+              onClick={() => {
+                handleSave();
+                setIsFieldCurrentlyEdited(false);
+              }}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>
