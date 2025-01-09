@@ -169,6 +169,11 @@ export default function ({ getService }: FtrProviderContext) {
         id: pvtLoc2.id,
         label: pvtLoc2.label,
         isServiceManaged: false,
+        agentPolicyId: pvtLoc2.id,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
       });
 
       const apiResponse = await supertestAPI
