@@ -36,8 +36,7 @@ run(
 
         // TODO: Remove this, once https://github.com/elastic/kibana/issues/206077 is resolved
         if (source.location === 'elastic/kibana-team') {
-          // eslint-disable-next-line no-console
-          console.warn(
+          log.info(
             'Removing internal.kibana.dev from elastic/kibana-team - see https://github.com/elastic/kibana/issues/206077 for more details.'
           );
           await repo.run('rm', ['-rf', 'internal.kibana.dev'], { desc: 'rm internal.kibana.dev' });
