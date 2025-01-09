@@ -28,7 +28,7 @@ export class MonacoEditorService extends FtrService {
     await this.retry.try(async () => {
       values = await this.browser.execute(
         () =>
-          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link packages/kbn-monaco/src/register_globals.ts}
+          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
           (window.MonacoEnvironment?.monaco.editor as typeof monaco.editor)
             .getModels()
             .map((model: any) => model.getValue()) as string[]
@@ -48,7 +48,7 @@ export class MonacoEditorService extends FtrService {
     await this.retry.try(async () => {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
-          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link packages/kbn-monaco/src/register_globals.ts}
+          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
           const editor = window.MonacoEnvironment?.monaco.editor as typeof monaco.editor;
           const textModels = editor.getModels();
 
@@ -62,8 +62,6 @@ export class MonacoEditorService extends FtrService {
         nthIndex,
         value
       );
-    });
-    await this.retry.try(async () => {
       const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
       expect(newCodeEditorValue).equal(
         value,
