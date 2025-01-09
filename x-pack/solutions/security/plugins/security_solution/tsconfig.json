@@ -226,7 +226,6 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
-    "@kbn/core-user-profile-browser",
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
