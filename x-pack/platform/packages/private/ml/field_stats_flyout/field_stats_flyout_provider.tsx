@@ -15,7 +15,6 @@ import React, {
 } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
@@ -117,7 +116,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
             setPopulatedFields(fieldsWithData);
           }
         } catch (e) {
-          if (!isRequestAbortedError(e)) {
+          if (e?.name !== 'AbortError') {
             // eslint-disable-next-line no-console
             console.error(
               `An error occurred fetching field caps to determine populated fields.

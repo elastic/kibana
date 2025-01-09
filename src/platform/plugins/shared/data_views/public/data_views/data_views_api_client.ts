@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isRequestAbortedError, CustomAbortError } from '@kbn/server-route-repository-client';
 import { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
@@ -82,8 +81,10 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       }
 
       // If the request was cancelled, pass on the AbortError so it can be handled by the caller
-      if (isRequestAbortedError(resp)) {
-        throw new CustomAbortError(resp.message);
+      if (resp?.name === 'AbortError') {
+        const abortError = new Error(resp?.message);
+        abortError.name = 'AbortError';
+        throw abortError;
       }
 
       // Handle other errors

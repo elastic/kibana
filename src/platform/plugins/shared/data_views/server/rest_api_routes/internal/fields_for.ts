@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';
@@ -20,6 +20,19 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+
+/**
+ * Copied from `@kbn/data-plugin/server` to avoid a cyclic dependency.
+ *
+ * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`
+ * which aborts when the given request is aborted.
+ * @param aborted$ The observable of abort events (usually `request.events.aborted$`)
+ */
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
 
 /**
  * Accepts one of the following:

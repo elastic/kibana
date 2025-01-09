@@ -9,19 +9,6 @@
 
 import { get } from 'lodash';
 
-/**
- * Identifies an AbortError, thrown when the signal of an AbortController gets aborted.
- */
 export function isRequestAbortedError(error: unknown): error is Error & { name: 'AbortError' } {
   return get(error, 'name') === 'AbortError';
-}
-
-/**
- * A custom error to replicate the native `AbortError`.
- */
-export class CustomAbortError extends Error {
-  constructor(message = 'aborted without reason') {
-    super(message);
-    this.name = 'AbortError';
-  }
 }
