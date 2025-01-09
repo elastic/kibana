@@ -246,8 +246,10 @@ interface RuleFormHorizontalSteps {
   hasNextStep: boolean;
   hasPreviousStep: boolean;
 }
-export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
-  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(STEP_ORDER[0]);
+export const useRuleFormHorizontalSteps: (
+  initialStep?: RuleFormStepId
+) => RuleFormHorizontalSteps = (initialStep = STEP_ORDER[0]) => {
+  const [currentStep, setCurrentStep] = useState<RuleFormStepId>(initialStep);
   const [touchedSteps, setTouchedSteps] = useState<Record<RuleFormStepId, boolean>>(
     STEP_ORDER.reduce(
       (result, stepId) => ({ ...result, [stepId]: false }),

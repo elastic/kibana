@@ -8,9 +8,11 @@
  */
 
 import { EuiFlyout, EuiPortal } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import type { RuleFormData } from '../types';
+import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
+import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
 
 interface RuleFlyoutProps {
   isEdit?: boolean;
@@ -19,10 +21,21 @@ interface RuleFlyoutProps {
   onSave: (formData: RuleFormData) => void;
 }
 
-// Wrapper component for the rule flyout. Currently only displays RuleFlyoutBody, but will be extended to conditionally
-// display the Show Request UI or the Action Connector UI. These UIs take over the entire flyout, so we need to swap out
-// their body elements entirely to avoid adding another EuiFlyout element to the DOM
-export const RuleFlyout = ({ onSave, isEdit, isSaving, onCancel = () => {} }: RuleFlyoutProps) => {
+export const RuleFlyout = ({
+  onSave,
+  isEdit = false,
+  isSaving = false,
+  onCancel = () => {},
+}: RuleFlyoutProps) => {
+  const [isShowRequestOpen, setIsShowRequestOpen] = useState(false);
+  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
+
+  const onOpenShowRequest = useCallback(() => setIsShowRequestOpen(true), []);
+  const onCloseShowRequest = useCallback(() => {
+    setInitialStep(RuleFormStepId.DETAILS);
+    setIsShowRequestOpen(false);
+  }, []);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -33,7 +46,18 @@ export const RuleFlyout = ({ onSave, isEdit, isSaving, onCancel = () => {} }: Ru
         maxWidth={500}
         className="ruleFormFlyout__container"
       >
-        <RuleFlyoutBody onSave={onSave} onCancel={onCancel} isEdit={isEdit} isSaving={isSaving} />
+        {isShowRequestOpen ? (
+          <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
+        ) : (
+          <RuleFlyoutBody
+            onSave={onSave}
+            onCancel={onCancel}
+            isEdit={isEdit}
+            isSaving={isSaving}
+            onShowRequest={onOpenShowRequest}
+            initialStep={initialStep}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

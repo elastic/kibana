@@ -730,3 +730,52 @@ export const DISABLED_ACTIONS_WARNING_TITLE = i18n.translate(
     defaultMessage: 'This rule has actions that are disabled',
   }
 );
+
+export const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
+  {
+    defaultMessage: 'edit',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleCreate',
+  {
+    defaultMessage: 'create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
+    defaultMessage: 'This Kibana request will {requestType} this rule.',
+    values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
+  });
+
+export const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleCreate',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
+    defaultMessage: '{requestType} alerting rule request',
+    values: {
+      requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
+    },
+  });
+
+export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.somethingWentWrongDescription',
+  {
+    defaultMessage: 'Sorry about that, something went wrong.',
+  }
+);
