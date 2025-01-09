@@ -46,9 +46,11 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
-  const inferenceEnabled = triggersActionsUi.actionTypeRegistry.get(
-    '.inference'
-  ) as unknown as boolean;
+  let inferenceEnabled: boolean = false;
+
+  if (triggersActionsUi.actionTypeRegistry.has('.inference')) {
+    inferenceEnabled = triggersActionsUi.actionTypeRegistry.get('.inference') as unknown as boolean;
+  }
   if (inferenceEnabled) {
     AllowedActionTypeIds.push('.inference');
   }
