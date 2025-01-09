@@ -32,7 +32,7 @@ export interface Props {
 }
 
 export const Threshold = ({
-  chartProps: { baseTheme },
+  chartProps: { theme, baseTheme },
   comparator,
   id,
   thresholds,
@@ -56,7 +56,7 @@ export const Threshold = ({
       data-test-subj={`threshold-${thresholds.join('-')}-${value}`}
     >
       <Chart>
-        <Settings baseTheme={baseTheme} locale={i18n.getLocale()} />
+        <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
         <Metric
           id={id}
           data={[
