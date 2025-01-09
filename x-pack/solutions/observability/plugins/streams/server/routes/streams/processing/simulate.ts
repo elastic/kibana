@@ -6,13 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { notFound, internal } from '@hapi/boom';
+import { notFound, internal, badRequest } from '@hapi/boom';
 import { FieldDefinitionConfig, processingDefinitionSchema } from '@kbn/streams-schema';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
+import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
@@ -37,7 +38,7 @@ export const simulateProcessorRoute = createServerRoute({
       documents: z.array(z.record(z.unknown())),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, response, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -50,11 +51,16 @@ export const simulateProcessorRoute = createServerRoute({
       // Convert input documents to ingest simulation format
       const docs = params.body.documents.map((doc) => ({ _source: doc }));
 
-      const simulationResult = await scopedClusterClient.asCurrentUser.ingest.simulate({
-        verbose: true,
-        pipeline: { processors },
-        docs,
-      });
+      let simulationResult: IngestSimulateResponse;
+      try {
+        simulationResult = await scopedClusterClient.asCurrentUser.ingest.simulate({
+          verbose: true,
+          pipeline: { processors },
+          docs,
+        });
+      } catch (error) {
+        throw new SimulationFailed(error);
+      }
 
       const documents = computeSimulationDocuments(simulationResult, docs);
       const detectedFields = computeDetectedFields(simulationResult, docs);
@@ -67,12 +73,16 @@ export const simulateProcessorRoute = createServerRoute({
         failure_rate: parseFloat(failureRate.toFixed(2)),
         detected_fields: detectedFields,
       };
-    } catch (e) {
-      if (e instanceof DefinitionNotFound) {
-        throw notFound(e);
+    } catch (error) {
+      if (error instanceof DefinitionNotFound) {
+        throw notFound(error);
       }
 
-      throw internal(e);
+      if (error instanceof SimulationFailed) {
+        throw badRequest(error);
+      }
+
+      throw internal(error);
     }
   },
 });

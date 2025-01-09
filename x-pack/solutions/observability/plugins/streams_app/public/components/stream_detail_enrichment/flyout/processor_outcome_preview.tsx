@@ -34,6 +34,7 @@ import {
 import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
@@ -78,9 +79,7 @@ export const ProcessorOutcomePreview = ({
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
-          path: {
-            id: definition.name,
-          },
+          path: { id: definition.name },
           body: {
             condition: { field: formFields.field, operator: 'exists' },
             start: start?.valueOf(),
@@ -97,7 +96,7 @@ export const ProcessorOutcomePreview = ({
   const {
     value: simulation,
     loading: isLoadingSimulation,
-    error: simulationError,
+    error,
     refresh: refreshSimulation,
   } = useStreamsAppFetch(
     async ({ signal }) => {
@@ -116,9 +115,7 @@ export const ProcessorOutcomePreview = ({
         {
           signal,
           params: {
-            path: {
-              id: definition.name,
-            },
+            path: { id: definition.name },
             body: {
               documents: samples.documents as Array<Record<PropertyKey, unknown>>,
               processing: [processingDefinition],
@@ -132,6 +129,8 @@ export const ProcessorOutcomePreview = ({
     [definition, samples, streamsRepositoryClient],
     { disableToastOnError: true }
   );
+
+  const simulationError = error as IHttpFetchError<ResponseErrorBody> | undefined;
 
   const simulationDocuments = useMemo(() => {
     if (!simulation?.documents) {
@@ -383,7 +382,7 @@ const getDetectedFieldSelectOptions = (
 interface OutcomePreviewTableProps {
   documents?: Array<Record<PropertyKey, unknown>>;
   columns: string[];
-  error?: Error;
+  error?: IHttpFetchError<ResponseErrorBody>;
   isLoading?: boolean;
 }
 
@@ -407,15 +406,15 @@ const OutcomePreviewTable = ({
           </h3>
         }
         body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.errorBody',
-              {
-                defaultMessage:
-                  'The processor did not run correctly on the sample documents. Try updating the configuration.',
-              }
-            )}
-          </p>
+          <>
+            <p>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.errorBody',
+                { defaultMessage: 'The processor did not run correctly.' }
+              )}
+            </p>
+            {Boolean(error.body) && <p>{error.body.message}</p>}
+          </>
         }
       />
     );
