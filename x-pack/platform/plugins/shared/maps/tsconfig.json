@@ -10,7 +10,7 @@
     "server/**/*",
     "server/config.ts",
     "../../../../../typings/**/*",
-    "ui_tests/**/*"
+    "ui_tests/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -93,7 +93,7 @@
     "@kbn/presentation-containers",
     "@kbn/field-utils",
     "@kbn/react-hooks",
-    "@kbn/scout"
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
