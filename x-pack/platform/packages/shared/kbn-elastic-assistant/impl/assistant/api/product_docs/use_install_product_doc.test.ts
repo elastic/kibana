@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useInstallProductDoc } from './use_install_product_doc';
 import { useAssistantContext } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
@@ -35,7 +35,7 @@ describe('useInstallProductDoc', () => {
 
   it('returns success state and shows success toast on successful installation', async () => {
     mockInstall.mockResolvedValueOnce({});
-    const { result, waitFor } = renderHook(() => useInstallProductDoc(), {
+    const { result } = renderHook(() => useInstallProductDoc(), {
       wrapper: TestProviders,
     });
 
@@ -50,7 +50,7 @@ describe('useInstallProductDoc', () => {
   it('returns error state and shows error toast on failed installation', async () => {
     const error = new Error('error message');
     mockInstall.mockRejectedValueOnce(error);
-    const { result, waitFor } = renderHook(() => useInstallProductDoc(), {
+    const { result } = renderHook(() => useInstallProductDoc(), {
       wrapper: TestProviders,
     });
 

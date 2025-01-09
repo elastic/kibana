@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useGetProductDocStatus } from './use_get_product_doc_status';
 import { useAssistantContext } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
@@ -29,7 +29,7 @@ describe('useGetProductDocStatus', () => {
 
   it('returns loading state initially', async () => {
     mockGetStatus.mockResolvedValueOnce('status');
-    const { result, waitFor } = renderHook(() => useGetProductDocStatus(), {
+    const { result } = renderHook(() => useGetProductDocStatus(), {
       wrapper: TestProviders,
     });
 
@@ -39,22 +39,24 @@ describe('useGetProductDocStatus', () => {
 
   it('returns success state with data', async () => {
     mockGetStatus.mockResolvedValueOnce('status');
-    const { result, waitFor } = renderHook(() => useGetProductDocStatus(), {
+    const { result } = renderHook(() => useGetProductDocStatus(), {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => result.current.isSuccess);
-    expect(result.current.status).toBe('status');
-    expect(result.current.isSuccess).toBe(true);
+    await waitFor(() => {
+      expect(result.current.status).toBe('status');
+      expect(result.current.isSuccess).toBe(true);
+    });
   });
 
   it('returns error state when query fails', async () => {
     mockGetStatus.mockRejectedValueOnce(new Error('error'));
-    const { result, waitFor } = renderHook(() => useGetProductDocStatus(), {
+    const { result } = renderHook(() => useGetProductDocStatus(), {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => result.current.isError);
-    expect(result.current.isError).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
   });
 });
