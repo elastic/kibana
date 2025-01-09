@@ -141,7 +141,6 @@ packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
-packages/kbn-formatters @elastic/obs-ux-logs-team
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
@@ -205,7 +204,6 @@ packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
-packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 packages/serverless/storybook/config @elastic/appex-sharedux
 src/core @elastic/kibana-core
@@ -3260,7 +3258,6 @@ x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
-x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
