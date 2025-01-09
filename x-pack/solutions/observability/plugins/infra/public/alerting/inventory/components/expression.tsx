@@ -579,7 +579,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  dataView: DataView;
+  dataView?: DataView;
 }
 
 const NonCollapsibleExpressionCss = css`

@@ -47,7 +47,7 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
-  dataView: DataView;
+  dataView?: DataView;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -116,10 +116,10 @@ export const MetricExpression = ({
 
   const fieldOptions = useMemo(
     () =>
-      (dataView.fields ?? [])
+      (dataView?.fields ?? [])
         .filter((f) => f.aggregatable && f.type === 'number' && !(customMetric?.field === f.name))
         .map((f) => ({ label: f.name })),
-    [dataView.fields, customMetric?.field]
+    [dataView?.fields, customMetric?.field]
   );
 
   const expressionDisplayValue = useMemo(() => {
