@@ -51,14 +51,14 @@
 }
 
 .domDroppable--incompatible:not(.domDroppable__overlayWrapper) {
-  background-color:  transparentize($euiColorWarning, .9) !important;
+  background-color:  $euiColorBackgroundBaseWarning !important;
   &:before {
-    border: $euiBorderWidthThin dashed $euiColorWarning !important;
+    border: $euiBorderWidthThin dashed $euiColorBorderBaseWarning !important;
   }
   &.domDroppable--hover {
-    background-color: transparentize($euiColorWarning, .75) !important;
+    background-color: $euiColorBackgroundLightWarning !important;
     &:before {
-      border-color: $euiColorWarning !important;
+      border-color: $euiColorBorderBaseWarning !important;
     }
   }
 }
@@ -177,7 +177,7 @@ $reorderItemMargin: $euiSizeS;
 }
 
 .domDragDrop-isActiveGroup {
-  background-color: transparentize($euiColorVis0, .75);
+  background-color: $euiColorBackgroundLightSuccess;
   .domDraggable_active_keyboard--reorderable {
     .domDraggable_dragover_keyboard--copy {
       opacity: 1;

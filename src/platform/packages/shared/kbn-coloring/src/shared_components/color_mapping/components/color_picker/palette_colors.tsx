@@ -50,8 +50,8 @@ export function PaletteColors({
         : palettes.get(color.paletteId).getColor(color.colorIndex)
       : color.colorCode;
   const selectedColorSwatchStyle = {
-    outline: 'currentcolor solid 2px',
-    outlineOffset: '-1px',
+    outline: `currentcolor solid ${euiTheme.border.width.thick}`,
+    outlineOffset: `-${euiTheme.border.width.thin}`,
     border: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseFormsColorSwatch}`,
   };
   return (
