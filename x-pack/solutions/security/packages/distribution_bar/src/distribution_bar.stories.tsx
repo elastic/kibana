@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { DistributionBar as DistributionBarComponent } from '..';
 
@@ -13,39 +12,37 @@ const mockStatsFindings = [
   {
     key: 'passed',
     count: 90,
-    color: euiThemeVars.euiColorSuccess,
+    color: 'green',
     label: 'Passed',
   },
   {
     key: 'failed',
     count: 10,
-    color: euiThemeVars.euiColorDanger,
+    color: 'red',
     label: <>{'Failed'}</>,
   },
 ];
 
-// TODO: replace with severity palette colors
-// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
 const mockStatsAlerts = [
   {
     key: 'low',
     count: 1000,
-    color: euiThemeVars.euiColorVis0,
+    color: 'green',
   },
   {
     key: 'medium',
     count: 800,
-    color: euiThemeVars.euiColorVis5,
+    color: '#f7dc6f',
   },
   {
     key: 'high',
     count: 300,
-    color: euiThemeVars.euiColorVis7,
+    color: 'orange',
   },
   {
     key: 'critical',
     count: 50,
-    color: euiThemeVars.euiColorVis9,
+    color: 'red',
   },
 ];
 
