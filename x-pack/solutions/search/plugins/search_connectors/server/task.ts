@@ -29,7 +29,7 @@ import { SearchConnectorsConfig } from './config';
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-manager-task';
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-manager';
 
-const SCHEDULE = { interval: '30s' };
+const SCHEDULE = { interval: '1m' };
 
 export function infraSyncTaskRunner(
   logger: Logger,

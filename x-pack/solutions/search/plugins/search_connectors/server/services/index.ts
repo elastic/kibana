@@ -160,7 +160,6 @@ export class AgentlessConnectorsInfraService {
     this.logger.info(
       `Successfully created agent policy ${createdPolicy.id} for agentless connector ${connector.id}`
     );
-
     this.logger.debug(`Creating a package policy for agentless connector ${connector.id}`);
     const packagePolicy = await this.packagePolicyService.create(this.soClient, this.esClient, {
       policy_ids: [createdPolicy.id],
