@@ -70,7 +70,7 @@ export class StorybookMock extends AbstractStorybookMock<
       esqlDocLink,
       openDataViewEditor: (options) => {
         action('openDataViewEditor')(options);
-        return () => { };
+        return () => {};
       },
       onTryESQL,
     };
