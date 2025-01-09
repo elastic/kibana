@@ -47,11 +47,14 @@ export const RuleFlyoutCreateFooter = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {hasPreviousStep ? (
-            <EuiButtonEmpty data-test-subj="previousStepButton" onClick={goToPreviousStep}>
+            <EuiButtonEmpty
+              data-test-subj="ruleFlyoutFooterPreviousStepButton"
+              onClick={goToPreviousStep}
+            >
               {RULE_FLYOUT_FOOTER_BACK_TEXT}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty data-test-subj="cancelSaveRuleButton" onClick={onCancel}>
+            <EuiButtonEmpty data-test-subj="ruleFlyoutFooterCancelButton" onClick={onCancel}>
               {RULE_FLYOUT_FOOTER_CANCEL_TEXT}
             </EuiButtonEmpty>
           )}
@@ -75,13 +78,17 @@ export const RuleFlyoutCreateFooter = ({
             </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               {hasNextStep ? (
-                <EuiButton fill data-test-subj="nextStepButton" onClick={goToNextStep}>
+                <EuiButton
+                  fill
+                  data-test-subj="ruleFlyoutFooterNextStepButton"
+                  onClick={goToNextStep}
+                >
                   {RULE_FLYOUT_FOOTER_NEXT_TEXT}
                 </EuiButton>
               ) : (
                 <EuiButton
                   fill
-                  data-test-subj="saveRuleButton"
+                  data-test-subj="ruleFlyoutFooterSaveButton"
                   type="submit"
                   isDisabled={isSaving || hasErrors}
                   isLoading={isSaving}
