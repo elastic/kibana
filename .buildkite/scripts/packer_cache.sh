@@ -10,6 +10,8 @@ export FORCE_BOOTSTRAP_REMOTE_CACHE=true
 
 yarn kbn bootstrap
 
+npm_install_global ts-node
+
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node scripts/es snapshot --download-only --base-path "$ES_CACHE_DIR" --version "$version"
 done
