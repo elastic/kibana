@@ -17,15 +17,38 @@ export interface BedRockMessage {
 /**
  * Bedrock message parts
  */
+export interface BedRockTextPart {
+  type: 'text';
+  text: string;
+}
+
+export interface BedRockToolUsePart {
+  type: 'tool_use';
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+export interface BedRockToolResultPart {
+  type: 'tool_result';
+  tool_use_id: string;
+  content: string;
+}
+
+export interface BedRockImagePart {
+  type: 'image';
+  source: {
+    type: 'base64';
+    mediaType: string;
+    data: string;
+  };
+}
+
 export type BedRockMessagePart =
-  | { type: 'text'; text: string }
-  | {
-      type: 'tool_use';
-      id: string;
-      name: string;
-      input: Record<string, unknown>;
-    }
-  | { type: 'tool_result'; tool_use_id: string; content: string };
+  | BedRockTextPart
+  | BedRockToolUsePart
+  | BedRockToolResultPart
+  | BedRockImagePart;
 
 export type BedrockToolChoice = { type: 'auto' } | { type: 'any' } | { type: 'tool'; name: string };
 

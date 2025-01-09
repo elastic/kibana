@@ -133,15 +133,6 @@ FROM weather_data
 ```esql
 FROM sales
 | WHERE @timestamp > NOW() - 1 quarter
-| STATS weekly_sales = SUM(sales_amount) BY week = DATE_TRUNC(1 week, @timestamp)
-| SORT week
-```
-
-4. The same example with BUCKET instead of DATE_TRUNC:
-
-```esql
-FROM sales
-| WHERE @timestamp > NOW() - 1 quarter
 | STATS weekly_sales = SUM(sales_amount) BY week = BUCKET(@timestamp, 1 week)
 | SORT week
 ```
