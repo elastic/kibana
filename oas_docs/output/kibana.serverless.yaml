@@ -16253,6 +16253,8 @@ paths:
                             - unenrolled
                             - updating
                             - degraded
+                            - uninstalled
+                            - orphaned
                           type: string
                         tags:
                           items:
@@ -16700,6 +16702,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -17039,6 +17043,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
