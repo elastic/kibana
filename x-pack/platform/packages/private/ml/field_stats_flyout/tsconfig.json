@@ -28,5 +28,6 @@
     "@kbn/ml-query-utils",
     "@kbn/ml-is-defined",
     "@kbn/field-types",
+    "@kbn/server-route-repository-client",
   ]
 }

@@ -39,6 +39,8 @@
     "@kbn/logging-mocks",
     "@kbn/doc-links",
     "@kbn/core-deprecations-common",
+    "@kbn/server-route-repository-client",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
