@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HOST_LIMIT_OPTIONS } from '../../constants';
-import { HostLimitOptions } from '../../types';
+import type { HostLimitOptions } from '../../types';
 
 interface Props {
   limit: HostLimitOptions;
