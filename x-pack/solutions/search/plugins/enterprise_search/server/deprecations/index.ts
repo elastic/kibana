@@ -115,7 +115,7 @@ export function getEnterpriseSearchNodeDeprecation(
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
               '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
-              '- Once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Crawler ' +
+              '- Once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Web Crawler ' +
               'will cease to operate.\n' +
               '- Native Connectors will also stop running syncs until the 9.x upgrade is completed.\n\n' +
               'For full details, see the documentation.' +
@@ -134,7 +134,7 @@ export function getEnterpriseSearchNodeDeprecation(
 }
 
 /**
- * if the customer was using Elastic Crawler, they must delete the connector records
+ * if the customer was using Elastic Web Crawler, they must delete the connector records
  */
 export async function getCrawlerDeprecations(
   ctx: GetDeprecationsContext,
@@ -143,7 +143,7 @@ export async function getCrawlerDeprecations(
   const client = ctx.esClient.asInternalUser;
   const crawlers: Connector[] = await fetchConnectors(client, undefined, true, undefined);
   if (crawlers.length === 0) {
-    return []; // no deprecations to register if there are no Elastic Crawlers in the connectors index
+    return []; // no deprecations to register if there are no Elastic Web Crawlers in the connectors index
   } else {
     return [
       {
@@ -151,15 +151,15 @@ export async function getCrawlerDeprecations(
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.title', {
           defaultMessage:
-            'Elastic Crawler metadata records in the `.elastic-connectors` index must be removed.',
+            'Elastic Web Crawler metadata records in the `.elastic-connectors` index must be removed.',
         }),
         message: {
           type: 'markdown',
           content: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.message', {
             defaultMessage:
-              'Enterprise Search, including Elastic Crawler, is not supported in versions >= 9.x.\n\n' +
+              'Enterprise Search, including Elastic Web Crawler, is not supported in versions >= 9.x.\n\n' +
               'In order to upgrade Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
-              'Elastic Crawler must be removed. For full details, see the documentation. ',
+              'Elastic Web Crawler must be removed. For full details, see the documentation. ',
           }),
         },
         documentationUrl: docsUrl,
