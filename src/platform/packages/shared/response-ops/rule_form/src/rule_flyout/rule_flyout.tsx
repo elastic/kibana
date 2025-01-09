@@ -56,6 +56,8 @@ export const RuleFlyout = ({
     [isConnectorsScreenVisible, isShowRequestScreenVisible]
   );
 
+  const hideCloseButton = useMemo(() => isShowRequestOpen, [isShowRequestOpen]);
+
   return (
     <EuiPortal>
       <EuiFlyout
