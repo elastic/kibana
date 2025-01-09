@@ -32,7 +32,7 @@ const VerticalSeparator = styled.div`
   :before {
     content: '';
     height: 100%;
-    border-left: 1px solid ${(props) => props.theme.euiTheme.border.color};
+    border-left: 1px solid ${(props) => props.theme.euiTheme.border.thin};
   }
 `;
 
@@ -92,7 +92,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         paddingSize="s"
         grow={false}
         css={css`
-          border-bottom: 1px solid ${euiTheme.border.color};
+          border-bottom: 1px solid ${euiTheme.border.thin};
         `}
       >
         <EuiFlexGroup
