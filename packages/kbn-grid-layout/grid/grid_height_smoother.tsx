@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
