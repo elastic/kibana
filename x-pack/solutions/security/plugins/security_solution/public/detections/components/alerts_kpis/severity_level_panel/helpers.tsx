@@ -15,6 +15,8 @@ import { emptyDonutColor } from '../../../../common/components/charts/donutchart
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import * as i18n from './translations';
 
+const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low'];
+
 export const getSeverityColor = (severity: string) => {
   return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
 };
@@ -26,13 +28,19 @@ export const parseSeverityData = (
 
   return severityBuckets.length === 0
     ? []
-    : severityBuckets.map((severity) => {
-        return {
-          key: severity.key,
-          value: severity.doc_count,
-          label: severityLabels[severity.key] ?? i18n.UNKNOWN_SEVERITY,
-        };
-      });
+    : severityBuckets
+        .map((severity) => {
+          return {
+            key: severity.key,
+            value: severity.doc_count,
+            label: severityLabels[severity.key] ?? i18n.UNKNOWN_SEVERITY,
+          };
+        })
+        .sort((a, b) => {
+          const aIndex = SEVERITY_ORDER.indexOf(a.key) ?? 4; // if not found, put it at the end as unknown
+          const bIndex = SEVERITY_ORDER.indexOf(b.key) ?? 4;
+          return aIndex - bIndex;
+        });
 };
 
 export const getIsAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {

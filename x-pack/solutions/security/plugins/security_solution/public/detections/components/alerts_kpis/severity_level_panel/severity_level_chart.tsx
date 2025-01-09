@@ -8,7 +8,6 @@ import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
@@ -47,13 +46,6 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
     return getSeverityColor(dataName);
   }, []);
 
-  const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {
-    sort: {
-      field: 'value',
-      direction: 'desc',
-    },
-  };
-
   const onDonutPartitionClicked = useCallback(
     (level: string) => {
       if (addFilter) {
@@ -71,7 +63,6 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
           columns={columns}
           items={data}
           loading={isLoading}
-          sorting={sorting}
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="severity-level-donut">

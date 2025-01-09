@@ -41,7 +41,6 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityDat
   {
     field: 'value',
     name: COUNT_TABLE_TITLE,
-    sortable: true,
     dataType: 'number',
     'data-test-subj': 'severityTable-alertCount',
     width: '45%',
