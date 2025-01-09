@@ -164,6 +164,7 @@ export interface StartPlugins {
   core: CoreStart;
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
