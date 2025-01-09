@@ -217,7 +217,7 @@ export const getSLOSummaryMappingsTemplate = (
             },
           },
         },
-        addedBy: {
+        createdBy: {
           type: 'keyword',
         },
         updatedBy: {
