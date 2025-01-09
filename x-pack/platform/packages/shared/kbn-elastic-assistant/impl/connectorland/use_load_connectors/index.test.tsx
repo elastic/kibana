@@ -9,7 +9,6 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import React, { ReactNode } from 'react';
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -55,13 +54,6 @@ const toasts = {
 };
 const defaultProps = { http, toasts } as unknown as Props;
 
-const createWrapper = (inferenceEnabled = false) => {
-  // eslint-disable-next-line react/display-name
-  return ({ children }: { children: ReactNode }) => (
-    <TestProviders providerContext={{ inferenceEnabled }}>{children}</TestProviders>
-  );
-};
-
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -91,9 +83,12 @@ describe('useLoadConnectors', () => {
   });
 
   it('includes preconfigured .inference results when inferenceEnabled is true', async () => {
-    const { result } = renderHook(() => useLoadConnectors(defaultProps), {
-      wrapper: createWrapper(true),
-    });
+    const { result } = renderHook(
+      () => useLoadConnectors({ ...defaultProps, inferenceEnabled: true }),
+      {
+        wrapper: TestProviders,
+      }
+    );
     await waitFor(() => {
       expect(result.current.data).toStrictEqual(
         mockConnectors

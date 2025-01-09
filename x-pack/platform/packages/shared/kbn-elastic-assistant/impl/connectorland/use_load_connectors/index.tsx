@@ -13,7 +13,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { useAssistantContext } from '../../assistant_context';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -26,6 +25,7 @@ const QUERY_KEY = ['elastic-assistant, load-connectors'];
 export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
+  inferenceEnabled?: boolean;
 }
 
 const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
@@ -33,8 +33,8 @@ const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 export const useLoadConnectors = ({
   http,
   toasts,
+  inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
-  const { inferenceEnabled } = useAssistantContext();
   if (inferenceEnabled) {
     actionTypes.push('.inference');
   }
