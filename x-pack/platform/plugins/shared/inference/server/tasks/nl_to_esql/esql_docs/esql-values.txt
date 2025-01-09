@@ -29,5 +29,4 @@ FROM employees
 
 ## Limitations
 
-- This functionality is in technical preview and may be changed or removed in a future release
 - The VALUES function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond memory. Therefore, if the function collects more values than can fit into memory, it will fail the query with a Circuit Breaker Error.
