@@ -17,10 +17,9 @@ import {
   SerializedTitles,
   getUnchangingComparator,
   initializeTitles,
+  SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-
-import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,

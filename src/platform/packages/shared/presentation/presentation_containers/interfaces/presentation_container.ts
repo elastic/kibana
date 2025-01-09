@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiHasParentApi,
+  apiHasUniqueId,
+  PublishingSubject,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
-import { SerializedPanelState } from './serialized_state';
 
-export interface PanelPackage<SerializedStateType extends object = object> {
+export interface PanelPackage<
+  SerializedStateType extends object = object,
+  RuntimeStateType extends object = object
+> {
   panelType: string;
 
   /**
@@ -23,7 +30,7 @@ export interface PanelPackage<SerializedStateType extends object = object> {
   /**
    * The runtime state of this panel. @deprecated Use `serializedState` instead.
    */
-  initialState?: object;
+  initialState?: RuntimeStateType;
 }
 
 export interface PresentationContainer extends CanAddNewPanel {

@@ -11,7 +11,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { noop } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-containers';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices } from '../types';
 import type { IntegrationCallbacks } from '../types';

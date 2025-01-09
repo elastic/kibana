@@ -13,7 +13,7 @@ import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
 import {
   DefaultEmbeddableApi,
   EmbeddablePackageState,
@@ -24,6 +24,7 @@ import {
   apiHasLibraryTransforms,
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
+  apiHasSerializableState,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';

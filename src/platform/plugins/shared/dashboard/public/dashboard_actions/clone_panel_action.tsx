@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiCanDuplicatePanels,
-  apiHasSerializableState,
-  CanDuplicatePanels,
-  HasSerializableState,
-} from '@kbn/presentation-containers';
+import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -22,6 +17,8 @@ import {
   getInheritedViewMode,
   HasParentApi,
   PublishesBlockingError,
+  apiHasSerializableState,
+  HasSerializableState,
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';

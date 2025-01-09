@@ -16,8 +16,7 @@ import {
   DataViewField,
 } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { StateComparators, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
 import type { DefaultControlState, DefaultDataControlState } from '../../../common';

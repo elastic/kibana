@@ -9,8 +9,7 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
 import { Reference } from '../../common/content_management';
 import {

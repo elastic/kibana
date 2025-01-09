@@ -12,7 +12,7 @@ import { of } from 'rxjs';
 
 import { estypes } from '@elastic/elasticsearch';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';

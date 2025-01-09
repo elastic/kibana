@@ -30,6 +30,9 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
   return Boolean((api as HasSerializableState)?.serializeState);
 };
 
+/**
+ * @deprecated use HasSerializableState instead
+ */
 export interface HasSnapshottableState<RuntimeState extends object = object> {
   /**
    * Serializes all runtime state exactly as it appears. This can be used
@@ -38,6 +41,9 @@ export interface HasSnapshottableState<RuntimeState extends object = object> {
   snapshotRuntimeState: () => RuntimeState;
 }
 
+/**
+ * @deprecated use apiHasSerializableState instead
+ */
 export const apiHasSnapshottableState = (api: unknown | null): api is HasSnapshottableState => {
   return Boolean((api as HasSnapshottableState)?.snapshotRuntimeState);
 };
