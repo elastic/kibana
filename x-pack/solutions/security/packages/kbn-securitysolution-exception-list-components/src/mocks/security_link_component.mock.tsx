@@ -6,7 +6,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { LinkedRulesMenuItems } from '../generate_linked_rules_menu_item';
+import { generateLinkedRulesMenuItems } from '../generate_linked_rules_menu_item';
 import { rules } from './rule_references.mock';
 export const securityLinkAnchorComponentMock = ({
   referenceName,
@@ -21,7 +21,7 @@ export const securityLinkAnchorComponentMock = ({
 );
 
 export const getSecurityLinkAction = (dataTestSubj: string) =>
-  LinkedRulesMenuItems({
+  generateLinkedRulesMenuItems({
     dataTestSubj,
     linkedRules: [
       ...rules,
