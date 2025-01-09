@@ -231,6 +231,7 @@
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
     "@kbn/react-hooks",
-    "@kbn/index-adapter"
+    "@kbn/index-adapter",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }
