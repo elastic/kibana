@@ -10,5 +10,13 @@
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 
 export const queryKeys = {
-  mutedAlerts: (ruleIds: string[]) => ['alerts', 'mutedInstanceIdsForRuleIds', ruleIds] as const,
+  root: 'alerts',
+  mutedAlerts: (ruleIds: string[]) =>
+    [queryKeys.root, 'mutedInstanceIdsForRuleIds', ruleIds] as const,
+};
+
+export const mutationKeys = {
+  root: 'alerts',
+  muteAlertInstance: () => [mutationKeys.root, 'muteAlertInstance'] as const,
+  unmuteAlertInstance: () => [mutationKeys.root, 'unmuteAlertInstance'] as const,
 };

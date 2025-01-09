@@ -111,16 +111,21 @@ export const defaultSort: SortCombinations[] = [
 ];
 
 export const queryKeys = {
-  root: ['alertsTable'] as const,
-  alerts: () => [...queryKeys.root, 'alerts'] as const,
-  cases: () => [...queryKeys.root, 'cases'] as const,
-  maintenanceWindows: () => [...queryKeys.root, 'maintenanceWindows'] as const,
-
+  root: 'alertsTable',
+  alerts: () => [queryKeys.root, 'alerts'] as const,
+  cases: () => [queryKeys.root, 'cases'] as const,
   casesBulkGet: (caseIds: string[]) => [...queryKeys.cases(), 'bulkGet', caseIds] as const,
+  maintenanceWindows: () => [queryKeys.root, 'maintenanceWindows'] as const,
   maintenanceWindowsBulkGet: (maintenanceWindowIds: string[]) => [
     ...queryKeys.maintenanceWindows(),
     maintenanceWindowIds,
   ],
+};
+
+export const mutationKeys = {
+  root: 'alertsTable',
+  bulkUntrackAlerts: () => [mutationKeys.root, 'bulkUntrackAlerts'] as const,
+  bulkUntrackAlertsByQuery: () => [mutationKeys.root, 'bulkUntrackAlertsByQuery'] as const,
 };
 
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;

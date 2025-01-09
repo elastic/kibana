@@ -12,7 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH, mutationKeys } from '../constants';
 
 export interface UseBulkUntrackAlertsParams {
   http: HttpStart;
@@ -24,7 +24,7 @@ export const useBulkUntrackAlerts = ({
   notifications: { toasts },
 }: UseBulkUntrackAlertsParams) => {
   return useMutation<string, string, { indices: string[]; alertUuids: string[] }>(
-    ['untrackAlerts'],
+    mutationKeys.bulkUntrackAlerts(),
     ({ indices, alertUuids }) => {
       try {
         const body = JSON.stringify({

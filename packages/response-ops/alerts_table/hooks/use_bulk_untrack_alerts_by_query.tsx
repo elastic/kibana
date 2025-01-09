@@ -13,7 +13,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH, mutationKeys } from '../constants';
 
 export interface UseBulkUntrackAlertsByQueryParams {
   http: HttpStart;
@@ -29,7 +29,7 @@ export const useBulkUntrackAlertsByQuery = ({
     string,
     { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>; ruleTypeIds: string[] }
   >(
-    ['untrackAlerts'],
+    mutationKeys.bulkUntrackAlertsByQuery(),
     ({ query, ruleTypeIds }) => {
       try {
         const body = JSON.stringify({
