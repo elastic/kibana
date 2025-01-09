@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
-import { FleetStart } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -53,15 +52,11 @@ import { StartStep } from './start_step';
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 
-interface CreateConnectorProps {
-  fleet?: FleetStart;
-}
-
-export const CreateConnector: React.FC<CreateConnectorProps> = ({ fleet }) => {
+export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
-  const { application, history } = useValues(KibanaLogic);
+  const { application, history, fleet } = useValues(KibanaLogic);
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
@@ -89,6 +84,7 @@ export const CreateConnector: React.FC<CreateConnectorProps> = ({ fleet }) => {
       setSelfManagePreference('selfManaged');
     }
     console.log('isAgentlessEnabled', isAgentlessEnabled);
+    console.log('configFleet', fleet);
   }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
