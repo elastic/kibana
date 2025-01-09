@@ -68,7 +68,7 @@ describe('Enterprise Search node deprecation', () => {
 describe('Crawler connector deprecation', () => {
   it('Has no deprecations if there are no crawler connectors', async () => {
     mockedFetchConnectors = jest.fn().mockResolvedValue([]);
-    const deprecations = await getCrawlerDeprecations(ctx);
+    const deprecations = await getCrawlerDeprecations(ctx, docsUrl);
     expect(deprecations).toHaveLength(0);
   });
 
@@ -77,7 +77,7 @@ describe('Crawler connector deprecation', () => {
       id: 'foo',
     } as Connector;
     mockedFetchConnectors = jest.fn().mockResolvedValue([crawlerConnector]);
-    const deprecations = await getCrawlerDeprecations(ctx);
+    const deprecations = await getCrawlerDeprecations(ctx, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/delete_crawler_connectors'
