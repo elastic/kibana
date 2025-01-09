@@ -47,9 +47,11 @@ export function getESQLForLayer(
   )
     return;
 
-  let esql = `FROM ${indexPattern.title} | `;
+  const esql = [`FROM ${indexPattern.title}`];
   if (indexPattern.timeFieldName) {
-    esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
+    esql.push(
+      `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend`
+    );
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -66,6 +68,9 @@ export function getESQLForLayer(
     .filter(([id, col]) => !col.isBucketed)
     .map(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
+
+      if (!def.toESQL) return undefined;
+
       const aggId = String(index);
       const wrapInFilter = Boolean(def.filterable && col.filter?.query);
       const wrapInTimeFilter =
@@ -110,8 +115,6 @@ export function getESQLForLayer(
         },
       ];
 
-      if (!def.toESQL) return undefined;
-
       let metricESQL = def.toESQL(
         {
           ...col,
@@ -134,18 +137,14 @@ export function getESQLForLayer(
       metricESQL = `${esAggsId} = ` + metricESQL;
 
       if (wrapInFilter || wrapInTimeFilter) {
-        const conditions: string[] = [];
         if (wrapInFilter) {
           if (col.filter?.language === 'kquery') {
             return;
           }
-          return; // conditions.push(`QSTR("${col.filter?.query}")`);
+          return;
         }
         if (wrapInTimeFilter) {
           return undefined;
-        }
-        if (conditions.length) {
-          metricESQL += ` WHERE ${conditions.join(' AND ')}`;
         }
       }
 
@@ -153,12 +152,15 @@ export function getESQLForLayer(
     });
 
   if (metrics.some((m) => !m)) return;
-  esql += `STATS ${metrics.join(', ')}`;
+  let stats = `STATS ${metrics.join(', ')}`;
 
   const buckets = esAggEntries
     .filter(([id, col]) => col.isBucketed)
     .map(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
+
+      if (!def.toESQL) return undefined;
+
       const aggId = String(index);
       const wrapInFilter = Boolean(def.filterable && col.filter?.query);
       const wrapInTimeFilter =
@@ -200,8 +202,6 @@ export function getESQLForLayer(
         const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
         interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }
-
-      if (!def.toESQL) return undefined;
 
       const format =
         operationDefinitionMap[col.operationType].getSerializedFormat?.(
@@ -268,7 +268,8 @@ export function getESQLForLayer(
   if (buckets.some((m) => !m)) return;
 
   if (buckets.length > 0) {
-    esql += ` BY ${buckets.join(', ')}`;
+    stats += ` BY ${buckets.join(', ')}`;
+    esql.push(stats);
 
     if (buckets.some((b) => !b || b.includes('undefined'))) return;
 
@@ -287,11 +288,11 @@ export function getESQLForLayer(
         return `${esAggsId} ASC`;
       });
 
-    esql += ` | SORT ${sorts.join(', ')}`;
+    esql.push(`SORT ${sorts.join(', ')}`);
   }
 
   return {
-    esql,
+    esql: esql.join(' | '),
     partialRows,
     esAggsIdMap,
   };

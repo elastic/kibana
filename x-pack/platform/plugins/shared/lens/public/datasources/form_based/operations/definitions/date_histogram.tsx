@@ -94,25 +94,30 @@ function getTimeZoneAndInterval(
   indexPattern: IndexPattern
 ) {
   const usedField = indexPattern.getFieldByName(column.sourceField);
- 
+
   if (
     usedField &&
     usedField.aggregationRestrictions &&
     usedField.aggregationRestrictions.date_histogram
   ) {
     return {
-      interval: restrictedInterval(usedField.aggregationRestrictions),
+      interval: restrictedInterval(usedField.aggregationRestrictions) ?? autoInterval,
       timeZone: usedField.aggregationRestrictions.date_histogram.time_zone,
       usedField,
+    };
   }
-  return { usedField: undefined, timeZone: undefined, interval: column.params?.interval ?? autoInterval  };
+  return {
+    usedField: undefined,
+    timeZone: undefined,
+    interval: column.params?.interval ?? autoInterval,
+  };
 }
 
-export function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
-  if (_interval !== 'm' && _interval.endsWith('m')) {
-    return _interval.replace('m', ' minutes');
+export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
+  if (interval !== 'm' && interval.endsWith('m')) {
+    return interval.replace('m', ' minutes');
   }
-  switch (_interval) {
+  switch (interval) {
     case '1M':
       return '1 month';
     case 'd':
@@ -126,7 +131,7 @@ export function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
     case 'ms':
       return '1ms';
     default:
-      return _interval;
+      return interval;
   }
 }
 
@@ -219,6 +224,7 @@ export const dateHistogramOperation: OperationDefinition<
     const rules = uiSettings?.get('dateFormat:scaled');
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
+      if (!Array.isArray(rule) || rule.length !== 2) continue;
       if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
         return { id: 'date', params: { pattern: rule[1] } };
       }
@@ -226,9 +232,9 @@ export const dateHistogramOperation: OperationDefinition<
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
   toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
-    const { timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
+    const { interval } = getTimeZoneAndInterval(column, indexPattern);
 
-    if (timeZone || column.params?.includeEmptyRows) return;
+    if (column.params?.includeEmptyRows) return;
 
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 

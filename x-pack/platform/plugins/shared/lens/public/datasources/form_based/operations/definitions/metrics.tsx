@@ -225,6 +225,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     toESQL: (column, columnId, _indexPattern, layer) => {
       if (column.timeShift) return;
+      if (!typeToESQLFn[type]) return;
       return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {

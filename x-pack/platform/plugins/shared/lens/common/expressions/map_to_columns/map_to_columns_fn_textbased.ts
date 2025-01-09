@@ -38,8 +38,8 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
         name: originalColumn.label,
         meta: {
           ...column.meta,
-          ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
-          ...(originalColumn.format ? { params: originalColumn.format } : {}),
+          ...('sourceField' in originalColumn ? { field: originalColumn.sourceField } : {}),
+          ...('format' in originalColumn ? { params: originalColumn.format } : {}),
           sourceParams: {
             ...(column.meta?.sourceParams ?? {}),
             ...('sourceField' in originalColumn ? { sourceField: originalColumn.sourceField } : {}),

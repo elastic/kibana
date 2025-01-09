@@ -198,7 +198,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
     if (column.filter) {
       if (column.filter.language === 'kquery') return undefined;
-      return undefined; // esql += ` WHERE QSTR("${sanitazeESQLInput(column.filter.query)}")`;
+      return undefined;
     }
 
     return esql;
