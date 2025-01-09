@@ -33,6 +33,7 @@ import {
 } from '@kbn/streams-schema';
 import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { flattenObject } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
@@ -64,9 +65,13 @@ export const ProcessorOutcomePreview = ({
   const [selectedDocsFilter, setSelectedDocsFilter] =
     useState<DocsFilterOption>('outcome_filter_all');
 
-  const { value: samples, refresh: refreshSamples } = useStreamsAppFetch(
+  const {
+    value: samples,
+    loading: isLoadingSamples,
+    refresh: refreshSamples,
+  } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) {
+      if (!definition || !formFields.field) {
         return { documents: [] };
       }
 
@@ -77,6 +82,7 @@ export const ProcessorOutcomePreview = ({
             id: definition.name,
           },
           body: {
+            condition: { field: formFields.field, operator: 'exists' },
             start: start?.valueOf(),
             end: end?.valueOf(),
             number: 100,
@@ -84,7 +90,7 @@ export const ProcessorOutcomePreview = ({
         },
       });
     },
-    [definition, streamsRepositoryClient, start, end],
+    [definition, formFields.field, streamsRepositoryClient, start, end],
     { disableToastOnError: true }
   );
 
@@ -129,7 +135,8 @@ export const ProcessorOutcomePreview = ({
 
   const simulationDocuments = useMemo(() => {
     if (!simulation?.documents) {
-      return (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
+      const docs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
+      return docs.map((doc) => flattenObject(doc));
     }
 
     const filterDocuments = (filter: DocsFilterOption) => {
@@ -194,7 +201,7 @@ export const ProcessorOutcomePreview = ({
         documents={simulationDocuments}
         columns={[formFields.field, ...detectedFieldsColumns]}
         error={simulationError}
-        isLoading={isLoadingSimulation}
+        isLoading={isLoadingSamples || isLoadingSimulation}
       />
     </EuiPanel>
   );
