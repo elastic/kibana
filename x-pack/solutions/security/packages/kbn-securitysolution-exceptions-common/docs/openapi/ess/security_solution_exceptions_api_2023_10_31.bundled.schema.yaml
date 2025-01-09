@@ -68,10 +68,11 @@ paths:
               examples:
                 simpleList:
                   value:
-                    items:
+                    ruleExceptionItems:
                       - _version: WzQsMV0=
                         comments: []
-                        created_at: 2025-01-07T20:07:33.119Z
+                        created_at: |
+                          2025-01-07T20:07:33.119Z
                         created_by: elastic
                         description: This is a sample detection type exception item.
                         entries:
@@ -95,7 +96,8 @@ paths:
                           - malware
                         tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
                         type: simple
-                        updated_at: 2025-01-07T20:07:33.119Z
+                        updated_at: |
+                          2025-01-07T20:07:33.119Z
                         updated_by: elastic
               schema:
                 items:
@@ -115,6 +117,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -162,7 +175,7 @@ paths:
           content:
             application/json:
               examples:
-                simpleList:
+                detectionExceptionList:
                   value:
                     _version: WzIsMV0=
                     created_at: 2025-01-07T19:34:27.942Z
@@ -189,6 +202,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -198,6 +217,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -211,7 +241,8 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: 'exception list list_id: simple-list does not exist'
+                    message: |
+                      exception list list_id: "foo" does not exist
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -282,6 +313,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -291,6 +328,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -303,6 +351,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message": 'exception list id: "foo" does not exist'
+                      status_code": 404
           description: Exception list item not found response
         '500':
           content:
@@ -376,7 +429,52 @@ paths:
           content:
             application/json:
               examples:
-                simpleList:
+                agnosticExceptionList:
+                  value:
+                    _version: WzUsMV0=
+                    created_at: |
+                      2025-01-09T01:10:36.369Z
+                    created_by: elastic
+                    description: This is a sample agnostic endpoint type exception.
+                    id: 1a744e77-22ca-4b6b-9085-54f55275ebe5
+                    immutable: false
+                    list_id: b935eb55-7b21-4c1c-b235-faa1df23b3d6
+                    name: Sample Agnostic Endpoint Exception List
+                    namespace_type: agnostic
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 49ea0adc-a2b8-4d83-a8f3-2fb98301dea3
+                    type: endpoint
+                    updated_at: |
+                      2025-01-09T01:10:36.369Z
+                    updated_by: elastic
+                    version: 1
+                autogeneratedListId:
+                  value:
+                    _version: WzMsMV0=
+                    created_at: |
+                      2025-01-09T01:05:23.019Z
+                    created_by: elastic
+                    description: >-
+                      This is a sample detection type exception with an
+                      autogenerated list_id.
+                    id: 28243c2f-624a-4443-823d-c0b894880931
+                    immutable: false
+                    list_id: 8c1aae4c-1ef5-4bce-a2e3-16584b501783
+                    name: Sample Detection Exception List
+                    namespace_type: single
+                    os_types: []
+                    tags:
+                      - malware
+                    tie_breaker_id: ad94de31-39f7-4ad7-b8e4-988bfa95f338
+                    type: detection
+                    updated_at: |
+                      2025-01-09T01:05:23.020Z
+                    updated_by: elastic
+                    version: 1
+                detectionExceptionList:
                   value:
                     _version: WzIsMV0=
                     created_at: '2025-01-07T19:34:27.942Z'
@@ -396,6 +494,28 @@ paths:
                     updated_at: '2025-01-07T19:34:27.942Z'
                     updated_by: elastic
                     version: 1
+                endpointExceptionList:
+                  value:
+                    _version: WzQsMV0=
+                    created_at: |
+                      2025-01-09T01:07:49.658Z
+                    created_by: elastic
+                    description: This is a sample endpoint type exception list.
+                    id: a79f4730-6e32-4278-abfc-349c0add7d54
+                    immutable: false
+                    list_id: endpoint_list
+                    name: Sample Endpoint Exception List
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 94a028af-8f47-427a-aca5-ffaf829e64ee
+                    type: endpoint
+                    updated_at: |
+                      2025-01-09T01:07:49.658Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
@@ -403,6 +523,11 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: |
+                    [request body]: list_id: Expected string, received number
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -412,6 +537,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  authenticationFailure:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -424,6 +560,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  alreadyExists:
+                    value:
+                      message: |
+                        exception list id: \simple_list\ already exists
+                      status_code: 409
           description: Exception list already exists response
         '500':
           content:
@@ -513,6 +655,11 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: |
+                    [request body]: list_id: Expected string, received number
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -522,6 +669,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -534,6 +692,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message": 'exception list id: "foo" does not exist'
+                      status_code": 404
           description: Exception list not found response
         '500':
           content:
@@ -595,6 +758,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -690,6 +864,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -702,6 +887,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                notFound:
+                  value:
+                    message": 'exception list id: "foo" does not exist'
+                    status_code": 404
           description: Exception list not found response
         '500':
           content:
@@ -838,6 +1027,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -847,6 +1042,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -977,6 +1183,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1024,11 +1241,12 @@ paths:
           content:
             application/json:
               examples:
-                simpleListItem:
+                simpleExceptionItem:
                   value:
                     _version: WzQsMV0=
                     comments: []
-                    created_at: 2025-01-07T20:07:33.119Z
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
                     created_by: elastic
                     description: This is a sample detection type exception item.
                     entries:
@@ -1052,7 +1270,8 @@ paths:
                       - malware
                     tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
                     type: simple
-                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
@@ -1061,6 +1280,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1070,6 +1295,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1082,6 +1318,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message: |
+                        exception list item item_id: \"foo\" does not exist
+                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
@@ -1161,6 +1403,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1170,6 +1418,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1182,6 +1441,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message: |
+                        exception list item item_id: \"foo\" does not exist
+                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
@@ -1270,7 +1535,34 @@ paths:
           content:
             application/json:
               examples:
-                simpleListItem:
+                autogeneratedItemId:
+                  value:
+                    _version: WzYsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-09T01:16:23.322Z
+                    created_by: elastic
+                    description: >-
+                      This is a sample exception that has no item_id so it is
+                      autogenerated.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                    id: 323faa75-c657-4fa0-9084-8827612c207b
+                    item_id: 80e6edf7-4b13-4414-858f-2fa74aa52b37
+                    list_id: 8c1aae4c-1ef5-4bce-a2e3-16584b501783
+                    name: Sample Autogenerated Exception List Item ID
+                    namespace_type: single
+                    os_types: []
+                    tags:
+                      - malware
+                    tie_breaker_id: d6799986-3a23-4213-bc6d-ed9463a32f23
+                    type: simple
+                    updated_at: |
+                      2025-01-09T01:16:23.322Z
+                    updated_by: elastic
+                detectionExceptionListItem:
                   value:
                     _version: WzQsMV0=
                     comments: []
@@ -1281,6 +1573,54 @@ paths:
                       - field: actingProcess.file.signer
                         operator: excluded
                         type: exists
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_by: elastic
+                withExistEntry:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
+                    updated_by: elastic
+                withMatchAnyEntry:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
                       - field: host.name
                         operator: included
                         type: match_any
@@ -1298,7 +1638,99 @@ paths:
                       - malware
                     tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
                     type: simple
-                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
+                    updated_by: elastic
+                withMatchEntry:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: included
+                        type: match
+                        value: Elastic N.V.
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
+                    updated_by: elastic
+                withNestedEntry:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - entries:
+                          - field: signer
+                            operator: included
+                            type: match
+                            value: Evil
+                          - field: trusted
+                            operator: included
+                            type: match
+                            value: true
+                        field: file.signature
+                        type: nested
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: |
+                      2025-01-07T20:07:33.119Z
+                    updated_by: elastic
+                withValueListEntry:
+                  value:
+                    _version: WzcsMV0=
+                    comments: []
+                    created_at: |
+                      2025-01-09T01:31:12.614Z
+                    created_by: elastic
+                    description: >-
+                      Don't signal when agent.name is rock01 and source.ip is in
+                      the goodguys.txt list
+                    entries:
+                      - field: source.ip
+                        list:
+                          id: goodguys.txt
+                          type: ip
+                        operator: excluded
+                        type: list
+                    id: deb26876-297d-4677-8a1f-35467d2f1c4f
+                    item_id: 686b129e-9b8d-4c59-8d8d-c93a9ea82c71
+                    list_id: 8c1aae4c-1ef5-4bce-a2e3-16584b501783
+                    name: Filter out good guys ip and agent.name rock01
+                    namespace_type: single
+                    os_types: []
+                    tags:
+                      - malware
+                    tie_breaker_id: 5e0288ce-6657-4c18-9dcc-00ec9e8cc6c8
+                    type: simple
+                    updated_at: |
+                      2025-01-09T01:31:12.614Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
@@ -1307,6 +1739,11 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request,
+                  message: |
+                    [request body]: list_id: Expected string, received number
+                  statusCode: 400,
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1316,6 +1753,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  cannotAuthenticate:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1328,6 +1776,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  alreadyExists:
+                    value:
+                      message: >
+                        exception list item id: \"simple_list_item\" already
+                        exists
+                      status_code: 409
           description: Exception list item already exists response
         '500':
           content:
@@ -1436,6 +1891,11 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: |
+                    [request body]: item_id: Expected string, received number
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1445,6 +1905,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1457,6 +1928,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message: |
+                        exception list item item_id: \"foo\" does not exist
+                      status_code: 404
           description: Exception list item not found response
         '500':
           content:
@@ -1618,6 +2095,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1627,6 +2110,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1637,6 +2131,12 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: |
+                      exception list list_id: "foo" does not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
@@ -1715,6 +2215,12 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  error: Bad Request
+                  message: >
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
+                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1724,6 +2230,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
+                examples:
+                  unauthorized:
+                    value:
+                      error: Unauthorized
+                      message: >
+                        [security_exception\n\tRoot
+                        causes:\n\t\tsecurity_exception: unable to authenticate
+                        user [elastic] for REST request
+                        [/_security/_authenticate]]: unable to authenticate user
+                        [elastic] for REST request [/_security/_authenticate]
+                      statusCode: 401
           description: Unsuccessful authentication response
         '403':
           content:
@@ -1736,6 +2253,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+                examples:
+                  notFound:
+                    value:
+                      message": 'exception list id: "foo" does not exist'
+                      status_code": 404
           description: Exception list not found response
         '500':
           content:
