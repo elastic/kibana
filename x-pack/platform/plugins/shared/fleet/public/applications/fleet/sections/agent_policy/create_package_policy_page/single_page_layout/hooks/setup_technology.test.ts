@@ -512,7 +512,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -557,10 +557,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(
-        SetupTechnology.AGENTLESS,
-        'never-gonna-give-you-up'
-      );
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -653,7 +650,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -700,21 +697,6 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
-    });
-
-    await waitFor(() => {
-      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
-      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
-        global_data_tags: [
-          { name: 'organization', value: 'org' },
-          { name: 'division', value: 'div' },
-          { name: 'team', value: 'team' },
-        ],
-      });
-    });
-
-    act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
@@ -730,6 +712,21 @@ describe('useSetupTechnology', () => {
           ],
         })
       );
+    });
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
+      });
     });
   });
 });

@@ -109,7 +109,11 @@ export function useSetupTechnology({
         name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
         ...getAdditionalAgentlessPolicyInfo(packageInfo),
       };
-      if (!newAgentlessPolicy.name || nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
+      if (
+        !newAgentlessPolicy.name ||
+        nextNewAgentlessPolicy.name !== newAgentlessPolicy.name ||
+        (packageInfo && !newAgentlessPolicy.global_data_tags)
+      ) {
         setNewAgentlessPolicy(nextNewAgentlessPolicy);
         setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
@@ -134,6 +138,7 @@ export function useSetupTechnology({
     isAgentlessEnabled,
     isEditPage,
     newAgentlessPolicy,
+    newAgentPolicy,
     packagePolicy.name,
     packagePolicy.supports_agentless,
     selectedSetupTechnology,
@@ -192,20 +197,21 @@ export function useSetupTechnology({
   return {
     handleSetupTechnologyChange,
     selectedSetupTechnology,
+    defaultSetupTechnology,
   };
 }
 
 const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
   // placegolder for the logic to determine if the agentless setup is the default
-  return true;
+  return packageInfo ? false : false;
 };
 
 const getAdditionalAgentlessPolicyInfo = (packageInfo?: PackageInfo) => {
-  // this assumes that there is all the deployments modes are the same for all the policy templates
   const agentlessPolicyTemplate = packageInfo?.policy_templates?.find(
     (policy) => policy.deployment_modes
   );
 
+  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
   const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
   if (
     agentlessInfo === undefined ||
