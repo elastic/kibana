@@ -112,8 +112,7 @@
     "@kbn/es-types",
     "@kbn/logging-mocks",
     "@kbn/response-ops-rule-form",
-    "@kbn/streams-plugin",
-    "@kbn/response-ops-rule-params"
+    "@kbn/streams-plugin"
   ],
   "exclude": ["target/**/*"]
 }
