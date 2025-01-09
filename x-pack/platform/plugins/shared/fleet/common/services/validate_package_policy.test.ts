@@ -872,6 +872,46 @@ describe('Fleet - validationHasErrors()', () => {
 });
 
 describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Multi Text', () => {
+    it('should return required error message for empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: [''],
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: true,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should return required error message for blank spaces', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: ['value1', '  '],
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: true,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+  });
+
   describe('Integer', () => {
     it('should return an error message for invalid integer', () => {
       const res = validatePackagePolicyConfig(
