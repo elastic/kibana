@@ -15,6 +15,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
@@ -170,7 +171,7 @@ const PreviewTabComponent = ({
         {EmptyPrompt ??
           (attributes && (
             <div
-              css={`
+              css={css`
                 .euiDataGridHeader {
                   background: none;
                   border-top: none;
