@@ -142,6 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/192891
+  // Failing: See https://github.com/elastic/kibana/issues/192891
   describe.skip('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {

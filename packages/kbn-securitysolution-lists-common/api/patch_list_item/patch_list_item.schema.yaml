@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: PatchListItem
       x-codegen-enabled: true
-      summary: Patches a list item
+      summary: Patch a list item
+      description: Update specific fields of an existing list item using the list item ID.
       requestBody:
         description: List item's properties
         required: true
