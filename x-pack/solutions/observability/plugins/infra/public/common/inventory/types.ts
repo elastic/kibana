@@ -16,6 +16,7 @@ import type {
   SnapshotNodePath,
 } from '../../../common/http_api/snapshot_api';
 import type { WaffleSortOption } from '../../pages/metrics/inventory_view/hooks/use_waffle_options';
+import type { InfraThresholdSearchSourceFields } from '../../alerting/common/helpers/get_search_configuration';
 export type { InventoryColorPalette } from '../../../common/inventory_views';
 
 export interface InfraWaffleMapNode {
@@ -128,6 +129,7 @@ export interface InfraWaffleMapOptions {
   groupBy: SnapshotGroupBy;
   legend: InfraWaffleMapLegend;
   sort: WaffleSortOption;
+  searchConfiguration: InfraThresholdSearchSourceFields;
 }
 
 export interface InfraOptions {

@@ -16,9 +16,13 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { AlertContextMeta } from './expression';
 import { defaultExpression, ExpressionRow, Expressions } from './expression';
-import type { ResolvedDataView } from '../../../utils/data_view';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
+import { dataViewPluginMocks as mockDataViewPlugin } from '@kbn/data-views-plugin/public/mocks';
+import { indexPatternEditorPluginMock as mockDataViewEditorPlugin } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
+import { kibanaStartMock } from '@kbn/observability-plugin/public/utils/kibana_react.mock';
 
 const mockDataView = {
   id: 'mock-id',
@@ -37,28 +41,31 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-jest.mock('../../../containers/metrics_source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: {
+      ...mockCoreMock.createStart(),
+      data: mockDataPlugin.createStartContract(),
+      dataViews: {
+        ...mockDataViewPlugin.createStartContract(),
+        getIds: jest.fn().mockImplementation(() => ['test-data-view-id']),
+        get: jest.fn().mockReturnValue(Promise.resolve({ isPersisted: jest.fn() })),
+      },
+      dataViewEditor: mockDataViewEditorPlugin.createStartContract(),
+    },
   }),
 }));
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: mockCoreMock.createStart(),
-  }),
-}));
+jest.mock('@kbn/observability-plugin/public/utils/kibana_react');
+
+const useKibanaMock = useKibana as jest.Mock;
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    ...kibanaStartMock.startContract(),
+  });
+};
+
 const exampleCustomMetric = {
   id: 'this-is-an-id',
   field: 'some.system.field',
@@ -67,11 +74,27 @@ const exampleCustomMetric = {
 } as SnapshotCustomMetricInput;
 
 describe('Expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockKibana();
+  });
+
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
       criteria: [],
       nodeType: undefined,
       filterQueryText: '',
+      searchConfiguration: {
+        index: {
+          id: 'infra_rules_data_view',
+          title: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+          timeFieldName: '@timestamp',
+        },
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
     };
     const wrapper = mountWithIntl(
       <Expressions
@@ -82,7 +105,10 @@ describe('Expression', () => {
         errors={{}}
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
-        metadata={currentOptions}
+        metadata={{
+          ...currentOptions,
+          adHocDataViewList: [],
+        }}
         onChangeMetaData={() => {}}
       />
     );
@@ -163,13 +189,14 @@ describe('Expression', () => {
     it('should prefill the alert using the context metadata', async () => {
       const currentOptions = {
         filter: '',
-        nodeType: 'tx',
+        nodeType: 'pod',
         customMetrics: [exampleCustomMetric],
         options: { metric: exampleCustomMetric },
+        adHocDataViewList: [],
       };
       const { ruleParams, update } = await setup(currentOptions as AlertContextMeta);
       await update();
-      expect(ruleParams.nodeType).toBe('tx');
+      expect(ruleParams.nodeType).toBe('pod');
       expect(ruleParams.filterQueryText).toBe('');
       expect(ruleParams.criteria).toEqual([
         {

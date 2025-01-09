@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { AutocompleteField } from '@kbn/observability-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 
@@ -29,6 +30,7 @@ interface Props {
   placeholder?: string;
   curryLoadSuggestions?: CurryLoadSuggestionsType;
   compressed?: boolean;
+  dataView?: DataView;
 }
 
 function validateQuery(query: string) {
@@ -47,6 +49,7 @@ export const MetricsExplorerKueryBar = ({
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
   compressed,
+  dataView,
 }: Props) => {
   const { metricsView } = useMetricsDataViewContext();
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
@@ -77,7 +80,7 @@ export const MetricsExplorerKueryBar = ({
   );
 
   return (
-    <WithKueryAutocompletion dataView={metricsView?.dataViewReference}>
+    <WithKueryAutocompletion dataView={dataView ? dataView : metricsView?.dataViewReference}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           compressed={compressed}

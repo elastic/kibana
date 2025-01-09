@@ -140,22 +140,32 @@ export const Expressions: React.FC<Props> = (props) => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
       if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
-        const newSearchSource = data.search.searchSource.createEmpty();
-        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        if (metadata?.options?.searchConfiguration) {
+          initialSearchConfiguration = {
+            query: {
+              query: ruleParams.searchConfiguration?.query ?? '',
+              language: 'kuery',
+            },
+            ...metadata.options.searchConfiguration,
+          };
+        } else {
+          const newSearchSource = data.search.searchSource.createEmpty();
+          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-        const metricsDataView =
-          (await data.dataViews.get('infra_rules_data_view')) ??
-          (await data.dataViews.getDefaultDataView());
+          const metricsDataView =
+            (await data.dataViews.get('infra_rules_data_view')) ??
+            (await data.dataViews.getDefaultDataView());
 
-        if (metricsDataView) {
-          newSearchSource.setField('index', metricsDataView);
-          setDataView(metricsDataView);
+          if (metricsDataView && Object.keys(metricsDataView).length !== 0) {
+            newSearchSource.setField('index', metricsDataView);
+            setDataView(metricsDataView);
+          }
+
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
-
-        initialSearchConfiguration = getSearchConfiguration(
-          newSearchSource.getSerializedFields(),
-          setParamsWarning
-        );
       }
 
       try {
@@ -537,6 +547,7 @@ export const Expressions: React.FC<Props> = (props) => {
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}
             value={ruleParams.filterQueryText}
+            dataView={dataView}
           />
         ) : (
           <EuiFieldSearch
