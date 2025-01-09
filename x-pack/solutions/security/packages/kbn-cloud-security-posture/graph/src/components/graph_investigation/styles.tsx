@@ -17,8 +17,10 @@ export const AnimatedSearchBarContainer = styled.div`
   display: grid;
   grid-template-rows: 1fr;
   border-top: ${() => useBorder()};
+  padding: 8px 0;
 
   &.toggled-off {
+    padding: 0;
     border-top: none;
     transform: translateY(-100%);
     grid-template-rows: 0fr;
