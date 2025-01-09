@@ -110,7 +110,6 @@
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/xstate-utils",
     "@kbn/entityManager-plugin",
-    "@kbn/entities-schema",
     "@kbn/zod",
     "@kbn/observability-utils-server",
     "@kbn/core-plugins-server",
