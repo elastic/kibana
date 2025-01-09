@@ -75,7 +75,7 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity.entityType;
+      const { entityType } = entity;
 
       switch (columnEntityTableId) {
         case 'alertsCount':

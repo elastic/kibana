@@ -840,7 +840,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 export const getUserInputModelDeploymentParamsProvider =
   (
     overlays: OverlayStart,
-    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
     startModelDeploymentDocUrl: string,
     cloudInfo: CloudInfo,
     showNodeInfo: boolean,
