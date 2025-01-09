@@ -1,0 +1,12 @@
+{
+    "type": "doc",
+    "value": {
+      "id": "1",
+      "index": ".siem-signals-another-space-legacy",
+      "source": {
+        "@timestamp": "2020-10-10T00:00:00.000Z",
+        "signal": {}
+      },
+      "type": "_doc"
+    }
+  }

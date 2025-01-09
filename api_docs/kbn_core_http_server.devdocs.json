@@ -3013,20 +3013,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/get.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/get.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -3074,11 +3074,11 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "licensing",
@@ -3545,26 +3545,6 @@
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_get_route.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/get_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/internal/find_tags.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/app.ts"
               },
@@ -3703,6 +3683,26 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -5461,40 +5461,40 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set_many.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/set.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/validate.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -5510,11 +5510,11 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -5522,7 +5522,7 @@
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "licensing",
@@ -6001,22 +6001,6 @@
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/create_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/update_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -6083,6 +6067,22 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_list_fields_route.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/create_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/update_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -7450,14 +7450,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/deprecations/kibana_user_role.test.ts"
               },
               {
@@ -8441,20 +8433,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/delete.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/routes/internal/delete.ts"
               },
               {
                 "plugin": "home",
@@ -8525,10 +8517,6 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/routes/tags/delete_tag.ts"
-              },
-              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -8547,6 +8535,10 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_delete_route.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/delete_tag.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -11404,30 +11396,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/saml.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/reset_session_page.ts"
               },
               {
@@ -13815,6 +13783,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
