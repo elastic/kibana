@@ -8975,8 +8975,8 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/object_types/registration.ts"
               },
               {
-                "plugin": "@kbn/core-ui-settings-server-internal",
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/ui_settings.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/ui-settings/server-internal/src/saved_objects/ui_settings.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -9878,10 +9878,6 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/custom_element.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/cases.ts"
               },
@@ -9900,6 +9896,10 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
                 "plugin": "maps",

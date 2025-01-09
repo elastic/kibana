@@ -34,6 +34,12 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Start or resume reindex`,
