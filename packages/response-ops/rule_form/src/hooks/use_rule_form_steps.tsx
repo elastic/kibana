@@ -178,10 +178,10 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
         data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
         onBlur={() =>
           !touchedSteps[stepId] &&
-          setTouchedSteps({
-            ...touchedSteps,
+          setTouchedSteps((steps) => ({
+            ...steps,
             [stepId]: true,
-          })
+          }))
         }
       >
         {element}
