@@ -8,7 +8,7 @@
  */
 
 import { EuiFlyout, EuiPortal } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { RuleFormData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
@@ -36,6 +36,8 @@ export const RuleFlyout = ({
     setIsShowRequestOpen(false);
   }, []);
 
+  const hideCloseButton = useMemo(() => isShowRequestOpen, [isShowRequestOpen]);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -45,6 +47,7 @@ export const RuleFlyout = ({
         size="m"
         maxWidth={500}
         className="ruleFormFlyout__container"
+        hideCloseButton={hideCloseButton}
       >
         {isShowRequestOpen ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
