@@ -11,7 +11,7 @@ import {
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
   DEFAULT_TIME_RANGE,
 } from '../../../common/constants';
-import { DefaultDatasetQualityDetailsContext } from './types';
+import { DefaultDatasetQualityDetailsContext, QualityIssueType } from './types';
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   degradedFields: {
@@ -24,11 +24,21 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
       },
     },
   },
+  failedDocsErrors: {
+    table: {
+      page: 0,
+      rowsPerPage: 10,
+      sort: {
+        field: 'type',
+        direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+      },
+    },
+  },
   isIndexNotFoundError: false,
   timeRange: {
     ...DEFAULT_TIME_RANGE,
     refresh: DEFAULT_DATEPICKER_REFRESH,
   },
   showCurrentQualityIssues: false,
-  qualityIssuesChart: 'degradedDocs',
+  qualityIssuesChart: 'degraded' as unknown as QualityIssueType,
 };

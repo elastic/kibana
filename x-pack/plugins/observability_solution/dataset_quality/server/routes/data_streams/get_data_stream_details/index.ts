@@ -21,7 +21,7 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
-import { getFailedDocsPaginated } from '../get_failed_docs';
+import { getFailedDocsPaginated } from '../get_failed_docs/get_failed_docs';
 
 export async function getDataStreamSettings({
   esClient,

@@ -345,10 +345,10 @@ export const overviewDegradedFieldsTableLoadingText = i18n.translate(
   }
 );
 
-export const overviewDegradedFieldsTableNoData = i18n.translate(
-  'xpack.datasetQuality.details.degradedFieldsTableNoData',
+export const qualityIssuesTableNoData = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTableNoData',
   {
-    defaultMessage: 'No degraded fields found',
+    defaultMessage: 'No quality issues found',
   }
 );
 
@@ -419,18 +419,28 @@ export const integrationVersionText = i18n.translate(
     defaultMessage: 'Version',
   }
 );
-export const fieldColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.field', {
-  defaultMessage: 'Field',
+export const issueColumnName = i18n.translate('xpack.datasetQuality.details.qualityIssues.issue', {
+  defaultMessage: 'Issue',
 });
 
-export const countColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.count', {
-  defaultMessage: 'Docs count',
-});
+export const countColumnName = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.docsCount',
+  {
+    defaultMessage: 'Docs count',
+  }
+);
 
 export const lastOccurrenceColumnName = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.lastOccurrence',
+  'xpack.datasetQuality.details.qualityIssues.lastOccurrence',
   {
     defaultMessage: 'Last occurrence',
+  }
+);
+
+export const documentIndexFailed = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.documentIndexFailed',
+  {
+    defaultMessage: 'Documents indexing failed',
   }
 );
 
@@ -696,5 +706,12 @@ export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.transla
   'xpack.datasetQuality.details.degradedField.possibleMitigation.createEditPipelineLink',
   {
     defaultMessage: 'create or edit the pipeline',
+  }
+);
+
+export const failedDocsErrorsColumnName = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errors',
+  {
+    defaultMessage: 'Error messages',
   }
 );

@@ -11,7 +11,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getDegradedFieldsColumns } from './columns';
 import {
   overviewDegradedFieldsTableLoadingText,
-  overviewDegradedFieldsTableNoData,
+  qualityIssuesTableNoData,
 } from '../../../../../common/translations';
 import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
 
@@ -56,7 +56,7 @@ export const DegradedFieldTable = () => {
           <EuiEmptyPrompt
             data-test-subj="datasetQualityDetailsDegradedTableNoData"
             layout="vertical"
-            title={<h2>{overviewDegradedFieldsTableNoData}</h2>}
+            title={<h2>{qualityIssuesTableNoData}</h2>}
             hasBorder={false}
             titleSize="m"
           />

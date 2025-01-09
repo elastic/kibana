@@ -19,7 +19,12 @@ export const getStateFromUrlValue = (
     degradedFields: urlValue.degradedFields,
     qualityIssuesChart: urlValue.qualityIssuesChart,
     breakdownField: urlValue.breakdownField,
-    expandedDegradedField: urlValue.expandedDegradedField,
+    expandedQualityIssue: urlValue.expandedDegradedField
+      ? {
+          name: urlValue.expandedDegradedField,
+          type: 'degraded',
+        }
+      : undefined,
     showCurrentQualityIssues: urlValue.showCurrentQualityIssues,
   });
 
@@ -32,7 +37,7 @@ export const getUrlValueFromState = (
     degradedFields: state.degradedFields,
     breakdownField: state.breakdownField,
     qualityIssuesChart: state.qualityIssuesChart,
-    expandedDegradedField: state.expandedDegradedField,
+    expandedDegradedField: state.expandedQualityIssue?.name,
     showCurrentQualityIssues: state.showCurrentQualityIssues,
     v: 1,
   });

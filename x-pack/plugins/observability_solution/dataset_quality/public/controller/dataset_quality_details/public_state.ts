@@ -22,7 +22,7 @@ export const getPublicStateFromContext = (
     breakdownField: context.breakdownField,
     qualityIssuesChart: context.qualityIssuesChart,
     integration: context.integration,
-    expandedDegradedField: context.expandedDegradedField,
+    expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
   };
 };
@@ -54,7 +54,7 @@ export const getContextFromPublicState = (
   dataStream: publicState.dataStream,
   qualityIssuesChart: publicState.qualityIssuesChart ?? DEFAULT_CONTEXT.qualityIssuesChart,
   breakdownField: publicState.breakdownField,
-  expandedDegradedField: publicState.expandedDegradedField,
+  expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
 });

@@ -27,7 +27,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     breakdownField,
     isIndexNotFoundError,
-    expandedDegradedField,
+    expandedQualityIssue: expandedDegradedField,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>

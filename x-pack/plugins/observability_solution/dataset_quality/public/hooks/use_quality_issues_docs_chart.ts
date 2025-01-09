@@ -20,7 +20,7 @@ import { getLensAttributes as getFailedLensAttributes } from '../components/data
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
-import { QualityIssue } from '../state_machines/dataset_quality_details_controller';
+import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
   defaultMessage: 'Open in Lens',
@@ -57,7 +57,7 @@ export const useQualityIssuesDocsChart = () => {
     ReturnType<typeof getDegradedLensAttributes | typeof getFailedLensAttributes> | undefined
   >(undefined);
 
-  const query = docsTrendChart === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
+  const query = docsTrendChart === 'degraded' ? DEGRADED_DOCS_KUERY : '';
 
   const { dataView } = useCreateDataView({
     indexPatternString: getDataViewIndexPattern(dataStream),
@@ -83,7 +83,7 @@ export const useQualityIssuesDocsChart = () => {
   );
 
   const handleDocsTrendChartChange = useCallback(
-    (qualityIssuesChart: QualityIssue) => {
+    (qualityIssuesChart: string) => {
       service.send({
         type: 'QUALITY_ISSUES_CHART_CHANGE',
         qualityIssuesChart,
@@ -103,7 +103,7 @@ export const useQualityIssuesDocsChart = () => {
       integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
 
     const lensAttributes =
-      docsTrendChart === 'degradedDocs'
+      docsTrendChart === 'degraded'
         ? getDegradedLensAttributes({
             color: euiTheme.colors.danger,
             dataStream: dataStreamName,

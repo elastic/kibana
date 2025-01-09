@@ -10,8 +10,8 @@ import * as rt from 'io-ts';
 export const DATA_QUALITY_URL_STATE_KEY = 'pageState';
 
 export const qualityIssuesRT = rt.keyof({
-  degradedDocs: null,
-  failedDocs: null,
+  degraded: null,
+  failed: null,
 });
 
 export const directionRT = rt.keyof({

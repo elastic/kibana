@@ -32,9 +32,9 @@ import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { analyzeDegradedField } from './get_degraded_field_analysis';
 import { getDegradedFieldValues } from './get_degraded_field_values';
 import { getDegradedFields } from './get_degraded_fields';
-import { getFailedDocsPaginated } from './get_failed_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { updateFieldLimit } from './update_field_limit';
+import { failedDocsRouteRepository } from './get_failed_docs/routes';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -123,39 +123,6 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 
     return {
       degradedDocs,
-    };
-  },
-});
-
-const failedDocsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/failed_docs',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      t.type({ types: typesRt }),
-      t.partial({
-        datasetQuery: t.string,
-      }),
-    ]),
-  }),
-  options: {
-    tags: [],
-  },
-  async handler(resources): Promise<{
-    failedDocs: DataStreamDocsStat[];
-  }> {
-    const { context, params } = resources;
-    const coreContext = await context.core;
-
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    const failedDocs = await getFailedDocsPaginated({
-      esClient,
-      ...params.query,
-    });
-
-    return {
-      failedDocs,
     };
   },
 });
@@ -445,7 +412,6 @@ const rolloverDataStream = createDatasetQualityServerRoute({
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
-  ...failedDocsRoute,
   ...totalDocsRoute,
   ...nonAggregatableDatasetsRoute,
   ...nonAggregatableDatasetRoute,
@@ -456,4 +422,5 @@ export const dataStreamsRouteRepository = {
   ...analyzeDegradedFieldRoute,
   ...updateFieldLimitRoute,
   ...rolloverDataStream,
+  ...failedDocsRouteRepository,
 };

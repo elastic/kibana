@@ -25,7 +25,6 @@ import {
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { QualityIssue } from '../../../../state_machines/dataset_quality_details_controller';
 import {
   discoverAriaText,
   logsExplorerAriaText,
@@ -101,16 +100,16 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
               legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
                 defaultMessage: 'Quality chart type',
               })}
-              onChange={(id) => handleDocsTrendChartChange(id as QualityIssue)}
+              onChange={(id) => handleDocsTrendChartChange(id)}
               options={[
                 {
-                  id: 'degradedDocs',
+                  id: 'degraded',
                   label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
                     defaultMessage: 'Ignored fields',
                   }),
                 },
                 {
-                  id: 'failedDocs',
+                  id: 'failed',
                   label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
                     defaultMessage: 'Failed docs',
                   }),
