@@ -299,7 +299,7 @@ const urlStateSerializer = (updated: {
 const tableColumnMetadata = {
   title: {
     field: 'attributes.title',
-    name: 'Name, description, tags',
+    name: 'Name',
   },
   updatedAt: {
     field: 'updatedAt',
