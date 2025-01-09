@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function hardenPrototypes() {
+function hardenPrototypesPostPolyfill() {
   // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/seal
   // > The Object.seal() static method seals an object.
   // > Sealing an object prevents extensions and makes existing properties non-configurable.
@@ -19,13 +19,14 @@ function hardenPrototypes() {
   // While Object.seal() is not a silver bullet, it does provide a good balance between security and compatibility.
   // The goal is to prevent a majority of prototype pollution vulnerabilities that can be exploited by an attacker.
 
-  Object.seal(Object.prototype);
+  Object.seal(Array.prototype);
   Object.seal(Number.prototype);
   Object.seal(String.prototype);
   Object.seal(Function.prototype);
-
-  // corejs currently manipulates Array.prototype, so we cannot seal it here.
-  // this is instead sealed within `src/platform/packages/shared/kbn-security-hardening/prototype.ts`
 }
 
-module.exports = hardenPrototypes;
+// Use of the `KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING` environment variable is discouraged, and should only be set to facilitate testing
+// specific scenarios. This should never be set in production.
+if (!process.env.KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING) {
+  hardenPrototypesPostPolyfill();
+}
