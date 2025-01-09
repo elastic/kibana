@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isWiredStream, WiredStreamDefinition } from '@kbn/streams-schema';
+import { conditionSchema, isWiredReadStream, WiredStreamDefinition } from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -58,7 +58,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      if (!isWiredStream(rootDefinition)) {
+      if (!isWiredReadStream(rootDefinition)) {
         throw new MalformedStreamId('Cannot fork a stream that is not managed');
       }
 

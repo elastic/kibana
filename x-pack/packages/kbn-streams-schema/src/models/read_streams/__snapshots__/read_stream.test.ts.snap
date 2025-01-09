@@ -13,6 +13,9 @@ Object {
       "type": "match_only_text",
     },
   },
+  "lifecycle": Object {
+    "type": "dlm",
+  },
   "name": "logs.nginx",
   "stream": Object {
     "ingest": Object {
@@ -60,6 +63,9 @@ Object {
       "from": "logs",
       "type": "match_only_text",
     },
+  },
+  "lifecycle": Object {
+    "type": "dlm",
   },
   "name": "logs.nginx",
   "stream": Object {

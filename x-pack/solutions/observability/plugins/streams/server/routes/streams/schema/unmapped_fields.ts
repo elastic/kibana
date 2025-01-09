@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { internal, notFound } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
-import { isWiredStream } from '@kbn/streams-schema';
+import { isWiredReadStream } from '@kbn/streams-schema';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess, readAncestors, readStream } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -71,7 +71,7 @@ export const unmappedFieldsRoute = createServerRoute({
       // Mapped fields from the stream's definition and inherited from ancestors
       const mappedFields = new Set<string>();
 
-      if (isWiredStream(streamEntity)) {
+      if (isWiredReadStream(streamEntity)) {
         Object.keys(streamEntity.stream.ingest.wired.fields).forEach((name) =>
           mappedFields.add(name)
         );
