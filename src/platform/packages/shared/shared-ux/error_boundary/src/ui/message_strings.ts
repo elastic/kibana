@@ -10,58 +10,76 @@
 import { i18n } from '@kbn/i18n';
 
 export const errorMessageStrings = {
-  fatal: {
+  page: {
     callout: {
-      title: () =>
-        i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.title', {
-          defaultMessage: 'Unable to load page',
-        }),
-      body: () =>
-        i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.body', {
-          defaultMessage: 'Try refreshing the page to resolve the issue.',
-        }),
-      showDetailsButton: () =>
-        i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.detailButton', {
-          defaultMessage: 'Show details',
-        }),
-      pageReloadButton: () =>
-        i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.pageReloadButton', {
-          defaultMessage: 'Refresh page',
-        }),
-    },
-  },
-  recoverable: {
-    callout: {
-      title: () =>
-        i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.title', {
-          defaultMessage: 'Refresh the page',
-        }),
-      body: () =>
-        i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
-          defaultMessage: 'This should resolve any issues loading the page.',
-        }),
-      pageReloadButton: () =>
-        i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
-          defaultMessage: 'Refresh page',
-        }),
+      fatal: {
+        title: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.title', {
+            defaultMessage: 'Unable to load page',
+          }),
+        body: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.body', {
+            defaultMessage: 'Try refreshing the page to resolve the issue.',
+          }),
+        showDetailsButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.detailButton', {
+            defaultMessage: 'Show details',
+          }),
+        pageReloadButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.pageReloadButton', {
+            defaultMessage: 'Refresh page',
+          }),
+      },
+      recoverable: {
+        title: () =>
+          i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.title', {
+            defaultMessage: 'Refresh the page',
+          }),
+        body: () =>
+          i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
+            defaultMessage: 'This should resolve any issues loading the page.',
+          }),
+        pageReloadButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
+            defaultMessage: 'Refresh page',
+          }),
+      },
     },
   },
   section: {
     callout: {
-      title: (sectionName: string) =>
-        i18n.translate('sharedUXPackages.section_error_boundary.prompt.title', {
-          defaultMessage: 'Unable to load {sectionName}',
-          values: { sectionName },
-        }),
-      body: (sectionName: string) =>
-        i18n.translate('sharedUXPackages.section_error_boundary.prompt.body', {
-          defaultMessage: 'An error happened while rendering {sectionName}.',
-          values: { sectionName },
-        }),
-      showDetailsButton: () =>
-        i18n.translate('sharedUXPackages.section_error_boundary.prompt.detailButton', {
-          defaultMessage: 'Show details',
-        }),
+      fatal: {
+        title: (sectionName: string) =>
+          i18n.translate('sharedUXPackages.section_error_boundary.fatal.prompt.title', {
+            defaultMessage: 'Unable to render {sectionName}',
+            values: { sectionName },
+          }),
+        body: (sectionName: string) =>
+          i18n.translate('sharedUXPackages.section_error_boundary.fatal.prompt.body', {
+            defaultMessage: 'An error happened while rendering {sectionName}.',
+            values: { sectionName },
+          }),
+        showDetailsButton: () =>
+          i18n.translate('sharedUXPackages.section_error_boundary.fatal.prompt.detailButton', {
+            defaultMessage: 'Show details',
+          }),
+      },
+      recoverable: {
+        title: (sectionName: string) =>
+          i18n.translate('sharedUXPackages.section_error_boundary.recoverable.prompt.title', {
+            defaultMessage: 'Unable to render {sectionName}',
+            values: { sectionName },
+          }),
+        body: (sectionName: string) =>
+          i18n.translate('sharedUXPackages.section_error_boundary.recoverable.prompt.body', {
+            defaultMessage: 'Refreshing should resolve any issues in {sectionName}.',
+            values: { sectionName },
+          }),
+        recoverButton: () =>
+          i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
+            defaultMessage: 'Refresh',
+          }),
+      },
     },
   },
   details: {

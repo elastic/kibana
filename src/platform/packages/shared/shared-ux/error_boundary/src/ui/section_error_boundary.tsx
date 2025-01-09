@@ -11,59 +11,10 @@ import React from 'react';
 
 import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
-import { SectionErrorPrompt } from './message_components';
-
-interface ErrorBoundaryState {
-  error: null | Error;
-  errorInfo: null | Partial<React.ErrorInfo>;
-  componentName: null | string;
-}
+import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
 
 interface SectionErrorBoundaryProps {
   sectionName: string;
-}
-
-interface ServiceContext {
-  services: KibanaErrorBoundaryServices;
-}
-
-class SectionErrorBoundaryInternal extends React.Component<
-  React.PropsWithChildren<SectionErrorBoundaryProps> & ServiceContext,
-  ErrorBoundaryState
-> {
-  constructor(props: SectionErrorBoundaryProps & ServiceContext) {
-    super(props);
-    this.state = {
-      error: null,
-      errorInfo: null,
-      componentName: null,
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
-    console.error(error); // eslint-disable-line no-console
-
-    const { name } = this.props.services.errorService.registerError(error, errorInfo);
-    this.setState({ error, errorInfo, componentName: name });
-  }
-
-  render() {
-    if (!this.state.error) {
-      return this.props.children;
-    }
-
-    const { error, errorInfo, componentName } = this.state;
-
-    return (
-      <SectionErrorPrompt
-        sectionName={this.props.sectionName}
-        error={error}
-        errorInfo={errorInfo}
-        name={componentName}
-      />
-    );
-  }
 }
 
 /**
@@ -84,3 +35,68 @@ export const KibanaSectionErrorBoundary = (
   const services = useErrorBoundary();
   return <SectionErrorBoundaryInternal {...props} services={services} />;
 };
+
+interface ErrorBoundaryState {
+  error: null | Error;
+  errorInfo: null | Partial<React.ErrorInfo>;
+  componentName: null | string;
+  isFatal: null | boolean;
+}
+
+const DEFAULT_STATE = {
+  error: null,
+  errorInfo: null,
+  componentName: null,
+  isFatal: null,
+} as const;
+
+interface ServiceContext {
+  services: KibanaErrorBoundaryServices;
+}
+
+class SectionErrorBoundaryInternal extends React.Component<
+  React.PropsWithChildren<SectionErrorBoundaryProps> & ServiceContext,
+  ErrorBoundaryState
+> {
+  constructor(props: SectionErrorBoundaryProps & ServiceContext) {
+    super(props);
+
+    this.state = DEFAULT_STATE;
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    console.error('Error caught by Kibana React Section Error Boundary'); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+
+    const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
+    this.setState({ error, errorInfo, componentName: name, isFatal });
+  }
+
+  render() {
+    if (!this.state.error) {
+      return this.props.children;
+    }
+
+    const { error, errorInfo, componentName, isFatal } = this.state;
+
+    if (isFatal) {
+      return (
+        <SectionFatalPrompt
+          sectionName={this.props.sectionName}
+          error={error}
+          errorInfo={errorInfo}
+          name={componentName}
+        />
+      );
+    }
+
+    return (
+      <SectionRecoverablePrompt
+        sectionName={this.props.sectionName}
+        onRecoverAttempt={this.resetState}
+      />
+    );
+  }
+
+  private resetState = () => this.setState(DEFAULT_STATE);
+}

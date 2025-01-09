@@ -37,12 +37,14 @@ interface FatalPromptProps {
 export const FatalPrompt = withErrorDetails(
   ({ showErrorDetails, onRecoverAttempt }: FatalPromptProps): JSX.Element => (
     <EuiEmptyPrompt
-      title={<h2 data-test-subj="errorBoundaryFatalHeader">{strings.fatal.callout.title()}</h2>}
+      title={
+        <h2 data-test-subj="errorBoundaryFatalHeader">{strings.page.callout.fatal.title()}</h2>
+      }
       color="danger"
       iconType="error"
       body={
         <>
-          <p data-test-subj="errorBoundaryFatalPromptBody">{strings.fatal.callout.body()}</p>
+          <p data-test-subj="errorBoundaryFatalPromptBody">{strings.page.callout.fatal.body()}</p>
           <p>
             <EuiButton
               color="danger"
@@ -51,7 +53,7 @@ export const FatalPrompt = withErrorDetails(
               onClick={onRecoverAttempt}
               data-test-subj="errorBoundaryFatalPromptReloadBtn"
             >
-              {strings.fatal.callout.pageReloadButton()}
+              {strings.page.callout.fatal.pageReloadButton()}
             </EuiButton>
           </p>
           <p>
@@ -60,7 +62,7 @@ export const FatalPrompt = withErrorDetails(
               onClick={showErrorDetails}
               data-test-subj="errorBoundaryFatalShowDetailsBtn"
             >
-              {strings.fatal.callout.showDetailsButton()}
+              {strings.page.callout.fatal.showDetailsButton()}
             </EuiLink>
           </p>
         </>
@@ -78,14 +80,14 @@ export const RecoverablePrompt = ({ onRecoverAttempt }: RecoverablePromptProps) 
     <EuiEmptyPrompt
       title={
         <h2 data-test-subj="errorBoundaryRecoverableHeader">
-          {strings.recoverable.callout.title()}
+          {strings.page.callout.recoverable.title()}
         </h2>
       }
       color="warning"
       iconType="warning"
       body={
         <p data-test-subj="errorBoundaryRecoverablePromptBody">
-          {strings.recoverable.callout.body()}
+          {strings.page.callout.recoverable.body()}
         </p>
       }
       actions={
@@ -96,37 +98,37 @@ export const RecoverablePrompt = ({ onRecoverAttempt }: RecoverablePromptProps) 
           onClick={onRecoverAttempt}
           data-test-subj="errorBoundaryRecoverablePromptReloadBtn"
         >
-          {strings.recoverable.callout.pageReloadButton()}
+          {strings.page.callout.recoverable.pageReloadButton()}
         </EuiButton>
       }
     />
   );
 };
 
-interface SectionErrorPromptProps {
+interface SectionFatalPromptProps {
   sectionName: string;
   showErrorDetails: () => void;
 }
 
-export const SectionErrorPrompt = withErrorDetails(
-  ({ sectionName, showErrorDetails }: SectionErrorPromptProps): JSX.Element => {
+export const SectionFatalPrompt = withErrorDetails(
+  ({ sectionName, showErrorDetails }: SectionFatalPromptProps): JSX.Element => {
     return (
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
         title={
           <h2 data-test-subj="sectionErrorBoundaryPromptHeader">
-            {strings.section.callout.title(sectionName)}
+            {strings.section.callout.fatal.title(sectionName)}
           </h2>
         }
         body={
           <>
             <p data-test-subj="sectionErrorBoundaryPromptBody">
-              {strings.section.callout.body(sectionName)}
+              {strings.section.callout.fatal.body(sectionName)}
             </p>
             <p>
               <EuiLink color="danger" onClick={showErrorDetails}>
-                {strings.section.callout.showDetailsButton()}
+                {strings.section.callout.fatal.showDetailsButton()}
               </EuiLink>
             </p>
           </>
@@ -135,6 +137,44 @@ export const SectionErrorPrompt = withErrorDetails(
     );
   }
 );
+
+interface SectionRecoverablePromptProps {
+  sectionName: string;
+  onRecoverAttempt: () => void;
+}
+
+export const SectionRecoverablePrompt = ({
+  sectionName,
+  onRecoverAttempt,
+}: SectionRecoverablePromptProps): JSX.Element => {
+  return (
+    <EuiEmptyPrompt
+      color="warning"
+      iconType="warning"
+      title={
+        <h2 data-test-subj="sectionErrorBoundaryPromptHeader">
+          {strings.section.callout.recoverable.title(sectionName)}
+        </h2>
+      }
+      body={
+        <p data-test-subj="sectionErrorBoundaryPromptBody">
+          {strings.section.callout.recoverable.body(sectionName)}
+        </p>
+      }
+      actions={
+        <EuiButton
+          color="warning"
+          iconType="refresh"
+          fill={true}
+          onClick={onRecoverAttempt}
+          data-test-subj="sectionErrorBoundaryRecoverBtn"
+        >
+          {strings.section.callout.recoverable.recoverButton()}
+        </EuiButton>
+      }
+    />
+  );
+};
 
 interface ErrorDetailsProps {
   error: Error;

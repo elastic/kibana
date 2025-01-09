@@ -10,7 +10,7 @@
 import { render } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { BadComponent, getServicesMock } from '../../mocks';
+import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorService } from '../services/error_service';
@@ -40,7 +40,30 @@ describe('<KibanaSectionErrorBoundary>', () => {
     expect(res.getByText(inputText)).toBeInTheDocument();
   });
 
-  it('renders a callout when an error is caught', () => {
+  it('renders a recoverable prompt when a recoverable error is caught', () => {
+    const { rerender, getByTestId, getByText } = render(
+      <Template>
+        <ChunkLoadErrorComponent />
+      </Template>
+    );
+    getByTestId('clickForErrorBtn').click();
+
+    expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.recoverButton())).toBeVisible();
+
+    getByTestId('sectionErrorBoundaryRecoverBtn').click();
+
+    rerender(
+      <Template>
+        <span>Good component</span>
+      </Template>
+    );
+
+    expect(getByText('Good component')).toBeInTheDocument();
+  });
+
+  it('renders a fatal prompt when a fatal error is caught', () => {
     const { getByTestId, getByText } = render(
       <Template>
         <BadComponent />
@@ -48,9 +71,9 @@ describe('<KibanaSectionErrorBoundary>', () => {
     );
     getByTestId('clickForErrorBtn').click();
 
-    expect(getByText(strings.section.callout.title('test section name'))).toBeVisible();
-    expect(getByText(strings.section.callout.body('test section name'))).toBeVisible();
-    expect(getByText(strings.section.callout.showDetailsButton())).toBeVisible();
+    expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.fatal.showDetailsButton())).toBeVisible();
   });
 
   it('captures the error event for telemetry', async () => {
