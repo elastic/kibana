@@ -71,9 +71,9 @@ jest.mock('@kbn/presentation-util-plugin/public/components/expression_input');
 // @ts-expect-error
 ExpressionInput.mockImplementation(() => 'ExpressionInput');
 
-// @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 jest.mock('react-dropzone');
+// @ts-expect-error untyped library
 Dropzone.mockImplementation(() => 'Dropzone');
 
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
