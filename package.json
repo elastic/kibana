@@ -192,7 +192,6 @@
     "@kbn/apm-utils": "link:src/platform/packages/shared/kbn-apm-utils",
     "@kbn/app-link-test-plugin": "link:test/plugin_functional/plugins/app_link_test",
     "@kbn/application-usage-test-plugin": "link:x-pack/test/usage_collection/plugins/application_usage_test",
-    "@kbn/asset-inventory-plugin": "link:x-pack/solutions/security/plugins/asset_inventory",
     "@kbn/audit-log-plugin": "link:x-pack/test/security_api_integration/plugins/audit_log",
     "@kbn/avc-banner": "link:src/platform/packages/shared/kbn-avc-banner",
     "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
