@@ -12,29 +12,24 @@ import {
   criterionRT,
   RequiredRuleParamsRT,
   OptionalRuleParamsRT,
-  countCriteriaRT,
-  ratioCriteriaRT,
-  timeUnitRT,
-  timeSizeRT,
-  groupByRT,
 } from '@kbn/response-ops-rule-params/log_threshold';
 import type {
   LogThresholdParams,
-  TimeUnit,
   RatioRuleParams,
-  CountRuleParams,
+  countCriteriaRT,
+  ratioCriteriaRT,
 } from '@kbn/response-ops-rule-params/log_threshold';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export { LOG_THRESHOLD_ALERT_TYPE_ID as LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 // export {
-////   criterionRT,
+// //   criterionRT,
 //   Comparator,
-////   countCriteriaRT,
-////   ratioCriteriaRT,
-////   timeUnitRT,
-////   timeSizeRT,
-////   groupByRT,
+// //   countCriteriaRT,
+// //   ratioCriteriaRT,
+// //   timeUnitRT,
+// //   timeSizeRT,
+// //   groupByRT,
 // };
 
 // export type { TimeUnit, RatioRuleParams, CountRuleParams };

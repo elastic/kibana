@@ -6,8 +6,6 @@
  */
 
 import { isError } from 'lodash';
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -224,9 +222,9 @@ export const getFormattedGroupBy = (
       const groupSetKeys = group.split(',');
       groupByKeysObjectMapping[group] = Array.isArray(groupBy)
         ? groupBy.reduce((result: Group[], groupByItem, index) => {
-          result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
-          return result;
-        }, [])
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
         : [{ field: groupBy, value: group }];
     });
   }

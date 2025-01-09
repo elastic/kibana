@@ -12,9 +12,7 @@ import {
   executeRatioAlert,
   LogThresholdAlertReporter,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
-import {
-  RatioCriteria,
-} from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
+import { RatioCriteria } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import type { LogThresholdParams, TimeUnit } from '@kbn/response-ops-rule-params/log_threshold';
 import { DATES } from './utils/constants';
