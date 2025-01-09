@@ -31,7 +31,7 @@
         "signature": [
           "(props: ErrorBoundaryProps) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "ErrorBoundaryProps"
             ],
-            "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +70,7 @@
           "KibanaErrorBoundaryProviderDeps",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +86,7 @@
               "KibanaErrorBoundaryProviderDeps",
               ">"
             ],
-            "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,7 +107,7 @@
         "signature": [
           "({ error }: { error: Error | null; }) => null"
         ],
-        "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +121,7 @@
             "signature": [
               "{ error: Error | null; }"
             ],
-            "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
