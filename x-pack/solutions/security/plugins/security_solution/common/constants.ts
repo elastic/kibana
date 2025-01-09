@@ -325,6 +325,7 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
  Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
+export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
  Machine Learning constants
@@ -433,19 +434,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
-
-// TODO: https://github.com/elastic/kibana/pull/142950
-/**
- * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
- */
-export enum BulkActionsDryRunErrCode {
-  IMMUTABLE = 'IMMUTABLE',
-  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
-  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
-  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
-  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
-}
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
