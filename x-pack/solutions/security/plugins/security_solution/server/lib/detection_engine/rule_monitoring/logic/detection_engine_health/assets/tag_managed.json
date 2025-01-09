@@ -4,6 +4,6 @@
   "managed": true,
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "8.0.0",
-  "attributes": { "name": "Managed", "description": "" },
+  "attributes": { "name": "Managed", "description": "", "color": "#FFFFFF" },
   "references": []
 }
