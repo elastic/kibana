@@ -28,11 +28,6 @@ export {
   LogPositionStateProvider,
   useLogPositionStateContext,
 } from './containers/logs/log_position';
-export {
-  LogHighlightsStateProvider,
-  useLogHighlightsStateContext,
-} from './containers/logs/log_highlights';
-export type { LogSummaryBuckets, WithSummaryProps } from './containers/logs/log_summary';
 
 // Shared components
 export type { LogAIAssistantDocument } from './components/log_ai_assistant/log_ai_assistant';
@@ -52,7 +47,6 @@ export type {
 } from './components/logging/log_text_stream/scrollable_log_text_stream_view';
 export type { LogsOverviewProps } from './components/logs_overview';
 
-export const WithSummary = dynamic(() => import('./containers/logs/log_summary/with_summary'));
 export const LogEntryFlyout = dynamic(
   () => import('./components/logging/log_entry_flyout/log_entry_flyout')
 );

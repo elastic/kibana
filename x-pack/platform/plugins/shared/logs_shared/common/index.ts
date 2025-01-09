@@ -47,19 +47,6 @@ export * from './log_entry';
 
 export { convertISODateToNanoPrecision } from './utils';
 
-// Http types
-export type { LogEntriesSummaryBucket, LogEntriesSummaryHighlightsBucket } from './http_api';
-
-// Http runtime
-export {
-  LOG_ENTRIES_HIGHLIGHTS_PATH,
-  LOG_ENTRIES_SUMMARY_PATH,
-  logEntriesHighlightsRequestRT,
-  logEntriesHighlightsResponseRT,
-  logEntriesSummaryRequestRT,
-  logEntriesSummaryResponseRT,
-} from './http_api';
-
 // Locators
 export {
   type LogsLocatorParams,
