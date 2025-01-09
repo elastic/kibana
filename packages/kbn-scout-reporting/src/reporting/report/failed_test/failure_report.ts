@@ -21,7 +21,7 @@ export class ScoutFailureReport extends GenericReport {
     super();
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-failures-report-'));
-    this.reportName = 'Scout Failure report';
+    this.reportName = 'Scout Test Failures report';
   }
 
   public get testFailuresPath(): string {
@@ -72,7 +72,7 @@ export class ScoutFailureReport extends GenericReport {
         htmlReportPath,
         htmlContent,
         this.log,
-        `html report for ${failure.id} is saved at ${htmlReportPath}`
+        `Html report for ${failure.id} is saved at ${htmlReportPath}`
       );
     }
 
