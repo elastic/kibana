@@ -27,6 +27,7 @@ import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 import { useEntitySummary } from '../hooks/use_entity_summary';
 import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
+import { useDatePickerContext } from '../hooks/use_date_picker';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -37,10 +38,13 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
+  const { getDateRangeInTimestamp } = useDatePickerContext();
   const trackOnlyOnce = React.useRef(false);
   const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
+    from: new Date(getDateRangeInTimestamp().from).toISOString(),
+    to: new Date(getDateRangeInTimestamp().to).toISOString(),
   });
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();
