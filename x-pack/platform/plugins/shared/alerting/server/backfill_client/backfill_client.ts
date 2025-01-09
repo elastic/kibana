@@ -44,7 +44,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
-import { addInProgressIntervalsToGaps } from '../lib/rule_gaps/update/add_in_progress_intervals_to_gaps';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -240,19 +240,22 @@ export class BackfillClient {
     });
 
     try {
-      // TODO: make it parallel
       for (const backfill of backfullsToSchedule) {
-        await addInProgressIntervalsToGaps({
-          backfill,
+        await updateGaps({
+          backfillSchedule: backfill.schedule,
+          ruleId: backfill.rule.id,
+          start: new Date(backfill.start),
+          end: backfill?.end ? new Date(backfill.end) : new Date(),
           eventLogger,
           eventLogClient,
           savedObjectsRepository: internalSavedObjectsRepository,
           logger: this.logger,
+          backfillClient: this,
         });
       }
     } catch {
       this.logger.warn(
-        `Error updating gaps ƒor backfill jobs: ${backfullsToSchedule
+        `Error updating gaps for backfill jobs: ${backfullsToSchedule
           .map((backfill) => backfill.id)
           .join(', ')}`
       );
@@ -327,6 +330,43 @@ export class BackfillClient {
         `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
       );
     }
+  }
+
+  public async findOverlappingBackfills({
+    ruleId,
+    start,
+    end,
+    savedObjectsRepository,
+  }: {
+    ruleId: string;
+    start: Date;
+    end: Date;
+    savedObjectsRepository: ISavedObjectsRepository;
+  }) {
+    const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+
+    // Create a point in time finder for efficient pagination
+    const adHocRunFinder = await savedObjectsRepository.createPointInTimeFinder<AdHocRunSO>({
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      perPage: 100,
+      hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
+      filter: `
+        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and 
+        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
+      `,
+    });
+
+    try {
+      // Collect all results using async iterator
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+    } finally {
+      // Make sure we always close the finder
+      await adHocRunFinder.close();
+    }
+
+    return adHocRuns.map((data) => transformAdHocRunToBackfillResult(data));
   }
 }
 

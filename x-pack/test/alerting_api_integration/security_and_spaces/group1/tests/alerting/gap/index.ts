@@ -11,5 +11,6 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 export default function gapsTests({ loadTestFile }: FtrProviderContext) {
   describe('rule gaps', () => {
     loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./update_gaps'));
   });
 }

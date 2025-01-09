@@ -16,7 +16,7 @@ import {
   adHocRunAuditEvent,
 } from '../../../../rules_client/common/audit_events';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
-import { calculateInProgressIntervalsForGaps } from '../../../../lib/rule_gaps/update/caclculate_in_progress_intervals_for_gaps';
+import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
 
 export async function deleteBackfill(context: RulesClientContext, id: string): Promise<{}> {
   return await retryIfConflicts(
@@ -103,14 +103,17 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     if ('rule' in backfillResult) {
       const eventLogClient = await context.getEventLogClient();
 
-      await calculateInProgressIntervalsForGaps({
+      await updateGaps({
         ruleId: backfillResult.rule.id,
         start: new Date(backfillResult.start),
         end: backfillResult.end ? new Date(backfillResult.end) : new Date(),
+        backfillSchedule: backfillResult.schedule,
         savedObjectsRepository: context.internalSavedObjectsRepository,
         logger: context.logger,
         eventLogClient,
         eventLogger: context.eventLogger,
+        shouldRefetchAllBackfills: true,
+        backfillClient: context.backfillClient,
       });
     }
 

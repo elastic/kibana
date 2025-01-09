@@ -40,7 +40,13 @@ export const findGapsParamsSchema = schema.object(
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleId: schema.string(),
     start: schema.maybe(schema.string()),
-    sortField: schema.maybe(schema.oneOf([schema.literal('@timestamp')])),
+    sortField: schema.maybe(
+      schema.oneOf([
+        schema.literal('@timestamp'),
+        schema.literal('total_gap_duration_ms'),
+        schema.literal('status'),
+      ])
+    ),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     statuses: schema.maybe(schema.arrayOf(gapStatusSchema)),
   },

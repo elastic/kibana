@@ -24,7 +24,7 @@ export const transformResponse = ({
   per_page: perPage,
   total,
   data: gapsData.map((gap) => ({
-    _id: gap?.meta?._id,
+    _id: gap?.internalFields?._id,
     ...gap.getEsObject(),
     '@timestamp': gap.timestamp,
   })),

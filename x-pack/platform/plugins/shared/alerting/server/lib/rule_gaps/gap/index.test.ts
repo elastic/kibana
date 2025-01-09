@@ -205,14 +205,14 @@ describe('Gap Class Tests', () => {
     expect(esObject.filled_duration_ms).toBe(10 * 60 * 1000);
   });
 
-  it('handles meta information if provided', () => {
-    const meta = {
+  it('handles internalFields information if provided', () => {
+    const internalFields = {
       _id: 'test_id',
       _index: 'test_index',
-      _seq_no: '1',
-      _primary_term: '1',
+      _seq_no: 1,
+      _primary_term: 1,
     };
-    const gap = new Gap({ range: baseRange, meta });
-    expect(gap.meta).toEqual(meta);
+    const gap = new Gap({ range: baseRange, internalFields });
+    expect(gap.internalFields).toEqual(internalFields);
   });
 });
