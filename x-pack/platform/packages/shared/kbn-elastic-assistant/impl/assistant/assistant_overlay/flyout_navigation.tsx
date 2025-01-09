@@ -32,7 +32,7 @@ const VerticalSeparator = styled.div`
   :before {
     content: '';
     height: 100%;
-    border-left: 1px solid ${(props) => props.theme.euiTheme.border.thin};
+    border-left: ${(props) => props.theme.euiTheme.border.thin};
   }
 `;
 
