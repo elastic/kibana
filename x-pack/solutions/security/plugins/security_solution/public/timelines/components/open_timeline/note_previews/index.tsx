@@ -191,21 +191,10 @@ const NoteActions = React.memo<{
     savedObjectId,
     showToggleEventDetailsAction = true,
   }) => {
-    return eventId && timelineId ? (
-      <>
-        {showToggleEventDetailsAction ? (
-          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
-        ) : null}
-        <DeleteNoteButton
-          noteId={noteId}
-          eventId={eventId}
-          confirmingNoteId={confirmingNoteId}
-          savedObjectId={savedObjectId}
-          timelineId={timelineId}
-          eventIdToNoteIds={eventIdToNoteIds}
-        />
-      </>
-    ) : (
+    const {
+      notesPrivileges: { crud: canCrudNotes },
+    } = useUserPrivileges();
+    const DeleteButton = canCrudNotes ? (
       <DeleteNoteButton
         noteId={noteId}
         eventId={eventId}
@@ -214,6 +203,17 @@ const NoteActions = React.memo<{
         timelineId={timelineId}
         eventIdToNoteIds={eventIdToNoteIds}
       />
+    ) : null;
+
+    return eventId && timelineId ? (
+      <>
+        {showToggleEventDetailsAction ? (
+          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+        ) : null}
+        {DeleteButton}
+      </>
+    ) : (
+      <>{DeleteButton}</>
     );
   }
 );
@@ -232,9 +232,6 @@ interface NotePreviewsProps {
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
   ({ notes, timelineId, showTimelineDescription, showToggleEventDetailsAction = true }) => {
-    const {
-      notesPrivileges: { crud: canCrudNotes },
-    } = useUserPrivileges();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
@@ -300,7 +297,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
               </div>
             ),
-            actions: canCrudNotes ? (
+            actions: (
               <NoteActions
                 eventId={eventId}
                 timelineId={timelineId}
@@ -310,7 +307,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 eventIdToNoteIds={eventIdToNoteIds}
                 showToggleEventDetailsAction={showToggleEventDetailsAction}
               />
-            ) : null,
+            ),
             timelineAvatar: (
               <EuiAvatar
                 data-test-subj="avatar"
@@ -326,7 +323,6 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
         timelineId,
         timeline?.confirmingNoteId,
         showToggleEventDetailsAction,
-        canCrudNotes,
       ]
     );
 
