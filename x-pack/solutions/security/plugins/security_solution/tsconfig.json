@@ -234,4 +234,5 @@
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme"
+  ]
 }
