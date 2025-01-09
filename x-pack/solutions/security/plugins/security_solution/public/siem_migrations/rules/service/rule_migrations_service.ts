@@ -12,15 +12,17 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
-  GetAllStatsRuleMigrationResponse,
   GetRuleMigrationStatsResponse,
+  RetryRuleMigrationResponse,
+  StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -35,8 +37,10 @@ import {
   type GetRuleMigrationsStatsAllParams,
   getMissingResources,
   upsertMigrationResources,
+  retryRuleMigration,
+  getIntegrations,
 } from '../api';
-import type { RuleMigrationStats } from '../types';
+import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -45,7 +49,7 @@ import * as i18n from './translations';
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
 
-const REQUEST_POLLING_INTERVAL_MS = 5000 as const;
+const REQUEST_POLLING_INTERVAL_SECONDS = 10 as const;
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
 export class SiemRulesMigrationsService {
@@ -119,7 +123,7 @@ export class SiemRulesMigrationsService {
     }
   }
 
-  public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
+  public async startRuleMigration(migrationId: string): Promise<StartRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
@@ -135,6 +139,34 @@ export class SiemRulesMigrationsService {
     }
 
     const result = await startRuleMigration({ migrationId, connectorId, langSmithOptions });
+    this.startPolling();
+    return result;
+  }
+
+  public async retryRuleMigration(
+    migrationId: string,
+    filter?: RetryRuleMigrationFilter
+  ): Promise<RetryRuleMigrationResponse> {
+    const connectorId = this.connectorIdStorage.get();
+    if (!connectorId) {
+      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+    }
+
+    const langSmithSettings = this.traceOptionsStorage.get();
+    let langSmithOptions: LangSmithOptions | undefined;
+    if (langSmithSettings) {
+      langSmithOptions = {
+        project_name: langSmithSettings.langSmithProject,
+        api_key: langSmithSettings.langSmithApiKey,
+      };
+    }
+
+    const result = await retryRuleMigration({
+      migrationId,
+      connectorId,
+      langSmithOptions,
+      ...filter,
+    });
     this.startPolling();
     return result;
   }
@@ -155,7 +187,7 @@ export class SiemRulesMigrationsService {
     return results;
   }
 
-  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceData[]> {
+  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceBase[]> {
     return getMissingResources({ migrationId });
   }
 
@@ -179,6 +211,10 @@ export class SiemRulesMigrationsService {
       }
       return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
+  }
+
+  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
+    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {
@@ -213,7 +249,12 @@ export class SiemRulesMigrationsService {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_MS));
+      // Do not wait if there are no more pending migrations
+      if (pendingMigrationIds.length > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000)
+        );
+      }
     } while (pendingMigrationIds.length > 0);
   }
 }

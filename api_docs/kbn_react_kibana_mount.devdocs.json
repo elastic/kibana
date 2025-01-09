@@ -89,13 +89,7 @@
             "text": "ToMountPointParams"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement>"
         ],
         "path": "packages/react/kibana_mount/to_mount_point.tsx",
@@ -183,13 +177,7 @@
             "description": [],
             "signature": [
               "(mountPoint: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
@@ -204,13 +192,7 @@
                 "label": "mountPoint",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
                 "path": "packages/react/kibana_mount/mount_point_portal.tsx",
@@ -250,21 +232,9 @@
         "description": [],
         "signature": [
           "{ i18n: ",
-          {
-            "pluginId": "@kbn/core-i18n-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           "; analytics?: Pick<",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
@@ -274,13 +244,7 @@
             "text": "ThemeServiceStart"
           },
           "; userProfile?: Pick<",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           ", \"getUserProfile$\"> | undefined; }"
         ],
         "path": "packages/react/kibana_mount/to_mount_point.tsx",

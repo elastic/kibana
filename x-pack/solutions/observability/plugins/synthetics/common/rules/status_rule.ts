@@ -5,67 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  StatusRuleCondition,
+  TimeWindow,
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { isEmpty } from 'lodash';
-
-export const TimeWindowSchema = schema.object({
-  unit: schema.oneOf(
-    [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
-    {
-      defaultValue: 'm',
-    }
-  ),
-  size: schema.number({
-    defaultValue: 5,
-  }),
-});
-
-export const NumberOfChecksSchema = schema.object({
-  numberOfChecks: schema.number({
-    defaultValue: 5,
-    min: 1,
-    max: 100,
-  }),
-});
-
-export const StatusRuleConditionSchema = schema.object({
-  groupBy: schema.maybe(
-    schema.string({
-      defaultValue: 'locationId',
-    })
-  ),
-  downThreshold: schema.maybe(
-    schema.number({
-      defaultValue: 3,
-    })
-  ),
-  locationsThreshold: schema.maybe(
-    schema.number({
-      defaultValue: 1,
-    })
-  ),
-  window: schema.oneOf([
-    schema.object({
-      time: TimeWindowSchema,
-    }),
-    NumberOfChecksSchema,
-  ]),
-  includeRetests: schema.maybe(schema.boolean()),
-});
-
-export const StatusRulePramsSchema = schema.object({
-  condition: schema.maybe(StatusRuleConditionSchema),
-  monitorIds: schema.maybe(schema.arrayOf(schema.string())),
-  locations: schema.maybe(schema.arrayOf(schema.string())),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  monitorTypes: schema.maybe(schema.arrayOf(schema.string())),
-  projects: schema.maybe(schema.arrayOf(schema.string())),
-  kqlQuery: schema.maybe(schema.string()),
-});
-
-export type TimeWindow = TypeOf<typeof TimeWindowSchema>;
-export type StatusRuleParams = TypeOf<typeof StatusRulePramsSchema>;
-export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
