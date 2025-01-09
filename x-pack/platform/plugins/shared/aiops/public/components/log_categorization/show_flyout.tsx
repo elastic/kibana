@@ -48,9 +48,16 @@ export async function showCategorizeFlyout(
         ...coreStart,
         ...plugins,
       };
-      const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+      const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
       const datePickerDeps: DatePickerDependencies = {
-        ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+        ...pick(appContextValue, [
+          'data',
+          'http',
+          'notifications',
+          'theme',
+          'uiSettings',
+          'userProfile',
+        ]),
         i18n,
         uiSettingsKeys: UI_SETTINGS,
       };

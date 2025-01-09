@@ -51,9 +51,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // Connectors
     loadTestFile(require.resolve('./connectors/cases/cases_connector'));
 
-    // Common
-    loadTestFile(require.resolve('../common'));
-
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
 
