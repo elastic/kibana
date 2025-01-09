@@ -656,7 +656,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
+        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
       });
     });
 
