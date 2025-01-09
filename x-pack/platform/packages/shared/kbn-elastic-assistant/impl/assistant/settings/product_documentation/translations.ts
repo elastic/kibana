@@ -13,7 +13,8 @@ export const LABEL = i18n.translate('xpack.elasticAssistant.assistant.settings.p
 export const DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.productDocDescription',
   {
-    defaultMessage: "Install Elastic documentation to improve the assistant's efficiency.",
+    defaultMessage:
+      'The Elastic Documentation has been uninstalled. Please reinstall to ensure the most accurate results from the AI Assistant.',
   }
 );
 
