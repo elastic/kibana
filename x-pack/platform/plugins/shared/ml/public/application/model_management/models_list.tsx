@@ -118,7 +118,7 @@ export const ModelsList: FC<Props> = ({
 
   const trainedModelsService = useTrainedModelsService();
   const isInitialized = trainedModelsService.isInitialized();
-  const items = useObservable(trainedModelsService.models$, trainedModelsService.models);
+  const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
   const activeOperations = useObservable(
     trainedModelsService.activeOperations$,

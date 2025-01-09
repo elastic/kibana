@@ -77,6 +77,10 @@ export function useModelActions({
 
   const trainedModelsService = useTrainedModelsService();
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
+  const activeOperations = useObservable(
+    trainedModelsService.activeOperations$,
+    trainedModelsService.activeOperations
+  );
 
   const [
     canCreateTrainedModels,
@@ -218,7 +222,11 @@ export function useModelActions({
         isPrimary: true,
         color: 'success',
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading;
+          const isModelBeingDeployed = activeOperations.some(
+            (op) => op.type === 'deploying' && op.modelId === item.model_id
+          );
+
+          return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
           return (
@@ -568,14 +576,15 @@ export function useModelActions({
       urlLocator,
       navigateToUrl,
       navigateToPath,
+      activeOperations,
       canStartStopTrainedModels,
-      isLoading,
       canCreateTrainedModels,
       getUserInputModelDeploymentParams,
       modelAndDeploymentIds,
       onModelDownloadRequest,
       trainedModelsService,
       displayErrorToast,
+      isLoading,
       displaySuccessToast,
       getUserConfirmation,
       onModelDeployRequest,

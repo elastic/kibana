@@ -14,6 +14,7 @@ import {
   takeUntil,
   distinctUntilChanged,
   map,
+  shareReplay,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -35,20 +36,19 @@ interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
 }
 
-interface ModelState {
-  items: TrainedModelUIItem[];
-  isLoading: boolean;
-}
-
-interface ModelOperation {
-  modelId: string;
-  type: 'downloading' | 'deploying';
-}
+type ModelOperation =
+  | {
+      modelId: string;
+      type: 'downloading' | 'deploying';
+    }
+  | {
+      type: 'fetching';
+    };
 
 const DOWNLOAD_POLL_INTERVAL = 3000;
 
 export class TrainedModelsService {
-  private modelState$ = new BehaviorSubject<ModelState>({ items: [], isLoading: false });
+  private _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
   private downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
   private stopPolling$ = new Subject<void>();
   private pollingSubscription?: Subscription;
@@ -60,14 +60,15 @@ export class TrainedModelsService {
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
-  public readonly models$ = this.modelState$.pipe(
-    map((state) => state.items),
-    distinctUntilChanged()
+  public readonly isLoading$ = this._activeOperations$.pipe(
+    map((operations) => operations.length > 0),
+    distinctUntilChanged(),
+    shareReplay(1)
   );
 
-  public readonly isLoading$ = this.modelState$.pipe(
-    map((state) => state.isLoading),
-    distinctUntilChanged()
+  public readonly modelItems$: Observable<TrainedModelUIItem[]> = this._modelItems$.pipe(
+    distinctUntilChanged(isEqual),
+    shareReplay(1)
   );
 
   public readonly activeOperations$ = this._activeOperations$.pipe(
@@ -78,12 +79,12 @@ export class TrainedModelsService {
     return this._activeOperations$.getValue();
   }
 
-  public get models(): TrainedModelUIItem[] {
-    return this.modelState$.getValue().items;
+  public get modelItems(): TrainedModelUIItem[] {
+    return this._modelItems$.getValue();
   }
 
   public get isLoading(): boolean {
-    return this.modelState$.getValue().isLoading;
+    return this._activeOperations$.getValue().length > 0;
   }
 
   public isInitialized() {
@@ -102,7 +103,7 @@ export class TrainedModelsService {
       this.initialized = true;
     }
 
-    this.setLoading(true);
+    this.addActiveOperation({ type: 'fetching' });
 
     try {
       const resultItems = await this.trainedModelsApiService.getTrainedModelsList();
@@ -110,16 +111,15 @@ export class TrainedModelsService {
       // to preserve state and download status
       const updatedItems = this.mergeModelItems(resultItems);
 
-      this.modelState$.next({ items: updatedItems, isLoading: false });
+      this._modelItems$.next(updatedItems);
 
       this.onFetchCallbacks.forEach((callback) => callback(updatedItems));
 
       this.startDownloadStatusPolling();
     } catch (error) {
-      // Rethrow to be handled by the caller
       throw error;
     } finally {
-      this.setLoading(false);
+      this.removeActiveOperation('fetching');
     }
   }
 
@@ -132,7 +132,7 @@ export class TrainedModelsService {
     try {
       await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
     } catch (error) {
-      this.removeActiveOperation(modelId, 'downloading');
+      this.removeActiveOperation('downloading', modelId);
       throw error;
     }
 
@@ -144,12 +144,10 @@ export class TrainedModelsService {
     deploymentParams: CommonDeploymentParams,
     adaptiveAllocationsParams?: AdaptiveAllocationsParams
   ) {
-    this.setLoading(true);
+    this.addActiveOperation({ modelId, type: 'deploying' });
 
     try {
       await this.ensureModelIsDownloaded(modelId);
-
-      this.addActiveOperation({ modelId, type: 'deploying' });
 
       await this.trainedModelsApiService.startModelAllocation(
         modelId,
@@ -162,8 +160,7 @@ export class TrainedModelsService {
       // Rethrow to be handled by the caller
       throw error;
     } finally {
-      this.removeActiveOperation(modelId, 'deploying');
-      this.setLoading(false);
+      this.removeActiveOperation('deploying', modelId);
     }
   }
 
@@ -172,15 +169,12 @@ export class TrainedModelsService {
     deploymentId: string,
     config: AdaptiveAllocationsParams
   ) {
-    this.setLoading(true);
     try {
       await this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config);
       await this.fetchModels();
     } catch (error) {
       // Rethrow to be handled by the caller
       throw error;
-    } finally {
-      this.setLoading(false);
     }
   }
 
@@ -189,7 +183,6 @@ export class TrainedModelsService {
     deploymentIds: string[],
     options: { force?: boolean } = {}
   ) {
-    this.setLoading(true);
     try {
       const results = await this.trainedModelsApiService.stopModelAllocation(
         modelId,
@@ -201,13 +194,11 @@ export class TrainedModelsService {
     } catch (error) {
       // Rethrow to be handled by the caller
       throw error;
-    } finally {
-      this.setLoading(false);
     }
   }
 
   public getModel(modelId: string): TrainedModelUIItem | undefined {
-    return this.modelState$.getValue().items.find((item) => item.model_id === modelId);
+    return this.modelItems.find((item) => item.model_id === modelId);
   }
 
   public markDownloadAborted(modelId: string) {
@@ -236,7 +227,7 @@ export class TrainedModelsService {
 
     const isNotDownloaded = model.state === MODEL_STATE.NOT_DOWNLOADED;
     const alreadyDownloading = this.activeOperations.some(
-      (op) => op.modelId === modelId && op.type === 'downloading'
+      (op) => op.type === 'downloading' && op.modelId === modelId
     );
 
     // If there's no "downloading" operation yet and the model is not downloaded, start downloading
@@ -258,7 +249,7 @@ export class TrainedModelsService {
   }
 
   private mergeModelItems(newItems: TrainedModelUIItem[]) {
-    const existingItems = this.modelState$.getValue().items;
+    const existingItems = this.modelItems;
 
     return newItems.map((item) => {
       const prevItem = existingItems.find((i) => i.model_id === item.model_id);
@@ -294,7 +285,7 @@ export class TrainedModelsService {
       )
       .subscribe({
         next: (downloadStatus) => {
-          const currentItems = this.modelState$.getValue().items;
+          const currentItems = this.modelItems;
           const updatedItems = currentItems.map((item) => {
             if (!isBaseNLPModelItem(item)) return item;
 
@@ -319,21 +310,18 @@ export class TrainedModelsService {
                 // Aborted
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
-                this.removeActiveOperation(item.model_id, 'downloading');
+                this.removeActiveOperation('downloading', item.model_id);
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
                 // Finished downloading
                 newItem.state = MODEL_STATE.DOWNLOADED;
-                this.removeActiveOperation(item.model_id, 'downloading');
+                this.removeActiveOperation('downloading', item.model_id);
               }
               downloadInProgress.delete(item.model_id);
               return newItem;
             }
           });
 
-          this.modelState$.next({
-            ...this.modelState$.getValue(),
-            items: updatedItems,
-          });
+          this._modelItems$.next(updatedItems);
 
           this.downloadStatus$.next(downloadStatus);
 
@@ -364,14 +352,10 @@ export class TrainedModelsService {
   }
 
   public getModel$(modelId: string): Observable<TrainedModelUIItem | undefined> {
-    return this.modelState$.pipe(
-      map((state) => state.items.find((item) => item.model_id === modelId)),
+    return this._modelItems$.pipe(
+      map((items) => items.find((item) => item.model_id === modelId)),
       distinctUntilChanged()
     );
-  }
-
-  private setLoading(isLoading: boolean): void {
-    this.modelState$.next({ ...this.modelState$.getValue(), isLoading });
   }
 
   private addActiveOperation(operation: ModelOperation) {
@@ -379,16 +363,22 @@ export class TrainedModelsService {
     this._activeOperations$.next([...currentOperations, operation]);
   }
 
-  private removeActiveOperation(modelId: string, operationType: ModelOperation['type']) {
+  private removeActiveOperation(operationType: ModelOperation['type'], modelId?: string) {
     const currentOperations = this._activeOperations$.getValue();
     this._activeOperations$.next(
-      currentOperations.filter((op) => op.modelId !== modelId && op.type !== operationType)
+      currentOperations.filter((op) => {
+        if ('modelId' in op) {
+          return !(op.type === operationType && op.modelId === modelId);
+        }
+
+        return op.type !== operationType;
+      })
     );
   }
 
   public destroy() {
     this.stopPolling();
-    this.modelState$.complete();
+    this._modelItems$.complete();
     this.downloadStatus$.complete();
     this.stopPolling$.complete();
     this.pollingSubscription?.unsubscribe();
