@@ -327,8 +327,8 @@ const getSLORoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const burnRatesClient = new DefaultBurnRatesClient(esClient);
     const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
-    const defintionClient = new SloDefinitionClient(repository, esClient, logger);
-    const getSLO = new GetSLO(defintionClient, summaryClient);
+    const definitionClient = new SloDefinitionClient(repository, esClient, logger);
+    const getSLO = new GetSLO(definitionClient, summaryClient);
 
     return await executeWithErrorHandler(() =>
       getSLO.execute(params.path.id, spaceId, params.query)
