@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 export type InfraCustomDashboardAssetType = InventoryItemType;
 

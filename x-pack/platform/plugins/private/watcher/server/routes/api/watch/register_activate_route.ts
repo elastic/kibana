@@ -33,6 +33,12 @@ export function registerActivateRoute({
   router.put(
     {
       path: '/api/watcher/watch/{watchId}/activate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },
