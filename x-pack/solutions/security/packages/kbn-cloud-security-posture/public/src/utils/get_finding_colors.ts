@@ -7,7 +7,10 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
-import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
+import type {
+  VulnSeverity,
+  MisconfigurationEvaluationStatus,
+} from '@kbn/cloud-security-posture-common';
 import {
   VULNERABILITIES_SEVERITY,
   MISCONFIGURATION_STATUS,
@@ -83,7 +86,7 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
 };
 
 export const getMisconfigurationStatusColor = (
-  status: 'passed' | 'failed' | 'unknown',
+  status: MisconfigurationEvaluationStatus,
   euiTheme: EuiThemeComputed
 ): string => {
   switch (status) {
@@ -91,7 +94,6 @@ export const getMisconfigurationStatusColor = (
       return euiTheme.colors.success;
     case MISCONFIGURATION_STATUS.FAILED:
       return euiTheme.colors.danger;
-    case MISCONFIGURATION_STATUS.UNKNOWN:
     default:
       return euiTheme.colors.vis.euiColorSeverity0;
   }

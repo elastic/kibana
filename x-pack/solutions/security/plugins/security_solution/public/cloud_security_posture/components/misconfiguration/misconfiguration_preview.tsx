@@ -14,6 +14,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { i18n } from '@kbn/i18n';
 import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
@@ -29,7 +30,7 @@ import {
 export const getFindingsStats = (
   passedFindingsStats: number,
   failedFindingsStats: number,
-  getMisconfigurationStatusColor: (status: 'passed' | 'failed' | 'unknown') => string
+  getMisconfigurationStatusColor: (status: MisconfigurationEvaluationStatus) => string
 ) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [

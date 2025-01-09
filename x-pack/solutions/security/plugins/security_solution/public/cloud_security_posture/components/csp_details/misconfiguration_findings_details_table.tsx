@@ -14,7 +14,10 @@ import {
   MISCONFIGURATION,
 } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
-import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
+import type {
+  CspFindingResult,
+  MisconfigurationEvaluationStatus,
+} from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
   buildMisconfigurationEntityFlyoutPreviewQuery,
@@ -46,7 +49,7 @@ const getFindingsStats = (
   failedFindingsStats: number,
   filterFunction: (filter: string) => void,
   currentFilter: string,
-  getMisconfigurationStatusColor: (status: 'passed' | 'failed' | 'unknown') => string
+  getMisconfigurationStatusColor: (status: MisconfigurationEvaluationStatus) => string
 ) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [

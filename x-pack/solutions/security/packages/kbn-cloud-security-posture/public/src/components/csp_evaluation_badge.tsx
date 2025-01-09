@@ -10,9 +10,10 @@ import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 
 interface Props {
-  type?: 'passed' | 'failed';
+  type?: MisconfigurationEvaluationStatus;
 }
 
 // 'fail' / 'pass' are same chars length, but not same width size.

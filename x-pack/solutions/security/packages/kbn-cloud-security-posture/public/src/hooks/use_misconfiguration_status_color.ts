@@ -6,14 +6,14 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 
 import { getMisconfigurationStatusColor as getMisconfigurationStatusColorUtil } from '../..';
 
 export const useMisconfigurationStatusColor = () => {
   const { euiTheme } = useEuiTheme();
 
-  // TODO: implement type for status
-  const getMisconfigurationStatusColor = (status: 'passed' | 'failed' | 'unknown') => {
+  const getMisconfigurationStatusColor = (status: MisconfigurationEvaluationStatus) => {
     return getMisconfigurationStatusColorUtil(status, euiTheme);
   };
 
