@@ -20,7 +20,11 @@ paths:
           description: List's `id` value
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-          examples: ip_list
+          examples:
+            customId:
+              value: ip_list
+            uuid:
+              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
         - name: deleteReferences
           in: query
           required: false
@@ -50,16 +54,13 @@ paths:
                       name: Changed the name here to something else
                       description: Some other description here for you
                       immutable: false
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': 2025-01-08T04:47:34.273Z
                       version: 3
                       _version: WzIsMV0=
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      created_at: 2025-01-08T04:47:34.273Z
                       created_by: elastic
-                      updated_at: |
-                        2025-01-08T05:39:39.292Z
+                      updated_at: 2025-01-08T05:39:39.292Z
                       updated_by: elastic
         400:
           description: Invalid input data response
@@ -69,12 +70,25 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request query]: id: Required'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
         403:
           description: Not enough privileges response
           content:
@@ -87,9 +101,19 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"ip_list\" was not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
