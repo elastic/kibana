@@ -11,6 +11,7 @@ import {
   type FieldMap,
   type InstallParams,
 } from '@kbn/index-adapter';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import {
@@ -36,6 +37,7 @@ interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
+  packageService?: PackageService;
 }
 interface CreateAdapterParams {
   adapterId: AdapterId;
@@ -101,7 +103,12 @@ export class RuleMigrationsDataService {
     ]);
   }
 
-  public createClient({ spaceId, currentUser, esScopedClient }: CreateClientParams) {
+  public createClient({
+    spaceId,
+    currentUser,
+    esScopedClient,
+    packageService,
+  }: CreateClientParams) {
     const indexNameProviders: IndexNameProviders = {
       rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
       resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
@@ -113,7 +120,8 @@ export class RuleMigrationsDataService {
       indexNameProviders,
       currentUser.username,
       esScopedClient,
-      this.logger
+      this.logger,
+      packageService
     );
   }
 
