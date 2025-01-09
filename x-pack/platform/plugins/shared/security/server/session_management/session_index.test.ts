@@ -1022,10 +1022,19 @@ describe('Session index', () => {
     });
 
     it('should fail silently if shards are missing', async () => {
-      mockElasticsearchClient.indices.stats.mockResolvedValue({
-        _shards: { total: 0, failed: 1, successful: 0 },
-        _all: {},
+      const failureReason = new errors.ResponseError({
+        statusCode: 503,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception Root causes: no_shard_available_action_exception',
+          },
+        },
+        warnings: null,
+        meta: {} as any,
       });
+
+      mockElasticsearchClient.openPointInTime.mockRejectedValue(failureReason);
+
       const runResult = await sessionIndex.cleanUp(mockRunContext);
 
       expect(runResult?.state).toBeTruthy();
@@ -1033,14 +1042,22 @@ describe('Session index', () => {
     });
 
     it('should throw error if shards are missing for more than 10 tries', async () => {
-      mockElasticsearchClient.indices.stats.mockResolvedValue({
-        _shards: { total: 0, failed: 1, successful: 0 },
-        _all: {},
-      });
-
-      const failureReason = new Error(
+      const operationFailureReason = new Error(
         'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
       );
+
+      const failureReason = new errors.ResponseError({
+        statusCode: 503,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception Root causes: no_shard_available_action_exception',
+          },
+        },
+        warnings: null,
+        meta: {} as any,
+      });
+
+      mockElasticsearchClient.openPointInTime.mockRejectedValue(failureReason);
 
       const runContext = {
         taskInstance: {
@@ -1049,7 +1066,7 @@ describe('Session index', () => {
         },
       };
 
-      await expect(sessionIndex.cleanUp(runContext)).rejects.toEqual(failureReason);
+      await expect(sessionIndex.cleanUp(runContext)).rejects.toEqual(operationFailureReason);
     });
 
     describe('concurrent session limit', () => {

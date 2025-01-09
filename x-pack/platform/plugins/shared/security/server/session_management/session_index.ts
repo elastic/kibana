@@ -481,35 +481,9 @@ export class SessionIndex {
     const { auditLogger, logger } = this.options;
     logger.debug('Running cleanup routine.');
 
-    const indexStats = await this.options.elasticsearchClient.indices.stats();
-
-    const securityIndexShardsExist = indexStats._shards.total > 0;
-
     let error: Error | undefined;
     let indexNeedsRefresh = false;
-
-    if (!securityIndexShardsExist) {
-      let shardMissingCounter = taskInstance.state?.shardMissingCounter ?? 0;
-      shardMissingCounter = shardMissingCounter + 1;
-
-      if (shardMissingCounter >= 10) {
-        error = new Error(
-          'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
-        );
-        logger.error(error.message);
-        throw error;
-      }
-
-      logger.debug(
-        `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
-      );
-
-      return {
-        state: {
-          shardMissingCounter,
-        },
-      };
-    }
+    let shardMissingCounter = taskInstance.state?.shardMissingCounter ?? 0;
 
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
@@ -522,8 +496,27 @@ export class SessionIndex {
         indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
     } catch (err) {
-      logger.error(`Failed to clean up sessions: ${err.message}`);
-      error = err;
+      if (err.statusCode === 503) {
+        shardMissingCounter = shardMissingCounter + 1;
+        if (shardMissingCounter < 10) {
+          logger.debug(
+            `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
+          );
+          return {
+            state: {
+              shardMissingCounter,
+            },
+          };
+        }
+        error = new Error(
+          'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
+        );
+        logger.error(error.message);
+        throw error;
+      } else {
+        logger.error(`Failed to clean up sessions: ${err.message}`);
+        error = err;
+      }
     }
 
     // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
