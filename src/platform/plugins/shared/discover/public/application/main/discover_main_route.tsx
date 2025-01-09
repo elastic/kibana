@@ -22,6 +22,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import useUnmount from 'react-use/lib/useUnmount';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -71,6 +72,7 @@ export function DiscoverMainRoute({
     dataViewEditor,
     share,
     getScopedHistory,
+    dataViews,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -340,7 +342,37 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
-  const rootProfileState = useRootProfile();
+  const [prevProfileDataViewIds, setPrevProfileDataViewIds] = useState<string[]>([]);
+  const rootProfileState = useRootProfile({
+    onRootProfileResolved: async ({ getDefaultAdHocDataViews }) => {
+      // debugger;
+      const profileDataViewSpecs = getDefaultAdHocDataViews?.(() => [])?.() ?? [];
+      const profileDataViews = await Promise.all(
+        profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
+      );
+      const currentDataViews = stateContainer.internalState.getState().adHocDataViews;
+      const newDataViews = currentDataViews
+        .filter((dataView) => !prevProfileDataViewIds.includes(dataView.id!))
+        .concat(profileDataViews);
+
+      for (const prevId of prevProfileDataViewIds) {
+        dataViews.clearInstanceCache(prevId);
+      }
+
+      setPrevProfileDataViewIds(profileDataViews.map((dataView) => dataView.id!));
+      stateContainer.internalState.transitions.setAdHocDataViews(newDataViews);
+
+      // if (!stateContainer.internalState.getState().dataView) {
+      //   await stateContainer.actions.onChangeDataView(newDataViews[0]);
+      // }
+    },
+  });
+
+  useUnmount(() => {
+    for (const prevId of prevProfileDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+  });
 
   if (error) {
     return <DiscoverError error={error} />;

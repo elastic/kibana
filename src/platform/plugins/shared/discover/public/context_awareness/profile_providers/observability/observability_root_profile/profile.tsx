@@ -18,6 +18,14 @@ export const createObservabilityRootProfileProvider = (
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,
   profile: {
     getAppMenu: createGetAppMenu(services),
+    getDefaultAdHocDataViews: (prev) => () => {
+      // debugger;
+      return prev().concat({
+        id: 'all-logs-ad-hoc-data-view',
+        name: 'All logs',
+        title: 'logs-*',
+      });
+    },
   },
   resolve: (params) => {
     if (params.solutionNavId === SolutionType.Observability) {

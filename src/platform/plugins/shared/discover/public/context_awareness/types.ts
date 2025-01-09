@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -276,6 +276,12 @@ export interface Profile {
    * @returns The default app state
    */
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
+
+  /**
+   * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs")
+   * @returns The default data views to display in the data view picker
+   */
+  getDefaultAdHocDataViews: () => DataViewSpec[];
 
   /**
    * Data grid

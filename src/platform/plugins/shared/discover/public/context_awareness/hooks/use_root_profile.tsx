@@ -10,16 +10,25 @@
 import { useEffect, useState } from 'react';
 import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
 import React from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
+import type { ResolveRootProfileResult } from '../profiles_manager';
 
 /**
  * Hook to trigger and wait for root profile resolution
  * @param options Options object
- * @returns If the root profile is loading
+ * @returns The root profile state
  */
-export const useRootProfile = () => {
+export const useRootProfile = ({
+  onRootProfileResolved: originalOnRootProfileResolved,
+}: {
+  onRootProfileResolved?: (
+    result: Pick<ResolveRootProfileResult, 'getDefaultAdHocDataViews'>
+  ) => unknown;
+} = {}) => {
   const { profilesManager, core } = useDiscoverServices();
+  const onRootProfileResolved = useLatest(originalOnRootProfileResolved);
   const [rootProfileState, setRootProfileState] = useState<
     | { rootProfileLoading: true }
     | { rootProfileLoading: false; AppWrapper: Profile['getRenderAppWrapper'] }
@@ -32,7 +41,11 @@ export const useRootProfile = () => {
         distinctUntilChanged(),
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
-        switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
+        switchMap(async (id) => {
+          const result = await profilesManager.resolveRootProfile({ solutionNavId: id });
+          await onRootProfileResolved.current?.(result);
+          return result;
+        }),
         tap(({ getRenderAppWrapper }) =>
           setRootProfileState({
             rootProfileLoading: false,
@@ -45,7 +58,7 @@ export const useRootProfile = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [core.chrome, profilesManager]);
+  }, [core.chrome, onRootProfileResolved, profilesManager]);
 
   return rootProfileState;
 };
