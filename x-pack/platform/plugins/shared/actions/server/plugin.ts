@@ -233,7 +233,7 @@ export class ActionsPlugin
   }
 
   public setup(
-    core: CoreSetup<ActionsPluginsStart>,
+    core: CoreSetup<ActionsPluginsStart, PluginStartContract>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);

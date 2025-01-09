@@ -2856,6 +2856,40 @@
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientSetupDeps.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsPublicPluginSetup",
+                "text": "DataViewsPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientSetupDeps.logsDataAccess",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "void"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3878,13 +3912,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -3917,13 +3945,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -3987,13 +4009,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4026,13 +4042,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4096,13 +4106,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4125,13 +4129,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4232,13 +4230,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4261,13 +4253,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4383,13 +4369,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
@@ -4406,13 +4386,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4523,13 +4497,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4562,13 +4530,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4632,13 +4594,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4671,13 +4627,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4741,13 +4691,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4770,13 +4714,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4877,13 +4815,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4906,13 +4838,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -5028,13 +4954,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
@@ -5051,13 +4971,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -5521,53 +5435,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.createNodeLogsQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "createNodeLogsQuery",
-        "description": [],
-        "signature": [
-          "(params: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          ") => string"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.createNodeLogsQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "logsShared",
-                "scope": "common",
-                "docId": "kibLogsSharedPluginApi",
-                "section": "def-common.NodeLogsLocatorParams",
-                "text": "NodeLogsLocatorParams"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-common.getLogEntryCursorFromHit",
         "type": "Function",
         "tags": [],
@@ -5613,17 +5480,17 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.getLogsLocatorsFromUrlService",
+        "id": "def-common.getLogsLocatorFromUrlService",
         "type": "Function",
         "tags": [],
-        "label": "getLogsLocatorsFromUrlService",
+        "label": "getLogsLocatorFromUrlService",
         "description": [],
         "signature": [
           "(urlService: ",
           "UrlService",
           "<unknown, ",
           "IShortUrlClient",
-          ">) => { logsLocator: ",
+          ">) => ",
           {
             "pluginId": "share",
             "scope": "common",
@@ -5633,45 +5500,13 @@
           },
           "<",
           {
-            "pluginId": "logsShared",
+            "pluginId": "discover",
             "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-common.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
           },
-          ">; traceLogsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.TraceLogsLocatorParams",
-            "text": "TraceLogsLocatorParams"
-          },
-          ">; nodeLogsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          ">; }"
+          "> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/get_logs_locators.ts",
         "deprecated": false,
@@ -5679,7 +5514,7 @@
         "children": [
           {
             "parentPluginId": "logsShared",
-            "id": "def-common.getLogsLocatorsFromUrlService.$1",
+            "id": "def-common.getLogsLocatorFromUrlService.$1",
             "type": "Object",
             "tags": [],
             "label": "urlService",
@@ -5698,153 +5533,218 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
+      },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.LogsLocatorParams",
-        "type": "Interface",
+        "id": "def-common.getNodeQuery",
+        "type": "Function",
         "tags": [],
-        "label": "LogsLocatorParams",
+        "label": "getNodeQuery",
         "description": [],
         "signature": [
+          "(params: ",
+          "NodeLogsParams",
+          ") => ",
           {
-            "pluginId": "logsShared",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
           },
-          " extends ",
+          " | ",
           {
-            "pluginId": "@kbn/utility-types",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
         ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.time",
+            "id": "def-common.getNodeQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "NodeLogsParams"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeRange",
+        "description": [],
+        "signature": [
+          "(time: number | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTimeRange.$1",
             "type": "number",
             "tags": [],
             "label": "time",
-            "description": [
-              "Defines log position"
-            ],
+            "description": [],
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [
-              "\nOptionally set the time range in the time picker."
-            ],
-            "signature": [
-              "{ startTime: number; endTime: number; } | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.filter",
-            "type": "string",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.logView",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logView",
-            "description": [],
-            "signature": [
-              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.NodeLogsLocatorParams",
-        "type": "Interface",
+        "id": "def-common.getTimeRangeEndFromTime",
+        "type": "Function",
         "tags": [],
-        "label": "NodeLogsLocatorParams",
+        "label": "getTimeRangeEndFromTime",
         "description": [],
         "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
-          }
+          "(time: number) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "logsShared",
-            "id": "def-common.NodeLogsLocatorParams.nodeField",
-            "type": "string",
+            "id": "def-common.getTimeRangeEndFromTime.$1",
+            "type": "number",
             "tags": [],
-            "label": "nodeField",
+            "label": "time",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.NodeLogsLocatorParams.nodeId",
-            "type": "string",
-            "tags": [],
-            "label": "nodeId",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTimeRangeStartFromTime",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeRangeStartFromTime",
+        "description": [],
+        "signature": [
+          "(time: number) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTimeRangeStartFromTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTraceQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getTraceQuery",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "TraceLogsParams",
+          ") => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTraceQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TraceLogsParams"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
       {
         "parentPluginId": "logsShared",
         "id": "def-common.ResolvedLogView",
@@ -5993,48 +5893,6 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.TraceLogsLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "TraceLogsLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.TraceLogsLocatorParams",
-            "text": "TraceLogsLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.TraceLogsLocatorParams.traceId",
-            "type": "string",
-            "tags": [],
-            "label": "traceId",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6467,9 +6325,34 @@
         "type": "string",
         "tags": [],
         "label": "LOGS_LOCATOR_ID",
-        "description": [],
+        "description": [
+          "\nLocator used to link to all log sources in Discover."
+        ],
         "signature": [
           "\"LOGS_LOCATOR\""
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.LogsLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsLocatorParams",
+        "description": [
+          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources."
+        ],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "common",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-common.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
         "deprecated": false,
@@ -6583,21 +6466,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.NODE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "NODE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"NODE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/node_logs_locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-common.PersistedLogViewReference",
         "type": "Type",
         "tags": [],
@@ -6655,21 +6523,6 @@
           " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.TRACE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "TRACE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"TRACE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/trace_logs_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

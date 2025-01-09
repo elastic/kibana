@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getServiceTransactionDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
 
 export async function getServicesDetailedStatistics({

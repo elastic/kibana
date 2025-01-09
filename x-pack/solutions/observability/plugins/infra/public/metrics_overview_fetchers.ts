@@ -13,10 +13,10 @@
  * 2.0.
  */
 
-import { FetchDataParams, MetricsFetchDataResponse } from '@kbn/observability-plugin/public';
-import { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
-import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
-import { InfraClientStartServicesAccessor } from './types';
+import type { FetchDataParams, MetricsFetchDataResponse } from '@kbn/observability-plugin/public';
+import type { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
+import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import type { InfraClientStartServicesAccessor } from './types';
 
 export const createMetricsHasData =
   (getStartServices: InfraClientStartServicesAccessor) => async () => {

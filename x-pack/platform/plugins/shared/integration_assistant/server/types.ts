@@ -13,8 +13,8 @@ import {
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
+  PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server/plugin';
 import { ESProcessorItem, SamplesFormat } from '../common';
 

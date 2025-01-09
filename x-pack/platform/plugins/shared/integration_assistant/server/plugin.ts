@@ -19,13 +19,17 @@ import type {
   IntegrationAssistantPluginSetup,
   IntegrationAssistantPluginStart,
   IntegrationAssistantPluginStartDependencies,
+  IntegrationAssistantPluginSetupDependencies,
 } from './types';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { IntegrationAssistantConfigType } from './config';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
-    getStartServices: CoreSetup<IntegrationAssistantPluginStartDependencies>['getStartServices'];
+    getStartServices: CoreSetup<
+      IntegrationAssistantPluginStartDependencies,
+      IntegrationAssistantPluginStart
+    >['getStartServices'];
     isAvailable: () => boolean;
     logger: Logger;
   };
@@ -36,7 +40,7 @@ export class IntegrationAssistantPlugin
     Plugin<
       IntegrationAssistantPluginSetup,
       IntegrationAssistantPluginStart,
-      {},
+      IntegrationAssistantPluginSetupDependencies,
       IntegrationAssistantPluginStartDependencies
     >
 {
@@ -53,7 +57,7 @@ export class IntegrationAssistantPlugin
   }
 
   public setup(
-    core: CoreSetup<IntegrationAssistantPluginStartDependencies>
+    core: CoreSetup<IntegrationAssistantPluginStartDependencies, IntegrationAssistantPluginStart>
   ): IntegrationAssistantPluginSetup {
     core.http.registerRouteHandlerContext<
       IntegrationAssistantRouteHandlerContext,

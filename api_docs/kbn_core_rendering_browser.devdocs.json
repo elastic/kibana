@@ -13,7 +13,7 @@
         "signature": [
           "() => HTMLElement | undefined"
         ],
-        "path": "packages/core/rendering/core-rendering-browser/src/use_app_fixed_viewport.ts",
+        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -34,7 +34,7 @@
         "signature": [
           "\"app-fixed-viewport\""
         ],
-        "path": "packages/core/rendering/core-rendering-browser/src/use_app_fixed_viewport.ts",
+        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

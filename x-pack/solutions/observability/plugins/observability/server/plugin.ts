@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -88,7 +88,7 @@ export class ObservabilityPlugin
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
+  public setup(core: CoreSetup<PluginStart, void>, plugins: PluginSetup) {
     const casesCapabilities = createCasesUICapabilities();
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
@@ -96,8 +96,8 @@ export class ObservabilityPlugin
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const logsExplorerLocator =
-      plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+    const logsLocator =
+      plugins.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
@@ -179,7 +179,7 @@ export class ObservabilityPlugin
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
       alertsLocator,
-      logsExplorerLocator,
+      logsLocator,
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {

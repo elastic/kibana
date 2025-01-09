@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -40,11 +40,12 @@ export function EntityTypesMultiSelect() {
   const items = useMemo(
     () =>
       value?.entityTypes.map((type): EuiSelectableOption => {
-        const checked = selectedEntityTypes?.[type];
+        const checked = selectedEntityTypes?.[type.id];
         return {
-          label: type,
+          label: type.display_name,
+          key: type.id,
           checked,
-          'data-test-subj': `entityTypes_multiSelect_filter_selection_${type}`,
+          'data-test-subj': `entityTypes_multiSelect_filter_selection_${type.id}`,
         };
       }) || [],
     [selectedEntityTypes, value?.entityTypes]
@@ -88,7 +89,7 @@ export function EntityTypesMultiSelect() {
             hasActiveFilters={!!items.find((item) => item.checked === 'on')}
             numActiveFilters={items.filter((item) => item.checked === 'on').length}
           >
-            {i18n.translate('xpack.inventory.entityTypesMultSelect.typeFilterButtonLabel', {
+            {i18n.translate('xpack.inventory.entityTypesMultiSelect.typeFilterButtonLabel', {
               defaultMessage: 'Type',
             })}
           </EuiFilterButton>
@@ -102,13 +103,13 @@ export function EntityTypesMultiSelect() {
           searchable
           searchProps={{
             placeholder: i18n.translate(
-              'xpack.inventory.entityTypesMultSelect.euiSelectable.placeholder',
+              'xpack.inventory.entityTypesMultiSelect.euiSelectable.placeholder',
               { defaultMessage: 'Filter types' }
             ),
             compressed: true,
           }}
           aria-label={i18n.translate(
-            'xpack.inventory.entityTypesMultSelect.euiSelectable.typeLabel',
+            'xpack.inventory.entityTypesMultiSelect.euiSelectable.typeLabel',
             { defaultMessage: 'Entity type' }
           )}
           options={items}
@@ -116,20 +117,23 @@ export function EntityTypesMultiSelect() {
             handleEntityTypeChecked(
               newOptions
                 .filter((item) => item.checked)
-                .reduce<EntityType>((acc, curr) => ({ ...acc, [curr.label]: curr.checked! }), {})
+                .reduce<EntityType>((acc, curr) => {
+                  acc[curr.key as string] = curr.checked!;
+                  return acc;
+                }, {} as EntityType)
             );
           }}
           isLoading={loading}
           loadingMessage={i18n.translate(
-            'xpack.inventory.entityTypesMultSelect.euiSelectable.loading',
+            'xpack.inventory.entityTypesMultiSelect.euiSelectable.loading',
             { defaultMessage: 'Loading types' }
           )}
           emptyMessage={i18n.translate(
-            'xpack.inventory.entityTypesMultSelect.euiSelectable.empty',
+            'xpack.inventory.entityTypesMultiSelect.euiSelectable.empty',
             { defaultMessage: 'No types available' }
           )}
           noMatchesMessage={i18n.translate(
-            'xpack.inventory.entityTypesMultSelect.euiSelectable.notFound',
+            'xpack.inventory.entityTypesMultiSelect.euiSelectable.notFound',
             { defaultMessage: 'No types found' }
           )}
         >

@@ -5,46 +5,9 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
-type AllowedValue = string | number | boolean | Record<string, any> | any[];
-
-function createInMemorySubject<T extends AllowedValue>(key: string, defaultValue: T) {
-  const currentValue = getFromStorage(key, defaultValue);
-
-  const subject$ = new BehaviorSubject(currentValue);
-
-  function onStorageUpdate(event: StorageEvent) {
-    if (event.storageArea === window.localStorage && event.key === key) {
-      subject$.next(event.newValue ? JSON.parse(event.newValue) : defaultValue);
-    }
-  }
-
-  window.addEventListener('storage', onStorageUpdate);
-
-  return {
-    asObservable: () => subject$.asObservable(),
-    get: () => subject$.value,
-    next: (value: T | ((prev: T) => T)) => {
-      const nextValue = typeof value === 'function' ? value(subject$.value) : value;
-      window.localStorage.setItem(key, JSON.stringify(value));
-      subject$.next(nextValue);
-    },
-  };
-}
-
-const createInMemorySubjectMemoized = memoize(
-  createInMemorySubject,
-  (key: string, defaultValue?: unknown) => key
-);
-
-export function clearUseLocalStorageCache() {
-  return createInMemorySubjectMemoized.cache.clear?.();
-}
-
-type SetValue<T extends AllowedValue> = (next: T | ((prev: T) => T)) => void;
+const LOCAL_STORAGE_UPDATE_EVENT_TYPE = 'customLocalStorage';
 
 export function useLocalStorage<T extends AllowedValue>(
   key: string,
@@ -54,32 +17,61 @@ export function useLocalStorage<T extends AllowedValue>(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
   );
 
-  const subject = useMemo(() => {
-    return createInMemorySubjectMemoized(key, defaultValueRef.current);
-  }, [key]);
+  const [value, setValue] = useState(() => getFromStorage(key, defaultValueRef.current));
 
-  const [value, setValue] = useState(() => subject.get());
-
-  useEffect(() => {
-    const subscription = subject.asObservable().subscribe((next) => {
-      setValue(next);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [subject]);
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   const setter = useMemo(() => {
     return (valueOrCallback: T | ((prev: T) => T)) => {
-      const val =
-        typeof valueOrCallback === 'function' ? valueOrCallback(subject.get()) : valueOrCallback;
-      subject.next(val);
+      const nextValue =
+        typeof valueOrCallback === 'function' ? valueOrCallback(valueRef.current) : valueOrCallback;
+
+      window.localStorage.setItem(key, JSON.stringify(nextValue));
+
+      /*
+       * This is necessary to trigger the event listener in the same
+       * window context.
+       */
+      window.dispatchEvent(
+        new window.CustomEvent<{ key: string }>(LOCAL_STORAGE_UPDATE_EVENT_TYPE, {
+          detail: { key },
+        })
+      );
     };
-  }, [subject]);
+  }, [key]);
+
+  useEffect(() => {
+    function updateValueFromStorage() {
+      setValue(getFromStorage(key, defaultValueRef.current));
+    }
+
+    function onStorageEvent(event: StorageEvent) {
+      if (event.key === key) {
+        updateValueFromStorage();
+      }
+    }
+
+    function onCustomLocalStorageEvent(event: Event) {
+      if (event instanceof window.CustomEvent && event.detail?.key === key) {
+        updateValueFromStorage();
+      }
+    }
+
+    window.addEventListener('storage', onStorageEvent);
+    window.addEventListener(LOCAL_STORAGE_UPDATE_EVENT_TYPE, onCustomLocalStorageEvent);
+
+    return () => {
+      window.removeEventListener('storage', onStorageEvent);
+      window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT_TYPE, onCustomLocalStorageEvent);
+    };
+  }, [key]);
 
   return [value, setter];
 }
+
+type AllowedValue = string | number | boolean | Record<string, any> | any[];
+type SetValue<T extends AllowedValue> = (next: T | ((prev: T) => T)) => void;
 
 function getFromStorage<T>(keyName: string, defaultValue: T) {
   const storedItem = window.localStorage.getItem(keyName);

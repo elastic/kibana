@@ -19,5 +19,7 @@ export interface DocumentDetailsProps extends FlyoutPanelProps {
     indexName: string;
     scopeId: string;
     isPreviewMode?: boolean;
+    jumpToEntityId?: string;
+    jumpToCursor?: string;
   };
 }
