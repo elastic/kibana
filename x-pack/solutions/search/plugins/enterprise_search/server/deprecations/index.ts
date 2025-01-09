@@ -111,7 +111,7 @@ export function getEnterpriseSearchNodeDeprecation(
         message: {
           type: 'markdown',
           content: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
-            values: {addendum: addendum},
+            values: { addendum },
             defaultMessage:
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
