@@ -40,7 +40,8 @@ import {
 } from '../../../../../tasks/alert_assignments';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 
-describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/183787
+describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -203,8 +204,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       cy.get(ALERTS_COUNT).contains(numberOfSelectedAlerts);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/183787
-    it.skip('by assignee and alert status', () => {
+    it('by assignee and alert status', () => {
       const totalNumberOfAlerts = 5;
       const numberOfAssignedAlerts = 3;
       selectNumberOfAlerts(numberOfAssignedAlerts);

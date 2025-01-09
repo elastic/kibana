@@ -213,7 +213,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
       });
 
       // FLAKY: https://github.com/elastic/kibana/issues/182669
-      // FLAKY: https://github.com/elastic/kibana/issues/179187
       describe.skip('Indicator mapping', () => {
         beforeEach(() => {
           const rule = getNewThreatIndicatorRule();
