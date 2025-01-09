@@ -264,6 +264,7 @@ export function InnerFieldItem(props: FieldItemProps) {
             order={order}
             onDragStart={closePopover}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            dragClassName="unifiedFieldListItemButton__dragging"
           >
             {isTextBasedColumnField(field) ? (
               <FieldItemButton<DatatableColumn>
