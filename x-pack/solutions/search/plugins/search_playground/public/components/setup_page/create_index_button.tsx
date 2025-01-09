@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -21,27 +21,29 @@ export const CreateIndexButton: React.FC = () => {
     [share.url.locators]
   );
 
-  const createIndexLinkProps = useMemo(() => {
-    if (createIndexLocator) {
-      return {
-        href: createIndexLocator.getRedirectUrl({}),
-        onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-          event.preventDefault();
-          const url = await createIndexLocator.getUrl({});
-          application?.navigateToUrl(url);
-        },
-      };
-    }
-    return null;
-  }, [application, createIndexLocator]);
+  const handleCreateIndexClick = useCallback(
+    async (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
 
-  return createIndexLocator && createIndexLinkProps ? (
+      if (!createIndexLocator) {
+        return;
+      }
+
+      const url = await createIndexLocator.getUrl({});
+      application?.navigateToUrl(url);
+    },
+    [application, createIndexLocator]
+  );
+
+  return createIndexLocator ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
       color="primary"
       iconType="plusInCircle"
       fill
       data-test-subj="createIndexButton"
-      {...createIndexLinkProps}
+      href={createIndexLocator.getRedirectUrl({})}
+      onClick={handleCreateIndexClick}
     >
       <FormattedMessage
         id="xpack.searchPlayground.createIndexButton"
