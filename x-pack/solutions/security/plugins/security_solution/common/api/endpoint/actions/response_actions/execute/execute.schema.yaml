@@ -10,14 +10,6 @@ paths:
       description: Run a shell command on an endpoint.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      parameters:
-        - in: header
-          name: kbn-xsrf
-          schema:
-            type: string
-            format: string
-          required: true
-          default: 123
       requestBody:
         required: true
         content:
