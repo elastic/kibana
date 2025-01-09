@@ -8,11 +8,18 @@
 import styled from '@emotion/styled';
 import { euiCanAnimate, useEuiTheme } from '@elastic/eui';
 
+export const useBorder = () => {
+  const { euiTheme } = useEuiTheme();
+  return `1px solid ${euiTheme.colors.borderBasePlain}`;
+};
+
 export const AnimatedSearchBarContainer = styled.div`
   display: grid;
   grid-template-rows: 1fr;
+  border-top: ${() => useBorder()};
 
   &.toggled-off {
+    border-top: none;
     transform: translateY(-100%);
     grid-template-rows: 0fr;
   }

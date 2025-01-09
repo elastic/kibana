@@ -36,7 +36,7 @@ import {
   TARGET_ENTITY_ID,
 } from '../../common/constants';
 import { Actions } from '../controls/actions';
-import { AnimatedSearchBarContainer } from './styles';
+import { AnimatedSearchBarContainer, useBorder } from './styles';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -356,7 +356,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               </AnimatedSearchBarContainer>
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              border-top: ${useBorder()};
+            `}
+          >
             <Graph
               css={css`
                 height: 100%;
