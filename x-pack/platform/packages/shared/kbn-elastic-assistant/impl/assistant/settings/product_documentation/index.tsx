@@ -20,30 +20,31 @@ import { useGetProductDocStatus } from '../../api/product_docs/use_get_product_d
 import * as i18n from './translations';
 
 export const ProductDocumentationManagement: React.FC = React.memo(() => {
-  const [isInstalled, setInstalled] = useState<boolean>(true);
-  const [isInstalling, setInstalling] = useState<boolean>(false);
+  const [{ isInstalled, isInstalling }, setState] = useState({
+    isInstalled: true,
+    isInstalling: false,
+  });
 
   const { mutateAsync: installProductDoc } = useInstallProductDoc();
   const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
 
   useEffect(() => {
     if (status) {
-      setInstalled(status.overall === 'installed');
+      setState((prevState) => ({
+        ...prevState,
+        isInstalled: status.overall === 'installed',
+      }));
     }
   }, [status]);
 
-  const onClickInstall = useCallback(() => {
-    setInstalling(true);
-    installProductDoc().then(
-      () => {
-        setInstalling(false);
-        setInstalled(true);
-      },
-      () => {
-        setInstalling(false);
-        setInstalled(false);
-      }
-    );
+  const onClickInstall = useCallback(async () => {
+    setState((prevState) => ({ ...prevState, isInstalling: true }));
+    try {
+      await installProductDoc();
+      setState({ isInstalled: true, isInstalling: false });
+    } catch {
+      setState({ isInstalled: false, isInstalling: false });
+    }
   }, [installProductDoc]);
 
   const content = useMemo(() => {
