@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -53,10 +54,10 @@ export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'fin
 export type SelfManagePreference = 'native' | 'selfManaged';
 
 interface CreateConnectorProps {
-  fleet?: any;
+  fleet?: FleetStart;
 }
 
-export const CreateConnector: React.FC<CreateConnectorProps> = () => {
+export const CreateConnector: React.FC<CreateConnectorProps> = ({ fleet }) => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
@@ -74,10 +75,11 @@ export const CreateConnector: React.FC<CreateConnectorProps> = () => {
   const isRunningLocally = (config.host ?? '').includes('localhost');
 
   const configFleet = fleet?.config;
-  const { cloud } = fleet?.services;
-  const isServerless = !!cloud?.isServerlessEnabled;
-  const isCloud = !!cloud?.isCloudEnabled;
-  const isAgentlessEnabled = (isCloud || isServerless) && configFleet.agentless?.enabled === true;
+  // const { cloud } = fleet?.services;
+  // const isServerless = !!cloud?.isServerlessEnabled;
+  // const isCloud = !!cloud?.isCloudEnabled;
+  // const isAgentlessEnabled = (isCloud || isServerless) && configFleet.agentless?.enabled === true;
+  const isAgentlessEnabled = configFleet?.agentless?.enabled === true;
 
   useEffect(() => {
     if (
@@ -86,7 +88,7 @@ export const CreateConnector: React.FC<CreateConnectorProps> = () => {
     ) {
       setSelfManagePreference('selfManaged');
     }
-    console.log('isAgentlessEnabled ss', isAgentlessEnabled);
+    console.log('isAgentlessEnabled', isAgentlessEnabled);
   }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
