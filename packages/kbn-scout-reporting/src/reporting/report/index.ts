@@ -8,4 +8,4 @@
  */
 
 export { ScoutReport, ScoutReportEventAction } from './event';
-export { ScoutFailureReport, TestFailure } from './failed_test';
+export { ScoutFailureReport, type TestFailure } from './failed_test';
