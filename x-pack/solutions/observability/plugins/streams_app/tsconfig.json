@@ -48,5 +48,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/streams-schema",
+    "@kbn/deeplinks-analytics",
+    "@kbn/dashboard-plugin",
   ]
 }
