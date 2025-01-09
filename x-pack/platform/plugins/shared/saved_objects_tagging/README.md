@@ -38,7 +38,7 @@ features.registerKibanaFeature({
 
 ### Update the SOT telemetry collector schema to add the new type
 
-The schema is located here: `x-pack/platform/plugins/private/saved_objects_tagging/server/usage/schema.ts`. You
+The schema is located here: `x-pack/platform/plugins/shared/saved_objects_tagging/server/usage/schema.ts`. You
 just need to add the name of the SO type you are adding.
 
 ```ts
@@ -54,5 +54,5 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
 
 ### Update the `taggableTypes` constant to add your type
 
-Edit the `taggableTypes` list in `x-pack/platform/plugins/private/saved_objects_tagging/common/constants.ts` to add
+Edit the `taggableTypes` list in `x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts` to add
 the name of the type you are adding.
