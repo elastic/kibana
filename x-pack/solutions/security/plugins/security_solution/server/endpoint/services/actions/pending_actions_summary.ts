@@ -76,10 +76,10 @@ export const getPendingActionsSummary = async (
         setActionAsPending(unExpiredAction.command);
       } else if (
         unExpiredAction.wasSuccessful &&
-        (unExpiredAction.command === 'isolate' || unExpiredAction.command === 'unisolate')
+        (unExpiredAction.command === 'isolate' || unExpiredAction.command === 'unisolate') &&
+        unExpiredAction.agentType === 'endpoint'
       ) {
-        // FIXME:PT fix this here - code should only be called if agent type is endpoint
-
+        // For Elastic Defend (endpoint):
         // For Isolate and Un-Isolate, we want to ensure that the isolation status being reported in the
         // endpoint metadata was received after the action was completed. This is to ensure that the
         // isolation status being reported in the UI remains as accurate as possible.
