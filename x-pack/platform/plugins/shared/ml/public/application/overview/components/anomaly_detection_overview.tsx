@@ -14,17 +14,17 @@ import { ML_PAGES } from '../../../locator';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
-import { useMlApi, useMlManagementLocator } from '../../contexts/kibana';
+import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
-  const canCreateJob = usePermissionCheck('canCreateJob');
+  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
   const [isLoading, setIsLoading] = useState(false);
   const [hasADJobs, setHasADJobs] = useState(false);
 
   const mlApi = useMlApi();
-
-  const mlLocator = useMlManagementLocator();
+  const mlLocator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocator();
 
   const loadJobs = useCallback(async () => {
     setIsLoading(true);
@@ -45,13 +45,31 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   }, []);
 
   const redirectToCreateJobSelectIndexPage = useCallback(async () => {
+    if (!mlManagementLocator) return;
+
+    await mlManagementLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
+    });
+  }, [mlManagementLocator]);
+
+  const redirectToMultiMetricExplorer = useCallback(async () => {
     if (!mlLocator) return;
 
     await mlLocator.navigate({
       sectionId: 'ml',
-      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
+      page: ML_PAGES.ANOMALY_EXPLORER,
     });
   }, [mlLocator]);
+
+  const redirectToManageJobs = useCallback(async () => {
+    if (!mlManagementLocator) return;
+
+    await mlManagementLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection`,
+    });
+  }, [mlManagementLocator]);
 
   const availableActions = useMemo(() => {
     const actions = [];
@@ -75,8 +93,8 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       actions.push(
         <EuiButton
           color="primary"
-          onClick={redirectToCreateJobSelectIndexPage}
-          isDisabled={disableCreateAnomalyDetectionJob}
+          onClick={redirectToMultiMetricExplorer}
+          isDisabled={!canGetJobs}
           data-test-subj="multiMetricExplorerButton"
         >
           <FormattedMessage
@@ -86,11 +104,11 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         </EuiButton>
       );
     }
-    if (canCreateJob) {
+    if (canGetJobs && canCreateJob) {
       actions.push(
         <EuiButtonEmpty
           color="primary"
-          onClick={redirectToCreateJobSelectIndexPage}
+          onClick={redirectToManageJobs}
           isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="manageJobsButton"
           iconType="popout"
@@ -109,6 +127,9 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     hasADJobs,
     redirectToCreateJobSelectIndexPage,
     canCreateJob,
+    canGetJobs,
+    redirectToMultiMetricExplorer,
+    redirectToManageJobs,
   ]);
 
   return (
