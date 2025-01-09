@@ -19,8 +19,6 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
 
-  const [globalCssVariables, setGlobalCssVariables] = useState<string>('');
-
   useEffect(() => {
     /**
      * When the user is interacting with an element, the page can grow, but it cannot
@@ -71,7 +69,7 @@ export const GridHeightSmoother = ({
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
-        setGlobalCssVariables(`--kbnGridGutterSize: ${gutterSize};`);
+        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
       });
 
     return () => {
@@ -87,8 +85,6 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
-        ${globalCssVariables}
-
         margin: calc(var(--kbnGridGutterSize) * 1px);
         overflow-anchor: none;
         transition: height 500ms linear;
