@@ -6,7 +6,11 @@
   container-type: inline-size;
 }
 
-@container (max-width: 768px) {
+.actionConnectorModal__container {
+  container-type: inline-size;
+}
+
+@container (max-width: 767px) { /* stylelint-disable-line */
   .euiDescribedFormGroup {
     flex-direction: column;
   }
@@ -23,5 +27,13 @@
   }
   .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
     font-size: $euiFontSizeS;
+  }
+
+
+}
+
+@container (max-width: 575px) { /* stylelint-disable-line */
+  .hideForContainer--s {
+    display: none;
   }
 }

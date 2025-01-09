@@ -9,20 +9,18 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import { RuleSystemAction } from '@kbn/alerting-types';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { v4 as uuidv4 } from 'uuid';
-import { RuleAction, RuleFormParamsErrors } from '../common/types';
-import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import { useRuleFormDispatch, useRuleFormState } from '../hooks';
+import { RuleAction } from '../common/types';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { useRuleFormState } from '../hooks';
+import { useOnSelectConnector } from '../hooks/use_on_select_connector';
 import {
   ADD_ACTION_DESCRIPTION_TEXT,
   ADD_ACTION_HEADER,
   ADD_ACTION_OPTIONAL_TEXT,
   ADD_ACTION_TEXT,
 } from '../translations';
-import { getDefaultParams } from '../utils';
 import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
@@ -45,13 +43,10 @@ export const RuleActions = () => {
 
   const {
     formData: { actions, consumer },
-    plugins: { actionTypeRegistry },
     multiConsumerSelection,
     selectedRuleType,
     connectorTypes,
   } = useRuleFormState();
-
-  const dispatch = useRuleFormDispatch();
 
   const onModalOpen = useCallback(() => {
     setIsConnectorModalOpen(true);
@@ -61,48 +56,7 @@ export const RuleActions = () => {
     setIsConnectorModalOpen(false);
   }, []);
 
-  const onSelectConnector = useCallback(
-    async (connector: ActionConnector) => {
-      const { id, actionTypeId } = connector;
-      const uuid = uuidv4();
-      const group = selectedRuleType.defaultActionGroupId;
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-
-      const params =
-        getDefaultParams({
-          group,
-          ruleType: selectedRuleType,
-          actionTypeModel,
-        }) || {};
-
-      dispatch({
-        type: 'addAction',
-        payload: {
-          id,
-          actionTypeId,
-          uuid,
-          params,
-          group,
-          frequency: DEFAULT_FREQUENCY,
-        },
-      });
-
-      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
-        .get(actionTypeId)
-        ?.validateParams(params);
-
-      dispatch({
-        type: 'setActionParamsError',
-        payload: {
-          uuid,
-          errors: res.errors,
-        },
-      });
-
-      onModalClose();
-    },
-    [dispatch, onModalClose, selectedRuleType, actionTypeRegistry]
-  );
+  const onSelectConnector = useOnSelectConnector({ onClose: onModalClose });
 
   const producerId = useMemo(() => {
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleType.id)) {
