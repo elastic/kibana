@@ -7,8 +7,6 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-// import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-// import { RCA_SYSTEM_PROMPT_BASE } from '@kbn/observability-ai-assistant-server/root_cause_analysis/prompts';
 import type {
   RootCauseAnalysisEvent,
   EndProcessToolMessage,
