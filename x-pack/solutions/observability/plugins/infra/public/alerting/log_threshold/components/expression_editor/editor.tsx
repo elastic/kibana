@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFormErrorText,
@@ -15,12 +14,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useMount from 'react-use/lib/useMount';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { ISearchSource } from '@kbn/data-plugin/common';
@@ -122,19 +119,29 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-        const logsDataView =
-          (await data.dataViews.get('log_rules_data_view')) ??
-          (await data.dataViews.getDefaultDataView());
+        try {
+          const logRulesDataViewExists =
+            (await data.dataViews.find('log_rules_data_view')).length > 0;
+          const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
 
-        if (logsDataView) {
-          newSearchSource.setField('index', logsDataView);
-          setDataView(logsDataView);
+          const logsDataView = logRulesDataViewExists
+            ? await data.dataViews.get('log_rules_data_view')
+            : defaultDataViewExists
+            ? await data.dataViews.getDefaultDataView()
+            : undefined;
+
+          if (logsDataView) {
+            newSearchSource.setField('index', logsDataView);
+            setDataView(logsDataView);
+          }
+
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
+        } catch (error) {
+          setParamsError(error);
         }
-
-        initialSearchConfiguration = getSearchConfiguration(
-          newSearchSource.getSerializedFields(),
-          setParamsWarning
-        );
       }
 
       try {
@@ -253,52 +260,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
         </EuiFormErrorText>
       )}
       <EuiSpacer size="m" />
-      {dataView && dataView.fields && (
-        <SourceStatusWrapper {...props}>
-          <Editor {...props} dataView={dataView} />
-        </SourceStatusWrapper>
-      )}
+      <Editor {...props} dataView={dataView} />
     </>
   );
 };
 
-export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
-
-  return (
-    <>
-      {isLoading || isUninitialized ? (
-        <div>
-          <EuiSpacer size="m" />
-          <EuiLoadingSpinner size="l" />
-          <EuiSpacer size="m" />
-        </div>
-      ) : hasFailedLoading ? (
-        <EuiCallOut
-          title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
-            defaultMessage: 'Sorry, there was a problem loading field information',
-          })}
-          color="danger"
-          iconType="warning"
-        >
-          <EuiButton
-            data-test-subj="infraSourceStatusWrapperTryAgainButton"
-            onClick={load}
-            iconType="refresh"
-          >
-            {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
-              defaultMessage: 'Try again',
-            })}
-          </EuiButton>
-        </EuiCallOut>
-      ) : (
-        children
-      )}
-    </>
-  );
-};
-
-export const Editor: React.FC<Props & { dataView: DataView }> = (props) => {
+export const Editor: React.FC<Props & { dataView?: DataView }> = (props) => {
   const { setRuleParams, ruleParams, errors, dataView } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
 

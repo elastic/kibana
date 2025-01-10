@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover a11y tests', () => {
     before(async () => {
       await common.navigateToApp('discover');
+      await discover.selectIndexPattern('Kibana Sample Data Flights');
       await timePicker.setCommonlyUsedTime('Last_7 days');
     });
 

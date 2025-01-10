@@ -143,19 +143,29 @@ export const Expressions: React.FC<Props> = (props) => {
           const newSearchSource = data.search.searchSource.createEmpty();
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-          const metricsDataView =
-            (await data.dataViews.get('infra_rules_data_view')) ??
-            (await data.dataViews.getDefaultDataView());
+          try {
+            const infraRulesDataViewExists =
+              (await data.dataViews.find('infra_rules_data_view')).length > 0;
+            const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
 
-          if (metricsDataView) {
-            newSearchSource.setField('index', metricsDataView);
-            setDataView(metricsDataView);
+            const metricsDataView = infraRulesDataViewExists
+              ? await data.dataViews.get('infra_rules_data_view')
+              : defaultDataViewExists
+              ? await data.dataViews.getDefaultDataView()
+              : undefined;
+
+            if (metricsDataView) {
+              newSearchSource.setField('index', metricsDataView);
+              setDataView(metricsDataView);
+            }
+
+            initialSearchConfiguration = getSearchConfiguration(
+              newSearchSource.getSerializedFields(),
+              setParamsWarning
+            );
+          } catch (error) {
+            setParamsError(error);
           }
-
-          initialSearchConfiguration = getSearchConfiguration(
-            newSearchSource.getSerializedFields(),
-            setParamsWarning
-          );
         }
       }
 
