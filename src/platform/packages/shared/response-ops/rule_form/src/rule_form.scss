@@ -10,7 +10,7 @@
   container-type: inline-size;
 }
 
-@container (max-width: 767px) { /* stylelint-disable-line */
+@container (max-width: 767px) {
   .euiDescribedFormGroup {
     flex-direction: column;
   }
@@ -36,7 +36,7 @@
   display: none;
 }
 
-@container (max-width: 767px) and (min-width: 575px) { /* stylelint-disable-line */
+@container (max-width: 767px) and (min-width: 575px) {
   .hideForContainer--s {
     display: none;
   }
@@ -46,7 +46,7 @@
   }
 }
 
-@container (max-width: 574px) { /* stylelint-disable-line */
+@container (max-width: 574px) {
   .hideForContainer--xs {
     display: none;
   }
