@@ -13,7 +13,6 @@ import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
