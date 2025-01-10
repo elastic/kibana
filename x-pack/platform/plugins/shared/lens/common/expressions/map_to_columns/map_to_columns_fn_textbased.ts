@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { OriginalColumn, MapToColumnsExpressionFunction } from './types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
@@ -24,7 +25,11 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
             mappedRow[cachedEntry.id] = row[id];
           }
         } else {
-          const col = data.columns.find((c) => c.id === id);
+          const columns = new Map<string, DatatableColumn>();
+          for (const column of data.columns) {
+            columns.set(column.id, column);
+          }
+          const col = columns.get(id);
           if (col?.variable) {
             const originalColumn = Object.values(idMap).find((idMapCol) => {
               return idMapCol.some((c) => c.variable === col.variable);
