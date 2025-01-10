@@ -214,6 +214,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     let response = await handler.fn(kibanaRequest, responseFactory);
 
+    // we don't want to overwrite the header value
     if (handler.options.options?.deprecated && !response.options.headers?.warning) {
       response = injectResponseHeaders(
         {

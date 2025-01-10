@@ -126,9 +126,9 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
 export const createDeprecationWarningHeaderPreResponseHandler = (
   kibanaVersion: string
 ): OnPreResponseHandler => {
-  // TODO: make sure we are not overwriting the warning header value
   return (request, response, toolkit) => {
-    if (!request.route.options.deprecated) {
+    // we don't want to overwrite the header value
+    if (!request.route.options.deprecated || response.headers?.warning) {
       return toolkit.next();
     }
     const additionalHeaders = {
