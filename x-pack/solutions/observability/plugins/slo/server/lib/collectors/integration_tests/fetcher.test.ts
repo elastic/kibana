@@ -83,13 +83,55 @@ describe('SLO usage collector fetcher', () => {
     it('without any SLOs', async () => {
       const results = await fetcher({ soClient, esClient });
 
-      expect(results.slo).toMatchInlineSnapshot();
+      expect(results.slo).toMatchInlineSnapshot(`
+        Object {
+          "by_budgeting_method": Object {
+            "occurrences": 6,
+            "timeslices": 2,
+          },
+          "by_calendar_aligned_duration": Object {},
+          "by_rolling_duration": Object {
+            "7d": 8,
+          },
+          "by_sli_type": Object {
+            "sli.apm.transactionDuration": 1,
+            "sli.apm.transactionErrorRate": 1,
+            "sli.kql.custom": 3,
+            "sli.metric.custom": 1,
+            "sli.metric.timeslice": 1,
+            "sli.synthetics.availability": 1,
+          },
+          "by_status": Object {
+            "disabled": 0,
+            "enabled": 8,
+          },
+          "definitions": Object {
+            "total": 8,
+            "total_with_ccs": 0,
+            "total_with_groups": 2,
+          },
+          "instances": Object {
+            "total": 0,
+          },
+          "total": 8,
+        }
+      `);
     });
   });
 
   async function createServers() {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
+      settings: {
+        es: {
+          license: 'trial',
+        },
+        kbn: {
+          cliArgs: {
+            oss: false,
+          },
+        },
+      },
     });
 
     esServer = await startES();
@@ -105,8 +147,12 @@ describe('SLO usage collector fetcher', () => {
   }
 
   async function stopServers() {
-    await kibanaServer.stop();
-    await esServer.stop();
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
 
     jest.clearAllMocks();
   }
