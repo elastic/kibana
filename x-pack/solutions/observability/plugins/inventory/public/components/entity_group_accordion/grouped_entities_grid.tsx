@@ -7,7 +7,6 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { InventoryEntity } from '../../../common/entities';
 import { type EntityColumnIds } from '../../../common/entities';
 import {
   type EntityTypeCheckOptions,
@@ -25,13 +24,13 @@ import { EntitiesGrid } from '../entities_grid';
 interface Props {
   groupValue: string;
   definitionIndexPatterns: string[];
-  isEntityDefinitionIndexPatternsLoading: boolean;
+  isIndexPatternsLoading: boolean;
 }
 
 export function GroupedEntitiesGrid({
   groupValue,
   definitionIndexPatterns,
-  isEntityDefinitionIndexPatternsLoading,
+  isIndexPatternsLoading,
 }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery } = query;
@@ -107,7 +106,7 @@ export function GroupedEntitiesGrid({
 
   return (
     <EntitiesGrid
-      entities={value.entities as InventoryEntity[]}
+      entities={value.entities}
       loading={loading}
       sortDirection={sortDirection}
       sortField={sortField}
@@ -116,7 +115,7 @@ export function GroupedEntitiesGrid({
       pageIndex={pageIndex}
       onFilterByType={handleEntityTypeFilter}
       definitionIndexPatterns={definitionIndexPatterns}
-      isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+      isIndexPatternsLoading={isIndexPatternsLoading}
     />
   );
 }

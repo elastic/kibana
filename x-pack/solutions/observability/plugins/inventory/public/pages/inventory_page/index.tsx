@@ -19,7 +19,7 @@ export function InventoryPage() {
     refresh,
     loading,
     definitionIndexPatterns,
-    loading: isEntityDefinitionIndexPatternsLoading,
+    loading: isIndexPatternsLoading,
   } = useUnifiedSearchContext();
 
   useEffectOnce(() => {
@@ -50,7 +50,7 @@ export function InventoryPage() {
             groupCount={entityType.count}
             isLoading={loading}
             definitionIndexPatterns={definitionIndexPatterns.definitionIndexPatterns[entityType.id]}
-            isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+            isIndexPatternsLoading={isIndexPatternsLoading}
           />
         );
       })}

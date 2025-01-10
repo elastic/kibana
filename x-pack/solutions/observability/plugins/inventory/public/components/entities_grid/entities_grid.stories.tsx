@@ -17,7 +17,7 @@ import { entitiesMock } from './mock/entities_mock';
 
 interface EntityGridStoriesArgs {
   entityType?: string;
-  isEntityDefinitionIndexPatternsLoading?: boolean;
+  isIndexPatternsLoading?: boolean;
 }
 
 const entityTypeOptions = ['host', 'container', 'service'];
@@ -33,7 +33,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
       control: {
         type: 'select',
       },
-      isEntityDefinitionIndexPatternsLoading: false,
+      isIndexPatternsLoading: false,
     },
   },
   args: { entityType: undefined },
@@ -41,7 +41,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
 
 export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [{ entityType, isEntityDefinitionIndexPatternsLoading }, updateArgs] = useArgs();
+  const [{ entityType, isIndexPatternsLoading }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
@@ -83,7 +83,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
           pageIndex={pageIndex}
           onFilterByType={() => {}}
           definitionIndexPatterns={definitionIndexPatterns}
-          isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+          isIndexPatternsLoading={isIndexPatternsLoading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -96,7 +96,7 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
   });
-  const [{ isEntityDefinitionIndexPatternsLoading }] = useArgs();
+  const [{ isIndexPatternsLoading }] = useArgs();
 
   return (
     <EntitiesGrid
@@ -109,7 +109,7 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
       pageIndex={pageIndex}
       onFilterByType={() => {}}
       definitionIndexPatterns={definitionIndexPatterns}
-      isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+      isIndexPatternsLoading={isIndexPatternsLoading}
     />
   );
 };

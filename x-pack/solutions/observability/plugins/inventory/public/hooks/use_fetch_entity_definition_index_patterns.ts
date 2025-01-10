@@ -28,6 +28,6 @@ export const useFetchEntityDefinitionIndexPattern = (types: string) => {
 
   return {
     definitionIndexPatterns: value?.definitionIndexPatterns,
-    isEntityDefinitionIndexPatternsLoading: loading,
+    isIndexPatternsLoading: loading,
   };
 };

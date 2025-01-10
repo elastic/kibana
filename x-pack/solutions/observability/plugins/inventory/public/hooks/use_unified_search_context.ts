@@ -47,7 +47,7 @@ function useUnifiedSearch() {
 
   const {
     value: definitionIndexPatterns = { definitionIndexPatterns: {} },
-    loading: isEntityDefinitionIndexPatternsLoading,
+    loading: isIndexPatternsLoading,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entity/definitions/sources', {
@@ -77,7 +77,7 @@ function useUnifiedSearch() {
     dataView,
     definitionIndexPatterns,
     refreshSubject$,
-    loading: loading || isEntityDefinitionIndexPatternsLoading,
+    loading: loading || isIndexPatternsLoading,
     refresh,
     value,
   };

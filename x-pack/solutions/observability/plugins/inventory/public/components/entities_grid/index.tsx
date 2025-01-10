@@ -29,7 +29,7 @@ interface Props {
   onChangePage: (nextPage: number) => void;
   onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
   definitionIndexPatterns: string[];
-  isEntityDefinitionIndexPatternsLoading: boolean;
+  isIndexPatternsLoading: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -44,7 +44,7 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
   definitionIndexPatterns,
-  isEntityDefinitionIndexPatternsLoading,
+  isIndexPatternsLoading,
 }: Props) {
   const [showActions, setShowActions] = useState<boolean>(true);
 
@@ -123,13 +123,13 @@ export function EntitiesGrid({
         case 'entityDisplayName':
           return <EntityName entity={entity} />;
         case 'actions':
-          return isEntityDefinitionIndexPatternsLoading ? (
+          return isIndexPatternsLoading ? (
             <EuiLoadingSpinner size="s" />
           ) : (
             <EntityActions
               entity={entity}
               definitionIndexPatterns={definitionIndexPatterns}
-              isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+              isIndexPatternsLoading={isIndexPatternsLoading}
               setShowActions={setShowActions}
             />
           );
@@ -137,7 +137,7 @@ export function EntitiesGrid({
           return null;
       }
     },
-    [definitionIndexPatterns, entities, isEntityDefinitionIndexPatternsLoading, onFilterByType]
+    [definitionIndexPatterns, entities, isIndexPatternsLoading, onFilterByType]
   );
 
   if (loading) {

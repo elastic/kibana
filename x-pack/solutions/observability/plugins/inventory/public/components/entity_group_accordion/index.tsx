@@ -22,7 +22,7 @@ export interface Props {
   groupCount: number;
   isLoading?: boolean;
   definitionIndexPatterns: string[];
-  isEntityDefinitionIndexPatternsLoading: boolean;
+  isIndexPatternsLoading: boolean;
 }
 
 export function EntityGroupAccordion({
@@ -31,7 +31,7 @@ export function EntityGroupAccordion({
   groupCount,
   isLoading,
   definitionIndexPatterns,
-  isEntityDefinitionIndexPatternsLoading,
+  isIndexPatternsLoading,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
@@ -85,7 +85,7 @@ export function EntityGroupAccordion({
           <GroupedEntitiesGrid
             groupValue={groupValue}
             definitionIndexPatterns={definitionIndexPatterns}
-            isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+            isIndexPatternsLoading={isIndexPatternsLoading}
           />
         </EuiPanel>
       )}

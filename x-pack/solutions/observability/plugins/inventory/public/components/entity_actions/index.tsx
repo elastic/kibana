@@ -17,14 +17,14 @@ interface Props {
   entity: InventoryEntity;
   setShowActions: Dispatch<SetStateAction<boolean>>;
   definitionIndexPatterns: string[];
-  isEntityDefinitionIndexPatternsLoading: boolean;
+  isIndexPatternsLoading: boolean;
 }
 
 export const EntityActions = ({
   entity,
   setShowActions,
   definitionIndexPatterns,
-  isEntityDefinitionIndexPatternsLoading,
+  isIndexPatternsLoading,
 }: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
   const actionButtonTestSubject = entity.entityDisplayName
@@ -39,12 +39,12 @@ export const EntityActions = ({
 
   const actions: React.ReactElement[] = [];
 
-  if (!discoverUrl && !isEntityDefinitionIndexPatternsLoading) {
+  if (!discoverUrl && !isIndexPatternsLoading) {
     setShowActions(false);
     return null;
   }
 
-  if (!isEntityDefinitionIndexPatternsLoading) {
+  if (!isIndexPatternsLoading) {
     actions.push(
       <EuiContextMenuItem
         data-test-subj="inventoryEntityActionExploreInDiscover"
@@ -75,7 +75,7 @@ export const EntityActions = ({
           iconType="boxesHorizontal"
           color="text"
           onClick={togglePopover}
-          isLoading={isEntityDefinitionIndexPatternsLoading}
+          isLoading={isIndexPatternsLoading}
         />
       }
       closePopover={closePopover}
