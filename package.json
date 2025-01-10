@@ -1242,7 +1242,7 @@
     "react-popper-tooltip": "^3.1.1",
     "react-recompose": "^0.33.0",
     "react-redux": "^7.2.8",
-    "react-resizable": "^3.0.4",
+    "react-resizable": "^3.0.5",
     "react-reverse-portal": "^2.1.2",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
