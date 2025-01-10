@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './processing';
 export * from './type_guards';

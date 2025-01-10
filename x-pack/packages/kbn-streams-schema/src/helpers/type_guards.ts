@@ -10,7 +10,7 @@ import {
   AndCondition,
   conditionSchema,
   dissectProcessingDefinitionSchema,
-  DissectProcssingDefinition,
+  DissectProcessingDefinition,
   FilterCondition,
   filterConditionSchema,
   GrokProcessingDefinition,
@@ -23,7 +23,7 @@ import {
   ReadStreamDefinition,
   readStreamDefinitonSchema,
   StreamDefinition,
-  streamDefintionSchema,
+  streamDefinitionSchema,
   WiredReadStreamDefinition,
   wiredReadStreamDefinitonSchema,
   WiredStreamDefinition,
@@ -60,7 +60,7 @@ export function isIngestReadStream(subject: any): subject is IngestReadStreamDef
 }
 
 export function isStream(subject: any): subject is StreamDefinition {
-  return isSchema(streamDefintionSchema, subject);
+  return isSchema(streamDefinitionSchema, subject);
 }
 
 export function isIngestStream(subject: StreamDefinition): subject is IngestStreamDefinition {
@@ -97,7 +97,7 @@ export function isGrokProcessor(subject: any): subject is GrokProcessingDefiniti
   return isSchema(grokProcessingDefinitionSchema, subject);
 }
 
-export function isDissectProcessor(subject: any): subject is DissectProcssingDefinition {
+export function isDissectProcessor(subject: any): subject is DissectProcessingDefinition {
   return isSchema(dissectProcessingDefinitionSchema, subject);
 }
 

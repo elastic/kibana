@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { conditionSchema } from '@kbn/streams-schema';
+import { conditionSchema, isCompleteCondition } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { checkAccess } from '../../lib/streams/stream_crud';
 import { conditionToQueryDsl } from '../../lib/streams/helpers/condition_to_query_dsl';
-import { getFields, isComplete } from '../../lib/streams/helpers/condition_fields';
+import { getFields } from '../../lib/streams/helpers/condition_fields';
 
 export const sampleStreamRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_sample',
@@ -48,7 +48,7 @@ export const sampleStreamRoute = createServerRoute({
         query: {
           bool: {
             must: [
-              isComplete(params.body.condition)
+              isCompleteCondition(params.body.condition)
                 ? conditionToQueryDsl(params.body.condition)
                 : { match_all: {} },
               {

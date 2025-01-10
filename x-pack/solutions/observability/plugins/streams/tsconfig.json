@@ -28,6 +28,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
     "@kbn/server-route-repository-client",
+    "@kbn/object-utils",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
     "@kbn/alerting-plugin",
