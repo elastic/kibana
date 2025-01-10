@@ -78,6 +78,14 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
         '@odata.count': 1,
         value: [createMicrosoftMachineAction()],
       }),
+
+    // Machine List
+    [`${apiUrl}/api/machines`]: () =>
+      createAxiosResponseMock({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        '@odata.count': 1,
+        value: [createMicrosoftMachineMock()],
+      }),
   };
 
   instanceMock.request.mockImplementation(
