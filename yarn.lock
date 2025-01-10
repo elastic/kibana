@@ -5504,7 +5504,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/observability_solution/entities_data_access":
+"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/entities_data_access":
   version "0.0.0"
   uid ""
 
