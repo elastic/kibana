@@ -6,17 +6,19 @@
  */
 
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   AGENT_NAME,
   PARENT_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_ID,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  TIMESTAMP_US,
   TRACE_ID,
+  TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
 import type {
   ConnectionNode,
@@ -24,7 +26,6 @@ import type {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { EsClient } from '../../lib/helpers/get_esql_client';
 
 type QueryReturnType = {
@@ -33,37 +34,61 @@ type QueryReturnType = {
 } & ConnectionNode;
 
 export async function fetchServicePathsFromTraceIds({
-  apmEventClient,
   traceIds,
   start,
   end,
-  terminateAfter,
-  serviceMapMaxAllowableBytes,
-  numOfRequests,
+  index,
+  filters,
   esqlClient,
+  terminateAfter,
 }: {
-  apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
   terminateAfter: number;
-  serviceMapMaxAllowableBytes: number;
-  numOfRequests: number;
   esqlClient: EsClient;
+  index: string[];
+  filters: QueryDslQueryContainer[];
 }) {
-  const { index, filters } = getRequestBase({
-    apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-    indices: esqlClient.indices,
-  });
-
+  // The query does the following:
+  // 1. Gets the latest field values for each event.id
+  //  Due to the  lack of esql native aggregation to get the latest value of a field,
+  //  we use the EVAL function to create a new field that is a concatenation of the timestamp and the value of the field we want to get the latest value of.
+  //  We then use the STATS function to get the latest value of the field by trace ID, event ID, event name, and service name.
+  // 2. Groups the events by their ID (either span or transaction ID)
   const { hits } = await esqlClient.esql<QueryReturnType, { transform: 'plain' }>(
     'get_service_paths_from_trace_ids',
     {
       query: `
-        FROM ${index}
-        | EVAL event.id = COALESCE(span.id, transaction.id)
-        | KEEP event.id, ${PARENT_ID}, ${AGENT_NAME}, ${SERVICE_NAME}, ${SERVICE_ENVIRONMENT}, ${SPAN_DESTINATION_SERVICE_RESOURCE}, ${SPAN_TYPE}, ${SPAN_SUBTYPE}
-        | LIMIT 10000
+        FROM ${index.join(',')}
+          | EVAL event.id = CASE(processor.event == "span", ${SPAN_ID}, ${TRANSACTION_ID}),
+              ${SPAN_SUBTYPE} =  CONCAT(${TIMESTAMP_US}::string, ":", ${SPAN_SUBTYPE}),
+              ${SPAN_TYPE} =  CONCAT(${TIMESTAMP_US}::string, ":", ${SPAN_TYPE}),
+              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, ":", ${AGENT_NAME}),
+              ${SERVICE_NAME} = CONCAT(${TIMESTAMP_US}::string, ":", ${SERVICE_NAME}),
+              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, ":", ${PARENT_ID}),
+              ${SERVICE_ENVIRONMENT} = CONCAT(${TIMESTAMP_US}::string, ":", ${SERVICE_ENVIRONMENT})
+          | LIMIT ${terminateAfter}
+          | STATS ${SPAN_DESTINATION_SERVICE_RESOURCE} = MAX(${SPAN_DESTINATION_SERVICE_RESOURCE}),
+              ${SPAN_SUBTYPE} = MAX(${SPAN_SUBTYPE}),
+              ${SPAN_TYPE} = MAX(${SPAN_TYPE}),
+              ${AGENT_NAME} = MAX(${AGENT_NAME}),
+              ${SERVICE_NAME} = MAX(${SERVICE_NAME}),
+              ${PARENT_ID} = MAX(${PARENT_ID}),
+              ${TRACE_ID} = MAX(${TRACE_ID}),
+              ${SERVICE_ENVIRONMENT} = MAX(${SERVICE_ENVIRONMENT}) BY event.id
+          | EVAL ${SPAN_SUBTYPE} = SPLIT(${SPAN_SUBTYPE}, ":"),
+              ${SPAN_TYPE} = SPLIT(${SPAN_TYPE}, ":"),
+              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, ":"),
+              ${SERVICE_NAME} = SPLIT(${SERVICE_NAME}, ":"),
+              ${PARENT_ID} = SPLIT(${PARENT_ID}, ":"),
+              ${SERVICE_ENVIRONMENT} = SPLIT(${SERVICE_ENVIRONMENT}, ":")
+          | EVAL ${SPAN_SUBTYPE} = TO_STRING(MV_LAST(${SPAN_SUBTYPE})),
+              ${SPAN_TYPE} = TO_STRING(MV_LAST(${SPAN_TYPE})),
+              ${AGENT_NAME} = TO_STRING(MV_LAST(${AGENT_NAME})),
+              ${SERVICE_NAME} = TO_STRING(MV_LAST(${SERVICE_NAME})),
+              ${PARENT_ID} = TO_STRING(MV_LAST(${PARENT_ID})),
+              ${SERVICE_ENVIRONMENT} = TO_STRING(MV_LAST(${SERVICE_ENVIRONMENT}))
       `,
       filter: {
         bool: {
@@ -153,28 +178,34 @@ const generatePathKey = (edges: ConnectionNode[]): string => {
 const buildEventPath = (
   startEventId: string,
   eventsById: Record<string, QueryReturnType>,
-  visitedEvents = new Map<string, Node>()
+  processedEvents = new Map<string, Node>()
 ) => {
   const stack: string[] = [startEventId];
-  const reprocessQueue: string[] = [];
+  const reprocessQueue = new Set<string>();
 
   const allPaths = new Map<string, ConnectionNode[]>();
   const allDiscoveredServices = new Map<string, DiscoveredService>();
 
+  const visited = new Set<string>();
+
   while (stack.length > 0) {
     const eventId = stack.pop()!;
+
     const currentEvent = eventsById[eventId];
 
-    if (!currentEvent || visitedEvents.has(eventId)) {
+    if (!currentEvent || processedEvents.has(eventId)) {
       continue;
     }
 
-    const parentId = currentEvent[PARENT_ID];
-    const processedParent = parentId ? visitedEvents.get(parentId) : undefined;
+    visited.add(eventId);
 
-    if (parentId && !processedParent) {
+    const parentId = currentEvent[PARENT_ID];
+    const processedParent = parentId ? processedEvents.get(parentId) : undefined;
+
+    if (parentId && !processedParent && !visited.has(parentId)) {
       stack.push(parentId);
-      reprocessQueue.push(eventId);
+      reprocessQueue.add(eventId);
+
       continue;
     }
 
@@ -216,12 +247,14 @@ const buildEventPath = (
       }
     }
 
-    visitedEvents.set(eventId, { edges, ...currentEvent });
+    processedEvents.set(eventId, { edges, ...currentEvent });
 
-    if (reprocessQueue.length > 0) {
+    if (reprocessQueue.size > 0) {
       stack.push(...reprocessQueue);
-      reprocessQueue.length = 0;
+      reprocessQueue.clear();
     }
+
+    visited.delete(eventId);
   }
 
   return {
@@ -235,10 +268,10 @@ const buildAllPaths = (eventsById: Record<string, QueryReturnType>) => {
   const allEventIds = getAllEventIds(eventsById);
   const allPaths: ConnectionNode[][] = [];
 
-  const visitedEvents = new Map<string, Node>();
+  const processedEvents = new Map<string, Node>();
 
   for (const eventId of allEventIds) {
-    const { discoveredServices, paths } = buildEventPath(eventId, eventsById, visitedEvents);
+    const { discoveredServices, paths } = buildEventPath(eventId, eventsById, processedEvents);
     allPaths.push(...paths);
     allDiscoveredServices.push(...discoveredServices);
   }

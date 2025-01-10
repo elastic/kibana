@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
@@ -62,7 +64,6 @@ async function getConnectionData({
       end,
       serviceGroupKuery,
       kuery,
-      // esqlClient,
     });
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
@@ -82,17 +83,21 @@ async function getConnectionData({
 
     logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
 
+    const { index, filters } = getRequestBase({
+      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+      indices: esqlClient.indices,
+    });
+
     const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
       Promise.all(
         chunks.map((traceIdsChunk) =>
           getServiceMapFromTraceIds({
-            apmEventClient,
+            index,
+            filters,
             traceIds: traceIdsChunk,
             start,
             end,
             terminateAfter: config.serviceMapTerminateAfter,
-            serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
-            numOfRequests: chunks.length,
             logger,
             esqlClient,
           })
