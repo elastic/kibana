@@ -39,6 +39,7 @@ export const createAuthorColumn = (): TableColumn => {
       );
     },
     sortable: true,
+    truncateText: true,
     width: '10%',
   };
 };

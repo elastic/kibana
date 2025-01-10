@@ -27,7 +27,9 @@ import {
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
+  RuleMigrationResourceBase,
 } from '../../rule_migration.gen';
+import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
@@ -78,6 +80,14 @@ export const GetRuleMigrationResponse = z.object({
   total: z.number(),
   data: z.array(RuleMigration),
 });
+
+/**
+ * The map of related integrations, with the integration id as a key
+ */
+export type GetRuleMigrationIntegrationsResponse = z.infer<
+  typeof GetRuleMigrationIntegrationsResponse
+>;
+export const GetRuleMigrationIntegrationsResponse = z.object({}).catchall(RelatedIntegration);
 
 export type GetRuleMigrationPrebuiltRulesRequestParams = z.infer<
   typeof GetRuleMigrationPrebuiltRulesRequestParams
@@ -138,7 +148,7 @@ export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
 export type GetRuleMigrationResourcesMissingResponse = z.infer<
   typeof GetRuleMigrationResourcesMissingResponse
 >;
-export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceData);
+export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceBase);
 
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({

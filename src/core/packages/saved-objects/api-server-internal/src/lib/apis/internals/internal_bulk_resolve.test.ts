@@ -147,7 +147,7 @@ describe('internalBulkResolve', () => {
     expect(client.bulk).toHaveBeenCalledTimes(1);
     expect(client.bulk).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: aliasIds
+        operations: aliasIds
           .map((id) => [
             {
               update: {
@@ -169,12 +169,10 @@ describe('internalBulkResolve', () => {
     expect(client.mget).toHaveBeenCalledTimes(1);
     expect(client.mget).toHaveBeenCalledWith(
       {
-        body: {
-          docs: objectIds.map((id) => ({
-            _id: serializer.generateRawId(normalizedNamespace, OBJ_TYPE, id),
-            _index: `index-for-${OBJ_TYPE}`,
-          })),
-        },
+        docs: objectIds.map((id) => ({
+          _id: serializer.generateRawId(normalizedNamespace, OBJ_TYPE, id),
+          _index: `index-for-${OBJ_TYPE}`,
+        })),
       },
       expect.anything()
     );
