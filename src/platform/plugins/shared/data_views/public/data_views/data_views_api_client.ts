@@ -29,11 +29,16 @@ async function sha1(str: string) {
   }
 }
 
-function getFieldsForWildcardRequestBody(options: GetFieldsOptions) {
+/**
+ * Helper function to get the request body for the getFieldsForWildcard request
+ * @param options options for fields request
+ * @returns string | undefined
+ */
+export function getFieldsForWildcardRequestBody(options: GetFieldsOptions): string | undefined {
   const { indexFilter, runtimeMappings } = options;
 
   if (!indexFilter && !runtimeMappings) {
-    return undefined;
+    return;
   }
 
   return JSON.stringify({
