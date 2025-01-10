@@ -100,7 +100,6 @@ export interface FilterOptions {
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
-  ruleIds?: string[];
 }
 
 export interface FetchRulesResponse {

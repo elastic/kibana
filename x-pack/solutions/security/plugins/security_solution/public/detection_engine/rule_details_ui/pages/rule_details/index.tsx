@@ -114,7 +114,6 @@ import {
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
-import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 

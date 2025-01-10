@@ -44,5 +44,4 @@ export enum WriteOperations {
   RunSoon = 'runSoon',
   ScheduleBackfill = 'scheduleBackfill',
   DeleteBackfill = 'deleteBackfill',
-  FillGaps = 'fillGaps',
 }

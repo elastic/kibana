@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiConfirmModal,
-  EuiEmptyPrompt,
-  EuiProgress,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
