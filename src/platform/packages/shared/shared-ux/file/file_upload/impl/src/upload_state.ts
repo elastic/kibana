@@ -166,7 +166,12 @@ export class UploadState {
   ): Rx.Observable<void | Error> => {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
-    const { file, status } = file$.getValue();
+    const { file, status, error } = file$.getValue();
+
+    if (error && status === 'idle') {
+      return Rx.of(undefined);
+    }
+
     if (!['idle', 'upload_failed'].includes(status)) {
       return Rx.of(undefined);
     }
@@ -227,14 +232,7 @@ export class UploadState {
     const upload$ = this.files$$.pipe(
       Rx.take(1),
       Rx.switchMap((files$) =>
-        Rx.forkJoin(
-          files$.map((file$) => {
-            if (file$.getValue().error) {
-              return Rx.of(undefined);
-            }
-            return this.uploadFile(file$, abort$, meta);
-          })
-        )
+        Rx.forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))
       ),
       Rx.map(() => undefined),
       Rx.finalize(() => {
