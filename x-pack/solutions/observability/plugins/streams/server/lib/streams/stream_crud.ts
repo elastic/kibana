@@ -24,6 +24,7 @@ import {
   WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { omit } from 'lodash';
+import { getAncestors } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
@@ -35,7 +36,6 @@ import {
 } from './data_streams/manage_data_streams';
 import { DefinitionNotFound } from './errors';
 import { MalformedFields } from './errors/malformed_fields';
-import { getAncestors } from './helpers/hierarchy';
 import { generateIndexTemplate } from './index_templates/generate_index_template';
 import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
 import { getIndexTemplateName } from './index_templates/name';

@@ -24,7 +24,7 @@ import {
   deleteUnmanagedStreamObjects,
 } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { getParentId } from '../../lib/streams/helpers/hierarchy';
+import { getParentId } from '../../../../../../../packages/kbn-streams-schema/src/helpers/hierarchy';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
 
 export const deleteStreamRoute = createServerRoute({

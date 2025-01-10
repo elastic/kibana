@@ -11,9 +11,9 @@ import {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { isRoot } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';
-import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
