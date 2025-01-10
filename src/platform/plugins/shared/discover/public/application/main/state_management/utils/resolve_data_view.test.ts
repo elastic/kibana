@@ -18,6 +18,7 @@ describe('Resolve data view tests', () => {
       id,
       services,
       dataViewList: [],
+      adHocDataViews: [],
     });
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateVal).toEqual(id);
@@ -29,6 +30,7 @@ describe('Resolve data view tests', () => {
       id,
       services,
       dataViewList: [],
+      adHocDataViews: [],
     });
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toBe(false);
