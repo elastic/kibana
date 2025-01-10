@@ -7,7 +7,7 @@
 
 import { useEntityCentricExperienceSetting } from '../../hooks/use_entity_centric_experience_setting';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export type ServiceEntitySummary =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/summary'>;

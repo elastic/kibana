@@ -19,15 +19,12 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import {
-  ITableColumn,
-  ManagedTable,
-  TableOptions,
-  TableSearchBar,
-} from '../../../shared/managed_table';
+import type { ITableColumn, TableOptions, TableSearchBar } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
+import type { ErrorGroupItem } from './use_error_group_list_data';
+import { useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`

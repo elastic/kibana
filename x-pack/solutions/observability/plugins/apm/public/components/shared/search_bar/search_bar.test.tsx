@@ -6,7 +6,8 @@
  */
 
 import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
@@ -18,7 +19,7 @@ import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../links/url_helpers';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
+import type { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
 import { useTheme } from '../../../../../../hooks/use_theme';
 
 const ResetLineHeight = euiStyled.span`

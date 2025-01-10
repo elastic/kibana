@@ -6,12 +6,13 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import type { Dictionary } from 'lodash';
+import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
+import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
+import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,

@@ -6,10 +6,11 @@
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CustomLinkMenuSection } from '.';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';

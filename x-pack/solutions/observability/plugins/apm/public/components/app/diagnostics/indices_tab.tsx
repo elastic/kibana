@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiIcon,
   EuiLoadingElastic,
   EuiSpacer,

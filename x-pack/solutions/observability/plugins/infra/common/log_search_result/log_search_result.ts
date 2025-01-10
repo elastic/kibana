@@ -7,7 +7,8 @@
 
 import { bisector } from 'd3-array';
 
-import { compareToTimeKey, TimeKey } from '../time';
+import type { TimeKey } from '../time';
+import { compareToTimeKey } from '../time';
 
 export interface SearchResult {
   gid: string;

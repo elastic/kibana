@@ -6,7 +6,7 @@
  */
 
 import { getConnections } from './get_service_map_from_trace_ids';
-import { Connection, ConnectionNode } from '../../../common/service_map';
+import type { Connection, ConnectionNode } from '../../../common/service_map';
 
 function getConnectionsPairs(connections: Connection[]) {
   return connections

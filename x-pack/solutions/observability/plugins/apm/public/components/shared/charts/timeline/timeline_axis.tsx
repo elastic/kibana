@@ -9,9 +9,9 @@ import { inRange } from 'lodash';
 import React from 'react';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from '.';
+import type { Mark } from '.';
 import { Marker } from './marker';
-import { PlotValues } from './plot_utils';
+import type { PlotValues } from './plot_utils';
 
 // Remove any tick that is too close to topTraceDuration
 const getXAxisTickValues = (tickValues: number[], topTraceDuration?: number) => {

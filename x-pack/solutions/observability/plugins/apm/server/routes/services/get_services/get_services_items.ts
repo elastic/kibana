@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import type { Logger } from '@kbn/logging';
+import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
+import type { ServiceGroup } from '../../../../common/service_groups';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { MergedServiceStat, mergeServiceStats } from './merge_service_stats';
+import type { MergedServiceStat } from './merge_service_stats';
+import { mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 

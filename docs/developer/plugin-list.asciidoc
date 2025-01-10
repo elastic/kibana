@@ -500,7 +500,7 @@ It was removed, but the plugin was left behind to register no longer used config
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |[!NOTE]
 This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
@@ -970,7 +970,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 

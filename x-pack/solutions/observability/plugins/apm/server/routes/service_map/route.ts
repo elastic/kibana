@@ -14,20 +14,16 @@ import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
-import {
-  getServiceMapDependencyNodeInfo,
-  ServiceMapServiceDependencyInfoResponse,
-} from './get_service_map_dependency_node_info';
-import {
-  getServiceMapServiceNodeInfo,
-  ServiceMapServiceNodeInfoResponse,
-} from './get_service_map_service_node_info';
+import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
+import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
+import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
+import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { TransformServiceMapResponse } from './transform_service_map_responses';
+import type { TransformServiceMapResponse } from './transform_service_map_responses';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',

@@ -19,7 +19,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 
 const pageHeader = {
   pageTitle: 'APM',

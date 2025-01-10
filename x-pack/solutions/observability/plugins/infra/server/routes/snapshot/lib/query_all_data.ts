@@ -6,7 +6,7 @@
  */
 
 import type { MetricsAPIResponse, MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
-import { ESSearchClient } from '../../../lib/metrics/types';
+import type { ESSearchClient } from '../../../lib/metrics/types';
 import { query } from '../../../lib/metrics';
 
 const handleResponse =

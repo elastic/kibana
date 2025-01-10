@@ -30,6 +30,7 @@
     "@kbn/server-route-repository-client",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
+    "@kbn/alerting-plugin",
     "@kbn/std",
     "@kbn/safer-lodash-set",
     "@kbn/streams-schema"
