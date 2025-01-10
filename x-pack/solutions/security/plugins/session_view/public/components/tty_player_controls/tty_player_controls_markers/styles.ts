@@ -141,6 +141,7 @@ export const useStyles = (progress: number) => {
     euiVars.terminalOutputMarkerWarning,
     euiVars.terminalOutputSliderBackground,
     progress,
+    themeName,
   ]);
 
   return cached;

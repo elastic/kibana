@@ -28,7 +28,7 @@ export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
 ): string => {
-  // TODO: remove old mapping when severity palette is fixed (atm it is inverted)
+  // TODO: remove old mapping in main when severity palette is fixed https://github.com/elastic/eui/pull/8254 and Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {
       case VULNERABILITIES_SEVERITY.LOW:
@@ -59,7 +59,7 @@ export const getSeverityStatusColor = (
 };
 
 export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): string | undefined => {
-  // TODO: remove old mapping when severity palette is fixed (atm it is inverted)
+  // TODO: remove old mapping in main when severity palette is fixed https://github.com/elastic/eui/pull/8254 and Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     if (score <= 4) {
       return euiThemeVars.euiColorVis0; // low severity

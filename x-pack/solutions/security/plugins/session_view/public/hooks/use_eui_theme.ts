@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { shade, useEuiTheme as useEuiThemeHook } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { useEuiTheme as useEuiThemeHook } from '@elastic/eui';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme'; // TODO: replace to use vars from useEuiTheme?
 import { useMemo } from 'react';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  euiColorVis6_asText: string;
   buttonsBackgroundNormalDefaultPrimary: string;
   terminalOutputBackground: string;
   terminalOutputMarkerAccent: string;
@@ -29,11 +27,9 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
   const euiThemeHook = useEuiThemeHook(...props);
 
   const euiVars = useMemo(() => {
-    const themeVars = euiThemeHook.colorMode === 'DARK' ? euiDarkVars : euiLightVars;
+    const themeVars = euiThemeHook.colorMode === 'DARK' ? euiDarkVars : euiLightVars; // TODO: check if euiLightVars and euiDarkVars are still available in Borialis
 
     const extraEuiVars: ExtraEuiVars = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335), // TODO: check in Borealis. Replce with proper color token and remove shade
       buttonsBackgroundNormalDefaultPrimary: '#006DE4', // TODO: replace with proper color token
       // Terminal Output Colors don't change with the theme
       terminalOutputBackground: '#1d1e23', // TODO: replace with proper color token
