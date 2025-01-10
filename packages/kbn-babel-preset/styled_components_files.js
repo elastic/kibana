@@ -24,6 +24,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]uptime[\/\\]/,
+    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]ux[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]ecs_data_quality_dashboard[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]lists[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]/,
