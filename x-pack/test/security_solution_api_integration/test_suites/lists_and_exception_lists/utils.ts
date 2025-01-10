@@ -711,7 +711,7 @@ const configurePolicyAndIndexTemplate = async (es: Client) => {
 /**
 * Emulates an index that was reindexed from 7.x to 8.x
  * 1. this index has  prefix .reindexed-v8-
- * 2. it has 2 aliases: index and bootstrap index with number in the end. For example: .items-another-4, .items-another-4-000001
+ * 2. it has 2 aliases: index and name of origjnal index(usually bootstrap index with number in the end). For example: .items-another-4, .items-another-4-000001
  */
 const createReindexedBootstrapIndex = async (esClient: Client, index: string): Promise<unknown> => {
   return (
