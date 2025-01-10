@@ -89,6 +89,7 @@ export interface PluginStart {
    * @param initialValues - initial type, indexPattern, and name to populate service
    * @returns DataViewEditorService
    */
+  // @eslint-ignore-next-line @typescript-eslint/consistent-type-imports TODO
   dataViewEditorServiceFactory: () => Promise<typeof import('./data_view_editor_service_lazy')>;
 }
 

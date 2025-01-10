@@ -8,6 +8,7 @@
  */
 
 import type { GrokCommandContext } from '../../antlr/esql_parser';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import esql_parser from '../../antlr/esql_parser';
 import type { ESQLCommand } from '../../types';
 import { createCommand, createLiteralString, textExistsAndIsValid } from '../factories';

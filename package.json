@@ -1678,6 +1678,7 @@
     "@types/yargs": "^15.0.0",
     "@types/yauzl": "^2.9.1",
     "@types/yazl": "^2.4.2",
+    "@typescript-eslint/parser": "^8.19.1",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",

@@ -8,6 +8,7 @@
  */
 
 import type { CommandOptionsContext, DissectCommandContext } from '../../antlr/esql_parser';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import esql_parser from '../../antlr/esql_parser';
 import type { ESQLCommand, ESQLCommandOption } from '../../types';
 import {

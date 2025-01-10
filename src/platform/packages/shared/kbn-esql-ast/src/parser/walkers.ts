@@ -11,6 +11,7 @@ import type { TerminalNode } from 'antlr4';
 import { ParserRuleContext } from 'antlr4';
 import type { InlinestatsCommandContext } from '../antlr/esql_parser';
 import {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   default as esql_parser,
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,

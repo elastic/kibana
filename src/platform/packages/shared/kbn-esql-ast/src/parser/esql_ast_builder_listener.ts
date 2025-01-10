@@ -27,6 +27,7 @@ import {
   type ShowCommandContext,
   type EnrichCommandContext,
   type WhereCommandContext,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   default as esql_parser,
   type MetricsCommandContext,
   IndexPatternContext,

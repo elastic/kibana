@@ -174,7 +174,6 @@ describe('When calling package policy', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
-    (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
     testPackagePolicy = {
       agents: 100,

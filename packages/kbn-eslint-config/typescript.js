@@ -82,6 +82,7 @@ module.exports = {
               },
             },
           ],
+          '@typescript-eslint/no-wrapper-object-types': 'error',
           camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
