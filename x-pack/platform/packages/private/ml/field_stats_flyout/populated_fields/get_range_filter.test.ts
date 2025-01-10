@@ -8,8 +8,8 @@
 import { getRangeFilter } from './get_range_filter';
 
 describe('getRangeFilter()', () => {
-  it('should return a dummay match_all filter when all arguments are undefined', () => {
-    expect(getRangeFilter()).toBe({
+  it('should return a dummy match_all filter when all arguments are undefined', () => {
+    expect(getRangeFilter()).toStrictEqual({
       bool: { must: { match_all: {} } },
     });
   });
