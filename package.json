@@ -195,7 +195,7 @@
     "@kbn/audit-log-plugin": "link:x-pack/test/security_api_integration/plugins/audit_log",
     "@kbn/avc-banner": "link:src/platform/packages/shared/kbn-avc-banner",
     "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
-    "@kbn/calculate-auto": "link:packages/kbn-calculate-auto",
+    "@kbn/calculate-auto": "link:src/platform/packages/shared/kbn-calculate-auto",
     "@kbn/calculate-width-from-char-count": "link:src/platform/packages/shared/kbn-calculate-width-from-char-count",
     "@kbn/canvas-plugin": "link:x-pack/platform/plugins/private/canvas",
     "@kbn/cases-api-integration-test-plugin": "link:x-pack/test/cases_api_integration/common/plugins/cases",

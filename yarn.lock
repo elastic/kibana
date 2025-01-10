@@ -4096,7 +4096,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/calculate-auto@link:packages/kbn-calculate-auto":
+"@kbn/calculate-auto@link:src/platform/packages/shared/kbn-calculate-auto":
   version "0.0.0"
   uid ""
 
