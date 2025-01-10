@@ -1545,7 +1545,7 @@ describe('runs with default preResponse deprecation handlers', () => {
 
     router.get(
       {
-        path: '/deprecated',
+        path: '/test',
         validate: false,
       },
       (context, req, res) => res.ok({})
@@ -1553,7 +1553,7 @@ describe('runs with default preResponse deprecation handlers', () => {
 
     await server.start();
 
-    const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
+    const response = await supertest(innerServer.listener).get('/test').expect(200);
 
     expect(response.header.warning).toBeUndefined();
   });
@@ -1585,7 +1585,7 @@ describe('runs with default preResponse deprecation handlers', () => {
     expect(response.header.warning).toMatch(expectedWarningHeader);
   });
 
-  it('should return warning header in deprecated v1 but not in non deprecated v2', async () => {
+  it('should return the warning header in deprecated v1 but not in non deprecated v2', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
