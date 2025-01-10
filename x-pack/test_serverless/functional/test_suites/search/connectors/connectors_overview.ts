@@ -17,7 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
   ]);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   describe('connectors', function () {
     before(async () => {
@@ -59,12 +58,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('connector table', () => {
-      before(async () => {
-        await browser.refresh();
-        await pageObjects.common.navigateToApp('serverlessConnectors');
-      });
-
       it('searchBar and select, filters connector table', async () => {
+        await pageObjects.common.navigateToApp('serverlessConnectors');
+
         // Ensure the page is rendered and we have items
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
@@ -94,10 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('delete connector', () => {
-      before(async () => {
-        await pageObjects.common.navigateToApp('serverlessConnectors');
-      });
       it('can delete a connector', async () => {
+        await pageObjects.common.navigateToApp('serverlessConnectors');
+
         // Ensure the page is rendered and we have items
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
