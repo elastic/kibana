@@ -30,6 +30,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 import { StreamsList } from '../streams_list';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { AssetImage } from '../asset_image';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -303,13 +304,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiImage
-                src={illustration}
-                alt="Illustration"
-                className={css`
-                  width: 250px;
-                `}
-              />
+              <AssetImage type="welcome" />
               <EuiText size="m" textAlign="center">
                 {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
                   defaultMessage: 'Create streams for your logs',
