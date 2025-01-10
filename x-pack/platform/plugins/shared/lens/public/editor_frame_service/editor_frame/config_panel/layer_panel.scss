@@ -33,7 +33,6 @@
 }
 
 .lnsLayerPanel__row {
-  background: $euiColorLightestShade;
   padding: $euiSize;
 
   &:last-child {
@@ -72,7 +71,6 @@
 
 .lnsLayerPanel__dimensionContainer {
   position: relative;
-
   &+& {
     margin-top: $euiSizeS;
   }
