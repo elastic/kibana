@@ -13,17 +13,25 @@ Status: `in progress`.
 
 ### Terminology
 
-- **Base version**: The version of the rule we ship with the rule package, can be thought of as the "original" version of the rule.
+- **Base version**: Prebuilt rule asset we ship in the rule package corresponding to the currently installed prebuilt rules. It represents "original" version of the rule. During prebuilt rules installation prebuilt rule assets data is copied over and becomes an installed prebuilt rule.
 
-- **Customized prebuilt rule**: A prebuilt rule that has been changed by the user from the base version of the rule. Also referred to as "Modified" in the UI.
+- **Customized prebuilt rule**: An installed prebuilt rule that has been changed by the user in the way rule fields semantically differ from the base version. Also referred to as "Modified" in the UI.
 
-- **Non-customized prebuilt rule**: A prebuilt rule that has no change from the base version of the rule.
+- **Non-customized prebuilt rule**: An installed prebuilt rule that has rule fields values matching the base version.
 
-- **Custom rules**: A rule created by the user themselves
+- **Custom rule**: A rule created by the user themselves
+
+- **rule source, or ruleSource**: A field on the rule that defines the rule's categorization. Can be `internal` or `external`.
+
+- **`is_customized`**: A field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version
+
+- **customizable rule field**: A rule field that is able to be customized on a prebuilt rule. This includes nearly every field on our rule object aside from `author` and `license`.
+
+- **non-semantic change**: A change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 
 ### Assumptions
 
-- Rule package used will have all rule versions present (no missing base versions)
+- Rule package used will have all previous rule versions present (no missing base versions)
 
 ## Scenarios
 
@@ -35,11 +43,11 @@ Status: `in progress`.
 
 ```Gherkin
 Given a space with at least one prebuilt rule installed
-And the rule is unmodified
-When a user edits the rule from the rule edit page to something different than the original version
+And the rule is non-customized
+When user changes any rule field value (so it differs from the base version) in rule edit form
 Then the rule is successfully updated
 And the ruleSource should be "external"
-And isCustomized should be true
+And `is_customized` should be true
 And the "Modified" badge should appear on the rule's detail page
 ```
 
@@ -48,20 +56,34 @@ And the "Modified" badge should appear on the rule's detail page
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
-When a user edits the rule from the rule edit page to something different than the original version
+Given a space with at least one prebuilt rule installed
+And it is customized
+When user changes any rule field value (so it differs from the base version) in rule edit form
 Then the rule is successfully updated
 And the ruleSource should be "external"
-And isCustomized should be true
-And the "Modified" badge should still appear on the rule's detail page
+And `is_customized` should be true
+And the "Modified" badge should appear on the rule's detail page
 ```
 
-#### **Scenario: User can edit a single prebuilt rule from the rule management page**
+#### **Scenario: User can navigate to rule editing page from the rule details page**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
 Given a space with at least one prebuilt rule installed
+And the user has navigated to its rule details page
+When a user clicks overflow button on this rule
+Then the "edit rule settings" button should be enabled
+And should bring the user to the rule edit page when clicked on
+```
+
+#### **Scenario: User can navigate to rule editing page from the rule management page**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule installed
+And the user has navigated to the rule management page
 When a user clicks overflow button on this rule
 Then the "edit rule settings" button should be enabled
 And should bring the user to the rule edit page when clicked on
@@ -72,12 +94,12 @@ And should bring the user to the rule edit page when clicked on
 **Automation**: 8 cypress tests and 8 integration tests.
 
 ```Gherkin
-Given a space with at multiple prebuilt rule installed
-And a user selects multiple rules in the rules table
+Given a space with N (where N > 1) prebuilt rules installed
+And a user selects M (where M <= N) in the rules table
 When a user applies a <bulk_action_type> bulk action
-And the action is successfully applied to selected rules
+And the action is successfully applied to M selected rules
 Then rules that have been changed from their base version should have a ruleSource of "external"
-And isCustomized should be true
+And `is_customized` should be true
 And the "Modified" badge should appear on the respective row in the rule management table
 
 Examples:
@@ -96,12 +118,12 @@ Examples:
 
 #### **Scenario: is_customized is set to true when user edits a customizable rule field**
 
-**Automation**: 44 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a space with at least one non-customized prebuilt rule installed
-When a user edits the <field_name> field to something different than the base version
-Then the rule's isCustomized value should be true
+When a user changes the <field_name> field so it differs from the base version
+Then the rule's `is_customized` value should be true
 And ruleSource should be "external"
 
 Examples:
@@ -153,14 +175,15 @@ Examples:
 | type                    |
 ```
 
-#### **Scenario: is_customized is not set to true when user edits rule fields that aren't used in customized calculation**
+#### **Scenario: is_customized calculation is not affected by specific fields**
 
 **Automation**: 4 integration tests.
 
 ```Gherkin
-Given a space with at least one non-customized prebuilt rule installed
-When a user edits the <field_name> field to something different than the base version
-Then the rule's isCustomized value should remain false
+Given a space with at least one prebuilt rule installed
+And it is non-customized
+When a user changes the <field_name> field so it differs from the base version
+Then the rule's `is_customized` value should remain false
 And ruleSource should be "external"
 
 Examples:
@@ -171,111 +194,161 @@ Examples:
 | revision        |
 ```
 
+#### **Scenario: User cannot change non-customizable rule fields on prebuilt rules**
+
+**Automation**: 4 integration tests.
+
+```Gherkin
+Given a space with at least one prebuilt rule installed
+And it is non-customized
+When a user changes the <field_name> field so it differs from the base version
+Then API should throw a 500 error
+And the rule should remain unchanged
+
+Examples:
+| field_name |
+| version    |
+| id         |
+| author     |
+| license    |
+```
+
 #### **Scenario: User can revert a customized prebuilt rule to its original state**
 
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
-When a user edits the rule back to the same rule object as the base version
-Then the rule's isCustomized value should be false
+Given a space with at least one prebuilt rule
+And it is customized
+When a user changes the rule fields to match the base version
+Then the rule's `is_customized` value should be false
 And ruleSource should be "external"
 ```
 
 ### Calculating the is_customized field and the Modified badge in the UI
 
-#### **Scenario: Modified badge should appear on the rule details page when rule is modified**
+#### **Scenario: Modified badge should appear on the rule details page when prebuilt rule is customized**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
+Given a space with at least one prebuilt rule
+And it is customized
 When a user navigates to that rule's detail page
-Then the rule's isCustomized value should be true
+Then the rule's `is_customized` value should be true
 And ruleSource should be "external"
 And the Modified badge should be present on the page
 ```
 
-#### **Scenario: Modified badge should not appear on the rule details page when rule isn't customized**
+#### **Scenario: Modified badge should not appear on the rule details page when prebuilt rule isn't customized**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one non-customized prebuilt rule installed
+Given a space with at least one prebuilt rule
+And it is non-customized
 When a user navigates to that rule's detail page
-Then the rule's isCustomized value should be false
+Then the rule's `is_customized` value should be false
 And ruleSource should be "external"
 And the Modified badge should NOT be present on the page
 ```
 
-#### **Scenario: Modified badge should appear on the rule management table when rule is modified**
+#### **Scenario: Modified badge should not appear on a custom rule's rule details page**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
-When a user navigates to that rule management page
-Then the customized rule's isCustomized value should be true
-And ruleSource should be "external"
-And the Modified badge should be present in the table row
+Given a space with at least one custom rule
+When a user navigates to that rule's detail page
+Then the Modified badge should NOT be present on the page
+And ruleSource should be "internal"
 ```
 
-#### **Scenario: Modified badge should not appear on the rule management table when rule isn't customized**
+#### **Scenario: Modified badge should appear on the rule management table when prebuilt rule is modified**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one non-customized prebuilt rule installed
+Given a space with at least one prebuilt rule
+And it is customized
 When a user navigates to the rule management page
-Then the non-customized rule's isCustomized value should be false
-And ruleSource should be "external"
-And the Modified badge should NOT be present in the table row
-```
-
-#### **Scenario: Modified badge should appear on the rule updates table when rule is modified**
-
-**Automation**: 1 cypress test.
-
-```Gherkin
-Given a space with at least one customized prebuilt rule installed
-When a user navigates to that rule updates page
-Then the customized rule's isCustomized value should be true
+Then the customized rule's `is_customized` value should be true
 And ruleSource should be "external"
 And the Modified badge should be present in the table row
 ```
 
-#### **Scenario: Modified badge should not appear on the rule updates table when rule isn't customized**
+#### **Scenario: Modified badge should not appear on the rule management table when prebuilt rule isn't customized**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one non-customized prebuilt rule installed
-When a user navigates to the rule updates page
-Then the non-customized rule's isCustomized value should be false
+Given a space with at least one prebuilt rule
+And it is non-customized
+When a user navigates to the rule management page
+Then the non-customized rule's `is_customized` value should be false
 And ruleSource should be "external"
 And the Modified badge should NOT be present in the table row
 ```
 
-#### **Scenario: User should be able to filter by modified rules on the rule updates table**
+#### **Scenario: Modified badge should not appear on the rule management table when row is a custom rule**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
-When a user navigates to the rule updates page
-And sorts by Modified in the filter drop-down
-Then the table should only display modified rules
-And the table rows should have the Modified badge present
+Given a space with at least one custom rule
+When a user navigates to the rule management page
+Then the Modified badge should NOT be present in the custom rule's table row
+And its ruleSource should be "external"
 ```
 
-#### **Scenario: User should be able to filter by unmodified rules on the rule updates table**
+#### **Scenario: Modified badge should appear on the rule updates table when prebuilt rule is customized**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
-Given a space with at least one customized prebuilt rule installed
+Given a space with at least one customized prebuilt rule
+And that rules have upgrades
+When a user navigates to the rule updates table
+Then the customized rule's `is_customized` value should be true
+And ruleSource should be "external"
+And the Modified badge should be present in the table row
+```
+
+#### **Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one non-customized prebuilt rule
+And that rules have upgrades
+When a user navigates to the rule updates table
+Then the non-customized rule's `is_customized` value should be false
+And ruleSource should be "external"
+And the Modified badge should NOT be present in the table row
+```
+
+#### **Scenario: User should be able to see only customized rules in the rule updates table**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one customized prebuilt rule
+And that rules have upgrades
 When a user navigates to the rule updates page
-And sorts by Unmodified in the filter drop-down
-Then the table should only display unmodified rules
-And the table rows should NOT have the Modified badge present
+And use filter to show customized rules
+Then the table should display only customized rules
+And all shown table rows should have the Modified badge present
+```
+
+#### **Scenario: User should be able to filter by non-customized rules on the rule updates table**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one customized prebuilt rule
+And that rules have upgrades
+When a user navigates to the rule updates page
+And use filter to show non-customized rules
+Then the table should display only non-customized rules
+And the all shown table rows should NOT have the Modified badge present
 ```
