@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import type { State } from '../../state';
-
-export const isCelReviewStepReadyToComplete = ({ isGenerating, celInputResult }: State) =>
-  isGenerating === false && celInputResult != null;
+export * from './microsoft_defender_endpoint_agent_status_client';
