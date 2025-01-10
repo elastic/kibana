@@ -11,11 +11,10 @@ import type { IndicesUpdateAliasesAction } from '@elastic/elasticsearch/lib/api/
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
 /**
- * remove aliases from indices that would be migrated to data stream
- * index can be migrated only if it has one alias(which is the one that data stream is going to be created)
- * so, we have to remove the rest of aliases
+ * Removes all but the specified alias from the concrete index(es) specified by said alias. Necessary when migrating an index to a data stream, as that index may only have one alias (name of data stream that going to be created)
+
+ * @param alias The name of the alias to be preserved
  * @param esClient
- * @param alias
  */
 export const removeAliases = async (
   esClient: ElasticsearchClient,
