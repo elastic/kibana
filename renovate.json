@@ -67,7 +67,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
