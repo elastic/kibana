@@ -11,7 +11,8 @@ import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
 import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
 import { changeUserCollapsedWidthAction, changeUserExpandedWidthAction } from '../store/actions';
 import {
-  selectDefaultWidths,
+  selectDefaultOverlayWidths,
+  selectDefaultPushWidths,
   selectPushVsOverlay,
   selectUserFlyoutWidths,
   useDispatch,
@@ -102,7 +103,8 @@ export const Container: React.FC<ContainerProps> = memo(
     const flyoutType = flyoutCustomProps?.pushVsOverlay?.disabled ? 'overlay' : type;
 
     const flyoutWidths = useSelector(selectUserFlyoutWidths);
-    const defaultWidths = useSelector(selectDefaultWidths);
+    const defaultOverlayWidths = useSelector(selectDefaultOverlayWidths);
+    const defaultPushWidths = useSelector(selectDefaultPushWidths);
 
     // retrieves the sections to be displayed
     const {
@@ -152,6 +154,7 @@ export const Container: React.FC<ContainerProps> = memo(
     );
 
     const flyoutWidth = useMemo(() => {
+      const defaultWidths = type === 'push' ? defaultPushWidths : defaultOverlayWidths;
       if (showCollapsed) {
         return flyoutWidths.collapsedWidth || defaultWidths.rightWidth;
       }
@@ -159,12 +162,13 @@ export const Container: React.FC<ContainerProps> = memo(
         return flyoutWidths.expandedWidth || defaultWidths.rightWidth + defaultWidths.leftWidth;
       }
     }, [
+      type,
+      defaultPushWidths,
+      defaultOverlayWidths,
       showCollapsed,
       showExpanded,
       flyoutWidths.collapsedWidth,
       flyoutWidths.expandedWidth,
-      defaultWidths.rightWidth,
-      defaultWidths.leftWidth,
     ]);
 
     // callback function called when user changes the flyout's width

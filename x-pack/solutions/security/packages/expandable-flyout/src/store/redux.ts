@@ -12,10 +12,10 @@ import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import { initialState, State } from './state';
 import {
-  savePushVsOverlayToLocalStorageMiddleware,
-  saveUserSectionWidthsToLocalStorageMiddleware,
-  saveUserFlyoutWidthsToLocalStorageMiddleware,
   clearAllUserWidthsFromLocalStorageMiddleware,
+  savePushVsOverlayToLocalStorageMiddleware,
+  saveUserFlyoutWidthsToLocalStorageMiddleware,
+  saveUserSectionWidthsToLocalStorageMiddleware,
 } from './middlewares';
 
 export const store = configureStore({
@@ -51,7 +51,14 @@ export const selectHistoryById = (id: string) =>
 
 const uiSelector = createSelector(stateSelector, (state) => state.ui);
 export const selectPushVsOverlay = createSelector(uiSelector, (state) => state.pushVsOverlay);
-export const selectDefaultWidths = createSelector(uiSelector, (state) => state.defaultWidths);
+export const selectDefaultOverlayWidths = createSelector(
+  uiSelector,
+  (state) => state.defaultOverlayWidths
+);
+export const selectDefaultPushWidths = createSelector(
+  uiSelector,
+  (state) => state.defaultPushWidths
+);
 export const selectUserFlyoutWidths = createSelector(uiSelector, (state) => state.userFlyoutWidths);
 export const selectUserSectionWidths = createSelector(
   uiSelector,

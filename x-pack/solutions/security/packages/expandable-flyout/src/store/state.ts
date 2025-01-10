@@ -101,9 +101,13 @@ export interface UiState {
    */
   pushVsOverlay: 'push' | 'overlay';
   /**
-   * Default widths for the flyout
+   * Default widths for the flyout in overlay mode
    */
-  defaultWidths: DefaultWidthsState;
+  defaultOverlayWidths: DefaultWidthsState;
+  /**
+   * Default widths for the flyout in push mode
+   */
+  defaultPushWidths: DefaultWidthsState;
   /**
    * User resized widths for the flyout
    */
@@ -116,7 +120,8 @@ export interface UiState {
 
 export const initialUiState: UiState = {
   pushVsOverlay: 'overlay',
-  defaultWidths: {} as DefaultWidthsState,
+  defaultOverlayWidths: {} as DefaultWidthsState,
+  defaultPushWidths: {} as DefaultWidthsState,
   userFlyoutWidths: {},
   userSectionWidths: {} as UserSectionWidthsState,
 };
