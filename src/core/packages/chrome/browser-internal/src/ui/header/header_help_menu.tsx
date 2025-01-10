@@ -22,8 +22,9 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiPopoverFooter,
+  withEuiTheme,
+  WithEuiThemeProps,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -33,6 +34,7 @@ import type {
 import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
+import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
@@ -91,10 +93,10 @@ interface State {
   defaultContentLinks: ChromeHelpMenuLink[];
 }
 
-export class HeaderHelpMenu extends Component<Props, State> {
+class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
   private subscription?: Subscription;
 
-  constructor(props: Props) {
+  constructor(props: Props & WithEuiThemeProps) {
     super(props);
 
     this.state = {
@@ -135,11 +137,15 @@ export class HeaderHelpMenu extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaVersion } = this.props;
+    const { kibanaVersion, theme } = this.props;
 
     const defaultContent = this.renderDefaultContent();
     const globalCustomContent = this.renderGlobalCustomContent();
     const customContent = this.renderCustomContent();
+
+    const euiThemePadding = css`
+      padding: ${theme.euiTheme.size.s};
+    `;
 
     const button = (
       <EuiHeaderSectionItemButton
@@ -195,7 +201,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           {defaultContent}
           {customContent && (
             <>
-              <EuiPopoverFooter css={{ padding: euiThemeVars.euiSizeS }} />
+              <EuiPopoverFooter css={euiThemePadding} />
               {customContent}
             </>
           )}
@@ -397,3 +403,5 @@ const createCustomLink = (
     </Fragment>
   );
 };
+
+export const HeaderHelpMenu = withEuiTheme(HelpMenu);
