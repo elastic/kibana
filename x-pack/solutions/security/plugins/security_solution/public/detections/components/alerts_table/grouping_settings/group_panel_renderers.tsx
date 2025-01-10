@@ -83,9 +83,6 @@ const RuleNameGroupContent = React.memo<{
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" size="m" />
-        </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
