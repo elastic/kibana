@@ -218,13 +218,18 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                     <EuiFlexItem key={`snooze-${schedule.id}`}>
                       <EuiButton
                         size="s"
-                        color={isActive ? 'accent' : 'subdued'}
                         onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
                         iconType={isActive ? 'bellSlash' : 'calendar'}
                         iconSide="left"
                         style={{
                           paddingLeft: '9px',
                           paddingRight: '9px',
+                          color: isActive
+                            ? euiTheme.colors.textAccent
+                            : euiTheme.colors.textSubdued,
+                          backgroundColor: isActive
+                            ? euiTheme.colors.backgroundLightAccent
+                            : euiTheme.colors.body,
                         }}
                         fullWidth={true}
                       >
