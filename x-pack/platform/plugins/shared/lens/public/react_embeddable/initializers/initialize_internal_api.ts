@@ -53,6 +53,7 @@ export function initializeInternalApi(
   // the isNewPanel won't be serialized so it will be always false after the edit panel closes applying the changes
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
@@ -78,6 +79,7 @@ export function initializeInternalApi(
     renderCount$,
     isNewlyCreated$,
     dataViews: dataViews$,
+    blockingError$,
     messages$,
     validationMessages$,
     dispatchError: () => {
@@ -103,6 +105,7 @@ export function initializeInternalApi(
       messages$.next([]);
       validationMessages$.next([]);
     },
+    updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();
