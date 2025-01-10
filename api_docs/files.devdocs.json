@@ -5979,7 +5979,7 @@
           },
           "<Meta>"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5992,7 +5992,7 @@
             "description": [
               "\nUnique file ID."
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6005,7 +6005,7 @@
             "description": [
               "\nISO string of when this file was created"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6018,7 +6018,7 @@
             "description": [
               "\nISO string of when the file was updated"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6033,7 +6033,7 @@
             "description": [
               "\nFile name.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6049,7 +6049,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6065,7 +6065,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6083,7 +6083,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6099,7 +6099,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6115,7 +6115,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6130,7 +6130,7 @@
             "description": [
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6146,7 +6146,7 @@
             "signature": [
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6162,7 +6162,7 @@
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6178,7 +6178,7 @@
             "signature": [
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6323,7 +6323,7 @@
             "text": "FileKindBase"
           }
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6341,7 +6341,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6357,7 +6357,7 @@
             "signature": [
               "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6373,7 +6373,7 @@
         "description": [
           "\nAttributes of a file that represent a serialised version of the file."
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6386,7 +6386,7 @@
             "description": [
               "\nUnique ID share instance"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6399,7 +6399,7 @@
             "description": [
               "\nISO timestamp the share was created"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6412,7 +6412,7 @@
             "description": [
               "\nUnix timestamp (in milliseconds) of when this share expires"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6428,7 +6428,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6441,7 +6441,7 @@
             "description": [
               "\nThe ID of the file this share is linked to"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6670,7 +6670,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6721,7 +6721,7 @@
         "signature": [
           "\"none\" | \"br\" | \"gzip\" | \"deflate\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6754,7 +6754,7 @@
           },
           " & { FileKind: string; Meta?: Meta | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6797,7 +6797,7 @@
         "signature": [
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6823,7 +6823,7 @@
           },
           " & { token: string; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6838,7 +6838,7 @@
         "signature": [
           "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

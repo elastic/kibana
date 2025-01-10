@@ -9,7 +9,7 @@
         "tags": [],
         "label": "UrlForwardingPlugin",
         "description": [],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,7 +33,7 @@
               },
               "[]; }>) => { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,7 +56,7 @@
                   },
                   "[]; }>"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,7 +84,7 @@
               },
               "[]; }"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -98,7 +98,7 @@
                 "signature": [
                   "CoreStart"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -119,7 +119,7 @@
         "tags": [],
         "label": "ForwardDefinition",
         "description": [],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +130,7 @@
             "tags": [],
             "label": "legacyAppId",
             "description": [],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -141,7 +141,7 @@
             "tags": [],
             "label": "newAppId",
             "description": [],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -155,7 +155,7 @@
             "signature": [
               "(legacyPath: string) => string"
             ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
+            "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -169,7 +169,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
+                "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,7 +193,7 @@
         "signature": [
           "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
         ],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -216,7 +216,7 @@
           },
           "[]; }"
         ],
-        "path": "src/plugins/url_forwarding/public/plugin.ts",
+        "path": "src/platform/plugins/private/url_forwarding/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

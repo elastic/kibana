@@ -52,6 +52,8 @@ export const grokProcessingDefinitionSchema = z.object({
     field: z.string(),
     patterns: z.array(z.string()),
     pattern_definitions: z.optional(z.record(z.string())),
+    ignore_failure: z.optional(z.boolean()),
+    ignore_missing: z.optional(z.boolean()),
   }),
 });
 
@@ -61,10 +63,13 @@ export const dissectProcessingDefinitionSchema = z.object({
   dissect: z.object({
     field: z.string(),
     pattern: z.string(),
+    append_separator: z.optional(z.string()),
+    ignore_failure: z.optional(z.boolean()),
+    ignore_missing: z.optional(z.boolean()),
   }),
 });
 
-export type DissectProcssingDefinition = z.infer<typeof dissectProcessingDefinitionSchema>;
+export type DissectProcessingDefinition = z.infer<typeof dissectProcessingDefinitionSchema>;
 
 export const processingConfigSchema = z.union([
   grokProcessingDefinitionSchema,
@@ -78,8 +83,24 @@ export const processingDefinitionSchema = z.object({
 
 export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
 
+export type ProcessorType = ProcessingDefinition['config'] extends infer U
+  ? U extends { [key: string]: any }
+    ? keyof U
+    : never
+  : never;
+
+export const FIELD_DEFINITION_TYPES = [
+  'keyword',
+  'match_only_text',
+  'long',
+  'double',
+  'date',
+  'boolean',
+  'ip',
+] as const;
+
 export const fieldDefinitionConfigSchema = z.object({
-  type: z.enum(['keyword', 'match_only_text', 'long', 'double', 'date', 'boolean', 'ip']),
+  type: z.enum(FIELD_DEFINITION_TYPES),
   format: z.optional(z.string()),
 });
 
@@ -116,3 +137,10 @@ export const elasticsearchAssetSchema = z.array(
 );
 
 export type ElasticsearchAsset = z.infer<typeof elasticsearchAssetSchema>;
+
+export const lifecycleSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('dlm'), data_retention: z.optional(z.string()) }),
+  z.object({ type: z.literal('ilm'), policy: z.string() }),
+]);
+
+export type StreamLifecycle = z.infer<typeof lifecycleSchema>;

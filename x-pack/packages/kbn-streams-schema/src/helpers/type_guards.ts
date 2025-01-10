@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ZodSchema } from '@kbn/zod';
+import { ZodSchema, custom } from '@kbn/zod';
 import {
   AndCondition,
   conditionSchema,
   dissectProcessingDefinitionSchema,
-  DissectProcssingDefinition,
+  DissectProcessingDefinition,
   FilterCondition,
   filterConditionSchema,
   GrokProcessingDefinition,
@@ -23,7 +23,7 @@ import {
   ReadStreamDefinition,
   readStreamDefinitonSchema,
   StreamDefinition,
-  streamDefintionSchema,
+  streamDefinitionSchema,
   WiredReadStreamDefinition,
   wiredReadStreamDefinitonSchema,
   WiredStreamDefinition,
@@ -60,7 +60,7 @@ export function isIngestReadStream(subject: any): subject is IngestReadStreamDef
 }
 
 export function isStream(subject: any): subject is StreamDefinition {
-  return isSchema(streamDefintionSchema, subject);
+  return isSchema(streamDefinitionSchema, subject);
 }
 
 export function isIngestStream(subject: StreamDefinition): subject is IngestStreamDefinition {
@@ -69,6 +69,16 @@ export function isIngestStream(subject: StreamDefinition): subject is IngestStre
 
 export function isWiredStream(subject: StreamDefinition): subject is WiredStreamDefinition {
   return isSchema(wiredStreamDefinitonSchema, subject);
+}
+
+const rootStreamSchema = custom<'RootStreamSchema'>((val) => {
+  return val?.name?.split('.').length === 1;
+});
+
+export function isRootStream(subject: any) {
+  return (
+    (isWiredStream(subject) || isWiredReadStream(subject)) && isSchema(rootStreamSchema, subject)
+  );
 }
 
 export function isWiredStreamConfig(subject: any): subject is WiredStreamConfigDefinition {
@@ -87,7 +97,7 @@ export function isGrokProcessor(subject: any): subject is GrokProcessingDefiniti
   return isSchema(grokProcessingDefinitionSchema, subject);
 }
 
-export function isDissectProcessor(subject: any): subject is DissectProcssingDefinition {
+export function isDissectProcessor(subject: any): subject is DissectProcessingDefinition {
   return isSchema(dissectProcessingDefinitionSchema, subject);
 }
 

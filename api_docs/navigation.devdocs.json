@@ -88,7 +88,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>, deps: ",
+              "<{}, unknown>, deps: ",
               "NavigationPublicSetupDependencies",
               ") => ",
               {
@@ -112,7 +112,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
                 "deprecated": false,
