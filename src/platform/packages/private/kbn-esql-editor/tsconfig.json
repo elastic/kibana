@@ -33,6 +33,7 @@
     "@kbn/content-management-favorites-common",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-table-persist",
+    "@kbn/esql",
   ],
   "exclude": [
     "target/**/*",
