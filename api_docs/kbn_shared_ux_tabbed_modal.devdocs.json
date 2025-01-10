@@ -33,7 +33,7 @@
           "ITabbedModalInner",
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +50,7 @@
               "<T>, \"children\"> & ",
               "ITabbedModalInner"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,7 +82,7 @@
           "ITabDeclaration",
           "<S>"
         ],
-        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,7 +126,7 @@
               "IDispatchFunction",
               "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -143,7 +143,7 @@
                   "IDispatchFunction",
                   "; }"
                 ],
-                "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+                "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -159,7 +159,7 @@
             "signature": [
               "IModalTabActionBtn<S> | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

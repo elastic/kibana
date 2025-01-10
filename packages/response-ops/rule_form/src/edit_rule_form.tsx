@@ -45,7 +45,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     onCancel,
     onSubmit,
   } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
+  const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
@@ -63,7 +63,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         ...(message.details && {
           text: toMountPoint(
             <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
-            { i18n, theme }
+            deps
           ),
         }),
       });
@@ -101,7 +101,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           schedule: newFormData.schedule,
           params: newFormData.params,
           actions: newFormData.actions,
-          notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
         },
@@ -162,6 +161,24 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
+  const actionsWithFrequency = fetchedFormData.actions.map((action) => {
+    const isSystemAction = connectorTypes.some((connectorType) => {
+      return connectorType.id === action.actionTypeId && connectorType.isSystemActionType;
+    });
+
+    if (!isSystemAction && fetchedFormData.notifyWhen) {
+      return {
+        ...action,
+        frequency: {
+          notifyWhen: fetchedFormData.notifyWhen ?? 'onActionGroupChange',
+          throttle: fetchedFormData.throttle ?? null,
+          summary: false,
+        },
+      };
+    }
+    return action;
+  });
+
   return (
     <div data-test-subj="editRuleForm">
       <RuleFormStateProvider
@@ -177,6 +194,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
               actions: fetchedFormData.actions,
             }),
             ...fetchedFormData,
+            actions: actionsWithFrequency,
           },
           id,
           plugins,

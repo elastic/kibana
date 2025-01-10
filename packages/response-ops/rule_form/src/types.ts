@@ -16,6 +16,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -46,6 +47,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   actions: RuleUiAction[];
   alertDelay?: Rule<Params>['alertDelay'];
   notifyWhen?: Rule<Params>['notifyWhen'];
+  throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
 }
@@ -54,6 +56,7 @@ export interface RuleFormPlugins {
   http: HttpStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   application: ApplicationStart;
   notifications: NotificationsStart;
   charts: ChartsPluginSetup;

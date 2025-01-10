@@ -14,23 +14,16 @@ export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {
     mappings: {
       dynamic: 'strict',
       properties: {
-        processing: {
-          type: 'object',
-          enabled: false,
-        },
-        fields: {
-          type: 'object',
-          enabled: false,
-        },
-        children: {
-          type: 'object',
-          enabled: false,
-        },
-        id: {
+        name: {
           type: 'keyword',
         },
-        managed: {
-          type: 'boolean',
+        stream: {
+          properties: {
+            ingest: {
+              type: 'object',
+              enabled: false,
+            },
+          },
         },
       },
     },
