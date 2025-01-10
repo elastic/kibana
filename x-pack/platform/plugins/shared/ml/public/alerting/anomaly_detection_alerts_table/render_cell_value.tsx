@@ -16,6 +16,7 @@ import { EuiHealth } from '@elastic/eui';
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
+import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import {
   alertFieldNameMap,
   ALERT_ANOMALY_SCORE,
@@ -45,8 +46,10 @@ const getAlertFieldValue = (alert: Alert, fieldName: string) => {
 export const AlertsTableCellValue: GetAlertsTableProp<'renderCellValue'> = ({
   columnId,
   alert,
-  fieldFormats,
 }) => {
+  const {
+    services: { fieldFormats },
+  } = useAlertsTableContext();
   const alertValueFormatter = getAlertFormatters(fieldFormats);
   const value = getAlertFieldValue(alert, columnId);
 

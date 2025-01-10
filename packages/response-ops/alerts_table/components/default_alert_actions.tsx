@@ -15,6 +15,7 @@ import type { AdditionalContext, AlertActionsProps } from '../types';
 import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { MuteAlertAction } from './mute_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 /**
  * Common alerts table row actions
@@ -27,7 +28,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
       http,
       notifications: { toasts },
     },
-  } = props;
+  } = useAlertsTableContext();
   const { authorizedToCreateAnyRules } = useLoadRuleTypesQuery({
     filteredRuleTypes: [],
     http,

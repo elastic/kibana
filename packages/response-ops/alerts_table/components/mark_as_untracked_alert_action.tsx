@@ -14,6 +14,7 @@ import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { typedMemo } from '../utils/react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 /**
  * Alerts table row action to mark the selected alert as untracked
@@ -23,8 +24,10 @@ export const MarkAsUntrackedAlertAction = typedMemo(
     alert,
     refresh,
     onActionExecuted,
-    services: { http, notifications },
   }: AlertActionsProps<AC>) => {
+    const {
+      services: { http, notifications },
+    } = useAlertsTableContext();
     const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 

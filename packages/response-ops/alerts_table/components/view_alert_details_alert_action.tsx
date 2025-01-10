@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { typedMemo } from '../utils/react';
 
@@ -25,12 +26,14 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
-    services: {
-      http: {
-        basePath: { prepend },
-      },
-    },
   }: AlertActionsProps<AC>) => {
+    const {
+      services: {
+        http: {
+          basePath: { prepend },
+        },
+      },
+    } = useAlertsTableContext();
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
     const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;

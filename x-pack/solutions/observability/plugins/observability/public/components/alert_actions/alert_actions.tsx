@@ -22,6 +22,7 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
+import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { EventNonEcsData } from '../../../common/typings';
 import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -64,8 +65,8 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   renderFlyoutHeader,
   renderFlyoutBody,
   renderFlyoutFooter,
-  services,
 }) => {
+  const { services } = useAlertsTableContext();
   const {
     http: {
       basePath: { prepend },

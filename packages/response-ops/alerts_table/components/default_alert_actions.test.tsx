@@ -10,10 +10,11 @@
 import React from 'react';
 import { DefaultAlertActions } from './default_alert_actions';
 import { render, screen } from '@testing-library/react';
-import type { AlertActionsProps } from '../types';
+import { AdditionalContext, AlertActionsProps, RenderContext } from '../types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
+import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
@@ -52,17 +53,26 @@ const notifications = notificationServiceMock.createStartContract();
 const props = createPartialObjectMock<AlertActionsProps>({
   alert: {},
   refresh: jest.fn(),
+});
+
+const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   services: {
     http,
     notifications,
   },
 });
 
+const TestComponent = (_props: AlertActionsProps) => (
+  <AlertsTableContextProvider value={context}>
+    <DefaultAlertActions {..._props} />
+  </AlertsTableContextProvider>
+);
+
 describe('DefaultAlertActions', () => {
   it('should show "Mute" and "Marked as untracked" option', async () => {
     useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: true });
 
-    render(<DefaultAlertActions {...props} />);
+    render(<TestComponent {...props} />);
 
     expect(await screen.findByText('MuteAlertAction')).toBeInTheDocument();
     expect(await screen.findByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
@@ -71,7 +81,7 @@ describe('DefaultAlertActions', () => {
   it('should hide "Mute" and "Marked as untracked" option', async () => {
     useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: false });
 
-    render(<DefaultAlertActions {...props} />);
+    render(<TestComponent {...props} />);
 
     expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
     expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import {
   ALERT_DURATION,
   ALERT_RULE_CONSUMER,
@@ -21,16 +21,23 @@ import { DefaultCellValue } from './default_cell_value';
 import { createPartialObjectMock } from '../utils/test';
 import { CellComponentProps } from '../types';
 import { mockRenderContext } from '../mocks/context.mock';
+import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 const props = createPartialObjectMock<CellComponentProps>({
   ...mockRenderContext,
   alert: mockRenderContext.alerts[0],
 });
 
+const TestComponent = (_props: ComponentProps<typeof DefaultCellValue>) => (
+  <AlertsTableContextProvider value={mockRenderContext}>
+    <DefaultCellValue {..._props} />
+  </AlertsTableContextProvider>
+);
+
 describe('DefaultCellValue', () => {
   it.each([TIMESTAMP, ALERT_START])('should format date fields', (columnId) => {
-    render(<DefaultCellValue {...props} columnId={columnId} />);
-    expect(props.services.fieldFormats.deserialize).toHaveBeenCalledWith(
+    render(<TestComponent {...props} columnId={columnId} />);
+    expect(mockRenderContext.services.fieldFormats.deserialize).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'date',
       })
@@ -38,13 +45,13 @@ describe('DefaultCellValue', () => {
   });
 
   it('should render the rule name as a link', () => {
-    render(<DefaultCellValue {...props} columnId={ALERT_RULE_NAME} />);
+    render(<TestComponent {...props} columnId={ALERT_RULE_NAME} />);
     expect(screen.queryByRole('link')).toBeInTheDocument();
   });
 
   it('should render the alert duration in milliseconds', () => {
-    render(<DefaultCellValue {...props} columnId={ALERT_DURATION} />);
-    expect(props.services.fieldFormats.deserialize).toHaveBeenCalledWith({
+    render(<TestComponent {...props} columnId={ALERT_DURATION} />);
+    expect(mockRenderContext.services.fieldFormats.deserialize).toHaveBeenCalledWith({
       id: 'duration',
       params: {
         inputFormat: 'microseconds',
@@ -56,7 +63,7 @@ describe('DefaultCellValue', () => {
   describe('in the rule consumer column', () => {
     it('should show "observability" for any observability producer', () => {
       render(
-        <DefaultCellValue
+        <TestComponent
           {...props}
           columnId={ALERT_RULE_CONSUMER}
           alert={{
@@ -72,7 +79,7 @@ describe('DefaultCellValue', () => {
       'should show the producer when the consumer is %s',
       (consumer) => {
         render(
-          <DefaultCellValue
+          <TestComponent
             {...props}
             columnId={ALERT_RULE_CONSUMER}
             alert={{
@@ -89,7 +96,7 @@ describe('DefaultCellValue', () => {
 
   it('else should show the consumer', () => {
     render(
-      <DefaultCellValue
+      <TestComponent
         {...props}
         columnId={ALERT_RULE_CONSUMER}
         alert={{

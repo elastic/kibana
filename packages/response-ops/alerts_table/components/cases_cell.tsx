@@ -12,6 +12,7 @@ import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { CellComponent } from '../types';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import type { Case } from '../apis/bulk_get_cases';
@@ -29,13 +30,10 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
 });
 
 export const CasesCell: CellComponent = memo((props) => {
+  const { isLoading, alert, cases, caseAppId } = props;
   const {
-    isLoading,
-    alert,
-    cases,
-    caseAppId,
     services: { application },
-  } = props;
+  } = useAlertsTableContext();
   const { navigateToCaseView } = useCaseViewNavigation(application, caseAppId);
 
   const caseIds = (alert && (alert[ALERT_CASE_IDS] as string[])) ?? [];

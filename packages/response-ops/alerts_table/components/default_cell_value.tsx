@@ -23,15 +23,15 @@ import { EuiBadge, EuiLink } from '@elastic/eui';
 import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const DefaultCellValue = ({
   alert,
   columnId,
-  services: { fieldFormats, http },
-}: Pick<
-  ComponentProps<GetAlertsTableProp<'renderCellValue'>>,
-  'alert' | 'columnId' | 'services'
->) => {
+}: Pick<ComponentProps<GetAlertsTableProp<'renderCellValue'>>, 'alert' | 'columnId'>) => {
+  const {
+    services: { fieldFormats, http },
+  } = useAlertsTableContext();
   const formatField = useFieldFormatter(fieldFormats);
   const rawValue = alert[columnId]?.[0];
   const value = getRenderValue(rawValue);

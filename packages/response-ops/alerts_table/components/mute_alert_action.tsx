@@ -17,6 +17,7 @@ import type { AdditionalContext, AlertActionsProps } from '../types';
 import { MUTE, UNMUTE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { typedMemo } from '../utils/react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
@@ -26,8 +27,10 @@ export const MuteAlertAction = typedMemo(
     alert,
     refresh,
     onActionExecuted,
-    services: { http, notifications },
   }: AlertActionsProps<AC>) => {
+    const {
+      services: { http, notifications },
+    } = useAlertsTableContext();
     const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
     const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
     const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });

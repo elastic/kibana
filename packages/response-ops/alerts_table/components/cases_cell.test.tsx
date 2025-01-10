@@ -14,11 +14,12 @@ import { Alert } from '@kbn/alerting-types';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CasesCell } from './cases_cell';
-import { CellComponentProps } from '../types';
+import { AdditionalContext, CellComponentProps, RenderContext } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import { createPartialObjectMock } from '../utils/test';
+import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 jest.mock('../hooks/use_case_view_navigation');
 
@@ -38,6 +39,9 @@ const props = createPartialObjectMock<CellComponentProps>({
   maintenanceWindows: maintenanceWindowsMap,
   columnId: 'kibana.alert.case_ids',
   showAlertStatusWithFlapping: false,
+});
+
+const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   services: {
     application: applicationServiceMock.createStartContract(),
   },
@@ -48,7 +52,9 @@ useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
 
 const TestComponent = (_props: CellComponentProps) => (
   <IntlProvider locale="en">
-    <CasesCell {..._props} />
+    <AlertsTableContextProvider value={context}>
+      <CasesCell {..._props} />
+    </AlertsTableContextProvider>
   </IntlProvider>
 );
 
@@ -65,7 +71,7 @@ describe('CasesCell', () => {
 
   it('renders multiple cases correctly', async () => {
     render(
-      <CasesCell
+      <TestComponent
         {...props}
         alert={{ ...alert, 'kibana.alert.case_ids': ['test-id', 'test-id-2'] }}
       />
