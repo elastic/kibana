@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { buildIngestPipeline } from '@kbn/asset-inventory-plugin/server/lib/ingest_pipelines';
+import { buildIngestPipeline } from '@kbn/security-solution-plugin/server/lib/asset_inventory/ingest_pipelines';
 import { applyIngestProcessorToDoc } from './utils/ingest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
