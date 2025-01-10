@@ -22,6 +22,8 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+  AGENTLESS_AGENT_POLICY_MONITORING,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -127,12 +129,12 @@ export function useSetupTechnology({
   ) {
     const nextNewAgentlessPolicy = {
       ...generateNewAgentPolicyWithDefaults({
-        inactivity_timeout: 3600,
+        inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
-        monitoring_enabled: ['logs', 'metrics'],
+        monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
       }),
       name: agentlessPolicyName,
-      ...getAdditionalAgentlessPolicyInfo(packageInfo),
+      global_data_tags: getGlobaDataTags(packageInfo),
     };
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
@@ -144,7 +146,7 @@ export function useSetupTechnology({
 
   if (
     !isEditPage &&
-    selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+    selectedSetupTechnology === SetupTechnology.AGENT_BASED &&
     (currentAgentPolicy.supports_agentless || packagePolicy.supports_agentless)
   ) {
     const nextNewAgentlessPolicy = {
@@ -157,7 +159,6 @@ export function useSetupTechnology({
     updatePackagePolicy({
       supports_agentless: false,
     });
-    // }
   }
 
   return {
@@ -173,7 +174,7 @@ const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
   return false;
 };
 
-const getAdditionalAgentlessPolicyInfo = (packageInfo?: PackageInfo) => {
+const getGlobaDataTags = (packageInfo?: PackageInfo) => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
@@ -194,22 +195,19 @@ const getAdditionalAgentlessPolicyInfo = (packageInfo?: PackageInfo) => {
   ) {
     return undefined;
   }
-  return {
-    global_data_tags: agentlessInfo
-      ? [
-          {
-            name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-            value: agentlessInfo.organization,
-          },
-          {
-            name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-            value: agentlessInfo.division,
-          },
-          {
-            name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-            value: agentlessInfo.team,
-          },
-        ]
-      : [],
-  };
+
+  return [
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+      value: agentlessInfo.organization,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+      value: agentlessInfo.division,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+      value: agentlessInfo.team,
+    },
+  ];
 };
