@@ -6,9 +6,7 @@
   container: ruleForm / inline-size;
 }
 
-/* TODO: Remove stylelint disable once we upgrade stylelint past 14.12.0 */
-/* https://github.com/stylelint/stylelint/issues/6304 */
-@container (max-width: 768px) { /* stylelint-disable-line */
+@container (max-width: 768px) {
   .euiDescribedFormGroup {
     flex-direction: column;
   }
