@@ -49,6 +49,13 @@ export async function findGaps(context: RulesClientContext, params: FindGapsPara
       logger: context.logger,
     });
 
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.FIND_GAPS,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.name },
+      })
+    );
+
     return gaps;
   } catch (err) {
     const errorMessage = `Failed to find gaps`;

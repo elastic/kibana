@@ -84,12 +84,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       })
     );
 
-    const backfill = await context.unsecuredSavedObjectsClient.get<AdHocRunSO>(
-      AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      id
-    );
-
-    const backfillResult = transformAdHocRunToBackfillResult(backfill);
+    const backfillResult = transformAdHocRunToBackfillResult(result);
 
     // delete the saved object
     const removeResult = await context.unsecuredSavedObjectsClient.delete(
