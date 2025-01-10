@@ -44,7 +44,7 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky; //if the page is wide enough, it should be stick, otherwise it should be relative
+  position: sticky;
   top: 120px;
 `;
 
