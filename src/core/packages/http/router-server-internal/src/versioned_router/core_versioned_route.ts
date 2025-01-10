@@ -220,7 +220,7 @@ export class CoreVersionedRoute implements VersionedRoute {
           warning: getWarningHeaderMessageFromRouteDeprecation(
             handler.options.options.deprecated,
             // TODO: put the actual version here
-            '9.0.0'
+            '9.32.0'
           ),
         },
         response

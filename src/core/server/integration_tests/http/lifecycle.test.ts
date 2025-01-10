@@ -1509,7 +1509,6 @@ describe('runs with default preResponse handlers', () => {
 });
 
 describe('runs with default preResponse deprecation handlers', () => {
-  // TODO: add tests to make sure we dont overwrite the warning header value
   const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
   const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
 
@@ -1559,6 +1558,33 @@ describe('runs with default preResponse deprecation handlers', () => {
     expect(response.header.warning).toBeUndefined();
   });
 
+  it('should not overwrite the warning header if it was already set', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    const expectedWarningHeader = 'This should not get overwritten';
+
+    router.get(
+      {
+        path: '/deprecated',
+        validate: false,
+        options: {
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'deprecate' },
+            severity: 'warning',
+            message: deprecationMessage,
+          },
+        },
+      },
+      (context, req, res) => res.ok({ headers: { warning: expectedWarningHeader } })
+    );
+
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
+    expect(response.header.warning).toMatch(expectedWarningHeader);
+  });
+
   it('should return warning header in deprecated v1 but not in non deprecated v2', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -1604,6 +1630,62 @@ describe('runs with default preResponse deprecation handlers', () => {
 
     expect(response.body.v).toMatch('1');
     expect(response.header.warning).toMatch(warningString);
+
+    response = await supertest(innerServer.listener)
+      .get('/test')
+      .set('Elastic-Api-Version', '2')
+      .expect(200);
+
+    expect(response.body.v).toMatch('2');
+    expect(response.header.warning).toBeUndefined();
+  });
+
+  it('should not overwrite the warning header if it was already set (versioned)', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    const expectedWarningHeader = 'This should not get overwritten';
+
+    router.versioned
+      .get({
+        access: 'internal',
+        path: '/test',
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          options: {
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'deprecate' },
+              severity: 'warning',
+              message: deprecationMessage,
+            },
+          },
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '1' }, headers: { warning: expectedWarningHeader } });
+        }
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '2' } });
+        }
+      );
+
+    await server.start();
+
+    let response = await supertest(innerServer.listener)
+      .get('/test')
+      .set('Elastic-Api-Version', '1')
+      .expect(200);
+
+    expect(response.body.v).toMatch('1');
+    expect(response.header.warning).toMatch(expectedWarningHeader);
 
     response = await supertest(innerServer.listener)
       .get('/test')
