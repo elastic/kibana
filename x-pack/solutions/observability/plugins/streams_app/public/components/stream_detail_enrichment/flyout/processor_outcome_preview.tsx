@@ -413,7 +413,7 @@ const OutcomePreviewTable = ({
                 { defaultMessage: 'The processor did not run correctly.' }
               )}
             </p>
-            {Boolean(error.body) && <p>{error.body.message}</p>}
+            {error.body?.message ? <p>{error.body.message}</p> : null}
           </>
         }
       />
