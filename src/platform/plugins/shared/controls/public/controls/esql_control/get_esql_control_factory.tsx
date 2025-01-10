@@ -93,7 +93,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             };
           },
           clearSelections: () => {
-            if (selections.selectedOptions$.getValue()?.length) selections.setSelectedOptions([]);
+            // do nothing, not allowed for now;
           },
           clearVariables: () => {
             esqlVariablesService.removeVariable(initialState.variableName);
@@ -144,6 +144,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 selectedOptions={selectedOptions.map((option) => ({ label: option }))}
                 compressed
                 fullWidth
+                isClearable={false}
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);
