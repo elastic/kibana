@@ -66,6 +66,10 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: AgentPolicy): s
     return [outputType.Elasticsearch];
   }
 
+  if (agentPolicy.supports_agentless) {
+    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
   return Object.values(outputType);
 }
 
