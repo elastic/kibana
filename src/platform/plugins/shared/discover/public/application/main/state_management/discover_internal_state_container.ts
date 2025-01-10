@@ -28,6 +28,7 @@ export interface InternalState {
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
+  defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -46,10 +47,12 @@ export interface InternalStateTransitions {
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
+  setDefaultProfileAdHocDataViews: (
+    state: InternalState
+  ) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
     state: InternalState
   ) => (dataViews: DataView | DataView[]) => InternalState;
-  removeAdHocDataViewById: (state: InternalState) => (id: string) => InternalState;
   replaceAdHocDataViewWithId: (
     state: InternalState
   ) => (id: string, dataView: DataView) => InternalState;
@@ -90,6 +93,7 @@ export function getInternalStateContainer() {
       dataView: undefined,
       isDataViewLoading: false,
       adHocDataViews: [],
+      defaultProfileAdHocDataViewIds: [],
       savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
@@ -126,6 +130,22 @@ export function getInternalStateContainer() {
         ...prevState,
         adHocDataViews: newAdHocDataViewList,
       }),
+      setDefaultProfileAdHocDataViews:
+        (prevState: InternalState) => (defaultProfileAdHocDataViews: DataView[]) => {
+          const adHocDataViews = prevState.adHocDataViews
+            .filter((dataView) => !prevState.defaultProfileAdHocDataViewIds.includes(dataView.id!))
+            .concat(defaultProfileAdHocDataViews);
+
+          const defaultProfileAdHocDataViewIds = defaultProfileAdHocDataViews.map(
+            (dataView) => dataView.id!
+          );
+
+          return {
+            ...prevState,
+            adHocDataViews,
+            defaultProfileAdHocDataViewIds,
+          };
+        },
       appendAdHocDataViews:
         (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => {
           // check for already existing data views
@@ -142,17 +162,24 @@ export function getInternalStateContainer() {
             adHocDataViews: prevState.adHocDataViews.concat(dataViewsAdHoc),
           };
         },
-      removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
-        ...prevState,
-        adHocDataViews: prevState.adHocDataViews.filter((dataView) => dataView.id !== id),
-      }),
       replaceAdHocDataViewWithId:
-        (prevState: InternalState) => (prevId: string, newDataView: DataView) => ({
-          ...prevState,
-          adHocDataViews: prevState.adHocDataViews.map((dataView) =>
-            dataView.id === prevId ? newDataView : dataView
-          ),
-        }),
+        (prevState: InternalState) => (prevId: string, newDataView: DataView) => {
+          let defaultProfileAdHocDataViewIds = prevState.defaultProfileAdHocDataViewIds;
+
+          if (defaultProfileAdHocDataViewIds.includes(prevId)) {
+            defaultProfileAdHocDataViewIds = defaultProfileAdHocDataViewIds.map((id) =>
+              id === prevId ? newDataView.id! : id
+            );
+          }
+
+          return {
+            ...prevState,
+            adHocDataViews: prevState.adHocDataViews.map((dataView) =>
+              dataView.id === prevId ? newDataView : dataView
+            ),
+            defaultProfileAdHocDataViewIds,
+          };
+        },
       setExpandedDoc: (prevState: InternalState) => (expandedDoc: DataTableRecord | undefined) => ({
         ...prevState,
         expandedDoc,

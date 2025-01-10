@@ -22,28 +22,25 @@ export const useDefaultAdHocDataViews = ({
   rootProfileState: RootProfileState;
 }) => {
   const { dataViews } = useDiscoverServices();
-  const [prevProfileDataViewIds, setPrevProfileDataViewIds] = useState<string[]>([]);
+  const { internalState } = stateContainer;
 
   const initializeDataViews = useLatest(async () => {
     if (rootProfileState.rootProfileLoading) {
       return;
     }
 
+    // Clear the cache of old data views before creating
+    // the new ones to avoid cache hits on duplicate IDs
+    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+
     const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
     const profileDataViews = await Promise.all(
       profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
     );
-    const currentDataViews = stateContainer.internalState.getState().adHocDataViews;
-    const newDataViews = currentDataViews
-      .filter((dataView) => !prevProfileDataViewIds.includes(dataView.id!))
-      .concat(profileDataViews);
 
-    for (const prevId of prevProfileDataViewIds) {
-      dataViews.clearInstanceCache(prevId);
-    }
-
-    setPrevProfileDataViewIds(profileDataViews.map((dataView) => dataView.id!));
-    stateContainer.internalState.transitions.setAdHocDataViews(newDataViews);
+    internalState.transitions.setDefaultProfileAdHocDataViews(profileDataViews);
   });
 
   // This approach allows us to return a callback with a stable reference
@@ -51,7 +48,7 @@ export const useDefaultAdHocDataViews = ({
 
   // Make sure to clean up on unmount
   useUnmount(() => {
-    for (const prevId of prevProfileDataViewIds) {
+    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
   });
