@@ -141,7 +141,67 @@
             },
             "; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: unknown[]; }, undefined>; \"POST /api/streams/_disable\": ",
+            ", { documents: unknown[]; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{id}/dashboards/_bulk\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ operations: Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ index: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { index: { id: string; }; }, { index: { id: string; }; }>, Zod.ZodObject<{ delete: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { delete: { id: string; }; }, { delete: { id: string; }; }>]>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }, { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }; }, { path: { id: string; }; body: { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "BulkUpdateAssetsResponse",
+            ", undefined>; \"POST /api/streams/{id}/dashboards/_suggestions\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{id}/dashboards/_suggestions\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ query: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { query: string; }, { query: string; }>; body: Zod.ZodObject<{ tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { query: string; }; path: { id: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { id: string; }; body: { tags?: string[] | undefined; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "SuggestDashboardResponse",
+            ", undefined>; \"DELETE /api/streams/{id}/dashboards/{dashboardId}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"DELETE /api/streams/{id}/dashboards/{dashboardId}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; dashboardId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; dashboardId: string; }, { id: string; dashboardId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; dashboardId: string; }; }, { path: { id: string; dashboardId: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "UnlinkDashboardResponse",
+            ", undefined>; \"PUT /api/streams/{id}/dashboards/{dashboardId}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"PUT /api/streams/{id}/dashboards/{dashboardId}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; dashboardId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; dashboardId: string; }, { id: string; dashboardId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; dashboardId: string; }; }, { path: { id: string; dashboardId: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "LinkDashboardResponse",
+            ", undefined>; \"GET /api/streams/{id}/dashboards\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{id}/dashboards\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "ListDashboardsResponse",
+            ", undefined>; \"POST /api/streams/_disable\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -193,7 +253,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -209,7 +269,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
+            "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -575,7 +635,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+            "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -591,7 +651,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
+            "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -804,7 +864,67 @@
           },
           "; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: unknown[]; }, undefined>; \"POST /api/streams/_disable\": ",
+          ", { documents: unknown[]; }, undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{id}/dashboards/_bulk\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; body: Zod.ZodObject<{ operations: Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ index: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { index: { id: string; }; }, { index: { id: string; }; }>, Zod.ZodObject<{ delete: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { delete: { id: string; }; }, { delete: { id: string; }; }>]>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }, { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }; }, { path: { id: string; }; body: { operations: ({ index: { id: string; }; } | { delete: { id: string; }; })[]; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "BulkUpdateAssetsResponse",
+          ", undefined>; \"POST /api/streams/{id}/dashboards/_suggestions\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{id}/dashboards/_suggestions\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ query: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { query: string; }, { query: string; }>; body: Zod.ZodObject<{ tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { query: string; }; path: { id: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { id: string; }; body: { tags?: string[] | undefined; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "SuggestDashboardResponse",
+          ", undefined>; \"DELETE /api/streams/{id}/dashboards/{dashboardId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/streams/{id}/dashboards/{dashboardId}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; dashboardId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; dashboardId: string; }, { id: string; dashboardId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; dashboardId: string; }; }, { path: { id: string; dashboardId: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "UnlinkDashboardResponse",
+          ", undefined>; \"PUT /api/streams/{id}/dashboards/{dashboardId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /api/streams/{id}/dashboards/{dashboardId}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; dashboardId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; dashboardId: string; }, { id: string; dashboardId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; dashboardId: string; }; }, { path: { id: string; dashboardId: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "LinkDashboardResponse",
+          ", undefined>; \"GET /api/streams/{id}/dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{id}/dashboards\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "ListDashboardsResponse",
+          ", undefined>; \"POST /api/streams/_disable\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -856,7 +976,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -872,7 +992,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
+          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1238,7 +1358,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1254,7 +1374,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
+          "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, undefined>; \"POST /api/streams/{id}/_fork\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1373,9 +1493,77 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.Asset",
+        "type": "Interface",
+        "tags": [],
+        "label": "Asset",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.Asset",
+            "text": "Asset"
+          },
+          "<TAssetType> extends ",
+          "AssetLink",
+          "<TAssetType>"
+        ],
+        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.Asset.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.Asset.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.AssetType",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetType",
+        "description": [],
+        "signature": [
+          "\"rule\" | \"slo\" | \"dashboard\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/streams/common/assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

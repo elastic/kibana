@@ -1380,6 +1380,87 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.MessageContentImage",
+        "type": "Interface",
+        "tags": [],
+        "label": "MessageContentImage",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.MessageContentImage.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"image\""
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.MessageContentImage.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "{ data: string; mimeType: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.MessageContentText",
+        "type": "Interface",
+        "tags": [],
+        "label": "MessageContentText",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.MessageContentText.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"text\""
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.MessageContentText.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.OutputOptions",
         "type": "Interface",
         "tags": [],
@@ -2894,6 +2975,37 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.MessageContent",
+        "type": "Type",
+        "tags": [],
+        "label": "MessageContent",
+        "description": [],
+        "signature": [
+          "string | (",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.MessageContentImage",
+            "text": "MessageContentImage"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.MessageContentText",
+            "text": "MessageContentText"
+          },
+          ")[]"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.MessageOf",
         "type": "Type",
         "tags": [],
@@ -3401,7 +3513,15 @@
             "section": "def-common.MessageRole",
             "text": "MessageRole"
           },
-          ".User> & { content: string; }"
+          ".User> & { content: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.MessageContent",
+            "text": "MessageContent"
+          },
+          "; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,

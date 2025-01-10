@@ -61,13 +61,7 @@
                 "label": "uiSettings",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
+                  "IUiSettingsClient"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,

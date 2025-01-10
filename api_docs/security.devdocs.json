@@ -5918,7 +5918,7 @@
             },
             {
               "plugin": "savedObjectsTagging",
-              "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/request_handler_context.ts"
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
             },
             {
               "plugin": "ml",

@@ -1369,7 +1369,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>, deps: SetupDependencies) => void"
+              "<{}, unknown>, deps: SetupDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1384,7 +1384,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -3286,13 +3286,7 @@
             "description": [],
             "signature": [
               "{ get: <T = any>(key: string, context?: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.GetUiSettingsContext",
-                "text": "GetUiSettingsContext"
-              },
+              "GetUiSettingsContext",
               " | undefined) => Promise<T>; }"
             ],
             "path": "src/plugins/data/server/search/types.ts",

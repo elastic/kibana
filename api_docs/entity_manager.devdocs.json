@@ -760,7 +760,7 @@
                   "CoreStart",
                   " | ",
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
                 "deprecated": false,
