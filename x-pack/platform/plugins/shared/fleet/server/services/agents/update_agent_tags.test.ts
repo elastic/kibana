@@ -44,7 +44,7 @@ const mockRunAsync = jest.fn().mockResolvedValue({});
 jest.mock('./update_agent_tags_action_runner', () => ({
   ...jest.requireActual('./update_agent_tags_action_runner'),
   UpdateAgentTagsActionRunner: jest.fn().mockImplementation(() => {
-    return { runActionAsyncWithRetry: mockRunAsync };
+    return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
   }),
 }));
 
