@@ -759,11 +759,11 @@
             "references": [
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
+                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
+                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "imageEmbeddable",

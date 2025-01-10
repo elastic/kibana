@@ -51,11 +51,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/services.ts"
+            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/services.ts"
+            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
           },
           {
             "plugin": "transform",
