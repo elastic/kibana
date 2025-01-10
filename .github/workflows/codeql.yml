@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         ref: ${{ matrix.branch }}
 
@@ -46,10 +46,15 @@ jobs:
         echo "CHECKOUT_REF=$(git symbolic-ref HEAD)" >> "$GITHUB_ENV"
         echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
+    - name: Set experimental environment variable for 8.x branch
+      if: env.CHECKOUT_REF == 'refs/heads/8.x'
+      run: echo "CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES=true" >> "$GITHUB_ENV"
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
       env:
         NODE_OPTIONS: "--max-old-space-size=6144"
+        CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
@@ -61,7 +66,7 @@ jobs:
     if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
     steps:
     - name: Checkout kibana-operations
-      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         repository: 'elastic/kibana-operations'
         ref: main

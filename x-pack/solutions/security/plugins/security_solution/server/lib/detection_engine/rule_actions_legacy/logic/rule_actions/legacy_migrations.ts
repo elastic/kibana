@@ -54,7 +54,7 @@ export const legacyRuleActionsSavedObjectMigration = {
         // Future developer, we needed to do that because when we created this migration
         // we forget to think about user already using 7.11.0 and having an incident attribute build the right way
         // IMPORTANT -> if you change this code please do the same inside of this file
-        // x-pack/plugins/alerting/server/saved_objects/migrations.ts
+        // x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations.ts
         const subActionParamsIncident =
           (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
         if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {

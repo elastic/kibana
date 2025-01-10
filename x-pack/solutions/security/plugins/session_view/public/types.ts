@@ -9,6 +9,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { Process } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginSetup {}
@@ -84,6 +85,26 @@ export interface SessionViewDeps {
     handleOnAlertDetailsClosed: () => void
   ) => void;
   canReadPolicyManagement?: boolean;
+  /**
+   * Allows to open the detailed panel outside of the SessionView component. This is necessary when the session view is rendered in the
+   * expandable flyout, where the tree and the detailed panel are separated and need to communicate with each other.
+   */
+  openDetailsInExpandableFlyout?: (selectedProcess: Process | null) => void;
+  /**
+   * Allows to close the detailed panel outside of the SessionView component. This is necessary when the session view is rendered in the
+   * expandable flyout: when the user clicks on the TTY output button we need to close the detailed panel.
+   */
+  closeDetailsInExpandableFlyout?: () => void;
+  /**
+   * Allows to reset the view from an external component. This is necessary when the session view is rendered in the
+   * expandable flyout, where the tree and the detailed panels are separated and need to communicate with each other.
+   */
+  resetJumpToEntityId?: string;
+  /**
+   * Allows to reset the view from an external component. This is necessary when the session view is rendered in the
+   * expandable flyout, where the tree and the detailed panels are separated and need to communicate with each other.
+   */
+  resetJumpToCursor?: string;
 }
 
 export interface EuiTabProps {

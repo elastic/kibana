@@ -470,22 +470,30 @@ export function HistoryAndStarredQueriesTabs({
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, usageCollection, storage } = kibana.services;
 
-  const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
+  const [starredQueriesService, setStarredQueriesService] = useState<
+    EsqlStarredQueriesService | null | undefined
+  >();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
 
   useEffect(() => {
     const initializeService = async () => {
       const starredService = await EsqlStarredQueriesService.initialize({
         http: core.http,
+        userProfile: core.userProfile,
         usageCollection,
         storage,
       });
-      setStarredQueriesService(starredService);
+
+      if (starredService) {
+        setStarredQueriesService(starredService);
+      } else {
+        setStarredQueriesService(null);
+      }
     };
     if (!starredQueriesService) {
       initializeService();
     }
-  }, [core.http, starredQueriesService, storage, usageCollection]);
+  }, [core.http, core.userProfile, starredQueriesService, storage, usageCollection]);
 
   starredQueriesService?.queries$.subscribe((nextQueries) => {
     if (nextQueries.length !== starredQueries.length) {
@@ -495,7 +503,11 @@ export function HistoryAndStarredQueriesTabs({
 
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
-    return [
+    // use typed helper instead of .filter directly to remove falsy values from result type
+    function filterMissing<T>(array: Array<T | false>): T[] {
+      return array.filter((item): item is T => item !== undefined);
+    }
+    return filterMissing([
       {
         id: 'history-queries-tab',
         name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
@@ -513,11 +525,11 @@ export function HistoryAndStarredQueriesTabs({
             tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
               defaultMessage: 'Queries history table',
             })}
-            starredQueriesService={starredQueriesService}
+            starredQueriesService={starredQueriesService ?? undefined}
           />
         ),
       },
-      {
+      starredQueriesService !== null && {
         id: 'starred-queries-tab',
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
@@ -539,12 +551,12 @@ export function HistoryAndStarredQueriesTabs({
             tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
               defaultMessage: 'Starred queries table',
             })}
-            starredQueriesService={starredQueriesService}
+            starredQueriesService={starredQueriesService ?? undefined}
             isStarredTab={true}
           />
         ),
       },
-    ];
+    ]);
   }, [
     containerCSS,
     containerWidth,

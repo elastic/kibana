@@ -246,6 +246,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: false,
             testSubj: 'mlMainTab indexDataVisualizer',
+            relatedRouteIds: ['data_view_datavisualizer'],
           },
           {
             id: 'esql_datavisualizer',
@@ -255,6 +256,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: false,
             testSubj: 'mlMainTab esqlDataVisualizer',
+            relatedRouteIds: ['data_view_datavisualizer_esql'],
           },
 
           {
@@ -265,6 +267,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataDrift',
+            relatedRouteIds: ['data_drift'],
           },
         ],
       },
@@ -337,7 +340,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         `/${pathId}` === activeRoute?.path ||
         (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`)) ||
         (Array.isArray(relatedRouteIds) && relatedRouteIds.includes(activeRoute?.id!));
-
       return {
         id,
         name,

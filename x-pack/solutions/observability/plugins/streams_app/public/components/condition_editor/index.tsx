@@ -21,7 +21,7 @@ import {
   Condition,
   FilterCondition,
   OrCondition,
-} from '@kbn/streams-plugin/common/types';
+} from '@kbn/streams-schema';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -175,11 +175,8 @@ function FilterForm(props: {
             };
 
             const newOperator = e.target.value as FilterCondition['operator'];
-            if (
-              'value' in newCondition &&
-              (newOperator === 'exists' || newOperator === 'notExists')
-            ) {
-              delete newCondition.value;
+            if (newOperator === 'exists' || newOperator === 'notExists') {
+              if ('value' in newCondition) delete newCondition.value;
             } else if (!('value' in newCondition)) {
               (newCondition as BinaryFilterCondition).value = '';
             }

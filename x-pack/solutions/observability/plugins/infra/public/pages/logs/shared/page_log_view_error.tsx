@@ -7,11 +7,10 @@
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { useSelector } from '@xstate/react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   FetchLogViewStatusError,
   FetchLogViewError,
@@ -87,26 +86,6 @@ export const LogViewErrorPage: React.FC<{
 };
 
 export const LogSourceErrorPage = LogViewErrorPage;
-
-export const ConnectedLogViewErrorPage: React.FC = () => {
-  const { logViewStateService } = useLogViewContext();
-
-  const errors = useSelector(logViewStateService, (state) => {
-    return state.matches('loadingFailed') ||
-      state.matches('resolutionFailed') ||
-      state.matches('checkingStatusFailed')
-      ? [state.context.error]
-      : [];
-  });
-
-  const retry = useCallback(() => {
-    logViewStateService.send({
-      type: 'RETRY',
-    });
-  }, [logViewStateService]);
-
-  return <LogSourceErrorPage errors={errors} onRetry={retry} />;
-};
 
 const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
   if (error instanceof ResolveLogViewError) {
