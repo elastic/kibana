@@ -73,6 +73,7 @@ export const performCheckConflicts = async <T>(
   });
 
   const validObjects = expectedBulkGetResults.filter(isRight);
+
   await securityExtension?.authorizeCheckConflicts({
     namespace,
     objects: validObjects.map((element) => ({ type: element.value.type, id: element.value.id })),
@@ -81,6 +82,8 @@ export const performCheckConflicts = async <T>(
   const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
     _id: serializer.generateRawId(namespace, type, id),
     _index: commonHelper.getIndexForType(type),
+    // PASS it here and log audit later
+    // [ELENA] TRADEOFF -> double retrieval
     _source: { includes: ['type', 'namespaces'] },
   }));
   const bulkGetResponse = bulkGetDocs.length
@@ -109,6 +112,7 @@ export const performCheckConflicts = async <T>(
 
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
+
     if (isMgetDoc(doc) && doc.found) {
       errors.push({
         id,
