@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiPopover, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export function ChooseColumnPopover({
   columns,
@@ -27,7 +28,13 @@ export function ChooseColumnPopover({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiLink onClick={onButtonClick} data-test-subj="chooseColumnBtn">
+    <EuiLink
+      css={css`
+        vertical-align: top;
+      `}
+      onClick={onButtonClick}
+      data-test-subj="chooseColumnBtn"
+    >
       {i18n.translate('esql.flyout.chooseColumnBtn.label', {
         defaultMessage: 'here',
       })}
