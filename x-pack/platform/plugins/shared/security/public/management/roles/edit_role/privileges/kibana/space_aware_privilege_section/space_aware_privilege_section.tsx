@@ -218,7 +218,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     const viewMatrixButton = (
       <PrivilegeSummary
         role={this.props.role}
-        spaces={this.getDisplaySpaces()}
+        spaces={this.getSelectedSpaces()}
         kibanaPrivileges={this.props.kibanaPrivileges}
         canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
         spacesApiUi={this.props.spacesApiUi}
@@ -239,6 +239,11 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
   private getDisplaySpaces = () => {
     return [this.globalSpaceEntry, ...this.props.spaces];
   };
+
+  private getSelectedSpaces = () =>
+    this.getDisplaySpaces().filter((space) =>
+      this.props.role.kibana.some((entry) => entry.spaces.includes(space.id))
+    );
 
   private getAvailableSpaces = (includeSpacesFromPrivilegeIndex: number = -1) => {
     const spacesToExclude = _.uniq(
