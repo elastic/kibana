@@ -26,8 +26,8 @@ interface Context {
   core: CoreStart;
   search: ISearchGeneric;
   variableType: ESQLVariableType;
-  onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
-  onCancelControlCb?: () => void;
+  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
@@ -41,8 +41,8 @@ export async function executeAction({
   core,
   search,
   variableType,
-  onSaveControlCb,
-  onCancelControlCb,
+  onSaveControl,
+  onCancelControl,
   cursorPosition,
   initialState,
 }: Context) {
@@ -68,8 +68,8 @@ export async function executeAction({
               closeFlyout={() => {
                 handle.close();
               }}
-              onSaveControlCb={onSaveControlCb}
-              onCancelControlCb={onCancelControlCb}
+              onSaveControl={onSaveControl}
+              onCancelControl={onCancelControl}
               cursorPosition={cursorPosition}
               initialState={initialState}
             />

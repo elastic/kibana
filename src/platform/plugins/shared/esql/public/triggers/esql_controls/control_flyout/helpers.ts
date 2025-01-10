@@ -8,7 +8,7 @@
  */
 import { monaco } from '@kbn/monaco';
 import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
-import { type ESQLColumn, parse, walk, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { type ESQLColumn, parse, walk, mutate, BasicPrettyPrinter, Walker } from '@kbn/esql-ast';
 
 export const updateQueryStringWithVariable = (
   queryString: string,
@@ -82,8 +82,10 @@ export const getValuesFromQueryField = (queryString: string) => {
     visitColumn: (node) => columns.push(node),
   });
 
-  if (columns.length) {
-    return `${columns[columns.length - 1].name}`;
+  const column = Walker.match(lastCommand, { type: 'column' });
+
+  if (column) {
+    return `${column.name}`;
   }
 };
 

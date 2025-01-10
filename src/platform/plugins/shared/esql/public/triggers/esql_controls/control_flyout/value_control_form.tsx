@@ -51,7 +51,7 @@ interface ValueControlFormProps {
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
-  onCancelControlCb?: () => void;
+  onCancelControl?: () => void;
   initialState?: ESQLControlState;
 }
 
@@ -60,7 +60,7 @@ const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 
 export function ValueControlForm({
   variableType,
   initialState,
-  onCancelControlCb,
+  onCancelControl,
   queryString,
   search,
   closeFlyout,
@@ -463,7 +463,7 @@ export function ValueControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        onCancelControlCb={onCancelControlCb}
+        onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateValueControl}

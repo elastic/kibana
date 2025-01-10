@@ -144,7 +144,7 @@ export function LensEditConfigurationFlyout({
     };
   }, [dashboardPanels, panelId]);
 
-  const onSaveControlCb = useCallback(
+  const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
       if (!panelId) {
         return;
@@ -199,7 +199,7 @@ export function LensEditConfigurationFlyout({
     ]
   );
 
-  const onCancelControlCb = useCallback(() => {
+  const onCancelControl = useCallback(() => {
     closeFlyout?.();
     if (panel) {
       panel.onEdit();
@@ -615,8 +615,8 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
-                onSaveControlCb={onSaveControlCb}
-                onCancelControlCb={onCancelControlCb}
+                onSaveControl={onSaveControl}
+                onCancelControl={onCancelControl}
               />
             </EuiFlexItem>
           )}

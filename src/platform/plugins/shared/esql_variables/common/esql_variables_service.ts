@@ -11,15 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export class EsqlVariablesService {
-  esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
+  esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   esqlVariables: ESQLControlVariable[] = [];
-  areSuggestionsEnabled: boolean;
-
-  constructor() {
-    this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-    this.esqlVariables = [];
-    this.areSuggestionsEnabled = false;
-  }
+  areSuggestionsEnabled: boolean = false;
 
   enableSuggestions() {
     this.areSuggestionsEnabled = true;

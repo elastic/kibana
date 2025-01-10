@@ -65,15 +65,15 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
-  onSaveControlCb?: ESQLEditorProps['onSaveControlCb'],
-  onCancelControlCb?: ESQLEditorProps['onCancelControlCb']
+  onSaveControl?: ESQLEditorProps['onSaveControl'],
+  onCancelControl?: ESQLEditorProps['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
     variableType,
     cursorPosition: position,
-    onSaveControlCb,
-    onCancelControlCb,
+    onSaveControl,
+    onCancelControl,
   });
 };
 
@@ -96,8 +96,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
-  onSaveControlCb,
-  onCancelControlCb,
+  onSaveControl,
+  onCancelControl,
   supportsControls,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -278,8 +278,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
-      onSaveControlCb,
-      onCancelControlCb
+      onSaveControl,
+      onCancelControl
     );
   });
 
@@ -290,8 +290,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.FIELDS,
       position,
       uiActions,
-      onSaveControlCb,
-      onCancelControlCb
+      onSaveControl,
+      onCancelControl
     );
   });
 
@@ -302,8 +302,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       ESQLVariableType.VALUES,
       position,
       uiActions,
-      onSaveControlCb,
-      onCancelControlCb
+      onSaveControl,
+      onCancelControl
     );
   });
 

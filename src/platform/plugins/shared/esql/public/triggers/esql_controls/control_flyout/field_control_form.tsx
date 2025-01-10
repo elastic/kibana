@@ -43,7 +43,7 @@ interface FieldControlFormProps {
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
-  onCancelControlCb?: () => void;
+  onCancelControl?: () => void;
 }
 
 export function FieldControlForm({
@@ -53,7 +53,7 @@ export function FieldControlForm({
   cursorPosition,
   onCreateControl,
   onEditControl,
-  onCancelControlCb,
+  onCancelControl,
   search,
   closeFlyout,
 }: FieldControlFormProps) {
@@ -262,7 +262,7 @@ export function FieldControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        onCancelControlCb={onCancelControlCb}
+        onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateFieldControl}

@@ -92,14 +92,14 @@ describe('FieldControlForm', () => {
     expect(onCreateControlSpy).toHaveBeenCalled();
   });
 
-  it('should call the onCancelControlCb callback, if Cancel button is clicked', async () => {
+  it('should call the onCancelControl callback, if Cancel button is clicked', async () => {
     const onCancelControlSpy = jest.fn();
     const { findByTestId } = render(
       <FieldControlForm
         variableType={ESQLVariableType.FIELDS}
         queryString="FROM foo | STATS BY"
         onCreateControl={jest.fn()}
-        onCancelControlCb={onCancelControlSpy}
+        onCancelControl={onCancelControlSpy}
         closeFlyout={jest.fn()}
         onEditControl={jest.fn()}
         search={searchMock}
