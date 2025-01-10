@@ -25,9 +25,12 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import React from 'react';
-import { StreamChild } from '@kbn/streams-plugin/common/types';
+import {
+  StreamChild,
+  ReadStreamDefinition,
+  WiredStreamConfigDefinition,
+} from '@kbn/streams-schema';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -89,7 +92,7 @@ export function StreamDetailRouting({
           closeModal={closeModal}
           clearChildUnderEdit={() => routingAppState.setChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
-          id={routingAppState.childUnderEdit.child.id}
+          id={routingAppState.childUnderEdit.child.name}
         />
       )}
       <EuiFlexGroup
@@ -197,14 +200,12 @@ function ControlBar({
       signal,
       params: {
         path: {
-          id: definition.id,
+          id: definition.name,
         },
         body: {
           condition: routingAppState.childUnderEdit.child.condition,
           stream: {
-            id: routingAppState.childUnderEdit.child.id,
-            processing: [],
-            fields: [],
+            name: routingAppState.childUnderEdit.child.name,
           },
         },
       },
@@ -217,19 +218,22 @@ function ControlBar({
     }
 
     const childUnderEdit = routingAppState.childUnderEdit.child;
-    const { inheritedFields, id, ...definitionToUpdate } = definition;
+    const { name, stream } = definition;
     return streamsRepositoryClient.fetch('PUT /api/streams/{id}', {
       signal,
       params: {
         path: {
-          id: definition.id,
+          id: name,
         },
         body: {
-          ...definitionToUpdate,
-          children: definition.children.map((child) =>
-            child.id === childUnderEdit.id ? childUnderEdit : child
-          ),
-        },
+          ...stream,
+          ingest: {
+            ...stream.ingest,
+            routing: definition.stream.ingest.routing.map((child) =>
+              child.name === childUnderEdit.name ? childUnderEdit : child
+            ),
+          },
+        } as WiredStreamConfigDefinition,
       },
     });
   }
@@ -350,7 +354,7 @@ function PreviewPanel({
         signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name,
           },
           body: {
             condition: routingAppState.debouncedChildUnderEdit.child.condition,
@@ -550,17 +554,17 @@ function ChildStreamList({
       >
         <PreviousStreamEntry definition={definition} />
         <CurrentStreamEntry definition={definition} />
-        {definition.children.map((child, i) => (
+        {definition.stream.ingest.routing.map((child, i) => (
           <NestedView key={i}>
             <RoutingStreamEntry
               child={
-                !childUnderEdit?.isNew && child.id === childUnderEdit?.child.id
+                !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
                   ? childUnderEdit.child
                   : child
               }
-              edit={!childUnderEdit?.isNew && child.id === childUnderEdit?.child.id}
+              edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
               onEditStateChange={() => {
-                if (child.id === childUnderEdit?.child.id) {
+                if (child.name === childUnderEdit?.child.name) {
                   setChildUnderEdit(undefined);
                 } else {
                   setChildUnderEdit({ isNew: false, child });
@@ -601,7 +605,7 @@ function ChildStreamList({
                   setChildUnderEdit({
                     isNew: true,
                     child: {
-                      id: `${definition.id}.child`,
+                      name: `${definition.name}.child`,
                       condition: {
                         field: '',
                         operator: 'eq',
@@ -627,7 +631,7 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-        <EuiText size="s">{definition.id}</EuiText>
+        <EuiText size="s">{definition.name}</EuiText>
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.streams.streamDetailRouting.currentStream', {
             defaultMessage: 'Current stream',
@@ -641,7 +645,7 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
 function PreviousStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
   const router = useStreamsAppRouter();
 
-  const parentId = definition.id.split('.').slice(0, -1).join('.');
+  const parentId = definition.name.split('.').slice(0, -1).join('.');
   if (parentId === '') {
     return null;
   }
@@ -686,7 +690,7 @@ function RoutingStreamEntry({
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow>
-          <EuiText size="s">{child.id}</EuiText>
+          <EuiText size="s">{child.name}</EuiText>
         </EuiFlexItem>
         <EuiButtonIcon
           data-test-subj="streamsAppRoutingStreamEntryButton"
@@ -702,7 +706,7 @@ function RoutingStreamEntry({
           data-test-subj="streamsAppRoutingStreamEntryButton"
           iconType="popout"
           href={router.link('/{key}/{tab}/{subtab}', {
-            path: { key: child.id, tab: 'management', subtab: 'route' },
+            path: { key: child.name, tab: 'management', subtab: 'route' },
           })}
           aria-label={i18n.translate('xpack.streams.streamDetailRouting.goto', {
             defaultMessage: 'Go to stream',
@@ -750,13 +754,13 @@ function NewRoutingStreamEntry({
         >
           <EuiFieldText
             data-test-subj="streamsAppRoutingStreamEntryNameField"
-            value={child.id}
+            value={child.name}
             fullWidth
             compressed
             onChange={(e) => {
               onChildChange({
                 ...child,
-                id: e.target.value,
+                name: e.target.value,
               });
             }}
           />

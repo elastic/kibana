@@ -9,7 +9,7 @@
 
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { getSearchParams, getSearchParamsFromRequest } from './get_search_params';
+import { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 function getConfigStub(config: any = {}): GetConfigFn {
@@ -18,11 +18,11 @@ function getConfigStub(config: any = {}): GetConfigFn {
 
 describe('getSearchParams', () => {
   test('includes custom preference', () => {
-    const config = getConfigStub({
+    const getConfig = getConfigStub({
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
       [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
     });
-    const searchParams = getSearchParams(config);
+    const searchParams = getSearchParamsFromRequest({ index: 'abc', body: {} }, { getConfig });
     expect(searchParams.preference).toBe('aaa');
   });
 
@@ -93,5 +93,40 @@ describe('getSearchParams', () => {
       { getConfig }
     );
     expect(searchParams).not.toHaveProperty('expand_wildcards', 'all');
+  });
+
+  describe('getEsPreference', () => {
+    const mockConfigGet = jest.fn();
+
+    beforeEach(() => {
+      mockConfigGet.mockClear();
+    });
+
+    test('returns the session ID if set to sessionId', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'sessionId';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet, 'my_session_id');
+      expect(preference).toBe('my_session_id');
+    });
+
+    test('returns the custom preference if set to custom', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'custom';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet);
+      expect(preference).toBe('foobar');
+    });
+
+    test('returns undefined if set to none', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'none';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet);
+      expect(preference).toBe(undefined);
+    });
   });
 });

@@ -33,12 +33,12 @@
             "path": "src/core/public/mocks.ts"
           },
           {
-            "plugin": "@kbn/core-plugins-browser-internal",
-            "path": "packages/core/plugins/core-plugins-browser-internal/src/plugins_service.test.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
           },
           {
-            "plugin": "@kbn/core-plugins-browser-internal",
-            "path": "packages/core/plugins/core-plugins-browser-internal/src/plugins_service.test.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
           }
         ],
         "children": [
@@ -67,13 +67,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              },
+              "SavedObjectsStart",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
@@ -121,29 +115,11 @@
             "description": [],
             "signature": [
               "(client: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-public.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
@@ -158,13 +134,7 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-public.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
                 "deprecated": false,
@@ -179,13 +149,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",

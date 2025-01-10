@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { initCreateMetricsExplorerViewRoute } from './create_metrics_explorer_view';
 import { initDeleteMetricsExplorerViewRoute } from './delete_metrics_explorer_view';
 import { initFindMetricsExplorerViewRoute } from './find_metrics_explorer_view';

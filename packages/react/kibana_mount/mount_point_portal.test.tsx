@@ -9,7 +9,7 @@
 
 import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { MountPoint, UnmountCallback } from '@kbn/core/public';
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 import { MountPointPortal } from './mount_point_portal';
 import { act } from 'react-dom/test-utils';
 

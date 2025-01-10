@@ -386,7 +386,7 @@
                     "text": "ConfigDeprecationFactory"
                   }
                 ],
-                "path": "packages/kbn-config/src/deprecation/types.ts",
+                "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

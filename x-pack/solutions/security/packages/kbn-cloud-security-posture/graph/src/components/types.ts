@@ -51,6 +51,7 @@ export interface LabelNodeViewModel
     LabelNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
+  nodeClick?: NodeClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;

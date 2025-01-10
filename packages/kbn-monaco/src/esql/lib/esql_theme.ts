@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import type { UseEuiTheme } from '@elastic/eui';
 import { themeRuleGroupBuilderFactory } from '../../common/theme';
 import { ESQL_TOKEN_POSTFIX } from './constants';
 import { monaco } from '../../monaco_imports';
@@ -15,14 +15,11 @@ import { monaco } from '../../monaco_imports';
 const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
 
 export const buildESQLTheme = ({
-  darkMode,
-}: {
-  darkMode: boolean;
-}): monaco.editor.IStandaloneThemeData => {
-  const euiThemeVars = darkMode ? euiDarkVars : euiLightVars;
-
+  euiTheme,
+  colorMode,
+}: UseEuiTheme): monaco.editor.IStandaloneThemeData => {
   return {
-    base: darkMode ? 'vs-dark' : 'vs',
+    base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
       // base
@@ -39,13 +36,13 @@ export const buildESQLTheme = ({
           'unquoted_identifier',
           'pipe',
         ],
-        euiThemeVars.euiTextColor
+        euiTheme.colors.textParagraph
       ),
 
       // source commands
       ...buildRuleGroup(
         ['from', 'row', 'show'],
-        euiThemeVars.euiColorPrimary,
+        euiTheme.colors.primary,
         true // isBold
       ),
 
@@ -88,12 +85,12 @@ export const buildESQLTheme = ({
           'desc',
           'nulls_order',
         ],
-        euiThemeVars.euiColorAccent,
+        euiTheme.colors.accent,
         true // isBold
       ),
 
       // functions
-      ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimary),
+      ...buildRuleGroup(['functions'], euiTheme.colors.primary),
 
       // operators
       ...buildRuleGroup(
@@ -116,7 +113,7 @@ export const buildESQLTheme = ({
           'percent', // '%'
           'cast_op', // '::'
         ],
-        euiThemeVars.euiColorPrimary
+        euiTheme.colors.primary
       ),
 
       // comments
@@ -156,7 +153,7 @@ export const buildESQLTheme = ({
           'closing_metrics_line_comment',
           'closing_metrics_multiline_comment',
         ],
-        euiThemeVars.euiTextSubduedColor
+        euiTheme.colors.textSubdued
       ),
 
       // values
@@ -169,23 +166,23 @@ export const buildESQLTheme = ({
           'param',
           'timespan_literal',
         ],
-        euiThemeVars.euiColorSuccessText
+        euiTheme.colors.textSuccess
       ),
     ],
     colors: {
-      'editor.foreground': euiThemeVars.euiTextColor,
-      'editor.background': euiThemeVars.euiColorEmptyShade,
-      'editor.lineHighlightBackground': euiThemeVars.euiColorLightestShade,
-      'editor.lineHighlightBorder': euiThemeVars.euiColorLightestShade,
-      'editor.selectionHighlightBackground': euiThemeVars.euiColorLightestShade,
-      'editor.selectionHighlightBorder': euiThemeVars.euiColorLightShade,
-      'editorSuggestWidget.background': euiThemeVars.euiColorEmptyShade,
-      'editorSuggestWidget.border': euiThemeVars.euiColorEmptyShade,
-      'editorSuggestWidget.focusHighlightForeground': euiThemeVars.euiColorEmptyShade,
-      'editorSuggestWidget.foreground': euiThemeVars.euiTextColor,
-      'editorSuggestWidget.highlightForeground': euiThemeVars.euiColorPrimary,
-      'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorPrimary,
-      'editorSuggestWidget.selectedForeground': euiThemeVars.euiColorEmptyShade,
+      'editor.foreground': euiTheme.colors.textParagraph,
+      'editor.background': euiTheme.colors.backgroundBasePlain,
+      'editor.lineHighlightBackground': euiTheme.colors.lightestShade,
+      'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
+      'editor.selectionHighlightBackground': euiTheme.colors.lightestShade,
+      'editor.selectionHighlightBorder': euiTheme.colors.lightShade,
+      'editorSuggestWidget.background': euiTheme.colors.emptyShade,
+      'editorSuggestWidget.border': euiTheme.colors.emptyShade,
+      'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.emptyShade,
+      'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
+      'editorSuggestWidget.highlightForeground': euiTheme.colors.primary,
+      'editorSuggestWidget.selectedBackground': euiTheme.colors.primary,
+      'editorSuggestWidget.selectedForeground': euiTheme.colors.emptyShade,
     },
   };
 };

@@ -42,54 +42,60 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await indexDocument(esClient, 'logs-test-default', doc);
       expect(response.result).to.eql('created');
       const streams = await listStreams(supertest);
-      const classicStream = streams.definitions.find(
-        (stream: JsonObject) => stream.id === 'logs-test-default'
+      const classicStream = streams.streams.find(
+        (stream: JsonObject) => stream.name === 'logs-test-default'
       );
       expect(classicStream).to.eql({
-        id: 'logs-test-default',
-        managed: false,
-        children: [],
-        fields: [],
-        processing: [],
+        name: 'logs-test-default',
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [],
+          },
+        },
       });
     });
 
     it('Allows setting processing on classic streams', async () => {
       const response = await putStream(supertest, 'logs-test-default', {
-        managed: false,
-        children: [],
-        fields: [],
-        processing: [
-          {
-            config: {
-              type: 'grok',
-              field: 'message',
-              patterns: [
-                '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-              ],
+        ingest: {
+          processing: [
+            {
+              config: {
+                grok: {
+                  field: 'message',
+                  patterns: [
+                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                  ],
+                },
+              },
             },
-          },
-        ],
+          ],
+          routing: [],
+        },
       });
       expect(response).to.have.property('acknowledged', true);
       const streamBody = await getStream(supertest, 'logs-test-default');
       expect(streamBody).to.eql({
-        id: 'logs-test-default',
-        managed: false,
-        children: [],
-        inheritedFields: [],
-        fields: [],
-        processing: [
-          {
-            config: {
-              type: 'grok',
-              field: 'message',
-              patterns: [
-                '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-              ],
-            },
+        name: 'logs-test-default',
+        inherited_fields: {},
+        stream: {
+          ingest: {
+            processing: [
+              {
+                config: {
+                  grok: {
+                    field: 'message',
+                    patterns: [
+                      '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    ],
+                  },
+                },
+              },
+            ],
+            routing: [],
           },
-        ],
+        },
       });
     });
 
@@ -121,10 +127,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Allows removing processing on classic streams', async () => {
       const response = await putStream(supertest, 'logs-test-default', {
-        managed: false,
-        children: [],
-        fields: [],
-        processing: [],
+        ingest: {
+          processing: [],
+          routing: [],
+        },
       });
       expect(response).to.have.property('acknowledged', true);
     });
@@ -154,8 +160,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('Allows deleting classic streams', async () => {
       await deleteStream(supertest, 'logs-test-default');
       const streams = await listStreams(supertest);
-      const classicStream = streams.definitions.find(
-        (stream: JsonObject) => stream.id === 'logs-test-default'
+      const classicStream = streams.streams.find(
+        (stream: JsonObject) => stream.name === 'logs-test-default'
       );
       expect(classicStream).to.eql(undefined);
     });

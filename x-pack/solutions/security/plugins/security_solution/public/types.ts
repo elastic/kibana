@@ -49,6 +49,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { AssetInventoryPluginStart } from '@kbn/asset-inventory-plugin/public';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -77,6 +78,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { AssetInventory } from './asset_inventory';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
@@ -121,6 +123,7 @@ export interface SetupPlugins {
  * in the code.
  */
 export interface StartPlugins {
+  assetInventory: AssetInventoryPluginStart;
   cases: CasesPublicStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -231,6 +234,7 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;
+  assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
@@ -255,6 +259,7 @@ export interface SubPlugins {
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   alerts: Awaited<ReturnType<Detections['start']>>;
+  assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;

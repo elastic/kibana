@@ -40,31 +40,13 @@
               "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -76,31 +58,13 @@
               "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -112,13 +76,7 @@
               "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -130,13 +88,7 @@
               "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ entities: ",
               {
                 "pluginId": "@kbn/entities-schema",
@@ -156,13 +108,7 @@
               "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -246,13 +192,7 @@
               "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -264,13 +204,7 @@
               "<\"POST /internal/entities/definition/{id}/_reset\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -282,13 +216,7 @@
               "<\"GET /internal/entities/definition/{id?}\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>; path: Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; }, { id?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }; path: { id?: string | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }; path: { id?: string | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -300,13 +228,7 @@
               "<\"DELETE /internal/entities/definition/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; path: { id: string; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; path: { id: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/definition\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -390,13 +312,7 @@
               "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -408,13 +324,7 @@
               "<\"DELETE /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -426,39 +336,15 @@
               "<\"PUT /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { installOnly: boolean; }; }, { query: { installOnly?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; }, TEndpoint> & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -478,31 +364,13 @@
               "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -514,31 +382,13 @@
               "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -550,13 +400,7 @@
               "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -568,13 +412,7 @@
               "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<{ entities: ",
               {
                 "pluginId": "@kbn/entities-schema",
@@ -594,13 +432,7 @@
               "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -684,13 +516,7 @@
               "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -702,13 +528,7 @@
               "<\"POST /internal/entities/definition/{id}/_reset\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -720,13 +540,7 @@
               "<\"GET /internal/entities/definition/{id?}\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>; path: Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; }, { id?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }; path: { id?: string | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }; path: { id?: string | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -738,13 +552,7 @@
               "<\"DELETE /internal/entities/definition/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; path: { id: string; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; path: { id: string; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"POST /internal/entities/definition\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -828,13 +636,7 @@
               "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -846,13 +648,7 @@
               "<\"DELETE /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -864,31 +660,13 @@
               "<\"PUT /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { installOnly: boolean; }; }, { query: { installOnly?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>; security?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RouteSecurity",
-                "text": "RouteSecurity"
-              },
+              "RouteSecurity",
               " | undefined; }; }, TEndpoint>>"
             ],
             "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
@@ -928,13 +706,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -944,13 +716,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "] : [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -960,13 +726,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "]"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -997,21 +757,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  },
+                  "CoreStart",
                   " | ",
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
@@ -1505,31 +1253,13 @@
           "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
           ", undefined, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<{ sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; security?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteSecurity",
-            "text": "RouteSecurity"
-          },
+          "RouteSecurity",
           " | undefined; }; \"POST /internal/entities/v2/definitions/sources\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1541,31 +1271,13 @@
           "<\"POST /internal/entities/v2/definitions/sources\", Zod.ZodObject<{ body: Zod.ZodObject<{ source: Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }, { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }, { body: { source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
           ", undefined, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteSecurity",
-            "text": "RouteSecurity"
-          },
+          "RouteSecurity",
           " | undefined; }; \"POST /internal/entities/v2/definitions/types\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1577,13 +1289,7 @@
           "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"POST /internal/entities/v2/_search/preview\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1595,13 +1301,7 @@
           "<\"POST /internal/entities/v2/_search/preview\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ sources: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; type_id: Zod.ZodString; index_patterns: Zod.ZodArray<Zod.ZodString, \"many\">; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; metadata_fields: Zod.ZodArray<Zod.ZodString, \"many\">; filters: Zod.ZodArray<Zod.ZodString, \"many\">; timestamp_field: Zod.ZodOptional<Zod.ZodString>; display_name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }, { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }, { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { sources: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }[]; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<{ entities: ",
           {
             "pluginId": "@kbn/entities-schema",
@@ -1621,13 +1321,7 @@
           "<\"POST /internal/entities/v2/_search\", Zod.ZodObject<{ body: Zod.ZodIntersection<Zod.ZodObject<{ start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; sort: Zod.ZodOptional<Zod.ZodObject<{ field: Zod.ZodString; direction: Zod.ZodEnum<[\"ASC\", \"DESC\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; direction: \"ASC\" | \"DESC\"; }, { field: string; direction: \"ASC\" | \"DESC\"; }>>; limit: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; metadata_fields: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; filters: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; }, { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; }>, Zod.ZodObject<{ type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; }, { type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters: string[]; limit: number; metadata_fields: string[]; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; } & { type: string; }; }, { body: { start?: string | undefined; end?: string | undefined; sort?: { field: string; direction: \"ASC\" | \"DESC\"; } | undefined; filters?: string[] | undefined; limit?: number | undefined; metadata_fields?: string[] | undefined; } & { type: string; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1711,13 +1405,7 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1729,13 +1417,7 @@
           "<\"POST /internal/entities/definition/{id}/_reset\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1747,13 +1429,7 @@
           "<\"GET /internal/entities/definition/{id?}\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>; path: Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; }, { id?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }; path: { id?: string | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }; path: { id?: string | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1765,13 +1441,7 @@
           "<\"DELETE /internal/entities/definition/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; path: { id: string; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; path: { id: string; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"POST /internal/entities/definition\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1855,13 +1525,7 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1873,13 +1537,7 @@
           "<\"DELETE /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -1891,31 +1549,13 @@
           "<\"PUT /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { installOnly: boolean; }; }, { query: { installOnly?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
           ", undefined, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>>; security?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteSecurity",
-            "text": "RouteSecurity"
-          },
+          "RouteSecurity",
           " | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/index.ts",
@@ -2004,13 +1644,7 @@
           "description": [],
           "signature": [
             "(options: { request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>; }) => Promise<",
             "EntityClient",
             ">"
@@ -2038,13 +1672,7 @@
                   "label": "request",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/core-http-server",
-                      "scope": "server",
-                      "docId": "kibKbnCoreHttpServerPluginApi",
-                      "section": "def-server.KibanaRequest",
-                      "text": "KibanaRequest"
-                    },
+                    "KibanaRequest",
                     "<unknown, unknown, unknown, any>"
                   ],
                   "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",

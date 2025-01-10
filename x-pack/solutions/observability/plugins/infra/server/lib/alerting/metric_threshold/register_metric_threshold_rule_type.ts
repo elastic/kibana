@@ -18,7 +18,7 @@ import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/conve
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
-import { InfraBackendLibs, InfraLocators } from '../../infra_types';
+import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,

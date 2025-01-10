@@ -99,7 +99,7 @@ export interface UiSettingsParams<T = unknown> {
    * Use schema options to specify limits on the value. For example:
    * `schema.number({ min: 0, max: 100 })`
    *
-   * More information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md
+   * More information about schema in https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-config-schema/README.md
    */
   schema: Type<T>;
   /**

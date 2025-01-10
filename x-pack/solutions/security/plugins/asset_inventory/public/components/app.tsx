@@ -6,33 +6,26 @@
  */
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 
-interface AssetInventoryAppDeps {
-  basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-}
-
-export const AssetInventoryApp = ({ basename }: AssetInventoryAppDeps) => {
+const AssetInventoryApp = () => {
   return (
-    <Router basename={basename}>
-      <I18nProvider>
-        <>
-          <EuiPageTemplate restrictWidth="1000px">
-            <EuiPageTemplate.Header>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage id="assetInventory.helloWorldText" defaultMessage="Inventory" />
-                </h1>
-              </EuiTitle>
-            </EuiPageTemplate.Header>
-            <EuiPageTemplate.Section />
-          </EuiPageTemplate>
-        </>
-      </I18nProvider>
-    </Router>
+    <I18nProvider>
+      <>
+        <EuiPageTemplate restrictWidth="1000px">
+          <EuiPageTemplate.Header>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage id="assetInventory.allAssets" defaultMessage="All Assets" />
+              </h1>
+            </EuiTitle>
+          </EuiPageTemplate.Header>
+          <EuiPageTemplate.Section />
+        </EuiPageTemplate>
+      </>
+    </I18nProvider>
   );
 };
+
+// we need to use default exports to import it via React.lazy
+export default AssetInventoryApp; // eslint-disable-line import/no-default-export
