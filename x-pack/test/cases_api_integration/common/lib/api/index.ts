@@ -60,7 +60,6 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
-  getInternalCaseFindUserActionsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
