@@ -111,6 +111,7 @@ export function AlertsOverview() {
               rangeTo={rangeTo}
               rangeFrom={rangeFrom}
               status={alertStatusFilter}
+              disableLocalStorageSync={true}
               services={{
                 timeFilterService,
                 AlertsSearchBar,

@@ -28,6 +28,7 @@ export interface AlertStatusFilterProps {
 export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
   urlStorageKey: string;
   defaultState?: AlertSearchBarContainerState;
+  disableLocalStorageSync?: boolean;
 }
 
 export interface Dependencies {
