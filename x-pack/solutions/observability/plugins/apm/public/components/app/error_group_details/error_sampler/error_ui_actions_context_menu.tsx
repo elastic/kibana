@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
-import { ObservabilityActionContextMenuItemProps } from '@kbn/observability-shared-plugin/public';
+import type { ObservabilityActionContextMenuItemProps } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 interface Props {

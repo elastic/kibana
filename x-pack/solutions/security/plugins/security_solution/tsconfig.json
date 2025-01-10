@@ -215,7 +215,6 @@
     "@kbn/cbor",
     "@kbn/zod",
     "@kbn/cloud-security-posture",
-    "@kbn/asset-inventory-plugin",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",
@@ -235,8 +234,9 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
-    "@kbn/llm-tasks-plugin",
+    "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
+    "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme"
   ]
 }

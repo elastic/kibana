@@ -6,7 +6,7 @@
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSuggestionsWithTermsEnum({
   fieldName,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiScreenReaderOnly,
   RIGHT_ALIGNMENT,
@@ -26,7 +27,7 @@ import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/c
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
@@ -42,7 +43,7 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;

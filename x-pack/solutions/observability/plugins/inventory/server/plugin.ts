@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { mapValues } from 'lodash';
 import { registerServerRoutes } from './routes/register_routes';
-import { InventoryRouteHandlerResources } from './routes/types';
+import type { InventoryRouteHandlerResources } from './routes/types';
 import type {
   ConfigSchema,
   InventoryServerSetup,

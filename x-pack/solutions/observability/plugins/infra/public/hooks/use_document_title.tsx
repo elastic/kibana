@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { observabilityTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';

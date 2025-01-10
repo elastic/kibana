@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { Comparator, RuleParams } from '../../../../common/alerting/logs/log_threshold';
+import type { RuleParams } from '../../../../common/alerting/logs/log_threshold';
+import { Comparator } from '../../../../common/alerting/logs/log_threshold';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 
 const params: RuleParams = {

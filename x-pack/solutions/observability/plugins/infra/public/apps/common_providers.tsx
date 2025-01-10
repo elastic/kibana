@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { FC, PropsWithChildren } from 'react';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
   useKibanaEnvironmentContextProvider,
 } from '../hooks/use_kibana';
-import { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../containers/header_action_menu_provider';
 import { TriggersActionsProvider } from '../containers/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';

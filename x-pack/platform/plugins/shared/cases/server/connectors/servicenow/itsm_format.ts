@@ -15,6 +15,7 @@ export const format: ServiceNowITSMFormat = (theCase, alerts) => {
     impact = null,
     category = null,
     subcategory = null,
+    additionalFields = null,
   } = (theCase.connector.fields as ConnectorServiceNowITSMTypeFields['fields']) ?? {};
   return {
     severity,
@@ -22,6 +23,7 @@ export const format: ServiceNowITSMFormat = (theCase, alerts) => {
     impact,
     category,
     subcategory,
+    additional_fields: additionalFields,
     correlation_id: theCase.id ?? null,
     correlation_display: 'Elastic Case',
   };

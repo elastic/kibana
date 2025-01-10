@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type {
   BaseFlameGraph,
@@ -13,7 +13,7 @@ import type {
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../../common/profiling_es_client';
+import type { ProfilingESClient } from '../../common/profiling_es_client';
 import { unwrapEsResponse } from './unwrap_es_response';
 import { withProfilingSpan } from './with_profiling_span';
 
@@ -153,7 +153,7 @@ export function createProfilingEsClient({
     },
     topNFunctions({
       query,
-      aggregationField,
+      aggregationFields,
       indices,
       stacktraceIdsField,
       co2PerKWH,
@@ -180,7 +180,7 @@ export function createProfilingEsClient({
               limit,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
-              aggregation_field: aggregationField,
+              aggregation_fields: aggregationFields,
               co2_per_kwh: co2PerKWH,
               per_core_watt_x86: pervCPUWattX86,
               per_core_watt_arm64: pervCPUWattArm64,

@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { ServerlessType } from '../../../../../common/serverless';
-import { APIEndpoint } from '../../../../../server';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import type { APIEndpoint } from '../../../../../server';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   MockApmPluginContextWrapper,
   mockApmPluginContextValue,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useApmServiceContext from '../../../../context/apm_service/use_apm_service_context';
-import { ServiceEntitySummary } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
+import type { ServiceEntitySummary } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';

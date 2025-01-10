@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ReactText } from 'react';
+import type { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
-import {
-  InventoryVisTypeRT,
+import type {
   InventoryFormatterType,
   InventoryVisType,
 } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryVisTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { createFormatter } from '../../../../../common/formatters';
-import { SeriesOverrides } from '../types';
-import {
+import type { SeriesOverrides } from '../types';
+import type {
   NodeDetailsDataSeries,
   NodeDetailsMetricData,
 } from '../../../../../common/http_api/node_details_api';

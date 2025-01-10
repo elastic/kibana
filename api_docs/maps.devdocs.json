@@ -433,13 +433,7 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1627,13 +1621,7 @@
             "description": [],
             "signature": [
               "(properties: GeoJSON.GeoJsonProperties, executionContext: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               ") => Promise<",
               {
                 "pluginId": "maps",
@@ -1671,13 +1659,7 @@
                 "label": "executionContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-execution-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                    "section": "def-common.KibanaExecutionContext",
-                    "text": "KibanaExecutionContext"
-                  }
+                  "KibanaExecutionContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
@@ -3765,13 +3747,7 @@
             "text": "Filter"
           },
           " | undefined; executionContext: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",

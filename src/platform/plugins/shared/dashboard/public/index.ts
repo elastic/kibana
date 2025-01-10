@@ -22,7 +22,6 @@ export {
   LazyDashboardRenderer as DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
   type DashboardLocatorParams,
-  type IProvidesLegacyPanelPlacementSettings,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
