@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -81,7 +81,8 @@ export function useSetupTechnology({
   const { isAgentlessEnabled } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
-  const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
+  const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
+  const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
   const defaultSetupTechnology = useMemo(() => {
     return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
       ? SetupTechnology.AGENTLESS
@@ -89,66 +90,8 @@ export function useSetupTechnology({
   }, [packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] =
     useState<SetupTechnology>(defaultSetupTechnology);
-  const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(() => {
-    const agentless = generateNewAgentPolicyWithDefaults({
-      inactivity_timeout: 3600,
-      supports_agentless: true,
-      monitoring_enabled: ['logs', 'metrics'],
-    });
-    return agentless;
-  });
 
-  useEffect(() => {
-    if (isEditPage && agentPolicies && agentPolicies.some((policy) => policy.supports_agentless)) {
-      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
-      return;
-    }
-    if (isAgentlessEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
-      const nextNewAgentlessPolicy = {
-        ...newAgentlessPolicy,
-        name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
-        ...getAdditionalAgentlessPolicyInfo(packageInfo),
-      };
-      if (
-        !newAgentlessPolicy.name ||
-        nextNewAgentlessPolicy.name !== newAgentlessPolicy.name ||
-        (packageInfo && !newAgentlessPolicy.global_data_tags)
-      ) {
-        setNewAgentlessPolicy(nextNewAgentlessPolicy);
-        setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
-        updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
-      }
-    }
-    if (
-      selectedSetupTechnology === SetupTechnology.AGENTLESS &&
-      !packagePolicy.supports_agentless
-    ) {
-      updatePackagePolicy({
-        supports_agentless: true,
-      });
-    } else if (
-      selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
-      packagePolicy.supports_agentless
-    ) {
-      updatePackagePolicy({
-        supports_agentless: false,
-      });
-    }
-  }, [
-    isAgentlessEnabled,
-    isEditPage,
-    newAgentlessPolicy,
-    newAgentPolicy,
-    packagePolicy.name,
-    packagePolicy.supports_agentless,
-    selectedSetupTechnology,
-    updateAgentPolicies,
-    setNewAgentPolicy,
-    agentPolicies,
-    setSelectedSetupTechnology,
-    updatePackagePolicy,
-    packageInfo,
-  ]);
+  const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {
@@ -157,42 +100,65 @@ export function useSetupTechnology({
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
-        if (isAgentlessEnabled) {
-          const agentlessPolicy = {
-            ...newAgentlessPolicy,
-          } as NewAgentPolicy;
-
-          setNewAgentPolicy(agentlessPolicy);
-          setNewAgentlessPolicy(agentlessPolicy);
-          setSelectedPolicyTab(SelectedPolicyTab.NEW);
-          updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
-        }
-        updatePackagePolicy({
-          supports_agentless: true,
-        });
-      } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
-        setNewAgentPolicy({
-          ...newAgentBasedPolicy.current,
-          supports_agentless: false,
-        });
-        updatePackagePolicy({
-          supports_agentless: false,
-        });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
-        updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
+      } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
+        setSelectedPolicyTab(SelectedPolicyTab.NEW);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
-    [
-      isAgentlessEnabled,
-      selectedSetupTechnology,
-      updatePackagePolicy,
-      setNewAgentPolicy,
-      newAgentlessPolicy,
-      setSelectedPolicyTab,
-      updateAgentPolicies,
-    ]
+    [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
+
+  if (
+    isEditPage &&
+    agentPolicies &&
+    agentPolicies.some((policy) => policy.supports_agentless) &&
+    selectedSetupTechnology === SetupTechnology.AGENT_BASED
+  ) {
+    setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
+  }
+
+  if (
+    !isEditPage &&
+    packagePolicy &&
+    isAgentlessEnabled &&
+    selectedSetupTechnology === SetupTechnology.AGENTLESS &&
+    (!currentAgentPolicy.supports_agentless || agentlessPolicyName !== currentAgentPolicy.name)
+  ) {
+    const nextNewAgentlessPolicy = {
+      ...generateNewAgentPolicyWithDefaults({
+        inactivity_timeout: 3600,
+        supports_agentless: true,
+        monitoring_enabled: ['logs', 'metrics'],
+      }),
+      name: agentlessPolicyName,
+      ...getAdditionalAgentlessPolicyInfo(packageInfo),
+    };
+    setCurrentAgentPolicy(nextNewAgentlessPolicy);
+    setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
+    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
+    updatePackagePolicy({
+      supports_agentless: true,
+    });
+  }
+
+  if (
+    !isEditPage &&
+    selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+    (currentAgentPolicy.supports_agentless || packagePolicy.supports_agentless)
+  ) {
+    const nextNewAgentlessPolicy = {
+      ...orginalAgentPolicyRef.current,
+      supports_agentless: false,
+    };
+    setCurrentAgentPolicy(nextNewAgentlessPolicy);
+    setNewAgentPolicy(nextNewAgentlessPolicy);
+    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
+    updatePackagePolicy({
+      supports_agentless: false,
+    });
+    // }
+  }
 
   return {
     handleSetupTechnologyChange,
@@ -203,11 +169,18 @@ export function useSetupTechnology({
 
 const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
   // placegolder for the logic to determine if the agentless setup is the default
-  return packageInfo ? false : false;
+  // return packageInfo ? false : false;
+  return false;
 };
 
 const getAdditionalAgentlessPolicyInfo = (packageInfo?: PackageInfo) => {
-  const agentlessPolicyTemplate = packageInfo?.policy_templates?.find(
+  if (
+    !packageInfo?.policy_templates &&
+    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
+  ) {
+    return undefined;
+  }
+  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
     (policy) => policy.deployment_modes
   );
 
