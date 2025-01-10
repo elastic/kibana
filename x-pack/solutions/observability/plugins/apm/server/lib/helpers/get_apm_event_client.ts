@@ -6,11 +6,11 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { DataTier } from '@kbn/observability-shared-plugin/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 import { inspectableEsQueriesMap } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmEventClient({

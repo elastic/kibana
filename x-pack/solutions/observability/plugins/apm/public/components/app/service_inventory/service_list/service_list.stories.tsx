@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { Meta, Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ApmServicesTable } from './apm_services_table';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';

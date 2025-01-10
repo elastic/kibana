@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart, CoreSetup } from '@kbn/core/public';
+import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { createContext } from 'react';
-import { Services } from '../../../services';
-import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from '../../../types';
+import type { Services } from '../../../services';
+import type {
+  ProfilingPluginPublicSetupDeps,
+  ProfilingPluginPublicStartDeps,
+} from '../../../types';
 
 export interface ProfilingDependencies {
   start: {

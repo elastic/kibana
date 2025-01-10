@@ -7,8 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
-import { ApmPluginStartDeps } from '../plugin';
+import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
+import type { ApmPluginStartDeps } from '../plugin';
 import { FETCH_STATUS } from './use_fetcher';
 
 export interface SearchDashboardsResult {

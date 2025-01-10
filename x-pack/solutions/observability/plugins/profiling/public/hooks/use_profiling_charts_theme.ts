@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PartialTheme } from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 const profilingThemeOverrides: PartialTheme = {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import { InventoryModel } from '../types';
+import type { InventoryModel } from '../types';
 
 export { awsRDSSnapshotMetricTypes } from './metrics';
 

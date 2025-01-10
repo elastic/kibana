@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiText } from '@elastic/eui';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;

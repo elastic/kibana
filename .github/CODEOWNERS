@@ -86,7 +86,7 @@ src/platform/packages/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
+x-pack/platform/plugins/private/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
@@ -95,8 +95,8 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/ki
 x-pack/platform/packages/shared/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
-packages/shared-ux/code_editor/impl @elastic/appex-sharedux
-packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 packages/kbn-code-owners @elastic/appex-qa
 packages/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
@@ -650,7 +650,7 @@ x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
-packages/kbn-monaco @elastic/appex-sharedux
+src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 src/platform/plugins/shared/navigation @elastic/appex-sharedux

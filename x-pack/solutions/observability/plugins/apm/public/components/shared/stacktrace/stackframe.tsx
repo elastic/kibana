@@ -8,7 +8,7 @@
 import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
+import type {
   Stackframe as StackframeType,
   StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';

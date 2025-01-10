@@ -8,14 +8,8 @@
 import React from 'react';
 import type { ValuesType } from 'utility-types';
 import { get } from 'lodash';
-import {
-  EuiBasicTable,
-  EuiText,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiButtonIcon,
-  copyToClipboard,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiButton, EuiButtonIcon, copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 function ConfigurationValueColumn({
   columnKey,

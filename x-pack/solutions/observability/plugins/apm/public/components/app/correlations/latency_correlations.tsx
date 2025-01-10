@@ -9,17 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { orderBy } from 'lodash';
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiBadge,
-  EuiIconTip,
-} from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiBadge, EuiIconTip } from '@elastic/eui';
+import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +22,7 @@ import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -44,7 +37,7 @@ import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { OnAddFilter } from './context_popover/field_stats_popover';
+import type { OnAddFilter } from './context_popover/field_stats_popover';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { useTheme } from '../../../hooks/use_theme';

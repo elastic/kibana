@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResult } from '../log_search_result';
+import type { SearchResult } from '../log_search_result';
 
 export interface SearchSummaryBucket {
   start: number;

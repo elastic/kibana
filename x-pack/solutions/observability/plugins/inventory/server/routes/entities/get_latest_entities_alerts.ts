@@ -7,7 +7,7 @@
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { AlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
+import type { AlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
 
 interface Bucket {

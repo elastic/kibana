@@ -6,7 +6,8 @@
  */
 
 import { getIsUsingTransactionEvents } from './get_is_using_transaction_events';
-import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import type { SearchParamsMock } from '../../../utils/test_helpers';
+import { inspectSearchParams } from '../../../utils/test_helpers';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 
 const mockResponseNoHits = {

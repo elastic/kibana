@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import React, { lazy, Suspense } from 'react';
-import { MetricsDataClient } from '../../../lib/metrics_client';
+import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
 
 const LazyIntegratedContainerMetricsTable = lazy(

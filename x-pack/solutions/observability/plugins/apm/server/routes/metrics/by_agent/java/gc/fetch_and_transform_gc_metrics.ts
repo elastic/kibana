@@ -11,7 +11,7 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
-import { ChartBase } from '../../../types';
+import type { ChartBase } from '../../../types';
 
 import {
   AGENT_NAME,
@@ -29,8 +29,8 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../../../../common/utils/environment_query';
-import { APMConfig } from '../../../../..';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../../../..';
+import type { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const RATE = 'rate';
 export const TIME = 'time';

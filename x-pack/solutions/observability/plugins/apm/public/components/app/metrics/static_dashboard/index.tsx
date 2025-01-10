@@ -8,16 +8,14 @@
 import React, { useState, useEffect } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRenderer,
-} from '@kbn/dashboard-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
+import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -25,7 +23,8 @@ import {
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { convertSavedDashboardToPanels, MetricsDashboardProps } from './helper';
+import type { MetricsDashboardProps } from './helper';
+import { convertSavedDashboardToPanels } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
