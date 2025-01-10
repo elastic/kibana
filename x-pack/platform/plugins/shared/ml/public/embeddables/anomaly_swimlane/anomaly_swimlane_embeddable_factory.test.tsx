@@ -118,7 +118,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     await waitFor(() => {
       const resultApi = onApiAvailable.mock.calls[0][0];
 
-      expect(resultApi.dataLoading!.value).toEqual(false);
+      expect(resultApi.dataLoading$?.value).toEqual(false);
       expect(resultApi.jobIds.value).toEqual(['my-job']);
       expect(resultApi.viewBy.value).toEqual('overall');
 

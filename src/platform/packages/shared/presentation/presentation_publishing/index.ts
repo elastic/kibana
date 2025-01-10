@@ -140,6 +140,7 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
+  type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
 export {

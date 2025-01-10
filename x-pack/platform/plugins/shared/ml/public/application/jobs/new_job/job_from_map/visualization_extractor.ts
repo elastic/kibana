@@ -30,7 +30,7 @@ export class VisualizationExtractor {
     embeddable: MapApi & Partial<PublishesDataViews>
   ): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
-    const dataViews: DataView[] = embeddable.dataViews?.value ?? [];
+    const dataViews: DataView[] = embeddable.dataViews$?.value ?? [];
 
     // Keep track of geoFields for layers as they can be repeated
     const layerGeoFields: Record<string, boolean> = {};
