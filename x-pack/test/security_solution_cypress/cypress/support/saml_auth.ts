@@ -98,7 +98,7 @@ export const samlAuthentication = async (
       const apiKey = response.data.encoded;
       return apiKey;
     },
-    setServerlessCustomRole: async ({
+    createServerlessCustomRole: async ({
       roleDescriptor,
       roleName,
     }: {

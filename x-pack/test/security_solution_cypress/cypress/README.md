@@ -312,7 +312,7 @@ Custom roles for serverless is currently supported only for stateless environmen
 
 ##### Creating a Custom Role
 
-To create a custom role, use the Cypress task `setServerlessCustomRole`. This task requires two parameters:
+To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
 - **`roleDescriptor`**: Defines the permissions and access for the role.
 - **`roleName`**: A unique name for the custom role.
 
@@ -333,7 +333,7 @@ const roleDescriptor = {
   ],
 };
 
-cy.task('setServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
 ```
 
 ##### Using a Custom Role
@@ -373,7 +373,7 @@ const roleDescriptor = {
 };
 
 before(() => {
-  cy.task('setServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+  cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
 });
 
 beforeEach(() => {
