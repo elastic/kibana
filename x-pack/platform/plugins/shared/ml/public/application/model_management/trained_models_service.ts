@@ -15,6 +15,11 @@ import {
   distinctUntilChanged,
   map,
   shareReplay,
+  tap,
+  from,
+  filter,
+  take,
+  finalize,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -54,7 +59,6 @@ export class TrainedModelsService {
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private initialized = false;
-  private onFetchCallbacks: Array<(items: TrainedModelUIItem[]) => void> = [];
   private downloadStatusFetchInProgress = false;
   private _activeOperations$ = new BehaviorSubject<ModelOperation[]>([]);
 
@@ -91,110 +95,91 @@ export class TrainedModelsService {
     return this.initialized;
   }
 
-  public onFetch(callback: (items: TrainedModelUIItem[]) => void) {
-    this.onFetchCallbacks.push(callback);
-    return () => {
-      this.onFetchCallbacks = this.onFetchCallbacks.filter((c) => c !== callback);
-    };
-  }
-
-  public async fetchModels(): Promise<void> {
+  public fetchModels$() {
     if (!this.isInitialized()) {
       this.initialized = true;
     }
 
     this.addActiveOperation({ type: 'fetching' });
 
-    try {
-      const resultItems = await this.trainedModelsApiService.getTrainedModelsList();
-      // Merge extisting items with new items
-      // to preserve state and download status
-      const updatedItems = this.mergeModelItems(resultItems);
-
-      this._modelItems$.next(updatedItems);
-
-      this.onFetchCallbacks.forEach((callback) => callback(updatedItems));
-
-      this.startDownloadStatusPolling();
-    } catch (error) {
-      throw error;
-    } finally {
-      this.removeActiveOperation('fetching');
-    }
+    return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
+      map((resultItems) => {
+        // Merge extisting items with new items
+        // to preserve state and download status
+        const updatedItems = this.mergeModelItems(resultItems);
+        this._modelItems$.next(updatedItems);
+        this.startDownloadStatusPolling();
+      }),
+      finalize(() => this.removeActiveOperation('fetching')),
+      take(1)
+    );
   }
 
-  public async downloadModel(modelId: string) {
+  public downloadModel$(modelId: string) {
     this.addActiveOperation({
       modelId,
       type: 'downloading',
     });
 
-    try {
-      await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-    } catch (error) {
-      this.removeActiveOperation('downloading', modelId);
-      throw error;
-    }
-
-    await this.fetchModels();
+    return from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId)).pipe(
+      tap({
+        error: () => this.removeActiveOperation('downloading', modelId),
+      }),
+      // Maybe use a MergeMap to allow multiple downloads in parallel
+      switchMap(() => this.fetchModels$())
+    );
   }
 
-  public async startModelDeployment(
+  public startModelDeployment$(
     modelId: string,
     deploymentParams: CommonDeploymentParams,
     adaptiveAllocationsParams?: AdaptiveAllocationsParams
   ) {
     this.addActiveOperation({ modelId, type: 'deploying' });
 
-    try {
-      await this.ensureModelIsDownloaded(modelId);
-
-      await this.trainedModelsApiService.startModelAllocation(
-        modelId,
-        deploymentParams,
-        adaptiveAllocationsParams
-      );
-
-      await this.fetchModels();
-    } catch (error) {
-      // Rethrow to be handled by the caller
-      throw error;
-    } finally {
-      this.removeActiveOperation('deploying', modelId);
-    }
+    return this.getModel$(modelId).pipe(
+      filter(
+        (model) =>
+          isBaseNLPModelItem(model) &&
+          (model.state === MODEL_STATE.DOWNLOADED || model.state === MODEL_STATE.STARTED)
+      ),
+      take(1),
+      switchMap(() => {
+        return from(
+          this.trainedModelsApiService.startModelAllocation(
+            modelId,
+            deploymentParams,
+            adaptiveAllocationsParams
+          )
+        ).pipe(finalize(() => this.removeActiveOperation('deploying', modelId)));
+      }),
+      switchMap(() => this.fetchModels$())
+    );
   }
 
-  public async updateModelDeployment(
+  public updateModelDeployment$(
     modelId: string,
     deploymentId: string,
     config: AdaptiveAllocationsParams
   ) {
-    try {
-      await this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config);
-      await this.fetchModels();
-    } catch (error) {
-      // Rethrow to be handled by the caller
-      throw error;
-    }
+    this.addActiveOperation({ modelId, type: 'deploying' });
+
+    return from(
+      this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config)
+    ).pipe(
+      finalize(() => this.removeActiveOperation('deploying', modelId)),
+      switchMap(() => this.fetchModels$())
+    );
   }
 
-  public async stopModelDeployment(
+  public stopModelDeployment$(
     modelId: string,
     deploymentIds: string[],
-    options: { force?: boolean } = {}
+    options?: { force: boolean }
   ) {
-    try {
-      const results = await this.trainedModelsApiService.stopModelAllocation(
-        modelId,
-        deploymentIds,
-        { force: options.force ?? false }
-      );
-      await this.fetchModels();
-      return results;
-    } catch (error) {
-      // Rethrow to be handled by the caller
-      throw error;
-    }
+    return from(
+      this.trainedModelsApiService.stopModelAllocation(modelId, deploymentIds, options)
+    ).pipe(switchMap((results) => this.fetchModels$().pipe(map(() => results))));
   }
 
   public getModel(modelId: string): TrainedModelUIItem | undefined {
@@ -203,49 +188,6 @@ export class TrainedModelsService {
 
   public markDownloadAborted(modelId: string) {
     this.abortedDownloads.add(modelId);
-  }
-
-  public getModelDownloadState$(modelId: string): Observable<ModelDownloadState | undefined> {
-    return this.downloadStatus$.pipe(
-      map((status) => status[modelId]),
-      distinctUntilChanged()
-    );
-  }
-
-  public getModelDownloadState(modelId: string): ModelDownloadState | undefined {
-    return this.downloadStatus$.getValue()[modelId];
-  }
-
-  private async ensureModelIsDownloaded(modelId: string) {
-    const model = this.getModel(modelId);
-
-    if (!isBaseNLPModelItem(model)) return;
-
-    if (model?.state === MODEL_STATE.DOWNLOADED) {
-      return;
-    }
-
-    const isNotDownloaded = model.state === MODEL_STATE.NOT_DOWNLOADED;
-    const alreadyDownloading = this.activeOperations.some(
-      (op) => op.type === 'downloading' && op.modelId === modelId
-    );
-
-    // If there's no "downloading" operation yet and the model is not downloaded, start downloading
-    if (isNotDownloaded && !alreadyDownloading) {
-      await this.downloadModel(modelId);
-    }
-
-    // Wait until the poll sets the model as fully downloaded
-    await new Promise<void>((resolve) => {
-      const subscription = this.getModel$(modelId).subscribe((updatedModel) => {
-        if (!isBaseNLPModelItem(updatedModel)) return;
-
-        if (updatedModel?.state === MODEL_STATE.DOWNLOADED) {
-          subscription.unsubscribe();
-          resolve();
-        }
-      });
-    });
   }
 
   private mergeModelItems(newItems: TrainedModelUIItem[]) {
@@ -381,7 +323,6 @@ export class TrainedModelsService {
     this._modelItems$.complete();
     this.downloadStatus$.complete();
     this.stopPolling$.complete();
-    this.pollingSubscription?.unsubscribe();
   }
 }
 

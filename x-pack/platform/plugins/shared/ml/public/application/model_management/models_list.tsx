@@ -191,52 +191,43 @@ export const ModelsList: FC<Props> = ({
     return items.filter((i): i is NLPModelItem | DFAModelItem => !isModelDownloadItem(i));
   }, [items]);
 
+  const fetchModels = useCallback(() => {
+    trainedModelsService.fetchModels$().subscribe({
+      error: (error) => {
+        displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
+            defaultMessage: 'Error loading trained models',
+          })
+        );
+      },
+    });
+  }, [displayErrorToast, trainedModelsService]);
+
+  // TODO: Figure out a better hook to check for deep changes in items
   useEffect(() => {
-    return () => {
-      if (trainedModelsService) {
-        trainedModelsService.destroy();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Update expanded rows when items change
+    setItemIdToExpandedRowMap((prevMap) => {
+      return Object.fromEntries(
+        Object.keys(prevMap).map((modelId) => {
+          const item = items.find((i) => i.model_id === modelId);
+          return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
+        })
+      );
+    });
+  }, [items]);
 
   useEffect(
     function updateOnTimerRefresh() {
       if (!refresh) return;
 
-      // Register callback for expanded rows updates
-      const removeCallback = trainedModelsService.onFetch((modelItems) => {
-        // Refresh expanded rows
-        setItemIdToExpandedRowMap((prevMap) => {
-          return Object.fromEntries(
-            Object.keys(prevMap).map((modelId) => {
-              const item = modelItems.find((i) => i.model_id === modelId);
-              return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
-            })
-          );
-        });
-      });
-
-      const fetchData = async () => {
-        try {
-          await trainedModelsService.fetchModels();
-        } catch (error) {
-          displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-              defaultMessage: 'Error loading trained models',
-            })
-          );
-        }
-      };
-
-      fetchData();
+      fetchModels();
 
       return () => {
-        removeCallback();
+        trainedModelsService.destroy();
       };
     },
-    [displayErrorToast, refresh, trainedModelsService]
+    [fetchModels, refresh, trainedModelsService]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -290,17 +281,17 @@ export const ModelsList: FC<Props> = ({
         return;
       }
 
-      try {
-        await trainedModelsService.downloadModel(modelId);
-      } catch (e) {
-        displayErrorToast(
-          e,
-          i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
-            defaultMessage: 'Failed to download "{modelId}"',
-            values: { modelId },
-          })
-        );
-      }
+      trainedModelsService.downloadModel$(modelId).subscribe({
+        error: (error) => {
+          displayErrorToast(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+              defaultMessage: 'Failed to download "{modelId}"',
+              values: { modelId },
+            })
+          );
+        },
+      });
     },
     [activeOperations, displayErrorToast, trainedModelsService]
   );
@@ -623,10 +614,7 @@ export const ModelsList: FC<Props> = ({
 
   return (
     <>
-      <SavedObjectsWarning
-        onCloseFlyout={trainedModelsService.fetchModels.bind(trainedModelsService)}
-        forceRefresh={isLoading}
-      />
+      <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats ? (
           <EuiFlexItem>
@@ -739,7 +727,7 @@ export const ModelsList: FC<Props> = ({
             setModelsToDelete([]);
 
             if (refreshList) {
-              trainedModelsService.fetchModels();
+              fetchModels();
             }
           }}
           models={modelsToDelete}
@@ -751,7 +739,7 @@ export const ModelsList: FC<Props> = ({
           onClose={(refreshList?: boolean) => {
             setModelToTest(null);
             if (refreshList) {
-              trainedModelsService.fetchModels();
+              fetchModels();
             }
           }}
         />

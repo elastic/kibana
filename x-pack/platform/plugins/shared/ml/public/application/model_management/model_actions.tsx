@@ -249,8 +249,8 @@ export function useModelActions({
 
           if (!modelDeploymentParams) return;
 
-          try {
-            await trainedModelsService.startModelDeployment(
+          trainedModelsService
+            .startModelDeployment$(
               item.model_id,
               {
                 priority: modelDeploymentParams.priority!,
@@ -263,18 +263,20 @@ export function useModelActions({
                   ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
                   : {}),
               }
-            );
-          } catch (e) {
-            displayErrorToast(
-              e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                defaultMessage: 'Failed to start "{modelId}"',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-          }
+            )
+            .subscribe({
+              error: (e) => {
+                displayErrorToast(
+                  e,
+                  i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                    defaultMessage: 'Failed to start "{modelId}"',
+                    values: {
+                      modelId: item.model_id,
+                    },
+                  })
+                );
+              },
+            });
         },
       },
       {
@@ -309,38 +311,38 @@ export function useModelActions({
 
           if (!deploymentParams) return;
 
-          try {
-            await trainedModelsService.updateModelDeployment(
-              item.model_id,
-              deploymentParams.deployment_id!,
-              {
-                ...(deploymentParams.adaptive_allocations
-                  ? { adaptive_allocations: deploymentParams.adaptive_allocations }
-                  : {
-                      number_of_allocations: deploymentParams.number_of_allocations!,
-                      adaptive_allocations: { enabled: false },
-                    }),
-              }
-            );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-          } catch (e) {
-            displayErrorToast(
-              e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
-                defaultMessage: 'Failed to update "{modelId}"',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-          }
+          trainedModelsService
+            .updateModelDeployment$(item.model_id, deploymentParams.deployment_id!, {
+              ...(deploymentParams.adaptive_allocations
+                ? { adaptive_allocations: deploymentParams.adaptive_allocations }
+                : {
+                    number_of_allocations: deploymentParams.number_of_allocations!,
+                    adaptive_allocations: { enabled: false },
+                  }),
+            })
+            .subscribe({
+              next: () => {
+                displaySuccessToast(
+                  i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
+                    defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
+                    values: {
+                      modelId: item.model_id,
+                    },
+                  })
+                );
+              },
+              error: (e) => {
+                displayErrorToast(
+                  e,
+                  i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
+                    defaultMessage: 'Failed to update "{modelId}"',
+                    values: {
+                      modelId: item.model_id,
+                    },
+                  })
+                );
+              },
+            });
         },
       },
       {
@@ -385,40 +387,40 @@ export function useModelActions({
             }
           }
 
-          try {
-            const results = await trainedModelsService.stopModelDeployment(
-              item.model_id,
-              deploymentIds,
-              {
-                force: requireForceStop,
-              }
-            );
-            if (Object.values(results).some((r) => r.error !== undefined)) {
-              Object.entries(results).forEach(([id, r]) => {
-                if (r.error !== undefined) {
-                  displayErrorToast(
-                    r.error,
-                    i18n.translate('xpack.ml.trainedModels.modelsList.stopDeploymentWarning', {
-                      defaultMessage: 'Failed to stop "{deploymentId}"',
-                      values: {
-                        deploymentId: id,
-                      },
-                    })
-                  );
+          trainedModelsService
+            .stopModelDeployment$(item.model_id, deploymentIds, {
+              force: requireForceStop,
+            })
+            .subscribe({
+              next: (results) => {
+                if (Object.values(results).some((r) => r.error !== undefined)) {
+                  Object.entries(results).forEach(([id, r]) => {
+                    if (r.error !== undefined) {
+                      displayErrorToast(
+                        r.error,
+                        i18n.translate('xpack.ml.trainedModels.modelsList.stopDeploymentWarning', {
+                          defaultMessage: 'Failed to stop "{deploymentId}"',
+                          values: {
+                            deploymentId: id,
+                          },
+                        })
+                      );
+                    }
+                  });
                 }
-              });
-            }
-          } catch (e) {
-            displayErrorToast(
-              e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
-                defaultMessage: 'Failed to stop "{modelId}"',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-          }
+              },
+              error: (e) => {
+                displayErrorToast(
+                  e,
+                  i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+                    defaultMessage: 'Failed to stop "{modelId}"',
+                    values: {
+                      modelId: item.model_id,
+                    },
+                  })
+                );
+              },
+            });
         },
       },
       {
