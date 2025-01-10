@@ -189,7 +189,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
             serializedVis: vis$.getValue().serialize(),
-            titles: titleManager.serializeTitles(),
+            titles: titleManager.serialize(),
             id: savedObjectId$.getValue(),
             linkedToLibrary:
               // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
@@ -250,7 +250,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const { rawState, references } = serializeState({
             serializedVis: vis$.getValue().serialize(),
             titles: {
-              ...titleManager.serializeTitles(),
+              ...titleManager.serialize(),
               title: newTitle,
             },
           });
@@ -265,12 +265,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
         checkForDuplicateTitle: () => false, // Handled by saveToLibrary action
         getByValueState: () => ({
           savedVis: vis$.getValue().serialize(),
-          ...titleManager.serializeTitles(),
+          ...titleManager.serialize(),
         }),
         getByReferenceState: (libraryId) =>
           serializeState({
             serializedVis: vis$.getValue().serialize(),
-            titles: titleManager.serializeTitles(),
+            titles: titleManager.serialize(),
             id: libraryId,
             linkedToLibrary: true,
           }).rawState,

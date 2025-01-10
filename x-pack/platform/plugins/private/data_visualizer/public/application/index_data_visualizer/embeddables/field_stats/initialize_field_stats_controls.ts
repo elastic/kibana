@@ -38,7 +38,7 @@ export const initializeFieldStatsControls = (
   const resetData$ = new BehaviorSubject<number>(Date.now());
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-  const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
   const updateUserInput = (update: FieldStatsInitialState, shouldResetData = false) => {
     if (shouldResetData) {
@@ -67,7 +67,7 @@ export const initializeFieldStatsControls = (
 
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
-  const onError = (error?: Error) => blockingError.next(error);
+  const onError = (error?: Error) => blockingError$.next(error);
 
   return {
     fieldStatsControlsApi: {
@@ -78,11 +78,11 @@ export const initializeFieldStatsControls = (
       showDistributions$,
     } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
-      dataLoading: dataLoading$,
+      dataLoading$,
       onRenderComplete,
       onLoading,
       onError,
-      blockingError,
+      blockingError$,
     },
     // Reset data is internal state management, so no need to expose this in api
     resetData$,

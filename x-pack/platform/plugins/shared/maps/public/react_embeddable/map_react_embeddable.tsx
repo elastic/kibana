@@ -112,7 +112,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       return {
         ...state,
         ...timeRange.serialize(),
-        ...titleManager.serializeTitles(),
+        ...titleManager.serialize(),
         ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
         ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),

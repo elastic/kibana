@@ -33,7 +33,7 @@ export const initializeTitleManager = (
 ): {
   api: TitlesApi;
   comparators: StateComparators<SerializedTitles>;
-  serializeTitles: () => SerializedTitles;
+  serialize: () => SerializedTitles;
 } => {
   const title$ = new BehaviorSubject<string | undefined>(rawState.title);
   const description$ = new BehaviorSubject<string | undefined>(rawState.description);
@@ -63,7 +63,7 @@ export const initializeTitleManager = (
       description: [description$, setDescription],
       hidePanelTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
     } as StateComparators<SerializedTitles>,
-    serializeTitles: () => ({
+    serialize: () => ({
       title: title$.value,
       hideTitles: hideTitle$.value,
       description: description$.value,

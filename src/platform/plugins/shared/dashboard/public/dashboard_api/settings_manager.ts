@@ -52,7 +52,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
 
   function getSettings() {
     return {
-      ...titleManager.serializeTitles(),
+      ...titleManager.serialize(),
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,

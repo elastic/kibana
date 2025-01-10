@@ -36,10 +36,10 @@ describe('titles api', () => {
   });
 
   it('should correctly serialize current state', () => {
-    const { serializeTitles, api } = initializeTitleManager(rawState);
-    api.setTitle('UH OH, A TITLE');
+    const titleManager = initializeTitleManager(rawState);
+    titleManager.api.setTitle('UH OH, A TITLE');
 
-    const serializedTitles = serializeTitles();
+    const serializedTitles = titleManager.serialize();
     expect(serializedTitles).toMatchInlineSnapshot(`
         Object {
           "description": "less cool description",

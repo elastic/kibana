@@ -158,7 +158,7 @@ export function initializeDashboardServices(
           }
         : {};
       return {
-        ...titleManager.serializeTitles(),
+        ...titleManager.serialize(),
         style,
         className,
         ...settings,
