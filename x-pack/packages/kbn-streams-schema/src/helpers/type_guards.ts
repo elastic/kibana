@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodSchema } from '@kbn/zod';
+import { ZodSchema, custom } from '@kbn/zod';
 import {
   AndCondition,
   conditionSchema,
@@ -69,6 +69,16 @@ export function isIngestStream(subject: StreamDefinition): subject is IngestStre
 
 export function isWiredStream(subject: StreamDefinition): subject is WiredStreamDefinition {
   return isSchema(wiredStreamDefinitonSchema, subject);
+}
+
+const rootStreamSchema = custom<'RootStreamSchema'>((val) => {
+  return val?.name?.split('.').length === 1;
+});
+
+export function isRootStream(subject: any) {
+  return (
+    (isWiredStream(subject) || isWiredReadStream(subject)) && isSchema(rootStreamSchema, subject)
+  );
 }
 
 export function isWiredStreamConfig(subject: any): subject is WiredStreamConfigDefinition {
