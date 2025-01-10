@@ -186,7 +186,12 @@ export class TrainedModelsService {
     return this.modelItems.find((item) => item.model_id === modelId);
   }
 
-  public markDownloadAborted(modelId: string) {
+  public cleanupModelOperations(modelId: string) {
+    this.markDownloadAborted(modelId);
+    this.removeActiveOperation('deploying', modelId);
+  }
+
+  private markDownloadAborted(modelId: string) {
     this.abortedDownloads.add(modelId);
   }
 

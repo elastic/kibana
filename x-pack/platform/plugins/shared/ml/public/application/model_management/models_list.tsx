@@ -712,7 +712,7 @@ export const ModelsList: FC<Props> = ({
           onClose={(refreshList) => {
             modelsToDelete.forEach((model) => {
               if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-                trainedModelsService.markDownloadAborted(model.model_id);
+                trainedModelsService.cleanupModelOperations(model.model_id);
               }
             });
 
