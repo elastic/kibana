@@ -177,7 +177,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
     isServerless: [
       () => [selectors.cloud],
-      (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isServerlessEnabled),
+      (cloud?: CloudSetup | CloudStart) => Boolean(cloud?.isServerlessEnabled),
     ],
   }),
 });
