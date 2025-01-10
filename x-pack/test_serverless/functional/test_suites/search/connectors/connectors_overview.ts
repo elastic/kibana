@@ -63,18 +63,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
         await pageObjects.common.navigateToApp('serverlessConnectors');
       });
-      it('confirm connector is exists', async () => {
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
-      });
-
-      it('confirm searchBar to exist', async () => {
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
-      });
 
       it('searchBar and select, filters connector table', async () => {
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
-          TEST_CONNECTOR_NAME
-        );
+        // Ensure the page is rendered and we have items
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
+
+        // Filter the table to just our connector
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
           TEST_CONNECTOR_NAME
         );
@@ -85,13 +81,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
           'Type'
         );
-
         await testSubjects.click('clearSearchButton');
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
           'confluence'
         );
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveNoItems();
         await testSubjects.click('clearSearchButton');
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
+          'Name'
+        );
       });
     });
     describe('delete connector', () => {

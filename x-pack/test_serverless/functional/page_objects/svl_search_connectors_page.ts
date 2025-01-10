@@ -109,6 +109,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async expectConnectorTableToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorTable');
       },
+      async expectConnectorTableToHaveItems(timeout?: number) {
+        await testSubjects.existOrFail('serverlessSearchColumnsLink', { timeout });
+      },
       async expectConnectorTableToHaveNoItems(timeout?: number) {
         await testSubjects.missingOrFail('serverlessSearchColumnsLink', { timeout });
       },
@@ -144,9 +147,6 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         });
         const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(false);
-      },
-      async getConnectorFromConnectorTable(connectorName: string) {
-        await testSubjects.getAttribute('serverlessSearchColumnsLink', connectorName);
       },
       async getConnectorsList() {
         const rows = await (
