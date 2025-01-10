@@ -40,6 +40,7 @@ import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in
 import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
+import { identityFieldsBySource } from './lib/v2/definitions/identity_fields_by_source';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -47,6 +48,7 @@ export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
   v2: {
     instanceAsFilter: typeof instanceAsFilter;
+    identityFieldsBySource: typeof identityFieldsBySource;
   };
 }
 
@@ -194,6 +196,7 @@ export class EntityManagerServerPlugin
       },
       v2: {
         instanceAsFilter,
+        identityFieldsBySource,
       },
     };
   }

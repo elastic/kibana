@@ -8,9 +8,11 @@
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-journey('ProjectAPIKeys', async ({ page }) => {
+journey('ProjectAPIKeys', async ({ page, params }) => {
   recordVideo(page);
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   let apiKey = '';
 
@@ -33,15 +35,7 @@ journey('ProjectAPIKeys', async ({ page }) => {
   });
 
   step('Go to http://localhost:5620/login?next=%2Fapp%2Fsynthetics%2Fsettings', async () => {
-    await page.goto('http://localhost:5620/login?next=%2Fapp%2Fsynthetics%2Fsettings');
-    await page.click('input[name="username"]');
-    await page.fill('input[name="username"]', 'elastic');
-    await page.press('input[name="username"]', 'Tab');
-    await page.fill('input[name="password"]', 'changeme');
-    await Promise.all([
-      page.waitForNavigation({ url: 'http://localhost:5620/app/synthetics/settings/alerting' }),
-      page.click('button:has-text("Log in")'),
-    ]);
+    await syntheticsApp.navigateToSettings(true);
   });
   step('Click text=Project API Keys', async () => {
     await page.click('text=Project API Keys');
