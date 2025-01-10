@@ -24,7 +24,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const samlAuth = getService('samlAuth');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   const messages: Message[] = [
@@ -71,8 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         (body) => !isFunctionTitleRequest(body)
       );
 
-      const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      const responsePromise = observabilityAIAssistantAPIClient.publicApi({
+      const responsePromise = observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           query: { format },
@@ -84,7 +82,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             instructions,
           },
         },
-        roleAuthc,
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.race([

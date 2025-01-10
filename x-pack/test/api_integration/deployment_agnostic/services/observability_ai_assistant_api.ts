@@ -13,7 +13,6 @@ import type {
   ObservabilityAIAssistantAPIEndpoint as APIEndpoint,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 type Options<TEndpoint extends APIEndpoint> = {
@@ -24,12 +23,6 @@ type Options<TEndpoint extends APIEndpoint> = {
     params?: { query?: { _inspect?: boolean } };
   };
 
-type InternalEndpoint<T extends APIEndpoint> = T extends `${string} /internal/${string}`
-  ? T
-  : never;
-
-type PublicEndpoint<T extends APIEndpoint> = T extends `${string} /api/${string}` ? T : never;
-
 function createObservabilityAIAssistantApiClient({
   getService,
 }: DeploymentAgnosticFtrProviderContext) {
@@ -37,7 +30,7 @@ function createObservabilityAIAssistantApiClient({
   const samlAuth = getService('samlAuth');
   const logger = getService('log');
 
-  async function makeApiRequest<TEndpoint extends APIEndpoint>({
+  async function sendApiRequest<TEndpoint extends APIEndpoint>({
     options,
     headers,
   }: {
@@ -80,8 +73,8 @@ function createObservabilityAIAssistantApiClient({
     return res;
   }
 
-  function makeInternalApiRequest(role: string) {
-    return async <TEndpoint extends InternalEndpoint<APIEndpoint>>(
+  function makeApiRequest(role: string) {
+    return async <TEndpoint extends APIEndpoint>(
       options: Options<TEndpoint>
     ): Promise<SupertestReturnType<TEndpoint>> => {
       const headers: Record<string, string> = {
@@ -89,25 +82,7 @@ function createObservabilityAIAssistantApiClient({
         ...(await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role)),
       };
 
-      return makeApiRequest({
-        options,
-        headers,
-      });
-    };
-  }
-
-  function makePublicApiRequest() {
-    return async <TEndpoint extends PublicEndpoint<APIEndpoint>>(
-      options: Options<TEndpoint> & {
-        roleAuthc: RoleCredentials;
-      }
-    ): Promise<SupertestReturnType<TEndpoint>> => {
-      const headers: Record<string, string> = {
-        ...samlAuth.getInternalRequestHeader(),
-        ...options.roleAuthc.apiKeyHeader,
-      };
-
-      return makeApiRequest({
+      return sendApiRequest({
         options,
         headers,
       });
@@ -116,7 +91,7 @@ function createObservabilityAIAssistantApiClient({
 
   async function deleteAllActionConnectors(): Promise<any> {
     const internalReqHeader = samlAuth.getInternalRequestHeader();
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     const res = await supertestWithoutAuth
       .get(`/api/actions/connectors`)
       .set(roleAuthc.apiKeyHeader)
@@ -128,7 +103,7 @@ function createObservabilityAIAssistantApiClient({
 
   async function deleteActionConnector({ actionId }: { actionId: string }) {
     const internalReqHeader = samlAuth.getInternalRequestHeader();
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     return supertestWithoutAuth
       .delete(`/api/actions/connector/${actionId}`)
       .set(roleAuthc.apiKeyHeader)
@@ -137,7 +112,7 @@ function createObservabilityAIAssistantApiClient({
 
   async function createProxyActionConnector({ port }: { port: number }) {
     const internalReqHeader = samlAuth.getInternalRequestHeader();
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     try {
       const res = await supertestWithoutAuth
         .post('/api/actions/connector')
@@ -166,8 +141,7 @@ function createObservabilityAIAssistantApiClient({
   }
 
   return {
-    makeInternalApiRequest,
-    makePublicApiRequest,
+    makeApiRequest,
     deleteAllActionConnectors,
     deleteActionConnector,
     createProxyActionConnector,
@@ -194,10 +168,9 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
 export function ObservabilityAIAssistantApiProvider(context: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantApiClient = createObservabilityAIAssistantApiClient(context);
   return {
-    admin: observabilityAIAssistantApiClient.makeInternalApiRequest('admin'),
-    viewer: observabilityAIAssistantApiClient.makeInternalApiRequest('viewer'),
-    editor: observabilityAIAssistantApiClient.makeInternalApiRequest('editor'),
-    publicApi: observabilityAIAssistantApiClient.makePublicApiRequest(),
+    admin: observabilityAIAssistantApiClient.makeApiRequest('admin'),
+    viewer: observabilityAIAssistantApiClient.makeApiRequest('viewer'),
+    editor: observabilityAIAssistantApiClient.makeApiRequest('editor'),
     deleteAllActionConnectors: observabilityAIAssistantApiClient.deleteAllActionConnectors,
     createProxyActionConnector: observabilityAIAssistantApiClient.createProxyActionConnector,
     deleteActionConnector: observabilityAIAssistantApiClient.deleteActionConnector,
