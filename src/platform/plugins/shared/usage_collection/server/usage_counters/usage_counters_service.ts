@@ -163,10 +163,17 @@ export class UsageCountersService {
     counters: UsageCounters.v1.CounterMetric[],
     soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
   ) {
+    const backoffDelay = (attempt: number) => Math.pow(2, attempt) * 10; // exponential backoff
     return Rx.forkJoin(
       counters.map((metric) =>
         Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
-          Rx.retry(this.retryCount),
+          Rx.retry({
+            count: this.retryCount,
+            delay: (error, retryIndex) => {
+              this.logger.warn(`Error: ${error.message}, retrying attempt ${retryIndex + 1}`);
+              return Rx.timer(backoffDelay(retryIndex));
+            },
+          }),
           Rx.catchError((error) => {
             this.logger.warn(error);
             return Rx.of(error);

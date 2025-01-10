@@ -25,9 +25,9 @@ const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.Mo
   typeof registerUsageCountersRollups
 >;
 
-const tick = () => {
+const tickWithDelay = (delay = 1) => {
   jest.useRealTimers();
-  return new Promise((resolve) => setTimeout(resolve, 1));
+  return new Promise((resolve) => setTimeout(resolve, delay));
 };
 
 describe('UsageCountersService', () => {
@@ -190,14 +190,15 @@ describe('UsageCountersService', () => {
   });
 
   it('retries errors by `retryCount` times before failing to store', async () => {
+    const retryConst = 1;
     const usageCountersService = new UsageCountersService({
       logger,
-      retryCount: 1,
+      retryCount: retryConst,
       bufferDurationMs,
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockError = new Error('failed.');
+    const mockError = new Error('failed in a mock from this test.');
     const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
       switch (key) {
         case 'test-counter:counterA:count:server:20210409':
@@ -222,9 +223,16 @@ describe('UsageCountersService', () => {
     jest.runOnlyPendingTimers();
 
     // wait for retries to kick in on next scheduler call
-    await tick();
+    await tickWithDelay(100);
     // number of incrementCounter calls + number of retries
-    expect(mockIncrementCounter).toBeCalledTimes(2 + 1);
+    expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
+    // expect(logger.warn).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
+    //   kibana: {
+    //     usageCounters: {
+    //       results: [mockError, 'pass'],
+    //     },
+    //   },
+    // });
     expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
       kibana: {
         usageCounters: {
@@ -264,7 +272,7 @@ describe('UsageCountersService', () => {
     jest.runOnlyPendingTimers();
 
     // wait for debounce to kick in on next scheduler call
-    await tick();
+    await tickWithDelay();
     expect(mockIncrementCounter).toBeCalledTimes(2);
     expect(mockIncrementCounter.mock.results.map(({ value }) => value)).toMatchInlineSnapshot(`
       Array [
