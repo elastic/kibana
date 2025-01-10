@@ -56,7 +56,11 @@ export const DefaultBucketContainer = ({
             <EuiIcon
               size="s"
               color={
-                euiTheme.colors[isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText']
+                isInvalid
+                  ? euiTheme.colors.textDanger
+                  : isNotDraggable
+                  ? euiTheme.colors.textDisabled
+                  : euiTheme.colors.textSubdued
               }
               type={isInvalid ? 'warning' : 'grab'}
               aria-label={
