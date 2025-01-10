@@ -117,7 +117,6 @@ export const ModelsList: FC<Props> = ({
   } = useMlKibana();
 
   const trainedModelsService = useTrainedModelsService();
-  const isInitialized = trainedModelsService.isInitialized();
   const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
   const activeOperations = useObservable(
@@ -609,8 +608,6 @@ export const ModelsList: FC<Props> = ({
       return items.filter((item) => !isModelDownloadItem(item) || item.recommended);
     }
   }, [items, pageState.showAll]);
-
-  if (!isInitialized) return null;
 
   return (
     <>

@@ -59,7 +59,6 @@ export class TrainedModelsService {
   private stopPolling$ = new Subject<void>();
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
-  private initialized = false;
   private downloadStatusFetchInProgress = false;
   private _activeOperations$ = new BehaviorSubject<ModelOperation[]>([]);
 
@@ -92,15 +91,7 @@ export class TrainedModelsService {
     return this._activeOperations$.getValue().length > 0;
   }
 
-  public isInitialized() {
-    return this.initialized;
-  }
-
   public fetchModels$() {
-    if (!this.isInitialized()) {
-      this.initialized = true;
-    }
-
     this.addActiveOperation({ type: 'fetching' });
 
     return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
