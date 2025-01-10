@@ -786,7 +786,7 @@
     "@kbn/saved-objects-settings": "link:src/platform/packages/private/kbn-saved-objects-settings",
     "@kbn/saved-objects-tagging-oss-plugin": "link:src/platform/plugins/shared/saved_objects_tagging_oss",
     "@kbn/saved-objects-tagging-plugin": "link:x-pack/platform/plugins/shared/saved_objects_tagging",
-    "@kbn/saved-search-component": "link:packages/kbn-saved-search-component",
+    "@kbn/saved-search-component": "link:src/platform/packages/shared/kbn-saved-search-component",
     "@kbn/saved-search-plugin": "link:src/platform/plugins/shared/saved_search",
     "@kbn/screenshot-mode-example-plugin": "link:examples/screenshot_mode_example",
     "@kbn/screenshot-mode-plugin": "link:src/platform/plugins/shared/screenshot_mode",

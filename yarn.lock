@@ -6956,7 +6956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-search-component@link:packages/kbn-saved-search-component":
+"@kbn/saved-search-component@link:src/platform/packages/shared/kbn-saved-search-component":
   version "0.0.0"
   uid ""
 
