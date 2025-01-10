@@ -49,13 +49,11 @@ export function LastUpdated({ chartTimeRange }: Props) {
 
   return (
     <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
-      <StyledToolTipWrapper
-        as={EuiToolTip}
-        position="top"
-        content={<ChartCreationInfo {...chartTimeRange} />}
-      >
-        <EuiIcon type="iInCircle" />
-      </StyledToolTipWrapper>{' '}
+      <EuiToolTip position="top" content={<ChartCreationInfo {...chartTimeRange} />}>
+        <IconWrapper>
+          <EuiIcon type="iInCircle" />
+        </IconWrapper>
+      </EuiToolTip>{' '}
       <FormattedMessage
         id="xpack.exploratoryView.expView.lastUpdated.label"
         defaultMessage="Last Updated: {updatedDate}"
@@ -67,6 +65,7 @@ export function LastUpdated({ chartTimeRange }: Props) {
   );
 }
 
-export const StyledToolTipWrapper = styled.div`
+const IconWrapper = styled.div`
+  display: inline-block;
   min-width: 30vw;
 `;

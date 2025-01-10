@@ -34,7 +34,7 @@ export function getExploratoryViewEmbeddable(
   services: CoreStart & ExploratoryViewPublicPluginsStart,
   analytics?: AnalyticsServiceSetup
 ) {
-  const { lens, dataViews: dataViewsService, theme } = services;
+  const { lens, dataViews: dataViewsService } = services;
 
   const dataViewCache: Record<string, DataView> = {};
 
