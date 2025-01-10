@@ -966,7 +966,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 

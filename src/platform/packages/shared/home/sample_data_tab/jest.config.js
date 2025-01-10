@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
 module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../../../../../src/platform/packages/shared/home/**/*.stories.+(tsx|mdx)',
-    '../**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
-  },
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/home/sample_data_tab'],
 };
