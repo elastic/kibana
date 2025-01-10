@@ -24,11 +24,11 @@ import {
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
-  SerializedPanelState,
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,

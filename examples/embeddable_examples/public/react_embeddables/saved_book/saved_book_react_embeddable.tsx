@@ -25,10 +25,11 @@ import {
   getUnchangingComparator,
   initializeTitles,
   SerializedTitles,
+  SerializedPanelState,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
 import { SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
