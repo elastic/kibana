@@ -37,6 +37,20 @@ it('immediate consecutive calls do not call the original function', async () => 
   expect(value3).toBe('value');
 });
 
+it('immediate consecutive synchronous calls do not call the original function', async () => {
+  const fn = jest.fn().mockResolvedValue('value');
+  const cached = cacheNonParametrizedAsyncFunction(fn);
+  const value1 = cached();
+  const value2 = cached();
+  const value3 = cached();
+
+  expect(fn.mock.calls.length).toBe(1);
+  expect(await value1).toBe('value');
+  expect(await value2).toBe('value');
+  expect(await value3).toBe('value');
+  expect(fn.mock.calls.length).toBe(1);
+});
+
 it('does not call original function if cached value is fresh enough', async () => {
   let time = 1;
   let value = 'value1';
@@ -87,7 +101,7 @@ it('immediately returns cached value, but calls original function when sufficien
   expect(value3).toBe('value2');
 });
 
-it('block and refreshes the value when cache expires', async () => {
+it('blocks and refreshes the value when cache expires', async () => {
   let time = 1;
   let value = 'value1';
   const now = jest.fn(() => time);

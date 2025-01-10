@@ -20,18 +20,17 @@ describe('autocomplete.suggest', () => {
           .filter((s) => s.label.includes('JOIN'))
           .map((s) => [s.label, s.text, s.detail]);
 
-        expect(filtered.map((s) => s[0])).toEqual(['LEFT JOIN', 'RIGHT JOIN', 'LOOKUP JOIN']);
-        expect(filtered[0][2]).not.toBe(filtered[1][2]);
-        expect(filtered[1][2]).not.toBe(filtered[2][2]);
+        expect(filtered.map((s) => s[0])).toEqual(['LOOKUP JOIN']);
+        // expect(filtered.map((s) => s[0])).toEqual(['LEFT JOIN', 'RIGHT JOIN', 'LOOKUP JOIN']);
       });
 
       test('suggests command on first character', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM index | LEFT J/');
-        const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LEFT JOIN');
+        const suggestions = await suggest('FROM index | LOOKUP J/');
+        const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LOOKUP JOIN');
 
-        expect(filtered[0].label).toBe('LEFT JOIN');
+        expect(filtered[0].label).toBe('LOOKUP JOIN');
       });
 
       test('returns command description', async () => {
@@ -41,7 +40,7 @@ describe('autocomplete.suggest', () => {
         const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LOOKUP JOIN');
 
         expect(filtered[0].label).toBe('LOOKUP JOIN');
-        expect(filtered[0].detail).toBe('Join index with another "lookup" mode index');
+        expect(filtered[0].detail).toBe('Join with a "lookup" mode index');
       });
 
       // test.only('suggests all command types', async () => {
