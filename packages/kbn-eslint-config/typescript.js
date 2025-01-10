@@ -59,7 +59,7 @@ module.exports = {
             'error',
             { default: 'array-simple', readonly: 'array-simple' },
           ],
-          '@typescript-eslint/ban-types': [
+          '@typescript-eslint/no-restricted-types': [
             'error',
             {
               types: {
@@ -79,10 +79,6 @@ module.exports = {
                   message: 'Use FunctionComponent instead.',
                   fixWith: 'React.FunctionComponent',
                 },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
               },
             },
           ],
@@ -92,6 +88,18 @@ module.exports = {
             {
               selector: 'default',
               format: ['camelCase'],
+              filter: {
+                regex: allowedNameRegexp,
+                match: false,
+              },
+            },
+            {
+              selector: 'import',
+              format: [
+                'camelCase',
+                'UPPER_CASE', // import {SOMETHING} from ...
+                'PascalCase', // import {FunctionComponent} from ...
+              ],
               filter: {
                 regex: allowedNameRegexp,
                 match: false,

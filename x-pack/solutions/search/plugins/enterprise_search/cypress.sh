@@ -5,7 +5,7 @@ MODE="${1}"
 
 if [ "$MODE" == "dev" ]; then
   echo "Running dev mode. This will run cypress only"
-  node ../../../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts ${2}
+  node ../../../../../node_modules/.bin/cypress open --config-file ./cypress/cypress.config.ts ${2}
 else
   if ! docker info > /dev/null 2>&1; then
     echo "This script needs docker to run. Start docker and try again."

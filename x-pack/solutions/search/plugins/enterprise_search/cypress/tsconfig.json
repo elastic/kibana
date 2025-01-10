@@ -1,6 +1,6 @@
 {
   "extends": "../../../../../../tsconfig.base.json",
-  "include": ["**/*", "../cypress.config.ts"],
+  "include": ["**/*"],
   "exclude": ["target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
