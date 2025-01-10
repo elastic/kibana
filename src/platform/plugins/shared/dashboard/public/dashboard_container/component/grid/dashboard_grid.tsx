@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -25,7 +24,7 @@ import {
 } from '../../../dashboard_constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 
-export const DashboardGrid = () => {
+export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
@@ -61,7 +60,7 @@ export const DashboardGrid = () => {
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
-      if (viewMode !== ViewMode.EDIT) return;
+      if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
       const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
@@ -105,10 +104,11 @@ export const DashboardGrid = () => {
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
+          dashboardContainer={dashboardContainer}
         />
       );
     },
-    [appFixedViewport, dashboardApi]
+    [appFixedViewport, dashboardApi, dashboardContainer]
   );
 
   const memoizedgridLayout = useMemo(() => {
