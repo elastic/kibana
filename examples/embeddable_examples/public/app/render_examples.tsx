@@ -47,7 +47,7 @@ export const RenderExamples = () => {
   const [api, setApi] = useState<SearchApi | null>(null);
   const [hidePanelChrome, setHidePanelChrome] = useState<boolean>(false);
   const [dataLoading, timeRange] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
+    api?.dataLoading$,
     parentApi.timeRange$
   );
 

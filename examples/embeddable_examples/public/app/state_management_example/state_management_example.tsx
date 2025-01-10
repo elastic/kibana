@@ -158,7 +158,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
               return unsavedChangesSessionStorage.load();
             },
             saveNotification$,
-            viewMode: new BehaviorSubject<ViewMode>('edit'),
+            viewMode$: new BehaviorSubject<ViewMode>('edit'),
           };
         }}
         onApiAvailable={(api) => {
