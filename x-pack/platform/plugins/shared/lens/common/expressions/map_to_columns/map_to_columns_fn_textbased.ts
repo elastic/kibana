@@ -12,7 +12,15 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   data,
   { idMap: encodedIdMap }
 ) => {
+  const isOriginalColumn = (item: OriginalColumn | undefined): item is OriginalColumn => {
+    return !!item;
+  };
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn[]>;
+
+  // extract all the entries once
+  const idMapColEntries = Object.entries(idMap);
+  // create a lookup id => column
+  const colLookups = new Map<string, DatatableColumn>(data.columns.map((c) => [c.id, c]));
 
   return {
     ...data,
@@ -25,11 +33,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
             mappedRow[cachedEntry.id] = row[id];
           }
         } else {
-          const columns = new Map<string, DatatableColumn>();
-          for (const column of data.columns) {
-            columns.set(column.id, column);
-          }
-          const col = columns.get(id);
+          const col = colLookups.get(id);
           if (col?.variable) {
             const originalColumn = Object.values(idMap).find((idMapCol) => {
               return idMapCol.some((c) => c.variable === col.variable);
@@ -50,9 +54,10 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
         return [];
       }
       if (column.variable) {
-        const originalColumn = Object.values(idMap).find((idMapCol) => {
-          return idMapCol.some((c) => c.variable === column.variable);
-        });
+        const originalColumn = idMapColEntries
+          .map(([_id, columns]) => columns.find((c) => c.variable === column.variable))
+          .filter(isOriginalColumn);
+
         if (!originalColumn) {
           return [];
         }
