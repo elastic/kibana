@@ -34,7 +34,7 @@ test.describe(
     test('dont show up if outside of range', async ({ page, pageObjects }) => {
       await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
-      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(4);
+      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(0);
     });
 
     test('show up if in range', async ({ page, pageObjects }) => {
@@ -47,7 +47,7 @@ test.describe(
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
         .allTextContents();
-      expect(actualSuggestions.join(',')).toContain('xyz');
+      expect(actualSuggestions.join(',')).toContain('jpg');
     });
 
     test('also displays descriptions for operators', async ({ page, pageObjects }) => {
