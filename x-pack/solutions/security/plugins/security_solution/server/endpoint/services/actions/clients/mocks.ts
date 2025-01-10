@@ -301,9 +301,11 @@ const createConnectorActionsClientMock = ({
 } = {}): ActionsClientMock => {
   const client = actionsClientMock.create();
 
-  (client.getAll as jest.Mock).mockImplementation(async () => {
+  client.getAll.mockImplementation(async () => {
     return getAllResponse ?? [];
   });
+
+  client.execute.mockImplementation(async () => createConnectorActionExecuteResponseMock());
 
   return client;
 };
