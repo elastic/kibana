@@ -30,7 +30,7 @@ import {
 } from '@kbn/code-owners';
 import { ScoutReport, ScoutReportEventAction } from '../../report';
 import { environmentMetadata } from '../../../datasources';
-import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
+import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import { generateTestRunId, getTestIDForTitle } from '../common';
 
 /**

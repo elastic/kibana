@@ -10,7 +10,7 @@
 /**
  * Configuration options for the Scout Playwright reporter
  */
-export declare interface ScoutPlaywrightReporterOptions {
+export interface ScoutPlaywrightReporterOptions {
   name?: string;
   runId?: string;
   outputPath?: string;

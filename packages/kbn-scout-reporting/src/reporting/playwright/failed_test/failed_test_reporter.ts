@@ -27,7 +27,7 @@ import {
 } from '@kbn/code-owners';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
-import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
+import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import {
   getRunTarget,
   getPluginManifestData,

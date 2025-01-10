@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutFailureReport } from './failure_report';
+export { ScoutFailureReport } from './report';
 export type { TestFailure } from './test_failure';
