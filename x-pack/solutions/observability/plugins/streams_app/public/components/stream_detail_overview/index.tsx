@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTab,
@@ -22,7 +21,6 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
@@ -30,6 +28,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 import { StreamsList } from '../streams_list';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { AssetImage } from '../asset_image';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -303,13 +302,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiImage
-                src={illustration}
-                alt="Illustration"
-                className={css`
-                  width: 250px;
-                `}
-              />
+              <AssetImage type="welcome" />
               <EuiText size="m" textAlign="center">
                 {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
                   defaultMessage: 'Create streams for your logs',
