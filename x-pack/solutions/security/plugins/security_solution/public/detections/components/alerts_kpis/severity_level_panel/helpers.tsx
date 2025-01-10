@@ -13,7 +13,6 @@ import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_char
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
-import * as i18n from './translations';
 
 const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low'];
 
@@ -33,12 +32,12 @@ export const parseSeverityData = (
           return {
             key: severity.key,
             value: severity.doc_count,
-            label: severityLabels[severity.key] ?? i18n.UNKNOWN_SEVERITY,
+            label: severityLabels[severity.key],
           };
         })
         .sort((a, b) => {
-          const aIndex = SEVERITY_ORDER.indexOf(a.key) ?? 4; // if not found, put it at the end as unknown
-          const bIndex = SEVERITY_ORDER.indexOf(b.key) ?? 4;
+          const aIndex = SEVERITY_ORDER.indexOf(a.key);
+          const bIndex = SEVERITY_ORDER.indexOf(b.key);
           return aIndex - bIndex;
         });
 };
