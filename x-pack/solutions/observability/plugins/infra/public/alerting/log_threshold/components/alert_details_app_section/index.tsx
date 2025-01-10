@@ -14,7 +14,6 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -106,7 +105,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 thresholds={[rule.params.count.value]}
@@ -173,7 +172,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 thresholds={[rule.params.count.value]}
