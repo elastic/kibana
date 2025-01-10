@@ -29,7 +29,7 @@ export const PresentationPanel = <
 ) => {
   const { Component, hidePanelChrome, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
-  const { loading, value, error } = useAsync(async () => {
+  const { loading, value } = useAsync(async () => {
     if (hidePanelChrome) {
       return {
         unwrappedComponent: isPromise(Component) ? await Component : Component,
@@ -44,13 +44,16 @@ export const PresentationPanel = <
       import('./panel_module'),
     ]);
 
+    let loadErrorReason: string | undefined;
     for (const result of results) {
       if (result.status === 'rejected') {
-        throw new Error(result.reason);
+        loadErrorReason = result.reason;
+        break;
       }
     }
 
     return {
+      loadErrorReason,
       Panel:
         results[2].status === 'fulfilled' ? results[2].value?.PresentationPanelInternal : undefined,
       PanelError:
@@ -81,7 +84,7 @@ export const PresentationPanel = <
   const PanelError = value?.PanelError;
   const UnwrappedComponent = value?.unwrappedComponent;
   const shouldHavePanel = !hidePanelChrome;
-  if (error || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
+  if (value?.loadErrorReason || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -90,11 +93,9 @@ export const PresentationPanel = <
         justifyContent="center"
       >
         {PanelError ? (
-          <PanelError error={error ?? new Error(getErrorLoadingPanel())} />
-        ) : error ? (
-          error.message
+          <PanelError error={new Error(value?.loadErrorReason ?? getErrorLoadingPanel())} />
         ) : (
-          getErrorLoadingPanel()
+          value?.loadErrorReason ?? getErrorLoadingPanel()
         )}
       </EuiFlexGroup>
     );
