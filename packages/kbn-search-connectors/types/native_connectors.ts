@@ -4379,7 +4379,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       auth_method: {
         default_value: null,
         depends_on: [],
-        display: DROPDOWN,
+        display: DisplayType.DROPDOWN,
         label: translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethodLabel',
           {
@@ -4410,7 +4410,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: null,
-        type: STRING,
+        type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
         value: 'certificate',
@@ -4443,7 +4443,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'certificate',
           },
         ],
-        display: TEXTAREA,
+        display: DisplayType.TEXTAREA,
         label: translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.certificateLabel',
           {
@@ -4455,7 +4455,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: true,
         tooltip: null,
-        type: STRING,
+        type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
         value: '',
@@ -4468,7 +4468,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'certificate',
           },
         ],
-        display: TEXTAREA,
+        display: DisplayType.TEXTAREA,
         label: translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.privateKeyLabel',
           {
@@ -4480,7 +4480,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: true,
         tooltip: null,
-        type: STRING,
+        type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
         value: '',
@@ -4515,7 +4515,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       enumerate_all_sites: {
         default_value: true,
         depends_on: [],
-        display: TOGGLE,
+        display: DisplayType.TOGGLE,
         label: i18n.translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
           { defaultMessage: 'Enumerate all sites?' }
@@ -4531,7 +4531,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
               'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
           }
         ),
-        type: BOOLEAN,
+        type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
         value: true,
@@ -4539,7 +4539,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       fetch_subsites: {
         default_value: false,
         depends_on: [{ field: 'enumerate_all_sites', value: false }],
-        display: TOGGLE,
+        display: DisplayType.TOGGLE,
         label: i18n.translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
           {
@@ -4557,7 +4557,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
               'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
-        type: BOOLEAN,
+        type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
         value: true,
