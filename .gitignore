@@ -120,7 +120,6 @@ report.asciidoc
 
 # Yarn local mirror content
 .yarn-local-mirror
-.yarn
 
 # Bazel
 .ijwb
