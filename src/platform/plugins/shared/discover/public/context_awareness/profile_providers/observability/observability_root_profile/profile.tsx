@@ -19,7 +19,6 @@ export const createObservabilityRootProfileProvider = (
   profile: {
     getAppMenu: createGetAppMenu(services),
     getDefaultAdHocDataViews: (prev) => () => {
-      // debugger;
       return prev().concat({
         id: 'all-logs-ad-hoc-data-view',
         name: 'All logs',

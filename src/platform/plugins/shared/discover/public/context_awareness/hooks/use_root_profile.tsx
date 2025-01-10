@@ -10,28 +10,23 @@
 import { useEffect, useState } from 'react';
 import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
 import React from 'react';
-import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
-import type { ResolveRootProfileResult } from '../profiles_manager';
 
 /**
  * Hook to trigger and wait for root profile resolution
  * @param options Options object
  * @returns The root profile state
  */
-export const useRootProfile = ({
-  onRootProfileResolved: originalOnRootProfileResolved,
-}: {
-  onRootProfileResolved?: (
-    result: Pick<ResolveRootProfileResult, 'getDefaultAdHocDataViews'>
-  ) => unknown;
-} = {}) => {
+export const useRootProfile = () => {
   const { profilesManager, core } = useDiscoverServices();
-  const onRootProfileResolved = useLatest(originalOnRootProfileResolved);
   const [rootProfileState, setRootProfileState] = useState<
     | { rootProfileLoading: true }
-    | { rootProfileLoading: false; AppWrapper: Profile['getRenderAppWrapper'] }
+    | {
+        rootProfileLoading: false;
+        AppWrapper: Profile['getRenderAppWrapper'];
+        getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
+      }
   >({ rootProfileLoading: true });
 
   useEffect(() => {
@@ -41,15 +36,14 @@ export const useRootProfile = ({
         distinctUntilChanged(),
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
-        switchMap(async (id) => {
-          const result = await profilesManager.resolveRootProfile({ solutionNavId: id });
-          await onRootProfileResolved.current?.(result);
-          return result;
-        }),
-        tap(({ getRenderAppWrapper }) =>
+        switchMap((solutionNavId) => profilesManager.resolveRootProfile({ solutionNavId })),
+        tap(({ getRenderAppWrapper, getDefaultAdHocDataViews }) =>
           setRootProfileState({
             rootProfileLoading: false,
             AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
+            getDefaultAdHocDataViews:
+              getDefaultAdHocDataViews?.(baseGetDefaultAdHocDataViews) ??
+              baseGetDefaultAdHocDataViews,
           })
         )
       )
@@ -58,9 +52,11 @@ export const useRootProfile = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [core.chrome, onRootProfileResolved, profilesManager]);
+  }, [core.chrome, profilesManager]);
 
   return rootProfileState;
 };
 
 export const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
+
+const baseGetDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'] = () => [];

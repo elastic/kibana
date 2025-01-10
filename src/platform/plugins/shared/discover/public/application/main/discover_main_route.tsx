@@ -23,6 +23,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import useUnmount from 'react-use/lib/useUnmount';
+import useLatest from 'react-use/lib/useLatest';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -136,7 +137,9 @@ export function DiscoverMainRoute({
           stateContainer.actions.loadDataViewList(),
         ]);
 
-        if (!hasUserDataViewValue || !defaultDataViewExists) {
+        const hasAdHocDataViews = stateContainer.internalState.getState().adHocDataViews.length > 0;
+
+        if ((!hasUserDataViewValue || !defaultDataViewExists) && !hasAdHocDataViews) {
           setNoDataState({
             showNoDataPage: true,
             hasESData: hasESDataValue,
@@ -230,22 +233,70 @@ export function DiscoverMainRoute({
     ]
   );
 
-  useEffect(() => {
-    if (!isCustomizationServiceInitialized) return;
-    setLoading(true);
-    setNoDataState({
-      hasESData: false,
-      hasUserDataView: false,
-      showNoDataPage: false,
-    });
-    setError(undefined);
-    if (savedSearchId) {
-      loadSavedSearch();
-    } else {
-      // restore the previously selected data view for a new state (when a saved search was open)
-      loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
+  const rootProfileState = useRootProfile();
+  const [prevProfileDataViewIds, setPrevProfileDataViewIds] = useState<string[]>([]);
+
+  const initializeProfileDataViews = useLatest(async () => {
+    if (rootProfileState.rootProfileLoading) {
+      return;
     }
-  }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
+
+    const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
+    const profileDataViews = await Promise.all(
+      profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
+    );
+    const currentDataViews = stateContainer.internalState.getState().adHocDataViews;
+    const newDataViews = currentDataViews
+      .filter((dataView) => !prevProfileDataViewIds.includes(dataView.id!))
+      .concat(profileDataViews);
+
+    for (const prevId of prevProfileDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+
+    setPrevProfileDataViewIds(profileDataViews.map((dataView) => dataView.id!));
+    stateContainer.internalState.transitions.setAdHocDataViews(newDataViews);
+  });
+
+  useUnmount(() => {
+    for (const prevId of prevProfileDataViewIds) {
+      dataViews.clearInstanceCache(prevId);
+    }
+  });
+
+  useEffect(() => {
+    if (!isCustomizationServiceInitialized || rootProfileState.rootProfileLoading) {
+      return;
+    }
+
+    const load = async () => {
+      setLoading(true);
+      setNoDataState({
+        hasESData: false,
+        hasUserDataView: false,
+        showNoDataPage: false,
+      });
+      setError(undefined);
+
+      await initializeProfileDataViews.current();
+
+      if (savedSearchId) {
+        await loadSavedSearch();
+      } else {
+        // restore the previously selected data view for a new state (when a saved search was open)
+        await loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
+      }
+    };
+
+    load();
+  }, [
+    initializeProfileDataViews,
+    isCustomizationServiceInitialized,
+    loadSavedSearch,
+    rootProfileState.rootProfileLoading,
+    savedSearchId,
+    stateContainer,
+  ]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -341,38 +392,6 @@ export function DiscoverMainRoute({
     noDataState.showNoDataPage,
     stateContainer,
   ]);
-
-  const [prevProfileDataViewIds, setPrevProfileDataViewIds] = useState<string[]>([]);
-  const rootProfileState = useRootProfile({
-    onRootProfileResolved: async ({ getDefaultAdHocDataViews }) => {
-      // debugger;
-      const profileDataViewSpecs = getDefaultAdHocDataViews?.(() => [])?.() ?? [];
-      const profileDataViews = await Promise.all(
-        profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
-      );
-      const currentDataViews = stateContainer.internalState.getState().adHocDataViews;
-      const newDataViews = currentDataViews
-        .filter((dataView) => !prevProfileDataViewIds.includes(dataView.id!))
-        .concat(profileDataViews);
-
-      for (const prevId of prevProfileDataViewIds) {
-        dataViews.clearInstanceCache(prevId);
-      }
-
-      setPrevProfileDataViewIds(profileDataViews.map((dataView) => dataView.id!));
-      stateContainer.internalState.transitions.setAdHocDataViews(newDataViews);
-
-      // if (!stateContainer.internalState.getState().dataView) {
-      //   await stateContainer.actions.onChangeDataView(newDataViews[0]);
-      // }
-    },
-  });
-
-  useUnmount(() => {
-    for (const prevId of prevProfileDataViewIds) {
-      dataViews.clearInstanceCache(prevId);
-    }
-  });
 
   if (error) {
     return <DiscoverError error={error} />;

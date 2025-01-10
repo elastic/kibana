@@ -281,7 +281,9 @@ export interface Profile {
    * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs")
    * @returns The default data views to display in the data view picker
    */
-  getDefaultAdHocDataViews: () => DataViewSpec[];
+  getDefaultAdHocDataViews: () => Array<
+    Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
+  >;
 
   /**
    * Data grid

@@ -13,6 +13,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
+
 interface DataViewData {
   /**
    * List of existing data views
@@ -40,11 +41,13 @@ export async function loadDataView({
   dataViewSpec,
   services,
   dataViewList,
+  adHocDataViews,
 }: {
   id?: string;
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   dataViewList: DataViewListItem[];
+  adHocDataViews: DataView[];
 }): Promise<DataViewData> {
   const { dataViews } = services;
 
@@ -102,7 +105,7 @@ export async function loadDataView({
   return {
     list: dataViewList || [],
     // we can be certain that the data view exists due to an earlier hasData check
-    loaded: fetchedDataView || defaultDataView!,
+    loaded: fetchedDataView || defaultDataView || adHocDataViews[0],
     stateVal: fetchId,
     stateValFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
@@ -112,13 +115,18 @@ export async function loadDataView({
  * Check if the given data view is valid, provide a fallback if it doesn't exist
  * And message the user in this case with toast notifications
  */
-export function resolveDataView(
-  ip: DataViewData,
-  savedSearch: SavedSearch | undefined,
-  toastNotifications: ToastsStart,
-  isEsqlMode?: boolean
-) {
-  const { loaded: loadedDataView, stateVal, stateValFound } = ip;
+export function resolveDataView({
+  dataViewData,
+  savedSearch,
+  toastNotifications,
+  isEsqlMode,
+}: {
+  dataViewData: DataViewData;
+  savedSearch: SavedSearch | undefined;
+  toastNotifications: ToastsStart;
+  isEsqlMode?: boolean;
+}) {
+  const { loaded: loadedDataView, stateVal, stateValFound } = dataViewData;
 
   const ownDataView = savedSearch?.searchSource.getField('index');
 
@@ -149,8 +157,10 @@ export function resolveDataView(
         }),
         'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
+
       return ownDataView;
     }
+
     toastNotifications.addWarning({
       title: warningTitle,
       text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
@@ -187,19 +197,24 @@ export const loadAndResolveDataView = async (
 ) => {
   const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
   const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);
-  if (adHocDataView) return { fallback: false, dataView: adHocDataView };
+
+  if (adHocDataView) {
+    return { fallback: false, dataView: adHocDataView };
+  }
 
   const nextDataViewData = await loadDataView({
     services,
     id,
     dataViewSpec,
     dataViewList: savedDataViews,
+    adHocDataViews,
   });
-  const nextDataView = resolveDataView(
-    nextDataViewData,
+  const nextDataView = resolveDataView({
+    dataViewData: nextDataViewData,
     savedSearch,
-    services.toastNotifications,
-    isEsqlMode
-  );
+    toastNotifications: services.toastNotifications,
+    isEsqlMode,
+  });
+
   return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
 };
