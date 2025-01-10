@@ -50,11 +50,11 @@ const WATCH_VISUALIZE_DATA = {
 // against it.
 jest.mock('uuid', () => ({
   v4: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('./helpers/jest_constants').WATCH_ID;
   },
   v1: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('./helpers/jest_constants').WATCH_ID;
   },
 }));

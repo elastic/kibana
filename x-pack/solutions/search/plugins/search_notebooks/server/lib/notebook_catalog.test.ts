@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 // Mocking dependencies
 jest.mock('fs/promises');
 jest.mock('node-fetch');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fetchMock = require('node-fetch') as jest.Mock;
 
 const mockLogger: Logger = {

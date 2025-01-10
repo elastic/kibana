@@ -36,7 +36,7 @@ export const endpointFieldsProvider = (
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   const beatFields: BeatFields =
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('@kbn/timelines-plugin/server/utils/beat_schema/fields.json').fieldsBeat;
 
   return {

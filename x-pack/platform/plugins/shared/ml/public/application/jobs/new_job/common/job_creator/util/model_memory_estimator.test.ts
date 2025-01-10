@@ -33,7 +33,7 @@ describe('delay', () => {
     } as unknown as JobCreator;
     mockMlApiServices = {
       calculateModelMemoryLimit$: jest.fn(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { of } = require('rxjs');
         return of({ modelMemoryLimit: '15MB' });
       }),

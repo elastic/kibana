@@ -17,7 +17,7 @@ import { AnomalyResultsViewSelector } from '.';
 jest.mock('../../contexts/kibana', () => {
   return {
     useMlLocator: () =>
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@kbn/share-plugin/public/mocks').sharePluginMock.createLocator(),
     useNavigateToPath: () => jest.fn(),
   };

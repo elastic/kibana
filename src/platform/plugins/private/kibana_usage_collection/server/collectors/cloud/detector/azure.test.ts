@@ -11,7 +11,7 @@
 jest.mock('node-fetch');
 import { AzureCloudService } from './azure';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fetchMock = require('node-fetch') as jest.Mock;
 
 describe('AzureCloudService', () => {

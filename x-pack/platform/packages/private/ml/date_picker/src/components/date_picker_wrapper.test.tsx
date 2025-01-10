@@ -59,7 +59,7 @@ jest.mock('../hooks/use_timefilter', () => ({
   }),
 
   useTimefilter: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { of } = require('rxjs');
     return {
       getRefreshIntervalUpdate$: of(),
@@ -75,7 +75,7 @@ jest.mock('../hooks/use_date_picker_context', () => ({
 }));
 
 const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { of } = require('rxjs');
   const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;
   const mockedI18n = jest.fn();

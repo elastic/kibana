@@ -45,7 +45,7 @@ export default defineCypressConfig({
         }
         return launchOptions;
       });
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@cypress/grep/src/plugin')(config);
       return config;
     },

@@ -8,7 +8,7 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
-import type { MockRouter} from './__mocks__/routes.mock';
+import type { MockRouter } from './__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -17,7 +17,7 @@ jest.mock('../lib/es_version_precheck', () => ({
 }));
 
 // Need to require to get mock on named export to work.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
 ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
 

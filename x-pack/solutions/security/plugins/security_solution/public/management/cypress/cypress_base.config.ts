@@ -110,7 +110,7 @@ export const getCypressBaseConfig = (
 
           responseActionTasks(on, config);
 
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           require('@cypress/grep/src/plugin')(config);
 
           on('after:spec', (_, results) => {

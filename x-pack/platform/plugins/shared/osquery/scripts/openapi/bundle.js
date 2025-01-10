@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('../../../../../../../src/setup_node_env');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { bundle } = require('@kbn/openapi-bundler');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { resolve } = require('path');
 
 const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');

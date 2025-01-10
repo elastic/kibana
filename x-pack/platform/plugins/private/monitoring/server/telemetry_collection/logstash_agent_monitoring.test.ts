@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const logstashStatsResultSetOfAgentMonitoring = require('./__mocks__/fixtures/logstash_stats_agent_monitoring_results.json');
 
 const logstashStateResultsMapOfAgentMonitoring = new Map();
@@ -18,7 +18,7 @@ const logstashStateResultsMapOfAgentMonitoring = new Map();
 ['1n1p', '1nmp', 'mnmp'].forEach((data) => {
   logstashStateResultsMapOfAgentMonitoring.set(
     data,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require(`./__mocks__/fixtures/logstash_state_agent_monitoring_results_${data}`)
   );
 });

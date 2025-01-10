@@ -43,7 +43,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     log.debug('Minify CSS');
     await asyncPipeline(
       vfs.src(['**/*.css'], { cwd: assetDir }),
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
       vfs.dest(assetDir)
     );

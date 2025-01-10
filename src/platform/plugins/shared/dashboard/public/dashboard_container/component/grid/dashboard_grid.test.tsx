@@ -20,7 +20,7 @@ import type { DashboardPanelMap } from '../../../../common';
 
 jest.mock('./dashboard_grid_item', () => {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
         const className = `${

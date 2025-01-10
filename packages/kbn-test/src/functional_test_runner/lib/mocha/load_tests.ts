@@ -71,7 +71,7 @@ export const loadTests = ({
     loadTracer(path, `testFile[${path}]`, () => {
       log.verbose('Loading test file %s', path);
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const testModule = require(path);
       const testProvider = testModule.__esModule ? testModule.default : testModule;
 

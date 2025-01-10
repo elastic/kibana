@@ -160,7 +160,7 @@ export class PluginWrapper<
       return null;
     }
     const pluginPathServer = join(this.path, 'server');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pluginDefinition = require(pluginPathServer);
 
     if (!('config' in pluginDefinition)) {
@@ -178,7 +178,7 @@ export class PluginWrapper<
   private async createPluginInstance() {
     this.log.debug('Initializing plugin');
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);

@@ -17,7 +17,7 @@ import {
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
 jest.mock('node-fetch');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fetchMock = require('node-fetch') as jest.Mock;
 
 const { Response } = jest.requireActual('node-fetch');

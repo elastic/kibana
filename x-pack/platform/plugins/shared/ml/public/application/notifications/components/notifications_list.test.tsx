@@ -20,7 +20,7 @@ jest.mock('../../components/saved_objects_warning');
 jest.mock('../../capabilities/check_capabilities');
 
 const getMockedTimefilter = () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { of } = require('rxjs');
   return {
     timefilter: {

@@ -28,7 +28,7 @@ jest.mock('../../kibana_services', () => ({
 
 describe('EMS enabled', () => {
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../kibana_services').getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {
@@ -44,7 +44,7 @@ describe('EMS enabled', () => {
 
   describe('offline', () => {
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('node-fetch').default = () => {
         throw new Error('Simulated offline environment with no EMS access');
       };
@@ -68,7 +68,7 @@ describe('EMS enabled', () => {
 
   describe('online', () => {
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('node-fetch').default = () => {
         return Promise.resolve({ status: 200 });
       };
@@ -93,7 +93,7 @@ describe('EMS enabled', () => {
 
 describe('EMS disabled', () => {
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../kibana_services').getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {

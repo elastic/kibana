@@ -23,7 +23,7 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 module.exports = (on: any, config: any) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('@cypress/grep/src/plugin')(config);
 
   // `on` is used to hook into various events Cypress emits

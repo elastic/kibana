@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashSelfMonitoring } from './logstash_self_monitoring';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const logstashStatsResultSetOfSelfMonitoring = require('./__mocks__/fixtures/logstash_stats_self_monitoring_results.json');
 
 const logstashStateResultsMapOfSelfMonitoring = new Map();
@@ -17,7 +17,7 @@ const logstashStateResultsMapOfSelfMonitoring = new Map();
 ['1n1p', '1nmp', 'mnmp'].forEach((data) => {
   logstashStateResultsMapOfSelfMonitoring.set(
     data,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require(`./__mocks__/fixtures/logstash_state_self_monitoring_results_${data}`)
   );
 });

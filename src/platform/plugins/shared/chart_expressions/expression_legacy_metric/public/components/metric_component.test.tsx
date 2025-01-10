@@ -16,12 +16,12 @@ import { LabelPosition } from '../../common/constants';
 
 jest.mock('../services', () => ({
   getFormatService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getFormatService } = require('../__mocks__/services');
     return getFormatService();
   },
   getPaletteService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getPaletteService } = require('../__mocks__/services');
     return getPaletteService();
   },

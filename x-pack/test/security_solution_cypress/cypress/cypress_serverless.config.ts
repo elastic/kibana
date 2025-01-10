@@ -49,7 +49,7 @@ export default defineCypressConfig({
       });
       samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@cypress/grep/src/plugin')(config);
       return config;
     },

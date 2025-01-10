@@ -15,7 +15,7 @@ export { servicesContextDecorator } from './services_decorator';
 
 export const addDecorators = () => {
   if (process.env.NODE_ENV === 'test') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('babel-plugin-require-context-hook/register')();
   }
 

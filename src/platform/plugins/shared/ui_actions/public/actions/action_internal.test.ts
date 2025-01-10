@@ -24,7 +24,7 @@ describe('ActionInternal', () => {
   describe('displays toasts when execute function throws', () => {
     const addWarningMock = jest.fn();
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../services').getNotifications = () => ({
         toasts: {
           addWarning: addWarningMock,

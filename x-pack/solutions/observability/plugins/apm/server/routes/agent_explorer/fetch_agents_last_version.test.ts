@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { fetchAgentsLatestVersion } from './fetch_agents_latest_version';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fetchMock = require('node-fetch') as jest.Mock;
 const logger = loggerMock.create();
 

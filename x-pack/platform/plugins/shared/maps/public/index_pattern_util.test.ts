@@ -78,7 +78,7 @@ describe('Gold+ licensing', () => {
 
   describe('basic license', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('./licensed_features').getIsGoldPlus = () => false;
     });
 
@@ -101,7 +101,7 @@ describe('Gold+ licensing', () => {
 
   describe('gold license', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('./licensed_features').getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {

@@ -36,17 +36,17 @@ describe('layer_actions', () => {
     const notifyLicensedFeatureUsageMock = jest.fn();
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../licensed_features').notifyLicensedFeatureUsage = (feature: LICENSED_FEATURES) => {
         notifyLicensedFeatureUsageMock(feature);
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../selectors/map_selectors').getMapReady = () => {
         return true;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../selectors/map_selectors').createLayerInstance = () => {
         return {
           getLicensedFeatures() {

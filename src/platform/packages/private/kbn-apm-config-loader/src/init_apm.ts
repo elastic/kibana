@@ -20,7 +20,7 @@ export const initApm = (
   const shouldRedactUsers = apmConfigLoader.isUsersRedactionEnabled();
 
   // we want to only load the module when effectively used
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const apm = require('elastic-apm-node');
 
   // Filter out all user PII

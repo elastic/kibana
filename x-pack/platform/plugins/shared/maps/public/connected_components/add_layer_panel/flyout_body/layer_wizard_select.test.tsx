@@ -18,7 +18,7 @@ const defaultProps = {
 
 describe('LayerWizardSelect', () => {
   beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../../classes/layers').getLayerWizards = async () => {
       return [
         {

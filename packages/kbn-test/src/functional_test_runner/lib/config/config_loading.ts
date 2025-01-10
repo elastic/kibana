@@ -74,7 +74,7 @@ async function getConfigModule({
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const exports = require(resolvedPath);
   const defaultExport = exports.__esModule ? exports.default : exports;
   if (typeof defaultExport === 'function') {

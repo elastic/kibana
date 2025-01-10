@@ -9,7 +9,7 @@
 
 import type { ExpressionAstExpression, ExpressionAstArgument } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { parse: parseRaw } = require('@kbn/interpreter');
 
 export function parse<E extends string, S extends 'expression' | 'argument'>(

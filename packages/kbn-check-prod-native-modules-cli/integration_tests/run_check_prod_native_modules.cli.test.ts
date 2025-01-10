@@ -31,11 +31,11 @@ describe('checkProdNativeModules', () => {
     const noNativeModulesDir = path.join(fixturesDir, 'no_native_modules');
     const noNativeModulesPkgJsonPath = path.join(noNativeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(noNativeModulesDir);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', noNativeModulesDir);
 
     const noNativeModulesPkgJson = JSON.parse(fs.readFileSync(noNativeModulesPkgJsonPath, 'utf8'));
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', noNativeModulesPkgJson);
 
     const result = await checkProdNativeModules(mockLog);
@@ -51,13 +51,13 @@ describe('checkProdNativeModules', () => {
     const withNativeModulesDir = path.join(fixturesDir, 'with_native_modules');
     const withNativeModulesPkgJsonPath = path.join(withNativeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(withNativeModulesDir);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withNativeModulesDir);
 
     const withNativeModulesPkgJson = JSON.parse(
       fs.readFileSync(withNativeModulesPkgJsonPath, 'utf8')
     );
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', withNativeModulesPkgJson);
 
     const result = await checkProdNativeModules(mockLog);
@@ -77,11 +77,11 @@ describe('checkProdNativeModules', () => {
     const noNodeModulesPkgJsonPath = path.join(noNodeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(noNodeModulesDir);
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', noNodeModulesDir);
 
     const noNodeModulesPkgJson = JSON.parse(fs.readFileSync(noNodeModulesPkgJsonPath, 'utf8'));
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'kibanaPackageJson', noNodeModulesPkgJson);
 
     expect(await checkProdNativeModules(mockLog)).toBe(true);
@@ -95,7 +95,7 @@ describe('checkProdNativeModules', () => {
     const withDevNativeModulesDir = path.join(fixturesDir, 'with_dev_native_modules');
     const withDevNativeModulesPkgJsonPath = path.join(withDevNativeModulesDir, 'package.json');
     jest.spyOn(process, 'cwd').mockReturnValue(withDevNativeModulesDir);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withDevNativeModulesDir);
 
     const withDevNativeModulesPkgJson = JSON.parse(
@@ -103,7 +103,7 @@ describe('checkProdNativeModules', () => {
     );
 
     jest.replaceProperty(
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@kbn/repo-info'),
       'kibanaPackageJson',
       withDevNativeModulesPkgJson
@@ -125,7 +125,7 @@ describe('checkProdNativeModules', () => {
       'package.json'
     );
     jest.spyOn(process, 'cwd').mockReturnValue(withTransientNativeModulesDir);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withTransientNativeModulesDir);
 
     const withTransientNativeModulesPkgJson = JSON.parse(
@@ -133,7 +133,7 @@ describe('checkProdNativeModules', () => {
     );
 
     jest.replaceProperty(
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@kbn/repo-info'),
       'kibanaPackageJson',
       withTransientNativeModulesPkgJson

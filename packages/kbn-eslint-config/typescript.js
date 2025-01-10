@@ -214,7 +214,7 @@ module.exports = {
               lib: 'never',
             },
           ],
-          '@typescript-eslint/no-var-requires': 'error',
+          '@typescript-eslint/no-require-imports': 'error',
           '@typescript-eslint/unified-signatures': 'error',
           'constructor-super': 'error',
           'dot-notation': 'error',

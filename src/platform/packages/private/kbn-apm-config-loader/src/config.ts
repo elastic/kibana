@@ -73,7 +73,7 @@ export class ApmConfiguration {
     private readonly rawKibanaConfig: KibanaRawConfig,
     private readonly isDistributable: boolean
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { version, build } = require(join(this.rootDir, 'package.json'));
     this.kibanaVersion = version;
     this.pkgBuild = build;

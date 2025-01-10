@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('../../../../../../../src/setup_node_env');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { generate } = require('@kbn/openapi-generator');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { REPO_ROOT } = require('@kbn/repo-info');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { join, resolve } = require('path');
 
 const OSQUERY_ROOT = resolve(__dirname, '../..');
