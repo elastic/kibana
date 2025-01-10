@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
+import type { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import { NoRemoteCluster } from '../../empty_states';
 import { SourceErrorPage } from '../../source_error_page';
 import { useMetricsDataViewContext, useSourceContext } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { OnboardingFlow, getNoDataConfig } from './no_data_config';
+import type { OnboardingFlow } from './no_data_config';
+import { getNoDataConfig } from './no_data_config';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,

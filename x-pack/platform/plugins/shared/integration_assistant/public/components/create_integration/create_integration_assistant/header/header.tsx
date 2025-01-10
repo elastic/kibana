@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiAvatar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useActions } from '../state';
@@ -40,8 +33,8 @@ interface HeaderProps {
 }
 export const Header = React.memo<HeaderProps>(({ currentStep, isGenerating }) => {
   const { setStep } = useActions();
-  const { euiTheme } = useEuiTheme();
   const avatarCss = useAvatarCss();
+
   return (
     <KibanaPageTemplate.Header>
       <EuiFlexGroup direction="column" alignItems="center">
@@ -56,13 +49,7 @@ export const Header = React.memo<HeaderProps>(({ currentStep, isGenerating }) =>
                 justifyContent="center"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiAvatar
-                    name={i18n.ASSISTANT_AVATAR}
-                    size="m"
-                    iconType={AssistantAvatar}
-                    color={euiTheme.colors.emptyShade}
-                    css={avatarCss}
-                  />
+                  <AssistantAvatar css={avatarCss} name={i18n.ASSISTANT_AVATAR} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText>

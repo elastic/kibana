@@ -31,7 +31,16 @@ function formatHit(hit: Hit, indexName: string) {
 
 export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
+    {
+      path: addBasePath('/stats/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: paramsSchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;

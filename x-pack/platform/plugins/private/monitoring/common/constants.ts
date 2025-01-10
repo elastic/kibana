@@ -588,12 +588,12 @@ export const LEGACY_RULES = [
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/plugins/stack_connectors/server/connector_types/stack/email/index.ts
+ * See x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/email/index.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
 /**
  * Matches the id for the built-in in log action type
- * See x-pack/plugins/stack_connectors/server/connector_types/stack/server_log/index.ts
+ * See x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/server_log/index.ts
  */
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 

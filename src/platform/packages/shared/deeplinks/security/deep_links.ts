@@ -16,7 +16,7 @@ export enum SecurityPageName {
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts
    */
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`

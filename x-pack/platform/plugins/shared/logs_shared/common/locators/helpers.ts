@@ -6,26 +6,29 @@
  */
 
 import moment, { DurationInputObject } from 'moment';
-import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
+import type { LogsLocatorParams } from './logs_locator';
 
-export const getLogsQuery = (params: LogsLocatorParams) => {
-  const { filter } = params;
+export interface NodeLogsParams {
+  nodeField: string;
+  nodeId: string;
+  filter?: string;
+}
 
-  return filter ? { language: 'kuery', query: filter } : undefined;
-};
-
-export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
+export const getNodeQuery = (params: NodeLogsParams): LogsLocatorParams['query'] => {
   const { nodeField, nodeId, filter } = params;
 
   const nodeFilter = `${nodeField}: ${nodeId}`;
-  return filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+  const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+
+  return { language: 'kuery', query };
 };
 
-export const getNodeQuery = (params: NodeLogsLocatorParams) => {
-  return { language: 'kuery', query: createNodeLogsQuery(params) };
-};
+export interface TraceLogsParams {
+  traceId: string;
+  filter?: string;
+}
 
-export const getTraceQuery = (params: TraceLogsLocatorParams) => {
+export const getTraceQuery = (params: TraceLogsParams): LogsLocatorParams['query'] => {
   const { traceId, filter } = params;
 
   const traceFilter = `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`;
@@ -35,6 +38,16 @@ export const getTraceQuery = (params: TraceLogsLocatorParams) => {
 };
 
 const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
+
+export function getTimeRange(time: number | undefined): LogsLocatorParams['timeRange'] {
+  if (time === undefined) {
+    return undefined;
+  }
+  return {
+    from: getTimeRangeStartFromTime(time),
+    to: getTimeRangeEndFromTime(time),
+  };
+}
 
 export const getTimeRangeStartFromTime = (time: number): string =>
   moment(time).subtract(defaultTimeRangeFromPositionOffset).toISOString();

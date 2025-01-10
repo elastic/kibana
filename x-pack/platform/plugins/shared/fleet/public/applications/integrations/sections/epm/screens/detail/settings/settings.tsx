@@ -33,6 +33,7 @@ import {
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
   useUpdatePackageMutation,
+  useAuthz,
 } from '../../../../../hooks';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -118,6 +119,7 @@ interface Props {
 
 export const SettingsPage: React.FC<Props> = memo(
   ({ packageInfo, packageMetadata, startServices }: Props) => {
+    const authz = useAuthz();
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
@@ -160,8 +162,11 @@ export const SettingsPage: React.FC<Props> = memo(
     }, [name]);
 
     const isShowKeepPoliciesUpToDateSwitchDisabled = useMemo(() => {
-      return AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name);
-    }, [name]);
+      return (
+        !authz.integrations.writePackageSettings ||
+        AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name)
+      );
+    }, [authz.integrations.writePackageSettings, name]);
 
     const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
       keepPoliciesUpToDate ?? false

@@ -172,6 +172,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
+      sub_feature: subFeature,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
@@ -180,6 +181,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       minimumLicenseRequired,
       supportedFeatureIds,
       isSystemActionType,
+      subFeature,
     })
   );
 };

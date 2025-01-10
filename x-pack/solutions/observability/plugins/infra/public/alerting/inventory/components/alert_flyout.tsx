@@ -7,10 +7,10 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import { InfraWaffleMapOptions } from '../../../common/inventory/types';
+import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { useAlertPrefillContext } from '../../use_alert_prefill';
 
 interface Props {
