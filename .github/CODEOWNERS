@@ -830,6 +830,7 @@ x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
+x-pack/platform/plugins/private/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
@@ -865,7 +866,6 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
-x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
@@ -3252,7 +3252,7 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
-x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
+x-pack/platform/plugins/private/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
