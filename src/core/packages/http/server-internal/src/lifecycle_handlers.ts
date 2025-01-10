@@ -13,7 +13,10 @@ import type {
   OnPreResponseInfo,
   KibanaRequest,
 } from '@kbn/core-http-server';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import {
+  getWarningHeaderMessageFromRouteDeprecation,
+  isSafeMethod,
+} from '@kbn/core-http-router-server-internal';
 import { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpConfig } from './http_config';
@@ -120,15 +123,19 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 };
 
-export const createDeprecationWarningHeaderPreResponseHandler = (kibanaVersion: string): OnPreResponseHandler => {
+export const createDeprecationWarningHeaderPreResponseHandler = (
+  kibanaVersion: string
+): OnPreResponseHandler => {
+  // TODO: make sure we are not overwriting the warning header value
   return (request, response, toolkit) => {
     if (!request.route.options.deprecated) {
       return toolkit.next();
     }
-    const deprecationMessage = request.route.options.deprecated.message ?? 'This endpoint is deprecated';
-    const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
     const additionalHeaders = {
-      warning: warningString
+      warning: getWarningHeaderMessageFromRouteDeprecation(
+        request.route.options.deprecated,
+        kibanaVersion
+      ),
     };
     return toolkit.next({ headers: { ...additionalHeaders } });
   };

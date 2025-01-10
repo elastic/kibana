@@ -1509,11 +1509,13 @@ describe('runs with default preResponse handlers', () => {
 });
 
 describe('runs with default preResponse deprecation handlers', () => {
+  // TODO: add tests to make sure we dont overwrite the warning header value
+  const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
+  const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+
   it('should handle a deprecated route and include deprecation warning headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
-    const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
-    const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
 
     router.get(
       {
@@ -1528,16 +1530,13 @@ describe('runs with default preResponse deprecation handlers', () => {
           },
         },
       },
-      (context, req, res) =>
-        res.ok({
-        })
+      (context, req, res) => res.ok({})
     );
 
     await server.start();
 
     const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
 
-    // Check that the warning message is in the response headers
     expect(response.header.warning).toMatch(warningString);
   });
 
@@ -1550,16 +1549,68 @@ describe('runs with default preResponse deprecation handlers', () => {
         path: '/deprecated',
         validate: false,
       },
-      (context, req, res) =>
-        res.ok({
-        })
+      (context, req, res) => res.ok({})
     );
 
     await server.start();
 
     const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
 
-    // Check that the warning message is in the response headers
+    expect(response.header.warning).toBeUndefined();
+  });
+
+  it('should return warning header in deprecated v1 but not in non deprecated v2', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.versioned
+      .get({
+        access: 'internal',
+        path: '/test',
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          options: {
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'deprecate' },
+              severity: 'warning',
+              message: deprecationMessage,
+            },
+          },
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '1' } });
+        }
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '2' } });
+        }
+      );
+
+    await server.start();
+
+    let response = await supertest(innerServer.listener)
+      .get('/test')
+      .set('Elastic-Api-Version', '1')
+      .expect(200);
+
+    expect(response.body.v).toMatch('1');
+    expect(response.header.warning).toMatch(warningString);
+
+    response = await supertest(innerServer.listener)
+      .get('/test')
+      .set('Elastic-Api-Version', '2')
+      .expect(200);
+
+    expect(response.body.v).toMatch('2');
     expect(response.header.warning).toBeUndefined();
   });
 });

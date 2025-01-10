@@ -34,7 +34,7 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectVersionHeader } from '../util';
+import { injectResponseHeaders, injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
@@ -44,6 +44,7 @@ import { RequestHandlerEnhanced, Router } from '../router';
 import { kibanaResponseFactory as responseFactory } from '../response';
 import { validateHapiRequest } from '../route';
 import { RouteValidator } from '../validator';
+import { getWarningHeaderMessageFromRouteDeprecation } from '../get_warning_header_message';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;
@@ -211,7 +212,20 @@ export class CoreVersionedRoute implements VersionedRoute {
       return injectVersionHeader(version, error);
     }
 
-    const response = await handler.fn(kibanaRequest, responseFactory);
+    let response = await handler.fn(kibanaRequest, responseFactory);
+
+    if (handler.options.options?.deprecated && !response.options.headers?.warning) {
+      response = injectResponseHeaders(
+        {
+          warning: getWarningHeaderMessageFromRouteDeprecation(
+            handler.options.options.deprecated,
+            // TODO: put the actual version here
+            '9.0.0'
+          ),
+        },
+        response
+      );
+    }
 
     if (this.isDev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
