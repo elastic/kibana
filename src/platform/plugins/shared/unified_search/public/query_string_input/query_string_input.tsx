@@ -359,7 +359,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
   private onQueryStringChange = (value: string) => {
     this.setState({
-      isSuggestionsVisible: true,
+      isSuggestionsVisible: false,
       index: null,
       suggestionLimit: 50,
     });
