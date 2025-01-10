@@ -185,5 +185,13 @@
     "@kbn/core-deprecations-common",
     "@kbn/usage-collection-plugin",
     "@kbn/integration-assistant-plugin",
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/streams-schema",
+    "@kbn/server-route-repository-utils",
+    "@kbn/streams-plugin",
+    "@kbn/palettes",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/sse-utils-server",
   ]
 }
