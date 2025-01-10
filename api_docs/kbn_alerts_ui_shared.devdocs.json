@@ -2637,7 +2637,7 @@
                   },
                   "[]) => void) | undefined; }"
                 ],
-                "path": "src/plugins/unified_search/public/types.ts",
+                "path": "src/platform/plugins/shared/unified_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
