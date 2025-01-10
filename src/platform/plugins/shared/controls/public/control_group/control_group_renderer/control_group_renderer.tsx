@@ -168,8 +168,8 @@ export const ControlGroupRenderer = ({
       type={CONTROL_GROUP_TYPE}
       getParentApi={() => ({
         reload$,
-        dataLoading: dataLoading$,
-        viewMode: viewMode$,
+        dataLoading$,
+        viewMode$,
         query$: searchApi.query$,
         timeRange$: searchApi.timeRange$,
         unifiedSearchFilters$: searchApi.filters$,
