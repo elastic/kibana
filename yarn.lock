@@ -6469,6 +6469,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/object-utils@link:src/platform/packages/shared/kbn-object-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/object-versioning-utils@link:src/platform/packages/shared/kbn-object-versioning-utils":
   version "0.0.0"
   uid ""
