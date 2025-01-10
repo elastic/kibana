@@ -16,7 +16,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
   const [items, setItems] = useState<ReactElement[]>([]);
 
   useEffect(() => {
-    let canceled = false;
+    let cancelled = false;
 
     const actionContext = {
       embeddable: pageApi,
@@ -26,7 +26,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
     };
 
     uiActions.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, actionContext).then((actions) => {
-      if (canceled) return;
+      if (cancelled) return;
 
       const nextItems = actions.map((action) => {
         return (
@@ -46,7 +46,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
     });
 
     return () => {
-      canceled = true;
+      cancelled = true;
     };
   }, [pageApi, uiActions]);
 
