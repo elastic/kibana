@@ -22,7 +22,7 @@ import {
   FetchContext,
   getUnchangingComparator,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -79,10 +79,8 @@ export const getSearchEmbeddableFactory = ({
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-      const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
-        initialState?.savedObjectTitle
-      );
-      const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectTitle);
+      const defaultDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
 
@@ -98,7 +96,7 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const titleManager = initializeTitleManager(initialState);
       const timeRange = initializeTimeRange(initialState);
       const searchEmbeddable = await initializeSearchEmbeddableApi(initialState, {
         discoverServices,
@@ -106,41 +104,43 @@ export const getSearchEmbeddableFactory = ({
       const unsubscribeFromFetch = initializeFetch({
         api: {
           parentApi,
-          ...titlesApi,
+          ...titleManager.api,
           ...timeRange.api,
           savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews: searchEmbeddable.api.dataViews,
-          savedObjectId: savedObjectId$,
-          dataLoading: dataLoading$,
-          blockingError: blockingError$,
+          dataViews$: searchEmbeddable.api.dataViews$,
+          savedObjectId$,
+          dataLoading$,
+          blockingError$,
           fetchContext$,
           fetchWarnings$,
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
+        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       const api: SearchEmbeddableApi = buildApi(
         {
-          ...titlesApi,
+          ...titleManager.api,
           ...searchEmbeddable.api,
           ...timeRange.api,
           ...initializeEditApi({
             uuid,
             parentApi,
-            partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId: savedObjectId$ },
+            partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
             discoverServices,
             isEditable: startServices.isEditable,
           }),
-          dataLoading: dataLoading$,
-          blockingError: blockingError$,
-          savedObjectId: savedObjectId$,
-          defaultPanelTitle: defaultPanelTitle$,
-          defaultPanelDescription: defaultPanelDescription$,
+          dataLoading$,
+          blockingError$,
+          savedObjectId$,
+          defaultTitle$,
+          defaultDescription$,
           getByValueRuntimeSnapshot: () => {
             const savedSearch = searchEmbeddable.api.savedSearch$.getValue();
             return {
-              ...serializeTitles(),
+              ...titleManager.serialize(),
               ...timeRange.serialize(),
               ...omit(savedSearch, 'searchSource'),
               serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
@@ -166,7 +166,7 @@ export const getSearchEmbeddableFactory = ({
               ...api.savedSearch$.getValue(),
               title,
             });
-            defaultPanelTitle$.next(title);
+            defaultTitle$.next(title);
             savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
@@ -178,37 +178,34 @@ export const getSearchEmbeddableFactory = ({
             }),
           unlinkFromLibrary: () => {
             savedObjectId$.next(undefined);
-            if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
-              titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
+            if ((titleManager.api.title$.getValue() ?? '').length === 0) {
+              titleManager.api.setTitle(defaultTitle$.getValue());
             }
-            if ((titlesApi.panelDescription.getValue() ?? '').length === 0) {
-              titlesApi.setPanelDescription(defaultPanelDescription$.getValue());
+            if ((titleManager.api.description$.getValue() ?? '').length === 0) {
+              titleManager.api.setDescription(defaultDescription$.getValue());
             }
-            defaultPanelTitle$.next(undefined);
-            defaultPanelDescription$.next(undefined);
+            defaultTitle$.next(undefined);
+            defaultDescription$.next(undefined);
           },
           serializeState: () =>
             serializeState({
               uuid,
               initialState,
               savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-              serializeTitles,
+              serializeTitles: titleManager.serialize,
               serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
             }),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           ...timeRange.comparators,
           ...searchEmbeddable.comparators,
           rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
-          savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
-          savedObjectDescription: [
-            defaultPanelDescription$,
-            (value) => defaultPanelDescription$.next(value),
-          ],
+          savedObjectTitle: [defaultTitle$, (value) => defaultTitle$.next(value)],
+          savedObjectDescription: [defaultDescription$, (value) => defaultDescription$.next(value)],
           nonPersistedDisplayOptions: [
             nonPersistedDisplayOptions$,
             (value) => nonPersistedDisplayOptions$.next(value),
@@ -221,7 +218,7 @@ export const getSearchEmbeddableFactory = ({
         Component: () => {
           const [savedSearch, dataViews] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews
+            api.dataViews$
           );
 
           useEffect(() => {

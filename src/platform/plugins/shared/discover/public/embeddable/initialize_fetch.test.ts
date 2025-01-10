@@ -29,7 +29,11 @@ describe('initialize fetch', () => {
     managed: false,
   };
 
-  const { api: mockedApi, stateManager } = getMockedSearchApi({ searchSource, savedSearch });
+  const {
+    api: mockedApi,
+    stateManager,
+    setters,
+  } = getMockedSearchApi({ searchSource, savedSearch });
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -38,6 +42,7 @@ describe('initialize fetch', () => {
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
+      ...setters,
     });
     await waitOneTick();
   });
@@ -73,7 +78,7 @@ describe('initialize fetch', () => {
   });
 
   it('should catch and emit error', async () => {
-    expect(mockedApi.blockingError.getValue()).toBeUndefined();
+    expect(mockedApi.blockingError$.getValue()).toBeUndefined();
     searchSource.fetch$ = jest.fn().mockImplementation(
       () =>
         new Observable(() => {
@@ -82,8 +87,8 @@ describe('initialize fetch', () => {
     );
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
-    expect(mockedApi.blockingError.getValue()).toBeDefined();
-    expect(mockedApi.blockingError.getValue()?.message).toBe('Search failed');
+    expect(mockedApi.blockingError$.getValue()).toBeDefined();
+    expect(mockedApi.blockingError$.getValue()?.message).toBe('Search failed');
   });
 
   it('should correctly handle aborted requests', async () => {
