@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -140,12 +139,10 @@ export const getStructuredToolForIndexEntry = ({
   indexEntry,
   esClient,
   logger,
-  elserId,
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
   logger: Logger;
-  elserId: string;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
     const fieldType =
@@ -182,26 +179,25 @@ export const getStructuredToolForIndexEntry = ({
       const params: SearchRequest = {
         index: indexEntry.index,
         size: 10,
-        retriever: {
-          standard: {
-            query: {
-              nested: {
-                path: `${indexEntry.field}.inference.chunks`,
-                query: {
-                  sparse_vector: {
-                    inference_id: elserId,
-                    field: `${indexEntry.field}.inference.chunks.embeddings`,
-                    query: input.query,
-                  },
-                },
-                inner_hits: {
-                  size: 2,
-                  name: `${indexEntry.name}.${indexEntry.field}`,
-                  _source: [`${indexEntry.field}.inference.chunks.text`],
+        query: {
+          bool: {
+            must: [
+              {
+                semantic: {
+                  field: indexEntry.field,
+                  query: input.query,
                 },
               },
-            },
+            ],
             filter,
+          },
+        },
+        highlight: {
+          fields: {
+            [indexEntry.field]: {
+              type: 'semantic',
+              number_of_fragments: 2,
+            },
           },
         },
       };
@@ -217,18 +213,8 @@ export const getStructuredToolForIndexEntry = ({
             }, {});
           }
 
-          // We want to send relevant inner hits (chunks) to the LLM as a context
-          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
-          if (hit.inner_hits?.[innerHitPath]) {
-            return {
-              text: hit.inner_hits[innerHitPath].hits.hits
-                .map((innerHit) => innerHit._source.text)
-                .join('\n --- \n'),
-            };
-          }
-
           return {
-            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
+            text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
           };
         });
 
