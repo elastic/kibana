@@ -6616,7 +6616,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/palettes@link:packages/kbn-palettes":
+"@kbn/palettes@link:src/platform/packages/shared/kbn-palettes":
   version "0.0.0"
   uid ""
 
