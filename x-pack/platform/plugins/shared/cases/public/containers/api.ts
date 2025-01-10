@@ -81,6 +81,7 @@ import {
   convertCasesToCamelCase,
   convertCaseResolveToCamelCase,
   convertSimilarCasesToCamel,
+  convertAttachmentsToCamelCase,
 } from '../api/utils';
 
 import type {
