@@ -7,7 +7,7 @@
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { APP_API_ROUTES } from '../../constants';
 import { PostHealthCheckRequestSchema, PostHealthCheckResponseSchema } from '../../types';
 import { genericErrorResponse } from '../schema/errors';
@@ -19,8 +19,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: APP_API_ROUTES.HEALTH_CHECK_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Check Fleet Server health`,
       options: {

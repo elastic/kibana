@@ -19,6 +19,7 @@ import {
 } from '@kbn/es-query';
 import type { Filter, Query, TimeRange, PhraseFilter } from '@kbn/es-query';
 import { css } from '@emotion/react';
+import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Graph, isEntityNode } from '../../..';
@@ -32,6 +33,7 @@ import {
   RELATED_ENTITY,
   TARGET_ENTITY_ID,
 } from '../../common/constants';
+import { Actions, type ActionsProps } from '../controls/actions';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -137,7 +139,7 @@ const useGraphPopovers = (
   return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
 };
 
-interface GraphInvestigationProps {
+export interface GraphInvestigationProps {
   /**
    * The initial state to use for the graph investigation view.
    */
@@ -167,6 +169,21 @@ interface GraphInvestigationProps {
      */
     timeRange: TimeRange;
   };
+
+  /**
+   * Whether to show investigate in timeline action button. Defaults value is false.
+   */
+  showInvestigateInTimeline?: boolean;
+
+  /**
+   * Callback when investigate in timeline action button is clicked, ignored if investigateInTimelineComponent is provided.
+   */
+  onInvestigateInTimeline?: (filters: Filter[], timeRange: TimeRange) => void;
+
+  /**
+   * Whether to show toggle search action button. Defaults value is false.
+   */
+  showToggleSearch?: boolean;
 }
 
 /**
@@ -175,9 +192,28 @@ interface GraphInvestigationProps {
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
     initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    showInvestigateInTimeline = false,
+    showToggleSearch = false,
+    onInvestigateInTimeline,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+
+    const onInvestigateInTimelineCallback = useCallback(() => {
+      const filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
+        return addFilter(dataView?.id ?? '', acc, 'event.id', id);
+      }, searchFilters);
+      onInvestigateInTimeline?.(filters, timeRange);
+    }, [dataView?.id, onInvestigateInTimeline, originEventIds, searchFilters, timeRange]);
+
+    const actionsProps: ActionsProps = useMemo(
+      () => ({
+        showInvestigateInTimeline,
+        showToggleSearch,
+        onInvestigateInTimeline: onInvestigateInTimelineCallback,
+      }),
+      [onInvestigateInTimelineCallback, showInvestigateInTimeline, showToggleSearch]
+    );
 
     const {
       services: { uiSettings },
@@ -293,7 +329,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
-            />
+            >
+              <Panel position="top-right">
+                <Actions {...actionsProps} />
+              </Panel>
+            </Graph>
           </EuiFlexItem>
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />

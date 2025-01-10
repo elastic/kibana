@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -66,7 +66,7 @@
             },
             "> | undefined) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -95,7 +95,7 @@
                 },
                 "[]"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -118,7 +118,7 @@
                 },
                 "> | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -136,7 +136,7 @@
           "signature": [
             "(homeHref: string) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -150,7 +150,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -202,7 +202,7 @@
             },
             " | undefined; } | undefined) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -222,7 +222,7 @@
                   "text": "SolutionId"
                 }
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -254,7 +254,7 @@
                 },
                 ", string, string>>"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -266,7 +266,7 @@
               "tags": [],
               "label": "config",
               "description": [],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -280,7 +280,7 @@
                   "signature": [
                     "string | undefined"
                   ],
-                  "path": "x-pack/plugins/serverless/public/types.ts",
+                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 },
@@ -301,7 +301,7 @@
                     },
                     " | undefined"
                   ],
-                  "path": "x-pack/plugins/serverless/public/types.ts",
+                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -330,7 +330,7 @@
             },
             ") => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": true,
           "trackAdoption": false,
           "references": [],
@@ -351,7 +351,7 @@
                   "text": "SideNavComponent"
                 }
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -385,7 +385,7 @@
             },
             "> | undefined"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -399,7 +399,7 @@
               "signature": [
                 "boolean | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -422,7 +422,7 @@
                 },
                 "> | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -449,7 +449,7 @@
       "tags": [],
       "label": "ServerlessServerSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -463,7 +463,7 @@
           "signature": [
             "(keys: string[]) => void"
           ],
-          "path": "x-pack/plugins/serverless/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -477,7 +477,7 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/serverless/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -496,7 +496,7 @@
       "tags": [],
       "label": "ServerlessServerStart",
       "description": [],
-      "path": "x-pack/plugins/serverless/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -522,7 +522,7 @@
         "signature": [
           "\"/internal/serverless/switch_project\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -537,7 +537,7 @@
         "signature": [
           "\"serverless\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -552,7 +552,7 @@
         "signature": [
           "\"serverless\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

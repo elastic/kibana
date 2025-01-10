@@ -152,6 +152,7 @@ import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
+import { runWithCache } from './epm/packages/cache';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -517,7 +518,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
       validateIsNotHostedPolicy(agentPolicy, options?.force);
@@ -1550,7 +1551,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
+      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
@@ -1694,40 +1695,42 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
-    const result: UpgradePackagePolicyResponse = [];
+    return runWithCache(async () => {
+      const result: UpgradePackagePolicyResponse = [];
 
-    for (const id of ids) {
-      try {
-        const {
-          packagePolicy: currentPackagePolicy,
-          packageInfo,
-          experimentalDataStreamFeatures,
-        } = await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
+      for (const id of ids) {
+        try {
+          const {
+            packagePolicy: currentPackagePolicy,
+            packageInfo,
+            experimentalDataStreamFeatures,
+          } = await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-        if (currentPackagePolicy.is_managed && !options?.force) {
-          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+          if (currentPackagePolicy.is_managed && !options?.force) {
+            throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+          }
+
+          await this.doUpgrade(
+            soClient,
+            esClient,
+            id,
+            currentPackagePolicy,
+            result,
+            packageInfo,
+            experimentalDataStreamFeatures,
+            options
+          );
+        } catch (error) {
+          result.push({
+            id,
+            success: false,
+            ...fleetErrorToResponseOptions(error),
+          });
         }
-
-        await this.doUpgrade(
-          soClient,
-          esClient,
-          id,
-          currentPackagePolicy,
-          result,
-          packageInfo,
-          experimentalDataStreamFeatures,
-          options
-        );
-      } catch (error) {
-        result.push({
-          id,
-          success: false,
-          ...fleetErrorToResponseOptions(error),
-        });
       }
-    }
 
-    return result;
+      return result;
+    });
   }
 
   private async doUpgrade(
