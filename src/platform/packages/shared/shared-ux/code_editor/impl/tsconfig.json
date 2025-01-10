@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -13,12 +13,18 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../../../typings/**/*",
+    "../../../../../../../typings/**/*",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ],
   "kbn_references": [
     "@kbn/monaco",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/code-editor-mock",
   ]
 }
