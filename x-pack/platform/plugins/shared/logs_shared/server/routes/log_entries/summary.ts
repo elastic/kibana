@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { logEntriesV1 } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 
-import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
+import type { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 import { parseFilterQuery } from '../../utils/serialized_query';
 

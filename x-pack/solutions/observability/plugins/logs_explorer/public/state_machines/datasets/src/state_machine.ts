@@ -8,7 +8,7 @@
 import { isEmpty, isError, omitBy } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { Dataset } from '../../../../common/datasets';
-import { IDatasetsClient } from '../../../services/datasets';
+import type { IDatasetsClient } from '../../../services/datasets';
 import { createDefaultContext } from './defaults';
 import type {
   DatasetsContext,

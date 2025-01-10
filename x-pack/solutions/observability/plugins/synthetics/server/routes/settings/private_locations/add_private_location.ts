@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
-import { PrivateLocation } from '../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),

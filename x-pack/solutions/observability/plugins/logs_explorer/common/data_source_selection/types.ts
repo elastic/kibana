@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import * as rt from 'io-ts';
 import { datasetRT } from '../datasets';
 import { dataViewDescriptorRT } from '../data_views/types';

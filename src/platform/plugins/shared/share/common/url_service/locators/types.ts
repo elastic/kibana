@@ -8,8 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DependencyList } from 'react';
-import {
+import type { DependencyList } from 'react';
+import type {
   MigrateFunction,
   PersistableState,
   PersistableStateService,

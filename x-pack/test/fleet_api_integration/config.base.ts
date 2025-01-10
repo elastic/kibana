@@ -7,11 +7,8 @@
 
 import path from 'path';
 
-import {
-  FtrConfigProviderContext,
-  defineDockerServersConfig,
-  getKibanaCliLoggers,
-} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { defineDockerServersConfig, getKibanaCliLoggers } from '@kbn/test';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 // Docker image to use for Fleet API integration tests.

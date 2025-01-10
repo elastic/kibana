@@ -6,7 +6,7 @@
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   IRouter,
   CustomRequestHandlerContext,

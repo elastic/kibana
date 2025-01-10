@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ProvidedType } from '@kbn/test';
+import type { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
 

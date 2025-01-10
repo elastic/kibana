@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import React, { useMemo, useRef } from 'react';
-import { Options } from '../register_items';
+import type { Options } from '../register_items';
 
 export const EMBEDDABLE_ITEM_TYPE = 'embeddable';
 

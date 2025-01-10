@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ActionDefinition } from '../../actions';
+import type { ActionDefinition } from '../../actions';
 
 type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 

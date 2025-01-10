@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
-import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { LlmProxy } from '../../common/create_llm_proxy';
+import { createLlmProxy } from '../../common/create_llm_proxy';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { ForbiddenApiError } from '../../common/config';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IEvent } from '@kbn/event-log-plugin/server';
-import { AlertInstanceState } from '../types';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { IEvent } from '@kbn/event-log-plugin/server';
+import type { AlertInstanceState } from '../types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldType, FunctionReturnType } from '../../definitions/types';
+import type { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';

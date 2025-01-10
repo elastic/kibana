@@ -49,7 +49,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';

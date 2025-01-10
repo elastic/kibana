@@ -9,8 +9,8 @@
 
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { ParsedDashboardAttributesWithType } from '../../types';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { ParsedDashboardAttributesWithType } from '../../types';
+import type { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 

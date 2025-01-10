@@ -14,8 +14,8 @@ import { createMaintenanceWindowRoute } from './create_maintenance_window_route'
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../common';
 
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
+import type { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import type { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
 import { transformCreateBody } from './transforms';
 import { transformMaintenanceWindowToResponse } from '../../transforms';
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as formContext from 'react-hook-form';
 import { Disclaimer } from './disclaimer';
-import { ServiceLocations } from '../types';
+import type { ServiceLocations } from '../types';
 
 export const mockLocation = {
   label: 'US Central',

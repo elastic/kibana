@@ -15,8 +15,8 @@ import {
   findingsMockData,
   vulnerabilityMockData,
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../shared/services';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../../../shared/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

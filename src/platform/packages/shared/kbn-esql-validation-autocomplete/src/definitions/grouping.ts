@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
+import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 const groupingTypeTable: Array<
   [

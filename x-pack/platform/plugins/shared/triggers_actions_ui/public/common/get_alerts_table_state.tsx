@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { LazyLoadProps } from '../types';
+import type { LazyLoadProps } from '../types';
 
 import type { AlertsTableStateProps } from '../application/sections/alerts_table/alerts_table_state';
 

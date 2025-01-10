@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn} from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../../assistant_context/types';
-import { AIConnector } from '../../../../connectorland/connector_selector';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../../../assistant_context/types';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../../common/components/assistant_settings_management/inline_actions';
 import { getConversationApiConfig } from '../../../use_conversation/helpers';

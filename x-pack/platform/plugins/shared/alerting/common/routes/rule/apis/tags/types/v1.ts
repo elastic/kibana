@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
-import { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from '..';
+import type { TypeOf } from '@kbn/config-schema';
+import type { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from '..';
 
 export type RuleTagsRequestQuery = TypeOf<typeof ruleTagsRequestQuerySchema>;
 export type RuleTagsFormattedResponse = TypeOf<typeof ruleTagsFormattedResponseSchema>;

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
+import type { ComponentType, ReactElement, Ref } from 'react';
+import React, { Suspense } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 /**

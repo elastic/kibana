@@ -17,10 +17,11 @@ import {
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
-import {
+import type {
   PagerDutyConfig,
   PagerDutySecrets,
-  PagerDutyActionParams,
+  PagerDutyActionParams} from '../types';
+import {
   EventActionOptions,
 } from '../types';
 

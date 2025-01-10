@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');

@@ -6,7 +6,7 @@
  */
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { TextScale } from '../../../../common/log_text_scale';
 import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
 
 export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({

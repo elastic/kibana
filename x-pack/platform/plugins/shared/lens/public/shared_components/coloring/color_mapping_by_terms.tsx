@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MutableRefObject, useState } from 'react';
+import type { MutableRefObject} from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiBadge,
@@ -16,17 +17,18 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import {
+import type {
   ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams,
+  CustomPaletteParams} from '@kbn/coloring';
+import {
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
+  SPECIAL_TOKENS_STRING_CONVERSION
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type {
+  ExpressionFunctionTheme} from '@kbn/expressions-plugin/common';
 import {
   buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionTheme,
+  buildExpressionFunction
 } from '@kbn/expressions-plugin/common';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import {
+import type {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
   EventAnnotationResultFn,
@@ -39,7 +40,7 @@ import {
 import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
   State as XYState,
   YConfig,

@@ -8,8 +8,8 @@
  */
 
 import { test as base } from '@playwright/test';
-import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import { ScoutWorkerFixtures } from '../types';
+import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { ScoutWorkerFixtures } from '../types';
 import { isValidUTCDate, formatTime } from '../../utils';
 
 /**

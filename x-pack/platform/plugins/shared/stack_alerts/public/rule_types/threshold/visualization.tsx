@@ -6,8 +6,10 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
+import type {
+  PartialTheme} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -17,8 +19,7 @@ import {
   Position,
   ScaleType,
   Settings,
-  niceTimeFormatter,
-  PartialTheme,
+  niceTimeFormatter
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import {
@@ -30,18 +31,19 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Comparator } from '@kbn/alerting-comparators';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { i18n } from '@kbn/i18n';
+import type {
+  GetThresholdRuleVisualizationDataParams} from './index_threshold_api';
 import {
-  getThresholdRuleVisualizationData,
-  GetThresholdRuleVisualizationDataParams,
+  getThresholdRuleVisualizationData
 } from './index_threshold_api';
-import { IndexThresholdRuleParams } from './types';
+import type { IndexThresholdRuleParams } from './types';
 
 const chartThemeOverrides = (): PartialTheme => {
   return {

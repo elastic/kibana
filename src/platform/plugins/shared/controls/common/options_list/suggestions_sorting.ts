@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 
 export type OptionsListSortBy = '_count' | '_key';
 

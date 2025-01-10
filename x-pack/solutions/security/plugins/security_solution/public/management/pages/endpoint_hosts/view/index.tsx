@@ -7,8 +7,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { CriteriaWithPagination, EuiSuperDatePickerProps } from '@elastic/eui';
-import {
+import type {
+  CriteriaWithPagination,
+  EuiSuperDatePickerProps,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiEmptyPrompt,

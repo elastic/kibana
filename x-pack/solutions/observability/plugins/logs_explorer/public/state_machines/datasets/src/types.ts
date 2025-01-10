@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DoneInvokeEvent } from 'xstate';
+import type { DoneInvokeEvent } from 'xstate';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { FindDatasetValue, SortOrder } from '../../../../common/latest';
-import { Dataset } from '../../../../common/datasets';
+import type { FindDatasetValue, SortOrder } from '../../../../common/latest';
+import type { Dataset } from '../../../../common/datasets';
 
 export interface DatasetsSearchParams {
   datasetQuery?: string;

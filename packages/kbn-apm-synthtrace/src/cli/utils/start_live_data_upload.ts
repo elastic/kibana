@@ -9,13 +9,14 @@
 
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
-import { PassThrough, Readable, Writable } from 'stream';
+import type { Writable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
+import type { SynthtraceEsClient } from '../../lib/shared/base_client';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 
 export async function startLiveDataUpload({
   runOptions,

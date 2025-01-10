@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
 import { SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';

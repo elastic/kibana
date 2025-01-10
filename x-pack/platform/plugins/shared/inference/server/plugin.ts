@@ -14,7 +14,7 @@ import {
 } from './inference_client';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
-import {
+import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
   InferenceServerSetup,

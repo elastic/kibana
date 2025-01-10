@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlyoutPanelProps } from '../..';
+import type { FlyoutPanelProps } from '../..';
 
 export interface FlyoutPanels {
   /**

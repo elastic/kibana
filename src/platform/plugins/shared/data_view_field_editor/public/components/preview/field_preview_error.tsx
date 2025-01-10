@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateSelector } from '../../state_utils';
-import { PreviewState } from './types';
+import type { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 

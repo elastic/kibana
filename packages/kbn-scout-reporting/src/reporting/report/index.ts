@@ -12,7 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutReportEvent } from './event';
+import type { ScoutReportEvent } from './event';
 
 /**
  * Generic error raised by a Scout report

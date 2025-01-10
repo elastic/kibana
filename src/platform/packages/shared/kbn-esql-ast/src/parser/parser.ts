@@ -17,7 +17,7 @@ import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
 import { Builder } from '../builder';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import type { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 
 export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
   const lexer = new ESQLLexer(inputStream);

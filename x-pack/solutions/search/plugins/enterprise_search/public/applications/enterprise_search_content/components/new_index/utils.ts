@@ -14,7 +14,7 @@ import { ConnectorIcon } from '../../../shared/icons/connector';
 import { CrawlerIcon } from '../../../shared/icons/crawler';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
-import { LanguageForOptimization } from './types';
+import type { LanguageForOptimization } from './types';
 
 // Enterprise Search expects the Universal language option to be represented by null
 // but we can't use null as the value for an EuiSelectOption

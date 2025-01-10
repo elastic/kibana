@@ -12,10 +12,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { getLinksEmbeddableFactory } from './links_embeddable';
-import { Link } from '../../common/content_management';
+import type { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   LinksApi,
   LinksParentApi,
   LinksRuntimeState,

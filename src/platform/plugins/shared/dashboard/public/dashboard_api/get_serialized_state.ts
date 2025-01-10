@@ -8,8 +8,9 @@
  */
 
 import { pick } from 'lodash';
-import moment, { Moment } from 'moment';
-import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
 
 import type { Reference } from '@kbn/content-management-utils';
 import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
@@ -22,7 +23,7 @@ import {
   savedObjectsTaggingService,
 } from '../services/kibana_services';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../dashboard_container';
-import { DashboardState } from './types';
+import type { DashboardState } from './types';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {

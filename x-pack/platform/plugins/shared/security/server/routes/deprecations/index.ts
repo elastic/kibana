@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 import type { RouteDefinitionParams } from '..';
+import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 
 export function defineDeprecationsRoutes(params: RouteDefinitionParams) {
   defineKibanaUserRoleDeprecationRoutes(params);

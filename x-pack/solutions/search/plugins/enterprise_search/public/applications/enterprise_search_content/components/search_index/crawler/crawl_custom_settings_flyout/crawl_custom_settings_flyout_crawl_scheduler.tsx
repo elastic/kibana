@@ -22,11 +22,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorScheduling } from '@kbn/search-connectors';
+import type { ConnectorScheduling } from '@kbn/search-connectors';
 
 import { EnterpriseSearchCronEditor } from '@kbn/search-connectors/components/cron_editor';
 
-import { CrawlerIndex } from '../../../../../../../common/types/indices';
+import type { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
 import { isCrawlerIndex } from '../../../../utils/indices';
 

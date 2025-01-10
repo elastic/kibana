@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { SecuritySolutionDataViewBase } from '../../../types';
+import type { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { DESCRIPTION } from './translations';
 

@@ -9,14 +9,14 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
-import { RunTestsOptions } from './flags';
+import type { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import { getPlaywrightGrepTag } from '../utils';
 

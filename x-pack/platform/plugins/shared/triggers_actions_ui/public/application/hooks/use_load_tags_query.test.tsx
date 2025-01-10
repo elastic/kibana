@@ -9,7 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadTagsQuery } from './use_load_tags_query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 

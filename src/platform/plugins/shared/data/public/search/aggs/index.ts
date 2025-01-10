@@ -8,4 +8,4 @@
  */
 
 export * from './aggs_service';
-export * from './types';
+export type * from './types';

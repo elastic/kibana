@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
 import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
-import { CrawlerCustomSchedule } from '../../../../api/crawler/types';
+import type { CrawlerCustomSchedule } from '../../../../api/crawler/types';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 

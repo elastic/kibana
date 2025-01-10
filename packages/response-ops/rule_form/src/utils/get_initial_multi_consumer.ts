@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../common/types';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { RuleTypeWithDescription } from '../common/types';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { FEATURE_NAME_MAP } from '../translations';
 import { getAuthorizedConsumers } from './get_authorized_consumers';

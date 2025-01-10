@@ -10,7 +10,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 
 /** @public types */
-export * from './types';
+export type * from './types';
 export * from './utils';
 export * from './expression_functions';
 export * from './convert_to_lens';

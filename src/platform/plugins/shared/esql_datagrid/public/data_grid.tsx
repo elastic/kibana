@@ -9,12 +9,13 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
+import type {
+  UnifiedDataTableRenderCustomToolbarProps} from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
   DataLoadingState,
   type SortOrder,
-  renderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
+  renderCustomToolbar
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';

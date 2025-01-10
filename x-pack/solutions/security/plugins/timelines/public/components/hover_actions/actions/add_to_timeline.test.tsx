@@ -10,12 +10,13 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
+import type { SuccessMessageProps } from './add_to_timeline';
 import AddToTimelineButton, {
   ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
-  SuccessMessageProps,
   AddSuccessMessage,
 } from './add_to_timeline';
-import { DataProvider, IS_OPERATOR } from '../../../../common/types';
+import type { DataProvider } from '../../../../common/types';
+import { IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
 

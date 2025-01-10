@@ -18,7 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { SettingsWorkspaceProps } from './settings';
+import type { SettingsWorkspaceProps } from './settings';
 import { useListKeys } from './use_list_keys';
 import { IconRenderer } from '../icon_renderer';
 

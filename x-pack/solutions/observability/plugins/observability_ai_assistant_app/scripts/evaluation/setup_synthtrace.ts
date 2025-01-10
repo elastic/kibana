@@ -11,10 +11,10 @@ import {
   LogsSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { isPromise } from 'util/types';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
-import { Client } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
+import type { Client } from '@elastic/elasticsearch';
 
 export interface SynthtraceEsClients {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;

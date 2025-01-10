@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiThemeComputed} from '@elastic/eui';
 import {
   EuiHeader,
   EuiHeaderLogo,
@@ -14,12 +16,11 @@ import {
   EuiHeaderSectionItem,
   EuiLoadingSpinner,
   useEuiTheme,
-  EuiThemeComputed,
   EuiImage,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
+import type {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
@@ -29,13 +30,14 @@ import {
 } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { useCallback, type ComponentProps } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';

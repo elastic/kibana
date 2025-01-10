@@ -8,7 +8,7 @@
  */
 
 import { strings } from '../i18n';
-import { XAxisConfigFn, YAxisConfigFn } from '../types';
+import type { XAxisConfigFn, YAxisConfigFn } from '../types';
 import { AXIS_EXTENT_CONFIG } from '../constants';
 
 type CommonAxisConfigFn = XAxisConfigFn | YAxisConfigFn;

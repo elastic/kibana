@@ -15,14 +15,15 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import type {
+  InstanceInfo} from './plugin_context';
 import {
   createPluginInitializerContext,
-  createPluginPrebootSetupContext,
-  InstanceInfo,
+  createPluginPrebootSetupContext
 } from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
-import { PluginManifest } from '@kbn/core-plugins-server';
+import type { PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';

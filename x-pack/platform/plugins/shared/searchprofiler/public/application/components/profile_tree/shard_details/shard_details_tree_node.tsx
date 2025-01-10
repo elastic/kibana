@@ -15,7 +15,7 @@ import { msToPretty } from '../../../lib';
 
 import { PercentageBadge } from '../../percentage_badge';
 
-import { Index, Operation, Shard } from '../../../types';
+import type { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
   index: Index;

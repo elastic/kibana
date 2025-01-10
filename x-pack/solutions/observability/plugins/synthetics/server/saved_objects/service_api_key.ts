@@ -6,13 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-  SavedObjectsType,
-} from '@kbn/core/server';
-import { SyntheticsServerSetup } from '../types';
-import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
+import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';

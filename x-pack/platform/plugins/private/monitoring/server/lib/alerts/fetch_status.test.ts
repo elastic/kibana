@@ -6,7 +6,7 @@
  */
 
 import { fetchStatus } from './fetch_status';
-import { AlertUiState, AlertState } from '../../../common/types/alerts';
+import type { AlertUiState, AlertState } from '../../../common/types/alerts';
 import { AlertSeverity } from '../../../common/enums';
 import {
   RULE_CPU_USAGE,

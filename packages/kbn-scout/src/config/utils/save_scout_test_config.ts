@@ -9,9 +9,9 @@
 
 import * as Fs from 'fs';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { ScoutTestConfig } from '../../types';
+import type { ScoutTestConfig } from '../../types';
 
 /**
  * Saves Scout server configuration to the disk.

@@ -9,10 +9,10 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
-import { Reference } from '../../common/content_management';
+import type { Reference } from '../../common/content_management';
 import {
   getAnalytics,
   getDataViews,
@@ -30,13 +30,14 @@ import {
 } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import {
-  isVisualizeSavedObjectState,
+import type {
   VisualizeSavedObjectInputState,
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
-  ExtraSavedObjectProperties,
+  ExtraSavedObjectProperties} from './types';
+import {
+  isVisualizeSavedObjectState,
   isVisualizeRuntimeState,
 } from './types';
 

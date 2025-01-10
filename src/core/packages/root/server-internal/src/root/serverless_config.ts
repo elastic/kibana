@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { TypeOf, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 // Config validation for how to run Kibana in Serverless mode.
 // Clients need to specify the project type to run in.

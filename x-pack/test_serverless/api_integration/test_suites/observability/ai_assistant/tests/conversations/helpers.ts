@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/tooling-log';
-import {
+import type { Readable } from 'stream';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type {
   ConversationCreateEvent,
   ConversationUpdateEvent,
   StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
+import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import type { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
 
 export function decodeEvents(body: Readable | string) {
   return String(body)

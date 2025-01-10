@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Timerange } from '@kbn/apm-synthtrace-client';
-import {
+import type { Timerange } from '@kbn/apm-synthtrace-client';
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
@@ -16,10 +16,10 @@ import {
   OtelSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
 } from '../..';
-import { Logger } from '../lib/utils/create_logger';
-import { ScenarioReturnType } from '../lib/utils/with_client';
-import { RunOptions } from './utils/parse_run_cli_flags';
-import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
+import type { Logger } from '../lib/utils/create_logger';
+import type { ScenarioReturnType } from '../lib/utils/with_client';
+import type { RunOptions } from './utils/parse_run_cli_flags';
+import type { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
 
 interface EsClients {
   apmEsClient: ApmSynthtraceEsClient;

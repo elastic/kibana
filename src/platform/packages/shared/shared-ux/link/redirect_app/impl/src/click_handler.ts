@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { getClosestLink, hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import { NavigateToUrl } from '@kbn/shared-ux-link-redirect-app-types';
+import type { NavigateToUrl } from '@kbn/shared-ux-link-redirect-app-types';
 
 interface CreateCrossAppClickHandlerOptions {
   event: MouseEvent<HTMLElement>;

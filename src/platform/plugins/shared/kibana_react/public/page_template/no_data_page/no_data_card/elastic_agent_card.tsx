@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;

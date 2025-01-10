@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskStore } from './task_store';
+import type { TaskStore } from './task_store';
 
 interface TaskStoreOptions {
   index?: string;

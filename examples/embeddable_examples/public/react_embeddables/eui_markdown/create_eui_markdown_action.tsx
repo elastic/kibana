@@ -9,15 +9,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type {
+  UiActionsStart} from '@kbn/ui-actions-plugin/public';
 import {
   IncompatibleActionError,
-  UiActionsStart,
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState } from './types';
+import type { MarkdownEditorSerializedState } from './types';
 
 // -----------------------------------------------------------------------------
 // Create and register an action which allows this embeddable to be created from

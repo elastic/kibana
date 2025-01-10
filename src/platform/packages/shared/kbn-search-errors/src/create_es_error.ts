@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import { IEsError } from './types';
+import type { IEsError } from './types';
 import { EsError } from './es_error';
 import { PainlessError } from './painless_error';
 import { TsdbError } from './tsdb_error';

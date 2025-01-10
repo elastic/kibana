@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type {
+  IngestPipeline,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 /**
  * Gets all ML inference pipelines. Redacts trained model IDs in those pipelines which reference

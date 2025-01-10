@@ -8,9 +8,9 @@
  */
 
 import color from 'color';
-import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
-import { Panel, Series } from '../../../../../common/types';
+import type { Panel, Series } from '../../../../../common/types';
 
 const Operators = {
   GTE: 'gte',

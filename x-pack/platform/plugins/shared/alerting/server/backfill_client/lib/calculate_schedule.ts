@@ -7,7 +7,7 @@
 
 import { adHocRunStatus } from '../../../common/constants';
 import { parseDuration } from '../../../common';
-import { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
+import type { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
 
 export function calculateSchedule(
   start: string,

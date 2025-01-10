@@ -12,7 +12,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition } from '../src/definitions/types';
+import type { FunctionDefinition } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],

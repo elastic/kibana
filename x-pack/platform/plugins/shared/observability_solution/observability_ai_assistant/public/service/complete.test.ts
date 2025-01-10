@@ -6,6 +6,9 @@
  */
 import { filter, last, lastValueFrom, map, of, throwError, toArray } from 'rxjs';
 import { v4 } from 'uuid';
+import type {
+  MessageAddEvent,
+  StreamingChatResponseEventWithoutError} from '../../common';
 import {
   type Message,
   MessageRole,
@@ -13,10 +16,8 @@ import {
   type StreamingChatResponseEvent,
   ChatCompletionErrorCode,
   ChatCompletionError,
-  MessageAddEvent,
   createInternalServerError,
-  createConversationNotFoundError,
-  StreamingChatResponseEventWithoutError,
+  createConversationNotFoundError
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { complete } from './complete';

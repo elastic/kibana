@@ -11,8 +11,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import OptionsTab, { OptionsTabProps } from './options_tab';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { OptionsTabProps } from './options_tab';
+import OptionsTab from './options_tab';
 
 describe('OptionsTab', () => {
   let props: OptionsTabProps;

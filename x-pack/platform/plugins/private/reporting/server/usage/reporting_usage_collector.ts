@@ -7,9 +7,9 @@
 
 import { firstValueFrom, map } from 'rxjs';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { ICollector } from '@kbn/usage-collection-plugin/server/collector/types';
-import { ReportingCore } from '..';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ICollector } from '@kbn/usage-collection-plugin/server/collector/types';
+import type { ReportingCore } from '..';
 import { ReportingSchema } from './collection_schema';
 
 export interface ReportingUsageType {

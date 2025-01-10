@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
-import {
+import type {
   SearchConnectorsPluginSetup,
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStart,

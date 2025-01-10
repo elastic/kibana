@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateCustomIntegrationState } from './state_machine';
+import type { CreateCustomIntegrationState } from './state_machine';
 
 export const isValidSelector = (state: CreateCustomIntegrationState) =>
   state && state.matches('valid');

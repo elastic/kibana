@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 import { createReduceStream, createPromiseFromStreams, createListStream } from '.';
 
 const promiseFromEvent = (name: string, emitter: Transform) =>

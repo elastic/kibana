@@ -6,7 +6,7 @@
  */
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,

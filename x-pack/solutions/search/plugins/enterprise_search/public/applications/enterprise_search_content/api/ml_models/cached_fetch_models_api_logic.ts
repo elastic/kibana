@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import { Status } from '../../../../../common/types/api';
-import { MlModel } from '../../../../../common/types/ml';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { MlModel } from '../../../../../common/types/ml';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { FetchModelsApiLogic, FetchModelsApiResponse } from './fetch_models_api_logic';
+import type { FetchModelsApiResponse } from './fetch_models_api_logic';
+import { FetchModelsApiLogic } from './fetch_models_api_logic';
 
 const FETCH_MODELS_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_MODELS_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds

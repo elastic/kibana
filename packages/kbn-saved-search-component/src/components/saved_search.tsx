@@ -15,9 +15,9 @@ import type {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
 import { css } from '@emotion/react';
-import { SavedSearchComponentProps } from '../types';
+import type { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
 const TIMESTAMP_FIELD = '@timestamp';

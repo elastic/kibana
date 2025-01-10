@@ -10,7 +10,7 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/constants';
-import {
+import type {
   IThreatIntelligencePlugin,
   ThreatIntelligencePluginCoreSetupDependencies,
   ThreatIntelligencePluginSetupDependencies,

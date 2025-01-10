@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,

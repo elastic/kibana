@@ -10,12 +10,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { RuleSystemAction } from '@kbn/alerting-types';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { RuleSystemAction } from '@kbn/alerting-types';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ADD_ACTION_TEXT } from '../translations';
 import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { RuleAction, RuleFormParamsErrors } from '../common/types';
+import type { RuleAction, RuleFormParamsErrors } from '../common/types';
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';

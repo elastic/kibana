@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
-import { Asset, DashboardAsset } from '../../../common/assets';
+import type { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 
 export interface SanitizedDashboardAsset {

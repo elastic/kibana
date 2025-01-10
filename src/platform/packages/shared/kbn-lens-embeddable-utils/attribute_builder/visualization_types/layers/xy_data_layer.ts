@@ -27,7 +27,7 @@ import {
   type TopValuesColumnParams,
   type DateHistogramColumnParams,
 } from '../../utils';
-import { XY_DATA_ID } from '../constants';
+import type { XY_DATA_ID } from '../constants';
 import { FormulaColumn } from './columns/formula';
 
 const BREAKDOWN_COLUMN_NAME = 'aggs_breakdown';

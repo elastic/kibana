@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSummaryExceptionListSchemaMock = (
   overrides?: Partial<ExceptionListSummarySchema>

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type {
   LogView,
   LogViewAttributes,
   LogViewReference,

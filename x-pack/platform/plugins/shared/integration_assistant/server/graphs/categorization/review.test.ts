@@ -13,7 +13,7 @@ import {
   categorizationMockProcessors,
   categorizationExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/categorization';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

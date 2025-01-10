@@ -6,18 +6,20 @@
  */
 
 import expect from '@kbn/expect';
+import type {
+  NetworkTopNFlowEdges,
+  NetworkTopNFlowStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   NetworkQueries,
-  NetworkTopNFlowEdges,
   Direction,
   FlowTargetSourceDest,
   NetworkTopTablesFields,
-  NetworkTopNFlowStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import TestAgent from 'supertest/lib/agent';
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import type TestAgent from 'supertest/lib/agent';
+import type { SearchService } from '@kbn/ftr-common-functional-services';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const EDGE_LENGTH = 10;
 

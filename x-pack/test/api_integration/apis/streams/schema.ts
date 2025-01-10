@@ -14,7 +14,7 @@ import {
   indexDocument,
   simulateFieldsForStream,
 } from './helpers/requests';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { cleanUpRootStream } from './helpers/cleanup';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 

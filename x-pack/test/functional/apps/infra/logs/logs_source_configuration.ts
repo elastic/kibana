@@ -12,7 +12,7 @@ import {
 } from '@kbn/core-http-common';
 import { DATES } from '../constants';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

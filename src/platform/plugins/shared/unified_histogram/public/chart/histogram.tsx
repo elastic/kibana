@@ -18,17 +18,18 @@ import type { TimeRange } from '@kbn/es-query';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import {
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
-  UnifiedHistogramVisContext,
+  UnifiedHistogramVisContext} from '../types';
+import {
+  UnifiedHistogramFetchStatus
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';

@@ -6,8 +6,9 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 
 import { WatchEditPage } from '../../../public/application/sections/watch_edit_page';
 import { registerRouter } from '../../../public/application/lib/navigation';

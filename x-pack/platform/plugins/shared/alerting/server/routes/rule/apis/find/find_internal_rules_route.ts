@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   FindRulesInternalRequestBodyV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
 import { findRulesInternalRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { ILicenseState } from '../../../../lib';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import type { ILicenseState } from '../../../../lib';
+import type {
+  AlertingRequestHandlerContext} from '../../../../types';
 import {
-  AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_FIND_RULES_PATH,
 } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';

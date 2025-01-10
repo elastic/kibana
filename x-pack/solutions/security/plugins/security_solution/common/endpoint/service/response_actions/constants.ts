@@ -216,6 +216,6 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
   microsoft_defender_endpoint: ['some.id'],
 });
 
-export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
+export const SUPPORTED_AGENT_ID_ALERT_FIELDS: readonly string[] = Object.values(
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
 ).flat();

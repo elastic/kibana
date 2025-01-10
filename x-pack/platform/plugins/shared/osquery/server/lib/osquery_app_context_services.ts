@@ -57,7 +57,6 @@ export class OsqueryAppContextService {
     this.fleetActionsClient = dependencies.createFleetActionsClient?.('osquery');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 
   public getAgentService(): AgentService | undefined {

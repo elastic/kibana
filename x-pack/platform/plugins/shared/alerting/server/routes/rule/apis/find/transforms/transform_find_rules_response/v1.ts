@@ -11,7 +11,7 @@ import type {
   RuleParamsV1,
 } from '../../../../../../../common/routes/rule/response';
 import type { FindResult } from '../../../../../../application/rule/methods/find';
-import { Rule, RuleParams } from '../../../../../../application/rule/types';
+import type { Rule, RuleParams } from '../../../../../../application/rule/types';
 import {
   transformRuleActionsV1,
   transformMonitoringV1,

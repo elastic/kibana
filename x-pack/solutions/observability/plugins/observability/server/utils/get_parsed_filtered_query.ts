@@ -6,15 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  BoolQuery,
-  buildEsQuery,
-  EsQueryConfig,
-  Filter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
-import { SearchConfigurationType } from '../../common/custom_threshold_rule/types';
+import type { BoolQuery, EsQueryConfig, Filter } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { SearchConfigurationType } from '../../common/custom_threshold_rule/types';
 
 export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<string, any>> = (
   filter

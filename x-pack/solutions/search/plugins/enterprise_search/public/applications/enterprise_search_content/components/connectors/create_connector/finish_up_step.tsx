@@ -32,7 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../../../common/constants';
 
-import { KibanaDeps } from '../../../../../../common/types';
+import type { KibanaDeps } from '../../../../../../common/types';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';

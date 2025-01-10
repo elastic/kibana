@@ -13,7 +13,7 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { convertToCumulativeSumColumns } from './cumulative_sum';
-import { Column, CommonColumnsConverterArgs, FormulaColumn } from './types';
+import type { Column, CommonColumnsConverterArgs, FormulaColumn } from './types';
 
 const dataView = stubLogstashDataView;
 const series = createSeries();

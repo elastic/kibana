@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as esTypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '@kbn/es-types';
+import type * as esTypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { createAsyncAction } from '../utils/actions';
 
 export interface EsActionPayload {

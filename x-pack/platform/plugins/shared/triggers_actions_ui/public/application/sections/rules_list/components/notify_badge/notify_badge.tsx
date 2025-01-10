@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { SnoozeSchedule } from '../../../../../types';
+import type { SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
 import { SnoozePanel, futureTimeToInterval } from '../rule_snooze';
 import { getNextRuleSnoozeSchedule, isRuleSnoozed } from './helpers';
@@ -31,7 +31,7 @@ import {
   UNSNOOZE_SUCCESS_MESSAGE,
   UNITS_TRANSLATION,
 } from './translations';
-import { RulesListNotifyBadgeProps } from './types';
+import type { RulesListNotifyBadgeProps } from './types';
 
 function getTimeRemaining(endtime: Date): string {
   const duration = moment.duration(moment(endtime).diff(moment()));

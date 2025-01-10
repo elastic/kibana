@@ -9,9 +9,10 @@
 
 import React from 'react';
 
+import type {
+  EuiButtonGroupOptionProps} from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,7 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
@@ -27,7 +29,7 @@ import {
 } from '../../config/default_color_mapping';
 import { SpecialAssignment } from '../assignment/special_assignment';
 import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
 
 export function UnassignedTermsConfig({
   palettes,

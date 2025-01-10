@@ -6,8 +6,8 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
-import { IHttpSerializedFetchError } from '..';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { IHttpSerializedFetchError } from '..';
 import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,

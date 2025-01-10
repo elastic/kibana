@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionTypeDefinition } from '../types';
-import { Datatable } from './datatable';
-import { ExpressionValueRender } from './render';
+import type { ExpressionTypeDefinition } from '../types';
+import type { Datatable } from './datatable';
+import type { ExpressionValueRender } from './render';
 
 const name = 'number';
 

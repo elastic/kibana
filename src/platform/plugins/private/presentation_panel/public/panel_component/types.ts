@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
-import {
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type {
   CanLockHoverActions,
   HasParentApi,
   HasUniqueId,
@@ -19,8 +19,8 @@ import {
   PublishesPanelTitle,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { MaybePromise } from '@kbn/utility-types';
+import type { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------
  * Panel Types

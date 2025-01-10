@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import type { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {

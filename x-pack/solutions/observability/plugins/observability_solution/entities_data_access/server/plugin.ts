@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { EntitiesPluginSetupDeps, EntitiesPluginStartDeps } from './types';
+import type { EntitiesPluginSetupDeps, EntitiesPluginStartDeps } from './types';
 
 export type EntitiesDataAccessPluginSetup = ReturnType<EntitiesDataAccessPlugin['setup']>;
 export type EntitiesDataAccessPluginStart = ReturnType<EntitiesDataAccessPlugin['start']>;

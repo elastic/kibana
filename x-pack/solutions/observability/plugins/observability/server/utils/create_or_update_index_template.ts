@@ -5,8 +5,8 @@
  * 2.0.
  */
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export async function createOrUpdateIndexTemplate({
   indexTemplate,

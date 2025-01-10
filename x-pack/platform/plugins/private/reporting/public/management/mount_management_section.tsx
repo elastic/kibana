@@ -14,12 +14,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { ClientConfigType } from '@kbn/reporting-public';
+import type { ClientConfigType ,
+  ReportingAPIClient,
+  KibanaContext} from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  InternalApiClientProvider,
-  ReportingAPIClient,
-  KibanaContext,
+  InternalApiClientProvider
 } from '@kbn/reporting-public';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';

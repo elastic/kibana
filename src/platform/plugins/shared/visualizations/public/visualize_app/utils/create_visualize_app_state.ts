@@ -9,10 +9,11 @@
 
 import { isFunction, omitBy, union } from 'lodash';
 
+import type {
+  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
-  syncState,
-  IKbnUrlStateStorage,
+  syncState
 } from '@kbn/kibana-utils-plugin/public';
 import { migrateAppState } from './migrate_app_state';
 import type { SavedVisState } from '../../types';

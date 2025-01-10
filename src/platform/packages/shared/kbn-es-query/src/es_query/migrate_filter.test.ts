@@ -8,9 +8,10 @@
  */
 
 import { isEqual, cloneDeep } from 'lodash';
-import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
-import { PhraseFilter, MatchAllFilter } from '../filters';
-import { Filter } from '../filters';
+import type { DeprecatedMatchPhraseFilter } from './migrate_filter';
+import { migrateFilter } from './migrate_filter';
+import type { PhraseFilter, MatchAllFilter } from '../filters';
+import type { Filter } from '../filters';
 
 describe('migrateFilter', function () {
   const oldMatchPhraseFilter = {

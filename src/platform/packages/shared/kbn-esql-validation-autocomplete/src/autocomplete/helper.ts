@@ -45,7 +45,7 @@ import {
   getOperatorSuggestions,
 } from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
 

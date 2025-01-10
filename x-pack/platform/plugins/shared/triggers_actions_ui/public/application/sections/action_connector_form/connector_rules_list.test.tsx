@@ -16,7 +16,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimenta
 import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
 import {} from '../../lib/rule_api/rules_kuery_filter';
-import { ActionConnector } from '../../../types';
+import type { ActionConnector } from '../../../types';
 import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
 
 jest.mock('../../../common/lib/kibana');

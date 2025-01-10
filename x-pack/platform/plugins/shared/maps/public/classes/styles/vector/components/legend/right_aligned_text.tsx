@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, CSSProperties, RefObject } from 'react';
+import type { CSSProperties, RefObject } from 'react';
+import React, { Component } from 'react';
 
 interface Props {
   setWidth: (width: number) => void;

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Location } from 'history';
-import * as t from 'io-ts';
-import { ReactElement } from 'react';
-import { RequiredKeys, ValuesType, UnionToIntersection } from 'utility-types';
-import { NormalizePath } from './utils';
+import type { Location } from 'history';
+import type * as t from 'io-ts';
+import type { ReactElement } from 'react';
+import type { RequiredKeys, ValuesType, UnionToIntersection } from 'utility-types';
+import type { NormalizePath } from './utils';
 
 export type PathsOf<TRouteMap extends RouteMap> = string &
   ValuesType<{

@@ -18,6 +18,10 @@ import type {
   RecognitionException,
   ParseTree,
 } from 'antlr4';
+import type {
+  FunctionContext,
+  IdentifierContext,
+  StringContext} from '../antlr/esql_parser';
 import {
   IndexPatternContext,
   QualifiedNameContext,
@@ -27,12 +31,9 @@ import {
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
   QualifiedNamePatternContext,
-  FunctionContext,
-  IdentifierContext,
   InputParamContext,
   InputNamedOrPositionalParamContext,
-  IdentifierOrParameterContext,
-  StringContext,
+  IdentifierOrParameterContext
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {

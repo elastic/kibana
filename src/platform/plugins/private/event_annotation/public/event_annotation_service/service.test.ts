@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart, SimpleSavedObject } from '@kbn/core/public';
+import type { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
-import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { EventAnnotationGroupSavedObjectAttributes } from '../../common';
 
 // TODO - I think applying this saved object type is no longer correct - since we migrated to content management,
 // there is no longer a single interchange format. Instead, the tests should use the operation-specific

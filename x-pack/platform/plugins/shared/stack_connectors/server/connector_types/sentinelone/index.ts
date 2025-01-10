@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  SubActionConnectorType} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -22,7 +23,7 @@ import {
   SentinelOneConfigSchema,
   SentinelOneSecretsSchema,
 } from '../../../common/sentinelone/schema';
-import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
+import type { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
 import { SentinelOneConnector } from './sentinelone';
 import { renderParameterTemplates } from './render';
 

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { mapValues } from 'lodash';
-import {
-  mergeMigrationFunctionMaps,
+import type {
   MigrateFunctionsObject,
-  VersionedState,
+  VersionedState} from '@kbn/kibana-utils-plugin/common';
+import {
+  mergeMigrationFunctionMaps
 } from '@kbn/kibana-utils-plugin/common';
 import type { QueryState } from './query_state';
 import * as filtersPersistableState from './filters/persistable_state';

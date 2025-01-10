@@ -11,18 +11,20 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } 
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
-import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
-import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import {
+import type { LensSuggestionsApi } from '@kbn/lens-plugin/public';
+import type { UnifiedHistogramLayoutProps } from '../layout';
+import { UnifiedHistogramLayout } from '../layout';
+import type {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramVisContext,
 } from '../types';
-import {
-  createStateService,
+import type {
   UnifiedHistogramStateOptions,
-  UnifiedHistogramStateService,
+  UnifiedHistogramStateService} from './services/state_service';
+import {
+  createStateService
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';

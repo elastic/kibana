@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { merge, Observable, partition } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { merge, partition } from 'rxjs';
 import type { StreamingChatResponseEvent } from '../../../../common';
+import type {
+  TokenCountEvent} from '../../../../common/conversation_complete';
 import {
-  StreamingChatResponseEventType,
-  TokenCountEvent,
+  StreamingChatResponseEventType
 } from '../../../../common/conversation_complete';
 
 type Hide = <T extends StreamingChatResponseEvent>() => (

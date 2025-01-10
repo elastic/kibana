@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Field,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
-import { SyntheticsEsClient } from '../../lib';
-import {
+import type { SyntheticsEsClient } from '../../lib';
+import type {
   GetPingsParams,
   HttpResponseBody,
   PingsResponse,

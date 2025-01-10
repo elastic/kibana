@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { BulkOperationResponse, BulkOperationAttributes } from '../../../types';
+import type { BulkOperationResponse, BulkOperationAttributes } from '../../../types';
 
 export const bulkEnableRules = async ({
   filter,

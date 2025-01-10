@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { ContainerNameRow } from './container_name_row';
 import { fireEvent } from '@testing-library/react';
 

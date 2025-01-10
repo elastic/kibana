@@ -6,17 +6,19 @@
  */
 
 import React, { memo, useState } from 'react';
+import type {
+  IconType} from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  IconType,
+  EuiIcon
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GaugeLabelMajorMode, GaugeShape, GaugeShapes } from '@kbn/expression-gauge-plugin/common';
+import type { GaugeLabelMajorMode, GaugeShape} from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import {
   IconChartGaugeArcSimple,

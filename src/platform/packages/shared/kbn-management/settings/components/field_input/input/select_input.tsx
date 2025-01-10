@@ -8,11 +8,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**

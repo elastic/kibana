@@ -8,14 +8,15 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type {
+  PercentileRanksParams} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
-  Operations,
-  PercentileRanksParams,
+  Operations
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Series } from '../../../../common/types';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
-import {
+import type {
   PercentileRanksColumn,
   Column,
   PercentileRanksColumnWithExtendedMeta,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 export const getDataBoundsForPalette = (
   accessors: { metric: string; max?: string; breakdownBy?: string },

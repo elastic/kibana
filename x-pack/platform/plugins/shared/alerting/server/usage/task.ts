@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '@kbn/core/server';
-import {
+import type { Logger, CoreSetup } from '@kbn/core/server';
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,

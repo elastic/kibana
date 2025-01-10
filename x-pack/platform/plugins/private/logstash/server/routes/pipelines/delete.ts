@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { checkLicense } from '../../lib/check_license';

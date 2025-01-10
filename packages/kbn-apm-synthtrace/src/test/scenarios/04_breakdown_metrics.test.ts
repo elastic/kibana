@@ -11,7 +11,8 @@ import { sumBy } from 'lodash';
 import { Readable } from 'stream';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { createBreakdownMetricsAggregator } from '../../lib/apm/aggregators/create_breakdown_metrics_aggregator';
-import { apm, ApmFields, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmFields} from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];

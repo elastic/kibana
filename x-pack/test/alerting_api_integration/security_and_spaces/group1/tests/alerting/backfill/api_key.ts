@@ -7,14 +7,15 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
-import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '@kbn/alerting-plugin/server/saved_objects';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
   getEventLog,
@@ -22,7 +23,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function apiKeyBackfillTests({ getService }: FtrProviderContext) {

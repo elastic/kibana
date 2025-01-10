@@ -11,8 +11,8 @@ import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analy
 import { getDataStreamsForEntity } from '@kbn/observability-utils-server/entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '@kbn/observability-utils-server/entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '@kbn/observability-utils-server/entities/signals/get_slos_for_entity';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { RootCauseAnalysisContext } from '../../types';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
 import { analyzeLogPatterns } from '../analyze_log_patterns';
 import { describeEntity } from '../describe_entity';
@@ -20,7 +20,7 @@ import { describeLogPatterns } from '../describe_log_patterns';
 import { findRelatedEntities } from '../find_related_entities';
 import { extractRelatedEntities } from '../find_related_entities/extract_related_entities';
 import { writeEntityInvestigationReport } from '../write_entity_investigation_report';
-import { EntityInvestigation } from './types';
+import type { EntityInvestigation } from './types';
 import { getKnowledgeBaseEntries } from '../get_knowledge_base_entries';
 
 export type { EntityInvestigation };

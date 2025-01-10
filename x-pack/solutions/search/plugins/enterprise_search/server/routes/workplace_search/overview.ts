@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 
 export function registerOverviewRoute({
   router,

@@ -7,10 +7,10 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
-import {
+import type {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,

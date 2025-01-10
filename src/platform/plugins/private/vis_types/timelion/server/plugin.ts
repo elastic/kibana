@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { PluginStart, DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewPluginStart } from '@kbn/data-views-plugin/server';
-import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
+import type { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import type { TimelionConfig } from './config';
 import { TIMELION_VIS_NAME } from '../common/constants';

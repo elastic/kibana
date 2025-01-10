@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { checkProdNativeModules } from '../check_prod_native_modules';
 
 describe('checkProdNativeModules', () => {

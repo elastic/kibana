@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { NetworkEvent } from '../../../../common/runtime_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { NetworkEvent } from '../../../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;

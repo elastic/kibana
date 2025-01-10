@@ -8,18 +8,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+  PublishesViewMode} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  EmbeddableApiContext,
-  getInheritedViewMode,
-  HasParentApi,
-  HasUniqueId,
-  PublishesViewMode,
+  getInheritedViewMode
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { getContainerParentFromAPI } from '@kbn/presentation-containers';
 
 export const ACTION_REMOVE_PANEL = 'deletePanel';
 

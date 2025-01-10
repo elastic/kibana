@@ -8,7 +8,8 @@
 import Boom from '@hapi/boom';
 import moment from 'moment';
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';

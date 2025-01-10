@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { sumBy } from 'lodash';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type StorageTimeSeries = APIReturnType<'GET /internal/apm/storage_chart'>;
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
-import { IndexPattern } from '@kbn/io-ts-utils';
+import type { IconType } from '@elastic/eui';
+import type { IndexPattern } from '@kbn/io-ts-utils';
 import { TIMESTAMP_FIELD } from '../../constants';
-import { DataViewSpecWithId } from '../../data_source_selection';
-import { DatasetId, DatasetType, IntegrationType } from '../types';
+import type { DataViewSpecWithId } from '../../data_source_selection';
+import type { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Partial<Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>>;
 

@@ -7,18 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type {
+  ExpressionFunctionTheme} from '@kbn/expressions-plugin/common';
 import {
   buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionTheme,
+  buildExpressionFunction
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
+import type { PaletteRegistry} from '@kbn/coloring';
+import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { OperationMetadata, Visualization } from '../..';

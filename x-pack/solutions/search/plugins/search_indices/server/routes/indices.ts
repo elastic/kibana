@@ -11,7 +11,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { POST_CREATE_INDEX_ROUTE } from '../../common/routes';
-import { CreateIndexRequest } from '../../common/types';
+import type { CreateIndexRequest } from '../../common/types';
 import { createIndex } from '../lib/indices';
 
 export function registerIndicesRoutes(router: IRouter, logger: Logger) {

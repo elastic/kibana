@@ -9,18 +9,20 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
+import type { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
+import type { RouteComponentProps} from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
+import type {
+  AutocompleteInfo} from '../services';
 import {
   createStorage,
   createHistory,
   createSettings,
-  AutocompleteInfo,
   setStorage,
 } from '../services';
 import { createUsageTracker } from '../services/tracker';
@@ -29,7 +31,7 @@ import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
-import { ConsoleStartServices } from '../types';
+import type { ConsoleStartServices } from '../types';
 
 const RedirectToShell = () => {
   const location = useLocation();

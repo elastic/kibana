@@ -34,7 +34,7 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   disabled: boolean;
   index: number;
   isEventViewer: boolean;
-  loadingEventIds: Readonly<string[]>;
+  loadingEventIds: readonly string[];
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;

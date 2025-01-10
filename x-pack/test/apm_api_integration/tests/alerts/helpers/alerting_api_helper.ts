@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Client, errors } from '@elastic/elasticsearch';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import type { Client } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
-import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,

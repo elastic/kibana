@@ -16,7 +16,7 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimestampRangeLabel } from './timestamp_range_label';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 import { AnnotationIcon } from './annotation_icon';
 
 import './annotations.scss';

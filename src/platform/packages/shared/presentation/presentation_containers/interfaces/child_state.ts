@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from './serialized_state';
+import type { SerializedPanelState } from './serialized_state';
 
 export interface HasSerializedChildState<SerializedState extends object = object> {
   getSerializedStateForChild: (

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;

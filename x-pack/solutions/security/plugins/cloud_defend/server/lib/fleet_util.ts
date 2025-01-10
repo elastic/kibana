@@ -18,7 +18,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import {
   INPUT_CONTROL,
   CLOUD_DEFEND_FLEET_PACKAGE_KUERY,

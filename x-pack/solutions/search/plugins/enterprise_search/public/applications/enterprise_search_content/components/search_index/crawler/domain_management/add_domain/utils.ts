@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../../../../shared/http';
-import {
+import type {
   CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationResultChange,
   CrawlerDomainValidationStepName,

@@ -11,8 +11,9 @@ import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { RunContext, RunOptions } from './run';
-import { getFlags, FlagOptions, mergeFlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
+import type { RunContext, RunOptions } from './run';
+import type { FlagOptions} from './flags';
+import { getFlags, mergeFlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
 import { FlagsReader } from './flags_reader';
 import { Cleanup } from './cleanup';
 import { getHelpForAllCommands, getCommandLevelHelp } from './help';

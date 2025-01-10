@@ -6,7 +6,7 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';

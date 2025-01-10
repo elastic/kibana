@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import {
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
   IRouter,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
+import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
@@ -66,10 +66,8 @@ import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
-import {
-  EnterpriseSearchRequestHandler,
-  IEnterpriseSearchRequestHandler,
-} from './lib/enterprise_search_request_handler';
+import type { IEnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
+import { EnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
@@ -93,7 +91,7 @@ import { getConnectorsSearchResultProvider } from './utils/connectors_search_res
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
-import { ConfigType } from '.';
+import type { ConfigType } from '.';
 
 interface PluginsSetup {
   cloud: CloudSetup;

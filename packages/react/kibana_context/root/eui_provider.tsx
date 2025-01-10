@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useMemo } from 'react';
+import type { FC, PropsWithChildren} from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+import type { EuiProviderProps} from '@elastic/eui';
+import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,

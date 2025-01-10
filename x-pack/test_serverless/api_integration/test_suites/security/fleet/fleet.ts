@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { RoleCredentials } from '../../../../shared/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../../shared/services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,

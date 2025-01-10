@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import { ChatCompletionEvent } from '@kbn/inference-common';
+import type { ChatCompletionEvent } from '@kbn/inference-common';
 import { chunkEvent, tokensEvent, messageEvent } from '../../test_utils/chat_complete_events';
 import { streamToResponse } from './stream_to_response';
 

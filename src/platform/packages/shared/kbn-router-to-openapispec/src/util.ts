@@ -17,7 +17,7 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { CustomOperationObject, KnownParameters } from './type';
+import type { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';

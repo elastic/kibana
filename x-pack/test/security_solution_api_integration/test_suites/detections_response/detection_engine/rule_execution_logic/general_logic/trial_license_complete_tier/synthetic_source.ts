@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getPreviewAlerts,
   previewRule,
@@ -20,7 +20,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

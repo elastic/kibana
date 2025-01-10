@@ -6,11 +6,12 @@
  */
 import { merge } from 'lodash';
 import { loggingSystemMock, docLinksServiceMock } from '@kbn/core/server/mocks';
-import { configSchema, TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
+import { configSchema } from '../config';
 import { HealthStatus } from '../monitoring';
-import { MonitoredHealth } from '../routes/health';
+import type { MonitoredHealth } from '../routes/health';
 import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { TaskPersistence } from '../task_events';
 
 jest.mock('./calculate_health_status', () => ({

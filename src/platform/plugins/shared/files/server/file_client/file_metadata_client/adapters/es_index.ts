@@ -9,10 +9,10 @@
 
 import { once } from 'lodash';
 import { pipe } from 'lodash/fp';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 
 import { wrapErrorAndReThrow } from '../../utils';

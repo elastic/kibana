@@ -10,10 +10,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Tooltip } from './tooltip';
-import { generateSeriesId, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
-import { XYChartSeriesIdentifier } from '@elastic/charts';
+import type { LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
+import { generateSeriesId } from '../../helpers';
+import type { XYChartSeriesIdentifier } from '@elastic/charts';
 import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 
 const getSeriesIdentifier = ({
   layerId,

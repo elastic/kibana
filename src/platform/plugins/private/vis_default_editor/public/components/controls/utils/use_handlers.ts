@@ -10,8 +10,8 @@
 import { useCallback } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { IAggConfig, AggParamType, AggConfigSerialized } from '@kbn/data-plugin/public';
-import { DefaultEditorCommonProps } from '../../agg_common_props';
+import type { IAggConfig, AggParamType, AggConfigSerialized } from '@kbn/data-plugin/public';
+import type { DefaultEditorCommonProps } from '../../agg_common_props';
 
 type SetValue = (value?: IAggConfig) => void;
 

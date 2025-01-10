@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  CreateMicrosoftDefenderConnectorMockResponse} from './mocks';
 import {
-  CreateMicrosoftDefenderConnectorMockResponse,
   microsoftDefenderEndpointConnectorMocks,
 } from './mocks';
 

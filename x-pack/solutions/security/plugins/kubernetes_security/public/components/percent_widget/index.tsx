@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
-import { AggregateResult } from '../../../common/types';
+import type { AggregateResult } from '../../../common/types';
 import { useFetchPercentWidgetData } from './hooks';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:percentWidgetLoading';

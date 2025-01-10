@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 const CUSTOM_SCHEDULING = 'custom_scheduling';
 

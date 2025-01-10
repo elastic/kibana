@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  SubActionConnectorType} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -15,7 +16,7 @@ import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import {
   CROWDSTRIKE_CONNECTOR_ID,
   CROWDSTRIKE_TITLE,
@@ -25,7 +26,7 @@ import {
   CrowdstrikeConfigSchema,
   CrowdstrikeSecretsSchema,
 } from '../../../common/crowdstrike/schema';
-import { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
+import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
 import { CrowdstrikeConnector } from './crowdstrike';
 
 export const getCrowdstrikeConnectorType = (

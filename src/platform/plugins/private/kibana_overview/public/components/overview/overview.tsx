@@ -10,7 +10,8 @@
 import './overview.scss';
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import type { FC} from 'react';
+import React, { useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
@@ -22,7 +23,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   useKibana,
   overviewPageActions,
@@ -34,15 +35,15 @@ import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
-import {
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
-import { AppPluginStartDependencies } from '../../types';
+import type { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';

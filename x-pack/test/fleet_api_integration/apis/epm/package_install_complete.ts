@@ -11,7 +11,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

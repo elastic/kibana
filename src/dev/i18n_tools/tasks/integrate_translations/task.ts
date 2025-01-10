@@ -9,7 +9,7 @@
 
 import { PRESET_TIMER } from 'listr2';
 import { readFile as readFileAsync } from 'fs/promises';
-import { TaskSignature } from '../../types';
+import type { TaskSignature } from '../../types';
 import { ErrorReporter } from '../../utils/error_reporter';
 import { makeAbsolutePath } from '../../utils';
 import { updateTranslationFile } from '../validate_translation_files';

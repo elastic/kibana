@@ -12,7 +12,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { GRAPH_ROUTE_PATH } from '../../../common/constants';
-import { CspRequestHandlerContext, CspRouter } from '../../types';
+import type { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
 
 export const defineGraphRoute = (router: CspRouter) =>

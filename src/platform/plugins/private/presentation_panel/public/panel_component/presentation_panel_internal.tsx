@@ -19,7 +19,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelError } from './presentation_panel_error';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,

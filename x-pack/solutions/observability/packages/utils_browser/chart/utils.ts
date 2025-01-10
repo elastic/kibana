@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BrushEvent } from '@elastic/charts';
+import type { BrushEvent } from '@elastic/charts';
 import moment from 'moment';
 
 export function getBrushData(e: BrushEvent) {

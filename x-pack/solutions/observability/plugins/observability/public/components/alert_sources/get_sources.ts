@@ -6,9 +6,9 @@
  */
 
 import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE, ALERT_GROUP } from '@kbn/rule-data-utils';
-import { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../typings/alerts';
 import { apmSources, infraSources } from './get_alert_source_links';
-import { Group } from '../../../common/typings';
+import type { Group } from '../../../common/typings';
 
 interface AlertFields {
   [key: string]: any;

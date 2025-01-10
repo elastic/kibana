@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils} from '@kbn/core-test-helpers-kbn-server';
 import {
   request,
-  TestServerlessESUtils,
-  TestServerlessKibanaUtils,
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 import { getFips } from 'crypto';

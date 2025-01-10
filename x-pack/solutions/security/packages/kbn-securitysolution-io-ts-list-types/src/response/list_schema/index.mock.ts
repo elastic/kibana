@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListSchema } from '.';
+import type { ListSchema } from '.';
 import {
   DATE_NOW,
   DESCRIPTION,

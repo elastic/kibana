@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Processor } from '../../../../common/types';
-import {
+import type { Processor } from '../../../../common/types';
+import type {
   ProcessorInternal,
   VerboseTestOutput,
   Document,

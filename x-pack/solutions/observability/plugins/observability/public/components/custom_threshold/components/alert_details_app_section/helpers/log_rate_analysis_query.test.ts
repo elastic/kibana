@@ -8,7 +8,7 @@
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
-import { CustomThresholdRuleTypeParams } from '../../../types';
+import type { CustomThresholdRuleTypeParams } from '../../../types';
 import { getLogRateAnalysisEQQuery } from './log_rate_analysis_query';
 
 describe('buildEsQuery', () => {

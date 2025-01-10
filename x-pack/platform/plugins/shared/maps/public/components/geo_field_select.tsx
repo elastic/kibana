@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { type Props as SingleFieldSelectProps, SingleFieldSelect } from './single_field_select';
 
 type Props = SingleFieldSelectProps & {

@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNoteResponse } from '@kbn/investigation-shared';
+import type { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import React, { useState } from 'react';
 import { ResizableTextInput } from './resizable_text_input';
 import { useInvestigation } from '../../contexts/investigation_context';

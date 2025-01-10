@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '..';
+import type { DataView } from '..';
 import { DataViewField } from './data_view_field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldSpec, RuntimeField } from '../types';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldSpec, RuntimeField } from '../types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {

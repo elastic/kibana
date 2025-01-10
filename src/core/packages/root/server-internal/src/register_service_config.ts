@@ -8,7 +8,7 @@
  */
 
 import { config as pathConfig } from '@kbn/utils';
-import { ConfigService } from '@kbn/config';
+import type { ConfigService } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { config as loggingConfig } from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider } from '@kbn/core-config-server-internal';

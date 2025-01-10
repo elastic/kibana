@@ -18,7 +18,7 @@ import {
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
 import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
 import { getDefaultRefinePrompt } from './helpers/get_default_refine_prompt';
-import { GraphState } from '../../types';
+import type { GraphState } from '../../types';
 import {
   getParsedAttackDiscoveriesMock,
   getRawAttackDiscoveriesMock,

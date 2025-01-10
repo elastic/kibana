@@ -12,7 +12,7 @@
 import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from '../ace_migration/worker_proxy';
 import { setupWorker } from '../ace_migration/setup_worker';
-import { XJsonWorker } from './worker';
+import type { XJsonWorker } from './worker';
 import { ID } from './constants';
 
 const OWNER = 'XJSON_GRAMMAR_CHECKER';

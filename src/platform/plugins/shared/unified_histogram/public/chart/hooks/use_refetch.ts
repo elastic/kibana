@@ -13,7 +13,7 @@ import type { Suggestion } from '@kbn/lens-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { filter, share, tap } from 'rxjs';
-import {
+import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,

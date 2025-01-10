@@ -10,7 +10,7 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { css } from '@emotion/react';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -25,10 +25,13 @@ import {
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
 } from '@kbn/discover-utils';
-import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
+import type { DataTableRecord} from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import type { LogDocument, ResourceFields} from '@kbn/discover-utils/src';
+import { getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { useEuiTheme } from '@elastic/eui';
-import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
+import type { FieldBadgeWithActionsProps } from '../cell_actions_popover';
+import { FieldBadgeWithActions } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 /**
  * getUnformattedResourceFields definitions

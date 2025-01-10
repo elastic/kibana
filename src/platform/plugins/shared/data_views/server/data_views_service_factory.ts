@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   Logger,
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -15,7 +15,7 @@ import {
   KibanaRequest,
   CoreStart,
 } from '@kbn/core/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';

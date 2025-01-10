@@ -8,10 +8,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { LogViewReference } from '../../../../common';
+import type { LogViewReference } from '../../../../common';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
-import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
+import type { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
 import { useBucketSize } from '../log_summary/bucket_size';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 

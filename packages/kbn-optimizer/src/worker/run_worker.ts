@@ -12,10 +12,11 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { take, mergeMap } from 'rxjs';
 
+import type {
+  WorkerMsg} from '../common';
 import {
   parseBundles,
   parseWorkerConfig,
-  WorkerMsg,
   isWorkerMsg,
   WorkerMsgs,
   BundleRemotes,

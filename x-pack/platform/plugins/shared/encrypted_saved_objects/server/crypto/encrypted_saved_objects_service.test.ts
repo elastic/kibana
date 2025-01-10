@@ -1297,7 +1297,7 @@ describe('#decryptAttributes', () => {
   });
 
   describe('with decryption only keys', () => {
-    function getService(primaryCrypto: Crypto, decryptionOnlyCryptos?: Readonly<Crypto[]>) {
+    function getService(primaryCrypto: Crypto, decryptionOnlyCryptos?: readonly Crypto[]) {
       const esoService = new EncryptedSavedObjectsService({
         primaryCrypto,
         decryptionOnlyCryptos,
@@ -2237,7 +2237,7 @@ describe('#decryptAttributesSync', () => {
   });
 
   describe('with decryption only keys', () => {
-    function getService(primaryCrypto: Crypto, decryptionOnlyCryptos?: Readonly<Crypto[]>) {
+    function getService(primaryCrypto: Crypto, decryptionOnlyCryptos?: readonly Crypto[]) {
       const esoService = new EncryptedSavedObjectsService({
         primaryCrypto,
         decryptionOnlyCryptos,

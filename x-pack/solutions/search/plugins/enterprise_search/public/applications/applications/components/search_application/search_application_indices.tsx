@@ -9,21 +9,20 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiTableActionsColumnType,
   EuiText,
   useEuiBackgroundColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';

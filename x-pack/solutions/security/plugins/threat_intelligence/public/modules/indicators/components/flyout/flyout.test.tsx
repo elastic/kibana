@@ -8,7 +8,8 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { IndicatorsFlyout } from './flyout';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { INDICATORS_FLYOUT_SUBTITLE_TEST_ID, INDICATORS_FLYOUT_TITLE_TEST_ID } from './test_ids';
 

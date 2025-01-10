@@ -41,9 +41,10 @@ import {
   CRAWLER_DOMAIN_FROM_SERVER,
 } from '../../../../../api/crawler/_mocks_/crawler_domains.mock';
 
-import { CrawlerDomain } from '../../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../../api/crawler/types';
 
-import { AddDomainLogic, AddDomainLogicValues } from './add_domain_logic';
+import type { AddDomainLogicValues } from './add_domain_logic';
+import { AddDomainLogic } from './add_domain_logic';
 import { getDomainWithProtocol } from './utils';
 
 const DEFAULT_VALUES: AddDomainLogicValues = {

@@ -10,7 +10,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import {
   useHealthCheck,

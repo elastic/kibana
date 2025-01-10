@@ -6,9 +6,9 @@
  */
 
 import { isEmpty, some } from 'lodash';
-import { AIConnector } from '../connectorland/connector_selector';
-import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
-import { Conversation } from '../..';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
+import type { Conversation } from '../..';
 import type { ClientMessage } from '../assistant_context/types';
 
 export const getMessageFromRawResponse = (

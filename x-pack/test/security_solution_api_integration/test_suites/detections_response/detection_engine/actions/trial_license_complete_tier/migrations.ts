@@ -14,7 +14,7 @@ import {
   getLegacyActionNotificationSOById,
   getRuleSOById,
 } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 /**
  * @deprecated Once the legacy notification system is removed, remove this test too.

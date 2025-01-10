@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
 
 export const getDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(

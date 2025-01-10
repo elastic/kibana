@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { getOAuthTokenPackageParams } from '../../lib/get_oauth_token_package_params';
 
 import { skipBodyValidation } from '../../lib/route_config_helpers';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 
 const schemaValuesSchema = schema.recordOf(
   schema.string(),

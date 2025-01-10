@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,8 +17,10 @@ import {
   EuiFieldSearch,
   EuiFormRow,
 } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  RuleTypeParamsExpressionProps} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   getFields,
   builtInComparators,
@@ -26,12 +29,11 @@ import {
   ForLastExpression,
   GroupByExpression,
   WhenExpression,
-  builtInAggregationTypes,
-  RuleTypeParamsExpressionProps,
+  builtInAggregationTypes
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
-import { IndexThresholdRuleParams } from './types';
+import type { IndexThresholdRuleParams } from './types';
 import './expression.scss';
 import { IndexSelectPopover } from '../components/index_select_popover';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';

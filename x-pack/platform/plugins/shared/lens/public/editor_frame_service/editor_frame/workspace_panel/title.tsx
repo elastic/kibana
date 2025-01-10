@@ -10,7 +10,8 @@ import './workspace_panel_wrapper.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { LensState, useLensSelector } from '../../../state_management';
+import type { LensState} from '../../../state_management';
+import { useLensSelector } from '../../../state_management';
 
 export function WorkspaceTitle() {
   const title = useLensSelector((state: LensState) => state.lens.persistedDoc?.title);

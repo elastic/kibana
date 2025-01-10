@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 
 export const codeDangerCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
   color: euiTheme.colors.danger,

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const uptimeSettingsObjectType = 'uptime-dynamic-settings';
 export const uptimeSettingsObjectId = 'uptime-dynamic-settings-singleton';

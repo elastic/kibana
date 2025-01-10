@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
-import { StartServices } from '../application';
+import type { StartServices } from '../application';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<(typeof routes)[T]['params']>;
 

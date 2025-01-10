@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { navigateToUrlClickHandler } from './click_handler';
 
 const createLink = ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
+import type { LogsExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
 import * as rt from 'io-ts';
 import { deepCompactObject, logsExplorerUrlSchemaV1 } from '../../../../common';
 

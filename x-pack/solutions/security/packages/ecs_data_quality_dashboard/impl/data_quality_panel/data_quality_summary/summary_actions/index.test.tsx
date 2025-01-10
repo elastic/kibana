@@ -18,7 +18,7 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../mock/test_providers/test_providers';
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 import { SummaryActions } from '.';
 import {
   getTotalDocsCount,

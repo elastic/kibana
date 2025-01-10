@@ -7,7 +7,7 @@
 
 // Order of node roles matters here, the warm phase prefers allocating data
 // to the data_warm role.
-import { DataTierRole, PhaseWithAllocation } from '../types';
+import type { DataTierRole, PhaseWithAllocation } from '../types';
 
 const WARM_PHASE_NODE_PREFERENCE: DataTierRole[] = ['data_warm', 'data_hot'];
 

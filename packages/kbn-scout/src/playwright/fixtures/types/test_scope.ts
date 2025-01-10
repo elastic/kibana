@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page } from 'playwright/test';
-import { PageObjects } from '../../page_objects';
+import type { Page } from 'playwright/test';
+import type { PageObjects } from '../../page_objects';
 
 export interface ScoutTestFixtures {
   browserAuth: LoginFixture;

@@ -6,11 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  Escape} from './mustache_renderer';
 import {
   renderMustacheString,
   renderMustacheStringNoEscape,
-  renderMustacheObject,
-  Escape,
+  renderMustacheObject
 } from './mustache_renderer';
 
 const logger = loggingSystemMock.create().get();

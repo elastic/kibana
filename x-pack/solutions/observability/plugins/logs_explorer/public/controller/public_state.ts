@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   AllDatasetSelection,
+  ControlPanels} from '../../common';
+import {
   availableControlsPanels,
   controlPanelConfigs,
-  ControlPanels,
   hydrateDataSourceSelection,
 } from '../../common';
+import type {
+  LogsExplorerControllerContext} from '../state_machines/logs_explorer_controller';
 import {
-  DEFAULT_CONTEXT,
-  LogsExplorerControllerContext,
+  DEFAULT_CONTEXT
 } from '../state_machines/logs_explorer_controller';
-import {
+import type {
   LogsExplorerPublicState,
   LogsExplorerPublicStateUpdate,
   OptionsListControl,

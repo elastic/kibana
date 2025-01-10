@@ -8,7 +8,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
 import { readdirSync } from 'fs';
 import path from 'path';

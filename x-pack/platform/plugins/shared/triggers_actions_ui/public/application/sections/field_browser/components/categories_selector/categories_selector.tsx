@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { omit } from 'lodash';
+import type { FilterChecked } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFilterButton,
@@ -15,9 +16,8 @@ import {
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
-  FilterChecked,
 } from '@elastic/eui';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import * as i18n from '../../translations';
 import { getFieldCount, isEscape } from '../../helpers';
 import { styles } from './categories_selector.styles';

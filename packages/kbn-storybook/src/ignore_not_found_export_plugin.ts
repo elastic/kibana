@@ -11,7 +11,7 @@
 //
 // This plugin suppresses the irritating TS-related warnings in Storybook HMR.
 
-import { Compiler, Stats } from 'webpack';
+import type { Compiler, Stats } from 'webpack';
 // @ts-expect-error
 import ModuleDependencyWarning from 'webpack/lib/ModuleDependencyWarning';
 

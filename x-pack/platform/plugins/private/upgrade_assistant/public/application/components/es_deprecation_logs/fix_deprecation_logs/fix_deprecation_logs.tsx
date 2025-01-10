@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import type { FunctionComponent} from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,7 +18,8 @@ import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {

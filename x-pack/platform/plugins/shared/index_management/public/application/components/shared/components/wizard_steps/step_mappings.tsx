@@ -16,14 +16,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { IndexMode } from '../../../../../../common/types/data_streams';
-import { Forms } from '../../../../../shared_imports';
+import type { IndexMode } from '../../../../../../common/types/data_streams';
+import type { Forms } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
+import type {
+  OnUpdateHandler,
+  IndexSettings} from '../../../mappings_editor';
 import {
   MappingsEditor,
-  OnUpdateHandler,
-  LoadMappingsFromJsonButton,
-  IndexSettings,
+  LoadMappingsFromJsonButton
 } from '../../../mappings_editor';
 
 import { documentationService } from '../../../mappings_editor/shared_imports';

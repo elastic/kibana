@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';

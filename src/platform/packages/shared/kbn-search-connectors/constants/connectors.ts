@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ConnectorClientSideDefinition,
   ConnectorServerSideDefinition,
 } from '../types/connector_definition';

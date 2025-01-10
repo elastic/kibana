@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, {
+import type {
   Dispatch,
+  SetStateAction} from 'react';
+import React, {
   memo,
-  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -16,12 +17,14 @@ import React, {
   useState,
 } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { GroupOption, isNoneGroup, useGrouping } from '@kbn/grouping';
+import type { GroupOption} from '@kbn/grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
+import type { AlertsGroupingLevelProps } from './alerts_grouping_level';
+import { AlertsGroupingLevel } from './alerts_grouping_level';
 import type { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 import {
   AlertsGroupingContextProvider,

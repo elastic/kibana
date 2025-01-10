@@ -13,9 +13,9 @@ import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import {
+import type {
   KibanaRequest,
   Headers,
   RouteMethod,

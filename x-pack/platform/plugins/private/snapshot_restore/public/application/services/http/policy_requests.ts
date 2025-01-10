@@ -6,7 +6,7 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import {
+import type {
   SlmPolicy,
   SlmPolicyPayload,
   PolicyIndicesResponse,
@@ -21,7 +21,7 @@ import {
   UIM_RETENTION_SETTINGS_UPDATE,
   UIM_RETENTION_EXECUTE,
 } from '../../constants';
-import { UiMetricService } from '../ui_metric';
+import type { UiMetricService } from '../ui_metric';
 import { useRequest, sendRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.

@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, ReactNode, useMemo } from 'react';
+import type { FunctionComponent, ReactNode} from 'react';
+import React, { useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 import { map as _map, groupBy as _groupBy } from 'lodash';
 
+import type {
+  FieldValidateResponse} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  FieldValidateResponse,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ILicense } from '../../../../../../../types';
+import type { ILicense } from '../../../../../../../types';
+import type {
+  FieldConfig} from '../../../../../../../shared_imports';
 import {
   FIELD_TYPES,
-  FieldConfig,
   UseField,
   fieldValidators,
   useKibana,

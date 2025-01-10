@@ -8,7 +8,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

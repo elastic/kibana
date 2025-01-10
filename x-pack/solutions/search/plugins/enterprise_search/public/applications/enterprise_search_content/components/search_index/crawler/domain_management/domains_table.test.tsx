@@ -14,14 +14,15 @@ import '../../_mocks_/index_name_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../../../shared/constants';
-import { CrawlerDomain } from '../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../api/crawler/types';
 
 import { DomainsTable } from './domains_table';
 

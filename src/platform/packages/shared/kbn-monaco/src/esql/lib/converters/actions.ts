@@ -8,8 +8,8 @@
  */
 
 import type { CodeAction } from '@kbn/esql-validation-autocomplete';
-import { monaco } from '../../../monaco_imports';
-import { MonacoCodeAction } from '../types';
+import type { monaco } from '../../../monaco_imports';
+import type { MonacoCodeAction } from '../types';
 import { wrapAsMonacoMessages } from './positions';
 
 export function wrapAsMonacoCodeActions(

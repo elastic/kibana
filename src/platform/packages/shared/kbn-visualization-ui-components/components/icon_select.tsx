@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
+import type {
+  IconType} from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  IconType,
+  EuiIcon
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

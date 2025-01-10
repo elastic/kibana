@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import {
+import type {
   BulkDeleteOperation,
   BulkIndexOperation,
   BulkRequest,
@@ -19,12 +19,12 @@ import {
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { castArray, merge, remove } from 'lodash';
-import { Required } from 'utility-types';
+import type { Required } from 'utility-types';
 import { v4 } from 'uuid';
 import { StorageIndexAdapter } from '.';
-import { StorageSettings } from '..';
+import type { StorageSettings } from '..';
 import * as getSchemaVersionModule from '../get_schema_version';
 
 type MockedElasticsearchClient = jest.Mocked<ElasticsearchClient> & {

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import { IndicatorsFlyout } from '../../indicators/components/flyout/flyout';
 import { useStyles } from './styles';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
-import { AttachmentMetadata } from '../utils/attachments';
+import type { AttachmentMetadata } from '../utils/attachments';
 
 export const INDICATOR_NAME_TEST_ID = 'tiCasesIndicatorName';
 export const INDICATOR_FEED_NAME_TEST_ID = 'tiCasesIndicatorFeedName';

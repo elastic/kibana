@@ -10,7 +10,7 @@
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   PRODUCT_RESPONSE_HEADER,
   USER_AGENT_HEADER,

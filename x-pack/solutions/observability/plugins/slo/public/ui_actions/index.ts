@@ -7,9 +7,9 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
-import { SLOPublicPluginsStart } from '..';
-import { SLORepositoryClient } from '../types';
+import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
+import type { SLOPublicPluginsStart } from '..';
+import type { SLORepositoryClient } from '../types';
 import { createAddAlertsPanelAction } from './create_alerts_panel_action';
 import { createBurnRatePanelAction } from './create_burn_rate_panel_action';
 import { createAddErrorBudgetPanelAction } from './create_error_budget_action';

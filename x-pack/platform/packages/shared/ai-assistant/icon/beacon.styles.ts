@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AssistantBeaconProps } from './beacon';
+import type { AssistantBeaconProps } from './beacon';
 
 /**
  * Returns contextually-relevant styles for the AI Assistant beacon.

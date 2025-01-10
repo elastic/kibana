@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiSwitch,
@@ -20,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError } from '../../../../../../common/types';
-import { DeprecationLoggingPreviewProps } from '../../../types';
+import type { ResponseError } from '../../../../../../common/types';
+import type { DeprecationLoggingPreviewProps } from '../../../types';
 
 import './_deprecation_logging_toggle.scss';
 

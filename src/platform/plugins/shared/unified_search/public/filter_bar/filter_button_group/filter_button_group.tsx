@@ -9,7 +9,8 @@
 
 import './filter_button_group.scss';
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 

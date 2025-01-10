@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 export const createDatasetSelectionRestoreFailedNotifier = (toasts: IToasts) => () =>

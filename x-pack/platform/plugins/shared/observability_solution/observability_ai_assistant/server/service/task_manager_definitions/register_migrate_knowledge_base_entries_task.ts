@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pLimit from 'p-limit';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
-import { KnowledgeBaseEntry } from '../../../common';
+import type { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { getElserModelStatus } from '../inference_endpoint';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { setupConversationAndKbIndexAssets } from '../setup_conversation_and_kb_index_assets';
 
 const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';

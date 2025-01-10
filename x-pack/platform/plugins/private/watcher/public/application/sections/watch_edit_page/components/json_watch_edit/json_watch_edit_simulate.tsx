@@ -30,7 +30,7 @@ import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
 import { ExecuteDetails } from '../../../../models/execute_details';
-import {
+import type {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { StoredInvestigation } from '../../models/investigation';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { StoredInvestigation } from '../../models/investigation';
 import { SO_INVESTIGATION_TYPE } from '../../saved_objects/investigation';
 import { computeMetrics } from './helpers/metrics';
-import { Usage } from './type';
+import type { Usage } from './type';
 
 export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredInvestigation>({

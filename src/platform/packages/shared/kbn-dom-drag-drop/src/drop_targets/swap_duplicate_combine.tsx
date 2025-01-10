@@ -11,7 +11,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../types';
+import type { DropType } from '../types';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {

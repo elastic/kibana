@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AIAssistantType } from '../common/ai_assistant_type';
+import type { AIAssistantType } from '../common/ai_assistant_type';
 
 export interface ConfigSchema {
   preferredAIAssistantType: AIAssistantType;

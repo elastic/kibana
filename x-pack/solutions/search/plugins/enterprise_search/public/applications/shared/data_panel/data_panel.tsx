@@ -9,18 +9,17 @@ import React from 'react';
 
 import classNames from 'classnames';
 
+import type { EuiIconProps, EuiTitleProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconProps,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiTitleProps,
 } from '@elastic/eui';
-import { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
+import type { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 
 import './data_panel.scss';
 import { LoadingOverlay } from '../loading';

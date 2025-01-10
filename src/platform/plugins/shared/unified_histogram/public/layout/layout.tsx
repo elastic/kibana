@@ -8,7 +8,8 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
+import type { PropsWithChildren, ReactElement} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -20,14 +21,14 @@ import type {
   LensEmbeddableOutput,
   LensSuggestionsApi,
 } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { Chart, checkChartAvailability } from '../chart';
-import {
+import type {
   UnifiedHistogramVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,

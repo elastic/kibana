@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsClient } from './alerts_client';
+import type { AlertsClient } from './alerts_client';
 
 type Schema = PublicMethodsOf<AlertsClient>;
 export type AlertsClientMock = jest.Mocked<Schema>;

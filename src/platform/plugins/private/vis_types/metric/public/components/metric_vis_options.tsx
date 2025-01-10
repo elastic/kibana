@@ -8,9 +8,10 @@
  */
 
 import React, { useCallback } from 'react';
+import type {
+  EuiButtonGroupProps} from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiButtonGroupProps,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -19,18 +20,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type {
+  SetColorRangeValue,
+  SetColorSchemaOptionsValue} from '@kbn/vis-default-editor-plugin/public';
 import {
   ColorRanges,
-  SetColorRangeValue,
   SwitchOption,
-  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   RangeOption,
   PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
 import { ColorMode, colorSchemas } from '@kbn/charts-plugin/public';
-import { MetricVisParam, VisParams } from '../types';
+import type { MetricVisParam, VisParams } from '../types';
 
 const metricColorMode = [
   {

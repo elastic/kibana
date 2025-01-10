@@ -8,7 +8,7 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { TagList } from '../tag_list';
-import { TagSpec } from '../../../lib/tag';
+import type { TagSpec } from '../../../lib/tag';
 
 const mockTagRegistry: { [tag: string]: TagSpec } = {
   tag1: {

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
-import { IEvent } from '../generated/schemas';
-import { AggregateOptionsType, FindOptionsType } from './event_log_client';
-import {
+import type { IEvent } from '../generated/schemas';
+import type { AggregateOptionsType, FindOptionsType } from './event_log_client';
+import type {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
@@ -22,7 +23,7 @@ export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
-import { SavedObjectProvider } from './saved_object_provider_registry';
+import type { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 

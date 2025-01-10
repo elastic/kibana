@@ -10,7 +10,7 @@
 import type { GroupingQueryArgs } from './types';
 import { getGroupingQuery, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
-import { GroupingAggregation } from '../../..';
+import type { GroupingAggregation } from '../../..';
 import { groupingBucket } from '../../mocks';
 
 const testProps: GroupingQueryArgs = {

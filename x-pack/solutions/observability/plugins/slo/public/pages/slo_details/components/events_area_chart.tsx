@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import React, { useRef } from 'react';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import moment from 'moment';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export function EventsAreaChart({

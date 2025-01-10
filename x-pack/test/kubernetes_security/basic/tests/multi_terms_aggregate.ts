@@ -13,7 +13,7 @@ import {
   CONTAINER_IMAGE_NAME,
   ENTRY_LEADER_ENTITY_ID,
 } from '@kbn/kubernetes-security-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';
 const TIMESTAMP_PROPERTY = '@timestamp';
 

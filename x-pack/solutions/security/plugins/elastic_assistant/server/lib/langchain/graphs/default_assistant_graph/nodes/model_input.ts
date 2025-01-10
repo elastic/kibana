@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '../constants';
-import { NodeParamsBase, AgentState } from '../types';
+import type { NodeParamsBase, AgentState } from '../types';
 
 interface ModelInputParams extends NodeParamsBase {
   state: AgentState;

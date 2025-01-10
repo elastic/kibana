@@ -8,9 +8,10 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
+import type {
+  LogEntriesSummaryHighlightsRequest} from '../../../../../common/http_api';
 import {
   LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
-  LogEntriesSummaryHighlightsRequest,
   logEntriesSummaryHighlightsRequestRT,
   logEntriesSummaryHighlightsResponseRT,
 } from '../../../../../common/http_api';

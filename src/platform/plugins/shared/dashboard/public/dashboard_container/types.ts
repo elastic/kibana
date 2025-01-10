@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { DashboardContainerInput } from '../../common';
 import type { DashboardPanel } from '../../server/content_management';
 

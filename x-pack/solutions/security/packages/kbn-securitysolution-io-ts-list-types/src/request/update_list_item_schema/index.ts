@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { _version } from '../../common/underscore_version';
 import { id } from '../../common/id';
 import { value } from '../../common/value';

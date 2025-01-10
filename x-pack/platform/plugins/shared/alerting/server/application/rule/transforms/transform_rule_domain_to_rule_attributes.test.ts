@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDomain } from '../types';
+import type { RuleDomain } from '../types';
 import { transformRuleDomainToRuleAttributes } from './transform_rule_domain_to_rule_attributes';
 
 describe('transformRuleDomainToRuleAttributes', () => {

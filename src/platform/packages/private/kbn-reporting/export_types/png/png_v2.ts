@@ -8,22 +8,24 @@
  */
 
 import apm from 'elastic-apm-node';
+import type {
+  Observable} from 'rxjs';
 import {
   finalize,
   fromEventPattern,
   lastValueFrom,
   map,
   mergeMap,
-  Observable,
   of,
   takeUntil,
   tap,
 } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
+  CancellationToken} from '@kbn/reporting-common';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -32,11 +34,12 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import {
+import type {
   JobParamsPNGV2,
+  TaskPayloadPNGV2} from '@kbn/reporting-export-types-png-common';
+import {
   PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-  TaskPayloadPNGV2,
+  PNG_REPORT_TYPE_V2
 } from '@kbn/reporting-export-types-png-common';
 import {
   decryptJobHeaders,

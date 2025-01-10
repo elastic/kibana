@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { enrichPoliciesApi } from './lib/enrich_policies.api';
 import { enrichPoliciesHelpers } from './lib/enrich_policies.helpers';

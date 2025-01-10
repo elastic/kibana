@@ -6,10 +6,11 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { State } from '../../../types';
+import type { State } from '../../../types';
+import type {
+  SetKeyboardShortcutsDocVisibilityPayload} from '../actions/flyouts';
 import {
-  SetKeyboardShortcutsDocVisibilityType,
-  SetKeyboardShortcutsDocVisibilityPayload,
+  SetKeyboardShortcutsDocVisibilityType
 } from '../actions/flyouts';
 
 export const flyoutsReducer = handleActions<

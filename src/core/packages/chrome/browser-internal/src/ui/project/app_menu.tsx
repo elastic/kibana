@@ -9,7 +9,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React from 'react';
 import { HeaderActionMenu } from '../header/header_action_menu';
 

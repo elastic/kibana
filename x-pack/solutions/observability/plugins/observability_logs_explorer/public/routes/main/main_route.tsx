@@ -20,7 +20,7 @@ import {
   useObservabilityLogsExplorerPageStateContext,
 } from '../../state_machines/observability_logs_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
-import { ObservabilityLogsExplorerHistory } from '../../types';
+import type { ObservabilityLogsExplorerHistory } from '../../types';
 import { useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';

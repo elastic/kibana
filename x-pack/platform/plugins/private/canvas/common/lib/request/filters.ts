@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
-  FilterType,
+import type {
   ExpressionValueFilter,
   CanvasTimeFilter,
   CanvasLuceneFilter,
-  CanvasExactlyFilter,
+  CanvasExactlyFilter} from '../../../types';
+import {
+  FilterType
 } from '../../../types';
 
 /*

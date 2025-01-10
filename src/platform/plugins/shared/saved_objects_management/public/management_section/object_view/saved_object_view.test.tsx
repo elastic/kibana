@@ -10,7 +10,7 @@
 import { bulkDeleteObjectsMock, bulkGetObjectsMock } from './saved_object_view.test.mocks';
 
 import React from 'react';
-import { ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import {
@@ -25,10 +25,11 @@ import {
 } from '@kbn/core/public/mocks';
 
 import type { SavedObjectWithMetadata } from '../../types';
-import {
-  SavedObjectEdition,
+import type {
   SavedObjectEditionProps,
-  SavedObjectEditionState,
+  SavedObjectEditionState} from './saved_object_view';
+import {
+  SavedObjectEdition
 } from './saved_object_view';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 

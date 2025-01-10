@@ -8,10 +8,11 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import type {
+  EuiEmptyPromptProps} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiEmptyPromptProps,
   EuiImage,
   useEuiTheme,
 } from '@elastic/eui';

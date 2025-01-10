@@ -6,7 +6,8 @@
  */
 
 import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
-import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
+import type { OverviewStatusStateReducer } from '../overview_status';
+import { selectOverviewStatus } from '../overview_status';
 import type { OverviewTrend, TrendTable } from '../../../../../common/types';
 import { selectOverviewTrends } from './selectors';
 import { refreshOverviewTrends, trendStatsBatch } from './actions';

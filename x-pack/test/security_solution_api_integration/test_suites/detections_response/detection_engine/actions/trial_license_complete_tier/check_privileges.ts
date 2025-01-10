@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import {
@@ -23,7 +23,7 @@ import {
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

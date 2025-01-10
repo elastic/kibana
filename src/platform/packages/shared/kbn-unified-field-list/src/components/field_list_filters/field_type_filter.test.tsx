@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';

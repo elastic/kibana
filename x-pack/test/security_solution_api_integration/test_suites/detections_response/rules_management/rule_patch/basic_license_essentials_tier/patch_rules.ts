@@ -8,7 +8,7 @@
 import expect from 'expect';
 
 import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

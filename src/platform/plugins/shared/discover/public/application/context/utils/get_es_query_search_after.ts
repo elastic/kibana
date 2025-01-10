@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SurrDocType } from '../services/context';
 

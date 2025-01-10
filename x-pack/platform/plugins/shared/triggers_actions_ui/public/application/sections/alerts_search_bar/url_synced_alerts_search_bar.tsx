@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
@@ -14,7 +14,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
 import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
-import { AlertsSearchBarProps } from './types';
+import type { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { buildEsQuery } from './build_es_query';
 

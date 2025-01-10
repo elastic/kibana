@@ -13,7 +13,7 @@ import expect from '@kbn/expect';
 import type { Agent } from 'supertest';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 

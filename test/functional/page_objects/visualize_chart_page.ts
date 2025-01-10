@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import chroma from 'chroma-js';
 
 import { FtrService } from '../ftr_provider_context';

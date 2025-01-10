@@ -6,15 +6,15 @@
  */
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
-import {
+import type {
   CreateSLOInput,
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body

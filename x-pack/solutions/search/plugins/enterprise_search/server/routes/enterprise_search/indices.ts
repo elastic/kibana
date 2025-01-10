@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -27,7 +27,7 @@ import {
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { AlwaysShowPattern } from '../../../common/types/indices';
+import type { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   AttachMlInferencePipelineResponse,
@@ -61,7 +61,7 @@ import { getIndexPipelineParameters } from '../../lib/pipelines/get_index_pipeli
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {

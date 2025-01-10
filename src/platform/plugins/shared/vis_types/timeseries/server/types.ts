@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { EsQueryConfig } from '@kbn/es-query';
-import { SharedGlobalConfig } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { EsQueryConfig } from '@kbn/es-query';
+import type { SharedGlobalConfig } from '@kbn/core/server';
 import type { IRouter, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';

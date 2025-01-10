@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerStatus } from '../api/crawler/types';
+import type { CrawlerStatus } from '../api/crawler/types';
 import {
   crawlStatusColors,
   readableCrawlerStatuses,

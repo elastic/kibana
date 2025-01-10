@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

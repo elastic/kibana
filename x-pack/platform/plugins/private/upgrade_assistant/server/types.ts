@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CredentialStore } from './lib/reindexing/credential_store';
-import { handleEsError } from './shared_imports';
+import type { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CredentialStore } from './lib/reindexing/credential_store';
+import type { handleEsError } from './shared_imports';
 import type { FeatureSet } from '../common/types';
 
 export interface RouteDependencies {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpServiceSetup } from '@kbn/core/server';
-import { ISavedObjectsManagement } from '../services';
+import type { HttpServiceSetup } from '@kbn/core/server';
+import type { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerBulkGetRoute } from './bulk_get';

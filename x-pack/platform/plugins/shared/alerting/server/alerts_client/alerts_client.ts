@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_INSTANCE_ID,
@@ -15,14 +15,14 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { DeepPartial } from '@kbn/utility-types';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockError } from '../lib/error_with_type';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type {
   SummarizedAlerts,
   ScopedQueryAlerts,
   AlertInstanceContext,
@@ -32,13 +32,14 @@ import {
   DataStreamAdapter,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
+import type {
+  IIndexPatternString} from '../alerts_service/resource_installer_utils';
 import {
-  getIndexTemplateAndPattern,
-  IIndexPatternString,
+  getIndexTemplateAndPattern
 } from '../alerts_service/resource_installer_utils';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
 import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
-import {
+import type {
   IAlertsClient,
   InitializeExecutionOpts,
   TrackedAlerts,

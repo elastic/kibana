@@ -6,7 +6,7 @@
  */
 
 import { toExpression } from './embeddable';
-import { EmbeddableInput } from '../../../../types';
+import type { EmbeddableInput } from '../../../../types';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
 import { fromExpression } from '@kbn/interpreter';
 

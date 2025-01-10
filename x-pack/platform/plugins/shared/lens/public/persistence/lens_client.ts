@@ -12,7 +12,7 @@ import type {
   VisualizationClient,
 } from '@kbn/visualizations-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
-import {
+import type {
   LensCreateIn,
   LensCreateOut,
   LensDeleteIn,

@@ -8,7 +8,8 @@
 import { useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
+import type { OnHighlightChangeArgs } from './highlight_context';
+import { useHighlightContext } from './highlight_context';
 
 export const useHighlightTreeNode = () => {
   const idRef = useRef<string>(uuidv4());

@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
+import type {
+  EuiDataGridControlColumn} from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiDataGridControlColumn,
   EuiScreenReaderOnly,
   EuiToolTip,
   useEuiTheme,

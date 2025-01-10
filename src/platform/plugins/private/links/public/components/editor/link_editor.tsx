@@ -10,6 +10,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type {
+  EuiRadioGroupOption} from '@elastic/eui';
 import {
   EuiForm,
   EuiIcon,
@@ -24,20 +26,20 @@ import {
   EuiFlyoutBody,
   EuiButtonEmpty,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiRadioGroupOption,
+  EuiFlyoutHeader
 } from '@elastic/eui';
 
-import {
+import type {
   LinkType,
+  LinkOptions} from '../../../common/content_management';
+import {
   EXTERNAL_LINK_TYPE,
-  DASHBOARD_LINK_TYPE,
-  LinkOptions,
+  DASHBOARD_LINK_TYPE
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
-import { UnorderedLink } from '../../editor/open_link_editor_flyout';
+import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
 
 export const LinkEditor = ({

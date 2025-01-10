@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 
 export const parseQueryFilterToKQL = (
   filter: string | undefined,
-  fields: Readonly<string[]>
+  fields: readonly string[]
 ): string => {
   if (!filter) return '';
   const kuery = fields

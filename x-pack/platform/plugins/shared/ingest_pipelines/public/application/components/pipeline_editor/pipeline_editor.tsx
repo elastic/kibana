@@ -9,11 +9,12 @@ import React from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { usePipelineProcessorsContext } from './context';
+import type {
+  OnDoneLoadJsonHandler} from './components';
 import {
   ProcessorsEmptyPrompt,
   OnFailureProcessorsTitle,
-  ProcessorsHeader,
-  OnDoneLoadJsonHandler,
+  ProcessorsHeader
 } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 

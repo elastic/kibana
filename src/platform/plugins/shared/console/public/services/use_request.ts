@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   SendRequestConfig,
   SendRequestResponse,
-  sendRequest as _sendRequest,
-  Error,
+  Error} from '../shared_imports';
+import {
+  sendRequest as _sendRequest
 } from '../shared_imports';
 
 import { httpService } from './http';

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import {
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import type {
   RuleExecutionStatus,
   RuleMonitoring,
   Rule,

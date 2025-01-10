@@ -12,7 +12,7 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import {
+import type {
   UiSettingsCommon,
   PersistenceAPI,
   SavedObject,

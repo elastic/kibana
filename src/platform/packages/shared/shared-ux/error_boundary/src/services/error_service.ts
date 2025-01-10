@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 import { REACT_FATAL_ERROR_EVENT_TYPE } from '../../lib/telemetry_events';
-import { KibanaErrorBoundaryProviderDeps } from '../../types';
+import type { KibanaErrorBoundaryProviderDeps } from '../../types';
 import { ThrowIfError } from '../ui/throw_if_error';
 
 const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;

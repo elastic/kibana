@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
-import { RuntimeField } from '../../types';
+import type { RuntimeField } from '../../types';
 import { getLinks } from '../../lib';
-import { RuntimeFieldForm, Props as FormProps } from '../runtime_field_form/runtime_field_form';
+import type { Props as FormProps } from '../runtime_field_form/runtime_field_form';
+import { RuntimeFieldForm } from '../runtime_field_form/runtime_field_form';
 
 export interface Props {
   docLinks: DocLinksStart;

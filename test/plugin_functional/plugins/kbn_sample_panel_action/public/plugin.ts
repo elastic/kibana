@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';

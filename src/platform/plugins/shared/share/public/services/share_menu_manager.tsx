@@ -10,10 +10,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
-import { ShowShareMenuOptions } from '../types';
-import { ShareMenuRegistryStart } from './share_menu_registry';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import type { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
+import type { ShowShareMenuOptions } from '../types';
+import type { ShareMenuRegistryStart } from './share_menu_registry';
+import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
 import { ShareMenu } from '../components/share_tabs';
 

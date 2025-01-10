@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type Query } from '@elastic/eui';
-import { Request } from '../../../../../../common/adapters/request/types';
+import type { Request } from '../../../../../../common/adapters/request/types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 
 export function findClusters(

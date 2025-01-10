@@ -8,7 +8,7 @@
 import { createContext } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { EntityClient } from '@kbn/entityManager-plugin/public';
+import type { EntityClient } from '@kbn/entityManager-plugin/public';
 
 export interface PluginContextValue {
   isDev?: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KeyboardEvent, MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 
 export const disableEventDefaults = (event: KeyboardEvent | MouseEvent<SVGElement>) => {
   event.preventDefault();

@@ -7,17 +7,18 @@
 
 import classNames from 'classnames';
 import React from 'react';
+import type {
+  DraggableProvidedDragHandleProps} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
   EuiLink,
   EuiIcon,
-  EuiToolTip,
-  DraggableProvidedDragHandleProps,
+  EuiToolTip
 } from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
+import type { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';
 
 import './component_templates_list_item.scss';

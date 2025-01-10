@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import type { WiredReadStreamDefinition } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 
 export type SchemaEditorUnpromotingState = ReturnType<typeof useUnpromotingState>;

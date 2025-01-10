@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type {
+  SubActionConnectorType} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
@@ -23,7 +24,7 @@ import {
   PushToServiceIncidentSchema,
 } from '../../../common/thehive/schema';
 import { THEHIVE_CONNECTOR_ID, THEHIVE_TITLE } from '../../../common/thehive/constants';
-import { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
+import type { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
 
 export type TheHiveConnectorType = SubActionConnectorType<TheHiveConfig, TheHiveSecrets>;
 

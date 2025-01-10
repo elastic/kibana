@@ -6,8 +6,8 @@
  */
 import { CSP_MISCONFIGURATIONS_DATASET, CSP_VULN_DATASET } from './get_vendor_name';
 import { isNativeCspFinding } from './is_native_csp_finding';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 
 describe('isNativeCspFinding', () => {
   it("should return true when finding's dataset matches CSP_MISCONFIGURATIONS_DATASET", () => {

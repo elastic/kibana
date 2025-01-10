@@ -5,6 +5,6 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { SLORouteHandlerResources } from './types';
+import type { SLORouteHandlerResources } from './types';
 
 export const createSloServerRoute = createServerRouteFactory<SLORouteHandlerResources>();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export const fetchInferenceEndpoints = async (
   client: ElasticsearchClient

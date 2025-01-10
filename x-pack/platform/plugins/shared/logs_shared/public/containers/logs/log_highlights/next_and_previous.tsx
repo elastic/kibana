@@ -7,13 +7,13 @@
 
 import { isNumber } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
+import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import {
   getLogEntryIndexAtTime,
   getLogEntryIndexBeforeTime,
   getUniqueLogEntryKey,
 } from '../../../utils/log_entry';
-import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
+import type { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 
 export const useNextAndPrevious = ({
   highlightTerms,

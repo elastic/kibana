@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InitialRule } from './rule_reducer';
+import type { InitialRule } from './rule_reducer';
 import { hasRuleChanged } from './has_rule_changed';
 
 function createRule(overrides = {}): InitialRule {

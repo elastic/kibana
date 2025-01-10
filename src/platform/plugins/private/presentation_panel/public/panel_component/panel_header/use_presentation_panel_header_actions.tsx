@@ -18,8 +18,8 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
-import { AnyApiAction } from '../../panel_actions/types';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { AnyApiAction } from '../../panel_actions/types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 

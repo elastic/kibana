@@ -10,8 +10,8 @@
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { QuerySuggestion } from '../autocomplete';
-import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
+import type { QuerySuggestion } from '../autocomplete';
+import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
 function getEuiIconType(type: string) {
   switch (type) {

@@ -13,9 +13,9 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 
 import { accountManagementApp } from './account_management_app';
 import * as AccountManagementPageImports from './account_management_page';
-import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
+import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 
 const AccountManagementPageMock = jest
   .spyOn(AccountManagementPageImports, 'AccountManagementPage')

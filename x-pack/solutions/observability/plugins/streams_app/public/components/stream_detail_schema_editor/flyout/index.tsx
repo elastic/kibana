@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
-import { SchemaEditorEditingState } from '../hooks/use_editing_state';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
+import type { SchemaEditorEditingState } from '../hooks/use_editing_state';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';

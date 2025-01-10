@@ -13,7 +13,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';

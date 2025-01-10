@@ -8,14 +8,15 @@
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { isNumber, random, range } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type {
   Config,
   Doc,
   EventsPerCycle,
-  EventsPerCycleTransitionDefRT,
-  ParsedSchedule,
+  ParsedSchedule} from '../types';
+import {
+  EventsPerCycleTransitionDefRT
 } from '../types';
 import { generateEvents } from '../data_sources';
 import { createQueue } from './queue';

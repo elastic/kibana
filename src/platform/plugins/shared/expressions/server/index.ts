@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';

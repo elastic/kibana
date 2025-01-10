@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { LlmProxy } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getMessageAddedEvents, invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
   createProxyActionConnector,

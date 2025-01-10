@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Client } from '@elastic/elasticsearch';
-import { JsonObject } from '@kbn/utility-types';
-import { Agent } from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
+import type { JsonObject } from '@kbn/utility-types';
+import type { Agent } from 'supertest';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { StreamConfigDefinition } from '@kbn/streams-schema';
 
 export async function enableStreams(supertest: Agent) {
   const req = supertest.post('/api/streams/_enable').set('kbn-xsrf', 'xxx');

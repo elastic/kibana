@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -13,7 +13,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ObservabilityLogsExplorerMainRoute } from '../routes/main';
 import { NotFoundPage } from '../routes/not_found';
-import {
+import type {
   ObservabilityLogsExplorerAppMountParameters,
   ObservabilityLogsExplorerPluginStart,
   ObservabilityLogsExplorerStartDeps,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView, TimeRange } from '@kbn/data-plugin/common';
+import type { DataView, TimeRange } from '@kbn/data-plugin/common';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
 
 const getSearchQueryRequestParams = (field: string, search: string): { regexp: {} } => {

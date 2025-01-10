@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -21,7 +21,7 @@ import {
 
 import { noKibanaPrivileges as noKibanaPrivilegesRole } from '../../../rule_registry/common/lib/authentication/roles';
 
-import { Role } from '../../../rule_registry/common/lib/authentication/types';
+import type { Role } from '../../../rule_registry/common/lib/authentication/types';
 
 const globalReadRole: Role = {
   name: 'global_read',

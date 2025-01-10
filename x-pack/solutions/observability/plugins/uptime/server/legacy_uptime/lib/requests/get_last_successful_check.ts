@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../../common/runtime_types/ping';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { Ping } from '../../../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
   monitorId: string;

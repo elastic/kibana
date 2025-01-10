@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../../../common/api/timeline';
-import {
+import type {
+  TimelineResponse,
   type TimelineType,
   TimelineTypeEnum,
   TimelineStatusEnum,

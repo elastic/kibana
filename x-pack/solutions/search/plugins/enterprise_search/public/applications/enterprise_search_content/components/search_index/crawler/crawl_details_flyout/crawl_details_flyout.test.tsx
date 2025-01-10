@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 import { EuiCodeBlock, EuiFlyout, EuiTab, EuiTabs } from '@elastic/eui';
 
 import { Loading } from '../../../../../shared/loading';
-import { CrawlRequestWithDetailsFromServer } from '../../../../api/crawler/types';
+import type { CrawlRequestWithDetailsFromServer } from '../../../../api/crawler/types';
 
 import { CrawlDetailsFlyout } from './crawl_details_flyout';
 import { CrawlDetailsPreview } from './crawl_details_preview';

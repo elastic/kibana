@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 
-import { Client } from '@elastic/elasticsearch';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Client } from '@elastic/elasticsearch';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type TransformSecurityCommon = ProvidedType<typeof TransformSecurityCommonProvider>;
 

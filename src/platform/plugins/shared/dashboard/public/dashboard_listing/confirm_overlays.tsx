@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices } from '../services/kibana_services';
 import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
 

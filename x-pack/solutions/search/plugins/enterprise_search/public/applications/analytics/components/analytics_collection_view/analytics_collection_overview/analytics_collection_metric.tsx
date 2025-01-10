@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 

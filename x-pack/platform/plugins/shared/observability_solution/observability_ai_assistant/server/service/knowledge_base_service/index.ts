@@ -11,9 +11,10 @@ import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { resourceNames } from '..';
-import {
+import type {
   Instruction,
-  KnowledgeBaseEntry,
+  KnowledgeBaseEntry} from '../../../common/types';
+import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseType,
 } from '../../../common/types';
@@ -26,8 +27,8 @@ import {
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;

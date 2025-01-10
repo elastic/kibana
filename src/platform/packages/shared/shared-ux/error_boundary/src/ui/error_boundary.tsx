@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { KibanaErrorBoundaryServices } from '../../types';
+import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
 

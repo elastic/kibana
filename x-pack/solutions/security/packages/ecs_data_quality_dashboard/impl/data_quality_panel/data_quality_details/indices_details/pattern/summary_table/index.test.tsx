@@ -18,8 +18,9 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../mock/test_providers/test_providers';
-import { SortConfig } from '../../../../types';
-import { Props, SummaryTable } from '.';
+import type { SortConfig } from '../../../../types';
+import type { Props } from '.';
+import { SummaryTable } from '.';
 import { getSummaryTableItems } from '../../../../utils/get_summary_table_items';
 
 const defaultBytesFormat = '0,0.[0]b';

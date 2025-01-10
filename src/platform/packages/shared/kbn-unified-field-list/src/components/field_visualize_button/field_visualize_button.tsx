@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButtonProps } from '@elastic/eui';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { EuiButtonProps } from '@elastic/eui';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldVisualizeButtonInner } from './field_visualize_button_inner';

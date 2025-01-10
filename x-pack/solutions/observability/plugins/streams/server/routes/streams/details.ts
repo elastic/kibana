@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readStream } from '../../lib/streams/stream_crud';

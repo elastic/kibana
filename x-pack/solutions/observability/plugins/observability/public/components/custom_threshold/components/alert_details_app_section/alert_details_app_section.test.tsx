@@ -10,16 +10,16 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
-import { CustomThresholdAlertFields } from '../../types';
+import type { CustomThresholdAlertFields } from '../../types';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import AlertDetailsAppSection from './alert_details_app_section';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();

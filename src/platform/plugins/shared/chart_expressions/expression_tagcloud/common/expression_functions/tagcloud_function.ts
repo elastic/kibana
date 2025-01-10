@@ -9,13 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type {
+  Dimension} from '@kbn/visualizations-plugin/common/utils';
 import {
   prepareLogTable,
-  Dimension,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { TagCloudRendererParams } from '../types';
-import { ExpressionTagcloudFunction } from '../types';
+import type { TagCloudRendererParams } from '../types';
+import type { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 const strings = {

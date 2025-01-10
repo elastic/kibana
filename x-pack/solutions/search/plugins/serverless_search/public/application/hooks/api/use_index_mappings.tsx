@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 

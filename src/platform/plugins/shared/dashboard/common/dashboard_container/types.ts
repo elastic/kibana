@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   PanelState,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardOptions, GridData } from '../../server/content_management';

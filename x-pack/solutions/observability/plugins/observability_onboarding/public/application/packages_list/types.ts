@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
 export type VirtualCard = {
   type: 'virtual';

@@ -7,7 +7,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AtomicStatusCheckParamsType,
   MonitorAvailabilityType,

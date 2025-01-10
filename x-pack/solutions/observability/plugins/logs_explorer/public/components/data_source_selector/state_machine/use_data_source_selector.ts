@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useInterpret, useSelector } from '@xstate/react';
 import { isAllDatasetSelection } from '../../../../common/data_source_selection';
-import {
+import type {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DataSourceSelectorSearchHandler,
@@ -17,7 +17,7 @@ import {
   PanelId,
 } from '../types';
 import { createDataSourceSelectorStateMachine } from './state_machine';
-import { DataSourceSelectorStateMachineDependencies } from './types';
+import type { DataSourceSelectorStateMachineDependencies } from './types';
 
 export const useDataSourceSelector = ({
   initialContext,

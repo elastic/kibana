@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 export const TitlePanel: FC<PropsWithChildren<unknown>> = ({ children }) => (

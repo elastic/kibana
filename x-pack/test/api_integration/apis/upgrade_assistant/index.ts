@@ -6,7 +6,7 @@
  */
 
 import { version as kibanaVersion } from '../../../../../package.json';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Upgrade Assistant', function () {

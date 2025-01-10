@@ -7,12 +7,12 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { EntityNodeViewModel, LabelNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
 import { GraphPopover } from './graph_popover';
-import { ExpandButtonClickCallback } from '../types';
+import type { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
 import { ExpandPopoverListItem } from '../styles';
 

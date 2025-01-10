@@ -10,7 +10,7 @@
 import React from 'react';
 import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
 const mockSetLocalStorage = jest.fn();

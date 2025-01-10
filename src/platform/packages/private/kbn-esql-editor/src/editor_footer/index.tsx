@@ -17,7 +17,8 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { Interpolation, Theme, css } from '@emotion/react';
+import type { Interpolation, Theme} from '@emotion/react';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationInline,

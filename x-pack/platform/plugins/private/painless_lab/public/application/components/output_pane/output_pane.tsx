@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -15,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Response } from '../../types';
+import type { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';

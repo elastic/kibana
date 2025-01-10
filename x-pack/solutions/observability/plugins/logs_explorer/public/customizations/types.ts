@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsExplorerControllerContext } from '../state_machines/logs_explorer_controller';
+import type { LogsExplorerControllerContext } from '../state_machines/logs_explorer_controller';
 
 export type OnUknownDataViewSelectionHandler = (context: LogsExplorerControllerContext) => void;
 

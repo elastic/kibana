@@ -10,7 +10,7 @@
 import { from, lastValueFrom } from 'rxjs';
 import { toArray } from 'rxjs';
 
-import { IterableInput, AsyncMapFn, AsyncMapResult } from './types';
+import type { IterableInput, AsyncMapFn, AsyncMapResult } from './types';
 import { mapWithLimit$ } from './observable';
 
 const getAllResults = <T>(input: AsyncMapResult<T>) => lastValueFrom(from(input).pipe(toArray()));

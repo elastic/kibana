@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import {
+import type {
   CanvasContainerApi,
   EmbeddableInput,
   RendererFactory,
   RendererHandlers,
 } from '../../../types';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
-import { StartDeps } from '../../plugin';
+import type { EmbeddableExpression } from '../../expression_types/embeddable';
+import type { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { useGetAppContext } from './use_get_app_context';
 

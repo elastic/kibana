@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18nTexts as i18nTextsFlyout } from './i18n_texts';
-import { SerializedDeletePhase } from '../../../../../../common/types';
+import type { SerializedDeletePhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
 import type { ActionComponentProps } from './types';

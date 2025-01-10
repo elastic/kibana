@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';
 import { generateMockUrlIndicator } from '../../../../common/types/indicator';

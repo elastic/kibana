@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { handleWarnings } from '@kbn/search-response-warnings';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -19,17 +19,19 @@ import {
 } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import type {
+  SearchSourceDependencies} from '../../common/search';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -53,7 +55,6 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
 } from '../../common/search';
@@ -63,17 +64,20 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import type { ConfigSchema } from '../../server/config';
-import { NowProviderInternalContract } from '../now_provider';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import type { NowProviderInternalContract } from '../now_provider';
+import type { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
-import { createUsageCollector, SearchUsageCollector } from './collectors';
+import type { SearchUsageCollector } from './collectors';
+import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
+import type { ISearchInterceptor} from './search_interceptor';
+import { SearchInterceptor } from './search_interceptor';
+import type { ISessionsClient, ISessionService} from './session';
+import { SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

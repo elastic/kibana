@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AttackDiscoveryStatus, Provider } from '@kbn/elastic-assistant-common';
-import { EsReplacementSchema } from '../../../ai_assistant_data_clients/conversations/types';
+import type { AttackDiscoveryStatus, Provider } from '@kbn/elastic-assistant-common';
+import type { EsReplacementSchema } from '../../../ai_assistant_data_clients/conversations/types';
 
 export interface EsAttackDiscoverySchema {
   '@timestamp': string;

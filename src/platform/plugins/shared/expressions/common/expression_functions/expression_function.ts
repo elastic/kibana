@@ -8,16 +8,16 @@
  */
 
 import { identity } from 'lodash';
-import { SavedObjectReference } from '@kbn/core/types';
-import {
+import type { SavedObjectReference } from '@kbn/core/types';
+import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import { AnyExpressionFunctionDefinition } from './types';
+import type { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
-import { ExpressionValue } from '../expression_types/types';
-import { ExpressionAstFunction } from '../ast';
+import type { ExpressionValue } from '../expression_types/types';
+import type { ExpressionAstFunction } from '../ast';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**

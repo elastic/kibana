@@ -9,7 +9,7 @@
 
 import { test as base } from '@playwright/test';
 import { PROJECT_DEFAULT_ROLES } from '../../../common';
-import { LoginFixture, ScoutWorkerFixtures } from '../types';
+import type { LoginFixture, ScoutWorkerFixtures } from '../types';
 import { serviceLoadedMsg } from '../../utils';
 
 type LoginFunction = (role: string) => Promise<void>;

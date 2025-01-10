@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { IRouter } from '@kbn/core-http-server';
+import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -29,7 +29,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**

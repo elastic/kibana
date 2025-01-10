@@ -8,24 +8,27 @@
  */
 
 import apm from 'elastic-apm-node';
-import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
+  CancellationToken} from '@kbn/reporting-common';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import {
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
+import type {
   JobParamsPDFDeprecated,
-  PDF_JOB_TYPE,
-  TaskPayloadPDF,
+  TaskPayloadPDF} from '@kbn/reporting-export-types-pdf-common';
+import {
+  PDF_JOB_TYPE
 } from '@kbn/reporting-export-types-pdf-common';
 import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
 

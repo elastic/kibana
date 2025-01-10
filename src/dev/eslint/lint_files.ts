@@ -11,8 +11,8 @@ import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
-import { File } from '../file';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { File } from '../file';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log

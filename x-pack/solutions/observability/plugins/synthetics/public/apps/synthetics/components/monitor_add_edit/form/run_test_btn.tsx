@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
-import { TestNowModeFlyout, TestRun } from '../../test_now_mode/test_now_mode_flyout';
+import type { TestRun } from '../../test_now_mode/test_now_mode_flyout';
+import { TestNowModeFlyout } from '../../test_now_mode/test_now_mode_flyout';
 import { format } from './formatter';
-import { MonitorFields as MonitorFieldsType } from '../../../../../../common/runtime_types';
+import type { MonitorFields as MonitorFieldsType } from '../../../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/manual_test_runs/api';
 import { useGetUrlParams } from '../../../hooks';
 

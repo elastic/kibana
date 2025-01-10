@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { defaultLogViewsStaticConfig, LogViewsStaticConfig } from '../../../common/log_views';
+import type { LogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewsStaticConfig } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
-import { LogViewsServiceStartDeps, LogViewsServiceSetup, LogViewsServiceStart } from './types';
+import type { LogViewsServiceStartDeps, LogViewsServiceSetup, LogViewsServiceStart } from './types';
 
 export class LogViewsService {
   private logViewsStaticConfig: LogViewsStaticConfig = defaultLogViewsStaticConfig;

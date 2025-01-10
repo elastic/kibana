@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest, Bucket, Pipeline } from '../../types';
+import type { LegacyRequest, Bucket, Pipeline } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { getIndexPatterns } from '../../../common/get_index_patterns';

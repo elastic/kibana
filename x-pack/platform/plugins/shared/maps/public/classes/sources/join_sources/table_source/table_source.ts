@@ -6,27 +6,30 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { GeoJsonProperties } from 'geojson';
+import type { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
-import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import {
+import type { VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
+import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
+import type {
   MapExtent,
   TableSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { ITermJoinSource } from '../types';
-import { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
-import { IField } from '../../../fields/field';
-import {
-  AbstractVectorSource,
+import type { ITermJoinSource } from '../types';
+import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
+import type { IField } from '../../../fields/field';
+import type {
   BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
-  SourceStatus,
+  SourceStatus} from '../../vector_source';
+import {
+  AbstractVectorSource
 } from '../../vector_source';
-import { DataRequest } from '../../../util/data_request';
+import type { DataRequest } from '../../../util/data_request';
 import { InlineField } from '../../../fields/inline_field';
-import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
+import type { ITooltipProperty} from '../../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;

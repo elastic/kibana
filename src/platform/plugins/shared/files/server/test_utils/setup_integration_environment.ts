@@ -14,7 +14,7 @@ import {
   request,
 } from '@kbn/core-test-helpers-kbn-server';
 import pRetry from 'p-retry';
-import { FileJSON } from '../../common';
+import type { FileJSON } from '../../common';
 import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;

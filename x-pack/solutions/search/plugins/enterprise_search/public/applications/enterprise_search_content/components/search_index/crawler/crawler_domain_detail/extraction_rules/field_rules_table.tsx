@@ -7,20 +7,14 @@
 
 import React from 'react';
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import type { ExtractionRuleFieldRule } from '../../../../../../../../common/types/extraction_rules';
 import {
   ContentFrom,
-  ExtractionRuleFieldRule,
   FieldType,
   MultipleObjectsHandling,
 } from '../../../../../../../../common/types/extraction_rules';

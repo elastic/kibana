@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { ActionsRequestHandlerContext } from '../../../types';
+import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import type {
+  DeleteConnectorRequestParamsV1} from '../../../../common/routes/connector/apis/delete';
 import {
-  deleteConnectorRequestParamsSchemaV1,
-  DeleteConnectorRequestParamsV1,
+  deleteConnectorRequestParamsSchemaV1
 } from '../../../../common/routes/connector/apis/delete';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 

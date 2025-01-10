@@ -13,7 +13,7 @@ import { BetaBadge } from './beta_badge';
 import { LandingLink } from './landing_links';
 
 export interface LandingLinksIconsProps {
-  items: Readonly<NavigationLink[]>;
+  items: readonly NavigationLink[];
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }

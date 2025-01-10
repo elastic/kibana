@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
-import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
+import type { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
+import type { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 

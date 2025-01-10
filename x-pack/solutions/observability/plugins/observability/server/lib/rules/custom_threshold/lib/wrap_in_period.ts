@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import type { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 
 export const createLastPeriod = (
   lastPeriodEnd: number,

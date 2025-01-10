@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import type { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, useFormData, NumericField, Field } from '../../../../shared_imports';
 import {

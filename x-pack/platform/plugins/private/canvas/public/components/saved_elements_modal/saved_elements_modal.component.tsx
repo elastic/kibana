@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type {
+  ChangeEvent,
+  FunctionComponent} from 'react';
 import React, {
   Fragment,
-  ChangeEvent,
-  FunctionComponent,
   useState,
   useEffect,
   useRef,
@@ -27,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { sortBy } from 'lodash';
-import { CustomElement } from '../../../types';
+import type { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
 import { ElementGrid } from './element_grid';

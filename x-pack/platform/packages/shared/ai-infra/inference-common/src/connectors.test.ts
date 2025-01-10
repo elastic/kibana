@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type {
+  RawConnector} from './connectors';
 import {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
-  RawConnector,
   COMPLETION_TASK_TYPE,
 } from './connectors';
 

@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { Index } from '../../../../types';
+import type { Index } from '../../../../types';
 
 const shard1 = {
   id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],

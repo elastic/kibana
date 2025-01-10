@@ -7,8 +7,9 @@
 
 import { useMemo } from 'react';
 import { useKibanaSpace, useTheme } from '@kbn/observability-shared-plugin/public';
-import { ExploratoryEmbeddableComponentProps } from './embeddable';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import type { ExploratoryEmbeddableComponentProps } from './embeddable';
+import type { LayerConfig} from '../configurations/lens_attributes';
+import { LensAttributes } from '../configurations/lens_attributes';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ReportTypes } from '../../../..';

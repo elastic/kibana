@@ -9,13 +9,14 @@ import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
-import { TemplateDeserialized } from '../../../../common';
+import type { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
+import type {
+  CommonWizardSteps} from '../shared';
 import {
-  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
@@ -23,11 +24,12 @@ import {
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
 import { serializeAsESLifecycle } from '../../../../common/lib';
+import type {
+  SimulateTemplateProps,
+  SimulateTemplateFilters} from '../index_templates';
 import {
   SimulateTemplateFlyoutContent,
-  SimulateTemplateProps,
   simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
   LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';

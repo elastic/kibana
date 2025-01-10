@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   BrowserFields,
-  ConfigKey,
-  MonitorTypeEnum,
-  FormMonitorType,
   ProjectMonitor,
   ThrottlingConfig,
 } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../../../../common/runtime_types';
 import {
   PROFILE_VALUES_ENUM,
   DEFAULT_FIELDS,
@@ -20,12 +18,8 @@ import {
   PROFILE_VALUES,
   CUSTOM_LABEL,
 } from '../../../../common/constants/monitor_defaults';
-import {
-  NormalizedProjectProps,
-  NormalizerResult,
-  getNormalizeCommonFields,
-  getValueInSeconds,
-} from './common_fields';
+import type { NormalizedProjectProps, NormalizerResult } from './common_fields';
+import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
 
 export const getNormalizeBrowserFields = ({
   locations = [],

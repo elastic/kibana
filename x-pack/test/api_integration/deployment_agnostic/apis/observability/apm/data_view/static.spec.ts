@@ -8,13 +8,13 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import request from 'superagent';
+import type request from 'superagent';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
+import type {
   SupertestReturnType,
   ApmApiError,
 } from '../../../../../../apm_api_integration/common/apm_api_supertest';

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+import type { SavedObjectReference} from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type {
   GeoContainmentRuleType,

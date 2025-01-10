@@ -6,12 +6,13 @@
  */
 
 import { useCallback } from 'react';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { combineLatest, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs';
 import { subtractMillisecondsFromDate } from '../../../../common/utils';
-import { LogEntryCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
-import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
+import type { LogEntryCursor } from '../../../../common/log_entry';
+import type { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
+import type { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
 import { useObservable, useObservableState } from '../../../utils/use_observable';
 import { useLogEntriesAfterRequest } from './use_fetch_log_entries_after';

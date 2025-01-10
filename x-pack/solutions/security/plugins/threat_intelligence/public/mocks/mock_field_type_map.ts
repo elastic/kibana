@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldTypesContextValue } from '../containers/field_types_provider';
+import type { FieldTypesContextValue } from '../containers/field_types_provider';
 
 /**
  * Mock to map an indicator field to its type.

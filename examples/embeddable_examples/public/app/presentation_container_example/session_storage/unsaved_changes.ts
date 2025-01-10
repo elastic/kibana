@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnsavedChanges } from '../types';
+import type { UnsavedChanges } from '../types';
 
 const UNSAVED_CHANGES_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.unsavedChanges';

@@ -17,8 +17,8 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
-import { StreamsAppServices } from '../../services/types';
+import type { StreamsAppStartDependencies } from '../../types';
+import type { StreamsAppServices } from '../../services/types';
 
 export function AppRoot({
   coreStart,

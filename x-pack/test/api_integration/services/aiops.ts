@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 import { LogRateAnalysisDataGeneratorProvider } from '../../functional/services/aiops/log_rate_analysis_data_generator';
 

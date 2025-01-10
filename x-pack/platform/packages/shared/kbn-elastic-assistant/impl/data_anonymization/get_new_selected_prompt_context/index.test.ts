@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { mockAlertPromptContext } from '../../mock/prompt_context';
 import { getNewSelectedPromptContext } from '.';
 

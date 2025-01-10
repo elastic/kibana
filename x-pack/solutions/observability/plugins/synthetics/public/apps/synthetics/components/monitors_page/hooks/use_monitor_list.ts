@@ -9,10 +9,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
+import type { MonitorListPageState } from '../../../state';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
-  MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   updateManagementPageStateAction,

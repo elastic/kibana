@@ -8,7 +8,8 @@
 // common properties on time_series_query and alert_type_params
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { MAX_GROUPS } from '..';

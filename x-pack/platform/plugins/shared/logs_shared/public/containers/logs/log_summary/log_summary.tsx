@@ -6,12 +6,13 @@
  */
 
 import { useEffect } from 'react';
-import { exhaustMap, map, Observable } from 'rxjs';
-import { HttpHandler } from '@kbn/core-http-browser';
-import { LogViewReference } from '../../../../common';
+import type { Observable } from 'rxjs';
+import { exhaustMap, map } from 'rxjs';
+import type { HttpHandler } from '@kbn/core-http-browser';
+import type { LogViewReference } from '../../../../common';
 import { useObservableState, useReplaySubject } from '../../../utils/use_observable';
 import { fetchLogSummary } from './api/fetch_log_summary';
-import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
+import type { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
 import { useBucketSize } from './bucket_size';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 

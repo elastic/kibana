@@ -9,24 +9,26 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
+import type {
   Direction,
-  EuiButtonGroup,
   EuiButtonGroupOptionProps,
+  EuiSelectableOption} from '@elastic/eui';
+import {
+  EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   EuiToolTip,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import type {
+  OptionsListSortBy} from '../../../../../common/options_list/suggestions_sorting';
 import {
   getCompatibleSortingTypes,
-  OptionsListSortBy,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../../../common/options_list/suggestions_sorting';
 import { useOptionsListContext } from '../options_list_context_provider';

@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardApi } from '../..';
+import type { DashboardApi } from '../..';
 import { getNewDashboardTitle } from '../_dashboard_app_strings';
 import { coreServices } from '../../services/kibana_services';
 

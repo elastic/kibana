@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import { ReportDocument } from '@kbn/reporting-common/types';
+import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ExportType, ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';

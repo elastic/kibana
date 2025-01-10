@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import { ConfigEntryView, FieldType } from '../../types/types';
+import type { ConfigEntryView} from '../../types/types';
+import { FieldType } from '../../types/types';
 import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './configuration_utils';
 
 interface ConfigurationFieldProps {

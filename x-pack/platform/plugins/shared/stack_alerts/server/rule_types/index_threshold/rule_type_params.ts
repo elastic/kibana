@@ -6,13 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { ComparatorFnNames } from '../../../common';
-import { Comparator } from '../../../common/comparator_types';
+import type { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
 
 // rule type parameters

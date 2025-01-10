@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { Actions, ActionsProps } from './actions';
+import type { ActionsProps } from './actions';
+import { Actions } from './actions';
 import { EuiThemeProvider } from '@elastic/eui';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,

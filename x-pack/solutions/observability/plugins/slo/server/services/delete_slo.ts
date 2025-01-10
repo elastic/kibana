@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -16,8 +16,8 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
 
 export class DeleteSLO {
   constructor(

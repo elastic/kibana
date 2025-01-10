@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 
 export const DropIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg

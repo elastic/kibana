@@ -8,14 +8,14 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SessionsClient } from '../../..';
 import { SearchSessionStatus } from '../../../../../common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 

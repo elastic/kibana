@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

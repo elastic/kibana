@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNoteResponse } from '@kbn/investigation-shared';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { InvestigationNoteResponse } from '@kbn/investigation-shared';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
 import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useFetchInvestigationNotes } from '../../../../hooks/use_fetch_investigation_notes';

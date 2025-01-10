@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Meta } from '../../../../../common/types';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import type { Meta } from '../../../../../common/types';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { HttpLogic } from '../../../shared/http';
 

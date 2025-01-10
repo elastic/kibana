@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
+import type {
+  CancellationToken} from '@kbn/reporting-common';
 import {
-  CancellationToken,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -21,16 +22,18 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
+import type { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
+import type {
+  JobParamsCSV,
+  TaskPayloadCSV} from '@kbn/reporting-export-types-csv-common';
 import {
   CSV_JOB_TYPE,
-  CSV_REPORT_TYPE,
-  JobParamsCSV,
-  TaskPayloadCSV,
+  CSV_REPORT_TYPE
 } from '@kbn/reporting-export-types-csv-common';
-import {
+import type {
   BaseExportTypeSetupDeps,
-  BaseExportTypeStartDeps,
+  BaseExportTypeStartDeps} from '@kbn/reporting-server';
+import {
   ExportType,
   decryptJobHeaders,
   getFieldFormats,

@@ -8,7 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import { HomeTestBed, setup } from './home.helpers';
+import type { HomeTestBed} from './home.helpers';
+import { setup } from './home.helpers';
 
 describe('<IndexManagementHome />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

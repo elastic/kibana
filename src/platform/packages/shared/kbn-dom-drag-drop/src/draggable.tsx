@@ -11,13 +11,14 @@ import React, { useContext, useCallback, useEffect, memo, useMemo } from 'react'
 import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
-import {
+import type {
   DragDropIdentifier,
   DropIdentifier,
+  RegisteredDropTargets,
+  DragDropAction} from './providers';
+import {
   nextValidDropTarget,
   ReorderContext,
-  RegisteredDropTargets,
-  DragDropAction,
   useDragDropContext,
 } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';

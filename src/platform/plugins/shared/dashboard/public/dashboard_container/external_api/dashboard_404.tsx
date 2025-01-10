@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
-import { DashboardRedirect } from '../types';
+import type { DashboardRedirect } from '../types';
 
 export const Dashboard404Page = ({
   dashboardRedirect,

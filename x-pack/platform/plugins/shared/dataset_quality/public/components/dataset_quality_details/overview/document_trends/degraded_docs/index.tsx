@@ -7,6 +7,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  OnTimeChangeProps} from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -19,7 +21,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';

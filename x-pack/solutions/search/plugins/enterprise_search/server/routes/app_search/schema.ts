@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { skipBodyValidation } from '../../lib/route_config_helpers';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 
 export function registerSchemaRoutes({
   router,

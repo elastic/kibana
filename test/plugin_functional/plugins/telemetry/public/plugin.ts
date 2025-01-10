@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 
 interface TelemetryTestPluginSetupDependencies {

@@ -8,21 +8,22 @@
  */
 
 import React from 'react';
+import type {
+  EuiThemeComputed} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiPanel,
   EuiPortal,
   EuiOverlayMask,
-  EuiFocusTrap,
-  EuiThemeComputed,
+  EuiFocusTrap
 } from '@elastic/eui';
-import { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
+import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 import { GuidePanelFlyoutHeader } from './guide_panel_flyout_header';
 import { GuidePanelFlyoutBody } from './guide_panel_flyout_body';
 import type { PluginState } from '../../../common';
 import { GuidePanelFlyoutFooter } from './guide_panel_flyout_footer';
-import { getGuidePanelStyles } from '../guide_panel.styles';
+import type { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyout = ({
   isOpen,

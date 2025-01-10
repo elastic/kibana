@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { API_BASE_PATH, Index } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { Index } from '@kbn/index-management-plugin/common';
+import { API_BASE_PATH } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { sortedExpectedIndexKeys } from '../constants';
 
 export default function ({ getService }: FtrProviderContext) {

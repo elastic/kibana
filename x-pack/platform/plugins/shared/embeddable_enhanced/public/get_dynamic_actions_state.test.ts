@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common/types';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common/types';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 
 describe('getDynamicActionsState', () => {

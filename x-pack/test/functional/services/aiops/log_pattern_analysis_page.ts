@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { CreateCaseParams } from '../cases/create';
+import type { CreateCaseParams } from '../cases/create';
 
 export function LogPatternAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const retry = getService('retry');

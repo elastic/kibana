@@ -10,8 +10,8 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
-import {
+import type {
+  RunScriptActionRequestBody,
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,

@@ -13,8 +13,6 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
-import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
   type MicrosoftDefenderEndpointIsolateHostParams,
   type MicrosoftDefenderEndpointMachine,
@@ -42,8 +40,6 @@ import type {
   ResponseActionsClientPendingAction,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-} from '../../../lib/base_response_actions_client';
-import {
   ResponseActionsClientImpl,
   type ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';

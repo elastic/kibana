@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
-import {
+import type {
   AlertMessage,
   AlertMessageTimeToken,
   AlertMessageLinkToken,

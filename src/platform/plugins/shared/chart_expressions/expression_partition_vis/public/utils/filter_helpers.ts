@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
-import { FilterEvent } from '../types';
+import type { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
+import type { FilterEvent } from '../types';
 
 export const canFilter = async (
   event: FilterEvent | null,

@@ -6,15 +6,17 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ReplaySubject, Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { authenticatedUser } from '../__mocks__/user';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantService, AIAssistantServiceOpts } from '.';
+import type { AIAssistantServiceOpts } from '.';
+import { AIAssistantService } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';

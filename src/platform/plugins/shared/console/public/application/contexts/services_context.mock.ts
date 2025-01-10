@@ -22,7 +22,7 @@ import { StorageMock } from '../../services/storage.mock';
 import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
 import { createApi, createEsHostService } from '../lib';
 
-import { ContextValue } from './services_context';
+import type { ContextValue } from './services_context';
 
 const coreStart = coreMock.createStart();
 

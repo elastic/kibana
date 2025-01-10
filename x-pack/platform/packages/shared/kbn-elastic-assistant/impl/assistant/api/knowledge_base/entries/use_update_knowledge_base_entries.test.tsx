@@ -6,9 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import type {
+  UseUpdateKnowledgeBaseEntriesParams} from './use_update_knowledge_base_entries';
 import {
-  useUpdateKnowledgeBaseEntries,
-  UseUpdateKnowledgeBaseEntriesParams,
+  useUpdateKnowledgeBaseEntries
 } from './use_update_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 

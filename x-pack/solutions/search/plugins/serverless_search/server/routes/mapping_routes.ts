@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => {

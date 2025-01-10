@@ -22,7 +22,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
+import type { FieldListSidebarProps } from './field_list_sidebar';
+import { FieldListSidebar } from './field_list_sidebar';
 import { ExampleDropZone } from './example_drop_zone';
 
 interface UnifiedFieldListExampleAppProps {

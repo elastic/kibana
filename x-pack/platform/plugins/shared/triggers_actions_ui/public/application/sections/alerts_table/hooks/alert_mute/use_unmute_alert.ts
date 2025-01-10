@@ -8,7 +8,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { ServerError, ToggleAlertParams } from '../../types';
+import type { ServerError, ToggleAlertParams } from '../../types';
 import { unmuteAlertInstance } from '../../../../lib/rule_api/unmute_alert';
 import { useKibana } from '../../../../..';
 

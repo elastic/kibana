@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -17,16 +17,16 @@ import {
   ScopedHistory,
   Capabilities,
 } from '@kbn/core/public';
-import {
+import type {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
-import { IndexManagementLocator } from '@kbn/index-management-shared-types';
-import { Subscription } from 'rxjs';
+import type { IndexManagementLocator } from '@kbn/index-management-shared-types';
+import type { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';

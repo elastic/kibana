@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  notifyManager,
-  QueryObserver,
+import type {
   QueryObserverOptions,
   QueryObserverResult,
   QueryClient,
-  QueryKey,
+  QueryKey} from '@tanstack/react-query';
+import {
+  notifyManager,
+  QueryObserver
 } from '@tanstack/react-query';
 import { Observable } from 'rxjs';
 

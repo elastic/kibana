@@ -13,11 +13,12 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { collectionActions } from './lib/collection_actions';
+import type {
+  ColorRulesProps,
+  ColorRulesOperator} from './color_rules';
 import {
   ColorRules,
-  ColorRulesProps,
-  colorRulesOperatorsList,
-  ColorRulesOperator,
+  colorRulesOperatorsList
 } from './color_rules';
 import { Operator } from '../../../common/operators_utils';
 

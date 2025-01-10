@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { ApiItem, NewsfeedItem } from '../types';
+import type { ApiItem, NewsfeedItem } from '../types';
 import { NEWSFEED_FALLBACK_LANGUAGE } from '../../common/constants';
 
 export const convertItems = (items: ApiItem[], userLanguage: string): NewsfeedItem[] => {

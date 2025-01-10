@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, pick, take } from 'lodash';
+import type {
+  Observable,
+  OperatorFunction} from 'rxjs';
 import {
   catchError,
   concat,
   EMPTY,
   from,
   isObservable,
-  Observable,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
   throwError,
 } from 'rxjs';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import type { Message} from '../../../../common';
+import { createFunctionNotFoundError, MessageRole } from '../../../../common';
+import type {
+  MessageOrChatEvent} from '../../../../common/conversation_complete';
 import {
-  createFunctionLimitExceededError,
-  MessageOrChatEvent,
+  createFunctionLimitExceededError
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, Instruction } from '../../../../common/types';
+import type { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
@@ -37,7 +40,7 @@ import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
-import { LangTracer } from '../instrumentation/lang_tracer';
+import type { LangTracer } from '../instrumentation/lang_tracer';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 import { hideTokenCountEvents } from './hide_token_count_events';

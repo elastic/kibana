@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import {
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type {
   GetOverviewParams,
   GetOverviewResponse,
 } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { typedSearch } from '../utils/queries';

@@ -9,6 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import type {
+  ESQLRealField} from '@kbn/esql-validation-autocomplete';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -18,8 +20,7 @@ import {
   getCommandDefinition,
   type ESQLCallbacks,
   getPolicyHelper,
-  collectVariables,
-  ESQLRealField,
+  collectVariables
 } from '@kbn/esql-validation-autocomplete';
 import { correctQuerySyntax } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import type { EditorContext } from '@kbn/esql-validation-autocomplete/src/autocomplete/types';

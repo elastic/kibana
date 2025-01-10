@@ -12,7 +12,7 @@ import {
   validateLogEntryDatasetsResponsePayloadRT,
 } from '@kbn/infra-plugin/common/http_api';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

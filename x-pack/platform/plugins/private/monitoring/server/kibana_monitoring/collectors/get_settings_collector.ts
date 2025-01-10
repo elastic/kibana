@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { Collector, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { Collector, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { MonitoringConfig } from '../../config';
+import type { MonitoringConfig } from '../../config';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import {
+import type {
   CrawlConfig,
   CrawlConfigFromServer,
-  CrawlerStatus,
   CrawlEvent,
   CrawlEventFromServer,
   CrawlRequest,
@@ -17,8 +16,8 @@ import {
   CrawlRequestStatsFromServer,
   CrawlRequestWithDetails,
   CrawlRequestWithDetailsFromServer,
-  CrawlType,
 } from '../types';
+import { CrawlerStatus, CrawlType } from '../types';
 
 // Server
 

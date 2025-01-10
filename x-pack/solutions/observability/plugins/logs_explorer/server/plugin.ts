@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
 import type { LogsExplorerSetupDeps } from './types';
 

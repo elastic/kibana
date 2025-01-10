@@ -20,7 +20,7 @@ import {
   IndexTemplate,
   ComponentTemplate,
 } from '../lib/autocomplete_entities';
-import { DevToolsSettings, Settings } from './settings';
+import type { DevToolsSettings, Settings } from './settings';
 
 export enum ENTITIES {
   INDICES = 'indices',

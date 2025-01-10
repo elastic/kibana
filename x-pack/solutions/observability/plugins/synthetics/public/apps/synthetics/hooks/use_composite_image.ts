@@ -8,7 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { composeScreenshotRef } from '../utils/monitor_test_result/compose_screenshot_images';
-import {
+import type {
   ScreenshotRefImageData,
   ScreenshotBlockCache,
   StoreScreenshotBlock,

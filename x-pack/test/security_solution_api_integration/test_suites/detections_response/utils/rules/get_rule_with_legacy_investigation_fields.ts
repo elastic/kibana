@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InternalRuleCreate } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { InternalRuleCreate } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 export const getRuleSavedObjectWithLegacyInvestigationFields = (
   rewrites?: Partial<InternalRuleCreate>

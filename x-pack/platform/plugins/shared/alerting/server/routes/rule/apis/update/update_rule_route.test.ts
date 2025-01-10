@@ -13,7 +13,8 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen, SanitizedRule } from '../../../../../common';
+import type { SanitizedRule } from '../../../../../common';
+import { RuleNotifyWhen } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

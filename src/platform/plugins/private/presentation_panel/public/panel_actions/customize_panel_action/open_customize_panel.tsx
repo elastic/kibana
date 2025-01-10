@@ -12,7 +12,7 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { core } from '../../kibana_services';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
 export const openCustomizePanelFlyout = ({

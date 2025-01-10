@@ -6,13 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { MouseEvent, useEffect } from 'react';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { MouseEvent} from 'react';
+import { useEffect } from 'react';
 import { useKibana } from '../utils/kibana_react';
 import { useNavigation } from './use_navigation';
+import type {
+  MaintenanceWindowDeepLinkIds} from '../../common';
 import {
   MANAGEMENT_APP_ID,
-  MaintenanceWindowDeepLinkIds,
   MAINTENANCE_WINDOW_DEEP_LINK_IDS,
 } from '../../common';
 

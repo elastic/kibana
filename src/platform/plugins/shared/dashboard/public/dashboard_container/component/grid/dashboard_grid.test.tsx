@@ -16,7 +16,7 @@ import { buildMockDashboardApi } from '../../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
-import { DashboardPanelMap } from '../../../../common';
+import type { DashboardPanelMap } from '../../../../common';
 
 jest.mock('./dashboard_grid_item', () => {
   return {

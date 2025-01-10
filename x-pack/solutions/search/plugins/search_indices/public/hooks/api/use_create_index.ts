@@ -8,7 +8,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { POST_CREATE_INDEX_ROUTE } from '../../../common/routes';
-import { CreateIndexRequest, CreateIndexResponse } from '../../../common/types';
+import type { CreateIndexRequest, CreateIndexResponse } from '../../../common/types';
 import { MutationKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';

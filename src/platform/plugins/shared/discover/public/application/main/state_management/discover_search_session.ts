@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
-import * as Rx from 'rxjs';
+import type { History } from 'history';
+import type * as Rx from 'rxjs';
 import { filter } from 'rxjs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
   getQueryParams,

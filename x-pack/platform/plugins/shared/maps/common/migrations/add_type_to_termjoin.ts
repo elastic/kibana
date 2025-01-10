@@ -6,7 +6,7 @@
  */
 
 import type { MapAttributes } from '../content_management';
-import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in

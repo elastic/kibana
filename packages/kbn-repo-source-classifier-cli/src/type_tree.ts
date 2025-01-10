@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ModuleType } from '@kbn/repo-source-classifier';
+import type { ModuleType } from '@kbn/repo-source-classifier';
 import normalizePath from 'normalize-path';
 
 type RecursiveTypes = Map<string, ModuleType | RecursiveTypes>;

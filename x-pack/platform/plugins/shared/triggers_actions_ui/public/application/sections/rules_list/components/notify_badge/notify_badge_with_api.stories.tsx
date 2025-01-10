@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EuiText } from '@elastic/eui';
 import { RulesListNotifyBadgeWithApi } from './notify_badge_with_api';
-import { RulesListNotifyBadgePropsWithApi } from './types';
+import type { RulesListNotifyBadgePropsWithApi } from './types';
 
 const rule = {
   id: uuidv4(),

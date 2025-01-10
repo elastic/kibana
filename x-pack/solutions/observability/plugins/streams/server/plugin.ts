@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -15,9 +15,10 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import type { StreamsConfig } from '../common/config';
+import { configSchema, exposeToBrowserConfig } from '../common/config';
 import { streamsRouteRepository } from './routes';
-import {
+import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,

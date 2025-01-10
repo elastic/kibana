@@ -9,17 +9,19 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { act, waitFor } from '@testing-library/react';
-import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from '../../../..';
+import type { SearchUsageCollector} from '../../../..';
+import { SessionsClient } from '../../../..';
 import { SearchSessionStatus } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';

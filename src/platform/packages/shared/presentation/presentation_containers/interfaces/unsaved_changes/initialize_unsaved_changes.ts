@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  Subscription} from 'rxjs';
 import {
   BehaviorSubject,
   combineLatest,
   combineLatestWith,
   debounceTime,
-  map,
-  Subscription,
+  map
 } from 'rxjs';
-import {
-  getInitialValuesFromComparators,
+import type {
   PublishesUnsavedChanges,
   PublishingSubject,
-  runComparators,
-  StateComparators,
+  StateComparators} from '@kbn/presentation-publishing';
+import {
+  getInitialValuesFromComparators,
+  runComparators
 } from '@kbn/presentation-publishing';
-import { HasSnapshottableState } from '../serialized_state';
+import type { HasSnapshottableState } from '../serialized_state';
 import { apiHasSaveNotification } from '../has_save_notification';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;

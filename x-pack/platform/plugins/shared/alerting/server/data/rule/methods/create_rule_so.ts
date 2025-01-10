@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObject,
 } from '@kbn/core/server';
-import { RawRule } from '../../../types';
+import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 export interface CreateRuleSoParams {

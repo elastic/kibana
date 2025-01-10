@@ -6,15 +6,16 @@
  */
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
+import type {
+  Model,
+  View,
+  Transform} from '../expression_types';
 import {
   modelRegistry,
   viewRegistry,
-  transformRegistry,
-  Model,
-  View,
-  Transform,
+  transformRegistry
 } from '../expression_types';
-import { ArgUiConfig } from '../expression_types/arg';
+import type { ArgUiConfig } from '../expression_types/arg';
 
 type ArgType = Model | View | Transform;
 

@@ -6,7 +6,7 @@
  */
 
 import type { MapAttributes } from '../content_management';
-import { MapSettings } from '../descriptor_types';
+import type { MapSettings } from '../descriptor_types';
 
 export class MapSettingsCollector {
   private _customIconsCount: number = 0;

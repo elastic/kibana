@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Services, KibanaDependencies } from '../src/types';
+import type { Services, KibanaDependencies } from '../src/types';
 
 export const getProjectSwitcherServicesMock: () => jest.Mocked<Services> = () => ({
   setProjectType: jest.fn(),

@@ -25,7 +25,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { RuleTypeList } from './rule_type_list';
-import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
+import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 export interface RuleTypeModalProps {
   onClose: () => void;

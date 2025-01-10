@@ -8,7 +8,7 @@
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
-import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
@@ -26,9 +26,11 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+import type { Index} from '../../../common';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers';
-import { IndicesTestBed, setup } from './indices_tab.helpers';
+import type { IndicesTestBed} from './indices_tab.helpers';
+import { setup } from './indices_tab.helpers';
 import {
   createDataStreamBackingIndex,
   createDataStreamPayload,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server as HapiServer } from '@hapi/hapi';
+import type { Server as HapiServer } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';

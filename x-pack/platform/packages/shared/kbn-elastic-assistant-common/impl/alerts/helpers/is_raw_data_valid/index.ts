@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MaybeRawData } from '../types';
+import type { MaybeRawData } from '../types';
 
 export const isRawDataValid = (rawData: MaybeRawData): rawData is Record<string, unknown[]> =>
   typeof rawData === 'object' && Object.keys(rawData).every((x) => Array.isArray(rawData[x]));

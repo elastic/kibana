@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Observable, Subscriber } from 'rxjs';
-import {
+import type { Subscriber } from 'rxjs';
+import { Observable } from 'rxjs';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  ChatCompletionChunkToolCall,
+  ChatCompletionChunkToolCall} from '@kbn/inference-common';
+import {
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import type { CompletionChunk, MessageStopChunk } from './types';

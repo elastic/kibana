@@ -11,9 +11,9 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SwitchOption, RangeOption } from '@kbn/vis-default-editor-plugin/public';
-import { MarkdownVisParams } from './types';
+import type { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   return (

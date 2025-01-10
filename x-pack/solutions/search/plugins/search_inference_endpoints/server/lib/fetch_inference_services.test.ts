@@ -6,7 +6,7 @@
  */
 
 import { fetchInferenceServices } from './fetch_inference_services';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { mockProviders } from '../../public/utils/test_utils/test_utils';
 
 describe('fetch inference services', () => {

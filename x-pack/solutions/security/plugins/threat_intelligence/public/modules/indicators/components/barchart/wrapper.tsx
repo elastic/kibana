@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -16,13 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeRange } from '@kbn/es-query';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { SecuritySolutionDataViewBase } from '../../../../types';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
 import { IndicatorsBarChart } from './barchart';
-import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 import {
   BARCHART_WRAPPER_TEST_ID,
   CHART_UPDATE_PROGRESS_TEST_ID,

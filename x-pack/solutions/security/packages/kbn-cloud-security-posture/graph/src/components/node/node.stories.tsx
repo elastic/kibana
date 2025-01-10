@@ -9,8 +9,8 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { Story } from '@storybook/react';
-import { NodeViewModel } from '../types';
+import type { Story } from '@storybook/react';
+import type { NodeViewModel } from '../types';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';

@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Filter as DataFilter } from '@kbn/es-query';
+import type { Filter as DataFilter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
+import type { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
+import type {
+  EmbeddableExpression} from '../../expression_types';
 import {
   EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
+  EmbeddableExpressionType
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 interface Arguments {

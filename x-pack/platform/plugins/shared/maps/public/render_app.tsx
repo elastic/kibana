@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -26,7 +27,7 @@ import {
 import { ListPage, MapPage } from './routes';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
-import { MapSerializedState } from './react_embeddable/types';
+import type { MapSerializedState } from './react_embeddable/types';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {

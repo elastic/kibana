@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 import { PingListExpandedRowComponent } from '../expanded_row';
 
 export const toggleDetails = (

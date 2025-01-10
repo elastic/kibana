@@ -9,12 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
-import { FieldListSerializedStateState } from './types';
+import type { FieldListSerializedStateState } from './types';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({

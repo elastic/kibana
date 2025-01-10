@@ -9,9 +9,9 @@
 
 import { getEsdsl } from './esdsl';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
-import { StartServicesAccessor } from '@kbn/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {

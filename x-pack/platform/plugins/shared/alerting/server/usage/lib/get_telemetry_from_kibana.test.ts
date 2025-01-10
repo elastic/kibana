@@ -13,7 +13,7 @@ import {
 } from './get_telemetry_from_kibana';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;

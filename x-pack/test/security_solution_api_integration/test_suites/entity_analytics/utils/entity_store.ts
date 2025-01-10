@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
 export const EntityStoreUtils = (

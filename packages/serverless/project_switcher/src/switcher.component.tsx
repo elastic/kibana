@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, useGeneratedHtmlId, EuiPopoverTitle, EuiKeyPadMenu } from '@elastic/eui';
 
-import { ProjectType } from '@kbn/serverless-types';
+import type { ProjectType } from '@kbn/serverless-types';
 
 import { SwitcherItem } from './item';
 import type { ProjectSwitcherComponentProps } from './types';

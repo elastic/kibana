@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import { getCloudEnterpriseSearchHost } from './get_cloud_enterprise_search_host';
 

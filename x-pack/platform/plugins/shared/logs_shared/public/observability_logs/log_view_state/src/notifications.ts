@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
+import type { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
 import { createNotificationChannel } from '../../xstate_helpers';
-import { LogViewContext, LogViewEvent } from './types';
+import type { LogViewContext, LogViewEvent } from './types';
 
 export type LogViewNotificationEvent =
   | {

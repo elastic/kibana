@@ -11,7 +11,7 @@ import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 import { StepFieldTrend } from './step_field_trend';
 import { microToSec } from '../../../lib/formatting';
 

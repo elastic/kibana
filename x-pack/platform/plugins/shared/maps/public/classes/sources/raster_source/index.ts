@@ -6,10 +6,10 @@
  */
 
 import type { RasterTileSource } from '@kbn/mapbox-gl';
-import { ReactElement } from 'react';
-import { DataRequest } from '../../util/data_request';
-import { ITMSSource } from '../tms_source';
-import { DataRequestMeta } from '../../../../common/descriptor_types';
+import type { ReactElement } from 'react';
+import type { DataRequest } from '../../util/data_request';
+import type { ITMSSource } from '../tms_source';
+import type { DataRequestMeta } from '../../../../common/descriptor_types';
 export interface RasterTileSourceData {
   url: string;
 }

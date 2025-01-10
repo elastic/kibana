@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CustomIntegrationOptions, IntegrationError } from '../../types';
-import { CreateCustomIntegrationContext, CreateCustomIntegrationEvent } from './types';
+import type { CustomIntegrationOptions} from '../../types';
+import { IntegrationError } from '../../types';
+import type { CreateCustomIntegrationContext, CreateCustomIntegrationEvent } from './types';
 
 export type CreateCustomIntegrationNotificationEvent =
   | {

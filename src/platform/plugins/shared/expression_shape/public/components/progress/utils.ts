@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Progress, ViewBoxParams } from '../../../common';
-import { SvgTextAttributes } from '../reusable';
+import type { ViewBoxParams } from '../../../common';
+import { Progress } from '../../../common';
+import type { SvgTextAttributes } from '../reusable';
 
 type GetViewBox = (
   shapeType: Progress,

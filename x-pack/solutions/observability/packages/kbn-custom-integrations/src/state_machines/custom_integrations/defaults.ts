@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DefaultCustomIntegrationsContext } from './types';
+import type { DefaultCustomIntegrationsContext } from './types';
 
 export const DEFAULT_CONTEXT: DefaultCustomIntegrationsContext = {
   mode: 'create' as const,

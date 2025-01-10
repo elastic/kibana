@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import * as i18n from '../translations';
-import { MaintenanceWindowStatus } from '../../../../common';
+import type { MaintenanceWindowStatus } from '../../../../common';
 
 export interface TableActionsPopoverProps {
   id: string;

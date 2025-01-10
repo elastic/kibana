@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLODefinition, StoredSLODefinition } from '../domain/models';
+import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';

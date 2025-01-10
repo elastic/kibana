@@ -6,7 +6,8 @@
  */
 
 import './table_basic.scss';
-import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
+import type { ColorMappingInputData, PaletteOutput} from '@kbn/coloring';
+import { getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -18,27 +19,29 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import {
-  EuiButtonIcon,
-  EuiDataGrid,
+import type {
   EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiDataGridStyle,
+  EuiDataGridStyle} from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDataGrid
 } from '@elastic/eui';
-import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { CustomPaletteState} from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import { LensGridDirection } from '../../../../common/expressions';
+import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
@@ -65,7 +68,8 @@ import {
   getFieldMetaFromDatatable,
   isNumericField,
 } from '../../../../common/expressions/datatable/utils';
-import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import type { CellColorFn} from '../../../shared_components/coloring/get_cell_color_fn';
+import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});

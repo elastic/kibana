@@ -11,7 +11,7 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
-import {
+import type {
   LensApiCallbacks,
   LensApi,
   LensComponentForwardedProps,

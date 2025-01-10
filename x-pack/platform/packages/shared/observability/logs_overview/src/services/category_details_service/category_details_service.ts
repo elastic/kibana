@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { MachineImplementationsFrom, assign, setup } from 'xstate5';
-import { LogCategory } from '../../types';
-import { CategoryDetailsServiceDependencies, LogCategoryDetailsParams } from './types';
+import type { MachineImplementationsFrom} from 'xstate5';
+import { assign, setup } from 'xstate5';
+import type { LogCategory } from '../../types';
+import type { CategoryDetailsServiceDependencies, LogCategoryDetailsParams } from './types';
 
 export const categoryDetailsService = setup({
   types: {

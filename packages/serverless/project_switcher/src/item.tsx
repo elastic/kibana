@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiKeyPadMenuItem, type EuiIconProps } from '@elastic/eui';
-import { ProjectType } from '@kbn/serverless-types';
+import type { ProjectType } from '@kbn/serverless-types';
 
 import { labels, icons } from './constants';
 

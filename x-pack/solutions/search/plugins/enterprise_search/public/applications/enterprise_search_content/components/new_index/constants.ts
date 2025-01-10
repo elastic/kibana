@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { languageToText } from '../../utils/language_to_text';

@@ -15,7 +15,7 @@ import { ExceptionItems } from '.';
 import { ViewerStatus } from '../types';
 import { fireEvent, render } from '@testing-library/react';
 import { ruleReferences } from '../mocks/rule_references.mock';
-import { Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';

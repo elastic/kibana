@@ -8,9 +8,9 @@
  */
 
 import { indices } from '../../../../public';
-import { ValidationFunc } from '../../hook_form_lib';
+import type { ValidationFunc } from '../../hook_form_lib';
 import { startsWith, containsChars } from '../../../validators/string';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 export const indexNameField =
   (i18n: any) =>

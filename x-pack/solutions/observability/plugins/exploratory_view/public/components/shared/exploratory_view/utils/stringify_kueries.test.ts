@@ -6,7 +6,7 @@
  */
 
 import { urlFiltersToKueryString } from './stringify_kueries';
-import { UrlFilter } from '../types';
+import type { UrlFilter } from '../types';
 import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
 
 describe('stringifyKueries', () => {

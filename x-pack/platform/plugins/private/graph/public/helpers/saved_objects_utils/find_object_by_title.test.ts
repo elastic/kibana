@@ -6,8 +6,8 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
-import { SimpleSavedObject } from '@kbn/core/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 
 const mockFindContent = jest.fn(async () => ({
   pagination: { total: 0 },

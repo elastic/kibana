@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { DynamicSettingsAttributes } from '../../../runtime_types/settings';
 
 export const add820Indices: SavedObjectMigrationFn<
   DynamicSettingsAttributes,

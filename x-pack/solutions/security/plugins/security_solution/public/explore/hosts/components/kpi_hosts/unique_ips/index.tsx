@@ -19,7 +19,7 @@ import * as i18n from './translations';
 
 export const ID = 'hostsKpiUniqueIpsQuery';
 
-export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
+export const useGetUniqueIpsStatItems: () => readonly StatItems[] = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

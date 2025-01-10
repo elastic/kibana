@@ -6,9 +6,9 @@
  */
 
 import { without } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { EntitySourceDefinition } from './types';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { EntitySourceDefinition } from './types';
 
 // verifies field capabilities of the provided source.
 // we map source fields in two categories:

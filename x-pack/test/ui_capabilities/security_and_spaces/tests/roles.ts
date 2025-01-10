@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import {
   GlobalAll as GlobalAllUser,
   Superuser,

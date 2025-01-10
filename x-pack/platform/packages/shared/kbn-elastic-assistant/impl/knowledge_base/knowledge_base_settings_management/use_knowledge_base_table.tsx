@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type {
+  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
-  EuiBasicTableColumn,
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
@@ -17,14 +18,15 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
+import type {
+  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
 import {
   DocumentEntryType,
-  IndexEntryType,
-  KnowledgeBaseEntryResponse,
+  IndexEntryType
 } from '@kbn/elastic-assistant-common';
 
 import useAsync from 'react-use/lib/useAsync';
-import { UserProfileAvatarData } from '@kbn/user-profile-components';
+import type { UserProfileAvatarData } from '@kbn/user-profile-components';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
 
 export const CLOUD_DATA_SAVED_OBJECT_TYPE = 'cloud' as const;
 

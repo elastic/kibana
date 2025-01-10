@@ -7,9 +7,9 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { ObservabilityOnboardingApiClientKey } from '../../../common/config';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ObservabilityOnboardingApiError } from '../../../common/observability_onboarding_api_supertest';
+import type { ObservabilityOnboardingApiClientKey } from '../../../common/config';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ObservabilityOnboardingApiError } from '../../../common/observability_onboarding_api_supertest';
 import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

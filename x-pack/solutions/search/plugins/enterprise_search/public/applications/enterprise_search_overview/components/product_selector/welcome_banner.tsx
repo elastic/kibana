@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AuthenticatedUser } from '@kbn/security-plugin/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/public';
 
 export interface WelcomeBannerProps {
   image: string;

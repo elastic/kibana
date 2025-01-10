@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Component, CSSProperties, Ref, SVGProps } from 'react';
-import { ViewBoxParams } from '../../../common/types';
+import type { Component, CSSProperties, Ref, SVGProps } from 'react';
+import type { ViewBoxParams } from '../../../common/types';
 import type { ShapeType } from './shape_factory';
 
 export type ShapeProps = {

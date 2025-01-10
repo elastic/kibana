@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '@kbn/observability-onboarding-plugin/server/saved_objects/observability_onboarding_status';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ObservabilityOnboardingApiError } from '../../common/observability_onboarding_api_supertest';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ObservabilityOnboardingApiError } from '../../common/observability_onboarding_api_supertest';
 import { expectToReject } from '../../common/utils/expect_to_reject';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

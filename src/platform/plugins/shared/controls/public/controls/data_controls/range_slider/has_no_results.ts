@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesDataViews } from '@kbn/presentation-publishing';
-import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import type { Observable} from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlGroupApi } from '../../../control_group/types';
-import { DataControlApi } from '../types';
+import type { ControlFetchContext } from '../../../control_group/control_fetch';
+import type { ControlGroupApi } from '../../../control_group/types';
+import type { DataControlApi } from '../types';
 
 export function hasNoResults$({
   controlFetch$,

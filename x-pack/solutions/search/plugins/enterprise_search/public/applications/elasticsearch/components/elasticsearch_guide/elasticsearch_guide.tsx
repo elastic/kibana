@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
+import type { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
 
 import { FetchApiKeysAPILogic } from '../../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { CreateApiKeyFlyout } from '../../../shared/api_key/create_api_key_flyout';

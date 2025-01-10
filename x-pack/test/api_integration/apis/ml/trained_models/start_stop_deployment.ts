@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { MlGetTrainedModelsStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../functional/services/ml/api';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 

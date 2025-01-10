@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
+import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { getVendorName } from './get_vendor_name';
 
 describe('getVendorName', () => {

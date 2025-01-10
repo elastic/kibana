@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Document } from '@langchain/core/documents';
+import type { Document } from '@langchain/core/documents';
 import { getCitations } from './get_citations';
 
 describe('getCitations', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
 // @ts-ignore
@@ -16,9 +16,9 @@ import chainRunnerFn from '../handlers/chain_runner';
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
 import getTlConfig from '../handlers/lib/tl_config';
-import { TimelionFunctionInterface } from '../types';
-import { ConfigManager } from '../lib/config_manager';
-import { TimelionPluginStartDeps } from '../plugin';
+import type { TimelionFunctionInterface } from '../types';
+import type { ConfigManager } from '../lib/config_manager';
+import type { TimelionPluginStartDeps } from '../plugin';
 
 const timelionDefaults = getNamespacesSettings();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
   createOpenAIToolsAgent,
@@ -15,11 +15,11 @@ import {
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { getLlmClass } from '../../../../routes/utils';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
-import { AssistantToolParams } from '../../../../types';
-import { AgentExecutor } from '../../executors/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { AssistantToolParams } from '../../../../types';
+import type { AgentExecutor } from '../../executors/types';
 import { formatPrompt, formatPromptStructured, systemPrompts } from './prompts';
-import { GraphInputs } from './types';
+import type { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';

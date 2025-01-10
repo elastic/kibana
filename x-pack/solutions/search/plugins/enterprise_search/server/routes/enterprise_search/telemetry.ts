@@ -12,7 +12,7 @@ import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry'
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../plugin';
 
 const productToTelemetryMap = {
   enterprise_search: ES_TELEMETRY_NAME,

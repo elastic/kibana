@@ -12,8 +12,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KbnPalettes } from '@kbn/palettes';
-import { RootState, updatePalette } from '../../state/color_mapping';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { RootState} from '../../state/color_mapping';
+import { updatePalette } from '../../state/color_mapping';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
 
 export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {

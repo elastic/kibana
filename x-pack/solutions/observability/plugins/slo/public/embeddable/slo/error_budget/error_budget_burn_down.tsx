@@ -10,14 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
-import { EmbeddableSloProps } from './types';
+import type { EmbeddableSloProps } from './types';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
 import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';

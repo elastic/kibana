@@ -11,13 +11,15 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
-import {
+import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   ImportExceptionsResponseSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   createExceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -62,10 +64,8 @@ import type {
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
-import {
-  ExportExceptionListAndItemsReturn,
-  exportExceptionListAndItems,
-} from './export_exception_list_and_items';
+import type { ExportExceptionListAndItemsReturn } from './export_exception_list_and_items';
+import { exportExceptionListAndItems } from './export_exception_list_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -79,7 +79,8 @@ import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
+import type { PromiseFromStreams } from './import_exception_list_and_items';
+import { importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,

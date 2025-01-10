@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import type { LogLevel } from '@kbn/tooling-log';
+import { pickLevelFromFlags, ToolingLog } from '@kbn/tooling-log';
+import type { ProcRunner} from '@kbn/dev-proc-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { Flags, getFlags, FlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
+import type { Flags, FlagOptions} from './flags';
+import { getFlags, DEFAULT_FLAG_ALIASES } from './flags';
 import { FlagsReader } from './flags_reader';
 import { getHelp } from './help';
-import { CleanupTask, Cleanup } from './cleanup';
-import { Metrics, MetricsMeta } from './metrics';
+import type { CleanupTask} from './cleanup';
+import { Cleanup } from './cleanup';
+import type { MetricsMeta } from './metrics';
+import { Metrics } from './metrics';
 
 export interface RunContext {
   log: ToolingLog;

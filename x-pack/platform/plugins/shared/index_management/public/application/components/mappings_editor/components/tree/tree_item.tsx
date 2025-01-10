@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { TreeItem as TreeItemType } from './tree';
+import type { TreeItem as TreeItemType } from './tree';
 import { Tree } from './tree';
 
 interface Props {

@@ -8,9 +8,10 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
+import type {
+  ExpressionInputProps} from '@kbn/presentation-util-plugin/public';
 import {
   LazyExpressionInput,
-  ExpressionInputProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
 /**

@@ -12,13 +12,9 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  cleanupInteractiveUser,
-  loginAsInteractiveUser,
-  LoginAsInteractiveUserResponse,
-  setupInteractiveUser,
-} from './helpers';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { LoginAsInteractiveUserResponse } from './helpers';
+import { cleanupInteractiveUser, loginAsInteractiveUser, setupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('favorites', function () {

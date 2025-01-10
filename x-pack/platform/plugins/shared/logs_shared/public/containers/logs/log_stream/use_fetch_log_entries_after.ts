@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
-import { LogEntryAfterCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
+import type { LogEntryAfterCursor } from '../../../../common/log_entry';
+import type { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import type {
+  LogEntriesSearchRequestQuery,
+  LogEntriesSearchResponsePayload} from '../../../../common/search_strategies/log_entries/log_entries';
 import {
   logEntriesSearchRequestParamsRT,
-  LogEntriesSearchRequestQuery,
-  LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
+import type {
+  ParsedDataSearchRequestDescriptor} from '../../../utils/data_search';
 import {
   flattenDataSearchResponseDescriptor,
   normalizeDataSearchResponses,
-  ParsedDataSearchRequestDescriptor,
   useDataSearch,
   useDataSearchResponseState,
 } from '../../../utils/data_search';

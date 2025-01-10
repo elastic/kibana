@@ -21,7 +21,7 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 
 import moment from 'moment';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_BEFORE_START = {
   time: new Date('2000-01-01T00:00:00.000Z').valueOf(),

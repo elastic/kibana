@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import fetch, { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import querystring from 'querystring';
 
-import {
+import type {
   RequestHandler,
   RequestHandlerContext,
   KibanaRequest,
@@ -16,7 +17,7 @@ import {
   Logger,
 } from '@kbn/core/server';
 
-import { ConfigType } from '..';
+import type { ConfigType } from '..';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StateComparators } from './types';
+import type { StateComparators } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 

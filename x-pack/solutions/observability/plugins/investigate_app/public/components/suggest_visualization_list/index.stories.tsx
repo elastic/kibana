@@ -6,7 +6,7 @@
  */
 
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import type { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { v4 } from 'uuid';
 import { SuggestVisualizationList as Component } from '.';

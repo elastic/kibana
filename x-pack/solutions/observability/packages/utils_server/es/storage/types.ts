@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { merge } from 'lodash';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];

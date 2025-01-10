@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 import { createFormToggleAction } from './form_toggle_action';
 
 export const createDeleteSearchableSnapshotActions = (testBed: TestBed) => {

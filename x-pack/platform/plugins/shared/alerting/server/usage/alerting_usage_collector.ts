@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { AlertingUsage } from './types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)

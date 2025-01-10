@@ -7,7 +7,7 @@
 
 import { badRequest, notFound } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getClustersStats } from './get_clusters_stats';
 
 /**

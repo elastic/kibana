@@ -6,7 +6,7 @@
  */
 
 import { countBy } from 'lodash';
-import { QualityIndicators } from '../../../common/types';
+import type { QualityIndicators } from '../../../common/types';
 import { mapPercentageToQuality } from '../../../common/utils';
 
 export const mapPercentagesToQualityCounts = (

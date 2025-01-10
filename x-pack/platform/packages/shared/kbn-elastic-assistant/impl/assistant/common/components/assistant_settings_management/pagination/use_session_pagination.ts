@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DEFAULT_ASSISTANT_NAMESPACE } from '../../../../../assistant_context/constants';

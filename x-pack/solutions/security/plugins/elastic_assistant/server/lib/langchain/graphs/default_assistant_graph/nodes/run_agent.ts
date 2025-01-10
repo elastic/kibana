@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RunnableConfig } from '@langchain/core/runnables';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { formatLatestUserMessage } from '../prompts';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;

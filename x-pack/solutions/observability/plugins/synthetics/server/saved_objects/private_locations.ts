@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { modelVersion1 } from './migrations/private_locations/model_version_1';
 import {
   legacyPrivateLocationsSavedObjectName,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
 import { Subject } from 'rxjs';
-import {
+import type {
   DataQualityPluginSetup,
   DataQualityPluginStart,
   AppPluginStartDependencies,

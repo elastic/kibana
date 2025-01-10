@@ -8,7 +8,7 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { EditorMenu } from '../editor_menu.component';
 
 const testVisTypes: BaseVisType[] = [

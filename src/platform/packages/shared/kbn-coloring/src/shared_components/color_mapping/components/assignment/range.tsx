@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFieldNumber, EuiFlexItem } from '@elastic/eui';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 
 export const Range: React.FC<{
   rule: ColorMapping.RuleRange;

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 import { systemIndicesSuperuser, createRemoteEsClientForFtrConfig } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
  * Kibana-specific @elastic/elasticsearch client instance.

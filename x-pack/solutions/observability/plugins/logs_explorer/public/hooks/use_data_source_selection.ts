@@ -7,8 +7,8 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { DataSourceSelectionChangeHandler } from '../../common/data_source_selection';
-import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
+import type { DataSourceSelectionChangeHandler } from '../../common/data_source_selection';
+import type { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 export const useDataSourceSelection = (
   logsExplorerControllerStateService: LogsExplorerControllerStateService

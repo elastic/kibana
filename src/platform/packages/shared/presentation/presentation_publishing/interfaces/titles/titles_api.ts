@@ -8,9 +8,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '../../comparators';
-import { PublishesWritablePanelDescription } from './publishes_panel_description';
-import { PublishesWritablePanelTitle } from './publishes_panel_title';
+import type { StateComparators } from '../../comparators';
+import type { PublishesWritablePanelDescription } from './publishes_panel_description';
+import type { PublishesWritablePanelTitle } from './publishes_panel_title';
 
 export interface SerializedTitles {
   title?: string;

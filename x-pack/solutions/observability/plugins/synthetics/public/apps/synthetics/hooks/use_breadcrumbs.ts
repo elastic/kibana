@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs as useObservabilityBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
-import { SyntheticsUrlParams, stringifyUrlParams } from '../utils/url_params';
+import type { ClientPluginsStart } from '../../../plugin';
+import type { SyntheticsUrlParams } from '../utils/url_params';
+import { stringifyUrlParams } from '../utils/url_params';
 import { useUrlParams } from './use_url_params';
 import { PLUGIN } from '../../../../common/constants/plugin';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ResolvedRule } from '../../../../../../application/rule/methods/resolve/types';
-import { RuleParams } from '../../../../../../application/rule/types';
+import type { ResolvedRule } from '../../../../../../application/rule/methods/resolve/types';
+import type { RuleParams } from '../../../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../../../transforms';
 
 export const transformResolveResponse = <Params extends RuleParams = never>(

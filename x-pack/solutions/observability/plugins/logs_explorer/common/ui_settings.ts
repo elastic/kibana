@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';

@@ -14,7 +14,7 @@ import { getKpiTotalUsersAreaLensAttributes } from '../../../../../common/compon
 import * as i18n from './translations';
 import type { UsersKpiProps } from '../types';
 
-export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
+export const useGetUsersStatItems: () => readonly StatItems[] = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

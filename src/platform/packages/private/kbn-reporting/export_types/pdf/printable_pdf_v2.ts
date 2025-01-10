@@ -10,11 +10,12 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
-import { Headers } from '@kbn/core/server';
+import type { Headers } from '@kbn/core/server';
+import type {
+  CancellationToken} from '@kbn/reporting-common';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -24,9 +25,9 @@ import {
 } from '@kbn/reporting-common';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { TaskPayloadPDFV2 ,
+  JobParamsPDFV2} from '@kbn/reporting-export-types-pdf-common';
 import {
-  JobParamsPDFV2,
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-pdf-common';

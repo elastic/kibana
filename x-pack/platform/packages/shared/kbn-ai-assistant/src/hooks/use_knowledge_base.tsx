@@ -6,10 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useMemo, useState } from 'react';
+import type {
+  APIReturnType} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   type AbortableAsyncState,
-  useAbortableAsync,
-  APIReturnType,
+  useAbortableAsync
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';

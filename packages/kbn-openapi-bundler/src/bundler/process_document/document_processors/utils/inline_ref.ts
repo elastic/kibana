@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResolvedRef } from '../../../ref_resolver/resolved_ref';
-import { DocumentNode } from '../../types/node';
+import type { ResolvedRef } from '../../../ref_resolver/resolved_ref';
+import type { DocumentNode } from '../../types/node';
 
 interface InlinableRefNode {
   $ref?: string;

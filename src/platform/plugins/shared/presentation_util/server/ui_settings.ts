@@ -8,8 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/types';
-import { projects, projectIDs, ProjectID } from '../common';
+import type { UiSettingsParams } from '@kbn/core/types';
+import type { ProjectID } from '../common';
+import { projects, projectIDs } from '../common';
 
 export const SETTING_CATEGORY = 'Presentation Labs';
 

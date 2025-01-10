@@ -8,7 +8,8 @@
 import fs from 'fs';
 import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { initializeDownloadShareableWorkpadRoute } from './download';
 import { getMockedRouterDeps } from '../test_helpers';

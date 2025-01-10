@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 
 export const plugin: PluginInitializer<{}, {}> = (context: PluginInitializerContext) => {

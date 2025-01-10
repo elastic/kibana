@@ -9,8 +9,8 @@ import type { FieldHook, ValidationError } from '../../../shared_imports';
 import type { ValidationResults } from './validation_results';
 
 export function extractValidationResults(
-  formFields: Readonly<FieldHook[]>,
-  warningValidationCodes: Readonly<string[]>
+  formFields: readonly FieldHook[],
+  warningValidationCodes: readonly string[]
 ): ValidationResults {
   const warningValidationCodesSet = new Set(warningValidationCodes);
   const errors: ValidationError[] = [];

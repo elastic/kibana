@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

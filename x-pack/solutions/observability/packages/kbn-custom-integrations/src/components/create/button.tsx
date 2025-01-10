@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useActor, useSelector } from '@xstate/react';
 import React, { useCallback } from 'react';
 import { isSubmittingSelector, isValidSelector } from '../../state_machines/create/selectors';
-import { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
+import type { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
 
 const SUBMITTING_TEXT = i18n.translate('customIntegrationsPackage.create.button.submitting', {
   defaultMessage: 'Creating integration...',

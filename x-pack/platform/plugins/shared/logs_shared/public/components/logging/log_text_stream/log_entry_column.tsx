@@ -9,14 +9,16 @@ import { useMemo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import moment from 'moment';
-import { TextScale } from '../../../../common/log_text_scale';
+import type { TextScale } from '../../../../common/log_text_scale';
+import type {
+  LogColumnRenderConfiguration} from '../../../utils/log_column_render_configuration';
 import {
-  LogColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,
   columnWidthToCSS,
 } from '../../../utils/log_column_render_configuration';
-import { useFormattedTime, TimeFormat } from '../../formatted_time';
+import type { TimeFormat } from '../../formatted_time';
+import { useFormattedTime } from '../../formatted_time';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 const DATE_COLUMN_SLACK_FACTOR = 1.1;

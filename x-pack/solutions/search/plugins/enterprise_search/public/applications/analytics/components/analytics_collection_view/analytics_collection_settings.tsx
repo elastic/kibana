@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { DeleteAnalyticsCollectionLogic } from './delete_analytics_collection_logic';
 

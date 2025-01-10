@@ -12,7 +12,7 @@ import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 import { cloneDeep } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
-import {
+import type {
   ActivePanel,
   GridAccessMode,
   GridLayoutData,

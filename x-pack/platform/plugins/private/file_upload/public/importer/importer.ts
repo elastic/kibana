@@ -22,7 +22,7 @@ import type {
   IngestPipeline,
   IngestPipelineWrapper,
 } from '../../common/types';
-import { CreateDocsResponse, IImporter, ImportResults } from './types';
+import type { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
 const REDUCED_CHUNK_SIZE = 100;

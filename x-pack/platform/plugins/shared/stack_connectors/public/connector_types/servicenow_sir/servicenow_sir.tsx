@@ -12,8 +12,8 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
-import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
-import { ServiceNowSIRActionParams } from './types';
+import type { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
+import type { ServiceNowSIRActionParams } from './types';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
 import { validateJSON } from '../lib/validate_json';
 

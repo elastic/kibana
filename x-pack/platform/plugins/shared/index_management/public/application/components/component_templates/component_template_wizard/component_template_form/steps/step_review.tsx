@@ -22,8 +22,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type {
+  ComponentTemplateDeserialized} from '../../../shared_imports';
 import {
-  ComponentTemplateDeserialized,
   serializers,
   serializeComponentTemplate,
 } from '../../../shared_imports';

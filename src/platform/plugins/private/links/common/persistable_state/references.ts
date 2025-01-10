@@ -9,7 +9,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
-import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../content_management';
+import type { LinksAttributes } from '../content_management';
+import { DASHBOARD_LINK_TYPE } from '../content_management';
 
 export function extractReferences({
   attributes,

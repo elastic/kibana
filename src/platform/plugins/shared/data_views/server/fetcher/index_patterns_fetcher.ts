@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';

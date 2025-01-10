@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { getColorIndicatorControlColumn } from './color_indicator_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../../../table_context';

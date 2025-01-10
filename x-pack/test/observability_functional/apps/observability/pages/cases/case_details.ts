@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');

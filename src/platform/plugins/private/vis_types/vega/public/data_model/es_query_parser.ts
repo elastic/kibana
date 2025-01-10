@@ -11,11 +11,11 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Assign } from 'utility-types';
+import type { Assign } from 'utility-types';
 import { dateHistogramInterval } from '@kbn/data-plugin/common';
-import { TimeCache } from './time_cache';
-import { SearchAPI } from './search_api';
-import {
+import type { TimeCache } from './time_cache';
+import type { SearchAPI } from './search_api';
+import type {
   Opts,
   Type,
   Data,

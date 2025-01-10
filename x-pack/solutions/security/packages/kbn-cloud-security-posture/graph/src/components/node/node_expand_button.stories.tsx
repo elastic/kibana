@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { NodeShapeContainer } from './styles';
 import { NodeExpandButton, type NodeExpandButtonProps } from './node_expand_button';
 

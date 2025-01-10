@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { API_VERSIONS, GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 export interface GetCapabilitiesParams {
   http: HttpSetup;

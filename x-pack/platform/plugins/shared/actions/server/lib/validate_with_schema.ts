@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import {
+import type {
   ActionType,
   ActionTypeConfig,
   ActionTypeSecrets,

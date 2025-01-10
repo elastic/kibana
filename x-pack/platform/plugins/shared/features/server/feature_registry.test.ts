@@ -6,7 +6,7 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
-import {
+import type {
   ElasticsearchFeatureConfig,
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { search } from '@kbn/data-plugin/public';
 import { SwitchParamEditor } from './switch';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const { isType } = search.aggs;
 

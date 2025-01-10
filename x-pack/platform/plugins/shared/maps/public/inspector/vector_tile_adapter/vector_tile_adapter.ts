@@ -10,7 +10,7 @@ import turfCenterOfMass from '@turf/center-of-mass';
 import { EventEmitter } from 'events';
 import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
 import type { TileError, TileMetaFeature } from '../../../common/descriptor_types';
-import { TileRequest } from './types';
+import type { TileRequest } from './types';
 import { isPointInTile } from '../../classes/util/geo_tile_utils';
 
 interface LayerState {

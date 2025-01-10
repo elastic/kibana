@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import {
   createConnector,

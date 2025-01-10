@@ -9,8 +9,8 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 export function createScoutConfig(configDir: string, configName: string, log: ToolingLog) {

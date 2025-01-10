@@ -6,10 +6,11 @@
  */
 
 import React, { Component } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiConfirmModal, EuiFormRow, EuiRange } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 import { isMvt } from './is_mvt';
 

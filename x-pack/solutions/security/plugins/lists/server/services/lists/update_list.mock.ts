@@ -18,7 +18,7 @@ import {
   VERSION,
 } from '../../../common/constants.mock';
 
-import { UpdateListOptions } from '.';
+import type { UpdateListOptions } from '.';
 
 export const getUpdateListOptionsMock = (): UpdateListOptions => ({
   _version: undefined,

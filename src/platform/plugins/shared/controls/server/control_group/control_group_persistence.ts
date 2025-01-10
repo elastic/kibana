@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
+import type { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 import {
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_LABEL_POSITION,

@@ -6,7 +6,7 @@
  */
 
 import { getRandomString } from './svl_random';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlIndicesHelpers({ getService }: FtrProviderContext) {
   const es = getService('es');

@@ -6,7 +6,7 @@
  */
 
 import { LAYER_TYPE } from '../constants';
-import { LayerDescriptor } from '../descriptor_types';
+import type { LayerDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 // LAYER_TYPE constants renamed in 8.1 to provide more distinguishable names that better refect layer.

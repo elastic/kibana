@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
-export * from '../common/types';
+export type * from '../common/types';
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   console?: ConsolePluginStart;

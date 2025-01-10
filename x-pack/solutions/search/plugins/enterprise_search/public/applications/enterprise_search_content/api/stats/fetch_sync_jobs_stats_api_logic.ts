@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyncJobsStats } from '../../../../../common/stats';
+import type { SyncJobsStats } from '../../../../../common/stats';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

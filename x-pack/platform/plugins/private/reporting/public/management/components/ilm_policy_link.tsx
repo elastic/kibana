@@ -13,7 +13,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 
-import { LocatorPublic, SerializableRecord } from '../../shared_imports';
+import type { LocatorPublic, SerializableRecord } from '../../shared_imports';
 
 interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];

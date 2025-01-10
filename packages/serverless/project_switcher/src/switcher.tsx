@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ProjectType } from '@kbn/serverless-types';
+import type { ProjectType } from '@kbn/serverless-types';
 import { ProjectSwitcher as Component } from './switcher.component';
 
 import { useServices } from './services';

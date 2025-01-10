@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -36,7 +36,7 @@ import {
   createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 import { PointInTimeFinder } from '../point_in_time_finder';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

@@ -6,7 +6,7 @@
  */
 
 import { Dataset } from '../datasets';
-import { DataSourceSelectionStrategy } from './types';
+import type { DataSourceSelectionStrategy } from './types';
 
 const SELECTION_TYPE = 'all' as const;
 

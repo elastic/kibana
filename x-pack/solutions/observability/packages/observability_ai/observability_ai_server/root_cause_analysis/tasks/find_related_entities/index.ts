@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { Logger } from '@kbn/logging';
-import {
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type {
+  RelatedEntityFromSearchResults} from './analyze_fetched_related_entities';
 import {
-  analyzeFetchedRelatedEntities,
-  RelatedEntityFromSearchResults,
+  analyzeFetchedRelatedEntities
 } from './analyze_fetched_related_entities';
+import type {
+  RelatedEntityKeywordSearch} from './write_keyword_searches_for_related_entities';
 import {
-  RelatedEntityKeywordSearch,
   writeKeywordSearchForRelatedEntities,
 } from './write_keyword_searches_for_related_entities';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export type { RelatedEntityFromSearchResults };
 

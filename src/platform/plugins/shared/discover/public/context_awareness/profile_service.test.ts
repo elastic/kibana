@@ -9,11 +9,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
+import type {
   AsyncProfileProvider,
-  AsyncProfileService,
   ContextWithProfileId,
-  ProfileProvider,
+  ProfileProvider} from './profile_service';
+import {
+  AsyncProfileService,
   ProfileService,
 } from './profile_service';
 import type { CellRenderersExtensionParams, Profile } from './types';

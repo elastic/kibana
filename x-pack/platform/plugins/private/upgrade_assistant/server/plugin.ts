@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
   Plugin,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
   Logger,
-  SavedObjectsClient,
-  SavedObjectsServiceStart,
+  SavedObjectsServiceStart} from '@kbn/core/server';
+import {
+  SavedObjectsClient
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
-import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
-import { ReindexWorker } from './lib/reindexing';
+import type { CredentialStore} from './lib/reindexing/credential_store';
+import { credentialStoreFactory } from './lib/reindexing/credential_store';
+import type { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
@@ -35,7 +37,7 @@ import {
   hiddenTypes,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
-import { RouteDependencies } from './types';
+import type { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import type { FeatureSet } from '../common/types';
 

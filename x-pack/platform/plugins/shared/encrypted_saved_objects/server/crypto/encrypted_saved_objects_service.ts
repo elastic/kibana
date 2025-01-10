@@ -92,7 +92,7 @@ interface EncryptedSavedObjectsServiceOptions {
   /**
    * NodeCrypto instances used ONLY for decryption (i.e. rotated encryption keys).
    */
-  decryptionOnlyCryptos?: Readonly<Crypto[]>;
+  decryptionOnlyCryptos?: readonly Crypto[];
 }
 
 /**

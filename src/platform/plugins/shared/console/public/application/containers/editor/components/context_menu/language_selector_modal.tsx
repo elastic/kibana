@@ -8,6 +8,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import type {
+  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,
@@ -18,7 +20,6 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiSelectable,
-  EuiSelectableOption,
   EuiLink,
   EuiTextColor,
 } from '@elastic/eui';

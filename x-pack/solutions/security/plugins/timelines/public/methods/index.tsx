@@ -7,7 +7,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
+import type { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 
 const LastUpdatedLazy = lazy(() => import('../components/last_updated'));
 export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {

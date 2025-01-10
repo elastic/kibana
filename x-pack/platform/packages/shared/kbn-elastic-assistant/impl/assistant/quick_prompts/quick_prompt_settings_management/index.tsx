@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';

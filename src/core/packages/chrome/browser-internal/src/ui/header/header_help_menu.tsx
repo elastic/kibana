@@ -8,12 +8,14 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  EuiButtonEmptyProps} from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,

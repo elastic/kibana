@@ -6,7 +6,7 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * @param logger - logger

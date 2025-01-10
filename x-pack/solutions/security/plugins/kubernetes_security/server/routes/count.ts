@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   COUNT_ROUTE,
   ORCHESTRATOR_CLUSTER_ID,

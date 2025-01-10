@@ -10,10 +10,10 @@
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Reference } from '@kbn/content-management-utils';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -25,7 +25,7 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import {
+import type {
   FieldListApi,
   Services,
   FieldListSerializedStateState,

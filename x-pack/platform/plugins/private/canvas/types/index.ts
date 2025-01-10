@@ -6,15 +6,15 @@
  */
 
 export * from '@kbn/expressions-plugin/common';
-export * from './assets';
-export * from './canvas';
-export * from './elements';
-export * from './embeddables';
+export type * from './assets';
+export type * from './canvas';
+export type * from './elements';
+export type * from './embeddables';
 export * from './filters';
 export * from './functions';
-export * from './renderers';
-export * from './shortcuts';
+export type * from './renderers';
+export type * from './shortcuts';
 export * from './state';
-export * from './strategy';
+export type * from './strategy';
 export * from './style';
-export * from './telemetry';
+export type * from './telemetry';

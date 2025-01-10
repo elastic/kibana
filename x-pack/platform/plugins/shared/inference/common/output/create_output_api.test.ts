@@ -6,9 +6,10 @@
  */
 
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
-import {
+import type {
   ChatCompleteResponse,
-  ChatCompletionEvent,
+  ChatCompletionEvent} from '@kbn/inference-common';
+import {
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';

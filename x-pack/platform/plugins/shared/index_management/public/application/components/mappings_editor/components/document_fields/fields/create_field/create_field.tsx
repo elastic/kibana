@@ -14,8 +14,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
@@ -23,7 +23,7 @@ import { fieldSerializer } from '../../../../lib';
 import { isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import type { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';

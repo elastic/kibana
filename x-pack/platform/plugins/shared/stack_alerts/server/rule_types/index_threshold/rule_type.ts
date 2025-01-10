@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
+  TimeSeriesQuery} from '@kbn/triggers-actions-ui-plugin/server';
 import {
-  TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
@@ -20,10 +21,12 @@ import {
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { Params, ParamsSchema } from './rule_type_params';
-import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { StackAlertType } from '../types';
+import type { ActionContext, BaseActionContext} from './action_context';
+import { addMessages } from './action_context';
+import type { Params} from './rule_type_params';
+import { ParamsSchema } from './rule_type_params';
+import type { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import type { StackAlertType } from '../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';

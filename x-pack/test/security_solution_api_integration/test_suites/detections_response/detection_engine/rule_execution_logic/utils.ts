@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import supertest from 'supertest';
+import type supertest from 'supertest';
 
-import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 export const getMetricsRequest = (request: supertest.Agent, reset: boolean = false) => {
   return request

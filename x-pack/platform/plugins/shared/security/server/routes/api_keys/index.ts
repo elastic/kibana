@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { RouteDefinitionParams } from '..';
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineQueryApiKeysAndAggregationsRoute } from './query';
 import { defineUpdateApiKeyRoutes } from './update';
-import type { RouteDefinitionParams } from '..';
 
 export type {
   UpdateAPIKeyParams,

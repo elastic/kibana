@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import { Story } from '@storybook/react';
-import { Writable } from '@kbn/utility-types';
+import type { Story } from '@storybook/react';
+import type { Writable } from '@kbn/utility-types';
 import type {
   EdgeViewModel,
   LabelNodeViewModel,

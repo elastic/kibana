@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, DocLinksStart } from '@kbn/core/public';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { HttpSetup, DocLinksStart } from '@kbn/core/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
+import type { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
 import { paths } from '../../../../../common/locators/paths';
 
 export interface ObservabilityStatusContent {

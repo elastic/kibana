@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  ReadableSpan} from '@opentelemetry/sdk-trace-base';
 import {
   InMemorySpanExporter,
   BasicTracerProvider,
-  SimpleSpanProcessor,
-  ReadableSpan,
+  SimpleSpanProcessor
 } from '@opentelemetry/sdk-trace-base';
 import { context } from '@opentelemetry/api';
 import { LangTracer } from './lang_tracer';

@@ -22,7 +22,7 @@ import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector } from '../../../utils/connectors';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 

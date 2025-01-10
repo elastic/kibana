@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from './ftr_provider_context';
-import { WebElementWrapper } from './web_element_wrapper';
+import type { WebElementWrapper } from './web_element_wrapper';
 
 export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');

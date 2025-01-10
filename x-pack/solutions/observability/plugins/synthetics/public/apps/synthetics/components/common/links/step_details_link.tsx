@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { CommonProps } from '@elastic/eui/src/components/common';
+import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';

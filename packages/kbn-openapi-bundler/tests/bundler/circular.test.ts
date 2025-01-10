@@ -8,7 +8,7 @@
  */
 
 import { dump } from 'js-yaml';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from '../create_oas_document';
 

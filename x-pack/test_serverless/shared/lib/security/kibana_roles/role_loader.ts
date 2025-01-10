@@ -7,16 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { KbnClient } from '@kbn/test';
-import { Role } from '@kbn/security-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import { AxiosError } from 'axios';
-import {
-  getServerlessSecurityKibanaRoleDefinitions,
-  ServerlessSecurityRoles,
-  YamlRoleDefinitions,
-} from './kibana_roles';
+import type { AxiosError } from 'axios';
+import type { ServerlessSecurityRoles, YamlRoleDefinitions } from './kibana_roles';
+import { getServerlessSecurityKibanaRoleDefinitions } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
 const ignoreHttp409Error = (error: AxiosError) => {

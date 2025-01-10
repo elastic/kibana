@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { ChatForm } from '../../../types';
+import type { ChatForm } from '../../../types';
 import { LANGCHAIN_PYTHON } from './py_langchain_python';
 
 describe('PY_LANGCHAIN function', () => {

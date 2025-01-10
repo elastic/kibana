@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from './inference_endpoint';
 
 const keyword = {

@@ -13,7 +13,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';

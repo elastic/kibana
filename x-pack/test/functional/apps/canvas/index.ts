@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const security = getService('security');
   const config = getService('config');

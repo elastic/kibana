@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../../mappings_state_context';
 import { shouldDeleteChildFieldsAfterTypeChange, getAllDescendantAliases } from '../../../../lib';
-import { NormalizedField, DataType } from '../../../../types';
+import type { NormalizedField, DataType } from '../../../../types';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;

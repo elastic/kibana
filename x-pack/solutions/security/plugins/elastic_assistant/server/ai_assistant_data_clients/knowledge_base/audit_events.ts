@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEvent } from '@kbn/core/server';
-import { AuditEvent } from '@kbn/security-plugin/server';
-import { ArrayElement } from '@kbn/utility-types';
+import type { EcsEvent } from '@kbn/core/server';
+import type { AuditEvent } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 export enum AUDIT_TYPE {
   CHANGE = 'change',

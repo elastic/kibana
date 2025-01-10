@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 import { MonitorFiltersForm } from './monitor_filters_form';
 
 interface MonitorConfigurationProps {

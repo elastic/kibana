@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import expect from '@kbn/expect';
@@ -16,7 +16,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { createSupertestErrorLogger } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');

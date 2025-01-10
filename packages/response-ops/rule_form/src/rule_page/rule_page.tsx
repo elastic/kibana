@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiStepsProps} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -17,7 +19,6 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
-  EuiStepsProps,
   useEuiBackgroundColorCSS,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';

@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { StyleError } from './style_error';
-import {
+import type {
   DynamicStyleProperty,
   IDynamicStyleProperty,
 } from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
-import { Mask } from '../../../../layers/vector_layer/mask';
-import { IStyleProperty } from '../../properties/style_property';
+import type { Mask } from '../../../../layers/vector_layer/mask';
+import type { IStyleProperty } from '../../properties/style_property';
 import { MaskLegend } from './mask_legend';
 
 interface Props {

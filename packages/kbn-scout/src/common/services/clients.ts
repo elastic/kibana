@@ -9,7 +9,7 @@
 
 import { KbnClient, createEsClientForTesting } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
+import type { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 interface ClientOptions {

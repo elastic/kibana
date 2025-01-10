@@ -9,7 +9,7 @@ import { getFlattenedBuckets } from '../../utils/get_flattened_buckets';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { PatternRollup } from '../../../../types';
+import type { PatternRollup } from '../../../../types';
 import { getLegendItems, getLegendItemsForPattern, getPatternLegendItem } from './get_legend_items';
 
 const ilmPhases = ['hot', 'warm', 'unmanaged'];

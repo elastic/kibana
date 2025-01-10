@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { StorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
+import type { StorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import {
-  ASSET_TYPES,
+import type {
   Asset,
   AssetLink,
   AssetType,
@@ -21,8 +20,9 @@ import {
   SloAsset,
   RuleAsset,
 } from '../../../../common/assets';
+import { ASSET_TYPES } from '../../../../common/assets';
 import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
-import { AssetStorageSettings } from './storage_settings';
+import type { AssetStorageSettings } from './storage_settings';
 
 function sloSavedObjectToAsset(
   sloId: string,

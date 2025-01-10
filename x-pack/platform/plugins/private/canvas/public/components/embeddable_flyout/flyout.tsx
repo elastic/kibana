@@ -8,13 +8,14 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
+import type { Props as ComponentProps } from './flyout.component';
+import { AddEmbeddableFlyout as Component } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 import { presentationUtilService } from '../../services/kibana_services';
 
 const allowedEmbeddables = {

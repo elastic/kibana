@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
+import type {
+  EuiButtonGroupOptionProps,
+  IconType,
+  EuiButtonGroupProps} from '@elastic/eui';
 import {
   EuiButtonGroup,
   htmlIdGenerator,
-  EuiButtonGroupOptionProps,
-  useEuiTheme,
-  IconType,
-  EuiButtonGroupProps,
+  useEuiTheme
 } from '@elastic/eui';
 
 import { IconButtonGroupStyles } from './icon_button_group.styles';

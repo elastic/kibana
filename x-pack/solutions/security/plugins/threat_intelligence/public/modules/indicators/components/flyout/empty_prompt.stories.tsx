@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 

@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionExtendedBounds, ExtendedBounds } from './extended_bounds';
+import type { ExpressionFunctionExtendedBounds, ExtendedBounds } from './extended_bounds';
 
 export const extendedBoundsToAst = (extendedBounds: ExtendedBounds) => {
   return buildExpression([

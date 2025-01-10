@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
-import { IBucketAggConfig } from '../bucket_agg_type';
+import type { Filter } from '@kbn/es-query';
+import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
+import type { IBucketAggConfig } from '../bucket_agg_type';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 export const getKBUserFilter = (user: AuthenticatedUser | null) => {
   // Only return the current users entries and all other global entries (where user[] is empty)

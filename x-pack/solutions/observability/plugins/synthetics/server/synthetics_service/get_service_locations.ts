@@ -7,15 +7,14 @@
 
 import axios from 'axios';
 import { pick } from 'lodash';
-import { SyntheticsServerSetup } from '../types';
-import {
+import type { SyntheticsServerSetup } from '../types';
+import type {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
   ThrottlingOptions,
-  BandwidthLimitKey,
-  LocationStatus,
 } from '../../common/runtime_types';
+import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
 export const getDevLocation = (devUrl: string): PublicLocation[] => [
   {

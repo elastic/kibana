@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
+import type { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 
 type ScheduledEvent = estypes.MlCalendarEvent;
 

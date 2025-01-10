@@ -13,14 +13,15 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { SearchBar, IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { of } from 'rxjs';
 import type { EsqlQueryMeta } from '../public/services/esql';
 import type { InvestigateAppServices } from '../public/services/types';
-import { InvestigateAppKibanaContext } from '../public/hooks/use_kibana';
+import type { InvestigateAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppKibanaContext> {
   const services: DeeplyMockedKeys<InvestigateAppServices> = {

@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { InvestigateAppStartDependencies } from '../types';
-import { InvestigateAppServices } from '../services/types';
+import type { InvestigateAppServices } from '../services/types';
 
 export interface InvestigateAppKibanaContext {
   core: CoreStart;

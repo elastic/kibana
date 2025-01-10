@@ -11,10 +11,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import type {
+  DataSourceProfileProviderParams,
+  RootContext} from '../../../profiles';
 import {
   DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
   SolutionType,
 } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { FtrProviderContext } from '../services';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { FtrProviderContext } from '../services';
 import { createScenario } from '../scenario';
 import '@kbn/core-provider-plugin/types';
 

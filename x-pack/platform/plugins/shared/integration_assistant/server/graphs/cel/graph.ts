@@ -12,7 +12,7 @@ import { handleBuildProgram } from './build_program';
 import { handleGetStateDetails } from './retrieve_state_details';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleSummarizeQuery } from './summarize_query';
-import { CelInputBaseNodeParams, CelInputGraphParams } from './types';
+import type { CelInputBaseNodeParams, CelInputGraphParams } from './types';
 
 const graphState: StateGraphArgs<CelInputState>['channels'] = {
   lastExecutedChain: {

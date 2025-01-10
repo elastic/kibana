@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataStreamDocsStat } from '../../../common/api_types';
+import type { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
 import { rangeQuery } from '../../utils/queries';
 

@@ -15,7 +15,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
+import type { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { replaceTokens } from './lib/replace_tokens';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';

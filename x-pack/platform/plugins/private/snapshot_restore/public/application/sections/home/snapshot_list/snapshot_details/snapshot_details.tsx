@@ -24,8 +24,9 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import { SectionError, Error } from '../../../../../shared_imports';
+import type { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
+import type { Error } from '../../../../../shared_imports';
+import { SectionError } from '../../../../../shared_imports';
 import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import {

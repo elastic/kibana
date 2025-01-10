@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type {
+  HorizontalAlignment} from '@elastic/eui';
 import {
   EuiBasicTable,
-  HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   euiScreenReaderOnly,

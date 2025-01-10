@@ -28,8 +28,8 @@ import {
   getYamlFromSelectorsAndResponses,
   getSelectorsAndResponsesFromYaml,
 } from '../../../common/utils/helpers';
-import { ViewDeps } from '../../types';
-import { SelectorType, Selector, Response } from '../../../common';
+import type { ViewDeps } from '../../types';
+import type { SelectorType, Selector, Response } from '../../../common';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';

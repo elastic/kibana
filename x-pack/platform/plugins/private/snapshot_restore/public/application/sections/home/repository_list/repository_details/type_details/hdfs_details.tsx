@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { HDFSRepository } from '../../../../../../../common/types';
+import type { HDFSRepository } from '../../../../../../../common/types';
 
 interface Props {
   repository: HDFSRepository;

@@ -17,7 +17,7 @@ import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
 import { initServices } from './services';
-import { EvaluationResult } from './types';
+import type { EvaluationResult } from './types';
 import { selectConnector } from '../util/select_connector';
 import { createInferenceEvaluationClient } from './evaluation_client';
 import { createResultRenderer, renderFailedScenarios } from './table_renderer';

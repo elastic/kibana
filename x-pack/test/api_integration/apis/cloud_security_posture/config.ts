@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../config.ts'));

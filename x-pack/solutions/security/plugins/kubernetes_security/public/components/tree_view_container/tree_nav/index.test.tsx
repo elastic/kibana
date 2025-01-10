@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
+import type { AppContextTestRender } from '../../../test';
+import { createAppRootMockRenderer } from '../../../test';
 import { clusterResponseMock } from '../mocks';
 import { TreeNav } from '.';
 import { TreeViewContextProvider } from '../contexts';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from '@elastic/eui';
-import { FieldDefinition } from '@kbn/management-settings-types';
+import type { Query } from '@elastic/eui';
+import type { FieldDefinition } from '@kbn/management-settings-types';
 import { useFields } from './use_fields';
 
 /**

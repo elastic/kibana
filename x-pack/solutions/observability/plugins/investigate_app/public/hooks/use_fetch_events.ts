@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GetEventsResponse } from '@kbn/investigation-shared';
+import type { GetEventsResponse } from '@kbn/investigation-shared';
 import { useQuery } from '@tanstack/react-query';
 import { isArray } from 'lodash';
 import { investigationKeys } from './query_key_factory';

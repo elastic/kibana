@@ -12,14 +12,15 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
+import type {
+  EuiButtonProps,
+  EuiPageSidebarProps} from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
   EuiPageSidebar,
-  EuiPageSidebarProps,
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
@@ -31,7 +32,8 @@ import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
 import { FieldsGroupNames } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
-import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
+import type { GroupedFieldsParams} from '../../hooks/use_grouped_fields';
+import { useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {

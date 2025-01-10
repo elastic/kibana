@@ -17,10 +17,11 @@ import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
+import type {
+  CancellationToken,
+  ReportingError} from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
-  CancellationToken,
-  ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';

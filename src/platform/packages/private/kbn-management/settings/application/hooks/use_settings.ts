@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from '../services';
 
 /**

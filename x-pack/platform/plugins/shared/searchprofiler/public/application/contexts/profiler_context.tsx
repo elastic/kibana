@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useContext, createContext, Dispatch } from 'react';
-import { useStore, State, Action } from '../store';
+import type { Dispatch } from 'react';
+import React, { useContext, createContext } from 'react';
+import type { State, Action } from '../store';
+import { useStore } from '../store';
 
 const ProfilerReadContext = createContext<State>(null as any);
 const ProfilerActionContext = createContext<Dispatch<Action>>(null as any);

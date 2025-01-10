@@ -5,10 +5,10 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { castArray, sortBy, uniq, partition, shuffle } from 'lodash';
 import { truncateList } from '@kbn/inference-common';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, excludeFrozenQuery } from './queries';
 

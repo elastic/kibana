@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { InitialAppData } from '../../../common/types';
+import type { InitialAppData } from '../../../common/types';
 
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';

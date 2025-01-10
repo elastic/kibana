@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityElasticsearchClient } from '../../es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '../../es/client/create_observability_es_client';
 import { kqlQuery } from '../../es/queries/kql_query';
 
 export async function getSlosForEntity({

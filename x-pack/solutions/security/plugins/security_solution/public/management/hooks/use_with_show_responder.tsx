@@ -8,8 +8,10 @@
 import React, { useCallback } from 'react';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
-import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
-import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
+import type {
+  EndpointCapabilities,
+  type ResponseActionAgentType,
+} from '../../../common/endpoint/service/response_actions/constants';
 import { AgentInfo } from '../components/endpoint_responder/components/header_info/agent_info/agent_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';

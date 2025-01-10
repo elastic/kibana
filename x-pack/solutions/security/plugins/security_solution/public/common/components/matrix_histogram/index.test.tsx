@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount, type ComponentType } from 'enzyme';
+import type { ReactWrapper, mount, type ComponentType } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';

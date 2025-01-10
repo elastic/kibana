@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { createDefaultContext } from './defaults';

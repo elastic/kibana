@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
-import { ConsoleServerPlugin } from './plugin';
+import type { Duration } from 'moment';
+import type { ConsoleServerPlugin } from './plugin';
 
 /** @public */
 export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>

@@ -7,8 +7,8 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { ActionsConfigMap } from './get_actions_config_map';
-import { SearchMetrics } from './types';
+import type { ActionsConfigMap } from './get_actions_config_map';
+import type { SearchMetrics } from './types';
 
 interface State {
   numSearches: number;

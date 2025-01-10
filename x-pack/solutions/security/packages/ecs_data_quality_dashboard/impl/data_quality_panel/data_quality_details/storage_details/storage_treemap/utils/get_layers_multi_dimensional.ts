@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ArrayNode, Datum, Key } from '@elastic/charts';
+import type { ArrayNode, Datum, Key } from '@elastic/charts';
 
-import { FlattenedBucket } from '../../types';
+import type { FlattenedBucket } from '../../types';
 import { getFillColor } from './get_fill_color';
 
 const groupByRollup = (d: Datum) => d.pattern; // the treemap is grouped by this field

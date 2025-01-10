@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { getDataViewComponentWrapper } from './components/data_view_wrapper';
 
 export const getTableViewDescription = (

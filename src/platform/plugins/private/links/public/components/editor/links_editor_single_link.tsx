@@ -10,6 +10,8 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
+import type {
+  DraggableProvidedDragHandleProps} from '@elastic/eui';
 import {
   EuiText,
   EuiIcon,
@@ -17,15 +19,14 @@ import {
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonIcon,
-  DraggableProvidedDragHandleProps,
+  EuiButtonIcon
 } from '@elastic/eui';
 
 import { LinkInfo } from './constants';
 import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE } from '../../../common/content_management';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 
 export const LinksEditorSingleLink = ({
   link,

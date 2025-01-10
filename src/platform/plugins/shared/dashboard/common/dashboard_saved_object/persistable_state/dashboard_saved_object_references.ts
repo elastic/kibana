@@ -8,13 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 
 import {
   convertPanelMapToPanelsArray,
   convertPanelsArrayToPanelMap,
 } from '../../lib/dashboard_panel_converters';
-import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
+import type { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
 import type { DashboardAttributes } from '../../../server/content_management';
 import {
   createExtract,

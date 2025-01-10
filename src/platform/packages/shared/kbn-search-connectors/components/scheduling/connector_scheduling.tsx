@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -20,10 +21,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   Connector,
+  SchedulingConfiguraton} from '../../types/connectors';
+import {
   ConnectorStatus,
-  SchedulingConfiguraton,
   SyncJobType,
 } from '../../types/connectors';
 import { ConnectorError } from './connector_error';

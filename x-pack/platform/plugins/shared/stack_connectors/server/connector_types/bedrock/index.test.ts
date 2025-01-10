@@ -6,11 +6,11 @@
  */
 
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import { Config, Secrets } from '../../../common/bedrock/types';
-import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { Config, Secrets } from '../../../common/bedrock/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 jest.mock('axios');

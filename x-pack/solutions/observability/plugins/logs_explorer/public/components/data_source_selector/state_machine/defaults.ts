@@ -8,8 +8,8 @@
 import { DEFAULT_ALL_SELECTION } from '../../../state_machines/logs_explorer_controller';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID } from '../constants';
-import { DataSourceSelectorSearchParams } from '../types';
-import { DefaultDataSourceSelectorContext } from './types';
+import type { DataSourceSelectorSearchParams } from '../types';
+import type { DefaultDataSourceSelectorContext } from './types';
 
 export const defaultSearch: DataSourceSelectorSearchParams = {
   name: '',

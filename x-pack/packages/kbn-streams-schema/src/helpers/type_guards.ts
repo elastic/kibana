@@ -5,36 +5,39 @@
  * 2.0.
  */
 
-import { ZodSchema, custom } from '@kbn/zod';
-import {
+import type { ZodSchema} from '@kbn/zod';
+import { custom } from '@kbn/zod';
+import type {
   AndCondition,
-  conditionSchema,
-  dissectProcessingDefinitionSchema,
   DissectProcssingDefinition,
   FilterCondition,
-  filterConditionSchema,
   GrokProcessingDefinition,
-  grokProcessingDefinitionSchema,
   IngestReadStreamDefinition,
-  ingestReadStreamDefinitonSchema,
   IngestStreamDefinition,
-  ingestStreamDefinitonSchema,
   OrCondition,
   ReadStreamDefinition,
-  readStreamDefinitonSchema,
   StreamDefinition,
-  streamDefintionSchema,
   WiredReadStreamDefinition,
+  WiredStreamDefinition} from '../models';
+import {
+  conditionSchema,
+  dissectProcessingDefinitionSchema,
+  filterConditionSchema,
+  grokProcessingDefinitionSchema,
+  ingestReadStreamDefinitonSchema,
+  ingestStreamDefinitonSchema,
+  readStreamDefinitonSchema,
+  streamDefintionSchema,
   wiredReadStreamDefinitonSchema,
-  WiredStreamDefinition,
   wiredStreamDefinitonSchema,
 } from '../models';
-import {
+import type {
   IngestStreamConfigDefinition,
-  ingestStreamConfigDefinitonSchema,
   StreamConfigDefinition,
+  WiredStreamConfigDefinition} from '../models/stream_config';
+import {
+  ingestStreamConfigDefinitonSchema,
   streamConfigDefinitionSchema,
-  WiredStreamConfigDefinition,
   wiredStreamConfigDefinitonSchema,
 } from '../models/stream_config';
 

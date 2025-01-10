@@ -10,12 +10,13 @@ import {
   OBSERVABILITY_ONBOARDING_TEST_PASSWORD,
 } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
 import { createObservabilityOnboardingUsers } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { ObservabilityOnboardingFtrConfigName } from '../configs';
-import {
+import type { ObservabilityOnboardingFtrConfigName } from '../configs';
+import type {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,

@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
-import { Group, TimeRange } from '../../../common/typings';
+import type { Group, TimeRange } from '../../../common/typings';
 import { generateSourceLink } from './get_alert_source_links';
 
 export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {

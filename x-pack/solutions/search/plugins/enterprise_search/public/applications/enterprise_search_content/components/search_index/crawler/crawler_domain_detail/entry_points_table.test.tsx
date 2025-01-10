@@ -14,9 +14,10 @@ import { EuiFieldText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
-import { CrawlerDomain } from '../../../../api/crawler/types';
+import type { CrawlerDomain } from '../../../../api/crawler/types';
 
-import { EntryPointsTable, EntryPointsTableProps } from './entry_points_table';
+import type { EntryPointsTableProps } from './entry_points_table';
+import { EntryPointsTable } from './entry_points_table';
 
 describe('EntryPointsTable', () => {
   const indexName = 'index-name';

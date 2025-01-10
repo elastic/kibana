@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  FC,
+  PropsWithChildren} from 'react';
 import React, {
   createContext,
   useState,
@@ -14,16 +17,14 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
-  useRef,
-  FC,
-  PropsWithChildren,
+  useRef
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import type { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';

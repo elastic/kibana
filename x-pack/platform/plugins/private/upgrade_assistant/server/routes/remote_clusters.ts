@@ -7,7 +7,7 @@
 
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 export function registerRemoteClustersRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(

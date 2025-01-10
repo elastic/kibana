@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SchedulingConfiguraton } from '@kbn/search-connectors';
+import type { SchedulingConfiguraton } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

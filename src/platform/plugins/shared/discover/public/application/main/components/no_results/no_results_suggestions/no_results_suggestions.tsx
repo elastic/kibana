@@ -15,9 +15,10 @@ import { isOfQueryType, type Query, type AggregateQuery, type Filter } from '@kb
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
+import type {
+  NoResultsSuggestionWhenFiltersProps} from './no_results_suggestion_when_filters';
 import {
-  NoResultsSuggestionWhenFilters,
-  NoResultsSuggestionWhenFiltersProps,
+  NoResultsSuggestionWhenFilters
 } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';

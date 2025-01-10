@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ExecutionContextStart } from '@kbn/core/public';
+import type { ExecutionContextStart } from '@kbn/core/public';
 
 export interface Context {
   isCloudEnabled: boolean;

@@ -9,7 +9,7 @@
 
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
-import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { Subject } from 'rxjs';
 import { unsafeConsole } from '@kbn/security-hardening';
 

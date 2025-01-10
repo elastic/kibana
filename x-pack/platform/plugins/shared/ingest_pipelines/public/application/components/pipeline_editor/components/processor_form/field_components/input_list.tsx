@@ -19,10 +19,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import type {
+  ArrayItem,
+  ValidationFunc} from '../../../../../../shared_imports';
 import {
   UseField,
-  ArrayItem,
-  ValidationFunc,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 

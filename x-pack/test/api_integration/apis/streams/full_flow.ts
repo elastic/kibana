@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { enableStreams, fetchDocument, forkStream, indexDocument } from './helpers/requests';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { cleanUpRootStream } from './helpers/cleanup';
 

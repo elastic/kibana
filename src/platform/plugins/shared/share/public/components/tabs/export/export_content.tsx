@@ -8,8 +8,11 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl} from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
+import type {
+  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,12 +25,11 @@ import {
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiToolTip,
   type EuiRadioGroupOption,
 } from '@elastic/eui';
-import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
+import type { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {

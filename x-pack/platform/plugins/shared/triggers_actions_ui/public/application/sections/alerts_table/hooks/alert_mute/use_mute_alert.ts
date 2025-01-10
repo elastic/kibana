@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { muteAlertInstance } from '../../../../lib/rule_api/mute_alert';
 import { useKibana } from '../../../../..';
-import { ServerError, ToggleAlertParams } from '../../types';
+import type { ServerError, ToggleAlertParams } from '../../types';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.muteAlert.error', {
   defaultMessage: 'Error muting alert',

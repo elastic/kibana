@@ -22,9 +22,9 @@ import type { NavigationLink, TitleLinkCategory, AccordionLinkCategory } from '.
 import { LandingColumnLinks } from './landing_links';
 
 export interface LandingLinksIconsCategoriesGroupsProps {
-  links: Readonly<NavigationLink[]>;
+  links: readonly NavigationLink[];
   /** Only accordion category type supported */
-  categories: Readonly<AccordionLinkCategory[]>;
+  categories: readonly AccordionLinkCategory[];
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }
@@ -81,8 +81,8 @@ export const LandingLinksIconsCategoriesGroups: React.FC<LandingLinksIconsCatego
   });
 
 interface LandingLinksIconsCategoryGroupsProps {
-  links: Readonly<NavigationLink[]>;
-  categories: Readonly<TitleLinkCategory[]>;
+  links: readonly NavigationLink[];
+  categories: readonly TitleLinkCategory[];
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }

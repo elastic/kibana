@@ -8,7 +8,7 @@
  */
 
 import { countBy } from 'lodash';
-import {
+import type {
   RuleTypeIndexWithDescriptions,
   RuleTypeCountsByProducer,
   RuleTypeWithDescription,

@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
+import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import _ from 'lodash';
 import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return (

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
+import type { StreamConfigDefinition } from '@kbn/streams-schema';
 
 export const ChildrenAffectedCallout = ({
   childStreams,

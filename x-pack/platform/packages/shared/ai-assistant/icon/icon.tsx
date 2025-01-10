@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 /**

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-ast';
+import type { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-ast';
 import { isColumnItem, isFunctionItem } from '../../../shared/helpers';
 
 export type CaretPosition =

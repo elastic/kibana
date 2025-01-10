@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  PhaseEvent} from '@kbn/presentation-publishing';
 import {
-  PhaseEvent,
   apiPublishesDataLoading,
   apiPublishesRendered,
 } from '@kbn/presentation-publishing';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Integration } from '../hooks/use_integrations';
+import type { Integration } from '../hooks/use_integrations';
 import {
   filterIntegrations,
   THREAT_INTELLIGENCE_CATEGORY,

@@ -6,11 +6,11 @@
  */
 
 import React, { useContext, createContext, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { HttpSetup, ToastsSetup } from '@kbn/core/public';
-import { LicenseStatus } from '../../../common';
-import { SearchProfilerStartServices } from '../../types';
+import type { HttpSetup, ToastsSetup } from '@kbn/core/public';
+import type { LicenseStatus } from '../../../common';
+import type { SearchProfilerStartServices } from '../../types';
 
 export interface ContextArgs extends SearchProfilerStartServices {
   http: HttpSetup;

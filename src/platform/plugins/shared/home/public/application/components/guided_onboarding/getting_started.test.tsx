@@ -10,7 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { findTestSubject, registerTestBed, TestBed, mountWithIntl } from '@kbn/test-jest-helpers';
+import type { TestBed} from '@kbn/test-jest-helpers';
+import { findTestSubject, registerTestBed, mountWithIntl } from '@kbn/test-jest-helpers';
 import { MemoryRouter } from 'react-router-dom';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
@@ -18,9 +19,9 @@ import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.se
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
+import type { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide/guide_filters';
+import type { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide/guide_filters';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();

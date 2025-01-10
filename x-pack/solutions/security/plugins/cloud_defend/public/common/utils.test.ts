@@ -13,7 +13,7 @@ import {
   selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
 } from './utils';
 
-import { Selector, Response } from '../../common';
+import type { Selector, Response } from '../../common';
 
 describe('getSelectorConditions', () => {
   it('grabs file conditions for file selectors', () => {

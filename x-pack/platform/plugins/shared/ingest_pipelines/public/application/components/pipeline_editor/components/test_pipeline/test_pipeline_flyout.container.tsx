@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useKibana, useForm } from '../../../../../shared_imports';
 import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
-import { DeserializeResult } from '../../deserialize';
-import { Document } from '../../types';
+import type { DeserializeResult } from '../../deserialize';
+import type { Document } from '../../types';
 import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
-import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;

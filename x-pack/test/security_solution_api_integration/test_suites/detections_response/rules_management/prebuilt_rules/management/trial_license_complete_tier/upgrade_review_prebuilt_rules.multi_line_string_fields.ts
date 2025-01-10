@@ -16,7 +16,7 @@ import {
   TEXT_XL_C,
   TEXT_XL_MERGED,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/algorithms/multi_line_string_diff_algorithm.mock';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,

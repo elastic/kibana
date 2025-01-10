@@ -14,5 +14,5 @@ export type {
   MultiTermsBucket,
 } from './latest';
 
-import * as v1 from './v1';
+import type * as v1 from './v1';
 export type { v1 };

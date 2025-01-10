@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
+import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
 export interface SLORoutesDependencies {
   plugins: {

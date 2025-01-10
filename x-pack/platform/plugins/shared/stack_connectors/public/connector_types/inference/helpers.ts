@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConfigEntryView } from '../../../common/dynamic_config/types';
-import { Config } from './types';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConfigEntryView } from '../../../common/dynamic_config/types';
+import type { Config } from './types';
 import * as i18n from './translations';
 
 export interface TaskTypeOption {

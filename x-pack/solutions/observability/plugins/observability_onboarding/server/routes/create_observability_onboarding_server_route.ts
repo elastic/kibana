@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import {
+import type {
   ObservabilityOnboardingRouteCreateOptions,
   ObservabilityOnboardingRouteHandlerResources,
 } from './types';

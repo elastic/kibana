@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { createOpenAiChunk } from './create_openai_chunk';
 

@@ -9,7 +9,7 @@
 
 import { test as base } from '@playwright/test';
 
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import type { LoadActionPerfOptions } from '@kbn/es-archiver';
 import {
   createKbnUrl,
   createEsArchiver,
@@ -19,8 +19,8 @@ import {
   createSamlSessionManager,
   createScoutConfig,
 } from '../../../common/services';
-import { ScoutWorkerFixtures } from '../types/worker_scope';
-import { ScoutTestOptions } from '../../types';
+import type { ScoutWorkerFixtures } from '../types/worker_scope';
+import type { ScoutTestOptions } from '../../types';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential

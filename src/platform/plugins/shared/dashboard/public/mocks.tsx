@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardStart } from './plugin';
-import { DashboardState } from './dashboard_api/types';
+import type { DashboardStart } from './plugin';
+import type { DashboardState } from './dashboard_api/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelState } from '../common';
-import { SavedDashboardInput } from './services/dashboard_content_management_service/types';
+import type { DashboardPanelState } from '../common';
+import type { SavedDashboardInput } from './services/dashboard_content_management_service/types';
 
 export type Start = jest.Mocked<DashboardStart>;
 

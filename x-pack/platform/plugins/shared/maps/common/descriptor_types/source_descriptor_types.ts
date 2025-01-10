@@ -7,11 +7,11 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { SortDirection } from '@kbn/data-plugin/common/search';
-import {
+import type { SortDirection } from '@kbn/data-plugin/common/search';
+import type {
   AGG_TYPE,
   GRID_RESOLUTION,
   MASK_OPERATOR,

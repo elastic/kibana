@@ -8,9 +8,9 @@
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { splitIntoCommands } from '../../../common';
 
 export async function runAndValidateEsqlQuery({

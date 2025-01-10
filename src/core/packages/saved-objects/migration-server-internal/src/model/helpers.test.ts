@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FetchIndexResponse } from '../actions/fetch_indices';
-import { BaseState } from '../state';
+import type { FetchIndexResponse } from '../actions/fetch_indices';
+import type { BaseState } from '../state';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,

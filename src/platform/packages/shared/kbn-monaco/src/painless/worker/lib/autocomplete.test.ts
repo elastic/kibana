@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PainlessCompletionItem } from '../../types';
+import type { PainlessCompletionItem } from '../../types';
 
+import type {
+  Suggestion} from './autocomplete';
 import {
   getStaticSuggestions,
   getFieldSuggestions,
   getClassMemberSuggestions,
   getConstructorSuggestions,
   getKeywords,
-  getTypeSuggestions,
-  Suggestion,
+  getTypeSuggestions
 } from './autocomplete';
 
 const keywords: PainlessCompletionItem[] = getKeywords();

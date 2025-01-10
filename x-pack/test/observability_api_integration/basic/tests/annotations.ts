@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utility-types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { JsonObject } from '@kbn/utility-types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {

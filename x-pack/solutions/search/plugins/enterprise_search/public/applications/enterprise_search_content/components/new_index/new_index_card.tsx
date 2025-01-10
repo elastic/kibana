@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

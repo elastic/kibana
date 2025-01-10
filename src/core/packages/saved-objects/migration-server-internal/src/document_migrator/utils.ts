@@ -14,7 +14,7 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
 import { maxVersion } from './pipelines/utils';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';

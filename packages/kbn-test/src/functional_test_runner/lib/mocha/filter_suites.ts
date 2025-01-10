@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Suite, Test } from '../../fake_mocha_types';
-import { EsVersion } from '../es_version';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Suite, Test } from '../../fake_mocha_types';
+import type { EsVersion } from '../es_version';
 
 interface SuiteInternal extends Suite {
   _tags?: string[];

@@ -7,12 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
 import { API_BASE_PATH } from '../../../common/constants';
+import type {
+  SearchableSnapshotsTestBed} from './searchable_snapshots.helpers';
 import {
-  SearchableSnapshotsTestBed,
   setupSearchableSnapshotsTestBed,
 } from './searchable_snapshots.helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';

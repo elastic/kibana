@@ -14,12 +14,12 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { mockVectorLayer } from '../../../classes/layers/__fixtures__/mock_vector_layer';
-import { IVectorSource } from '../../../classes/sources/vector_source';
+import type { IVectorSource } from '../../../classes/sources/vector_source';
 
 // mutable map state
 let featuresAtLocation: MapGeoJSONFeature[] = [];

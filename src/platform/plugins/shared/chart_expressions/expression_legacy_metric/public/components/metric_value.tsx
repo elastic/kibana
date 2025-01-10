@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
+import type { CSSProperties} from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';

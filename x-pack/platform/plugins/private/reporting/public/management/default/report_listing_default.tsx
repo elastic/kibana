@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ListingPropsInternal } from '..';
+import type { ListingPropsInternal } from '..';
 import { ReportListingTable } from '../report_listing_table';
 
 /**

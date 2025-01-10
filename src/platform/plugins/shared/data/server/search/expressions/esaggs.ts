@@ -11,14 +11,15 @@ import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
-import {
+import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type {
   EsaggsExpressionFunctionDefinition,
-  EsaggsStartDependencies,
+  EsaggsStartDependencies} from '../../../common/search/expressions';
+import {
   getEsaggsMeta,
   handleEsaggsRequest,
 } from '../../../common/search/expressions';
-import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
+import type { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

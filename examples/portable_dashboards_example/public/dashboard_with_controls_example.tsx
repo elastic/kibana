@@ -13,10 +13,11 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
-import {
+import type {
   DashboardApi,
-  DashboardRenderer,
-  DashboardCreationOptions,
+  DashboardCreationOptions} from '@kbn/dashboard-plugin/public';
+import {
+  DashboardRenderer
 } from '@kbn/dashboard-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 

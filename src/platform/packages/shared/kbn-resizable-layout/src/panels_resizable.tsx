@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ResizableLayoutDirection } from '../types';
+import type { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({

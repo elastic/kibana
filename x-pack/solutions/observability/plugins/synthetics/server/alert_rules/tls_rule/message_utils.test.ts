@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { setTLSRecoveredAlertsContext } from './message_utils';
-import { TLSLatestPing } from './tls_rule_executor';
+import type { TLSLatestPing } from './tls_rule_executor';
 
 describe('setTLSRecoveredAlertsContext', () => {
   const timestamp = new Date().toISOString();

@@ -6,7 +6,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { EventFunction } from '../../../../../types';
+import type { EventFunction } from '../../../../../types';
 import { NGINX_PROXY, NGINX_PROXY_HOSTS } from '../../../common/constants';
 import { createNginxTimestamp } from '../create_nginx_timestamp';
 

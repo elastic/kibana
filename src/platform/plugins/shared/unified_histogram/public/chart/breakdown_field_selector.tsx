@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   FieldIcon,
   getFieldIconProps,
@@ -21,12 +21,13 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
-import { UnifiedHistogramBreakdownContext } from '../types';
+import type { UnifiedHistogramBreakdownContext } from '../types';
+import type {
+  ToolbarSelectorProps,
+  SelectableEntry} from './toolbar_selector';
 import {
   ToolbarSelector,
-  ToolbarSelectorProps,
-  EMPTY_OPTION,
-  SelectableEntry,
+  EMPTY_OPTION
 } from './toolbar_selector';
 
 export interface BreakdownFieldSelectorProps {

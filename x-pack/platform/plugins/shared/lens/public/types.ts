@@ -38,10 +38,10 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { estypes } from '@elastic/elasticsearch';
-import React from 'react';
-import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { estypes } from '@elastic/elasticsearch';
+import type React from 'react';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
@@ -53,7 +53,7 @@ import type {
   LensPagesizeActionData,
 } from './visualizations/datatable/components/types';
 
-import {
+import type {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
@@ -63,7 +63,7 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
-import { TableInspectorAdapter } from './editor_frame_service/types';
+import type { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<
   CoreStart,

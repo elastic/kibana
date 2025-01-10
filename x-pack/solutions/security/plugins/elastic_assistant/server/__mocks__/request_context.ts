@@ -7,28 +7,28 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { MockedKeys } from '@kbn/utility-types-jest';
-import { AwaitedProperties } from '@kbn/utility-types';
-import {
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   attackDiscoveryDataClientMock,
   conversationsDataClientMock,
   dataClientMock,
   knowledgeBaseDataClientMock,
 } from './data_clients.mock';
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import {
+import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import type {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
+import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import type { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { authenticatedUser } from './user';
 
 export const createMockClients = () => {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -43,7 +44,7 @@ import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
-import { LensVisService } from '../services/lens_vis_service';
+import type { LensVisService } from '../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
 

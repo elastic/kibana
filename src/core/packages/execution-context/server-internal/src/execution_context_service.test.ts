@@ -10,9 +10,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type {
+  InternalExecutionContextSetup} from './execution_context_service';
 import {
-  ExecutionContextService,
-  InternalExecutionContextSetup,
+  ExecutionContextService
 } from './execution_context_service';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));

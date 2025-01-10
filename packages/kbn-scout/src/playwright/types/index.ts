@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
+import type { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
 
 export type Protocol = 'http' | 'https';
 

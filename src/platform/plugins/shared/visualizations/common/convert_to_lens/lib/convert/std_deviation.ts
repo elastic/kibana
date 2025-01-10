@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { isFieldValid } from '../../utils';
 import { addTimeRangeToFormula } from '../metrics/formula';
 import { getFieldNameFromField } from '../utils';
 import { createFormulaColumn } from './formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
-import { CommonColumnConverterArgs, FormulaColumn } from './types';
+import type { CommonColumnConverterArgs, FormulaColumn } from './types';
 
 const STD_LOWER = 'std_lower';
 const STD_UPPER = 'std_upper';

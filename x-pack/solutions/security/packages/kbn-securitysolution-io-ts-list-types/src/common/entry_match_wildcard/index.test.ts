@@ -8,7 +8,8 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEntryMatchWildcardMock } from './index.mock';
-import { entriesMatchWildcard, EntryMatchWildcard } from '.';
+import type { EntryMatchWildcard } from '.';
+import { entriesMatchWildcard } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('entriesMatchWildcard', () => {

@@ -8,8 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import type { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import type { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/public';
 import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { OverviewItem } from './overview_item';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AstFunction } from '@kbn/interpreter';
+import type { AstFunction } from '@kbn/interpreter';
 import { adaptCanvasFilter } from './filter_adapters';
 
 describe('adaptCanvasFilter', () => {

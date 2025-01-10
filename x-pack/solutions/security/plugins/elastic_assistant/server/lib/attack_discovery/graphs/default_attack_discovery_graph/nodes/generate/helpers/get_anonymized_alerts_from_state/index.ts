@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GraphState } from '../../../../types';
+import type { GraphState } from '../../../../types';
 
 export const getAnonymizedAlertsFromState = (state: GraphState): string[] =>
   state.anonymizedAlerts.map((doc) => doc.pageContent);

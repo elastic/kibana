@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('X-Pack Accessibility Tests - Group 2', function () {

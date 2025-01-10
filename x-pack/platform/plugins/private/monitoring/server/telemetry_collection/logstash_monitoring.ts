@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export type Counter = Map<string, number>;
 export const HITS_SIZE = 10000; // maximum hits to receive from ES with each search

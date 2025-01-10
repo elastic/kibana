@@ -6,9 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import type {
+  UseDeleteKnowledgeEntriesParams} from './use_delete_knowledge_base_entries';
 import {
-  useDeleteKnowledgeBaseEntries,
-  UseDeleteKnowledgeEntriesParams,
+  useDeleteKnowledgeBaseEntries
 } from './use_delete_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 

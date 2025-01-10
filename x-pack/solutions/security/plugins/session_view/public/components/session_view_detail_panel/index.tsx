@@ -7,7 +7,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTabProps } from '../../types';
+import type { EuiTabProps } from '../../types';
 import type { Process, ProcessEvent } from '../../../common';
 import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';

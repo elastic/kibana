@@ -10,6 +10,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import useMountedState from 'react-use/lib/useMountedState';
+import type {
+  OnTimeChangeProps} from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -21,22 +23,22 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiToolTip,
-  OnTimeChangeProps,
+  EuiToolTip
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataLoading,
+import type {
   HasUniqueId,
   PublishesDataLoading,
-  useBatchedPublishingSubjects,
-  ViewMode as ViewModeType,
+  ViewMode as ViewModeType} from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataLoading,
+  useBatchedPublishingSubjects
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

@@ -9,7 +9,7 @@
 
 import { getStatusCodeDecorations } from './status_code_decoration_utils';
 import { STATUS_CODE_LINE_CLASSNAME } from './constants';
-import { RequestResult } from '../../../hooks/use_send_current_request/send_request';
+import type { RequestResult } from '../../../hooks/use_send_current_request/send_request';
 
 const SUCCESS_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--success`;
 const WARNING_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--warning`;

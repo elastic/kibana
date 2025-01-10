@@ -7,7 +7,7 @@
 
 import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -28,10 +28,10 @@ import {
   reportingExportModalProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
-import { InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { StartServices } from './types';
+import type { StartServices } from './types';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;

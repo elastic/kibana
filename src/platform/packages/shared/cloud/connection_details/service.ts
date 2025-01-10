@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
+import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
 import type { ConnectionDetailsOpts, TabID, ConnectionDetailsTelemetryEvents } from './types';
 

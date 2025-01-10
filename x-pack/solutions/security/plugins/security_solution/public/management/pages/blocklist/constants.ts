@@ -25,7 +25,7 @@ export const BLOCKLISTS_LIST_DEFINITION: CreateExceptionListSchema = {
   type: BLOCKLISTS_LIST_TYPE,
 };
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+export const SEARCHABLE_FIELDS: readonly string[] = [
   `name`,
   `description`,
   'item_id',

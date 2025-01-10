@@ -7,13 +7,11 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import {
-  descriptorToArray,
-  SavedObjectDescriptor,
-} from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import type { SavedObjectDescriptor } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import { descriptorToArray } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { validateEvent } from '../../../../spaces_only/tests/alerting/group1/event_log';
 
 // eslint-disable-next-line import/no-default-export

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { bulkDisableRulesRequestBodySchemaV1 } from '..';
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
+import type { bulkDisableRulesRequestBodySchemaV1 } from '..';
+import type { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export interface BulkOperationError {
   message: string;

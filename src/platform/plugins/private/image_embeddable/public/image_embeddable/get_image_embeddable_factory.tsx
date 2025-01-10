@@ -11,19 +11,19 @@ import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
-import { FileImageMetadata } from '../imports';
+import type { FileImageMetadata } from '../imports';
 import { filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
-import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
+import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,

@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { OtelDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, Readable, Transform } from 'stream';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import type { Client } from '@elastic/elasticsearch';
+import type { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import type { OtelDocument } from '@kbn/apm-synthtrace-client';
+import type { Readable} from 'stream';
+import { pipeline, Transform } from 'stream';
+import type { SynthtraceEsClientOptions } from '../shared/base_client';
+import { SynthtraceEsClient } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { Logger } from '../utils/create_logger';
+import type { Logger } from '../utils/create_logger';
 
 export type OtelSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 

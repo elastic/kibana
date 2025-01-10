@@ -10,12 +10,13 @@
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PublishesPhaseEvents} from '@kbn/presentation-publishing';
+import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
 import { coreServices } from '../../../../services/kibana_services';
-import { DashboardLoadType } from '../../../types';
+import type { DashboardLoadType } from '../../../types';
 
 export interface PerformanceState {
   firstLoad: boolean;

@@ -10,8 +10,8 @@ import {
   PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { User } from '../../../rule_registry/common/lib/authentication/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { User } from '../../../rule_registry/common/lib/authentication/types';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;

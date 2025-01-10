@@ -8,7 +8,7 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import {
+import type {
   AstProviderFn,
   ESQLAst,
   ESQLAstItem,
@@ -19,11 +19,12 @@ import {
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
-  ESQLSource,
+  ESQLSource} from '@kbn/esql-ast';
+import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstField, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import {
+import type {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,

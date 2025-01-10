@@ -11,8 +11,8 @@ import {
 } from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {
   name: string;

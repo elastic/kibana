@@ -6,7 +6,7 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 import { excludeFrozenQuery } from '../es/queries/exclude_frozen_query';
 import { kqlQuery } from '../es/queries/kql_query';
 

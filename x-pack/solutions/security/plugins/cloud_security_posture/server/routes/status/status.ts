@@ -30,9 +30,9 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
-import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
-import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
+import type { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,

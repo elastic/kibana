@@ -9,7 +9,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group.component';
-import { FiltersGroup as FiltersGroupType } from '../types';
+import type { FiltersGroup as FiltersGroupType } from '../types';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

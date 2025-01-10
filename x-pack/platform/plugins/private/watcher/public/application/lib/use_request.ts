@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
+  UseRequestConfig} from '../shared_imports';
+import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../shared_imports';

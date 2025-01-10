@@ -7,11 +7,11 @@
 
 import { renderHook } from '@testing-library/react';
 import { useSystemPromptTable } from './use_system_prompt_table';
-import { Conversation } from '../../../../assistant_context/types';
-import { AIConnector } from '../../../../connectorland/connector_selector';
+import type { Conversation } from '../../../../assistant_context/types';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
 import { customConvo, welcomeConvo } from '../../../../mock/conversation';
 import { mockConnectors } from '../../../../mock/connectors';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 
 // Mock data for tests
 const mockSystemPrompts: PromptResponse[] = [

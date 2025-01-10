@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { UseChatSend } from './use_chat_send';
+import type { UseChatSend } from './use_chat_send';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';

@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
@@ -39,7 +39,7 @@ import {
   ESQLBooleanLiteral,
   ESQLNullLiteral,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**

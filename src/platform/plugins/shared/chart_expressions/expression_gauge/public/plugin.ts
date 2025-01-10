@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';

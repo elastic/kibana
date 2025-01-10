@@ -18,7 +18,7 @@ import {
   type HasParentApi,
 } from '@kbn/presentation-publishing';
 import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.

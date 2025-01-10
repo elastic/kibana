@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type TransformRowActionName =
   | 'Clone'

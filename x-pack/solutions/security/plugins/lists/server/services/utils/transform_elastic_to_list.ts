@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ListArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { SearchEsListSchema } from '../../schemas/elastic_response';
+import type { SearchEsListSchema } from '../../schemas/elastic_response';
 
 export interface TransformElasticToListOptions {
   response: estypes.SearchResponse<SearchEsListSchema>;

@@ -7,7 +7,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { replaceSpecialChars } from '../../../components/create/utils';
-import { CreateCustomIntegrationContext, UpdateFieldsEvent, WithTouchedFields } from '../types';
+import type { CreateCustomIntegrationContext, UpdateFieldsEvent, WithTouchedFields } from '../types';
 
 type ValuesTuple = [CreateCustomIntegrationContext, UpdateFieldsEvent];
 

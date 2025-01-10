@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
+import type { RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
-import { AggregationRestrictions } from '../../../common';
-import { RollupIndexCapability } from './map_capabilities';
+import type { AggregationRestrictions } from '../../../common';
+import type { RollupIndexCapability } from './map_capabilities';
 
 /**
  * Checks if given job configs are compatible by attempting to merge them

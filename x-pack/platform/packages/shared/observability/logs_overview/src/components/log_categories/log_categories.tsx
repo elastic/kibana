@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchGeneric } from '@kbn/search-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
 import React, { useCallback } from 'react';
@@ -18,13 +18,14 @@ import {
   categoryDetailsService,
   createCategoryDetailsServiceImplementations,
 } from '../../services/category_details_service';
-import { LogCategory } from '../../types';
-import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { LogCategory } from '../../types';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
+import type {
+  LogCategoriesResultContentDependencies} from './log_categories_result_content';
 import {
-  LogCategoriesResultContent,
-  LogCategoriesResultContentDependencies,
+  LogCategoriesResultContent
 } from './log_categories_result_content';
 
 export interface LogCategoriesProps {

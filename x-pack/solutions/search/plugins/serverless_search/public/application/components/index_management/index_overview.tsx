@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
 import {
@@ -22,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Index } from '@kbn/index-management-plugin/common/types/indices';
+import type { Index } from '@kbn/index-management-plugin/common/types/indices';
 
 import { docLinks } from '../../../../common/doc_links';
 import { useIndex } from '../../hooks/api/use_index';

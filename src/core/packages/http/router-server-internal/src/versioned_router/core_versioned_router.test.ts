@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Router } from '../router';
+import type { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map, shareReplay, Subject } from 'rxjs';
 import { interpret } from 'xstate';
-import { AllDatasetSelection } from '../../common';
+import type { AllDatasetSelection } from '../../common';
 import { DatasetsService } from '../services/datasets';
 import {
   createLogsExplorerControllerStateMachine,
   DEFAULT_CONTEXT,
 } from '../state_machines/logs_explorer_controller';
-import { LogsExplorerStartDeps } from '../types';
-import { LogsExplorerCustomizations } from '../customizations/types';
+import type { LogsExplorerStartDeps } from '../types';
+import type { LogsExplorerCustomizations } from '../customizations/types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
 import {

@@ -9,7 +9,7 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithB
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useMemo, useState } from 'react';
 
-import { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { DefaultSort } from './constants';
 
 const formatGridColumns = (cols: SortCombinations[]): EuiDataGridSorting['columns'] => {

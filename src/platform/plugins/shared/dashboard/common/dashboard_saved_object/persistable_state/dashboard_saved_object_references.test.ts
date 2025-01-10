@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  InjectExtractDeps} from './dashboard_saved_object_references';
 import {
   extractReferences,
-  injectReferences,
-  InjectExtractDeps,
+  injectReferences
 } from './dashboard_saved_object_references';
 
 import {
@@ -19,7 +20,7 @@ import {
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import type { DashboardAttributes, DashboardItem } from '../../../server/content_management';
-import { DashboardAttributesAndReferences } from '../../types';
+import type { DashboardAttributesAndReferences } from '../../types';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);

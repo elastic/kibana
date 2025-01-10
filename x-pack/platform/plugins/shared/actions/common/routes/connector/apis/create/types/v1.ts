@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { createConnectorRequestParamsSchemaV1, createConnectorRequestBodySchemaV1 } from '..';
+import type { createConnectorRequestParamsSchemaV1, createConnectorRequestBodySchemaV1 } from '..';
 
 export type CreateConnectorRequestParams = TypeOf<typeof createConnectorRequestParamsSchemaV1>;
 export type CreateConnectorRequestBody = TypeOf<typeof createConnectorRequestBodySchemaV1>;

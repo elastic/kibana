@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 

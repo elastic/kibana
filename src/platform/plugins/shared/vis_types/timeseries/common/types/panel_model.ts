@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
+import type { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
 import type { IndexPatternValue, Annotation } from '.';
 import type {
   ColorRules,

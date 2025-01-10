@@ -7,7 +7,8 @@
 
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { CollapseArgs, collapse } from '.';
+import type { CollapseArgs} from '.';
+import { collapse } from '.';
 
 describe('collapse_fn', () => {
   const fn = functionWrapper(collapse);

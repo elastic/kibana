@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { useStyles } from './styles';
-import { Indicator } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorsTableContext } from '../../hooks/use_table_context';
 import { ActionsRowCell } from './actions_row_cell';

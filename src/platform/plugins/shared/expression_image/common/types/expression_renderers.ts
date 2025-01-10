@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImageMode } from './expression_functions';
+import type { ImageMode } from './expression_functions';
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 

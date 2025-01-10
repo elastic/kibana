@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import {
-  formatRequest,
+import type {
   ServerRouteRepository,
   EndpointOf,
   ReturnOf,
   ClientRequestParamsOf,
 } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
-import { Subtract, RequiredKeys } from 'utility-types';
-import { format, UrlObject } from 'url';
+import type { Subtract, RequiredKeys } from 'utility-types';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { kbnTestConfig } from '@kbn/test';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never

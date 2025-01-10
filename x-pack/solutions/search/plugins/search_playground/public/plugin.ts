@@ -7,14 +7,13 @@
 
 import { BehaviorSubject, type Subscription } from 'rxjs';
 
+import type { Plugin, AppUpdater } from '@kbn/core/public';
 import {
   type CoreSetup,
-  Plugin,
   type CoreStart,
   type AppMountParameters,
   type PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppUpdater,
   AppStatus,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';

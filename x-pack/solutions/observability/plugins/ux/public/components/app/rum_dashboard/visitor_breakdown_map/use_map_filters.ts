@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { FieldFilter as Filter } from '@kbn/es-query';
+import type { FieldFilter as Filter } from '@kbn/es-query';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {

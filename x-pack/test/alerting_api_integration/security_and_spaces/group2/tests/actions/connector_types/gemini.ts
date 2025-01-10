@@ -12,7 +12,7 @@ import {
 } from '@kbn/actions-simulators-plugin/server/gemini_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { DEFAULT_GEMINI_MODEL } from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.gemini';
 const name = 'A Gemini action';

@@ -10,7 +10,7 @@ import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { Conversation } from '../../../assistant_context/types';
+import type { Conversation } from '../../../assistant_context/types';
 import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
 import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';

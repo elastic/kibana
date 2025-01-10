@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldMetadata, TEcsFields, TMetadataFields } from '../../../common';
+import type { TEcsFields, TMetadataFields } from '../../../common';
+import { FieldMetadata } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';

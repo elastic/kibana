@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Connector, ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
+import type { Connector, ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
 
-import { Crawler } from './crawler';
+import type { Crawler } from './crawler';
 
 export interface AlwaysShowPattern {
   alias_pattern: string;

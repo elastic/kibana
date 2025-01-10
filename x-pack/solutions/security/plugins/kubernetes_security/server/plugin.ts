@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
   IRouter,
 } from '@kbn/core/server';
-import { KubernetesSecuritySetupPlugins, KubernetesSecurityStartPlugins } from './types';
+import type { KubernetesSecuritySetupPlugins, KubernetesSecurityStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
 export class KubernetesSecurityPlugin implements Plugin {

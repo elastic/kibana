@@ -7,7 +7,7 @@
 
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { ReportingCore } from '..';
+import type { ReportingCore } from '..';
 import { createMockReportingCore } from '../test_helpers';
 import { registerReportingUsageCollector } from './reporting_usage_collector';
 

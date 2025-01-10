@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
 import { storeTypeDefinition } from './type_definition';
 import { storeSourceDefinition } from './source_definition';
 import { builtInDefinitions } from './built_in';
-import { EntitySourceDefinition, EntityTypeDefinition } from '../types';
+import type { EntitySourceDefinition, EntityTypeDefinition } from '../types';
 
 export async function installBuiltInDefinitions(clusterClient: IClusterClient, logger: Logger) {
   logger.info('Installing built in entity definitions');

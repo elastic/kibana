@@ -15,7 +15,7 @@ import * as i18n from './translations';
 
 export const ID = 'networkKpiTlsHandshakesQuery';
 
-export const tlsStatItems: Readonly<StatItems[]> = [
+export const tlsStatItems: readonly StatItems[] = [
   {
     key: 'tlsHandshakes',
     fields: [

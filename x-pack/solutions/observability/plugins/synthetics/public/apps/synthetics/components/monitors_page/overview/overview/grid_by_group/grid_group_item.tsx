@@ -20,10 +20,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import useKey from 'react-use/lib/useKey';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
-import { OverviewStatusMetaData } from '../../types';
+import type { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item';
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, RefCallback, useCallback, useState } from 'react';
+import type { FC, RefCallback} from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  ShapeDrawerComponent,
-  getDefaultShapeData,
+import type {
   SvgConfig,
   ShapeRef,
-  ViewBoxParams,
+  ViewBoxParams} from '@kbn/expression-shape-plugin/public';
+import {
+  ShapeDrawerComponent,
+  getDefaultShapeData
 } from '@kbn/expression-shape-plugin/public';
 
 interface Props {

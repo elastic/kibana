@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 

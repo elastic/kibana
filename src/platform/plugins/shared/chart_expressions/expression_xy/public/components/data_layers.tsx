@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  BarSeriesProps} from '@elastic/charts';
 import {
   AreaSeries,
   BarSeries,
-  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
 } from '@elastic/charts';
-import React, { FC } from 'react';
-import { PaletteRegistry } from '@kbn/coloring';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { FC } from 'react';
+import React from 'react';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { KbnPalettes } from '@kbn/palettes';
-import {
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { KbnPalettes } from '@kbn/palettes';
+import type {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
@@ -29,14 +31,15 @@ import {
   XScaleType,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
+import type {
+  GroupsConfiguration,
+  DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
+  LayersFieldFormats} from '../helpers';
 import {
   getColorAssignments,
   getFitOptions,
-  GroupsConfiguration,
   getSeriesProps,
-  DatatablesWithFormatInfo,
-  LayersAccessorsTitles,
-  LayersFieldFormats,
   hasMultipleLayersWithSplits,
 } from '../helpers';
 

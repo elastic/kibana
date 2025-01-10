@@ -6,7 +6,7 @@
  */
 
 import { createContext } from 'react';
-import { SecuritySolutionPluginContext } from '../types';
+import type { SecuritySolutionPluginContext } from '../types';
 
 export const SecuritySolutionContext = createContext<SecuritySolutionPluginContext | undefined>(
   undefined

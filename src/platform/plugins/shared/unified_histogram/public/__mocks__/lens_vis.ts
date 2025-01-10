@@ -15,7 +15,7 @@ import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',

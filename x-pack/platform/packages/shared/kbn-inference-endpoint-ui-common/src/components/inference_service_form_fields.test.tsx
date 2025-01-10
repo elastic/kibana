@@ -6,7 +6,8 @@
  */
 
 import { InferenceServiceFormFields } from './inference_service_form_fields';
-import { FieldType, InferenceProvider } from '../types/types';
+import type { InferenceProvider } from '../types/types';
+import { FieldType } from '../types/types';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

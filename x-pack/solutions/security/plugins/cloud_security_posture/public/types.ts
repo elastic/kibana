@@ -7,9 +7,9 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CspRouterProps } from './application/csp_router';

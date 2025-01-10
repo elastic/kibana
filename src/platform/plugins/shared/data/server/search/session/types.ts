@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CoreStart,
   KibanaRequest,
   SavedObject,
@@ -15,12 +15,12 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
-import {
+import type {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
 } from '../../../common/search';
-import { SearchSessionsConfigSchema } from '../../config';
+import type { SearchSessionsConfigSchema } from '../../config';
 
 export { SearchStatus } from '../../../common/search';
 

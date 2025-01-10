@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { defineSecurityFeatureCheckRoute } from './feature_check';
 import type { RouteDefinitionParams } from '..';
+import { defineSecurityFeatureCheckRoute } from './feature_check';
 
 export function defineSecurityFeatureRoutes(params: RouteDefinitionParams) {
   defineSecurityFeatureCheckRoute(params);

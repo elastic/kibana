@@ -17,7 +17,7 @@ import * as i18n from './translations';
 
 export const ID = 'hostsKpiHostsQuery';
 
-export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
+export const useGetHostsStatItems: () => readonly StatItems[] = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

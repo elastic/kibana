@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class CorePluginStaticAssets implements Plugin {
   public setup(core: CoreSetup, deps: {}) {}

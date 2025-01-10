@@ -11,14 +11,15 @@ import {
   KBN_IS_CENTROID_FEATURE,
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
-import {
+import type {
   Category,
   DynamicStylePropertyOptions,
   RangeFieldMeta,
   StyleMetaDescriptor,
 } from '../../../../../common/descriptor_types';
+import type {
+  IDynamicStyleProperty} from '../../../styles/vector/properties/dynamic_style_property';
 import {
-  IDynamicStyleProperty,
   OTHER_CATEGORY_KEY,
 } from '../../../styles/vector/properties/dynamic_style_property';
 

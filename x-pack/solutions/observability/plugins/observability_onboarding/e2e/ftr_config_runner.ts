@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import cypress from 'cypress';
 import { cypressTestRunner } from './cypress_test_runner';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./ftr_config.ts'));

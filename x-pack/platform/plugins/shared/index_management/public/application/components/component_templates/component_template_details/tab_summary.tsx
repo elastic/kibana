@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { getLifecycleValue } from '../../../lib/data_streams';
-import { ComponentTemplateDeserialized } from '../shared_imports';
+import type { ComponentTemplateDeserialized } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
 interface Props {

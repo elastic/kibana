@@ -10,9 +10,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { ObservabilityOnboardingAppServices } from '../..';
-import { CustomCard } from '../packages_list/types';
-import { Category } from './types';
+import type { ObservabilityOnboardingAppServices } from '../..';
+import type { CustomCard } from '../packages_list/types';
+import type { Category } from './types';
 import { LogoIcon } from '../shared/logo_icon';
 
 export function useCustomCardsForCategory(

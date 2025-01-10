@@ -14,7 +14,7 @@ import { StatItemsComponent } from '../stat_items';
 interface KpiBaseComponentProps {
   from: string;
   id: string;
-  statItems: Readonly<StatItems[]>;
+  statItems: readonly StatItems[];
   to: string;
 }
 

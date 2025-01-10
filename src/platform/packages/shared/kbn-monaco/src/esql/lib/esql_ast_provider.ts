@@ -14,13 +14,13 @@ import {
   suggest,
   validateQuery,
 } from '@kbn/esql-validation-autocomplete';
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
 import { monacoPositionToOffset, offsetRangeToMonacoRange } from './shared/utils';
 import { getSignatureHelp } from './signature';
-import { SuggestionRawDefinitionWithMonacoRange } from './types';
+import type { SuggestionRawDefinitionWithMonacoRange } from './types';
 
 export class ESQLAstAdapter {
   constructor(

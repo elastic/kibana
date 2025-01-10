@@ -21,7 +21,7 @@ import {
   type Edge as xyEdge,
 } from '@xyflow/react';
 import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { DefaultEdge } from '.';
 import { LabelNode } from '../node';
 import type { EdgeViewModel } from '../types';

@@ -8,7 +8,7 @@
  */
 
 import type { HttpServiceSetup } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export function registerRoutes(http: HttpServiceSetup, usageCounter: UsageCounter) {
   const router = http.createRouter();

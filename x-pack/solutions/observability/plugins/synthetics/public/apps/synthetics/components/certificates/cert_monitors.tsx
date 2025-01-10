@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { MonitorPageLink } from './monitor_page_link';
-import { CertMonitor } from '../../../../../common/runtime_types';
+import type { CertMonitor } from '../../../../../common/runtime_types';
 
 interface Props {
   monitors: CertMonitor[];

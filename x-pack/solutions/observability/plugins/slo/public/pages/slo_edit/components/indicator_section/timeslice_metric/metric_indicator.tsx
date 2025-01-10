@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
@@ -26,7 +26,7 @@ import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { QueryBuilder } from '../../common/query_builder';
 import { COMPARATOR_OPTIONS } from '../../../constants';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { MetricInput } from './metric_input';
 
 interface MetricIndicatorProps {

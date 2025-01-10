@@ -9,17 +9,20 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import type {
+  Dispatch,
+  FocusEvent,
+  ChangeEventHandler} from 'react';
 import React, {
   useState,
   useCallback,
-  Dispatch,
-  FocusEvent,
   useContext,
-  useMemo,
-  ChangeEventHandler,
+  useMemo
 } from 'react';
 import { css } from '@emotion/react';
 
+import type {
+  EuiFieldNumberProps} from '@elastic/eui';
 import {
   EuiFieldNumber,
   EuiColorPicker,
@@ -28,16 +31,16 @@ import {
   EuiIcon,
   EuiColorPickerSwatch,
   EuiButtonIcon,
-  EuiFieldNumberProps,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { isValidColor } from '../../../color_manipulation';
-import {
+import type {
   PaletteContinuity,
+  CustomPaletteParams} from '../../../palettes';
+import {
   checkIsMaxContinuity,
-  checkIsMinContinuity,
-  CustomPaletteParams,
+  checkIsMinContinuity
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';

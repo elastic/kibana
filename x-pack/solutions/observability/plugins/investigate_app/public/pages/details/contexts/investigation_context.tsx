@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { isEqual } from 'lodash';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useAddInvestigationItem } from '../../../hooks/use_add_investigation_item';

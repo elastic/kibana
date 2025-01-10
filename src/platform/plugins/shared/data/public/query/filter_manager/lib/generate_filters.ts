@@ -8,8 +8,12 @@
  */
 
 import _ from 'lodash';
-import {
+import type {
   Filter,
+  DataViewFieldBase,
+  DataViewBase,
+  RangeFilterParams} from '@kbn/es-query';
+import {
   isExistsFilter,
   isPhraseFilter,
   getPhraseFilterValue,
@@ -19,15 +23,12 @@ import {
   isScriptedPhraseFilter,
   buildFilter,
   FilterStateStore,
-  FILTERS,
-  DataViewFieldBase,
-  DataViewBase,
-  RangeFilterParams,
+  FILTERS
 } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
 
-import { FilterManager } from '../filter_manager';
+import type { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
   appFilters: Filter[],

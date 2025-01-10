@@ -13,12 +13,13 @@ import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
-import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ApplicationStart, IBasePath } from '@kbn/core/public';
+import type { SearchSessionIndicatorRef } from '../search_session_indicator';
+import { SearchSessionIndicator } from '../search_session_indicator';
 import { useSearchSessionTour } from './search_session_tour';
-import { SearchUsageCollector } from '../../../collectors';
-import { ISessionService } from '../../session_service';
+import type { SearchUsageCollector } from '../../../collectors';
+import type { ISessionService } from '../../session_service';
 import { SearchSessionState } from '../../search_session_state';
 
 export interface SearchSessionIndicatorDeps {

@@ -9,12 +9,13 @@ import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterQueryInputProps } from '@kbn/visualization-ui-components/components/query_input/filter_query_input';
+import type { FilterQueryInputProps } from '@kbn/visualization-ui-components/components/query_input/filter_query_input';
 import { LENS_APP_NAME } from '../../../../common/constants';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
+import type { GenericIndexPatternColumn} from '../operations';
+import { operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern } from '../../../types';
-import { LensAppServices } from '../../../app_plugin/types';
+import type { LensAppServices } from '../../../app_plugin/types';
 
 export function setFilter(columnId: string, layer: FormBasedLayer, query: Query | undefined) {
   return {

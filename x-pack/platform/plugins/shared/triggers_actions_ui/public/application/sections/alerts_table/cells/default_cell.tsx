@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { CellComponentProps } from '../types';
+import type { CellComponentProps } from '../types';
 
 const DefaultCellComponent: React.FC<CellComponentProps> = ({ columnId, alert }) => {
   const value = (alert && alert[columnId]) ?? [];

@@ -6,17 +6,17 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
-import { StoredSLOSettings } from '../../domain/models';
+import type { StoredSLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
 import { getListOfSummaryIndices, getSloSettings } from '../slo_settings';
-import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from '../utils';

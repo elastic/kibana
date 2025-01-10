@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -15,12 +16,13 @@ import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
-import {
+import type {
   ISessionService,
   RefreshInterval,
-  SearchSessionState,
   SearchUsageCollector,
-  TimefilterContract,
+  TimefilterContract} from '../../../..';
+import {
+  SearchSessionState
 } from '../../../..';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';

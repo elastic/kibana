@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type {
+  ServerSentErrorEvent} from '@kbn/sse-utils/src/errors';
 import {
   isSSEError,
-  ServerSentErrorEvent,
   ServerSentEventErrorCode,
 } from '@kbn/sse-utils/src/errors';
-import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
-import { catchError, map, Observable, of } from 'rxjs';
+import type { ServerSentEvent} from '@kbn/sse-utils/src/events';
+import { ServerSentEventType } from '@kbn/sse-utils/src/events';
+import type { Observable} from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { PassThrough } from 'stream';
 
 export function observableIntoEventSourceStream(

@@ -11,15 +11,8 @@
  *2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, {
-  useState,
-  useEffect,
-  MouseEvent,
-  useCallback,
-  useMemo,
-  RefObject,
-  ReactElement,
-} from 'react';
+import type { MouseEvent, RefObject, ReactElement } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +28,7 @@ import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',

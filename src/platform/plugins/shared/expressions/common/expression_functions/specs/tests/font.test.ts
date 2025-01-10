@@ -9,7 +9,8 @@
 
 import { openSans } from '../../../fonts';
 import { FontWeight, TextAlignment } from '../../../types';
-import { font, FontArguments } from '../font';
+import type { FontArguments } from '../font';
+import { font } from '../font';
 import { functionWrapper } from './utils';
 
 describe('font', () => {

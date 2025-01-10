@@ -10,12 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import {
+import type {
   Vis,
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
   VisParams,
-  VisTypeDefinition,
+  VisTypeDefinition} from '@kbn/visualizations-plugin/public';
+import {
+  VIS_EVENT_TO_TRIGGER,
+  VisGroups
 } from '@kbn/visualizations-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';

@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
-import { SavedObjectsTaggingClientConfigRawType } from './config';
+import type { SavedObjectsTaggingClientConfigRawType } from './config';
 import { TagsCache } from './services';
 import { tagsCacheMock } from './services/tags/tags_cache.mock';
 

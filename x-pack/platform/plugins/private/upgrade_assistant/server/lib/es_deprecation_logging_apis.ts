@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { DeprecationLoggingStatus } from '../../common/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DeprecationLoggingStatus } from '../../common/types';
 
 export async function getDeprecationLoggingStatus(
   dataClient: IScopedClusterClient

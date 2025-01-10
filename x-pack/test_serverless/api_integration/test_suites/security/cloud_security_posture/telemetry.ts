@@ -13,9 +13,9 @@ import {
   waitForPluginInitialized,
   EsIndexDataProvider,
 } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import type { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 

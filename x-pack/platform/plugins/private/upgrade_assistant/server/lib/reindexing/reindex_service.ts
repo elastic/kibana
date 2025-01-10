@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import {
+import type {
   ReindexSavedObject,
+  ReindexWarning} from '../../../common/types';
+import {
   ReindexStatus,
-  ReindexStep,
-  ReindexWarning,
+  ReindexStep
 } from '../../../common/types';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
@@ -26,7 +27,7 @@ import {
   transformFlatSettings,
 } from './index_settings';
 
-import { ReindexActions } from './reindex_actions';
+import type { ReindexActions } from './reindex_actions';
 
 import { error } from './error';
 

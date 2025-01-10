@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RuleExecutorOptions, RuleTypeParams } from '../../types';
-import { ActionContext } from './action_context';
-import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
-import { ActionGroupId } from './constants';
-import { StackAlertType } from '../types';
+import type { RuleExecutorOptions, RuleTypeParams } from '../../types';
+import type { ActionContext } from './action_context';
+import type { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import type { ActionGroupId } from './constants';
+import type { StackAlertType } from '../types';
 
 export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration' | 'esqlQuery'> & {
   searchType: 'esQuery';

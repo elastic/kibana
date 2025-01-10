@@ -17,7 +17,7 @@ import {
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const expectTaskIsNotRunning = (taskStatus?: string) => {
   expect(['idle', 'claiming']).contain(taskStatus);

@@ -12,7 +12,8 @@ import type { AppError } from '@kbn/securitysolution-t-grid';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ErrorToastOptions, ToastsStart, Toast, NotificationsStart } from '@kbn/core/public';
-import { IEsError, isEsError } from '@kbn/search-errors';
+import type { IEsError } from '@kbn/search-errors';
+import { isEsError } from '@kbn/search-errors';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;

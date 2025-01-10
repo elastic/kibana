@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
-import { Readable } from 'stream';
+import type { Logger } from '@kbn/core/server';
+import type { Readable } from 'stream';
+import type {
+  Observable} from 'rxjs';
 import {
   map,
   from,
@@ -17,13 +19,13 @@ import {
   NEVER,
   mergeMap,
   catchError,
-  Observable,
   lastValueFrom,
 } from 'rxjs';
-import { UploadOptions } from '../blob_storage_service';
+import type { UploadOptions } from '../blob_storage_service';
 import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';
-import { fileAttributesReducer, Action } from './file_attributes_reducer';
+import type { Action } from './file_attributes_reducer';
+import { fileAttributesReducer } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
 import {
   AbortedUploadError,

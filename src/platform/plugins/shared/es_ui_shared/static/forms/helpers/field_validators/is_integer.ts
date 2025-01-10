@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFunc } from '../../hook_form_lib';
-import { ERROR_CODE } from './types';
+import type { ValidationFunc } from '../../hook_form_lib';
+import type { ERROR_CODE } from './types';
 
 export const isInteger =
   ({ message }: { message: string }) =>

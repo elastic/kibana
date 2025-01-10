@@ -9,12 +9,12 @@
 
 import { inspect } from 'util';
 
-import { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
+import type { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
 
-import { ChangeEvent } from './watcher';
-import { WorkerStatus } from './observe_worker';
-import { BundleCacheEvent } from './bundle_cache';
-import { OptimizerConfig } from './optimizer_config';
+import type { ChangeEvent } from './watcher';
+import type { WorkerStatus } from './observe_worker';
+import type { BundleCacheEvent } from './bundle_cache';
+import type { OptimizerConfig } from './optimizer_config';
 
 export interface OptimizerInitializedEvent {
   type: 'optimizer initialized';

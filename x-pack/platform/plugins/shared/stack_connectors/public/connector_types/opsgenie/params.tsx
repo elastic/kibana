@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import {
+import type {
   ActionParamsProps,
-  ActionConnectorMode,
-  IErrorObject,
+  IErrorObject} from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionConnectorMode
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
@@ -22,7 +23,7 @@ import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertSubActionParams,
 } from '../../../server/connector_types';
-import { EditActionCallback } from './types';
+import type { EditActionCallback } from './types';
 
 const actionOptions = [
   {

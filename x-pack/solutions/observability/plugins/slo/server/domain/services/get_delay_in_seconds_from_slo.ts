@@ -6,7 +6,7 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { SLODefinition } from '../models';
+import type { SLODefinition } from '../models';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinition) {
   const fixedInterval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)

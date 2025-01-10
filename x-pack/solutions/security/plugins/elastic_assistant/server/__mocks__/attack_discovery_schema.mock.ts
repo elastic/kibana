@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
 
 export const getAttackDiscoverySearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsAttackDiscoverySchema> = {

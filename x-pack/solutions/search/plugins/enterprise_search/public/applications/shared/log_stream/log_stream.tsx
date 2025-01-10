@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
+import type { LogStreamProps } from '@kbn/logs-shared-plugin/public';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 
 /*
  * EnterpriseSearchLogStream is a light wrapper on top of logsShared's embeddable LogStream component.

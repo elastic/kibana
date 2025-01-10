@@ -8,7 +8,7 @@
  */
 
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 describe('makeKQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;

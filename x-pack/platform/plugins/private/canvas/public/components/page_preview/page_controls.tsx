@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler } from 'react';
+import type { FC, ReactEventHandler } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

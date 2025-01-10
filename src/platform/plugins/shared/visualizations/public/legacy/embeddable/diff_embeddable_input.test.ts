@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaExecutionContext } from '@kbn/core/types';
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/types';
+import type { EmbeddableInput} from '@kbn/embeddable-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from './diff_embeddable_input';
 
 const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): EmbeddableInput => {

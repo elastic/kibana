@@ -8,7 +8,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonIcon } from '@elastic/eui';
 import { DiscoverLink } from './discover_link';
-import { AppContextProvider, AppDependencies } from '../app_context';
+import type { AppDependencies } from '../app_context';
+import { AppContextProvider } from '../app_context';
 
 describe('DiscoverLink', () => {
   const indexName = 'my-fancy-index';

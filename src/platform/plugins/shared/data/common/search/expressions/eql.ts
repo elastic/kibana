@@ -9,21 +9,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
-import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestStatistics} from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
+import type {
   KibanaContext,
   EqlSearchStrategyResponse,
-  EQL_SEARCH_STRATEGY,
-  EqlSearchStrategyRequest,
+  EqlSearchStrategyRequest} from '..';
+import {
+  EQL_SEARCH_STRATEGY
 } from '..';
 import { getEsQueryConfig } from '../../es_query';
-import { DataViewsContract, UiSettingsCommon } from '../..';
-import { EqlRawResponse } from './eql_raw_response';
+import type { DataViewsContract, UiSettingsCommon } from '../..';
+import type { EqlRawResponse } from './eql_raw_response';
 
 const name = 'eql';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { DEFINITIONS_ALIAS } from '@kbn/entityManager-plugin/server/lib/v2/constants';
 
 export async function clearEntityDefinitions(esClient: ElasticsearchClient) {

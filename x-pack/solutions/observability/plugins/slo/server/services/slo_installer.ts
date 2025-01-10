@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { ResourceInstaller } from '.';
+import type { Logger } from '@kbn/core/server';
+import type { ResourceInstaller } from '.';
 
 export interface SLOInstaller {
   install(): Promise<void>;

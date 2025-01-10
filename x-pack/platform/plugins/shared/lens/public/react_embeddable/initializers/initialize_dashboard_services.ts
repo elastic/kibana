@@ -6,13 +6,14 @@
  */
 
 import { noop } from 'lodash';
-import {
+import type {
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   PublishesWritablePanelTitle,
   PublishesWritablePanelDescription,
   SerializedTitles,
-  StateComparators,
+  StateComparators} from '@kbn/presentation-publishing';
+import {
   getUnchangingComparator,
   initializeTitles,
 } from '@kbn/presentation-publishing';
@@ -30,7 +31,7 @@ import type {
   LensApi,
 } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;

@@ -12,7 +12,7 @@ import type {
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from '@kbn/observability-ai-assistant-app-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {

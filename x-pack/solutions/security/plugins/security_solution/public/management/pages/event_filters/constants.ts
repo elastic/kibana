@@ -27,7 +27,7 @@ export const EVENT_FILTER_LIST_DEFINITION: CreateExceptionListSchema = {
   type: EVENT_FILTER_LIST_TYPE,
 };
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+export const SEARCHABLE_FIELDS: readonly string[] = [
   `name`,
   `description`,
   `entries.value`,

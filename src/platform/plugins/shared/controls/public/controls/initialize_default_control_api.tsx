@@ -9,8 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-containers';
+import type { StateComparators } from '@kbn/presentation-publishing';
 
 import type { ControlWidth, DefaultControlState } from '../../common';
 import type { ControlApiInitialization, ControlStateManager, DefaultControlApi } from './types';

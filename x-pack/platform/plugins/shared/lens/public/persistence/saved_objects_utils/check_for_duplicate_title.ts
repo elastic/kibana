@@ -11,7 +11,7 @@ import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 import type { ConfirmModalSavedObjectMeta } from './types';
-import { SavedObjectIndexStore } from '..';
+import type { SavedObjectIndexStore } from '..';
 
 /**
  * check for an existing saved object with the same title in ES

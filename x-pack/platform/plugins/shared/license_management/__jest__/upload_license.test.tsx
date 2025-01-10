@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 

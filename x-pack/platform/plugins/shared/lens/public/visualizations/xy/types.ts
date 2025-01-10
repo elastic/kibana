@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   LegendConfig,
@@ -21,7 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -35,7 +35,7 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
-import { CollapseFunction } from '../../../common/expressions';
+import type { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 

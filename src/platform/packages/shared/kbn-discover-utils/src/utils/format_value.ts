@@ -15,7 +15,7 @@ import type {
   HtmlContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
-import { EsHitRecord } from '../types';
+import type { EsHitRecord } from '../types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available

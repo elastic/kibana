@@ -15,11 +15,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/setup';
 import { MockLocatorDefinition } from '../../../../common/url_service/mocks';
 import { BrowserShortUrlClientFactory } from '../../../url_service/short_urls/short_url_client_factory';
+import type {
+  BrowserShortUrlClientHttp} from '../../../url_service/short_urls/short_url_client';
 import {
-  BrowserShortUrlClientHttp,
   BrowserShortUrlClient,
 } from '../../../url_service/short_urls/short_url_client';
-import { BrowserUrlService } from '../../../types';
+import type { BrowserUrlService } from '../../../types';
 import { LinkContent } from './link_content';
 
 const renderComponent = (props: ComponentProps<typeof LinkContent>) => {

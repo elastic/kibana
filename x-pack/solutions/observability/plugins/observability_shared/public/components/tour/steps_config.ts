@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTourStepProps, ElementTarget } from '@elastic/eui';
+import type { EuiTourStepProps, ElementTarget } from '@elastic/eui';
 
 interface TourStep {
   content: string;

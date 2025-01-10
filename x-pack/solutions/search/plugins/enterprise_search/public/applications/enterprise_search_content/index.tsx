@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { InitialAppData } from '../../../common/types';
+import type { InitialAppData } from '../../../common/types';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 
 import { ConnectorsRouter } from './components/connectors/connectors_router';

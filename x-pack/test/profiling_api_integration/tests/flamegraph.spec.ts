@@ -6,10 +6,10 @@
  */
 
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { sortBy } from 'lodash';
 import { getBettertest } from '../common/bettertest';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();

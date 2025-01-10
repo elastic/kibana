@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceProfileProvider } from '../../../../profiles';
+import type { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
 import { HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';

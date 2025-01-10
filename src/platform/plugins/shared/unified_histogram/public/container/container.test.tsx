@@ -14,7 +14,8 @@ import { act } from 'react-dom/test-utils';
 import { UnifiedHistogramLayout } from '../layout';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { UnifiedHistogramApi, UnifiedHistogramContainer } from './container';
+import type { UnifiedHistogramApi} from './container';
+import { UnifiedHistogramContainer } from './container';
 
 describe('UnifiedHistogramContainer', () => {
   it('should initialize', async () => {

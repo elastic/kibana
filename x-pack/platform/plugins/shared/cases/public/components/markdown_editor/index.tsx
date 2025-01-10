@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export * from './renderer';
 export * from './editor';
 export * from './eui_form';

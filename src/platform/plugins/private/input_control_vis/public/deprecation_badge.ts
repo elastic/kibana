@@ -9,15 +9,17 @@
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
 import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
 

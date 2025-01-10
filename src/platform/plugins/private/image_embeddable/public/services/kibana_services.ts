@@ -9,12 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { FilesStart } from '@kbn/files-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { FilesStart } from '@kbn/files-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { ImageEmbeddableStartDependencies } from '../plugin';
+import type { ImageEmbeddableStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let filesService: FilesStart;

@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { APIReturnType } from '../../../services/rest/create_call_api';
+import type { APIReturnType } from '../../../services/rest/create_call_api';
 
 type ApiKeyPayload = APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
 

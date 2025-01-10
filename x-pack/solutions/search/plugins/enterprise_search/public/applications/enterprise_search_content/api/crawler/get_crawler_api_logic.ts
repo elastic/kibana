@@ -8,7 +8,7 @@
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-import { CrawlerData, CrawlerDataFromServer } from './types';
+import type { CrawlerData, CrawlerDataFromServer } from './types';
 
 import { crawlerDataServerToClient } from './utils';
 

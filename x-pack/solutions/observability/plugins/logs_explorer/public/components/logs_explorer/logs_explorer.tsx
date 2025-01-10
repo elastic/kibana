@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import type { LogsExplorerController } from '../../controller';
 import { createLogsExplorerProfileCustomizations } from '../../customizations/logs_explorer_profile';
-import { LogsExplorerStartDeps } from '../../types';
+import type { LogsExplorerStartDeps } from '../../types';
 
 export interface CreateLogsExplorerArgs {
   core: CoreStart;

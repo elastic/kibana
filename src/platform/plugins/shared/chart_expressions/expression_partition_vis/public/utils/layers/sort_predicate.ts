@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ArrayEntry } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
+import type { ArrayEntry } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { BucketColumns, PartitionVisParams } from '../../../common/types';
+import { ChartTypes } from '../../../common/types';
 
 type SortFn = (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;
 

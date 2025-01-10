@@ -6,7 +6,7 @@
  */
 
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -14,7 +14,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { RulesPage } from './rules';

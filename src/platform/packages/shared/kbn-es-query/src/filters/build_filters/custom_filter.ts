@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter, FilterMeta, FilterStateStore } from './types';
+import { FILTERS } from './types';
 
 /** @public */
 export type CustomFilter = Filter;

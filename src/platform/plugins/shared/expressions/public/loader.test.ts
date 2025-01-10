@@ -12,13 +12,14 @@ import { first, skip, toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
-import {
-  parseExpression,
+import type {
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,
   ExpressionsService,
-  ExecutionContract,
+  ExecutionContract} from '../common';
+import {
+  parseExpression
 } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

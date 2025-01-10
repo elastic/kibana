@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Request, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { FetcherResult } from '../../hooks/use_fetcher';
+import type { Request } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { FetcherResult } from '../../hooks/use_fetcher';
 
 type InspectResponse = Request[];
 

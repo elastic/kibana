@@ -7,16 +7,17 @@
 
 import pMap from 'p-map';
 import times from 'lodash/times';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { intersection } from 'lodash';
-import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
+import type { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
 import {
   FINAL_SUMMARY_FILTER,
   getTimespanFilter,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { OverviewPing } from '../../../../common/runtime_types';
-import { createEsParams, SyntheticsEsClient } from '../../../lib';
+import type { OverviewPing } from '../../../../common/runtime_types';
+import type { SyntheticsEsClient } from '../../../lib';
+import { createEsParams } from '../../../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 

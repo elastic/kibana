@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
+import type {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import React, { lazy, Suspense, memo, useMemo, useContext } from 'react';
-import { BrowserFields } from '@kbn/alerting-types';
-import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
+import type { BrowserFields } from '@kbn/alerting-types';
+import type { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { AlertsCount } from './components/alerts_count/alerts_count';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import type { Alerts, BulkActionsPanelConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
-import { FieldBrowserOptions } from '../../field_browser/types';
+import type { FieldBrowserOptions } from '../../field_browser/types';
 import { InspectButton } from './components/inspect';
 import { ALERTS_TABLE_TITLE } from '../translations';
 

@@ -10,8 +10,8 @@ import 'jquery';
 
 import { debounce } from 'lodash';
 import { RendererStrings } from '../../../i18n';
-import { Pie } from '../../../public/functions/pie';
-import { RendererFactory } from '../../../types';
+import type { Pie } from '../../../public/functions/pie';
+import type { RendererFactory } from '../../../types';
 
 const { pie: strings } = RendererStrings;
 

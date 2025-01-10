@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
+import type { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { UseField, TextAreaField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import {

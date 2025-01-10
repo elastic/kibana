@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { catchError, last, map, Observable, of, tap } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import type { Observable} from 'rxjs';
+import { catchError, last, map, of, tap } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole } from '../../../../common';
+import type { Message} from '../../../../common';
+import { MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { hideTokenCountEvents } from './hide_token_count_events';
-import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
-import { LangTracer } from '../instrumentation/lang_tracer';
+import type { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
+import type { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 

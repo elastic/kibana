@@ -13,7 +13,7 @@ import {
   apiPublishesPanelTitle,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
-import { LinksParentApi } from '../types';
+import type { LinksParentApi } from '../types';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&

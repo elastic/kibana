@@ -9,7 +9,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { InvestigationForm } from '../investigation_edit_form';
+import type { InvestigationForm } from '../investigation_edit_form';
 import { useFetchAllInvestigationTags } from '../../../hooks/use_fetch_all_investigation_tags';
 
 const I18N_TAGS_LABEL = i18n.translate(

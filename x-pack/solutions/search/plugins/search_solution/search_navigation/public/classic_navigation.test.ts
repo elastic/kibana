@@ -9,7 +9,7 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { classicNavigationFactory } from './classic_navigation';
-import { ClassicNavItem } from './types';
+import type { ClassicNavItem } from './types';
 
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [

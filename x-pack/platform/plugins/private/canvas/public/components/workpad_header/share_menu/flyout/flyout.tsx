@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -15,12 +16,12 @@ import {
 } from '../../../../state/selectors/workpad';
 
 import { ShareWebsiteFlyout as FlyoutComponent } from './flyout.component';
-import { State, CanvasWorkpad } from '../../../../../types';
+import type { State, CanvasWorkpad } from '../../../../../types';
 import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
-import { OnCloseFn } from '../share_menu.component';
+import type { OnCloseFn } from '../share_menu.component';
 export type { OnDownloadFn, OnCopyFn } from './flyout.component';
 
 const getUnsupportedRenderers = (state: State) => {

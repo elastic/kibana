@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ControlPanels } from './types';
+import type { ControlPanels } from './types';
 
 export const availableControlsPanels = {
   NAMESPACE: 'data_stream.namespace',

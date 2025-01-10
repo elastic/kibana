@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext, Config, defineDockerServersConfig } from '@kbn/test';
+import type { FtrConfigProviderContext, Config } from '@kbn/test';
+import { defineDockerServersConfig } from '@kbn/test';
 
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { dockerImage } from '../../../fleet_api_integration/config.base';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import type { DeploymentAgnosticCommonServices } from '../services';
+import { services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;

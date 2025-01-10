@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
+import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
@@ -14,8 +14,8 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

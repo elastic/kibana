@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import { ListStreamsResponse } from '@kbn/streams-schema';
+import type { ListStreamsResponse } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { listStreams } from '../../lib/streams/stream_crud';

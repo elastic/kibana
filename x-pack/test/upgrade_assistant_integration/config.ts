@@ -6,7 +6,7 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'node:path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
