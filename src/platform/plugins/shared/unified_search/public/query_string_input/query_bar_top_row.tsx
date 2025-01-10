@@ -699,6 +699,7 @@ export const QueryBarTopRow = React.memo(
             isDisabled={props.isDisabled}
             appName={appName}
             submitOnBlur={props.submitOnBlur}
+            bubbleSubmitEvent={true}
             deps={{
               unifiedSearch,
               data,
