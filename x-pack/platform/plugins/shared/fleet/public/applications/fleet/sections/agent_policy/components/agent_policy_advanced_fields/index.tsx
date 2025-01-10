@@ -129,7 +129,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
 
   const userHasAccessToAllPolicySpaces = useMemo(
-    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes(UNKNOWN_SPACE),
+    () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
 
