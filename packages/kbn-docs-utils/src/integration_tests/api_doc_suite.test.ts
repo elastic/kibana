@@ -383,7 +383,7 @@ describe('Types', () => {
   it('Function type is exported correctly', () => {
     const fnType = doc.client.find((c) => c.label === 'FnWithGeneric');
     expect(fnType).toBeDefined();
-    expect(fnType?.type).toBe(TypeKind.TypeKind);
+    expect(fnType?.type).toBe(TypeKind.TypeReferenceKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
       Array [
         "<T>(t: T) => ",
@@ -411,7 +411,7 @@ describe('Types', () => {
   it('Union type is exported correctly', () => {
     const type = doc.client.find((c) => c.label === 'ImAType');
     expect(type).toBeDefined();
-    expect(type?.type).toBe(TypeKind.TypeKind);
+    expect(type?.type).toBe(TypeKind.TypeReferenceKind);
     expect(type?.signature).toBeDefined();
     expect(type?.signature!).toMatchInlineSnapshot(`
       Array [

@@ -88,7 +88,7 @@ it('Function type is exported as type with signature', () => {
     captureReferences: false,
   });
   expect(def).toBeDefined();
-  expect(def?.type).toBe(TypeKind.TypeKind);
+  expect(def?.type).toBe(TypeKind.TypeReferenceKind);
   expect(def?.signature?.length).toBeGreaterThan(0);
 });
 

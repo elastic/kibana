@@ -18,7 +18,7 @@ export function getTypeKind(node: Node): TypeKind {
     // For some reason constructors come back as Any type.
     return TypeKind.FunctionKind;
   } else if (Node.isTypeAliasDeclaration(node)) {
-    return TypeKind.TypeKind;
+    return TypeKind.TypeReferenceKind;
   } else {
     return getTypeKindForType(node.getType());
   }
