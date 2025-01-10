@@ -125,9 +125,6 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'management:index_management',
-                      title: i18n.translate('xpack.enterpriseSearch.searchNav.kibana.indices', {
-                        defaultMessage: 'Indices',
-                      }),
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },

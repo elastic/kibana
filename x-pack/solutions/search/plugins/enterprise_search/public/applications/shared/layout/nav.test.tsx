@@ -44,7 +44,7 @@ const baseNavItems = [
         href: '/app/management/data/index_management/',
         id: 'search_indices',
         items: undefined,
-        name: 'Indices',
+        name: 'Index Management',
       },
       {
         'data-test-subj': 'searchSideNav-Connectors',
@@ -149,7 +149,7 @@ const mockNavLinks = [
   },
   {
     id: 'management:index_management',
-    title: 'Indices',
+    title: 'Index Management',
     url: '/app/management/data/index_management/',
   },
   {
