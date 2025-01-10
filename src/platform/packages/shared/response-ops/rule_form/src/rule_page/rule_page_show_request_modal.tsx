@@ -17,17 +17,22 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { RequestCodeBlock } from '../request_code_block';
 import { SHOW_REQUEST_MODAL_SUBTITLE, SHOW_REQUEST_MODAL_TITLE } from '../translations';
+import { useRuleFormScreenContext } from '../hooks';
 
 export interface RulePageShowRequestModalProps {
-  onClose: () => void;
   isEdit?: boolean;
 }
 
 export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) => {
-  const { onClose, isEdit = false } = props;
+  const { isEdit = false } = props;
+  const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
+
+  const onClose = useCallback(() => {
+    setIsShowRequestScreenVisible(false);
+  }, [setIsShowRequestScreenVisible]);
 
   return (
     <EuiModal

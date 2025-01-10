@@ -32,6 +32,7 @@ import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
+import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 
 export interface RulePageProps {
   isEdit?: boolean;
@@ -70,7 +71,8 @@ export const RulePage = (props: RulePageProps) => {
     }
   }, [touched, onCancel]);
 
-  const { isConnectorsScreenVisible, setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const { isConnectorsScreenVisible, isShowRequestScreenVisible, setIsConnectorsScreenVisible } =
+    useRuleFormScreenContext();
   const onCloseConnectorsModal = useCallback(
     () => setIsConnectorsScreenVisible(false),
     [setIsConnectorsScreenVisible]
@@ -158,6 +160,7 @@ export const RulePage = (props: RulePageProps) => {
         </EuiConfirmModal>
       )}
       {isConnectorsScreenVisible && <RuleActionsConnectorsModal onClose={onCloseConnectorsModal} />}
+      {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
     </>
   );
 };

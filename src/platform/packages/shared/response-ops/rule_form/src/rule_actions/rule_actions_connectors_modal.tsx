@@ -15,23 +15,23 @@ import {
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ACTION_TYPE_MODAL_TITLE } from '../translations';
 import { RuleActionsConnectorsBody } from './rule_actions_connectors_body';
+import { useRuleFormScreenContext } from '../hooks';
 
-export interface RuleActionsConnectorsModalProps {
-  onClose: () => void;
-}
-
-export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProps) => {
-  const { onClose } = props;
-
+export const RuleActionsConnectorsModal = () => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);
 
   const responsiveHeight = isFullscreenPortrait ? 'initial' : '80vh';
   const responsiveOverflow = isFullscreenPortrait ? 'auto' : 'hidden';
+
+  const { setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const onClose = useCallback(() => {
+    setIsConnectorsScreenVisible(false);
+  }, [setIsConnectorsScreenVisible]);
 
   return (
     <EuiModal
