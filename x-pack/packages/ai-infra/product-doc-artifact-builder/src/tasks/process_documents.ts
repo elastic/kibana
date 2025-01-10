@@ -56,7 +56,9 @@ const processDocument = (document: ExtractedDocument) => {
     })
     // remove edit links
     .replaceAll(/\[\s*edit\s*\]\(\s*[^)]+\s*\)/g, '')
-    // remove empty and image links
+    // // remove empty links
+    .replaceAll('[]()', '')
+    // remove image links
     .replaceAll(/\[\]\(\s*[^)]+\s*\)/g, '')
     // limit to 2 consecutive carriage return
     .replaceAll(/\n\n+/g, '\n\n');
