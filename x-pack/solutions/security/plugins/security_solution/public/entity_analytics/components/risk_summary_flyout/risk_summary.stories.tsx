@@ -27,6 +27,7 @@ export const Default: Story<void> = () => {
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
+            isLinkEnabled
           />
         </div>
       </TestProvider>
@@ -34,7 +35,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const PreviewMode: Story<void> = () => {
+export const LinkEnabledInPreviewMode: Story<void> = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -43,7 +44,27 @@ export const PreviewMode: Story<void> = () => {
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
+            openDetailsPanel={() => {}}
+            isLinkEnabled
             isPreviewMode
+          />
+        </div>
+      </TestProvider>
+    </StorybookProviders>
+  );
+};
+
+export const LinkDisabled: Story<void> = () => {
+  return (
+    <StorybookProviders>
+      <TestProvider>
+        <div style={{ maxWidth: '300px' }}>
+          <FlyoutRiskSummary
+            riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            queryId={'testQuery'}
+            recalculatingScore={false}
+            openDetailsPanel={() => {}}
+            isLinkEnabled={false}
           />
         </div>
       </TestProvider>

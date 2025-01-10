@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../common/types';
+import { WiredStreamDefinition } from '@kbn/streams-schema';
 
-export const rootStreamDefinition: StreamDefinition = {
-  id: 'logs',
-  managed: true,
-  processing: [],
-  children: [],
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
+export const rootStreamDefinition: WiredStreamDefinition = {
+  name: 'logs',
+  stream: {
+    ingest: {
+      processing: [],
+      routing: [],
+      wired: {
+        fields: {
+          '@timestamp': {
+            type: 'date',
+          },
+          message: {
+            type: 'match_only_text',
+          },
+          'host.name': {
+            type: 'keyword',
+          },
+          'log.level': {
+            type: 'keyword',
+          },
+        },
+      },
     },
-    {
-      name: 'message',
-      type: 'match_only_text',
-    },
-    {
-      name: 'host.name',
-      type: 'keyword',
-    },
-    {
-      name: 'log.level',
-      type: 'keyword',
-    },
-  ],
+  },
 };

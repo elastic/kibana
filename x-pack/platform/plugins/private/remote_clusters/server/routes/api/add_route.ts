@@ -95,6 +95,12 @@ export const register = (deps: RouteDependencies): void => {
   router.post(
     {
       path: API_BASE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodyValidation,
       },

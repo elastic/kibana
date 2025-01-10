@@ -149,7 +149,7 @@ export const getNotesRoute = (
           if (createdByFilter) {
             // because the notes createdBy property can be either full_name, email or username
             // see pickSaveNote (https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object/notes/saved_object.ts#L302)
-            // which uses the getUserDisplayName (https://github.com/elastic/kibana/blob/main/packages/kbn-user-profile-components/src/user_profile.ts#L138)
+            // which uses the getUserDisplayName (https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts#L138)
             const [_, { security }] = await startServices();
             const users: UserProfile[] = await security.userProfiles.bulkGet({
               uids: new Set([createdByFilter]),
