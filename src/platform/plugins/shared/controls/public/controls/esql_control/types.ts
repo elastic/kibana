@@ -10,6 +10,7 @@ import type { PublishesPanelTitle, PublishingSubject } from '@kbn/presentation-p
 import type { ESQLControlState as ControlState } from '@kbn/esql/public';
 import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
+import type { CanClearVariables } from '../../types';
 
 interface PublishesSelectedOptions {
   selectedOptions$: PublishingSubject<string[]>;
@@ -19,4 +20,5 @@ export interface ESQLControlState extends DefaultControlState, Omit<ControlState
 
 export type ESQLControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
+  CanClearVariables &
   PublishesSelectedOptions;

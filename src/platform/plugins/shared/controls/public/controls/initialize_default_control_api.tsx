@@ -38,7 +38,6 @@ export const initializeDefaultControlApi = (
       blockingError,
       setBlockingError: (error) => blockingError.next(error),
       setDataLoading: (loading) => dataLoading.next(loading),
-      clearVariables: () => {},
     },
     comparators: {
       grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
