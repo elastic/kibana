@@ -16,7 +16,6 @@ import { registerOpenRoute } from './register_open_route';
 import { registerRefreshRoute } from './register_refresh_route';
 import { registerReloadRoute } from './register_reload_route';
 import { registerDeleteRoute } from './register_delete_route';
-import { registerUnfreezeRoute } from './register_unfreeze_route';
 import { registerGetRoute } from './register_get_route';
 import { registerCreateRoute } from './register_create_route';
 
@@ -30,7 +29,6 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerRefreshRoute(dependencies);
   registerReloadRoute(dependencies);
   registerDeleteRoute(dependencies);
-  registerUnfreezeRoute(dependencies);
   registerGetRoute(dependencies);
   registerCreateRoute(dependencies);
 }
