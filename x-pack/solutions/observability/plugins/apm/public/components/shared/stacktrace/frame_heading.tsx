@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { FrameHeadingRendererProps } from './frame_heading_renderers';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
-  FrameHeadingRendererProps,
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
   RubyFrameHeadingRenderer,

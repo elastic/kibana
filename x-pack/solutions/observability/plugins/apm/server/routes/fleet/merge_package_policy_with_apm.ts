@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
-import { APMPluginStartDependencies } from '../../types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import type { APMPluginStartDependencies } from '../../types';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import {
   getPackagePolicyWithAgentConfigurations,

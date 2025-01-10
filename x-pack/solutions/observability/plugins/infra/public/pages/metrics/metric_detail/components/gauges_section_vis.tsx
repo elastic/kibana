@@ -15,12 +15,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { get, last, max } from 'lodash';
-import React, { ReactText } from 'react';
+import type { ReactText } from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
 import { createFormatter } from '../../../../../common/formatters';
-import { SeriesOverrides, VisSectionProps } from '../types';
+import type { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
 
 const getFormatter =

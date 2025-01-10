@@ -120,6 +120,7 @@
     "@kbn/observability-utils-common",
     "@kbn/core-plugins-server",
     "@kbn/config",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,10 +7,11 @@
 
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { APIReturnType, callApmApi } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 type Config =

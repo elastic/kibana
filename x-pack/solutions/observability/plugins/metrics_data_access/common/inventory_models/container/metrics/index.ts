@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetricsWithCharts } from '../../types';
+import type { InventoryMetricsWithCharts } from '../../types';
 import { cpu } from './snapshot/cpu';
 import { memory } from './snapshot/memory';
 import { rx } from './snapshot/rx';
@@ -21,7 +21,7 @@ import { containerMemory } from './tsvb/container_memory';
 import { containerNetworkTraffic } from './tsvb/container_network_traffic';
 import { containerOverview } from './tsvb/container_overview';
 import type { ContainerFormulas } from './formulas';
-import { ContainerCharts } from './charts';
+import type { ContainerCharts } from './charts';
 
 const containerSnapshotMetrics = { cpu, memory, rx, tx };
 
