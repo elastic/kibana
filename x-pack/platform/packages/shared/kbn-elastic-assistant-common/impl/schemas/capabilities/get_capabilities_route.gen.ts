@@ -19,5 +19,6 @@ import { z } from '@kbn/zod';
 export type GetCapabilitiesResponse = z.infer<typeof GetCapabilitiesResponse>;
 export const GetCapabilitiesResponse = z.object({
   assistantModelEvaluation: z.boolean(),
+  attackDiscoveryAlertFiltering: z.boolean(),
   defendInsights: z.boolean(),
 });

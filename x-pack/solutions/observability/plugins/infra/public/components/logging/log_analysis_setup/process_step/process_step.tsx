@@ -15,12 +15,12 @@ import {
   EuiCallOut,
   EuiCode,
 } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { SetupStatus } from '../../../../../common/log_analysis';
+import type { SetupStatus } from '../../../../../common/log_analysis';
 import { CreateMLJobsButton } from './create_ml_jobs_button';
 import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 

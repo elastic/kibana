@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiHorizontalRule,
@@ -12,15 +13,15 @@ import {
   EuiFlexGroup,
   EuiSelect,
   EuiComboBox,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
-import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
+import type { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
-import { NormalizedFields, MetricRowBaseProps } from './types';
+import type { NormalizedFields, MetricRowBaseProps } from './types';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;

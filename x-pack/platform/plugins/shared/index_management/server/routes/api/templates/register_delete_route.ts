@@ -25,6 +25,12 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
   router.post(
     {
       path: addBasePath('/delete_index_templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { body: bodySchema },
     },
     async (context, request, response) => {

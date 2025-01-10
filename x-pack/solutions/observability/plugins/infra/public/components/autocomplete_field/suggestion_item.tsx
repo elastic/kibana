@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiIcon, useEuiFontSize } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { Theme } from '@emotion/react';
-import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
 
 interface Props {

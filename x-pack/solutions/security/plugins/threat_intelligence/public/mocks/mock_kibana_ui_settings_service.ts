@@ -9,7 +9,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../constants/common';
 
 /**
- * Creates an object to pass to the uiSettings property when creating a KibanaReacrContext (see src/plugins/kibana_react/public/context/context.tsx).
+ * Creates an object to pass to the uiSettings property when creating a KibanaReacrContext (see src/platform/plugins/shared/kibana_react/public/context/context.tsx).
  * @param dateFormat defaults to ''
  * @param timezone defaults to 'UTC
  * @returns the object {@link IUiSettingsClient}

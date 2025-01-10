@@ -10,7 +10,7 @@ import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
 import styled from '@emotion/styled';
-import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
+import type { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
 import { COLOR_MODES_STANDARD } from '@elastic/eui';
 
 interface DensityChartProps {

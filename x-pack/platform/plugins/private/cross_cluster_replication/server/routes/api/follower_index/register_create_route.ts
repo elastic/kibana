@@ -39,6 +39,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: addBasePath('/follower_indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },
