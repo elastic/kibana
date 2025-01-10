@@ -23,7 +23,6 @@ import {
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
-import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
