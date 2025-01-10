@@ -4421,7 +4421,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser@link:packages/core/chrome/core-chrome-browser":
+"@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
   version "0.0.0"
   uid ""
 
@@ -5341,7 +5341,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-shared@link:packages/deeplinks/shared":
+"@kbn/deeplinks-shared@link:src/platform/packages/shared/deeplinks/shared":
   version "0.0.0"
   uid ""
 
@@ -5877,7 +5877,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding@link:packages/kbn-guided-onboarding":
+"@kbn/guided-onboarding@link:src/platform/packages/shared/kbn-guided-onboarding":
   version "0.0.0"
   uid ""
 
@@ -5905,15 +5905,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-card@link:packages/home/sample_data_card":
+"@kbn/home-sample-data-card@link:src/platform/packages/shared/home/sample_data_card":
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-tab@link:packages/home/sample_data_tab":
+"@kbn/home-sample-data-tab@link:src/platform/packages/shared/home/sample_data_tab":
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-types@link:packages/home/sample_data_types":
+"@kbn/home-sample-data-types@link:src/platform/packages/shared/home/sample_data_types":
   version "0.0.0"
   uid ""
 
@@ -6045,7 +6045,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/item-buffer@link:packages/kbn-item-buffer":
+"@kbn/item-buffer@link:src/platform/packages/private/kbn-item-buffer":
   version "0.0.0"
   uid ""
 
@@ -6249,11 +6249,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-ids@link:packages/kbn-management/settings/setting_ids":
+"@kbn/management-settings-ids@link:src/platform/packages/shared/kbn-management/settings/setting_ids":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-section-registry@link:packages/kbn-management/settings/section_registry":
+"@kbn/management-settings-section-registry@link:src/platform/packages/shared/kbn-management/settings/section_registry":
   version "0.0.0"
   uid ""
 
@@ -6697,31 +6697,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-common@link:packages/react/kibana_context/common":
+"@kbn/react-kibana-context-common@link:src/platform/packages/shared/react/kibana_context/common":
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-render@link:packages/react/kibana_context/render":
+"@kbn/react-kibana-context-render@link:src/platform/packages/shared/react/kibana_context/render":
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-root@link:packages/react/kibana_context/root":
+"@kbn/react-kibana-context-root@link:src/platform/packages/shared/react/kibana_context/root":
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-styled@link:packages/react/kibana_context/styled":
+"@kbn/react-kibana-context-styled@link:src/platform/packages/shared/react/kibana_context/styled":
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-theme@link:packages/react/kibana_context/theme":
+"@kbn/react-kibana-context-theme@link:src/platform/packages/shared/react/kibana_context/theme":
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-mount@link:packages/react/kibana_mount":
+"@kbn/react-kibana-mount@link:src/platform/packages/shared/react/kibana_mount":
   version "0.0.0"
   uid ""
 
-"@kbn/react-mute-legacy-root-warning@link:packages/kbn-react-mute-legacy-root-warning":
+"@kbn/react-mute-legacy-root-warning@link:src/platform/packages/private/kbn-react-mute-legacy-root-warning":
   version "0.0.0"
   uid ""
 
@@ -6929,7 +6929,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+"@kbn/saved-objects-settings@link:src/platform/packages/private/kbn-saved-objects-settings":
   version "0.0.0"
   uid ""
 
@@ -7249,11 +7249,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-common-settings@link:packages/serverless/settings/common":
+"@kbn/serverless-common-settings@link:src/platform/packages/private/serverless/settings/common":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability-settings@link:packages/serverless/settings/observability_project":
+"@kbn/serverless-observability-settings@link:src/platform/packages/shared/serverless/settings/observability_project":
   version "0.0.0"
   uid ""
 
@@ -7261,7 +7261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
+"@kbn/serverless-project-switcher@link:src/platform/packages/private/serverless/project_switcher":
   version "0.0.0"
   uid ""
 
@@ -7281,7 +7281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-types@link:packages/serverless/types":
+"@kbn/serverless-types@link:src/platform/packages/private/serverless/types":
   version "0.0.0"
   uid ""
 
@@ -7857,7 +7857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
+"@kbn/url-drilldown-plugin@link:x-pack/platform/plugins/private/drilldowns/url_drilldown":
   version "0.0.0"
   uid ""
 
