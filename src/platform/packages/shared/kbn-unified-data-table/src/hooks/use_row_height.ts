@@ -132,12 +132,10 @@ export const useRowHeight = ({
     (newRowHeightLines: number) => {
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
-      setLineCountInput(newRowHeightLines);
     },
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
 
-  // it's necessary to set correct row height value to input when only URL changes, but onChangeRowHeightLines does not fire
   useEffect(() => {
     if (rowHeight === RowHeightMode.custom) {
       setLineCountInput(rowHeightState && rowHeightState > 0 ? rowHeightState : configRowHeight);
