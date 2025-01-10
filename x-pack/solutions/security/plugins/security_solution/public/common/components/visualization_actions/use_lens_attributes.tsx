@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -32,6 +33,7 @@ export const useLensAttributes = ({
   stackByField,
   title,
 }: UseLensAttributesProps): LensAttributes | null => {
+  const { euiTheme } = useEuiTheme();
   const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -73,8 +75,8 @@ export const useLensAttributes = ({
       lensAttributes ??
       ((getLensAttributes &&
         stackByField !== null &&
-        getLensAttributes(stackByField, extraOptions)) as LensAttributes),
-    [extraOptions, getLensAttributes, lensAttributes, stackByField]
+        getLensAttributes({ stackByField, euiTheme, extraOptions })) as LensAttributes),
+    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;

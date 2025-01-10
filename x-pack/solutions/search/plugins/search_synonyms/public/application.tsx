@@ -11,8 +11,9 @@ import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router } from '@kbn/shared-ux-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { AppPluginStartDependencies } from './types';
+import { SearchSynonymsOverview } from './components/overview/overview';
 
 export const renderApp = async (
   core: CoreStart,
@@ -24,7 +25,11 @@ export const renderApp = async (
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router history={services.history}>
-            <div>Synonyms</div>
+            <Routes>
+              <Route path="/">
+                <SearchSynonymsOverview />
+              </Route>
+            </Routes>
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
