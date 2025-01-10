@@ -289,7 +289,7 @@ export const MetricExpression = ({
                     onChange={onFieldChange}
                     isClearable={false}
                     // @ts-expect-error upgrade typescript v5.1.6
-                    isInvalid={errors.metric.length > 0}
+                    isInvalid={errors.metric?.length > 0}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -343,7 +343,7 @@ export const MetricExpression = ({
                   singleSelection={{ asPlainText: true }}
                   data-test-subj="availableFieldsOptionsComboBox"
                   // @ts-expect-error upgrade typescript v5.1.6
-                  isInvalid={errors.metric.length > 0}
+                  isInvalid={errors.metric?.length > 0}
                   placeholder={firstFieldOption.text}
                   options={availableFieldsOptions}
                   noSuggestions={!availableFieldsOptions.length}

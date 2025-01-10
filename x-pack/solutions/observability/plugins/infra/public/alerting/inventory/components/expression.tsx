@@ -51,7 +51,6 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -127,14 +126,6 @@ export const Expressions: React.FC<Props> = (props) => {
   const [paramsWarning, setParamsWarning] = useState<string>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
 
-  const dataViewIndexPattern = useMemo<DataViewBase>(
-    () => ({
-      fields: dataView?.fields || [],
-      title: dataView?.getIndexPattern() || 'unknown-index',
-    }),
-    [dataView]
-  );
-
   useEffect(() => {
     const initSearchSource = async () => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
@@ -156,7 +147,7 @@ export const Expressions: React.FC<Props> = (props) => {
             (await data.dataViews.get('infra_rules_data_view')) ??
             (await data.dataViews.getDefaultDataView());
 
-          if (metricsDataView && Object.keys(metricsDataView).length !== 0) {
+          if (metricsDataView) {
             newSearchSource.setField('index', metricsDataView);
             setDataView(metricsDataView);
           }
@@ -452,8 +443,7 @@ export const Expressions: React.FC<Props> = (props) => {
         </EuiFlexGroup>
       </div>
       <EuiSpacer size="xs" />
-      {dataView &&
-        ruleParams.criteria &&
+      {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
@@ -475,7 +465,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
-                indexPattern={dataView.getIndexPattern()}
+                indexPattern={dataView?.getIndexPattern() || 'unknown-index'}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
@@ -542,7 +532,7 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {metadata && dataViewIndexPattern ? (
+        {metadata && dataView && dataView.getIndexPattern() ? (
           <MetricsExplorerKueryBar
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -23,6 +23,8 @@ import { indexPatternEditorPluginMock as mockDataViewEditorPlugin } from '@kbn/d
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { kibanaStartMock } from '@kbn/observability-plugin/public/utils/kibana_react.mock';
+import { chartPluginMock as mockChartPlugin } from '@kbn/charts-plugin/public/mocks';
+import { ReloadRequestTimeProvider } from '../../../hooks/use_reload_request_time';
 
 const mockDataView = {
   id: 'mock-id',
@@ -41,6 +43,11 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
+const mockToasts = {
+  danger: jest.fn(),
+  warning: jest.fn(),
+};
+
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
@@ -52,7 +59,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
         get: jest.fn().mockReturnValue(Promise.resolve({ isPersisted: jest.fn() })),
       },
       dataViewEditor: mockDataViewEditorPlugin.createStartContract(),
+      charts: mockChartPlugin.createStartContract(),
     },
+    notifications: { toasts: mockToasts },
   }),
 }));
 
@@ -85,11 +94,7 @@ describe('Expression', () => {
       nodeType: undefined,
       filterQueryText: '',
       searchConfiguration: {
-        index: {
-          id: 'infra_rules_data_view',
-          title: 'kbn-data-forge-fake_hosts.fake_hosts-*',
-          timeFieldName: '@timestamp',
-        },
+        index: 'mockedIndex',
         query: {
           query: '',
           language: 'kuery',
@@ -97,20 +102,22 @@ describe('Expression', () => {
       },
     };
     const wrapper = mountWithIntl(
-      <Expressions
-        ruleInterval="1m"
-        ruleThrottle="1m"
-        alertNotifyWhen="onThrottleInterval"
-        ruleParams={ruleParams as any}
-        errors={{}}
-        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
-        setRuleProperty={() => {}}
-        metadata={{
-          ...currentOptions,
-          adHocDataViewList: [],
-        }}
-        onChangeMetaData={() => {}}
-      />
+      <ReloadRequestTimeProvider>
+        <Expressions
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={ruleParams as any}
+          errors={{}}
+          setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+          setRuleProperty={() => {}}
+          metadata={{
+            ...currentOptions,
+            adHocDataViewList: [],
+          }}
+          onChangeMetaData={() => {}}
+        />
+      </ReloadRequestTimeProvider>
     );
 
     const update = async () =>
@@ -151,34 +158,15 @@ describe('Expression', () => {
     const FILTER_QUERY =
       '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
 
-    const ruleParams = {
-      criteria: [
-        {
-          metric: 'cpuV2',
-          timeSize: 1,
-          timeUnit: 'm',
-          threshold: [10],
-          comparator: COMPARATORS.GREATER_THAN,
-        },
-      ],
+    const currentOptions = {
+      filter: 'host.name: "testHostName"',
       nodeType: undefined,
-      filterQueryText: 'host.name: "testHostName"',
-      filterQuery: FILTER_QUERY,
+      customMetrics: [],
+      options: { metric: { type: 'memory' } },
+      adHocDataViewList: [],
     };
 
-    const wrapper = shallowWithIntl(
-      <Expressions
-        ruleInterval="1m"
-        ruleThrottle="1m"
-        alertNotifyWhen="onThrottleInterval"
-        ruleParams={ruleParams as any}
-        errors={{}}
-        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
-        setRuleProperty={() => {}}
-        metadata={{ adHocDataViewList: [] }}
-        onChangeMetaData={() => {}}
-      />
-    );
+    const { wrapper } = await setup(currentOptions as AlertContextMeta);
 
     const chart = wrapper.find('[data-test-subj="preview-chart"]');
 
@@ -189,14 +177,13 @@ describe('Expression', () => {
     it('should prefill the alert using the context metadata', async () => {
       const currentOptions = {
         filter: '',
-        nodeType: 'pod',
+        nodeType: 'host',
         customMetrics: [exampleCustomMetric],
         options: { metric: exampleCustomMetric },
         adHocDataViewList: [],
       };
-      const { ruleParams, update } = await setup(currentOptions as AlertContextMeta);
-      await update();
-      expect(ruleParams.nodeType).toBe('pod');
+      const { ruleParams } = await setup(currentOptions as AlertContextMeta);
+      expect(ruleParams.nodeType).toBe('host');
       expect(ruleParams.filterQueryText).toBe('');
       expect(ruleParams.criteria).toEqual([
         {
