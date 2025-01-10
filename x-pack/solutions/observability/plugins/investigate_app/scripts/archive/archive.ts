@@ -14,14 +14,7 @@ import { options } from './cli';
 async function archiveAllRelevantData({ filePath, esUrl }: { filePath: string; esUrl: string }) {
   spawnSync(
     'node',
-    [
-      'scripts/es_archiver',
-      'save',
-      `${filePath}/alerts`,
-      '.internal.alerts-observability.*',
-      '--es-url',
-      esUrl,
-    ],
+    ['scripts/es_archiver', 'save', `${filePath}/alerts`, '.internal.alerts-*', '--es-url', esUrl],
     {
       stdio: 'inherit',
     }
