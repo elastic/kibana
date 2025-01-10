@@ -224,7 +224,7 @@ export interface LLMModel {
   promptTokenLimit?: number;
 }
 
-export { ActionConnector };
+export type { ActionConnector };
 export type InferenceActionConnector = ActionConnector & {
   config: { provider: ServiceProviderKeys };
 };
