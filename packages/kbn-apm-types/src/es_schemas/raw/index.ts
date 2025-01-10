@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './apm_base_doc';
-export type * from './error_raw';
-export type * from './event_raw';
-export type * from './metric_raw';
-export type * from './span_raw';
-export type * from './transaction_raw';
+export * from './apm_base_doc';
+export * from './error_raw';
+export * from './event_raw';
+export * from './metric_raw';
+export * from './span_raw';
+export * from './transaction_raw';

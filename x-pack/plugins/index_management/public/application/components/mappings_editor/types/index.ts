@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type * from './mappings_editor';
+export * from './mappings_editor';
 
 export * from './document_fields';
 
-export type * from './state';
+export * from './state';

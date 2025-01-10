@@ -8,6 +8,6 @@
 import * as groupActions from './actions';
 import * as groupSelectors from './selectors';
 
-export type * from './types';
+export * from './types';
 
 export { groupActions, groupSelectors };

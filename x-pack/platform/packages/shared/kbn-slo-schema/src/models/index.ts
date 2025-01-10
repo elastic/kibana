@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type * from './pagination';
+export * from './pagination';
 export * from './duration';

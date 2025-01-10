@@ -68,4 +68,4 @@ export { FloatingActions } from './floating_actions/floating_actions';
  */
 export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
 
-export type * from './types';
+export * from './types';

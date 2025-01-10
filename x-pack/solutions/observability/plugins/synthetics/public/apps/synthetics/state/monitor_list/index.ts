@@ -132,7 +132,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
 });
 
 export * from './api';
-export type * from './models';
+export * from './models';
 export * from './actions';
 export * from './effects';
 export * from './selectors';

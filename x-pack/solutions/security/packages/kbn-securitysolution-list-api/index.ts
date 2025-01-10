@@ -9,4 +9,4 @@ export * from './src/api';
 export * from './src/fp_utils';
 export * from './src/list_api';
 export * from './src/list_item_api';
-export type * from './src/types';
+export * from './src/types';

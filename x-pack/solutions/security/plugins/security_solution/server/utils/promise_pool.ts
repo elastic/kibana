@@ -73,10 +73,10 @@ export const initPromisePool = async <Item, Result, Error = unknown>({
         outcome.errors.push({ item, error });
       })
       .finally(() => {
-        void tasks.splice(tasks.indexOf(task), 1);
+        tasks.splice(tasks.indexOf(task), 1);
       });
 
-    void tasks.push(task);
+    tasks.push(task);
   }
 
   // Wait for all remaining tasks to finish

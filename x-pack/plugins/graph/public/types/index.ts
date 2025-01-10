@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from './config';
-export type * from './app_state';
-export type * from './workspace_state';
-export type * from './persistence';
+export * from './config';
+export * from './app_state';
+export * from './workspace_state';
+export * from './persistence';

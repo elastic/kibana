@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type * from './types';
+export * from './types';
 export { casesCustomFields } from './factory';

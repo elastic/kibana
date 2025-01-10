@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './src/es_schemas/ui';
-export type * from './src/es_schemas/ui/fields';
+export * from './src/es_schemas/ui';
+export * from './src/es_schemas/ui/fields';

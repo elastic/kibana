@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
+export * from './types';
 export { Visitor, type VisitorOptions } from './visitor';
 export { GlobalVisitorContext, type SharedData } from './global_visitor_context';
 export * from './contexts';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from './types';
+export * from './types';
 export { AttributeSelector } from './attribute_selector';
 export { DeactivatedUserCallout } from './deactivated_user_callout';
 export { RolesEmptyPrompt } from './roles_empty_prompt';

@@ -6,4 +6,4 @@
  */
 
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
-export type * from './src/policies';
+export * from './src/policies';

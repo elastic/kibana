@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from '../customizations/types';
+export * from '../customizations/types';
 export * from './create_controller';
 export * from './provider';
-export type * from './types';
+export * from './types';

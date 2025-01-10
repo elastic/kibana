@@ -58,7 +58,7 @@ export { DatePicker } from './pages/overview/components/date_picker';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
-export type * from './typings';
+export * from './typings';
 import { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';

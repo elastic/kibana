@@ -12,7 +12,7 @@ import type { JiraFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
-export type * from './types';
+export * from './types';
 
 export const getCaseConnector = (): CaseConnector<JiraFieldsType> => ({
   id: ConnectorTypes.jira,

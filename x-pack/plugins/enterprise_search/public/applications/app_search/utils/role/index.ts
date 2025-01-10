@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type * from './types';
+export * from './types';
 export { getRoleAbilities } from './get_role_abilities';
 export { roleHasScopedEngines } from './has_scoped_engines';

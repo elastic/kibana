@@ -75,6 +75,6 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     });
 });
 
-export type * from './models';
+export * from './models';
 export * from './actions';
 export * from './selectors';

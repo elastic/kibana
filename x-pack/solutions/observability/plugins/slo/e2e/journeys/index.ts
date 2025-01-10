@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type * from './slos_overview.journey';
-export type * from './annotation_list.journey';
+export * from './slos_overview.journey';
+export * from './annotation_list.journey';

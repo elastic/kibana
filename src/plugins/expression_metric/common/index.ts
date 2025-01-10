@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110893
+
 export * from './constants';
-export type * from './types';
+export * from './types';
 export * from './expression_functions';

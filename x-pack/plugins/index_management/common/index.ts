@@ -11,4 +11,4 @@ export { API_BASE_PATH, INTERNAL_API_BASE_PATH, BASE_PATH, MAJOR_VERSION } from 
 
 export { getTemplateParameter, splitSizeAndUnits } from './lib';
 
-export type * from './types';
+export * from './types';

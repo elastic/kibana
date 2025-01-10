@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './enable_rule_types';
+export * from './enable_rule_types';

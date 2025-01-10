@@ -10,4 +10,4 @@ export * from './plugin_configuration';
 export * from './plugin_dependencies';
 export * from './plugin_interfaces';
 export * from './fleet_start_services';
-export type * from './types';
+export * from './types';

@@ -6,4 +6,4 @@
  */
 
 export * from './links';
-export type * from './types';
+export * from './types';

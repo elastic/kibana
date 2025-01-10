@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export type * from './all';
-export type * from './details';
-export type * from './last_event_time';
-export type * from './eql';
+export * from './all';
+export * from './details';
+export * from './last_event_time';
+export * from './eql';
 
 export const EntityType = {
   EVENTS: 'events',

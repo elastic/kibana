@@ -8,4 +8,4 @@
  */
 
 export * from './discover_features_service';
-export type * from './types';
+export * from './types';

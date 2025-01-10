@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type * from './fetch_overview_data';
-export type * from './utils';
+export * from './fetch_overview_data';
+export * from './utils';

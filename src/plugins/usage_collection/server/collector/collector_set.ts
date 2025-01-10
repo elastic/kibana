@@ -249,7 +249,7 @@ export class CollectorSet implements ICollectorSet {
 
         this.fetchingCollectors.set(collector, wrappedPromise);
 
-        void wrappedPromise.finally(() => this.fetchingCollectors.delete(collector));
+        wrappedPromise.finally(() => this.fetchingCollectors.delete(collector));
 
         return await wrappedPromise;
       })

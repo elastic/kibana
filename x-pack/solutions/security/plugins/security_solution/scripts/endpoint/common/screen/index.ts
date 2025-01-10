@@ -8,6 +8,6 @@
 export { ScreenBaseClass } from './screen_base_class';
 export { ChoiceMenuFormatter } from './choice_menu_formatter';
 export { DataFormatter } from './data_formatter';
-export type * from './types';
+export * from './types';
 export * from './type_gards';
 export * from './common_choices';
