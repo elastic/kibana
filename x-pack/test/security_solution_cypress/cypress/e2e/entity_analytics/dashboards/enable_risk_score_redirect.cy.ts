@@ -18,6 +18,13 @@ describe(
   'Enable risk scores from dashboard',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['entityStoreDisabled'])}`,
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {
