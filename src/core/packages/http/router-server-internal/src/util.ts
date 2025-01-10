@@ -102,8 +102,8 @@ export function formatErrorMeta(
     error,
     request,
   }: {
-    request: Request;
     error: Error;
+    request: Request;
   }
 ) {
   return {
