@@ -79,6 +79,11 @@ export function runJest(configName = 'jest.config.js') {
 
   if (!argv.config) {
     testFiles = argv._.map((p) => resolve(cwd, p.toString()));
+
+    if (argv.testPathPattern) {
+      testFiles.push(argv.testPathPattern);
+    }
+
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
