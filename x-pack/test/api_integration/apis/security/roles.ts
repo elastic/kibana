@@ -519,5 +519,118 @@ export default function ({ getService }: FtrProviderContext) {
         expect(roleToUpdateWithDlsFls).to.eql({});
       });
     });
+
+    describe('Query Role', () => {
+      it('should query roles by name', async () => {
+        await es.security.putRole({
+          name: 'role_to_query',
+          body: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
+              },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application: 'logstash-default',
+                privileges: ['logstash-privilege'],
+                resources: ['*'],
+              },
+            ],
+            run_as: ['watcher_user'],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        });
+
+        await supertest
+          .post('/api/security/role/_query')
+          .send({
+            from: 0,
+            size: 25,
+            query: 'role_to_query',
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(200, {
+            total: 1,
+            count: 1,
+            roles: [
+              {
+                name: 'role_to_query',
+                metadata: {
+                  foo: 'test-metadata',
+                },
+                transient_metadata: { enabled: true },
+                elasticsearch: {
+                  cluster: ['manage'],
+                  indices: [
+                    {
+                      names: ['logstash-*'],
+                      privileges: ['read', 'view_index_metadata'],
+                      allow_restricted_indices: false,
+                    },
+                  ],
+                  run_as: ['watcher_user'],
+                },
+                kibana: [
+                  {
+                    base: ['read'],
+                    feature: {},
+                    spaces: ['*'],
+                  },
+                  {
+                    base: [],
+                    feature: {
+                      dashboard: ['read'],
+                      discover: ['all'],
+                      ml: ['all'],
+                    },
+                    spaces: ['marketing', 'sales'],
+                  },
+                ],
+
+                _transform_error: [],
+                _unrecognized_applications: ['logstash-default'],
+              },
+            ],
+          });
+      });
+
+      it('should hide reserved roles when filtered', async () => {
+        const response = await supertest
+          .post('/api/security/role/_query')
+          .send({
+            from: 0,
+            size: 100,
+            filters: {
+              showReservedRoles: false,
+            },
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const filteredResults = response.body.roles.filter(
+          (role: any) => role.metadata._reserved === true
+        );
+        expect(filteredResults.length).to.eql(0);
+      });
+    });
   });
 }
