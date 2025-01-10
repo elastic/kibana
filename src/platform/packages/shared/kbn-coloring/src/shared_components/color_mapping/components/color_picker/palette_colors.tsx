@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
@@ -34,6 +35,7 @@ export function PaletteColors({
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   const colors = Array.from({ length: palette.colorCount }, (d, i) => {
     return palette.getColor(i);
   });
@@ -47,6 +49,11 @@ export function PaletteColors({
         ? neutralPalette.getColor(color.colorIndex)
         : palettes.get(color.paletteId).getColor(color.colorIndex)
       : color.colorCode;
+  const selectedColorSwatchStyle = {
+    outline: `currentcolor solid ${euiTheme.border.width.thick}`,
+    outlineOffset: `-${euiTheme.border.width.thin}`,
+    border: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseFormsColorSwatch}`,
+  };
   return (
     <>
       <EuiFlexGroup direction="column" style={{ padding: 8 }}>
@@ -70,9 +77,7 @@ export function PaletteColors({
               <EuiFlexItem key={c} grow={0}>
                 <EuiColorPickerSwatch
                   data-test-subj={`lns-colorMapping-colorPicker-staticColor-${index}`}
-                  style={{
-                    border: isSameColor(c, originalColor) ? '2px solid black' : 'transparent',
-                  }}
+                  css={isSameColor(c, originalColor) ? selectedColorSwatchStyle : undefined}
                   color={c}
                   onClick={() =>
                     selectColor({ type: 'categorical', paletteId: palette.id, colorIndex: index })
@@ -116,9 +121,7 @@ export function PaletteColors({
             {neutralColors.map((c, index) => (
               <EuiFlexItem key={c} grow={0}>
                 <EuiColorPickerSwatch
-                  style={{
-                    border: isSameColor(c, originalColor) ? '2px solid black' : 'transparent',
-                  }}
+                  css={isSameColor(c, originalColor) ? selectedColorSwatchStyle : undefined}
                   data-test-subj={`lns-colorMapping-colorPicker-neutralColor-${index}`}
                   color={c}
                   onClick={() =>
