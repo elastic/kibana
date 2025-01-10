@@ -487,15 +487,15 @@ export class AdHocTaskRunner implements CancellableTask {
             executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
             executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
 
-        if (startedAt) {
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
-
         await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
           ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
           ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
         });
+
+        if (startedAt) {
+          // Capture how long it took for the rule to run after being claimed
+          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+        }
 
         return { executionStatus, executionMetrics };
       });
@@ -541,8 +541,6 @@ export class AdHocTaskRunner implements CancellableTask {
     await this.processAdHocRunResults(runMetrics);
 
     this.shouldDeleteTask = this.shouldDeleteTask || !this.hasAnyPendingRuns();
-
-    // await this.updateGapsAfterBackfillComplete();
 
     return {
       state: {},

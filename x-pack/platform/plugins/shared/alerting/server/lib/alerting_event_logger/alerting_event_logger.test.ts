@@ -6,7 +6,7 @@
  */
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY, InternalFields } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
@@ -36,6 +36,7 @@ import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { GapBase } from '../rule_gaps/types';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -1476,12 +1477,64 @@ describe('AlertingEventLogger', () => {
       };
       alertingEventLogger.reportGap({ gap: range });
 
-      const event = createGapRecord(ruleContext, ruleData, [alertSO], {
-        status: 'unfilled',
+      const gap: GapBase = {
+        status: 'unfilled' as const,
         range,
-      });
+        filled_intervals: [],
+        unfilled_intervals: [range],
+        in_progress_intervals: [],
+        total_gap_duration_ms: 3600000,
+        filled_duration_ms: 0,
+        unfilled_duration_ms: 3600000,
+        in_progress_duration_ms: 0,
+      };
 
+      const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe('updateGap()', () => {
+    const mockInternalFields: InternalFields = {
+      _id: 'test-id',
+      _index: 'test-index',
+      _seq_no: 1,
+      _primary_term: 1,
+    };
+
+    const mockGap: GapBase = {
+      status: 'filled' as const,
+      range: {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      },
+      filled_intervals: [
+        {
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
+        },
+      ],
+      unfilled_intervals: [],
+      in_progress_intervals: [],
+      total_gap_duration_ms: 3600000,
+      filled_duration_ms: 3600000,
+      unfilled_duration_ms: 0,
+      in_progress_duration_ms: 0,
+    };
+
+    test('should call eventLogger.updateEvent with correct parameters', async () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      await alertingEventLogger.updateGap({ internalFields: mockInternalFields, gap: mockGap });
+
+      expect(eventLogger.updateEvent).toHaveBeenCalledWith(mockInternalFields, {
+        kibana: {
+          alert: {
+            rule: {
+              gap: mockGap,
+            },
+          },
+        },
+      });
     });
   });
 });

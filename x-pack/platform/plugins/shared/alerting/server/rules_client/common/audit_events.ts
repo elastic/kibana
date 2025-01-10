@@ -47,7 +47,6 @@ export enum AdHocRunAuditAction {
   DELETE = 'ad_hoc_run_delete',
 }
 
-
 type VerbsTuple = [string, string, string];
 
 const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
