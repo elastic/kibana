@@ -893,7 +893,15 @@
         "label": "SchemaFieldMapKeys",
         "description": [],
         "signature": [
-          "Key extends string ? NonNullable<T[Key]> extends Record<string, unknown> ? `${Key}` | `${Key}.${",
+          "Key extends string ? NonNullable<T[Key]> extends any[] ? NonNullable<T[Key]> extends Record<string, any>[] ? `${Key}` | `${Key}.${",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.SchemaFieldMapKeys",
+            "text": "SchemaFieldMapKeys"
+          },
+          "<NonNullable<T[Key]>[number], keyof NonNullable<T[Key]>[number]>}` : `${Key}` : NonNullable<T[Key]> extends Record<string, any> ? `${Key}` | `${Key}.${",
           {
             "pluginId": "@kbn/index-adapter",
             "scope": "server",
