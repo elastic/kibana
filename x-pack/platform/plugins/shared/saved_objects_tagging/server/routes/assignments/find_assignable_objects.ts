@@ -13,6 +13,13 @@ export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => 
   router.get(
     {
       path: '/internal/saved_objects_tagging/assignments/_find_assignable_objects',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as there is a separate authorization check within the assignment service.',
+        },
+      },
       validate: {
         query: schema.object({
           search: schema.maybe(schema.string()),

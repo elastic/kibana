@@ -38,10 +38,10 @@ export function ColorPicker({
   );
 
   return (
-    <div style={{ width: 168 }}>
+    <div css={{ width: 168, position: 'relative' }}>
       <EuiPopoverTitle
         paddingSize="none"
-        style={{
+        css={{
           borderBottom: 'none',
         }}
       >
@@ -79,7 +79,9 @@ export function ColorPicker({
               close();
               deleteStep();
             }}
-            style={{ paddingBottom: 8 }}
+            css={({ euiTheme }) => ({
+              paddingBottom: euiTheme.size.s,
+            })}
           >
             {i18n.translate('coloring.colorMapping.colorPicker.removeGradientColorButtonLabel', {
               defaultMessage: 'Remove color stop',
