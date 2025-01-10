@@ -39,6 +39,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
         data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
         {...rest}
       />
+      <div>ze page goes here</div>
       <Page
         restrictWidth={restrictWidth || fullWidthSize}
         data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
@@ -46,6 +47,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
         <EuiPageBody>
           <ContentWrapper>
             <EuiSpacer size="m" />
+            <div>the children are under here</div>
             {children}
           </ContentWrapper>
         </EuiPageBody>

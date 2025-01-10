@@ -44,7 +44,7 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
+  position: sticky; //if the page is wide enough, it should be stick, otherwise it should be relative
   top: 120px;
 `;
 
@@ -198,7 +198,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         </StickySidebar>
       )}
 
-      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
+      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{}}>
         {showSearchTools && (
           <EuiFlexItem grow={false}>
             <SearchBox

@@ -49,58 +49,60 @@ export const DefaultLayout: React.FC<Props> = memo(
     const { CreateIntegrationCardButton } = integrationAssistant?.components ?? {};
 
     return (
-      <WithHeaderLayout
-        leftColumn={
-          <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.fleet.integrationsHeaderTitle"
-                  defaultMessage="Integrations"
-                />
-              </h1>
-            </EuiText>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <p>
+      <>
+        <WithHeaderLayout
+          leftColumn={
+            <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+              <EuiText>
+                <h1>
                   <FormattedMessage
-                    id="xpack.fleet.epm.pageSubtitle"
-                    defaultMessage="Choose an integration to start collecting and analyzing your data."
+                    id="xpack.fleet.integrationsHeaderTitle"
+                    defaultMessage="Integrations"
                   />
-                </p>
+                </h1>
               </EuiText>
-            </EuiFlexItem>
 
-            <EuiSpacer size="s" />
-          </EuiFlexGroup>
-        }
-        rightColumnGrow={false}
-        rightColumn={
-          CreateIntegrationCardButton ? (
-            <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton />
-            </EuiFlexItem>
-          ) : undefined
-        }
-        tabs={tabs.map((tab) => {
-          const notificationCount = notificationsBySection?.[tab.section];
-          return {
-            name: tab.name,
-            append: notificationCount ? (
-              <EuiNotificationBadge className="eui-alignCenter" size="m">
-                {notificationCount}
-              </EuiNotificationBadge>
-            ) : undefined,
-            href: tab.href,
-            isSelected: section === tab.section,
-          };
-        })}
-      >
-        {children}
-      </WithHeaderLayout>
+              <EuiSpacer size="s" />
+
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.pageSubtitle"
+                      defaultMessage="Choose an integration to start collecting and analyzing your data."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiSpacer size="s" />
+            </EuiFlexGroup>
+          }
+          rightColumnGrow={false}
+          rightColumn={
+            CreateIntegrationCardButton ? (
+              <EuiFlexItem grow={false}>
+                <CreateIntegrationCardButton />
+              </EuiFlexItem>
+            ) : undefined
+          }
+          tabs={tabs.map((tab) => {
+            const notificationCount = notificationsBySection?.[tab.section];
+            return {
+              name: tab.name,
+              append: notificationCount ? (
+                <EuiNotificationBadge className="eui-alignCenter" size="m">
+                  {notificationCount}
+                </EuiNotificationBadge>
+              ) : undefined,
+              href: tab.href,
+              isSelected: section === tab.section,
+            };
+          })}
+        >
+          {children}
+        </WithHeaderLayout>
+      </>
     );
   }
 );
