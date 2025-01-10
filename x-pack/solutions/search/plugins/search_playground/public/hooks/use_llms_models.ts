@@ -8,19 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
 
-type InferenceConnector = ActionConnector & { config: { provider: ServiceProviderKeys } };
+const isInferenceActionConnector = (
+  connector: ActionConnector
+): connector is InferenceActionConnector => {
+  return 'config' in connector && 'provider' in connector.config;
+};
 
 const mapLlmToModels: Record<
   LLMs,
   {
-    icon: string | ((connector: InferenceConnector) => string);
+    icon: string | ((connector: PlaygroundConnector) => string);
     getModels: (
       connectorName: string,
       includeName: boolean
@@ -77,8 +80,10 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.inference]: {
-    icon: (connector: InferenceConnector) => {
-      return SERVICE_PROVIDERS[connector.config.provider].icon;
+    icon: (connector) => {
+      return isInferenceActionConnector(connector)
+        ? SERVICE_PROVIDERS[connector.config.provider].icon
+        : '';
     },
     getModels: (connectorName) => [
       {
@@ -99,7 +104,7 @@ export const useLLMsModels = (): LLMModel[] => {
       connectors?.reduce<Partial<Record<LLMs, number>>>(
         (result, connector) => ({
           ...result,
-          [connector.type]: (result[connector.type] || 0) + 1,
+          [connector.type]: (result[connector.type as LLMs] || 0) + 1,
         }),
         {}
       ),
@@ -109,13 +114,14 @@ export const useLLMsModels = (): LLMModel[] => {
   return useMemo(
     () =>
       connectors?.reduce<LLMModel[]>((result, connector) => {
-        const llmParams = mapLlmToModels[connector.type];
+        const connectorType = connector.type as LLMs;
+        const llmParams = mapLlmToModels[connectorType];
 
         if (!llmParams) {
           return result;
         }
 
-        const showConnectorName = Number(mapConnectorTypeToCount?.[connector.type]) > 1;
+        const showConnectorName = Number(mapConnectorTypeToCount?.[connectorType]) > 1;
 
         return [
           ...result,
