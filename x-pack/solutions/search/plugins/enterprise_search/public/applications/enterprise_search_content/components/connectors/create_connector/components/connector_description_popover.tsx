@@ -99,6 +99,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
   const { isAgentlessEnabled } = useValues(KibanaLogic);
+
   return (
     <EuiPopover
       anchorPosition="upCenter"
@@ -124,7 +125,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         hasBorder={false}
         hasShadow={false}
       >
-        {(showIsOnlySelfManaged || !isAgentlessEnabled) && (
+        {((isNative && !isAgentlessEnabled) || showIsOnlySelfManaged) && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -156,7 +157,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
           </>
         )}
 
-        {isAgentlessEnabled && (
+        {((isNative && isAgentlessEnabled) || !isNative) && (
           <EuiFlexGroup>
             {panels.map((panel) => {
               return (
@@ -187,7 +188,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             })}
           </EuiFlexGroup>
         )}
-        {!isAgentlessEnabled && (
+        {isNative && !isAgentlessEnabled && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup direction="column" justifyContent="center">
