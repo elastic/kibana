@@ -16,16 +16,19 @@ import type { Package } from './types';
 import { BASE_FOLDER, EXCLUDED_MODULES, KIBANA_FOLDER } from './constants';
 import { calculateModuleTargetFolder, isInTargetFolder } from './utils/relocate';
 import { createModuleTable } from './utils/logging';
+import { safeExec } from './utils/exec';
 
 export const listModules = async (listFlag: string, log: ToolingLog) => {
-  // get all modules
-  const modules = getPackages(REPO_ROOT);
   const devOnly: Package[] = [];
   const test: Package[] = [];
   const examples: Package[] = [];
   const uncategorised: Package[] = [];
   const incorrect: Package[] = [];
   const correct: Package[] = [];
+
+  // get all modules
+  await safeExec('yarn kbn bootstrap');
+  const modules = getPackages(REPO_ROOT);
 
   // find modules selected by user filters
   sortBy(modules, 'directory')
