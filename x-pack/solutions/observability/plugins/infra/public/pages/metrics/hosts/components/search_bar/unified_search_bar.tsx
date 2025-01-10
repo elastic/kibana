@@ -49,6 +49,7 @@ export const UnifiedSearchBar = () => {
               defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
             })}
             onQuerySubmit={handleRefresh}
+            allowSavingQueries
             showDatePicker
             showFilterBar
             showQueryInput

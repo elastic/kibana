@@ -331,6 +331,7 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
+        allowSavingQueries
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={

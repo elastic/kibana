@@ -38,9 +38,19 @@ const esqlQuery = {
 };
 
 describe('canShowSaveQuery', () => {
+  it('should return false if allowSavingQueries is not true', async () => {
+    expect(
+      canShowSavedQuery({
+        core: coreWithSavedQueryManagement,
+        query: kqlQuery,
+      })
+    );
+  });
+
   it('should return true with saved query management privilege', async () => {
     expect(
       canShowSavedQuery({
+        allowSavingQueries: true,
         core: coreWithSavedQueryManagement,
         query: kqlQuery,
       })
@@ -50,6 +60,7 @@ describe('canShowSaveQuery', () => {
   it('should return false without saved query management privilege', async () => {
     expect(
       canShowSavedQuery({
+        allowSavingQueries: true,
         core: coreWithoutSavedQueryManagement,
         query: kqlQuery,
       })
@@ -59,6 +70,7 @@ describe('canShowSaveQuery', () => {
   it('should return false for ES|QL queries', async () => {
     expect(
       canShowSavedQuery({
+        allowSavingQueries: true,
         core: coreWithSavedQueryManagement,
         query: esqlQuery,
       })

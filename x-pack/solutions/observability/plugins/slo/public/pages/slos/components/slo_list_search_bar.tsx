@@ -74,6 +74,7 @@ export function SloListSearchBar() {
         showDatePicker={false}
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
+        allowSavingQueries
         onClearSavedQuery={() => {}}
         onSavedQueryUpdated={(savedQuery) => {
           onStateChange({

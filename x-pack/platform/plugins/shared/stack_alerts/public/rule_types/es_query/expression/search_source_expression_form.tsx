@@ -350,6 +350,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             onClearSavedQuery={onClearSavedQuery}
             onSavedQueryUpdated={onSavedQuery}
             onSaved={onSavedQuery}
+            allowSavingQueries
             showQueryInput
             showFilterBar
             showDatePicker={false}

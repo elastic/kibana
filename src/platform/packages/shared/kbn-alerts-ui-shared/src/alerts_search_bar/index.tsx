@@ -109,6 +109,7 @@ export const AlertsSearchBar = ({
     onRefresh,
     showDatePicker,
     showQueryInput: true,
+    allowSavingQueries: true,
     showSubmitButton,
     submitOnBlur,
     onQueryChange: onSearchQueryChange,

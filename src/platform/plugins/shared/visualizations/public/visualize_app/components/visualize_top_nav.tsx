@@ -334,6 +334,7 @@ const TopNav = ({
             ]
           : undefined
       }
+      allowSavingQueries
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern
           ? {

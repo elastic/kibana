@@ -98,6 +98,7 @@ export const App = ({
             showSearchBar={true}
             indexPatterns={[dataView]}
             useDefaultBehaviors={true}
+            allowSavingQueries
           />
           <EuiPageTemplate.Section>
             <EuiText>

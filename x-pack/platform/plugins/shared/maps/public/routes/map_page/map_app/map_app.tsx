@@ -533,6 +533,7 @@ export class MapApp extends React.Component<Props, State> {
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}
+        allowSavingQueries
         savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}
         onSavedQueryUpdated={this._updateStateFromSavedQuery}
