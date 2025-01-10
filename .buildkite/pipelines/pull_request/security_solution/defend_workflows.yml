@@ -4,7 +4,6 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 100
     depends_on:
       - build
       - quick_checks
@@ -25,7 +24,6 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 100
     depends_on:
       - build
       - quick_checks
