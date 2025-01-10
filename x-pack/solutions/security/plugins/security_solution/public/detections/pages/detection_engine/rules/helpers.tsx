@@ -32,7 +32,6 @@ import {
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
