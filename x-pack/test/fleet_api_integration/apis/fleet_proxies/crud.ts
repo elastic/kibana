@@ -164,11 +164,12 @@ export default function (providerContext: FtrProviderContext) {
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
         await retry.tryWithRetries(
+          'wait for fleet policy deploy',
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
-            if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
+            if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx)
               throw new Error('fleet server policy not deployed');
-            }
+
             expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be('https://testupdated.fr:3232');
             expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(
               'https://testupdated.fr:3232'
@@ -178,7 +179,8 @@ export default function (providerContext: FtrProviderContext) {
             );
           },
           {
-            timeout: 30 * 1000, // 30s for the task to run
+            retryCount: 10,
+            timeout: 30_1000,
           }
         );
       });
@@ -202,7 +204,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        await pRetry(
+        await retry.tryWithRetries(
+          'wait for fleet policy delete',
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
@@ -213,7 +216,8 @@ export default function (providerContext: FtrProviderContext) {
             expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
           },
           {
-            maxRetryTime: 30 * 1000, // 30s for the task to run
+            retryCount: 10,
+            timeout: 30_1000,
           }
         );
       });
