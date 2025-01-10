@@ -1218,24 +1218,7 @@
           "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-            }
-          ]
+          "references": []
         }
       ],
       "lifecycle": "start",
