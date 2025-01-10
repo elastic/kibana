@@ -98,11 +98,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+            "path": "x-pack/platform/plugins/shared/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+            "path": "x-pack/platform/plugins/shared/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           }
         ],
         "children": [

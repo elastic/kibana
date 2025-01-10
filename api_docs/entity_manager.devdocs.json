@@ -900,7 +900,7 @@
             "label": "asKqlFilter",
             "description": [],
             "signature": [
-              "(entityInstance: { entity: Pick<{ id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }, \"identity_fields\">; } & Required<Metadata>) => string"
+              "({ entity, }: { entity: { [key: string]: any; } & { entityIdentityFields: { [key: string]: string[]; }; }; }) => string"
             ],
             "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
             "deprecated": false,
@@ -909,17 +909,29 @@
               {
                 "parentPluginId": "entityManager",
                 "id": "def-public.EntityClient.asKqlFilter.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "entityInstance",
+                "label": "{\n    entity,\n  }",
                 "description": [],
-                "signature": [
-                  "{ entity: Pick<{ id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }, \"identity_fields\">; } & Required<Metadata>"
-                ],
                 "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "entityManager",
+                    "id": "def-public.EntityClient.asKqlFilter.$1.entity",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "entity",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; } & { entityIdentityFields: { [key: string]: string[]; }; }"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -932,7 +944,7 @@
             "label": "getIdentityFieldsValue",
             "description": [],
             "signature": [
-              "(entityInstance: { entity: Pick<{ id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }, \"identity_fields\">; } & Required<Metadata>) => Record<string, string>"
+              "({ entity, }: { entity: { [key: string]: any; } & { entityIdentityFields: { [key: string]: string[]; }; }; }) => Record<string, any>"
             ],
             "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
             "deprecated": false,
@@ -941,17 +953,29 @@
               {
                 "parentPluginId": "entityManager",
                 "id": "def-public.EntityClient.getIdentityFieldsValue.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "entityInstance",
+                "label": "{\n    entity,\n  }",
                 "description": [],
-                "signature": [
-                  "{ entity: Pick<{ id: string; type: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; metrics?: Record<string, number> | undefined; }, \"identity_fields\">; } & Required<Metadata>"
-                ],
                 "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "entityManager",
+                    "id": "def-public.EntityClient.getIdentityFieldsValue.$1.entity",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "entity",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; } & { entityIdentityFields: { [key: string]: string[]; }; }"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/entity_manager/public/lib/entity_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -1710,7 +1734,17 @@
               "section": "def-common.Logger",
               "text": "Logger"
             },
-            ") => Promise<string>; }"
+            ") => Promise<string>; identityFieldsBySource: (type: string, clusterClient: ",
+            "InternalClusterClient",
+            ", logger: ",
+            {
+              "pluginId": "@kbn/logging",
+              "scope": "common",
+              "docId": "kibKbnLoggingPluginApi",
+              "section": "def-common.Logger",
+              "text": "Logger"
+            },
+            ") => Promise<{ [key: string]: string[]; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
           "deprecated": false,
