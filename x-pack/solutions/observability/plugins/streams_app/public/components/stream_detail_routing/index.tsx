@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -13,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiResizableContainer,
@@ -31,6 +33,7 @@ import {
   WiredStreamConfigDefinition,
 } from '@kbn/streams-schema';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { isDescendandOf } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -404,7 +407,12 @@ function PreviewPanel({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow>
-            <EuiText size="s">
+            <EuiText
+              size="s"
+              className={css`
+                font-weight: bold;
+              `}
+            >
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiIcon type="inspect" />
                 {i18n.translate('xpack.streams.streamDetail.preview.header', {
@@ -517,6 +525,25 @@ function ChildStreamList({
   definition: ReadStreamDefinition;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      return streamsRepositoryClient.fetch('GET /api/streams', {
+        signal,
+      });
+    },
+    [streamsRepositoryClient]
+  );
+
+  const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -531,6 +558,7 @@ function ChildStreamList({
           className={css`
             height: 40px;
             align-content: center;
+            font-weight: bold;
           `}
         >
           {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
@@ -550,6 +578,7 @@ function ChildStreamList({
         {definition.stream.ingest.routing.map((child, i) => (
           <NestedView key={i}>
             <RoutingStreamEntry
+              availableStreams={availableStreams}
               child={
                 !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
                   ? childUnderEdit.child
@@ -672,59 +701,71 @@ function RoutingStreamEntry({
   onChildChange,
   onEditStateChange,
   edit,
+  availableStreams,
 }: {
   child: StreamChild;
   onChildChange: (child: StreamChild) => void;
   onEditStateChange: () => void;
   edit?: boolean;
+  availableStreams: string[];
 }) {
+  const children = availableStreams.filter((stream) => isDescendandOf(child.name, stream)).length;
   const router = useStreamsAppRouter();
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow>
-          <EuiText size="s">{child.name}</EuiText>
-        </EuiFlexItem>
-        <EuiButtonIcon
-          data-test-subj="streamsAppRoutingStreamEntryButton"
-          iconType="pencil"
-          onClick={() => {
-            onEditStateChange();
-          }}
-          aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
-            defaultMessage: 'Edit',
-          })}
-        />
-        <EuiButtonIcon
-          data-test-subj="streamsAppRoutingStreamEntryButton"
-          iconType="popout"
-          href={router.link('/{key}/{tab}/{subtab}', {
-            path: { key: child.name, tab: 'management', subtab: 'route' },
-          })}
-          aria-label={i18n.translate('xpack.streams.streamDetailRouting.goto', {
-            defaultMessage: 'Go to stream',
-          })}
-        />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiLink
+                href={router.link('/{key}/{tab}/{subtab}', {
+                  path: { key: child.name, tab: 'management', subtab: 'route' },
+                })}
+                data-test-subj="streamsAppRoutingStreamEntryButton"
+              >
+                <EuiText size="s">{child.name}</EuiText>
+              </EuiLink>
+              {children > 0 && (
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
+                    defaultMessage: '{children, plural, one {# child} other {# children}}',
+                    values: { children },
+                  })}
+                </EuiBadge>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiButtonIcon
+            data-test-subj="streamsAppRoutingStreamEntryButton"
+            iconType="pencil"
+            onClick={() => {
+              onEditStateChange();
+            }}
+            aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+              defaultMessage: 'Edit',
+            })}
+          />
+        </EuiFlexGroup>
+        {child.condition && (
+          <ConditionEditor
+            readonly={!edit}
+            condition={child.condition}
+            onConditionChange={(condition) => {
+              onChildChange({
+                ...child,
+                condition,
+              });
+            }}
+          />
+        )}
+        {!child.condition && (
+          <EuiText>
+            {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
+              defaultMessage: 'No condition, no documents will be routed',
+            })}
+          </EuiText>
+        )}
       </EuiFlexGroup>
-      {child.condition && (
-        <ConditionEditor
-          readonly={!edit}
-          condition={child.condition}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              condition,
-            });
-          }}
-        />
-      )}
-      {!child.condition && (
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-            defaultMessage: 'No condition, no documents will be routed',
-          })}
-        </EuiText>
-      )}
     </EuiPanel>
   );
 }
