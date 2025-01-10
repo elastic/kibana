@@ -22,11 +22,9 @@ import {
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import { CONTROL_GROUP_TYPE } from '../../common';
-import { isVariablesControl, type CanClearVariables } from '../types';
 
 type DeleteControlActionApi = HasType &
   HasUniqueId &
-  CanClearVariables &
   HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
 
 export const compatibilityCheck = (api: unknown | null): api is DeleteControlActionApi =>
@@ -34,7 +32,6 @@ export const compatibilityCheck = (api: unknown | null): api is DeleteControlAct
     apiHasType(api) &&
       apiHasUniqueId(api) &&
       apiHasParentApi(api) &&
-      isVariablesControl(api) &&
       apiCanAccessViewMode(api.parentApi) &&
       apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
