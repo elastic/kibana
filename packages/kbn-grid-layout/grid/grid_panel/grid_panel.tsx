@@ -82,6 +82,18 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+
+        // expanded panel styles
+        [data-expanded-panel-id]:not([data-expanded-panel-id='${panelId}']) & {
+          // hide the non-expanded panels
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+        }
+        [data-expanded-panel-id='${panelId}'] & {
+          height: 100% !important;
+        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -155,32 +167,14 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
-        /**
-         * This subscription adds and/or removes the necessary class name for expanded panel styling
-         */
-        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
-          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe((expandedPanelId) => {
-            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-            const panel = gridLayout[rowIndex].panels[panelId];
-            if (!ref || !panel) return;
-
-            if (expandedPanelId && expandedPanelId === panelId) {
-              ref.classList.add('kbnGridPanel--isExpanded');
-            } else {
-              ref.classList.remove('kbnGridPanel--isExpanded');
-            }
-          });
-
         return () => {
-          expandedPanelSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
+
     /**
      * Memoize panel contents to prevent unnecessary re-renders
      */

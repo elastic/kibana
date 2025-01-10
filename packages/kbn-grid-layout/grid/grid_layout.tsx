@@ -129,11 +129,14 @@ export const GridLayout = ({
 
       if (currentExpandedPanelId) {
         layoutRef.current?.classList.add('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
+        layoutRef.current?.setAttribute(`data-expanded-panel-id`, currentExpandedPanelId);
       } else if (currentAccessMode === 'VIEW') {
         layoutRef.current?.classList.add('kbnGrid--static');
         layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
+        layoutRef.current?.removeAttribute(`data-expanded-panel-id`);
       } else {
         layoutRef.current?.classList.remove('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
+        layoutRef.current?.removeAttribute(`data-expanded-panel-id`);
       }
     });
 
@@ -224,20 +227,6 @@ const expandedPanelStyles = css`
       .kbnGridRow {
         display: block !important; // overwrite grid display
         height: 100%;
-
-        .kbnGridPanel {
-          &:not(.kbnGridPanel--isExpanded) {
-            // hide the non-expanded panels
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-          }
-          &--isExpanded {
-            // show only the expanded panel and make it take up the full height
-            height: 100% !important;
-          }
-        }
       }
     }
   }
