@@ -65,7 +65,7 @@ export const initializeTitleManager = (
     } as StateComparators<SerializedTitles>,
     serialize: () => ({
       title: title$.value,
-      hideTitles: hideTitle$.value,
+      hidePanelTitles: hideTitle$.value,
       description: description$.value,
     }),
   };
