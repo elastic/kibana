@@ -1875,7 +1875,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"message\" | \"event.original\" | \"error.message\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
+          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: \"message\" | \"event.original\" | \"error.message\"; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
@@ -1901,6 +1901,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getMessageFieldWithFallbacks.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ includeFormattedValue = false }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getMessageFieldWithFallbacks.$2.includeFormattedValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeFormattedValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
