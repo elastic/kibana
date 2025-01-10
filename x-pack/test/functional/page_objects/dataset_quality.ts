@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
