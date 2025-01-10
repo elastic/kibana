@@ -174,7 +174,7 @@
         "tags": [],
         "label": "validateTimeRange",
         "description": [
-          "\nValidate a time range of two string based dates.\nCopy of `src/plugins/data/public/query/timefilter/lib/validate_timerange.ts`\nfor the time being so it can be used in packages.\n"
+          "\nValidate a time range of two string based dates.\nCopy of `src/platform/plugins/shared/data/public/query/timefilter/lib/validate_timerange.ts`\nfor the time being so it can be used in packages.\n"
         ],
         "signature": [
           "(time: ",
