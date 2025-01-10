@@ -40,7 +40,6 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   const { data } = useKibanaContextForPlugin().services;
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
-  const theme = useTheme();
   const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
