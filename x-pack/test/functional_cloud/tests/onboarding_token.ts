@@ -44,15 +44,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(
         deployment.getHostPort() +
           `/app/cloud/onboarding?onboarding_token=vector&next=${encodeURIComponent(
-            '/app/enterprise_search/vector_search'
+            '/app/elasticsearch/vector_search'
           )}#some=hash-value`
       );
-      // ?onboarding_token=vector&next=/app/enterprise_search/vector_search
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/enterprise_search/vector_search');
+      expect(currentURL.pathname).to.eql('/app/elasticsearch/vector_search');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
       const {
