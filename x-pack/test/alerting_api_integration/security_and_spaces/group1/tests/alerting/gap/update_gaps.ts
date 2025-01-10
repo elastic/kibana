@@ -478,6 +478,26 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         .send([{ rule_id: ruleId, start: gapStart, end: gapEnd }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
+
+      await retry.try(async () => {
+        const firstGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: gapStart,
+            end: gapEnd,
+          });
+
+        const firstGap = firstGapResponse.body.data[0];
+        expect(firstGap.status).to.eql('partially_filled');
+        expect(firstGap.unfilled_intervals).to.have.length(0);
+        expect(firstGap.in_progress_intervals).to.have.length(1);
+        expect(firstGap.in_progress_intervals[0].gte).to.eql(gapStart);
+        expect(firstGap.in_progress_intervals[0].lte).to.eql(gapEnd);
+        expect(firstGap.filled_intervals).to.have.length(0);
+      });
+
       const backfillId = scheduleResponse.body[0].id;
 
       // Wait for task failure event
@@ -494,6 +514,8 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         expect(events[0]?.event?.outcome).to.eql('failure');
         expect(events[0]?.error?.message).to.eql('rule executor error');
       });
+
+      await waitForBackfillComplete(backfillId, space.id);
 
       // Verify gap status is updated
       const finalGapResponse = await supertest

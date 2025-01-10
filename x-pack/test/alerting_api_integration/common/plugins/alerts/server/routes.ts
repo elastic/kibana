@@ -628,6 +628,7 @@ export function defineRoutes(
 
       const alertingEventLogger = new AlertingEventLogger(eventLogger);
 
+      // mocked ruleData to initialize alert event logger
       alertingEventLogger.initialize({
         context: {
           savedObjectId: req.body.ruleId,
@@ -648,9 +649,7 @@ export function defineRoutes(
             defaultActionGroupId: 'default',
             minimumLicenseRequired: 'basic',
             isExportable: true,
-            executor: {
-              execute: async () => ({ state: {} }),
-            },
+            executor: async () => ({ state: {} }),
             category: 'test',
             producer: 'alerts',
             cancelAlertsOnRuleTimeout: true,
