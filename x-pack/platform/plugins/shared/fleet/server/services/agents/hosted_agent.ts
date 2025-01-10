@@ -20,7 +20,7 @@ export async function getHostedPolicies(
   );
 
   // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
+  const agentPolicies = await agentPolicyService.getByIds(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
     ignoreMissing: true,
   });

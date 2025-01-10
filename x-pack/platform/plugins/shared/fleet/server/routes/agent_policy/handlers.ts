@@ -196,7 +196,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
         'full query parameter require agent policies read permissions'
       );
     }
-    let items = await agentPolicyService.getByIDs(soClient, ids, {
+    let items = await agentPolicyService.getByIds(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
     });
@@ -687,7 +687,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
       body: { items: [] },
     });
   }
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, ids, {
+  const agentPolicies = await agentPolicyService.getByIds(soClient, ids, {
     withPackagePolicies: true,
   });
 

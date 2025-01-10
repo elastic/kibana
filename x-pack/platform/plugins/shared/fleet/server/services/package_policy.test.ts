@@ -227,7 +227,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       });
     }
   );
-  mockAgentPolicyService.getByIDs.mockImplementation(
+  mockAgentPolicyService.getByIds.mockImplementation(
     // @ts-ignore
     (_soClient: SavedObjectsClientContract, ids: string[]) => {
       return Promise.resolve(

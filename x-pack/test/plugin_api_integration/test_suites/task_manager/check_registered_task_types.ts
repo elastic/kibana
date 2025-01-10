@@ -161,6 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-saved-queries',
         'report:execute',
         'risk_engine:risk_scoring',
+        'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
