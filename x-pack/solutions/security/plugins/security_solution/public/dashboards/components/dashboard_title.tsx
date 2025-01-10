@@ -18,7 +18,7 @@ const DashboardTitleComponent = ({
   dashboardContainer: DashboardApi;
   onTitleLoaded: (title: string) => void;
 }) => {
-  const dashboardTitle = useStateFromPublishingSubject(dashboardContainer.panelTitle);
+  const dashboardTitle = useStateFromPublishingSubject(dashboardContainer.title$);
   const title = useMemo(() => {
     return dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : EDIT_DASHBOARD_TITLE;
   }, [dashboardTitle]);

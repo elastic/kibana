@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   fetch$,
   getUnchangingComparator,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { Router } from '@kbn/shared-ux-router';
@@ -58,13 +58,13 @@ export const getOverviewEmbeddableFactory = ({
 
     const dynamicActionsApi = deps.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
       uuid,
-      () => titlesApi.panelTitle.getValue(),
+      () => titleManager.api.title$.getValue(),
       state
     );
 
     const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const sloId$ = new BehaviorSubject(state.sloId);
     const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
@@ -76,10 +76,10 @@ export const getOverviewEmbeddableFactory = ({
 
     const api = buildApi(
       {
-        ...titlesApi,
+        ...titleManager.api,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         supportedTriggers: () => [],
-        defaultPanelTitle: defaultTitle$,
+        defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'criteria',
@@ -103,7 +103,7 @@ export const getOverviewEmbeddableFactory = ({
         serializeState: () => {
           return {
             rawState: {
-              ...serializeTitles(),
+              ...titleManager.serialize(),
               sloId: sloId$.getValue(),
               sloInstanceId: sloInstanceId$.getValue(),
               showAllGroupByInstances: showAllGroupByInstances$.getValue(),
@@ -134,7 +134,7 @@ export const getOverviewEmbeddableFactory = ({
         ],
         remoteName: [remoteName$, (value) => remoteName$.next(value)],
         overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
-        ...titleComparators,
+        ...titleManager.comparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
           enhancements: getUnchangingComparator(),
         }),
