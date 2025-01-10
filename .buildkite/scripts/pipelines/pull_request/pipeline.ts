@@ -110,18 +110,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
-        /^x-pack\/platform\/plugins\/shared\/fleet/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/observability_onboarding_cypress.yml')
-      );
-    }
-
-    if (
       (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -405,6 +393,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/private\/discover_enhanced\/ui_tests/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^packages\/kbn-scout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
