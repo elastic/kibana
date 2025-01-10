@@ -753,7 +753,6 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
-x-pack/packages/kbn-streams-schema @elastic/streams-program-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
@@ -911,6 +910,7 @@ x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-op
 x-pack/solutions/observability/packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team

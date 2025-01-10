@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-streams-schema'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-streams-schema'],
 };
