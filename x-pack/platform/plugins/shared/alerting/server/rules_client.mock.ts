@@ -56,6 +56,7 @@ const createRulesClientMock = () => {
     clone: jest.fn(),
     getScheduleFrequency: jest.fn(),
     bulkUntrackAlerts: jest.fn(),
+    findGaps: jest.fn(),
   };
   return mocked;
 };

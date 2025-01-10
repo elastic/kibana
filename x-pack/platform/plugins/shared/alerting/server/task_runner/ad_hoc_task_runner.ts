@@ -52,6 +52,7 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -74,6 +75,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private readonly taskInstance: ConcreteTaskInstance;
 
   private adHocRunSchedule: AdHocRunSchedule[] = [];
+  private adHocRange: { start: string; end: string | undefined } | null = null;
   private alertingEventLogger: AlertingEventLogger;
   private cancelled: boolean = false;
   private logger: Logger;
@@ -98,6 +100,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
+  private apiKeyToUse: string | null = null;
 
   constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
     this.context = context;
@@ -318,7 +321,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule } = adHocRunData;
+      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
+      this.apiKeyToUse = apiKeyToUse;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -383,6 +387,7 @@ export class AdHocTaskRunner implements CancellableTask {
       // Determine which schedule entry we're going to run
       // Find the first index where the status is pending
       this.adHocRunSchedule = schedule;
+      this.adHocRange = { start, end };
       this.scheduleToRunIndex = (this.adHocRunSchedule ?? []).findIndex(
         (s: AdHocRunSchedule) => s.status === adHocRunStatus.PENDING
       );
@@ -491,6 +496,7 @@ export class AdHocTaskRunner implements CancellableTask {
           // Capture how long it took for the rule to run after being claimed
           this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
         }
+
         return { executionStatus, executionMetrics };
       });
     this.alertingEventLogger.done({
@@ -584,6 +590,8 @@ export class AdHocTaskRunner implements CancellableTask {
   async cleanup() {
     if (!this.shouldDeleteTask) return;
 
+    await this.updateGapsAfterBackfillComplete();
+
     try {
       await this.internalSavedObjectsRepository.delete(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -599,5 +607,31 @@ export class AdHocTaskRunner implements CancellableTask {
         `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`
       );
     }
+  }
+
+  private async updateGapsAfterBackfillComplete() {
+    if (!this.shouldDeleteTask) return;
+
+    if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
+
+    const fakeRequest = getFakeKibanaRequest(
+      this.context,
+      this.taskInstance.params.spaceId,
+      this.apiKeyToUse
+    );
+
+    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
+
+    return updateGaps({
+      ruleId: this.ruleId,
+      start: new Date(this.adHocRange.start),
+      end: this.adHocRange.end ? new Date(this.adHocRange.end) : new Date(),
+      eventLogger: this.context.eventLogger,
+      eventLogClient,
+      logger: this.logger,
+      backfillSchedule: this.adHocRunSchedule,
+      savedObjectsRepository: this.internalSavedObjectsRepository,
+      backfillClient: this.context.backfillClient,
+    });
   }
 }

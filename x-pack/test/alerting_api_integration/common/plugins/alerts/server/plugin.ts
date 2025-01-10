@@ -92,7 +92,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(
     core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting, ruleRegistry }: FixtureSetupDeps
+    { features, actions, alerting, ruleRegistry, eventLog }: FixtureSetupDeps
   ) {
     features.registerKibanaFeature({
       id: 'alertsFixture',
@@ -134,7 +134,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     defineActionTypes(core, { actions });
     defineRuleTypes(core, { alerting, ruleRegistry }, this.logger);
     defineConnectorAdapters(core, { alerting });
-    defineRoutes(core, this.taskManagerStart, this.notificationsStart, { logger: this.logger });
+    const eventLogger = eventLog.getLogger({
+      event: { provider: 'alerting' },
+    });
+    defineRoutes(core, this.taskManagerStart, this.notificationsStart, {
+      logger: this.logger,
+      eventLogger,
+    });
   }
 
   public start(core: CoreStart, { taskManager, notifications }: FixtureStartDeps) {

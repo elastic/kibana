@@ -21,7 +21,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IAlertsClient } from '../alerts_client/types';
@@ -179,5 +179,6 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
 }

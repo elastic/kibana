@@ -629,6 +629,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
+
           await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,

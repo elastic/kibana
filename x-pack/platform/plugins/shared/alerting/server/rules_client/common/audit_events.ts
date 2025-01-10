@@ -36,6 +36,8 @@ export enum RuleAuditAction {
   RUN_SOON = 'rule_run_soon',
   UNTRACK_ALERT = 'rule_alert_untrack',
   SCHEDULE_BACKFILL = 'rule_schedule_backfill',
+  FIND_GAPS = 'rule_find_gaps',
+  FILL_GAPS = 'rule_fill_gaps',
 }
 
 export enum AdHocRunAuditAction {
@@ -97,6 +99,8 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'scheduling backfill for',
     'scheduled backfill for',
   ],
+  rule_find_gaps: ['find gaps for', 'finding gaps for', 'found gaps for'],
+  rule_fill_gaps: ['fill gaps for', 'filling gaps for', 'filled gaps for'],
 };
 
 const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
@@ -132,6 +136,8 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_get_global_execution_kpi: 'access',
   rule_alert_untrack: 'change',
   rule_schedule_backfill: 'access',
+  rule_find_gaps: 'access',
+  rule_fill_gaps: 'change',
 };
 
 const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {

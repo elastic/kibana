@@ -23,7 +23,7 @@ import {
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc } from './es/cluster_client_adapter';
+import { Doc, InternalFields } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -107,6 +107,24 @@ export class EventLogger implements IEventLogger {
       logEventDoc(this.systemLogger, doc);
     }
   }
+
+  async updateEvent(internalFields: InternalFields, event: IEvent): Promise<void> {
+    const doc: Required<Doc> = {
+      index: this.esContext.esNames.dataStream,
+      body: event,
+      internalFields,
+    };
+
+    if (this.eventLogService.isIndexingEntries()) {
+      const result = await updateEventDoc(this.esContext, doc);
+
+      if (this.eventLogService.isLoggingEntries()) {
+        logUpdateEventDoc(this.systemLogger, doc);
+      }
+
+      return result;
+    }
+  }
 }
 
 // return the epoch millis of the start date, or null; may be NaN if garbage
@@ -161,6 +179,14 @@ function logEventDoc(logger: Logger, doc: Doc): void {
   logger.info(`event logged: ${JSON.stringify(doc.body)}`);
 }
 
+function logUpdateEventDoc(logger: Logger, doc: Doc): void {
+  logger.info(`event updated: ${JSON.stringify(doc.body)}`);
+}
+
 function indexEventDoc(esContext: EsContext, doc: Doc): void {
   esContext.esAdapter.indexDocument(doc);
+}
+
+async function updateEventDoc(esContext: EsContext, doc: Required<Doc>): Promise<void> {
+  return esContext.esAdapter.updateDocument(doc);
 }

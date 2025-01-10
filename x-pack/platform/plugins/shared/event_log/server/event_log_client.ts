@@ -40,6 +40,8 @@ const sortSchema = schema.object({
     schema.literal('event.duration'),
     schema.literal('event.action'),
     schema.literal('message'),
+    schema.literal('kibana.alert.rule.gap.status'),
+    schema.literal('kibana.alert.rule.gap.total_gap_duration_ms'),
   ]),
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
 });

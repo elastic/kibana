@@ -28,6 +28,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getRuleExecutionKPI',
     'getBackfill',
     'findBackfill',
+    'findGaps',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };

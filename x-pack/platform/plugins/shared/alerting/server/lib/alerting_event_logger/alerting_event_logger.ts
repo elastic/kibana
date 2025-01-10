@@ -10,6 +10,7 @@ import {
   IEventLogger,
   millisToNanos,
   SAVED_OBJECT_REL_PRIMARY,
+  InternalFields,
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
@@ -18,6 +19,8 @@ import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
+import { Gap } from '../rule_gaps/gap';
+import { GapBase } from '../rule_gaps/types';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -408,12 +411,36 @@ export class AlertingEventLogger {
       throw new Error('AlertingEventLogger not initialized');
     }
 
+    const gapToReport = new Gap({
+      range: gap,
+    });
+
     this.eventLogger.logEvent(
-      createGapRecord(this.context, this.ruleData, this.relatedSavedObjects, {
-        status: 'unfilled',
-        range: gap,
-      })
+      createGapRecord(
+        this.context,
+        this.ruleData,
+        this.relatedSavedObjects,
+        gapToReport.getEsObject()
+      )
     );
+  }
+
+  public async updateGap({
+    internalFields,
+    gap,
+  }: {
+    internalFields: InternalFields;
+    gap: GapBase;
+  }): Promise<void> {
+    return this.eventLogger.updateEvent(internalFields, {
+      kibana: {
+        alert: {
+          rule: {
+            gap,
+          },
+        },
+      },
+    });
   }
 }
 

@@ -19,10 +19,9 @@ export type {
   IEventLogClient,
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  InternalFields,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
-
-export { ClusterClientAdapter } from './es/cluster_client_adapter';
 
 export { createReadySignal } from './lib/ready_signal';
 
