@@ -249,15 +249,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           count += data.results.active;
         }
       }
-      if (count !== agentCount) {
-        setAgentCount(count);
-      }
+      // if (count !== agentCount) {
+      setAgentCount(count);
+      // }
     };
 
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
-      if (agentCount !== 0) {
-        setAgentCount(0);
-      }
+      // if (agentCount !== 0) {
+      setAgentCount(0);
+      // }
       return;
     }
 
