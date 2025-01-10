@@ -29,7 +29,7 @@ dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange)
 };
 
 const dashboardApi = {
-  viewMode: new BehaviorSubject<ViewMode>('view'),
+  viewMode$: new BehaviorSubject<ViewMode>('view'),
 };
 const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),

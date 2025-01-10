@@ -104,7 +104,7 @@ describe('GetCsvReportPanelAction', () => {
         }),
         hasTimeRange: () => true,
         parentApi: {
-          viewMode: new BehaviorSubject('view'),
+          viewMode$: new BehaviorSubject('view'),
         },
       },
     } as EmbeddableApiContext;
