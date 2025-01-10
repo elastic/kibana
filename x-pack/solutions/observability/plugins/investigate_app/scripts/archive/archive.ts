@@ -8,8 +8,8 @@
 import { spawnSync } from 'child_process';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
+import { getServiceUrls } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/get_service_urls';
 import { options } from './cli';
-import { getServiceUrls } from '../common/get_service_urls';
 
 async function archiveAllRelevantData({ filePath, esUrl }: { filePath: string; esUrl: string }) {
   spawnSync(

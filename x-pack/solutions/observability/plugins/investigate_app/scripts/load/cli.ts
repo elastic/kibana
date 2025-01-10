@@ -6,7 +6,7 @@
  */
 import { format, parse } from 'url';
 import { Argv } from 'yargs';
-import { readKibanaConfig } from '../common/read_kibana_config';
+import { readKibanaConfig } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/read_kibana_config';
 
 const config = readKibanaConfig();
 
