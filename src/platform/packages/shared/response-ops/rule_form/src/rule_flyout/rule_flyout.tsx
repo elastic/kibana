@@ -42,7 +42,10 @@ export const RuleFlyout = ({
     setIsConnectorsScreenVisible(false);
   }, [setIsConnectorsScreenVisible]);
 
-  const onOpenShowRequest = useCallback(() => setIsShowRequestScreenVisible(true), []);
+  const onOpenShowRequest = useCallback(
+    () => setIsShowRequestScreenVisible(true),
+    [setIsShowRequestScreenVisible]
+  );
   const onCloseShowRequest = useCallback(() => {
     setInitialStep(RuleFormStepId.DETAILS);
     setIsShowRequestScreenVisible(false);
