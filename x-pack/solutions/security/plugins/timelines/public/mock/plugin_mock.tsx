@@ -5,14 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { LastUpdatedAt, LastUpdatedAtProps, LoadingPanel, LoadingPanelProps } from '../components';
-import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
+import { LastUpdatedAt, LastUpdatedAtProps } from '../components';
+import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { mockHoverActions } from './mock_hover_actions';
 
 export const createTGridMocks = () => ({
   getHoverActions: () => mockHoverActions,
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
-  getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
   getUseAddToTimeline: () => useAddToTimeline,
-  getUseAddToTimelineSensor: () => useAddToTimelineSensor,
 });
