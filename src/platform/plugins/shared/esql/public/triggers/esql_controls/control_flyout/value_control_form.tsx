@@ -379,7 +379,6 @@ export function ValueControlForm({
                 {queryColumns.length === 1 ? (
                   <EuiPanel
                     paddingSize="s"
-                    // hasBorder
                     color="primary"
                     css={css`
                       white-space: wrap;
