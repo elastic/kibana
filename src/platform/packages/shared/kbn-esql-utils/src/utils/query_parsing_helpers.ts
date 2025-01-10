@@ -165,12 +165,11 @@ export const mapVariableToColumn = (
     return columns;
   }
   const { root } = parse(esql);
-  const usedVariablesInQuery = Walker.params(root).map((param) => param);
+  const usedVariablesInQuery = Walker.params(root);
 
-  const uniqueVariablesInQyery = new Set<string>();
-  usedVariablesInQuery.forEach((variable) => {
-    uniqueVariablesInQyery.add(variable.text.replace('?', ''));
-  });
+  const uniqueVariablesInQyery = new Set<string>(
+    usedVariablesInQuery.map((v) => v.text.replace('?', ''))
+  );
 
   columns.map((column) => {
     if (variables.some((variable) => variable.value === column.id)) {
