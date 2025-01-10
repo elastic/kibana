@@ -230,6 +230,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
 
+        const interceptPromises = proxy
+          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .completeAfterIntercept();
+
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),
@@ -274,9 +278,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await proxy
-          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-          .completeAfterIntercept();
+        await interceptPromises;
 
         const conversation = res.body;
         return conversation;
@@ -291,6 +293,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         proxy.close();
+        await clearKnowledgeBase(es);
+        await clearConversations(es);
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
         });
