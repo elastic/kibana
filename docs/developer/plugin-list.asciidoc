@@ -576,7 +576,7 @@ security and spaces filtering.
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entity_manager_app/README.md[entityManagerApp]
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
