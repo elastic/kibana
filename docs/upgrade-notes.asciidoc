@@ -157,7 +157,7 @@ We would love to discuss your use case.
 [%collapsible]
 ====
 *Details* +
-Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides. This change simplifies the security model and fixes bugginess in the saved query management UI, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX.
+Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides (e.g. implicit access with `all` privilege for Discover, Dashboard, Maps, and Visualize apps). This change simplifies the security model and ensures consistency in the saved query management UI across Kibana, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX.
 For more information, refer to {kibana-pull}202863[#202863].
 *Impact* +
 The `savedQueryManagement` feature privilege now globally controls access to saved query management for all new user roles. Regardless of privileges for Discover, Dashboard, Maps, or Visualize, new user roles follow this behaviour:
