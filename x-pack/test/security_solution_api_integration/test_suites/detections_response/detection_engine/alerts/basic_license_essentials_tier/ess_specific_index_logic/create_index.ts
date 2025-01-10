@@ -86,13 +86,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('with reIndexed from 7.xto 8.x .siem-signals index', () => {
         beforeEach(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/signals/reindexed-v8-siem-signals'
+            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
           );
         });
 
         afterEach(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/signals/reindexed-v8-siem-signals'
+            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
           );
           await es.indices.delete({
             index: '.reindexed-v8-siem-signals-default-000002',
