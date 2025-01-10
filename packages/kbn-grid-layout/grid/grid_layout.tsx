@@ -128,14 +128,12 @@ export const GridLayout = ({
       }
 
       if (currentExpandedPanelId) {
-        layoutRef.current?.classList.add('kbnGrid--static');
-        layoutRef.current?.classList.add('kbnGrid--hasExpandedPanel');
+        layoutRef.current?.classList.add('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
       } else if (currentAccessMode === 'VIEW') {
         layoutRef.current?.classList.add('kbnGrid--static');
         layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
       } else {
-        layoutRef.current?.classList.remove('kbnGrid--static');
-        layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
+        layoutRef.current?.classList.remove('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
       }
     });
 
