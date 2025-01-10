@@ -8,8 +8,7 @@
 import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { FtrProviderContext } from '../common/ftr_provider_context';
-
+import type { FtrProviderContext } from '@kbn/test';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -70,10 +69,5 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-    KIBANA_URL: Url.format({
-      protocol: config.get('servers.kibana.protocol'),
-      hostname: config.get('servers.kibana.hostname'),
-      port: config.get('servers.kibana.port'),
-    }),
   };
 }
