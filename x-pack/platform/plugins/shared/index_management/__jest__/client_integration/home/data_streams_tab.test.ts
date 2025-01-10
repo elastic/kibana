@@ -451,9 +451,64 @@ describe('Data Streams tab', () => {
       });
     });
 
+    describe('bulk delete of data streams', () => {
+      beforeAll(async () => {
+        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
+
+        const ds1 = createDataStreamPayload({
+          name: 'dataStream1',
+          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+        });
+        const ds2 = createDataStreamPayload({
+          name: 'dataStream2',
+          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+        });
+
+        setLoadDataStreamsResponse([ds1, ds2]);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('can delete multiple data streams at once', async () => {
+        const {
+          actions: { selectDataStream, clickBulkDeleteDataStreamsButton, clickConfirmDelete },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+
+        clickBulkDeleteDataStreamsButton();
+
+        httpRequestsMockHelpers.setDeleteDataStreamResponse({
+          results: {
+            dataStreamsDeleted: ['dataStream1', 'dataStream2'],
+            errors: [],
+          },
+        });
+
+        await clickConfirmDelete();
+
+        testBed.component.update();
+
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_data_streams`,
+          expect.objectContaining({
+            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+          })
+        );
+      });
+    });
+
     describe('bulk update data retention', () => {
       beforeAll(async () => {
-        const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+        const { setLoadDataStreamsResponse } = httpRequestsMockHelpers;
 
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
@@ -469,7 +524,6 @@ describe('Data Streams tab', () => {
         });
 
         setLoadDataStreamsResponse([ds1, ds2]);
-        setLoadDataStreamResponse(ds1.name, ds1);
 
         testBed = await setup(httpSetup, {
           history: createMemoryHistory(),
@@ -483,24 +537,15 @@ describe('Data Streams tab', () => {
 
       test('can set data retention period for mutliple data streams', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -528,24 +573,15 @@ describe('Data Streams tab', () => {
 
       test('can disable lifecycle', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -566,24 +602,15 @@ describe('Data Streams tab', () => {
 
       test('allows to set infinite retention period', async () => {
         const {
-          actions: {
-            selectDataStream,
-            clickManageDataStreamsButton,
-            clickBulkEditDataRetentionButton,
-          },
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
         } = testBed;
 
         selectDataStream('dataStream1', true);
         selectDataStream('dataStream2', true);
-        clickManageDataStreamsButton();
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -695,7 +722,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -727,7 +754,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -755,7 +782,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 

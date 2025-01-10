@@ -19,7 +19,6 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../../../common/siem_migrations/constants';
 import type { UploadedLookups } from '../../lookups_data_input';
 import * as i18n from './translations';
 
@@ -31,18 +30,18 @@ const scrollPanelCss = css`
 interface MissingLookupsListProps {
   missingLookups: string[];
   uploadedLookups: UploadedLookups;
-  clearLookup: (lookupsName: string) => void;
+  omitLookup: (lookupsName: string) => void;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, clearLookup, onCopied }) => {
+  ({ missingLookups, uploadedLookups, omitLookup, onCopied }) => {
     const { euiTheme } = useEuiTheme();
     return (
       <>
         <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {missingLookups.map((lookupName) => {
-              const isMarkedAsEmpty = uploadedLookups[lookupName] === EMPTY_RESOURCE_PLACEHOLDER;
+              const isOmitted = uploadedLookups[lookupName] === '';
               return (
                 <EuiFlexItem key={lookupName}>
                   <EuiFlexGroup
@@ -52,17 +51,14 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     justifyContent="flexStart"
                   >
                     <EuiFlexItem grow={false}>
-                      {uploadedLookups[lookupName] ? (
+                      {uploadedLookups[lookupName] != null ? (
                         <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
                       ) : (
                         <EuiIcon type="dot" />
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="s"
-                        style={isMarkedAsEmpty ? { textDecoration: 'line-through' } : {}}
-                      >
+                      <EuiText size="s" style={isOmitted ? { textDecoration: 'line-through' } : {}}>
                         {lookupName}
                       </EuiText>
                     </EuiFlexItem>
@@ -78,10 +74,10 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                       </EuiCopy>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <ClearLookupButton
+                      <OmitLookupButton
                         lookupName={lookupName}
-                        clearLookup={clearLookup}
-                        isDisabled={isMarkedAsEmpty}
+                        omitLookup={omitLookup}
+                        isDisabled={isOmitted}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -115,7 +111,7 @@ const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
       <EuiToolTip content={i18n.COPY_LOOKUP_NAME_TOOLTIP}>
         <EuiButtonIcon
           onClick={onClick}
-          iconType="copyClipboard"
+          iconType="copy"
           color="text"
           aria-label={`${i18n.COPY_LOOKUP_NAME_TOOLTIP} ${lookupName}`}
           data-test-subj="lookupNameCopy"
@@ -126,18 +122,18 @@ const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
 );
 CopyLookupNameButton.displayName = 'CopyLookupNameButton';
 
-interface ClearLookupButtonProps {
+interface OmitLookupButtonProps {
   lookupName: string;
-  clearLookup: (lookupName: string) => void;
+  omitLookup: (lookupName: string) => void;
   isDisabled: boolean;
 }
-const ClearLookupButton = React.memo<ClearLookupButtonProps>(
-  ({ lookupName, clearLookup, isDisabled: isDisabledDefault }) => {
+const OmitLookupButton = React.memo<OmitLookupButtonProps>(
+  ({ lookupName, omitLookup, isDisabled: isDisabledDefault }) => {
     const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
     const onClick = useCallback(() => {
       setIsDisabled(true);
-      clearLookup(lookupName);
-    }, [clearLookup, lookupName]);
+      omitLookup(lookupName);
+    }, [omitLookup, lookupName]);
 
     const button = useMemo(
       () => (
@@ -158,4 +154,4 @@ const ClearLookupButton = React.memo<ClearLookupButtonProps>(
     return <EuiToolTip content={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}>{button}</EuiToolTip>;
   }
 );
-ClearLookupButton.displayName = 'ClearLookupButton';
+OmitLookupButton.displayName = 'OmitLookupButton';
