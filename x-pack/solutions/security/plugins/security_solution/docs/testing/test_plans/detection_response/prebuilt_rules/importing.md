@@ -57,7 +57,7 @@ CASE: Should work with older, newer, or identical version numbers
 Given the import payload contains a custom rule with a matching rule_id and version
 And the overwrite flag is set to true
 When the user imports the rule
-Then the rule should be created or updated
+Then the rule should be updated
 And the ruleSource type should be "internal"
 ```
 
@@ -69,7 +69,7 @@ And the ruleSource type should be "internal"
 Given the import payload contains a prebuilt rule with a matching rule_id but no matching version
 And the overwrite flag is set to true
 When the user imports the rule
-Then the rule should be created or updated
+Then the rule should be created
 And the ruleSource type should be "external"
 And isCustomized should be true
 ```
