@@ -964,6 +964,7 @@ describe('useSetupTechnology', () => {
     });
 
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
       expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
         global_data_tags: [

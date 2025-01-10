@@ -248,18 +248,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           count += data.results.active;
         }
       }
-      setAgentCount(count);
+      if (count !== agentCount) {
+        setAgentCount(count);
+      }
     };
 
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
-      setAgentCount(0);
+      if (agentCount !== 0) {
+        setAgentCount(0);
+      }
       return;
     }
 
     if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentCount]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
