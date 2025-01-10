@@ -21,7 +21,7 @@
           },
           ">"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -77,7 +77,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,7 +99,7 @@
               },
               ">"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +128,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +150,7 @@
               },
               ">"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -170,7 +170,7 @@
         "description": [
           "\nAn interface containing a collection of Kibana dependencies required to\nrender this component"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,13 +183,7 @@
             "description": [],
             "signature": [
               "{ application: { navigateToUrl: (url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
               "Observable",
               "<",
@@ -238,7 +232,7 @@
               "Observable",
               "<number>; }; analytics: { reportEvent: (eventType: string, eventData: object) => void; }; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,7 +255,7 @@
               },
               "[][]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -277,7 +271,7 @@
         "description": [
           "\nA list of services that are consumed by this component."
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +285,7 @@
             "signature": [
               "{ prepend: (url: string) => string; remove: (url: string) => string; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -314,7 +308,7 @@
               },
               "[]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,16 +321,10 @@
             "description": [],
             "signature": [
               "(url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -348,7 +336,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -360,16 +348,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.NavigateToUrlOptions",
-                    "text": "NavigateToUrlOptions"
-                  },
+                  "NavigateToUrlOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -394,7 +376,7 @@
               },
               "[][]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -405,7 +387,7 @@
             "tags": [],
             "label": "isSideNavCollapsed",
             "description": [],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,7 +401,7 @@
             "signature": [
               "EventTracker"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,7 +422,7 @@
               },
               " | null | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -462,7 +444,7 @@
               },
               " | null) => void) | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -483,7 +465,7 @@
                   },
                   " | null"
                 ],
-                "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+                "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -502,7 +484,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -516,7 +498,7 @@
         "tags": [],
         "label": "PanelComponentProps",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -532,7 +514,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -558,7 +540,7 @@
               },
               ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,7 +563,7 @@
               },
               "[][]"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,7 +577,7 @@
         "tags": [],
         "label": "PanelContent",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -609,7 +591,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -631,7 +613,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -645,7 +627,7 @@
         "tags": [],
         "label": "Props",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -668,7 +650,7 @@
               },
               ">"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,7 +664,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -703,7 +685,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -719,7 +701,7 @@
         "tags": [],
         "label": "FieldType",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -743,7 +725,7 @@
             "text": "PanelContent"
           }
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -755,7 +737,7 @@
             "tags": [],
             "label": "nodeId",
             "description": [],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -769,7 +751,7 @@
         "tags": [],
         "label": "EventType",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

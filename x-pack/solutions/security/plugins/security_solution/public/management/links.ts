@@ -99,7 +99,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 10,
+  globalNavPosition: 11,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {

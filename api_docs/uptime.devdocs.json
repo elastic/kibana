@@ -34,7 +34,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

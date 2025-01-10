@@ -5,9 +5,7 @@ pageLoadAssetSize:
   aiops: 18000
   alerting: 106936
   apm: 64385
-  assetInventory: 18478
   banners: 17946
-  bfetch: 22837
   canvas: 29355
   cases: 180037
   charts: 55000
@@ -149,6 +147,7 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
   securitySolutionEss: 31781

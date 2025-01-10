@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { EntityManagerServerSetup } from '../types';
 import { EntityDiscoveryAPIKey } from './auth/api_key/api_key';
+import { EntityDiscoveryApiKeyType } from '../saved_objects';
 
 export const getClientsFromAPIKey = ({
   apiKey,
@@ -17,9 +18,11 @@ export const getClientsFromAPIKey = ({
 }: {
   apiKey: EntityDiscoveryAPIKey;
   server: EntityManagerServerSetup;
-}): { esClient: ElasticsearchClient; soClient: SavedObjectsClientContract } => {
+}): { clusterClient: IScopedClusterClient; soClient: SavedObjectsClientContract } => {
   const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-  const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-  const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-  return { esClient, soClient };
+  const clusterClient = server.core.elasticsearch.client.asScoped(fakeRequest);
+  const soClient = server.core.savedObjects.getScopedClient(fakeRequest, {
+    includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+  });
+  return { clusterClient, soClient };
 };

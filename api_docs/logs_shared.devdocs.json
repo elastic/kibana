@@ -13,7 +13,7 @@
         "signature": [
           "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | null"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "LogViewUrlStateDependencies"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
           "LogViewEvent",
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,7 +120,7 @@
             "signature": [
               "LogViewUrlStateDependencies"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -207,7 +207,7 @@
           "LogViewEvent",
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,7 +218,7 @@
             "tags": [],
             "label": "{\n    urlStateStorage,\n    logViewKey = defaultLogViewKey,\n  }",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -238,7 +238,7 @@
                     "text": "IKbnUrlStateStorage"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -252,7 +252,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -280,7 +280,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -314,7 +314,7 @@
           "LogEntryColumnWidth",
           "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -346,7 +346,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<{ [x: string]: any; role?: string | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -394,7 +394,7 @@
           },
           " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -428,7 +428,7 @@
           "LogEntryContextMenuProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -462,7 +462,7 @@
           "LogEntryFieldColumnProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -496,7 +496,7 @@
           "LogEntryFlyoutProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -530,7 +530,7 @@
           "LogEntryMessageColumnProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -578,7 +578,7 @@
           },
           " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -612,7 +612,7 @@
           "LogEntryTimestampColumnProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -644,7 +644,7 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<UseLogHighlightsStateProps>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_highlights/log_highlights.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_highlights/log_highlights.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -694,7 +694,7 @@
           "LogStreamPageCallbacks",
           "; }>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_position/use_log_position.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_position/use_log_position.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -748,7 +748,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -780,7 +780,7 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<LogStreamProps>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_stream/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_stream/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1004,7 +1004,7 @@
           "LogViewEvent",
           "> | undefined; }>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1062,7 +1062,7 @@
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1104,7 +1104,7 @@
           },
           ">, \"ref\"> & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1192,7 +1192,7 @@
           "LogViewEvent",
           ") => void"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1206,7 +1206,7 @@
             "signature": [
               "LogViewUrlStateDependencies"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1241,7 +1241,7 @@
           },
           "; CharacterDimensionsProbe: () => React.JSX.Element; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1252,7 +1252,7 @@
             "tags": [],
             "label": "{\n  columnConfigurations,\n  scale,\n  timeFormat = 'time',\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1267,7 +1267,7 @@
                   "LogColumnRenderConfiguration",
                   "[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1281,7 +1281,7 @@
                 "signature": [
                   "\"small\" | \"medium\" | \"large\""
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1296,7 +1296,7 @@
                   "TimeFormat",
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1408,7 +1408,7 @@
           },
           " | null; hasPreviousHighlight: boolean; hasNextHighlight: boolean; goToPreviousHighlight: () => void; goToNextHighlight: () => void; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_highlights/log_highlights.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_highlights/log_highlights.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1426,7 +1426,7 @@
           "() => DateRange & { targetPosition: TimeKeyOrNull; isStreaming: boolean; firstVisiblePosition: TimeKeyOrNull; pagesBeforeStart: number; pagesAfterEnd: number; visibleMidpoint: TimeKeyOrNull; visibleMidpointTime: number | null; visibleTimeInterval: { start: number; end: number; } | null; } & ",
           "LogPositionCallbacks"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_position/use_log_position.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_position/use_log_position.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1459,7 +1459,7 @@
           },
           "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; topCursor: { time: string; tiebreaker: number; } | null; bottomCursor: { time: string; tiebreaker: number; } | null; hasMoreBefore: boolean; hasMoreAfter: boolean; lastLoadedTime?: Date | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_stream/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_stream/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1946,7 +1946,7 @@
           "ServiceMap",
           ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1957,7 +1957,7 @@
             "tags": [],
             "label": "{\n  initialLogViewReference,\n  logViews,\n  useDevTools = isDevMode(),\n  initializeFromUrl,\n  updateContextInUrl,\n  listenForUrlChanges,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1971,7 +1971,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1985,7 +1985,7 @@
                 "signature": [
                   "ILogViewsClient"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1999,7 +1999,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2072,7 +2072,7 @@
                   "LogViewEvent",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2142,7 +2142,7 @@
                   "LogViewEvent",
                   ") => void) | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2215,7 +2215,7 @@
                   "LogViewEvent",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2527,7 +2527,7 @@
           "ServiceMap",
           ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2552,7 +2552,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2583,7 +2583,7 @@
         "tags": [],
         "label": "LogAIAssistantDocument",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2605,7 +2605,7 @@
               },
               "; }[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2619,7 +2619,7 @@
         "tags": [],
         "label": "LogAIAssistantProps",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2639,7 +2639,7 @@
                 "text": "ObservabilityAIAssistantPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2660,7 +2660,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2674,7 +2674,7 @@
         "tags": [],
         "label": "LogEntryColumnWidths",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2689,7 +2689,7 @@
               "[columnId: string]:  ",
               "LogEntryColumnWidth"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2703,7 +2703,7 @@
             "signature": [
               "{ baseWidth: string; growWeight: number; shrinkWeight: number; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2717,7 +2717,7 @@
         "tags": [],
         "label": "LogEntryStreamItem",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/item.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2731,7 +2731,7 @@
             "signature": [
               "\"logEntry\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/item.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2761,7 +2761,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/item.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2791,7 +2791,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/item.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2805,7 +2805,7 @@
         "tags": [],
         "label": "LogsSharedClientSetupDeps",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2853,7 +2853,41 @@
               },
               ") => void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientSetupDeps.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsPublicPluginSetup",
+                "text": "DataViewsPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientSetupDeps.logsDataAccess",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "void"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2867,7 +2901,7 @@
         "tags": [],
         "label": "LogsSharedClientStartDeps",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2890,7 +2924,7 @@
               "ActiveCursor",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2910,7 +2944,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2930,7 +2964,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2950,7 +2984,7 @@
                 "text": "DiscoverSharedPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2966,7 +3000,7 @@
               "LogSourcesService",
               "; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2987,7 +3021,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3027,7 +3061,7 @@
               },
               ">): void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3115,7 +3149,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3145,7 +3179,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3165,7 +3199,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3185,7 +3219,7 @@
                 "text": "SavedSearchPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3209,7 +3243,7 @@
           },
           " extends LogStreamContentProps"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3223,7 +3257,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3237,7 +3271,7 @@
         "tags": [],
         "label": "LogViewContextWithError",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3251,7 +3285,7 @@
             "signature": [
               "Error"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3265,7 +3299,7 @@
         "tags": [],
         "label": "LogViewContextWithResolvedLogView",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3285,7 +3319,7 @@
                 "text": "ResolvedLogView"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3299,7 +3333,7 @@
         "tags": [],
         "label": "UpdatedDateRange",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3313,7 +3347,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3327,7 +3361,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3341,7 +3375,7 @@
         "tags": [],
         "label": "VisibleInterval",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3352,7 +3386,7 @@
             "tags": [],
             "label": "pagesBeforeStart",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3363,7 +3397,7 @@
             "tags": [],
             "label": "pagesAfterEnd",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3377,7 +3411,7 @@
             "signature": [
               "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3391,7 +3425,7 @@
             "signature": [
               "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3405,7 +3439,7 @@
             "signature": [
               "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3416,7 +3450,7 @@
             "tags": [],
             "label": "fromScroll",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3430,7 +3464,7 @@
         "tags": [],
         "label": "WithSummaryProps",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/with_summary.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_summary/with_summary.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3444,7 +3478,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/with_summary.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_summary/with_summary.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3459,7 +3493,7 @@
               "(args: { buckets: { start: number; end: number; entriesCount: number; }[]; start: number | null; end: number | null; }) => ",
               "RendererResult"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/with_summary.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_summary/with_summary.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3474,7 +3508,7 @@
                 "signature": [
                   "RenderArgs"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/public/utils/typed_react.tsx",
+                "path": "x-pack/platform/plugins/shared/logs_shared/public/utils/typed_react.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3503,7 +3537,7 @@
             "text": "iconColumnId"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3528,7 +3562,7 @@
           },
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logs_overview/logs_overview.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3543,7 +3577,7 @@
         "signature": [
           "{ start: number; end: number; entriesCount: number; }[]"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3623,7 +3657,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3646,7 +3680,7 @@
           },
           "; status: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3660,7 +3694,7 @@
       "tags": [],
       "label": "LogsSharedClientSetupExports",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3674,7 +3708,7 @@
           "signature": [
             "LogViewsServiceSetup"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3688,7 +3722,7 @@
           "signature": [
             "LogsSharedLocators"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3703,7 +3737,7 @@
       "tags": [],
       "label": "LogsSharedClientStartExports",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3717,7 +3751,7 @@
           "signature": [
             "LogViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3739,7 +3773,7 @@
             },
             ", \"observabilityAIAssistant\">) => JSX.Element) | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3761,7 +3795,7 @@
                 },
                 ", \"observabilityAIAssistant\">"
               ],
-              "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3781,7 +3815,7 @@
             " & ",
             "SelfContainedLogsOverviewHelpers"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3816,7 +3850,7 @@
             "text": "ILogsSharedLogEntriesDomain"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3830,7 +3864,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3844,7 +3878,7 @@
                 "signature": [
                   "LogEntriesAdapter"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3861,7 +3895,7 @@
                   "LogsSharedBackendLibs",
                   ", \"framework\" | \"getStartServices\">"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3878,13 +3912,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -3905,7 +3933,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3917,15 +3945,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3940,7 +3962,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3955,7 +3977,7 @@
                 "signature": [
                   "LogEntriesAroundParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3970,7 +3992,7 @@
                 "signature": [
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3987,13 +4009,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4014,7 +4030,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4026,15 +4042,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4049,7 +4059,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4064,7 +4074,7 @@
                 "signature": [
                   "LogEntriesParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4079,7 +4089,7 @@
                 "signature": [
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4096,13 +4106,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4113,7 +4117,7 @@
               },
               " | undefined) => Promise<{ start: number; end: number; entriesCount: number; }[]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4125,15 +4129,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4148,7 +4146,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4163,7 +4161,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4178,7 +4176,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4193,7 +4191,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4215,7 +4213,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4232,13 +4230,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4249,7 +4241,7 @@
               },
               " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[][]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4261,15 +4253,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4284,7 +4270,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4299,7 +4285,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4314,7 +4300,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4329,7 +4315,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4344,7 +4330,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4366,7 +4352,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4383,18 +4369,12 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4406,15 +4386,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4429,7 +4403,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4444,7 +4418,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4459,7 +4433,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4474,7 +4448,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4489,7 +4463,7 @@
                 "signature": [
                   "MappingRuntimeFields"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4510,7 +4484,7 @@
         "tags": [],
         "label": "ILogsSharedLogEntriesDomain",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4523,13 +4497,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4550,7 +4518,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4562,15 +4530,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4585,7 +4547,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4600,7 +4562,7 @@
                 "signature": [
                   "LogEntriesAroundParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4615,7 +4577,7 @@
                 "signature": [
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4632,13 +4594,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4659,7 +4615,7 @@
               },
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4671,15 +4627,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4694,7 +4644,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4709,7 +4659,7 @@
                 "signature": [
                   "LogEntriesParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4724,7 +4674,7 @@
                 "signature": [
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4741,13 +4691,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4758,7 +4702,7 @@
               },
               " | undefined) => Promise<{ start: number; end: number; entriesCount: number; }[]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4770,15 +4714,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4793,7 +4731,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4808,7 +4746,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4823,7 +4761,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4838,7 +4776,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4860,7 +4798,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4877,13 +4815,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4894,7 +4826,7 @@
               },
               " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[][]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4906,15 +4838,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4929,7 +4855,7 @@
                 "signature": [
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4944,7 +4870,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4959,7 +4885,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4974,7 +4900,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4989,7 +4915,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5011,7 +4937,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5028,18 +4954,12 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5051,15 +4971,9 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5074,7 +4988,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5089,7 +5003,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5104,7 +5018,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5119,7 +5033,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5134,7 +5048,7 @@
                 "signature": [
                   "MappingRuntimeFields"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5158,7 +5072,7 @@
         "signature": [
           "\"infrastructure-monitoring-log-view\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5183,7 +5097,7 @@
         " extends ",
         "LogsSharedDomainLibs"
       ],
-      "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5197,7 +5111,7 @@
           "signature": [
             "LogViewsServiceSetup"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -5213,7 +5127,7 @@
             "UsageCollector",
             ") => void"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -5227,7 +5141,7 @@
               "signature": [
                 "UsageCollector"
               ],
-              "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -5246,7 +5160,7 @@
       "tags": [],
       "label": "LogsSharedPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5260,7 +5174,7 @@
           "signature": [
             "LogViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_shared/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -5288,7 +5202,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5302,7 +5216,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5316,7 +5230,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5331,7 +5245,7 @@
                 "signature": [
                   "Error | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5359,7 +5273,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5373,7 +5287,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5387,7 +5301,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5402,7 +5316,7 @@
                 "signature": [
                   "Error | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5430,7 +5344,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5444,7 +5358,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5458,7 +5372,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5473,7 +5387,7 @@
                 "signature": [
                   "Error | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/errors.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5496,7 +5410,7 @@
         "signature": [
           "(date: string) => string"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/utils/date_helpers.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/utils/date_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5510,54 +5424,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/utils/date_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.createNodeLogsQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "createNodeLogsQuery",
-        "description": [],
-        "signature": [
-          "(params: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          ") => string"
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.createNodeLogsQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "logsShared",
-                "scope": "common",
-                "docId": "kibLogsSharedPluginApi",
-                "section": "def-common.NodeLogsLocatorParams",
-                "text": "NodeLogsLocatorParams"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/helpers.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/utils/date_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5576,7 +5443,7 @@
         "signature": [
           "(hit: { sort: [string, number]; }) => { time: string; tiebreaker: number; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5587,7 +5454,7 @@
             "tags": [],
             "label": "hit",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5601,7 +5468,7 @@
                 "signature": [
                   "[string, number]"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5613,17 +5480,17 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.getLogsLocatorsFromUrlService",
+        "id": "def-common.getLogsLocatorFromUrlService",
         "type": "Function",
         "tags": [],
-        "label": "getLogsLocatorsFromUrlService",
+        "label": "getLogsLocatorFromUrlService",
         "description": [],
         "signature": [
           "(urlService: ",
           "UrlService",
           "<unknown, ",
           "IShortUrlClient",
-          ">) => { logsLocator: ",
+          ">) => ",
           {
             "pluginId": "share",
             "scope": "common",
@@ -5633,53 +5500,21 @@
           },
           "<",
           {
-            "pluginId": "logsShared",
+            "pluginId": "discover",
             "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-common.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
           },
-          ">; traceLogsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.TraceLogsLocatorParams",
-            "text": "TraceLogsLocatorParams"
-          },
-          ">; nodeLogsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          ">; }"
+          "> | undefined"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/get_logs_locators.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/get_logs_locators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "logsShared",
-            "id": "def-common.getLogsLocatorsFromUrlService.$1",
+            "id": "def-common.getLogsLocatorFromUrlService.$1",
             "type": "Object",
             "tags": [],
             "label": "urlService",
@@ -5690,7 +5525,216 @@
               "IShortUrlClient",
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/get_logs_locators.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/get_logs_locators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getNodeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getNodeQuery",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "NodeLogsParams",
+          ") => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getNodeQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "NodeLogsParams"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeRange",
+        "description": [],
+        "signature": [
+          "(time: number | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTimeRange.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTimeRangeEndFromTime",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeRangeEndFromTime",
+        "description": [],
+        "signature": [
+          "(time: number) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTimeRangeEndFromTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTimeRangeStartFromTime",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeRangeStartFromTime",
+        "description": [],
+        "signature": [
+          "(time: number) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTimeRangeStartFromTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getTraceQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getTraceQuery",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "TraceLogsParams",
+          ") => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getTraceQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TraceLogsParams"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5703,156 +5747,12 @@
     "interfaces": [
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.LogsLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogsLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.time",
-            "type": "number",
-            "tags": [],
-            "label": "time",
-            "description": [
-              "Defines log position"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [
-              "\nOptionally set the time range in the time picker."
-            ],
-            "signature": [
-              "{ startTime: number; endTime: number; } | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.filter",
-            "type": "string",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.LogsLocatorParams.logView",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logView",
-            "description": [],
-            "signature": [
-              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.NodeLogsLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "NodeLogsLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.NodeLogsLocatorParams",
-            "text": "NodeLogsLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
-          }
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.NodeLogsLocatorParams.nodeField",
-            "type": "string",
-            "tags": [],
-            "label": "nodeField",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.NodeLogsLocatorParams.nodeId",
-            "type": "string",
-            "tags": [],
-            "label": "nodeId",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-common.ResolvedLogView",
         "type": "Interface",
         "tags": [],
         "label": "ResolvedLogView",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5863,7 +5763,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5874,7 +5774,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5885,7 +5785,7 @@
             "tags": [],
             "label": "indices",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5896,7 +5796,7 @@
             "tags": [],
             "label": "timestampField",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5907,7 +5807,7 @@
             "tags": [],
             "label": "tiebreakerField",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5921,7 +5821,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5942,7 +5842,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5958,7 +5858,7 @@
               "MappingRuntimeField",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5972,7 +5872,7 @@
             "signature": [
               "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5992,49 +5892,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.TraceLogsLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "TraceLogsLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.TraceLogsLocatorParams",
-            "text": "TraceLogsLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.LogsLocatorParams",
-            "text": "LogsLocatorParams"
-          }
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.TraceLogsLocatorParams.traceId",
-            "type": "string",
-            "tags": [],
-            "label": "traceId",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6054,7 +5912,7 @@
         "signature": [
           "\"logFilter\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6069,7 +5927,7 @@
         "signature": [
           "\"logPosition\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6084,7 +5942,7 @@
         "signature": [
           "\"/api/log_entries/highlights\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/highlights.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/highlights.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6099,7 +5957,7 @@
         "signature": [
           "\"/api/log_entries/summary\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/summary.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/summary.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6130,7 +5988,7 @@
           },
           "; highlights: string[]; })[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6145,7 +6003,7 @@
         "signature": [
           "{ type: \"data_view\"; dataViewId: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6160,7 +6018,7 @@
         "signature": [
           "{ start: number; end: number; entriesCount: number; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/summary.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/summary.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6175,7 +6033,7 @@
         "signature": [
           "{ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/summary_highlights.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/summary_highlights.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6206,7 +6064,7 @@
           },
           "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6221,7 +6079,7 @@
         "signature": [
           "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6236,7 +6094,7 @@
         "signature": [
           "{ center: { time: string; tiebreaker: number; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6251,7 +6109,7 @@
         "signature": [
           "{ before: { time: string; tiebreaker: number; } | \"last\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6266,7 +6124,7 @@
         "signature": [
           "{} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6281,7 +6139,7 @@
         "signature": [
           "{ time: string; tiebreaker: number; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6304,7 +6162,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6319,7 +6177,7 @@
         "signature": [
           "{ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6342,7 +6200,7 @@
           },
           "; highlights: string[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6357,7 +6215,7 @@
         "signature": [
           "{ type: \"index_name\"; indexName: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6372,7 +6230,7 @@
         "signature": [
           "{ type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6395,7 +6253,7 @@
           },
           "; highlights: string[]; })[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6410,7 +6268,7 @@
         "signature": [
           "{ constant: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6433,7 +6291,7 @@
           },
           "; highlights: string[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6456,7 +6314,7 @@
           },
           "; highlights: string[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6467,11 +6325,36 @@
         "type": "string",
         "tags": [],
         "label": "LOGS_LOCATOR_ID",
-        "description": [],
+        "description": [
+          "\nLocator used to link to all log sources in Discover."
+        ],
         "signature": [
           "\"LOGS_LOCATOR\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/logs_locator.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.LogsLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsLocatorParams",
+        "description": [
+          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources."
+        ],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "common",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-common.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6486,7 +6369,7 @@
         "signature": [
           "{ type: \"kibana_advanced_setting\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6501,7 +6384,7 @@
         "signature": [
           "{ columnId: string; time: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6516,7 +6399,7 @@
         "signature": [
           "{ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6531,7 +6414,7 @@
         "signature": [
           "{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6546,7 +6429,7 @@
         "signature": [
           "{ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6561,7 +6444,7 @@
         "signature": [
           "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6576,22 +6459,7 @@
         "signature": [
           "{ index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.NODE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "NODE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"NODE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/node_logs_locator.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6606,7 +6474,7 @@
         "signature": [
           "{ logViewId: string; type: \"log-view-reference\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6654,22 +6522,7 @@
           "MappingTimeSeriesMetricType",
           " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.TRACE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "TRACE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"TRACE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/trace_logs_locator.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6683,7 +6536,7 @@
         "tags": [],
         "label": "DEFAULT_LOG_VIEW",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6697,7 +6550,7 @@
             "signature": [
               "\"log-view-reference\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6708,7 +6561,7 @@
             "tags": [],
             "label": "logViewId",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6722,7 +6575,7 @@
         "tags": [],
         "label": "DEFAULT_REFRESH_INTERVAL",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6733,7 +6586,7 @@
             "tags": [],
             "label": "pause",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6744,7 +6597,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6758,7 +6611,7 @@
         "tags": [],
         "label": "defaultLogViewAttributes",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6769,7 +6622,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6780,7 +6633,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6791,7 +6644,7 @@
             "tags": [],
             "label": "logIndices",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6805,7 +6658,7 @@
                 "signature": [
                   "\"index_name\""
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6816,7 +6669,7 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6832,7 +6685,7 @@
             "signature": [
               "({ timestampColumn: { id: string; }; } | { fieldColumn: { id: string; field: string; }; } | { messageColumn: { id: string; }; })[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
+            "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6922,7 +6775,7 @@
           "StringC",
           ">; }>]>>; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6942,7 +6795,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7580,7 +7433,7 @@
           "NumberC",
           "; }>; }>]>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/highlights.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/highlights.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7828,7 +7681,7 @@
           "StringC",
           "; }>]>; }>>; }>]>>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/highlights.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/highlights.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7940,7 +7793,7 @@
           "NullC",
           "]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/summary.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/summary.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7972,7 +7825,7 @@
           "NumberC",
           "; }>>; }>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/v1/summary.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/http_api/log_entries/v1/summary.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7998,7 +7851,7 @@
           "LiteralC",
           "<\"first\">]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8020,7 +7873,7 @@
           "NumberC",
           "; }>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8046,7 +7899,7 @@
           "LiteralC",
           "<\"last\">]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8076,7 +7929,7 @@
           "StringC",
           "; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8096,7 +7949,7 @@
           "NumberC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8132,7 +7985,7 @@
           },
           ", unknown>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8250,7 +8103,7 @@
           "StringC",
           "; }>]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8292,7 +8145,7 @@
           "StringC",
           ">; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8312,7 +8165,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8364,7 +8217,7 @@
           "StringC",
           ">; }>]>>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8384,7 +8237,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8424,7 +8277,7 @@
           "StringC",
           ">; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8470,7 +8323,7 @@
           "StringC",
           ">; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8488,7 +8341,7 @@
           "LiteralC",
           "<\"kibana_advanced_setting\">; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8510,7 +8363,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8564,7 +8417,7 @@
           "StringC",
           "; }>>]>; }>>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8660,7 +8513,7 @@
           "StringC",
           "; }>>]>; }>>]>>; }>>; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8680,7 +8533,7 @@
           "LiteralC",
           "<\"log-view-reference\">; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
