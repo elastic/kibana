@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './use_rule_form_dispatch';
-export * from './use_rule_form_state';
-export * from './use_rule_form_steps';
-export * from './use_rule_form_screen_context';
+import { useContext } from 'react';
+import { RuleFormScreenContext } from '../rule_form_screen_context';
+
+export const useRuleFormScreenContext = () => {
+  return useContext(RuleFormScreenContext);
+};

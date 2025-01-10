@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useRuleFormState, useRuleFormSteps } from '../hooks';
+import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FORM_CANCEL_MODAL_CANCEL,
@@ -31,6 +31,7 @@ import {
 import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
+import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
 
 export interface RulePageProps {
   isEdit?: boolean;
@@ -68,6 +69,12 @@ export const RulePage = (props: RulePageProps) => {
       onCancel();
     }
   }, [touched, onCancel]);
+
+  const { isConnectorsScreenVisible, setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const onCloseConnectorsModal = useCallback(
+    () => setIsConnectorsScreenVisible(false),
+    [setIsConnectorsScreenVisible]
+  );
 
   const hasActionsDisabled = useMemo(() => {
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
@@ -150,6 +157,7 @@ export const RulePage = (props: RulePageProps) => {
           <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
         </EuiConfirmModal>
       )}
+      {isConnectorsScreenVisible && <RuleActionsConnectorsModal onClose={onCloseConnectorsModal} />}
     </>
   );
 };

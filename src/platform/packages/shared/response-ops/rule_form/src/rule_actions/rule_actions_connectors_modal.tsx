@@ -15,18 +15,16 @@ import {
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
 import React from 'react';
 import { ACTION_TYPE_MODAL_TITLE } from '../translations';
 import { RuleActionsConnectorsBody } from './rule_actions_connectors_body';
 
 export interface RuleActionsConnectorsModalProps {
   onClose: () => void;
-  onSelectConnector: (connector: ActionConnector) => void;
 }
 
 export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProps) => {
-  const { onClose, onSelectConnector } = props;
+  const { onClose } = props;
 
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -51,10 +49,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="actionConnectorModal__container">
-        <RuleActionsConnectorsBody
-          onSelectConnector={onSelectConnector}
-          responsiveOverflow={responsiveOverflow}
-        />
+        <RuleActionsConnectorsBody responsiveOverflow={responsiveOverflow} onClose={onClose} />
       </EuiModalBody>
     </EuiModal>
   );

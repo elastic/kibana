@@ -13,6 +13,8 @@ import type { RuleFormData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
 import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
+import { useRuleFormScreenContext } from '../hooks';
+import { RuleFlyoutSelectConnector } from './rule_flyout_select_connector';
 
 interface RuleFlyoutProps {
   isEdit?: boolean;
@@ -30,13 +32,22 @@ export const RuleFlyout = ({
   const [isShowRequestOpen, setIsShowRequestOpen] = useState(false);
   const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
 
+  const { isConnectorsScreenVisible, setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const onCloseConnectorsScreen = useCallback(() => {
+    setInitialStep(RuleFormStepId.ACTIONS);
+    setIsConnectorsScreenVisible(false);
+  }, [setIsConnectorsScreenVisible]);
+
   const onOpenShowRequest = useCallback(() => setIsShowRequestOpen(true), []);
   const onCloseShowRequest = useCallback(() => {
     setInitialStep(RuleFormStepId.DETAILS);
     setIsShowRequestOpen(false);
   }, []);
 
-  const hideCloseButton = useMemo(() => isShowRequestOpen, [isShowRequestOpen]);
+  const hideCloseButton = useMemo(
+    () => isShowRequestOpen || isConnectorsScreenVisible,
+    [isShowRequestOpen, isConnectorsScreenVisible]
+  );
 
   return (
     <EuiPortal>
@@ -51,6 +62,8 @@ export const RuleFlyout = ({
       >
         {isShowRequestOpen ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
+        ) : isConnectorsScreenVisible ? (
+          <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
         ) : (
           <RuleFlyoutBody
             onSave={onSave}

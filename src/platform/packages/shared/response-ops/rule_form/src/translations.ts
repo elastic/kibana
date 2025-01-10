@@ -343,6 +343,13 @@ export const RULE_FLYOUT_HEADER_EDIT_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FLYOUT_HEADER_BACK_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.backText',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
 export const RULE_FLYOUT_FOOTER_CANCEL_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.cancelText',
   {

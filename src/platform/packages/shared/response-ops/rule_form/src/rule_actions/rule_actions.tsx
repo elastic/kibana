@@ -13,15 +13,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { RuleAction } from '../common/types';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import { useRuleFormState } from '../hooks';
-import { useOnSelectConnector } from '../hooks/use_on_select_connector';
+import { useRuleFormState, useRuleFormScreenContext } from '../hooks';
 import {
   ADD_ACTION_DESCRIPTION_TEXT,
   ADD_ACTION_HEADER,
   ADD_ACTION_OPTIONAL_TEXT,
   ADD_ACTION_TEXT,
 } from '../translations';
-import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 
@@ -38,8 +36,8 @@ const useRuleActionsIllustration = () => {
 };
 
 export const RuleActions = () => {
-  const [isConnectorModalOpen, setIsConnectorModalOpen] = useState<boolean>(false);
   const ruleActionsIllustration = useRuleActionsIllustration();
+  const { setIsConnectorsScreenVisible } = useRuleFormScreenContext();
 
   const {
     formData: { actions, consumer },
@@ -49,14 +47,8 @@ export const RuleActions = () => {
   } = useRuleFormState();
 
   const onModalOpen = useCallback(() => {
-    setIsConnectorModalOpen(true);
-  }, []);
-
-  const onModalClose = useCallback(() => {
-    setIsConnectorModalOpen(false);
-  }, []);
-
-  const onSelectConnector = useOnSelectConnector({ onClose: onModalClose });
+    setIsConnectorsScreenVisible(true);
+  }, [setIsConnectorsScreenVisible]);
 
   const producerId = useMemo(() => {
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleType.id)) {
@@ -138,9 +130,6 @@ export const RuleActions = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isConnectorModalOpen && (
-        <RuleActionsConnectorsModal onClose={onModalClose} onSelectConnector={onSelectConnector} />
-      )}
     </>
   );
 };

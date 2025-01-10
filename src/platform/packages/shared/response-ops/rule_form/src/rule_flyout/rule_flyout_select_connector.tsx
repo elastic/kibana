@@ -11,7 +11,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiText,
   EuiTitle,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -20,18 +19,16 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import {
-  SHOW_REQUEST_MODAL_SUBTITLE,
-  SHOW_REQUEST_MODAL_TITLE,
+  ACTION_TYPE_MODAL_TITLE,
   RULE_FLYOUT_FOOTER_BACK_TEXT,
   RULE_FLYOUT_HEADER_BACK_TEXT,
 } from '../translations';
-import { RequestCodeBlock } from '../request_code_block';
+import { RuleActionsConnectorsBody } from '../rule_actions/rule_actions_connectors_body';
 
-interface RuleFlyoutShowRequestProps {
-  isEdit: boolean;
+interface RuleFlyoutSelectConnectorProps {
   onClose: () => void;
 }
-export const RuleFlyoutShowRequest = ({ isEdit, onClose }: RuleFlyoutShowRequestProps) => {
+export const RuleFlyoutSelectConnector = ({ onClose }: RuleFlyoutSelectConnectorProps) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -45,23 +42,20 @@ export const RuleFlyoutShowRequest = ({ isEdit, onClose }: RuleFlyoutShowRequest
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="xs" data-test-subj="ruleFlyoutShowRequestTitle">
-              <h4 id="flyoutTitle">{SHOW_REQUEST_MODAL_TITLE(isEdit)}</h4>
+            <EuiTitle size="xs" data-test-subj="ruleFlyoutSelectConnectorTitle">
+              <h4 id="flyoutTitle">{ACTION_TYPE_MODAL_TITLE}</h4>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <p>
-          <EuiText color="subdued">{SHOW_REQUEST_MODAL_SUBTITLE(isEdit)}</EuiText>
-        </p>
-        <RequestCodeBlock isEdit={isEdit} data-test-subj="flyoutRequestCodeBlock" />
+        <RuleActionsConnectorsBody onClose={onClose} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
           iconType="arrowLeft"
           onClick={onClose}
-          data-test-subj="ruleFlyoutShowRequestBackButton"
+          data-test-subj="ruleFlyoutSelectConnectorBackButton"
         >
           {RULE_FLYOUT_FOOTER_BACK_TEXT}
         </EuiButtonEmpty>

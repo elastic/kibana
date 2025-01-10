@@ -27,7 +27,10 @@ import {
 } from '@elastic/eui';
 import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import { useRuleFormState } from '../hooks';
+import { v4 as uuidv4 } from 'uuid';
+import { RuleFormParamsErrors } from '../common/types';
+import { DEFAULT_FREQUENCY } from '../constants';
+import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {
   ACTION_TYPE_MODAL_EMPTY_TEXT,
   ACTION_TYPE_MODAL_EMPTY_TITLE,
@@ -35,17 +38,18 @@ import {
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
 } from '../translations';
+import { getDefaultParams } from '../utils';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
 export interface RuleActionsConnectorsBodyProps {
-  onSelectConnector: (connector: ActionConnector) => void;
-  responsiveOverflow: 'auto' | 'hidden';
+  onClose: () => void;
+  responsiveOverflow?: 'auto' | 'hidden';
 }
 
 export const RuleActionsConnectorsBody = ({
-  onSelectConnector,
-  responsiveOverflow,
+  onClose,
+  responsiveOverflow = 'auto',
 }: RuleActionsConnectorsBodyProps) => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedConnectorType, setSelectedConnectorType] = useState<string>('all');
@@ -57,7 +61,53 @@ export const RuleActionsConnectorsBody = ({
     formData: { actions },
     connectors,
     connectorTypes,
+    selectedRuleType,
   } = useRuleFormState();
+
+  const dispatch = useRuleFormDispatch();
+
+  const onSelectConnector = useCallback(
+    async (connector: ActionConnector) => {
+      const { id, actionTypeId } = connector;
+      const uuid = uuidv4();
+      const group = selectedRuleType.defaultActionGroupId;
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+
+      const params =
+        getDefaultParams({
+          group,
+          ruleType: selectedRuleType,
+          actionTypeModel,
+        }) || {};
+
+      dispatch({
+        type: 'addAction',
+        payload: {
+          id,
+          actionTypeId,
+          uuid,
+          params,
+          group,
+          frequency: DEFAULT_FREQUENCY,
+        },
+      });
+
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
+        .get(actionTypeId)
+        ?.validateParams(params);
+
+      dispatch({
+        type: 'setActionParamsError',
+        payload: {
+          uuid,
+          errors: res.errors,
+        },
+      });
+
+      onClose();
+    },
+    [dispatch, onClose, selectedRuleType, actionTypeRegistry]
+  );
 
   const preconfiguredConnectors = useMemo(() => {
     return connectors.filter((connector) => connector.isPreconfigured);
