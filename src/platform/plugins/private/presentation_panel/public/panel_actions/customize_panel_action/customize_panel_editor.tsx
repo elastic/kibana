@@ -101,8 +101,7 @@ export const CustomizePanelEditor = ({
   const save = () => {
     if (panelTitle !== api.title$?.value) api.setTitle?.(panelTitle);
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
-    if (panelDescription !== api.description$?.value)
-      api.setDescription?.(panelDescription);
+    if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
     if (newTimeRange !== api.timeRange$?.value) {

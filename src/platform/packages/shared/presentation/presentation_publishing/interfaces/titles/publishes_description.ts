@@ -25,9 +25,7 @@ export type PublishesWritableDescription = PublishesDescription & {
 export const apiPublishesDescription = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDescription => {
-  return Boolean(
-    unknownApi && (unknownApi as PublishesDescription)?.description$ !== undefined
-  );
+  return Boolean(unknownApi && (unknownApi as PublishesDescription)?.description$ !== undefined);
 };
 
 export const apiPublishesWritableDescription = (

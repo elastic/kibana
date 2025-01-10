@@ -22,5 +22,7 @@ export interface PublishesSavedObjectId {
 export const apiPublishesSavedObjectId = (
   unknownApi: null | unknown
 ): unknownApi is PublishesSavedObjectId => {
-  return Boolean(unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId$ !== undefined);
+  return Boolean(
+    unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId$ !== undefined
+  );
 };

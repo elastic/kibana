@@ -67,12 +67,7 @@ const MenuItem: React.FC = () => {
 type EditInLensActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
-  Partial<
-    PublishesUnifiedSearch &
-      HasExpressionVariables &
-      PublishesTitle &
-      PublishesDescription
-  >;
+  Partial<PublishesUnifiedSearch & HasExpressionVariables & PublishesTitle & PublishesDescription>;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is EditInLensActionApi =>
   apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiHasVisualizeConfig(api);

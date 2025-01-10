@@ -24,9 +24,7 @@ export type PublishesWritableTitle = PublishesTitle & {
   setHideTitle: (hide: boolean | undefined) => void;
 };
 
-export const apiPublishesTitle = (
-  unknownApi: null | unknown
-): unknownApi is PublishesTitle => {
+export const apiPublishesTitle = (unknownApi: null | unknown): unknownApi is PublishesTitle => {
   return Boolean(
     unknownApi &&
       (unknownApi as PublishesTitle)?.title$ !== undefined &&

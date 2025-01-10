@@ -80,8 +80,7 @@ export interface DefaultPresentationPanelApi
         PublishesDescription &
         PublishesDisabledActionIds &
         HasParentApi<
-          PresentationContainer &
-            Partial<Pick<PublishesTitle, 'hideTitle$'> & PublishesViewMode>
+          PresentationContainer & Partial<Pick<PublishesTitle, 'hideTitle$'> & PublishesViewMode>
         > &
         CanLockHoverActions
     > {}
