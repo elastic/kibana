@@ -1158,6 +1158,20 @@
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormData.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
             "id": "def-public.RuleFormData.ruleTypeId",
             "type": "string",
             "tags": [],

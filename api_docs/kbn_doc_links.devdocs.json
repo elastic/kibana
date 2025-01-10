@@ -1066,6 +1066,20 @@
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.synonyms",
+            "type": "Object",
+            "tags": [],
+            "label": "synonyms",
+            "description": [],
+            "signature": [
+              "{ readonly synonymsAPIDocumentation: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

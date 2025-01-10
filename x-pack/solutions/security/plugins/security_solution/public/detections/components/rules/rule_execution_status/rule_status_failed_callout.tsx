@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 
+import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
