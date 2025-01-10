@@ -49,28 +49,26 @@ export const performDeleteByNamespace = async <T>(
     {
       index: commonHelper.getIndicesForTypes(typesToUpdate),
       refresh: options.refresh,
-      body: {
-        script: {
-          source: `
-              if (!ctx._source.containsKey('namespaces')) {
-                ctx.op = "delete";
-              } else {
-                ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
-                if (ctx._source['namespaces'].empty) {
-                  ctx.op = "delete";
-                }
-              }
-            `,
-          lang: 'painless',
-          params: { namespace },
-        },
-        conflicts: 'proceed',
-        ...getSearchDsl(mappings, registry, {
-          namespaces: [namespace],
-          type: typesToUpdate,
-          kueryNode,
-        }),
+      script: {
+        source: `
+          if (!ctx._source.containsKey('namespaces')) {
+            ctx.op = "delete";
+          } else {
+            ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
+            if (ctx._source['namespaces'].empty) {
+              ctx.op = "delete";
+            }
+          }
+        `,
+        lang: 'painless',
+        params: { namespace },
       },
+      conflicts: 'proceed',
+      ...(getSearchDsl(mappings, registry, {
+        namespaces: [namespace],
+        type: typesToUpdate,
+        kueryNode,
+      }) as Omit<ReturnType<typeof getSearchDsl>, 'sort'>), // Sort types don't match and we're not sorting anyways
     },
     { ignore: [404], meta: true }
   );
