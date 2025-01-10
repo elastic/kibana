@@ -76,7 +76,7 @@ var IGNORE_WARNINGS = [
     message:
       "Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.",
   },
-  // from node_modules/node-fetch, fix available that requires es modules, which requires webpack 5
+  // from node_modules/node-fetch, fix available but requires es modules
   {
     name: 'DeprecationWarning',
     code: 'DEP0040',
