@@ -57,14 +57,18 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     setIsOpen,
     stats = null,
   }) => {
-    const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
+    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled } =
+      useAssistantContext();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const { data: actionTypes } = useLoadActionTypes({ http });
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
+      http,
+      inferenceEnabled,
+    });
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
@@ -97,12 +101,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(
       () =>
         (aiConnectors ?? []).map((connector) => {
-          const connectorTypeTitle =
-            getGenAiConfig(connector)?.apiProvider ??
-            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
-            : connectorTypeTitle;
+            : getGenAiConfig(connector)?.apiProvider ??
+              getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const attackDiscoveryStats =
             stats !== null
               ? stats.statsPerConnector.find((s) => s.connectorId === connector.id) ?? null

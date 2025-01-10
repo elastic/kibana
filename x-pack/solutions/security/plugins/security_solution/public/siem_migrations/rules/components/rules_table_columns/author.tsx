@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { TableColumn } from './constants';
+import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
 
 const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
   return (
@@ -31,9 +32,14 @@ export const createAuthorColumn = (): TableColumn => {
     field: 'elastic_rule.prebuilt_rule_id',
     name: i18n.COLUMN_AUTHOR,
     render: (_, rule: RuleMigration) => {
-      return <Author isPrebuiltRule={!!rule.elastic_rule?.prebuilt_rule_id} />;
+      return rule.status === SiemMigrationStatus.FAILED ? (
+        <>{COLUMN_EMPTY_VALUE}</>
+      ) : (
+        <Author isPrebuiltRule={!!rule.elastic_rule?.prebuilt_rule_id} />
+      );
     },
     sortable: true,
+    truncateText: true,
     width: '10%',
   };
 };

@@ -21,7 +21,16 @@ export function registerPolicyRoutes({
 }: RouteDependencies) {
   // GET all policies
   router.get(
-    { path: addBasePath('policies'), validate: false },
+    {
+      path: addBasePath('policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -51,7 +60,16 @@ export function registerPolicyRoutes({
 
   // GET one policy
   router.get(
-    { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policy/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
