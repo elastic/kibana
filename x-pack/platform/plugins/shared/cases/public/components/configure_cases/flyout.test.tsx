@@ -682,6 +682,7 @@ describe('CommonFlyout ', () => {
                 impact: null,
                 category: 'software',
                 subcategory: null,
+                additionalFields: null,
               },
             },
             settings: {

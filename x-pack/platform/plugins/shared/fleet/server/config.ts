@@ -131,6 +131,7 @@ export const config: PluginConfigDescriptor = {
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
       enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableManagedLogsAndMetricsDataviews: schema.boolean({ defaultValue: true }),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({

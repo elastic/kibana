@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { mockRulePreviewFilter, wrapper } from '../../../mocks';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
@@ -14,7 +15,13 @@ const mockInternalReferenceId = 'mockInternalReferenceId';
 const mockRuleId = 'mockRuleId';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValueOnce('mockLayerId').mockReturnValueOnce('mockInternalReferenceId'),
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('mockLayerId')
+    .mockReturnValueOnce('mockInternalReferenceId')
+    .mockReturnValueOnce('mockColumnCountOfRecordsId')
+    .mockReturnValueOnce('mockColumnTimestampId')
+    .mockReturnValueOnce('mockColumnTopValuesId'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
+import type { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
 import {
   extractSavedObjectReferences,
   resolveSavedObjectReferences,

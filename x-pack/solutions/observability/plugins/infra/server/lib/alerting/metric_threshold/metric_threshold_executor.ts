@@ -13,22 +13,24 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
-import {
+import type {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
-import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InfraBackendLibs, InfraLocators } from '../../infra_types';
+import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -36,9 +38,9 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import type { AdditionalContext } from '../common/utils';
 import {
   createScopedLogger,
-  AdditionalContext,
   getContextForRecoveredAlerts,
   getMetricsViewInAppUrlWithSpaceId,
   UNGROUPED_FACTORY_KEY,
@@ -50,8 +52,9 @@ import {
 } from '../common/utils';
 import { getEvaluationValues, getThresholds } from '../common/get_values';
 
-import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
-import { MissingGroupsRecord } from './lib/check_missing_group';
+import type { EvaluatedRuleParams, Evaluation } from './lib/evaluate_rule';
+import { evaluateRule } from './lib/evaluate_rule';
+import type { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export type MetricThresholdAlert = Omit<

@@ -10,15 +10,13 @@ export const HAS_DATA_FETCH_INTERVAL = 5000;
 export function buildCreateStackCommand({
   templateUrl,
   stackName,
-  logsStreamName,
-  metricsStreamName,
+  streamName,
   encodedApiKey,
   elasticsearchUrl,
 }: {
   templateUrl: string;
   stackName: string;
-  logsStreamName: string;
-  metricsStreamName: string;
+  streamName: string;
   encodedApiKey: string;
   elasticsearchUrl: string;
 }) {
@@ -29,8 +27,7 @@ export function buildCreateStackCommand({
     aws cloudformation create-stack
       --stack-name ${stackName}
       --template-url ${escapedTemplateUrl}
-      --parameters ParameterKey=FirehoseStreamNameForLogs,ParameterValue=${logsStreamName}
-                   ParameterKey=FirehoseStreamNameForMetrics,ParameterValue=${metricsStreamName}
+      --parameters ParameterKey=FirehoseStreamName,ParameterValue=${streamName}
                    ParameterKey=ElasticEndpointURL,ParameterValue=${escapedElasticsearchUrl}
                    ParameterKey=ElasticAPIKey,ParameterValue=${encodedApiKey}
       --capabilities CAPABILITY_IAM
@@ -54,15 +51,13 @@ export function buildStackStatusCommand({ stackName }: { stackName: string }) {
 export function buildCreateStackAWSConsoleURL({
   templateUrl,
   stackName,
-  logsStreamName,
-  metricsStreamName,
+  streamName,
   elasticsearchUrl,
   encodedApiKey,
 }: {
   templateUrl: string;
   stackName: string;
-  logsStreamName: string;
-  metricsStreamName: string;
+  streamName: string;
   elasticsearchUrl: string;
   encodedApiKey: string;
 }): string {
@@ -76,8 +71,7 @@ export function buildCreateStackAWSConsoleURL({
      * which triggers the eslint rule.
      */
     /* eslint-disable @typescript-eslint/naming-convention */
-    param_FirehoseStreamNameForLogs: logsStreamName,
-    param_FirehoseStreamNameForMetrics: metricsStreamName,
+    param_FirehoseStreamName: streamName,
     param_ElasticEndpointURL: elasticsearchUrl,
     param_ElasticAPIKey: encodedApiKey,
     /* eslint-enable @typescript-eslint/naming-convention */

@@ -8,7 +8,7 @@
 import { createInventoryViewsServiceStartMock } from './services/inventory_views/inventory_views_service.mock';
 import { createMetricsExplorerViewsServiceStartMock } from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
 import { createTelemetryServiceMock } from './services/telemetry/telemetry_service.mock';
-import { InfraClientStartExports } from './types';
+import type { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
   inventoryViews: createInventoryViewsServiceStartMock(),
