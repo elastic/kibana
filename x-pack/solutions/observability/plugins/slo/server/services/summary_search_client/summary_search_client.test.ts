@@ -8,13 +8,14 @@
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Pagination } from '@kbn/slo-schema/src/models/pagination';
-import { createSLO } from './fixtures/slo';
+import { createSLO } from '../fixtures/slo';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
   aSummaryDocument,
-} from './fixtures/summary_search_document';
-import { DefaultSummarySearchClient, Sort, SummarySearchClient } from './summary_search_client';
+} from '../fixtures/summary_search_document';
+import { DefaultSummarySearchClient } from './summary_search_client';
+import type { Sort, SummarySearchClient } from './types';
 
 const defaultSort: Sort = {
   field: 'sli_value',
@@ -169,6 +170,12 @@ describe('Summary Search Client', () => {
           sliValue: {
             order: 'asc',
           },
+          'slo.id': {
+            order: 'asc',
+          },
+          'slo.instanceId': {
+            order: 'asc',
+          },
         },
         track_total_hits: true,
       },
@@ -202,6 +209,12 @@ describe('Summary Search Client', () => {
           sliValue: {
             order: 'asc',
           },
+          'slo.id': {
+            order: 'asc',
+          },
+          'slo.instanceId': {
+            order: 'asc',
+          },
         },
         track_total_hits: true,
       },
@@ -229,7 +242,16 @@ describe('Summary Search Client', () => {
           },
         },
         size: 40,
-        sort: { isTempDoc: { order: 'asc' }, sliValue: { order: 'asc' } },
+        sort: {
+          isTempDoc: { order: 'asc' },
+          sliValue: { order: 'asc' },
+          'slo.id': {
+            order: 'asc',
+          },
+          'slo.instanceId': {
+            order: 'asc',
+          },
+        },
         track_total_hits: true,
       },
     ]);
