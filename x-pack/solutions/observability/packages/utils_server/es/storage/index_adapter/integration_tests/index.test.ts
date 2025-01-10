@@ -11,9 +11,9 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import {
-  StorageAdapterBulkResponse,
-  StorageAdapterIndexResponse,
-  StorageClient,
+  IStorageClient,
+  StorageClientBulkResponse,
+  StorageClientIndexResponse,
   StorageIndexAdapter,
   type StorageSettings,
 } from '../..';
@@ -58,7 +58,7 @@ describe('StorageIndexAdapter', () => {
   } satisfies StorageSettings;
 
   let adapter: StorageIndexAdapter<typeof storageSettings>;
-  let client: StorageClient<typeof storageSettings>;
+  let client: IStorageClient<typeof storageSettings>;
 
   describe('with a clean Elasticsearch instance', () => {
     beforeAll(async () => {
@@ -82,7 +82,7 @@ describe('StorageIndexAdapter', () => {
     describe('after searching', () => {
       beforeAll(async () => {
         await client
-          .search('get_all_docs', { track_total_hits: false, size: 1, query: { match_all: {} } })
+          .search({ track_total_hits: false, size: 1, query: { match_all: {} } })
           .catch((error) => {});
       });
 
@@ -93,7 +93,7 @@ describe('StorageIndexAdapter', () => {
 
       it('does not fail a search when an index does not exist', async () => {
         expect(
-          await client.search('get_all_docs', {
+          await client.search({
             track_total_hits: true,
             size: 1,
             query: { match_all: {} },
@@ -120,7 +120,7 @@ describe('StorageIndexAdapter', () => {
       await stopServers();
     });
 
-    let indexResponse: StorageAdapterIndexResponse;
+    let indexResponse: StorageClientIndexResponse;
 
     beforeAll(async () => {
       indexResponse = await client.index({
@@ -145,7 +145,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('returns the document when searching', async () => {
-      const searchResponse = await client.search('get_bar', {
+      const searchResponse = await client.search({
         track_total_hits: true,
         size: 1,
         query: {
@@ -205,17 +205,19 @@ describe('StorageIndexAdapter', () => {
       await stopServers();
     });
 
-    let bulkIndexResponse: StorageAdapterBulkResponse;
+    let bulkIndexResponse: StorageClientBulkResponse;
 
     beforeAll(async () => {
-      bulkIndexResponse = await client.bulk([
-        {
-          index: {
-            _id: 'doc1',
-            document: { foo: 'bar' },
+      bulkIndexResponse = await client.bulk({
+        operations: [
+          {
+            index: {
+              _id: 'doc1',
+              document: { foo: 'bar' },
+            },
           },
-        },
-      ]);
+        ],
+      });
     });
 
     it('creates the resources', async () => {
@@ -241,7 +243,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('returns the document when searching', async () => {
-      const searchResponse = await client.search('get_bar', {
+      const searchResponse = await client.search({
         track_total_hits: true,
         size: 1,
         query: {
@@ -277,28 +279,33 @@ describe('StorageIndexAdapter', () => {
 
     describe('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
-        await client.bulk([
-          {
-            index: {
-              _id: 'doc1',
-              document: {
-                foo: 'bar',
+        await client.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc1',
+                document: {
+                  foo: 'bar',
+                },
               },
             },
-          },
-        ]);
+          ],
+        });
+
         await rolloverIndex();
 
-        await client.bulk([
-          {
-            index: {
-              _id: 'doc1',
-              document: {
-                foo: 'bar',
+        await client.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc1',
+                document: {
+                  foo: 'bar',
+                },
               },
             },
-          },
-        ]);
+          ],
+        });
       });
 
       it('puts the document in the new write index', async () => {
@@ -501,7 +508,7 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function verifyDocumentInNewWriteIndex() {
-    const searchResponse = await client.search('get_doc', {
+    const searchResponse = await client.search({
       track_total_hits: true,
       size: 10_000,
     });
@@ -526,7 +533,7 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function verifyDocumentDeletedInRolledOverIndex() {
-    const searchResponse = await client.search('get_doc', {
+    const searchResponse = await client.search({
       track_total_hits: true,
       size: 10_000,
       query: {
