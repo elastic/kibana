@@ -39,7 +39,7 @@ import {
   WiredStreamConfigDefinition,
 } from '@kbn/streams-schema';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { isDescendandOf } from '@kbn/streams-schema/src/helpers/hierarchy';
+import { isDescendandOf, isRoot } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -125,6 +125,25 @@ export function StreamDetailRouting({
   const theme = useEuiTheme().euiTheme;
   const routingAppState = useRoutingState({ definition });
 
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      return streamsRepositoryClient.fetch('GET /api/streams', {
+        signal,
+      });
+    },
+    [streamsRepositoryClient]
+  );
+
+  const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+
   if (!definition) {
     return null;
   }
@@ -144,6 +163,7 @@ export function StreamDetailRouting({
           clearChildUnderEdit={() => routingAppState.setChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
           id={routingAppState.childUnderEdit.child.name}
+          availableStreams={availableStreams}
         />
       )}
       <EuiFlexGroup
@@ -178,7 +198,11 @@ export function StreamDetailRouting({
                     display: flex;
                   `}
                 >
-                  <ChildStreamList definition={definition} routingAppState={routingAppState} />
+                  <ChildStreamList
+                    definition={definition}
+                    routingAppState={routingAppState}
+                    availableStreams={availableStreams}
+                  />
                 </EuiResizablePanel>
 
                 <EuiResizableButton accountForScrollbars="both" />
@@ -574,6 +598,7 @@ function PreviewPanelIllustration({
 
 function ChildStreamList({
   definition,
+  availableStreams,
   routingAppState: {
     childUnderEdit,
     setChildUnderEdit,
@@ -585,26 +610,8 @@ function ChildStreamList({
 }: {
   definition: ReadStreamDefinition;
   routingAppState: ReturnType<typeof useRoutingState>;
+  availableStreams: string[];
 }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
-
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams', {
-        signal,
-      });
-    },
-    [streamsRepositoryClient]
-  );
-
-  const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -634,7 +641,6 @@ function ChildStreamList({
           overflow: auto;
         `}
       >
-        <PreviousStreamEntry definition={definition} />
         <CurrentStreamEntry definition={definition} />
         <EuiDragDropContext onDragEnd={onChildStreamDragEnd} onDragStart={onChildStreamDragStart}>
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
@@ -727,17 +733,55 @@ function ChildStreamList({
 }
 
 function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
+  const router = useStreamsAppRouter();
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-        <EuiText size="s">{definition.name}</EuiText>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.streamDetailRouting.currentStream', {
-            defaultMessage: 'Current stream',
-          })}
-        </EuiText>
-      </EuiPanel>
-    </EuiFlexItem>
+    <>
+      {!isRoot(definition.name) && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            {definition.name.split('.').map((part, i, parts) => {
+              const parentId = parts.slice(0, i + 1).join('.');
+              if (parentId === definition.name) {
+                return (
+                  <EuiText size="s" key={part}>
+                    {'/ '}
+                    {parentId}
+                  </EuiText>
+                );
+              }
+              return (
+                <EuiText size="s" key={part}>
+                  {!isRoot(parentId) && '/ '}
+                  <EuiLink
+                    key={part}
+                    data-test-subj="streamsAppCurrentStreamEntryParentButton"
+                    href={router.link('/{key}/{tab}/{subtab}', {
+                      path: {
+                        key: parentId,
+                        tab: 'management',
+                        subtab: 'route',
+                      },
+                    })}
+                  >
+                    {parentId}
+                  </EuiLink>
+                </EuiText>
+              );
+            })}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+          <EuiText size="s">{definition.name}</EuiText>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.streams.streamDetailRouting.currentStream', {
+              defaultMessage: 'Current stream',
+            })}
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+    </>
   );
 }
 
