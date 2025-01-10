@@ -6,17 +6,12 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { INDICES_APP_ID } from '../common';
-import { CREATE_INDEX_PATH } from './routes';
+import { INDICES_APP_ID } from '../../common';
+import { CREATE_INDEX_PATH } from '../routes';
 
-export function registerLocators(share: SharePluginSetup) {
-  share.url.locators.create<SerializableRecord>(new CreateIndexLocatorDefinition());
-}
-
-class CreateIndexLocatorDefinition implements LocatorDefinition<SerializableRecord> {
+export class CreateIndexLocatorDefinition implements LocatorDefinition<SerializableRecord> {
   public readonly getLocation = async () => {
     return {
       app: INDICES_APP_ID,
