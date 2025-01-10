@@ -20,6 +20,7 @@ import {
   filter,
   take,
   finalize,
+  withLatestFrom,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -228,11 +229,11 @@ export class TrainedModelsService {
       .pipe(
         takeUntil(this.stopPolling$),
         switchMap(() => this.trainedModelsApiService.getModelsDownloadStatus()),
-        distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        withLatestFrom(this._modelItems$)
       )
       .subscribe({
-        next: (downloadStatus) => {
-          const currentItems = this.modelItems;
+        next: ([downloadStatus, currentItems]) => {
           const updatedItems = currentItems.map((item) => {
             if (!isBaseNLPModelItem(item)) return item;
 
