@@ -4380,7 +4380,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: translate(
+        label: i18n.translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethodLabel',
           {
             defaultMessage: 'Authentication Method',
@@ -4388,7 +4388,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [
           {
-            label: translate(
+            label: i18n.translate(
               'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.clientSecretLabel',
               {
                 defaultMessage: 'Client Secret',
@@ -4397,7 +4397,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'secret',
           },
           {
-            label: translate(
+            label: i18n.translate(
               'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.certificateLabel',
               {
                 defaultMessage: 'Certificate',
@@ -4444,7 +4444,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTAREA,
-        label: translate(
+        label: i18n.translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.certificateLabel',
           {
             defaultMessage: 'Content of certificate file',
@@ -4469,7 +4469,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTAREA,
-        label: translate(
+        label: i18n.translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.privateKeyLabel',
           {
             defaultMessage: 'Content of private key file',
