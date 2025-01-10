@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTab,
@@ -22,7 +21,6 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
