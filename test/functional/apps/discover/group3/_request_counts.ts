@@ -202,6 +202,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       const type = 'ese';
 
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+      });
+
       getSharedTests({
         type,
         savedSearch: 'data view test',
@@ -239,14 +244,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 2, async () => {
           await discover.chooseBreakdownField('type');
         });
-        await discover.clearBreakdownField();
       });
 
       it('should send no more than 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+        await testSubjects.click('discoverNewButton');
         await expectSearches(type, 3, async () => {
           await discover.chooseBreakdownField('extension.raw');
         });
-        await discover.clearBreakdownField();
       });
 
       it('should send no more than 2 requests (documents + chart) when changing the chart interval', async () => {
@@ -261,9 +265,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
-    // Currently ES|QL checks are disabled due to various flakiness
-    // Note that ES|QL also checks for different number of requests due to the fields request triggered
-    // by the ES|QL Editor
     describe('ES|QL mode', () => {
       const type = 'esql';
       before(async () => {
