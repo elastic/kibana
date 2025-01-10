@@ -47,6 +47,8 @@
     "@kbn/features-plugin",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/inference-common",
   ],
   "exclude": [
     "target/**/*",
