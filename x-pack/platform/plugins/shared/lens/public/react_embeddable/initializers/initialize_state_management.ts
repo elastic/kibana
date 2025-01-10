@@ -63,7 +63,7 @@ export function initializeStateManagement(
   // This is the way to communicate to the embeddable panel to render a blocking error with the
   // default panel error component - i.e. cannot find a Lens SO type of thing.
   // For Lens specific errors, we use a Lens specific error component.
-  const [blockingError$] = buildObservableVariable<Error | undefined>(undefined);
+  const [blockingError$] = buildObservableVariable<Error | undefined>(internalApi.blockingError$);
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,

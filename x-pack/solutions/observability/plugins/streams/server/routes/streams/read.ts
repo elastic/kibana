@@ -54,7 +54,7 @@ export const readStreamRoute = createServerRoute({
       }
 
       const { ancestors } = await readAncestors({
-        id: streamEntity.name,
+        name: streamEntity.name,
         scopedClusterClient,
       });
 
