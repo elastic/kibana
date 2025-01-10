@@ -24,7 +24,14 @@ const isTimelineEventDetailsItems = (
 };
 
 // The list of ECS fields we check to try and determine the OS type
-const ECS_OS_TYPE_FIELDS = Object.freeze(['host.os.type', 'host.os.name', 'host.os.platform']);
+const ECS_OS_TYPE_FIELDS = Object.freeze([
+  'host.os.type',
+  'host.os.name',
+  'host.os.platform',
+
+  // Microsoft Defender Events
+  'm365_defender.alerts.devices.osPlatform',
+]);
 
 /**
  * Retrieve a host's platform type from either ECS data or Event Details list of items
@@ -45,6 +52,12 @@ export const getHostPlatform = (
       ).toLowerCase();
     } else {
       fieldValue = get(data, field, '').toLowerCase();
+    }
+
+    // Microsoft Defender data, that is loaded via one of the Integration Policies, seems to report the OS name
+    // with a number on it (ex. Windows10), so we attempt to normalize it here.
+    if (fieldValue.startsWith('windows')) {
+      fieldValue = 'windows';
     }
 
     if (SUPPORTED_HOST_OS_TYPE.includes(fieldValue as Platform)) {
