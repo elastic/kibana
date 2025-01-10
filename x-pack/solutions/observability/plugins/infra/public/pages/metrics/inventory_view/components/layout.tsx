@@ -75,6 +75,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     metric,
     sort,
     groupBy,
+    searchConfiguration: {},
   };
 
   useInterval(
