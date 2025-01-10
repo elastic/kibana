@@ -37,7 +37,7 @@
           },
           ") => (rowA: Record<string, unknown> | null | undefined, rowB: Record<string, unknown> | null | undefined, direction: \"asc\" | \"desc\") => number"
         ],
-        "path": "packages/kbn-sort-predicates/src/sorting.ts",
+        "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +51,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -66,7 +66,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,7 +87,7 @@
                 "text": "FieldFormat"
               }
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
