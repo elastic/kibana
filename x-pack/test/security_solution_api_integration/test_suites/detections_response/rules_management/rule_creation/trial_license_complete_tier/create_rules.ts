@@ -162,12 +162,12 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await fetchRule(supertest, { id });
 
           expect(rule?.execution_summary?.last_execution.status).toBe('partial failure');
-          expect(rule?.execution_summary?.last_execution.message).toBe(
+          expect(rule?.execution_summary?.last_execution.message).toContain(
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
         });
 
-        it('expects rule runs successfully with only one index pattern matching existing index', async () => {
+        it('expects rule partial failure with only one index pattern matching existing index', async () => {
           const {
             body: { id },
           } = await securitySolutionApi
@@ -179,11 +179,14 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await waitForRuleSuccess({ supertest, log, id });
+          await waitForRulePartialFailure({ supertest, log, id });
 
           const rule = await fetchRule(supertest, { id });
 
-          expect(rule?.execution_summary?.last_execution?.status).toBe('succeeded');
+          expect(rule?.execution_summary?.last_execution.status).toBe('partial failure');
+          expect(rule?.execution_summary?.last_execution.message).toBe(
+            'Indexes matching "does-not-exist-*" were not found.'
+          );
         });
 
         it('creates a rule without an input index', async () => {
