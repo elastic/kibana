@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments'],
+  roots: ['<rootDir>/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

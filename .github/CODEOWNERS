@@ -86,7 +86,7 @@ src/platform/packages/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
+x-pack/platform/plugins/private/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
