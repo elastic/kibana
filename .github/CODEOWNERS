@@ -1222,6 +1222,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/solutions/observability/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
+
 # Infra Monitoring tests
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
