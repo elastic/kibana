@@ -6,8 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { calcDateMathDiff } from '@kbn/securitysolution-utils/date_math';
-import { TimeDuration as TimeDurationUtil } from '@kbn/securitysolution-utils/time_duration';
 import { RuleIntervalFrom, RuleIntervalTo } from './common_attributes.gen';
 import { TimeDuration as TimeDurationSchema } from './time_duration';
 
@@ -50,25 +48,3 @@ export const SimpleRuleSchedule = z.object({
    */
   lookback: TimeDurationSchema({ allowedUnits: ['s', 'm', 'h'] }),
 });
-
-/**
- * Transforms RuleSchedule to SimpleRuleSchedule by replacing `from` and `to` with `lookback`.
- *
- * The transformation is only possible when `to` equals to `now` and result `lookback` is non-negative.
- */
-export function toSimpleRuleSchedule(ruleSchedule: RuleSchedule): SimpleRuleSchedule | undefined {
-  if (ruleSchedule.to !== 'now') {
-    return undefined;
-  }
-
-  const lookBackMs = calcDateMathDiff(ruleSchedule.from, `now-${ruleSchedule.interval}`);
-
-  if (lookBackMs === undefined || lookBackMs < 0) {
-    return undefined;
-  }
-
-  return {
-    interval: ruleSchedule.interval,
-    lookback: TimeDurationUtil.fromMilliseconds(lookBackMs).toString(),
-  };
-}

@@ -11,7 +11,7 @@ import type {
   RuleSchedule,
   SimpleRuleSchedule,
 } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { type FormData } from '../../../../../../../../shared_imports';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';

@@ -10,7 +10,7 @@ import type {
   RuleSchedule,
   SimpleRuleSchedule,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type {
   AllFieldsDiff,
   RuleFieldsDiffWithDataSource,

@@ -6,10 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  toSimpleRuleSchedule,
-  type RuleSchedule,
-} from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { type RuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { SimpleRuleScheduleForm } from './simple_rule_schedule_form';
 import { useFieldUpgradeContext } from '../../../rule_upgrade/field_upgrade_context';
 import { FullRuleScheduleForm } from './full_rule_schedule_form';

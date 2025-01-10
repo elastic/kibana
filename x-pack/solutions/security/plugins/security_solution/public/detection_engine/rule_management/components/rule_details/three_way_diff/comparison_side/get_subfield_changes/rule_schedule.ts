@@ -6,7 +6,7 @@
  */
 
 import type { SimpleRuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { stringifyToSortedJson } from '../utils';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
 import type { SubfieldChange } from '../types';

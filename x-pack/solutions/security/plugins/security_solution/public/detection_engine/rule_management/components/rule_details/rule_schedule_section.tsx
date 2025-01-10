@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';

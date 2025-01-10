@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { RuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import * as i18n from '../../../../translations';
 import { AccessibleTimeValue } from '../../../../rule_schedule_section';
 
