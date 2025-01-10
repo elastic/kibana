@@ -16,11 +16,11 @@
   }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
-    @include euiBottomShadowMedium;
     flex-grow: 1;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
+    border: $euiBorderThin;
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;

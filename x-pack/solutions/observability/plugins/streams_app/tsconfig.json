@@ -48,5 +48,11 @@
     "@kbn/core-notifications-browser",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/streams-schema",
+    "@kbn/react-hooks",
+    "@kbn/i18n-react",
+    "@kbn/react-field",
+    "@kbn/shared-ux-utility",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/object-utils"
   ]
 }
