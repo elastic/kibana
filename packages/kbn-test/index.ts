@@ -78,3 +78,10 @@ export * from './src/kbn_client';
 export * from './src/find_test_plugin_paths';
 
 export { getDockerFileMountPath } from '@kbn/es';
+
+// Docker image to use for Fleet API integration tests.
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+export const fleetPackageRegistryDockerImage =
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';

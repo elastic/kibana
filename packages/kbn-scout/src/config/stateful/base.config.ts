@@ -17,12 +17,9 @@ import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
-import { defineDockerServersConfig } from '@kbn/test';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import path from 'path';
-
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
-
-import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { ScoutServerConfig } from '../../types';
@@ -66,7 +63,7 @@ export const defaultConfig: ScoutServerConfig = {
   dockerServers: defineDockerServersConfig({
     registry: {
       enabled: !!dockerRegistryPort,
-      image: dockerImage,
+      image: fleetPackageRegistryDockerImage,
       portInContainer: 8080,
       port: dockerRegistryPort,
       args: dockerArgs,

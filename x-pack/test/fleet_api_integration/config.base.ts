@@ -8,18 +8,13 @@
 import path from 'path';
 
 import {
+  fleetPackageRegistryDockerImage,
   FtrConfigProviderContext,
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
-// Docker image to use for Fleet API integration tests.
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
-export const dockerImage =
-  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
@@ -47,7 +42,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     ? defineDockerServersConfig({
         registry: {
           enabled: !!registryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: registryPort,
           args: dockerArgs,
@@ -58,7 +53,9 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     : undefined;
 
   if (skipRunningDockerRegistry) {
-    const cmd = `docker run ${dockerArgs.join(' ')} -p ${registryPort}:8080 ${dockerImage}`;
+    const cmd = `docker run ${dockerArgs.join(
+      ' '
+    )} -p ${registryPort}:8080 ${fleetPackageRegistryDockerImage}`;
     log.warning(`Not running docker registry, you can run it with the following command: ${cmd}`);
   }
 
