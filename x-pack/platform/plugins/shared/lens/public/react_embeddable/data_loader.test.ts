@@ -209,7 +209,7 @@ describe('Data Loader', () => {
         },
       });
       // trigger a change by changing the title in the attributes
-      (api.viewMode as BehaviorSubject<ViewMode | undefined>).next('view');
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
     });
   });
 
@@ -217,7 +217,7 @@ describe('Data Loader', () => {
     await expectRerenderOnDataLoder(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes
-      (api.viewMode as BehaviorSubject<ViewMode | undefined>).next('view');
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
       // should not re-render
       return false;
     });
@@ -322,7 +322,7 @@ describe('Data Loader', () => {
       // trigger a onData
       params?.onData$?.(1);
       expect(parentApi.onLoad).toHaveBeenCalledTimes(2);
-      expect(parentApi.onLoad).toHaveBeenNthCalledWith(2, false, undefined, api.dataLoading);
+      expect(parentApi.onLoad).toHaveBeenNthCalledWith(2, false, undefined, api.dataLoading$);
 
       // turn off the re-render check, that will be performed here
       return false;
@@ -333,10 +333,10 @@ describe('Data Loader', () => {
     await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
-          internalApi.dataViews,
+          internalApi.dataViews$,
           (v: NonNullable<unknown>) => Array.isArray(v) && v.length > 0
         );
-        const outputIndexPatterns = internalApi.dataViews.getValue() || [];
+        const outputIndexPatterns = internalApi.dataViews$.getValue() || [];
 
         expect(outputIndexPatterns.length).toEqual(2);
         expect(outputIndexPatterns[0].id).toEqual('123');
@@ -376,7 +376,7 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      (api.savedObjectId as BehaviorSubject<string | undefined>).next('newSavedObjectId');
+      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
     });
   });
 
