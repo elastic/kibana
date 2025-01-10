@@ -84,7 +84,7 @@ describe('<RulePanel />', () => {
       isExistingRule: true,
     });
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule(euiTheme),
+      aboutRuleData: mockAboutStepRule,
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },

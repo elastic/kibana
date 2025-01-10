@@ -19,7 +19,7 @@ import { usePreviewRoute } from './use_preview_route';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getStepScheduleDefaultValue,
-  getStepAboutDefaultValue,
+  stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
@@ -96,7 +96,7 @@ const defaultProps: RulePreviewProps = {
     newTermsFields: ['host.ip'],
     historyWindowSize: '7d',
   },
-  aboutRuleData: getStepAboutDefaultValue({} as unknown as EuiThemeComputed),
+  aboutRuleData: stepAboutDefaultValue,
   scheduleRuleData: getStepScheduleDefaultValue('threat_match'),
 };
 

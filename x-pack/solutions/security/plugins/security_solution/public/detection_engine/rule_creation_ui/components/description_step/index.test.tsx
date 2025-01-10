@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { render, renderHook } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import {
   StepRuleDescription,
@@ -40,7 +40,6 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import { useEuiTheme } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -61,9 +60,7 @@ describe('description_step', () => {
   beforeEach(() => {
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
     mockFilterManager = new FilterManager(setupMock.uiSettings);
-    const { result } = renderHook(() => useEuiTheme());
-    const euiTheme = result.current.euiTheme;
-    mockAboutStep = mockAboutStepRule(euiTheme);
+    mockAboutStep = mockAboutStepRule;
   });
 
   describe('StepRuleDescription', () => {

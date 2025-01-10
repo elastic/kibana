@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { PanelContent } from './content';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
@@ -30,7 +30,6 @@ import {
   ACTIONS_HEADER_TEST_ID,
   ACTIONS_CONTENT_TEST_ID,
 } from './test_ids';
-import { useEuiTheme } from '@elastic/eui';
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
@@ -51,9 +50,6 @@ const renderRulePreview = () =>
   );
 
 describe('<RulePreview />', () => {
-  const { result } = renderHook(() => useEuiTheme());
-  const euiTheme = result.current.euiTheme;
-
   afterEach(() => {
     jest.clearAllMocks();
     mockUseRuleDetails.mockReturnValue({
@@ -65,7 +61,7 @@ describe('<RulePreview />', () => {
 
   it('should render rule preview and its sub sections', () => {
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule(euiTheme),
+      aboutRuleData: mockAboutStepRule,
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
@@ -90,7 +86,7 @@ describe('<RulePreview />', () => {
 
   it('should not render actions if action is not available', () => {
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule(euiTheme),
+      aboutRuleData: mockAboutStepRule,
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
     });

@@ -13,14 +13,13 @@ import { StepScheduleRule, StepScheduleRuleReadOnly } from '.';
 import {
   getStepScheduleDefaultValue,
   defaultSchedule,
-  getStepAboutDefaultValue,
+  stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { useRuleForms } from '../../pages/form';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import type { FormHook } from '../../../../shared_imports';
 import type { ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import type { EuiThemeComputed } from '@elastic/eui';
 
 describe('StepScheduleRule', () => {
   const TestComp = ({
@@ -30,7 +29,7 @@ describe('StepScheduleRule', () => {
   }) => {
     const { scheduleStepForm } = useRuleForms({
       defineStepDefault: stepDefineDefaultValue,
-      aboutStepDefault: getStepAboutDefaultValue({} as unknown as EuiThemeComputed),
+      aboutStepDefault: stepAboutDefaultValue,
       scheduleStepDefault: defaultSchedule,
       actionsStepDefault: stepActionsDefaultValue,
     });

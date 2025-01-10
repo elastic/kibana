@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { EuiProgress, EuiButtonGroup, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
 import { ThemeProvider } from 'styled-components';
 
 import { StepAboutRuleToggleDetails } from '.';
@@ -19,7 +19,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../../../rule_creation_ui/components/step_about_rule';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-import { renderHook } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -31,9 +30,7 @@ describe('StepAboutRuleToggleDetails', () => {
   let stepDataMock: AboutStepRule;
 
   beforeEach(() => {
-    const { result } = renderHook(() => useEuiTheme());
-    const euiTheme = result.current.euiTheme;
-    stepDataMock = mockAboutStepRule(euiTheme);
+    stepDataMock = mockAboutStepRule;
   });
 
   test('it renders loading component when "loading" is true', () => {

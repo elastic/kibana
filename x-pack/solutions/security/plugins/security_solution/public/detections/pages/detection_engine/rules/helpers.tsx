@@ -449,6 +449,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
     case 'eql':
       return queryRuleParams;
   }
+  assertUnreachable(ruleType);
 };
 
 export const getActionMessageRuleParams = (ruleType: Type): string[] => {
