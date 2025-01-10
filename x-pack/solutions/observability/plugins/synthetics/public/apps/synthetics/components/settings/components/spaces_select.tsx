@@ -33,7 +33,7 @@ export const SpaceSelector: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      data?.spacesDataPromise?.then((spacesData) => {
+      data.spacesDataPromise.then((spacesData) => {
         setSpacesList([
           allSpacesOption,
           ...[...spacesData.spacesMap].map(([spaceId, dataS]) => ({
@@ -70,12 +70,13 @@ export const SpaceSelector: React.FC = () => {
             options={spacesList}
             selectedOptions={(field.value ?? []).map((id) => {
               const sp = spacesList.find((space) => space.id === id);
-              if (!sp)
+              if (!sp) {
                 return {
                   id,
                   label: id,
                 };
-              return { id: sp?.id!, label: sp?.label! };
+              }
+              return { id: sp.id, label: sp.label };
             })}
             isClearable={true}
             onChange={(selected) => {
