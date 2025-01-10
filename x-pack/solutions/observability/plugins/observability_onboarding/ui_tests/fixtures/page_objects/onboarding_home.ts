@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import { ScoutPage } from '@kbn/scout';
 
-export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;
+export class OnboardingHomePage {
+  constructor(private readonly page: ScoutPage) {}
+
+  async goto() {
+    this.page.gotoApp('observabilityOnboarding');
+  }
+}

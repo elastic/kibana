@@ -932,7 +932,6 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/o
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
-x-pack/solutions/observability/plugins/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
