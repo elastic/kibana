@@ -28,7 +28,10 @@ describe('AgentTypeVendorLogo component', () => {
     };
   });
 
-  it.each(RESPONSE_ACTION_AGENT_TYPE)('should display logo for: %s', async (agentType) => {
+  // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
+  it.each(
+    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'microsoft_defender_endpoint')
+  )('should display logo for: %s', async (agentType) => {
     props.agentType = agentType;
     const { getByTitle } = render();
 

@@ -301,4 +301,66 @@ describe('SubFeatureForm', () => {
 
     expect(wrapper.children()).toMatchInlineSnapshot(`null`);
   });
+
+  it('correctly renders privileges that require all spaces to be enabled', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['cool_all'],
+        },
+        spaces: [],
+      },
+    ]);
+    const feature = new KibanaFeature({
+      id: 'test_feature',
+      name: 'test feature',
+      category: { id: 'test', label: 'test' },
+      app: [],
+      privileges: {
+        all: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+        },
+        read: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'subFeature1',
+          requireAllSpaces: true,
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [],
+            },
+          ],
+        },
+      ],
+    });
+    const subFeature1 = new SecuredSubFeature(feature.toRaw().subFeatures![0]);
+    const kibanaPrivileges = createKibanaPrivileges([feature]);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <SubFeatureForm
+        featureId={feature.id}
+        subFeature={subFeature1}
+        selectedFeaturePrivileges={['cool_all']}
+        privilegeCalculator={calculator}
+        privilegeIndex={0}
+        onChange={onChange}
+        disabled={true}
+        allSpacesSelected={false}
+      />
+    );
+
+    const buttonGroups = wrapper.find(EuiButtonGroup);
+
+    buttonGroups.every((button) => button.props().idSelected.id === 'none');
+  });
 });

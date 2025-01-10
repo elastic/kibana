@@ -115,15 +115,11 @@ describe('PrivilegeSpaceForm', () => {
         },
         "with_require_all_spaces_for_feature_and_sub_features": Object {
           "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [
-            "cool_toggle_1",
-          ],
+          "subFeaturePrivileges": Array [],
         },
         "with_require_all_spaces_sub_features": Object {
           "primaryFeaturePrivilege": "all",
-          "subFeaturePrivileges": Array [
-            "cool_toggle_1",
-          ],
+          "subFeaturePrivileges": Array [],
         },
         "with_sub_features": Object {
           "primaryFeaturePrivilege": "all",
