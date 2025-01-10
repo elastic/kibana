@@ -12,15 +12,12 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PanelInteractionEvent } from '../types';
+import { UserInteractionEvent, PanelInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
   interactionStart,
 }: {
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -30,6 +27,12 @@ export const ResizeHandle = ({
         interactionStart('resize', e);
       }}
       onMouseUp={(e) => {
+        interactionStart('drop', e);
+      }}
+      onTouchStart={(e) => {
+        interactionStart('resize', e);
+      }}
+      onTouchEnd={(e) => {
         interactionStart('drop', e);
       }}
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {

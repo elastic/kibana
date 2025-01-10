@@ -38,10 +38,10 @@
       },
       {
         "parentPluginId": "@kbn/avc-banner",
-        "id": "def-public.useIsStillYear2024",
+        "id": "def-public.useIsStillYear2025",
         "type": "Function",
         "tags": [],
-        "label": "useIsStillYear2024",
+        "label": "useIsStillYear2025",
         "description": [],
         "signature": [
           "() => boolean"
