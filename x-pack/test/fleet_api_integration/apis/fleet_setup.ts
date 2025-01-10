@@ -153,7 +153,7 @@ export default function (providerContext: FtrProviderContext) {
           {
             retryCount: 10,
             retryDelay: 1000,
-            timeout: 20 * 1000,
+            timeout: 20_000,
           }
         );
       });
