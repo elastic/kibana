@@ -29,24 +29,28 @@ export const RuleFlyout = ({
   isSaving = false,
   onCancel = () => {},
 }: RuleFlyoutProps) => {
-  const [isShowRequestOpen, setIsShowRequestOpen] = useState(false);
   const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
 
-  const { isConnectorsScreenVisible, setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const {
+    isConnectorsScreenVisible,
+    isShowRequestScreenVisible,
+    setIsShowRequestScreenVisible,
+    setIsConnectorsScreenVisible,
+  } = useRuleFormScreenContext();
   const onCloseConnectorsScreen = useCallback(() => {
     setInitialStep(RuleFormStepId.ACTIONS);
     setIsConnectorsScreenVisible(false);
   }, [setIsConnectorsScreenVisible]);
 
-  const onOpenShowRequest = useCallback(() => setIsShowRequestOpen(true), []);
+  const onOpenShowRequest = useCallback(() => setIsShowRequestScreenVisible(true), []);
   const onCloseShowRequest = useCallback(() => {
     setInitialStep(RuleFormStepId.DETAILS);
-    setIsShowRequestOpen(false);
-  }, []);
+    setIsShowRequestScreenVisible(false);
+  }, [setIsShowRequestScreenVisible]);
 
   const hideCloseButton = useMemo(
-    () => isShowRequestOpen || isConnectorsScreenVisible,
-    [isShowRequestOpen, isConnectorsScreenVisible]
+    () => isShowRequestScreenVisible || isConnectorsScreenVisible,
+    [isConnectorsScreenVisible, isShowRequestScreenVisible]
   );
 
   return (
@@ -60,7 +64,7 @@ export const RuleFlyout = ({
         className="ruleFormFlyout__container"
         hideCloseButton={hideCloseButton}
       >
-        {isShowRequestOpen ? (
+        {isShowRequestScreenVisible ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
         ) : isConnectorsScreenVisible ? (
           <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
