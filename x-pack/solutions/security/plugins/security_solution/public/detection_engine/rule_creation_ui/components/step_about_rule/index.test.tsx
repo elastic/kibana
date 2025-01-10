@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
-import { act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
@@ -16,7 +16,7 @@ import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_g
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
-import { stepAboutDefaultValue } from './default_value';
+import { getStepAboutDefaultValue } from './default_value';
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -46,6 +46,7 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
+import { useEuiTheme } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
@@ -95,6 +96,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
 describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
+  const { result: euiThemeResult } = renderHook(() => useEuiTheme());
+  const euiTheme = euiThemeResult.current.euiTheme;
   const TestComp = ({
     setFormRef,
     defineStepDefaultOverride,
@@ -103,9 +106,10 @@ describe('StepAboutRuleComponent', () => {
     defineStepDefaultOverride?: DefineStepRule;
   }) => {
     const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
+    const aboutStepDefault = getStepAboutDefaultValue(euiTheme);
     const { aboutStepForm } = useRuleForms({
       defineStepDefault,
-      aboutStepDefault: stepAboutDefaultValue,
+      aboutStepDefault,
       scheduleStepDefault: defaultSchedule,
       actionsStepDefault: stepActionsDefaultValue,
     });
@@ -118,7 +122,7 @@ describe('StepAboutRuleComponent', () => {
         machineLearningJobId={defineStepDefault.machineLearningJobId}
         index={defineStepDefault.index}
         dataViewId={defineStepDefault.dataViewId}
-        timestampOverride={stepAboutDefaultValue.timestampOverride}
+        timestampOverride={aboutStepDefault.timestampOverride}
         isLoading={false}
         form={aboutStepForm}
       />
@@ -287,7 +291,11 @@ describe('StepAboutRuleComponent', () => {
       setup: '',
       references: [''],
       riskScore: { value: 21, mapping: [], isMappingChecked: false },
-      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      severity: {
+        value: 'low',
+        mapping: fillEmptySeverityMappings([], euiTheme),
+        isMappingChecked: false,
+      },
       tags: [],
       threat: [
         {
@@ -349,7 +357,11 @@ describe('StepAboutRuleComponent', () => {
       setup: '',
       references: [''],
       riskScore: { value: 80, mapping: [], isMappingChecked: false },
-      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      severity: {
+        value: 'low',
+        mapping: fillEmptySeverityMappings([], euiTheme),
+        isMappingChecked: false,
+      },
       tags: [],
       threat: [
         {

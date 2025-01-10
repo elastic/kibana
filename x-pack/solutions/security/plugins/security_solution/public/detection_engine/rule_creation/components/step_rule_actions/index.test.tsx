@@ -14,13 +14,14 @@ import { TestProviders } from '../../../../common/mock';
 import { StepRuleActions, stepActionsDefaultValue } from '.';
 import {
   defaultSchedule,
-  stepAboutDefaultValue,
+  getStepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { useRuleForms } from '../../../rule_creation_ui/pages/form';
 import type { FormHook } from '../../../../shared_imports';
 import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { FrequencyDescription } from './notification_action';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -61,7 +62,7 @@ describe('StepRuleActions', () => {
   }) => {
     const { actionsStepForm } = useRuleForms({
       defineStepDefault: stepDefineDefaultValue,
-      aboutStepDefault: stepAboutDefaultValue,
+      aboutStepDefault: getStepAboutDefaultValue({} as unknown as EuiThemeComputed),
       scheduleStepDefault: defaultSchedule,
       actionsStepDefault: stepActionsDefaultValue,
     });

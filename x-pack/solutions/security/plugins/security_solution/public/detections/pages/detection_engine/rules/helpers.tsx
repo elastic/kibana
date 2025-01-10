@@ -11,6 +11,7 @@ import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import type {
   Severity,
@@ -44,7 +45,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, AlertSuppressionDurationType } from './types';
-import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
+import { getSeverityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 import { normalizeMachineLearningJobId } from '../../../../common/utils/normalize_machine_learning_job_id';
@@ -62,12 +63,14 @@ export interface GetStepsData {
 export const getStepsData = ({
   rule,
   detailsView = false,
+  euiTheme,
 }: {
   rule: RuleResponse;
   detailsView?: boolean;
+  euiTheme: EuiThemeComputed;
 }): GetStepsData => {
   const defineRuleData: DefineStepRule = getDefineStepsData(rule);
-  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
+  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView, euiTheme);
   const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
   const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
   const ruleActionsData: ActionsStepRule = getActionsStepsData(rule);
@@ -230,7 +233,11 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   return secondsToDurationString(intervalDuration);
 };
 
-export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
+export const getAboutStepsData = (
+  rule: RuleResponse,
+  detailsView: boolean,
+  euiTheme: EuiThemeComputed
+): AboutStepRule => {
   const { name, description, note, setup } = determineDetailsValue(rule, detailsView);
   const {
     author,
@@ -269,7 +276,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     references,
     severity: {
       value: severity as Severity,
-      mapping: fillEmptySeverityMappings(severityMapping),
+      mapping: fillEmptySeverityMappings(severityMapping, euiTheme),
       isMappingChecked: severityMapping.length > 0,
     },
     tags,
@@ -294,8 +301,11 @@ const severitySortMapping = {
   critical: 3,
 };
 
-export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
-  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
+export const fillEmptySeverityMappings = (
+  mappings: SeverityMapping,
+  euiTheme: EuiThemeComputed
+): SeverityMapping => {
+  const missingMappings: SeverityMapping = getSeverityOptions(euiTheme).flatMap((so) =>
     mappings.find((mapping) => mapping.severity === so.value) == null
       ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
       : []

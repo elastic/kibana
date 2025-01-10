@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import { EuiLoadingSpinner, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
@@ -49,7 +50,10 @@ interface AlertCountInsightProps {
 /**
  * Filters closed alerts and format the alert stats for the distribution bar
  */
-export const getFormattedAlertStats = (alertsData: ParsedAlertsData) => {
+export const getFormattedAlertStats = (
+  alertsData: ParsedAlertsData,
+  euiTheme: EuiThemeComputed
+) => {
   const severityMap = new Map<string, number>();
 
   const filteredAlertsData: ParsedAlertsData = alertsData
@@ -68,7 +72,7 @@ export const getFormattedAlertStats = (alertsData: ParsedAlertsData) => {
   const alertStats = Array.from(severityMap, ([key, count]) => ({
     key: capitalize(key),
     count,
-    color: getSeverityColor(key),
+    color: getSeverityColor(key, euiTheme),
   }));
   return alertStats;
 };
@@ -82,6 +86,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   direction,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
@@ -94,7 +99,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     from,
   });
 
-  const alertStats = useMemo(() => getFormattedAlertStats(items), [items]);
+  const alertStats = useMemo(() => getFormattedAlertStats(items, euiTheme), [items, euiTheme]);
 
   const totalAlertCount = useMemo(
     () => alertStats.reduce((acc, item) => acc + item.count, 0),

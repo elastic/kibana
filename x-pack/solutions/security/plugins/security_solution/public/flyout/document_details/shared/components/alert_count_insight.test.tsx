@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import { useEuiTheme } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -110,8 +111,11 @@ describe('AlertCountInsight', () => {
 });
 
 describe('getFormattedAlertStats', () => {
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+
   it('should return alert stats', () => {
-    const alertStats = getFormattedAlertStats(mockAlertData);
+    const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
       { key: 'High', count: 2, color: SEVERITY_COLOR.high },
       { key: 'Low', count: 2, color: SEVERITY_COLOR.low },
@@ -121,15 +125,18 @@ describe('getFormattedAlertStats', () => {
   });
 
   it('should return empty array if no active alerts are available', () => {
-    const alertStats = getFormattedAlertStats({
-      closed: {
-        total: 2,
-        severities: [
-          { key: 'high', value: 1, label: 'High' },
-          { key: 'low', value: 1, label: 'Low' },
-        ],
+    const alertStats = getFormattedAlertStats(
+      {
+        closed: {
+          total: 2,
+          severities: [
+            { key: 'high', value: 1, label: 'High' },
+            { key: 'low', value: 1, label: 'Low' },
+          ],
+        },
       },
-    });
+      euiTheme
+    );
     expect(alertStats).toEqual([]);
   });
 });

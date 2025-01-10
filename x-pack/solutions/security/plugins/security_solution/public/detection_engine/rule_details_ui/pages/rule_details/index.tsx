@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -194,7 +195,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     timelines: timelinesUi,
     spaces: spacesApi,
   } = useKibana().services;
-
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -273,7 +274,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { aboutRuleData, modifiedAboutRuleDetailsData, ruleActionsData } =
     rule != null
-      ? getStepsData({ rule, detailsView: true })
+      ? getStepsData({ rule, detailsView: true, euiTheme })
       : {
           aboutRuleData: null,
           modifiedAboutRuleDetailsData: null,

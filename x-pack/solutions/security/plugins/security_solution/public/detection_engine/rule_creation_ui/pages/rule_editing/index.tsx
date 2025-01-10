@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -73,6 +74,7 @@ import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
+  const { euiTheme } = useEuiTheme();
   const { addSuccess } = useAppToasts();
   const [
     {
@@ -115,6 +117,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
     rule,
+    euiTheme,
   });
 
   const {
