@@ -1,9 +1,9 @@
 .ruleForm__container {
-  container: ruleForm / inline-size;
+  container-type: inline-size;
 }
 
 .ruleFormFlyout__container {
-  container: ruleForm / inline-size;
+  container-type: inline-size;
 }
 
 @container (max-width: 768px) {
