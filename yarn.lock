@@ -4049,10 +4049,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/asset-inventory-plugin@link:x-pack/solutions/security/plugins/asset_inventory":
-  version "0.0.0"
-  uid ""
-
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -4089,7 +4085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/calculate-width-from-char-count@link:packages/kbn-calculate-width-from-char-count":
+"@kbn/calculate-width-from-char-count@link:src/platform/packages/shared/kbn-calculate-width-from-char-count":
   version "0.0.0"
   uid ""
 
@@ -4121,15 +4117,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
+"@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/chart-icons@link:packages/kbn-chart-icons":
+"@kbn/chart-icons@link:src/platform/packages/shared/kbn-chart-icons":
   version "0.0.0"
   uid ""
 
-"@kbn/charts-plugin@link:src/plugins/charts":
+"@kbn/charts-plugin@link:src/platform/plugins/shared/charts":
   version "0.0.0"
   uid ""
 
@@ -4177,7 +4173,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
 
@@ -4217,11 +4213,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor-mock@link:packages/shared-ux/code_editor/mocks":
+"@kbn/code-editor-mock@link:src/platform/packages/shared/shared-ux/code_editor/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor@link:packages/shared-ux/code_editor/impl":
+"@kbn/code-editor@link:src/platform/packages/shared/shared-ux/code_editor/impl":
   version "0.0.0"
   uid ""
 
@@ -4229,7 +4225,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/coloring@link:packages/kbn-coloring":
+"@kbn/coloring@link:src/platform/packages/shared/kbn-coloring":
   version "0.0.0"
   uid ""
 
@@ -5253,7 +5249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-plugin@link:src/plugins/data":
+"@kbn/data-plugin@link:src/platform/plugins/shared/data":
   version "0.0.0"
   uid ""
 
@@ -5265,7 +5261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-service@link:packages/kbn-data-service":
+"@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
   version "0.0.0"
   uid ""
 
@@ -5429,7 +5425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dom-drag-drop@link:packages/kbn-dom-drag-drop":
+"@kbn/dom-drag-drop@link:src/platform/packages/shared/kbn-dom-drag-drop":
   version "0.0.0"
   uid ""
 
@@ -5613,19 +5609,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
+"@kbn/event-annotation-common@link:src/platform/packages/shared/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+"@kbn/event-annotation-components@link:src/platform/packages/shared/kbn-event-annotation-components":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
+"@kbn/event-annotation-listing-plugin@link:src/platform/plugins/private/event_annotation_listing":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
+"@kbn/event-annotation-plugin@link:src/platform/plugins/private/event_annotation":
   version "0.0.0"
   uid ""
 
@@ -5657,11 +5653,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-gauge-plugin@link:src/plugins/chart_expressions/expression_gauge":
+"@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-heatmap-plugin@link:src/plugins/chart_expressions/expression_heatmap":
+"@kbn/expression-heatmap-plugin@link:src/platform/plugins/shared/chart_expressions/expression_heatmap":
   version "0.0.0"
   uid ""
 
@@ -5669,7 +5665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-legacy-metric-vis-plugin@link:src/plugins/chart_expressions/expression_legacy_metric":
+"@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
   version "0.0.0"
   uid ""
 
@@ -5677,11 +5673,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-metric-vis-plugin@link:src/plugins/chart_expressions/expression_metric":
+"@kbn/expression-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_metric":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-partition-vis-plugin@link:src/plugins/chart_expressions/expression_partition_vis":
+"@kbn/expression-partition-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_partition_vis":
   version "0.0.0"
   uid ""
 
@@ -5697,11 +5693,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-tagcloud-plugin@link:src/plugins/chart_expressions/expression_tagcloud":
+"@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-xy-plugin@link:src/plugins/chart_expressions/expression_xy":
+"@kbn/expression-xy-plugin@link:src/platform/plugins/shared/chart_expressions/expression_xy":
   version "0.0.0"
   uid ""
 
@@ -5709,7 +5705,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expressions-plugin@link:src/plugins/expressions":
+"@kbn/expressions-plugin@link:src/platform/plugins/shared/expressions":
   version "0.0.0"
   uid ""
 
@@ -5793,10 +5789,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/formatters@link:packages/kbn-formatters":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ftr-apis-plugin@link:src/platform/plugins/private/ftr_apis":
   version "0.0.0"
   uid ""
@@ -5857,7 +5849,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/graph-plugin@link:x-pack/plugins/graph":
+"@kbn/graph-plugin@link:x-pack/platform/plugins/private/graph":
   version "0.0.0"
   uid ""
 
@@ -6021,7 +6013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interpreter@link:packages/kbn-interpreter":
+"@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
   version "0.0.0"
   uid ""
 
@@ -6137,7 +6129,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-formula-docs@link:packages/kbn-lens-formula-docs":
+"@kbn/lens-formula-docs@link:src/platform/packages/private/kbn-lens-formula-docs":
   version "0.0.0"
   uid ""
 
@@ -6145,7 +6137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-plugin@link:x-pack/plugins/lens":
+"@kbn/lens-plugin@link:x-pack/platform/plugins/shared/lens":
   version "0.0.0"
   uid ""
 
@@ -6213,7 +6205,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/managed-content-badge@link:packages/kbn-managed-content-badge":
+"@kbn/managed-content-badge@link:src/platform/packages/private/kbn-managed-content-badge":
   version "0.0.0"
   uid ""
 
@@ -6445,7 +6437,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monaco@link:packages/kbn-monaco":
+"@kbn/monaco@link:src/platform/packages/shared/kbn-monaco":
   version "0.0.0"
   uid ""
 
@@ -6474,6 +6466,10 @@
   uid ""
 
 "@kbn/notifications-plugin@link:x-pack/platform/plugins/shared/notifications":
+  version "0.0.0"
+  uid ""
+
+"@kbn/object-utils@link:src/platform/packages/shared/kbn-object-utils":
   version "0.0.0"
   uid ""
 
@@ -6530,10 +6526,6 @@
   uid ""
 
 "@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
@@ -6693,7 +6685,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/random-sampling@link:x-pack/packages/kbn-random-sampling":
+"@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
 
@@ -6834,10 +6826,6 @@
   uid ""
 
 "@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
-  version "0.0.0"
-  uid ""
-
-"@kbn/response-ops-feature-flag-service@link:packages/response-ops/feature_flag_service":
   version "0.0.0"
   uid ""
 
@@ -7548,7 +7536,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
+"@kbn/sort-predicates@link:src/platform/packages/shared/kbn-sort-predicates":
   version "0.0.0"
   uid ""
 
@@ -7728,7 +7716,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
+"@kbn/timelion-grammar@link:src/platform/packages/private/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
 
@@ -7736,7 +7724,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:packages/kbn-tinymath":
+"@kbn/tinymath@link:src/platform/packages/private/kbn-tinymath":
   version "0.0.0"
   uid ""
 
@@ -7752,7 +7740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
+"@kbn/transpose-utils@link:src/platform/packages/private/kbn-transpose-utils":
   version "0.0.0"
   uid ""
 
@@ -7852,7 +7840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-search-plugin@link:src/plugins/unified_search":
+"@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
   version "0.0.0"
   uid ""
 
@@ -7876,7 +7864,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+"@kbn/url-forwarding-plugin@link:src/platform/plugins/private/url_forwarding":
   version "0.0.0"
   uid ""
 
@@ -7928,15 +7916,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-default-editor-plugin@link:src/plugins/vis_default_editor":
+"@kbn/vis-default-editor-plugin@link:src/platform/plugins/private/vis_default_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-gauge-plugin@link:src/plugins/vis_types/gauge":
+"@kbn/vis-type-gauge-plugin@link:src/platform/plugins/private/vis_types/gauge":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-heatmap-plugin@link:src/plugins/vis_types/heatmap":
+"@kbn/vis-type-heatmap-plugin@link:src/platform/plugins/private/vis_types/heatmap":
   version "0.0.0"
   uid ""
 
@@ -7944,51 +7932,51 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-metric-plugin@link:src/plugins/vis_types/metric":
+"@kbn/vis-type-metric-plugin@link:src/platform/plugins/private/vis_types/metric":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-pie-plugin@link:src/plugins/vis_types/pie":
+"@kbn/vis-type-pie-plugin@link:src/platform/plugins/private/vis_types/pie":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-table-plugin@link:src/plugins/vis_types/table":
+"@kbn/vis-type-table-plugin@link:src/platform/plugins/private/vis_types/table":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-tagcloud-plugin@link:src/plugins/vis_types/tagcloud":
+"@kbn/vis-type-tagcloud-plugin@link:src/platform/plugins/private/vis_types/tagcloud":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timelion-plugin@link:src/plugins/vis_types/timelion":
+"@kbn/vis-type-timelion-plugin@link:src/platform/plugins/private/vis_types/timelion":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timeseries-plugin@link:src/plugins/vis_types/timeseries":
+"@kbn/vis-type-timeseries-plugin@link:src/platform/plugins/shared/vis_types/timeseries":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-vega-plugin@link:src/plugins/vis_types/vega":
+"@kbn/vis-type-vega-plugin@link:src/platform/plugins/private/vis_types/vega":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-vislib-plugin@link:src/plugins/vis_types/vislib":
+"@kbn/vis-type-vislib-plugin@link:src/platform/plugins/private/vis_types/vislib":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-xy-plugin@link:src/plugins/vis_types/xy":
+"@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
+"@kbn/visualization-ui-components@link:src/platform/packages/shared/kbn-visualization-ui-components":
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-utils@link:packages/kbn-visualization-utils":
+"@kbn/visualization-utils@link:src/platform/packages/shared/kbn-visualization-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/visualizations-plugin@link:src/plugins/visualizations":
+"@kbn/visualizations-plugin@link:src/platform/plugins/shared/visualizations":
   version "0.0.0"
   uid ""
 
@@ -12294,13 +12282,6 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react-syntax-highlighter@^15.4.0":
-  version "15.5.5"
-  resolved "https://registry.yarnpkg.com/@types/react-syntax-highlighter/-/react-syntax-highlighter-15.5.5.tgz#4d3b51f8956195f1f63360ff03f8822c5d74c516"
-  integrity sha512-QH3JZQXa2usAvJvSsdSUJ4Yu4j8ReuZpgRrEW+XP+Rmosbn425YshW9iGEb/pAARm8496axHhHUPRH3UmTiB6A==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-test-renderer@^17.0.2":
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-17.0.2.tgz#5f800a39b12ac8d2a2149e7e1885215bcf4edbbf"
@@ -12374,11 +12355,6 @@
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.12.0.tgz#2b35eccfcee7d38cd72ad99232fbd58bffb3c84d"
   integrity sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==
-
-"@types/scheduler@^0.23.0":
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.23.0.tgz#0a6655b3e2708eaabca00b7372fafd7a792a7b09"
-  integrity sha512-YIoDCTH3Af6XM5VuwGG/QL/CJqga1Zm3NkU3HZ4ZHK2fRMPYP1VczsTUqtsf43PH/iJNVlPHAo2oWX7BSdB2Hw==
 
 "@types/seedrandom@>=2.0.0 <4.0.0":
   version "2.4.28"
@@ -13172,19 +13148,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.3.5":
-  version "12.3.5"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.3.5.tgz#88ca2efe2ddf1300bc171a2ef797f7cb41386ca4"
-  integrity sha512-wAYqpicdrVo1rxCu0X3M9s3YIF45Agqfabw0IBryTGqjWvr2NyfciI8gIP4MB+NKpWWN5kxZ9tiZ9u8lwC7iAg==
+"@xyflow/react@^12.3.6":
+  version "12.3.6"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.3.6.tgz#b122af1be35fcaaf78da79a3538f67fdd12b694e"
+  integrity sha512-9GS+cz8hDZahpvTrVCmySAEgKUL8oN4b2q1DluHrKtkqhAMWfH2s7kblhbM4Y4Y4SUnH2lt4drXKZ/4/Lot/2Q==
   dependencies:
-    "@xyflow/system" "0.0.46"
+    "@xyflow/system" "0.0.47"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.46":
-  version "0.0.46"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.46.tgz#b0a5915d59c0ea5ca6d24e1eb90c5a0d7eda7864"
-  integrity sha512-bmFXvboVdiydIFZmDCjrbBCYgB0d5pYdkcZPWbAxGmhMRUZ+kW3CksYgYxWabrw51rwpWitLEadvLrivG0mVfA==
+"@xyflow/system@0.0.47":
+  version "0.0.47"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.47.tgz#c2443e6778ffae9af05b2dc61cb2145be5803405"
+  integrity sha512-aUXJPIvsCFxGX70ccRG8LPsR+A8ExYXfh/noYNpqn8udKerrLdSHxMG2VsvUrQ1PGex10fOpbJwFU4A+I/Xv8w==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-selection" "^3.0.10"
@@ -19113,13 +19089,6 @@ fastq@^1.13.0, fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
-fault@^1.0.0:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/fault/-/fault-1.0.4.tgz#eafcfc0a6d214fc94601e170df29954a4f842f13"
-  integrity sha512-CJ0HCB5tL5fYTEA7ToAq5+kTwd++Borf1/bifxd9iT70QcXr4MRrO3Llf8Ifs70q+SJcGHFtnIE/Nw6giCtECA==
-  dependencies:
-    format "^0.2.0"
-
 faye-websocket@^0.11.3:
   version "0.11.3"
   resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.11.3.tgz#5c0e9a8968e8912c286639fde977a8b209f2508e"
@@ -19539,11 +19508,6 @@ form-data@^4.0.0, form-data@~4.0.0:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
-
-format@^0.2.0:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/format/-/format-0.2.2.tgz#d6170107e9efdc4ed30c9dc39016df942b5cb58b"
-  integrity sha1-1hcBB+nv3E7TDJ3DkBbflCtctYs=
 
 formdata-node@^4.3.2:
   version "4.4.1"
@@ -20709,11 +20673,6 @@ hexoid@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/hexoid/-/hexoid-2.0.0.tgz#fb36c740ebbf364403fa1ec0c7efd268460ec5b9"
   integrity sha512-qlspKUK7IlSQv2o+5I7yhUd7TxlOG2Vr5LTa3ve2XSNVKAL/n/u/7KLvKmFNimomDIKvZFXWHv0T12mv7rT8Aw==
-
-highlight.js@^10.1.1, highlight.js@~10.4.0:
-  version "10.4.1"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.4.1.tgz#d48fbcf4a9971c4361b3f95f302747afe19dbad0"
-  integrity sha512-yR5lWvNz7c85OhVAEAeFhVCc/GV4C30Fjzc/rCP0aCWzc1UUOPUk55dK/qdwTZHBvMZo+eZ2jpk62ndX/xMFlg==
 
 history@^4.9.0:
   version "4.9.0"
@@ -23732,14 +23691,6 @@ lowercase-keys@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/lowercase-keys/-/lowercase-keys-2.0.0.tgz#2603e78b7b4b0006cbca2fbcc8a3202558ac9479"
   integrity sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==
-
-lowlight@^1.14.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/lowlight/-/lowlight-1.17.0.tgz#a1143b2fba8239df8cd5893f9fe97aaf8465af4a"
-  integrity sha512-vmtBgYKD+QVNy7tIa7ulz5d//Il9R4MooOVh4nkOf9R9Cb/Dk5TXMSTieg/vDulkBkIWj59/BIlyFQxT9X1oAQ==
-  dependencies:
-    fault "^1.0.0"
-    highlight.js "~10.4.0"
 
 lru-cache@10.2.0:
   version "10.2.0"
@@ -27039,7 +26990,7 @@ printj@~1.1.0:
   resolved "https://registry.yarnpkg.com/printj/-/printj-1.1.2.tgz#d90deb2975a8b9f600fb3a1c94e3f4c53c78a222"
   integrity sha512-zA2SmoLaxZyArQTOPj5LXecR+RagfPSU5Kw1qP+jkWeNlrq+eJZyY2oS68SU1Z/7/myXM4lo9716laOFAVStCQ==
 
-prismjs@^1.22.0, prismjs@^1.29.0:
+prismjs@^1.29.0:
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.29.0.tgz#f113555a8fa9b57c35e637bba27509dcf802dd12"
   integrity sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==
@@ -27976,17 +27927,6 @@ react-style-singleton@^2.2.0, react-style-singleton@^2.2.1:
     invariant "^2.2.4"
     tslib "^2.0.0"
 
-react-syntax-highlighter@^15.3.1:
-  version "15.3.1"
-  resolved "https://registry.yarnpkg.com/react-syntax-highlighter/-/react-syntax-highlighter-15.3.1.tgz#ba16ae8705f191956b73d0e11ae938fd255f2579"
-  integrity sha512-XVQuug7kQ4/cWxiYE0XfGXvbDqLLqRsMK/GpmD3v1WOLzb6REcgkL59cJo0m3Y2LB0eoRCNhV62jqQe9/Z0p9w==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    highlight.js "^10.1.1"
-    lowlight "^1.14.0"
-    prismjs "^1.22.0"
-    refractor "^3.2.0"
-
 react-tabs@^6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/react-tabs/-/react-tabs-6.0.2.tgz#bc1065c3828561fee285a8fd045f22e0fcdde1eb"
@@ -28359,7 +28299,7 @@ reflect-metadata@^0.2.2:
   resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.2.2.tgz#400c845b6cba87a21f2c65c4aeb158f4fa4d9c5b"
   integrity sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==
 
-refractor@^3.2.0, refractor@^3.6.0:
+refractor@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/refractor/-/refractor-3.6.0.tgz#ac318f5a0715ead790fcfb0c71f4dd83d977935a"
   integrity sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==
