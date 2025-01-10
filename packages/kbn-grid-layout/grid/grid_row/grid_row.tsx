@@ -149,12 +149,12 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               );
               const includesExpandedPanel = panelsIds.includes(expandedPanelId);
               if (includesExpandedPanel) {
-                rowContainerRef.classList.add('kbnGridRowContainer--hasExpandedPanel');
+                rowContainerRef.setAttribute(`data-expanded-panel-id`, expandedPanelId);
               } else {
-                rowContainerRef.classList.remove('kbnGridRowContainer--hasExpandedPanel');
+                rowContainerRef.removeAttribute(`data-expanded-panel-id`);
               }
             } else {
-              rowContainerRef.classList.remove('kbnGridRowContainer--hasExpandedPanel');
+              rowContainerRef.removeAttribute(`data-expanded-panel-id`);
             }
           });
 

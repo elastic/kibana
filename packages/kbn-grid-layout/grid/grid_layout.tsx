@@ -129,14 +129,11 @@ export const GridLayout = ({
 
       if (currentExpandedPanelId) {
         layoutRef.current?.classList.add('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
-        layoutRef.current?.setAttribute(`data-expanded-panel-id`, currentExpandedPanelId);
       } else if (currentAccessMode === 'VIEW') {
         layoutRef.current?.classList.add('kbnGrid--static');
         layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
-        layoutRef.current?.removeAttribute(`data-expanded-panel-id`);
       } else {
         layoutRef.current?.classList.remove('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
-        layoutRef.current?.removeAttribute(`data-expanded-panel-id`);
       }
     });
 
@@ -212,22 +209,20 @@ const singleColumnStyles = css`
 const expandedPanelStyles = css`
   height: 100%;
 
-  .kbnGridRowContainer {
-    &:not(.kbnGridRowContainer--hasExpandedPanel) {
-      // hide the rows that do not contain the expanded panel
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
+  & .kbnGridRowContainer[data-expanded-panel-id] {
+    .kbnGridRowHeader {
+      height: 0px; // used instead of 'display: none' due to a11y concerns
     }
-    &--hasExpandedPanel {
-      .kbnGridRowHeader {
-        height: 0px; // used instead of 'display: none' due to a11y concerns
-      }
+    .kbnGridRow {
+      display: block !important; // overwrite grid display
+      height: 100%;
+    }
+  }
 
-      .kbnGridRow {
-        display: block !important; // overwrite grid display
-        height: 100%;
-      }
-    }
+  & .kbnGridRowContainer:not([data-expanded-panel-id]) {
+    // hide the rows that do not contain the expanded panel
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
   }
 `;

@@ -45,20 +45,6 @@ export const GridHeightSmoother = ({
     });
 
     /**
-     * This subscription adds and/or removes the necessary class name for expanded panel styling
-     */
-    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
-      (expandedPanelId) => {
-        if (!smoothHeightRef.current) return;
-        if (expandedPanelId) {
-          smoothHeightRef.current.classList.add('kbnGridWrapper--hasExpandedPanel');
-        } else {
-          smoothHeightRef.current.classList.remove('kbnGridWrapper--hasExpandedPanel');
-        }
-      }
-    );
-
-    /**
      * This subscription sets global CSS variables that can be used by all components contained within
      * this wrapper; note that this is **currently** only used for the gutter size, but things like column
      * count could be added here once we add the ability to change these values
@@ -74,7 +60,6 @@ export const GridHeightSmoother = ({
 
     return () => {
       interactionStyleSubscription.unsubscribe();
-      expandedPanelSubscription.unsubscribe();
       globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +74,7 @@ export const GridHeightSmoother = ({
         overflow-anchor: none;
         transition: height 500ms linear;
 
-        &.kbnGridWrapper--hasExpandedPanel {
+        &:has(.kbnGrid--hasExpandedPanel) {
           height: 100% !important;
           position: relative;
           transition: none;
