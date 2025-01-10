@@ -16,9 +16,11 @@ import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
+  const appParams = coreMock.createAppMountParameters();
   const core = coreMock.createStart();
 
   return {
+    appParams,
     core,
     dependencies: {
       start: {
