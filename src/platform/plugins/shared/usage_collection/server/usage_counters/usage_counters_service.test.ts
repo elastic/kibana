@@ -25,6 +25,7 @@ const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.Mo
   typeof registerUsageCountersRollups
 >;
 
+// optionally advance test timers after a delay
 const tickWithDelay = (delay = 1) => {
   jest.useRealTimers();
   return new Promise((resolve) => setTimeout(resolve, delay));
