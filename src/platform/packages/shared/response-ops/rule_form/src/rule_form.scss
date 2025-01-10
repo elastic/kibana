@@ -28,11 +28,9 @@
   .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
     font-size: $euiFontSizeS;
   }
-
-
 }
 
-[class*="showForContainer"] {
+[class*='showForContainer'] {
   display: none;
 }
 
