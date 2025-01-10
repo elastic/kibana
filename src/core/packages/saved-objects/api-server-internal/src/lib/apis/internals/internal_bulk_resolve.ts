@@ -23,6 +23,7 @@ import {
   type SavedObject,
   type BulkResolveError,
   type ISavedObjectsSerializer,
+  type WithAuditName,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -222,6 +223,13 @@ export async function internalBulkResolve<T>(
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
+
+      if (result && securityExtension) {
+        (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
+          result.saved_object,
+          registry.getNameAttribute(type)
+        );
+      }
     } catch (error) {
       return {
         id,
@@ -263,24 +271,7 @@ export async function internalBulkResolve<T>(
 
   const redactedObjects = await securityExtension.authorizeAndRedactInternalBulkResolve({
     namespace,
-    objects: resolvedObjects.map((value) => {
-      if (!isBulkResolveError(value)) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { saved_object, ...rest } = value;
-        return {
-          saved_object: {
-            ...saved_object,
-            name: SavedObjectsUtils.getName(
-              saved_object,
-              registry.getNameAttribute(saved_object.type)
-            ),
-          },
-          ...rest,
-        };
-      }
-
-      return value;
-    }),
+    objects: resolvedObjects,
   });
 
   return { resolved_objects: redactedObjects };

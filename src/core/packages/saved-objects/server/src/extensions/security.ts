@@ -261,7 +261,7 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
  */
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams extends AuthorizeParams {
   /** The objects to authorize */
-  objects: SavedObjectReferenceWithContext[];
+  objects: Array<WithAuditName<SavedObjectReferenceWithContext>>;
   /**
    * options for the operation
    * - purpose: 'collectMultiNamespaceReferences' or 'updateObjectsSpaces'

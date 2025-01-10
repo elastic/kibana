@@ -115,9 +115,14 @@ export class SavedObjectsUtils {
   }
 
   public static getName(
-    savedObject: Pick<SavedObject<unknown>, 'attributes'>,
+    savedObject?: Pick<SavedObject<unknown>, 'attributes'> | null,
     nameAttribute?: string
   ): string {
+    if (!savedObject) {
+      // [ELENA] Todo make null?
+      return '';
+    }
+
     const attributes = savedObject?.attributes as Record<string, unknown> & {
       name?: string;
       title?: string;

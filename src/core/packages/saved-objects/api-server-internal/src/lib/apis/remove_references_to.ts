@@ -13,6 +13,7 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 
@@ -31,6 +32,16 @@ export const performRemoveReferencesTo = async <T>(
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { refresh = true } = options;
+
+  const nameAttribute = registry.getNameAttribute(type);
+  const sourceIncludes = nameAttribute ? [nameAttribute] : ['name', 'title'];
+
+  // [Elena] Check response
+  const savedObject = await client.get({
+    index: registry.getIndex(type)!,
+    id,
+    _source_includes: sourceIncludes,
+  });
 
   await securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
 

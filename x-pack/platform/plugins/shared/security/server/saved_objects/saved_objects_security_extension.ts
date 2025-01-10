@@ -40,6 +40,7 @@ import type {
   ISavedObjectsSecurityExtension,
   RedactNamespacesParams,
   SavedObject,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
@@ -1080,7 +1081,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       new Set<string>()
     );
     const traversedObjects = new Set<string>();
-    const filteredObjectsMap = new Map<string, SavedObjectReferenceWithContext>();
+    const filteredObjectsMap = new Map<string, WithAuditName<SavedObjectReferenceWithContext>>();
     const getIsAuthorizedForInboundReference = (inbound: { type: string; id: string }) => {
       const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
       return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
@@ -1088,7 +1089,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     let objectsToProcess = [...objects];
     while (objectsToProcess.length > 0) {
       const obj = objectsToProcess.shift()!;
-      const { type, id, spaces, inboundReferences } = obj;
+      const { type, id, spaces, inboundReferences, name } = obj;
       const objKey = `${type}:${id}`;
       traversedObjects.add(objKey);
       // Is the user authorized to access this object in this space?
@@ -1122,7 +1123,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           // ("empty result" means the object was a non-multi-namespace type, or hidden type, or not found)
           this.addAuditEvent({
             action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
-            savedObject: { type, id },
+            savedObject: { type, id, name },
           });
         }
         filteredObjectsMap.set(objKey, obj);
@@ -1186,8 +1187,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const redactedSpaces = getRedactedSpaces(spaces)!;
       const redactedSpacesWithMatchingAliases = getRedactedSpaces(spacesWithMatchingAliases);
       const redactedSpacesWithMatchingOrigins = getRedactedSpaces(spacesWithMatchingOrigins);
+      const { name, ...normalizedObject } = obj;
       return {
-        ...obj,
+        ...normalizedObject,
         spaces: redactedSpaces,
         ...(redactedSpacesWithMatchingAliases && {
           spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
