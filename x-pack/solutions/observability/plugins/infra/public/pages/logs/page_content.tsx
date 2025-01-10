@@ -10,16 +10,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
-  ObservabilityOnboardingLocatorParams,
+  type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { isDevMode } from '@kbn/xstate-utils';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -35,12 +33,6 @@ const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
 
-const StateMachinePlayground = dynamic(() =>
-  import('../../observability_logs/xstate_helpers').then((mod) => ({
-    default: mod.StateMachinePlayground,
-  }))
-);
-
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
 
@@ -50,16 +42,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
   );
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const enableDeveloperRoutes = isDevMode();
-
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
   const routes = getLogsAppRoutes();
-
-  const settingsLinkProps = useLinkProps({
-    app: 'logs',
-    pathname: 'settings',
-  });
 
   return (
     <>
@@ -70,9 +55,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
               <EuiHeaderLinks gutterSize="xs">
-                <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                  {settingsTabTitle}
-                </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
                   href={onboardingLocator?.useUrl({ category: 'logs' })}
@@ -92,16 +74,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
           path="/stream"
           exact
           render={() => {
-            share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)?.navigate({});
+            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate({});
 
             return null;
           }}
         />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
-        {enableDeveloperRoutes && (
-          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
-        )}
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
@@ -114,10 +93,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
-});
-
-const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-  defaultMessage: 'Settings',
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';

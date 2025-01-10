@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import type { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
 import type {
   AssetDetailsLocator,
@@ -16,12 +16,12 @@ import type {
   MetricsExplorerLocator,
 } from '@kbn/observability-shared-plugin/common';
 import type { AlertsLocator } from '@kbn/observability-plugin/common';
-import { RulesServiceSetup } from '../services/rules';
-import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
-import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSources } from './sources';
-import { InfraSourceStatus } from './source_status';
+import type { RulesServiceSetup } from '../services/rules';
+import type { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
+import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import type { InfraMetricsDomain } from './domains/metrics_domain';
+import type { InfraSources } from './sources';
+import type { InfraSourceStatus } from './source_status';
 import type { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './adapters/framework';
 
 export interface InfraDomainLibs {

@@ -10,6 +10,7 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
+import { AssetInventory } from './asset_inventory';
 import { AttackDiscovery } from './attack_discovery';
 import { Cases } from './cases';
 import { Detections } from './detections';
@@ -35,6 +36,7 @@ import { SiemMigrations } from './siem_migrations';
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
 const subPluginClasses = {
+  AssetInventory,
   AttackDiscovery,
   Detections,
   Cases,

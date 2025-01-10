@@ -48,7 +48,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
       },
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: ['securitySolution-writeWorkflowInsights'],
         },
       },
     })
@@ -69,7 +69,11 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
       async (context, request, response): Promise<IKibanaResponse<DefendInsightsPostResponse>> => {
         const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
+
+        const ctx = await context.resolve(['licensing', 'elasticAssistant']);
+
+        const assistantContext = ctx.elasticAssistant;
+
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
 
@@ -81,6 +85,15 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           });
           if (!isEnabled) {
             return response.notFound();
+          }
+
+          if (!ctx.licensing.license.hasAtLeast('enterprise')) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Your license does not support Defend Workflows. Please upgrade your license.',
+              },
+            });
           }
 
           const actions = assistantContext.actions;

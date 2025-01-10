@@ -7,15 +7,15 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type {
   LogEntryContext,
   PersistedLogViewReference,
   ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat } from '../../../common/http_api/latest';
+import type { IdFormat } from '../../../common/http_api/latest';
+import type { CategoriesSort } from '../../../common/log_analysis';
 import {
-  CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
   jobCustomSettingsRT,
@@ -25,14 +25,14 @@ import { startTracingSpan } from '../../../common/performance_tracing';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
+import type { LogEntryCategoryHit } from './queries/log_entry_categories';
 import {
   createLogEntryCategoriesQuery,
   logEntryCategoriesResponseRT,
-  LogEntryCategoryHit,
 } from './queries/log_entry_categories';
+import type { LogEntryCategoryExampleHit } from './queries/log_entry_category_examples';
 import {
   createLogEntryCategoryExamplesQuery,
-  LogEntryCategoryExampleHit,
   logEntryCategoryExamplesResponseRT,
 } from './queries/log_entry_category_examples';
 import {

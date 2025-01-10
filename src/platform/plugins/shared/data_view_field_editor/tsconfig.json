@@ -1,0 +1,35 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "__jest__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/usage-collection-plugin",
+    "@kbn/monaco",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/field-types",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/react-kibana-mount",
+    "@kbn/code-editor",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
