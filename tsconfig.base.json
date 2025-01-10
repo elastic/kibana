@@ -1336,8 +1336,6 @@
       "@kbn/observability-logs-explorer-plugin/*": ["x-pack/solutions/observability/plugins/observability_logs_explorer/*"],
       "@kbn/observability-logs-overview": ["x-pack/platform/packages/shared/observability/logs_overview"],
       "@kbn/observability-logs-overview/*": ["x-pack/platform/packages/shared/observability/logs_overview/*"],
-      "@kbn/observability-onboarding-e2e": ["x-pack/solutions/observability/plugins/observability_onboarding/e2e"],
-      "@kbn/observability-onboarding-e2e/*": ["x-pack/solutions/observability/plugins/observability_onboarding/e2e/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/solutions/observability/plugins/observability_onboarding"],
       "@kbn/observability-onboarding-plugin/*": ["x-pack/solutions/observability/plugins/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/solutions/observability/plugins/observability"],
