@@ -13,12 +13,12 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
-  PublishesPanelTitle,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesDataViews,
 } from '@kbn/presentation-publishing';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
@@ -66,21 +66,21 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
     );
   const api = context.embeddable as Partial<
     HasUniqueId &
-      PublishesPanelTitle &
+      PublishesTitle &
       PublishesSavedObjectId &
       PublishesUnifiedSearch &
       PublishesDataViews &
       HasParentApi<Partial<PublishesUnifiedSearch>>
   >;
-  const dataViewIds = api.dataViews?.value
-    ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
+  const dataViewIds = api.dataViews$?.value
+    ? (api.dataViews$?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
     : [];
 
   return {
     panel: deleteUndefinedKeys({
       id: api.uuid,
-      title: getPanelTitle(api),
-      savedObjectId: api.savedObjectId?.value,
+      title: getTitle(api),
+      savedObjectId: api.savedObjectId$?.value,
       query: api.parentApi?.query$?.value,
       timeRange: api.timeRange$?.value ?? api.parentApi?.timeRange$?.value,
       filters: api.parentApi?.filters$?.value,
