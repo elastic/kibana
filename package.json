@@ -409,7 +409,7 @@
     "@kbn/core-user-profile-server": "link:src/core/packages/user-profile/server",
     "@kbn/core-user-profile-server-internal": "link:src/core/packages/user-profile/server-internal",
     "@kbn/core-user-profile-server-mocks": "link:src/core/packages/user-profile/server-mocks",
-    "@kbn/core-user-settings-server": "link:packages/core/user-settings/core-user-settings-server",
+    "@kbn/core-user-settings-server": "link:src/core/packages/user-settings/server",
     "@kbn/core-user-settings-server-internal": "link:packages/core/user-settings/core-user-settings-server-internal",
     "@kbn/core-user-settings-server-mocks": "link:packages/core/user-settings/core-user-settings-server-mocks",
     "@kbn/cross-cluster-replication-plugin": "link:x-pack/platform/plugins/private/cross_cluster_replication",

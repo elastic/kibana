@@ -5212,7 +5212,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server@link:packages/core/user-settings/core-user-settings-server":
+"@kbn/core-user-settings-server@link:src/core/packages/user-settings/server":
   version "0.0.0"
   uid ""
 
