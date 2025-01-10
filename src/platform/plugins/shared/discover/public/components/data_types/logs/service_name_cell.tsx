@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, UseEuiTheme } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import { getFieldValue } from '@kbn/discover-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { CellRenderersExtensionParams } from '../../../context_awareness';
@@ -22,8 +21,9 @@ import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 const dataTestSubj = 'serviceNameCell';
-const agentIconStyle = css`
-  margin-right: ${euiThemeVars.euiSizeXS};
+
+const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`
+  margin-right: ${euiTheme.size.xs};
 `;
 
 export const getServiceNameCell =
