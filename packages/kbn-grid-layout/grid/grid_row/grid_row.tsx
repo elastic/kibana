@@ -133,35 +133,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             }
           });
 
-        /**
-         * This subscription adds and/or removes the necessary class name for expanded panel styling;
-         */
-        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
-          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe((expandedPanelId) => {
-            const rowContainerRef = rowContainer.current;
-            if (!rowContainerRef) return;
-
-            if (expandedPanelId) {
-              // only add the expanded panel class if this row contains the expanded panel
-              const panelsIds = Object.keys(
-                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-              );
-              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
-              if (includesExpandedPanel) {
-                rowContainerRef.setAttribute(`data-expanded-panel-id`, expandedPanelId);
-              } else {
-                rowContainerRef.removeAttribute(`data-expanded-panel-id`);
-              }
-            } else {
-              rowContainerRef.removeAttribute(`data-expanded-panel-id`);
-            }
-          });
-
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          expandedPanelSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

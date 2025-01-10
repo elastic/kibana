@@ -209,18 +209,31 @@ const singleColumnStyles = css`
 const expandedPanelStyles = css`
   height: 100%;
 
-  & .kbnGridRowContainer[data-expanded-panel-id] {
+  & .kbnGridRowContainer:has(.kbnGridPanel[data-expanded-panel]) {
+    // targets the grid row container that contains the expanded panel
     .kbnGridRowHeader {
       height: 0px; // used instead of 'display: none' due to a11y concerns
     }
     .kbnGridRow {
       display: block !important; // overwrite grid display
       height: 100%;
+      .kbnGridPanel {
+        &[data-expanded-panel] {
+          height: 100% !important;
+        }
+        &:not([data-expanded-panel]) {
+          // hide the non-expanded panels
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+        }
+      }
     }
   }
 
-  & .kbnGridRowContainer:not([data-expanded-panel-id]) {
-    // hide the rows that do not contain the expanded panel
+  & .kbnGridRowContainer:not(:has(.kbnGridPanel[data-expanded-panel])) {
+    // targets the grid row containers that **do not** contain the expanded panel
     position: absolute;
     top: -9999px;
     left: -9999px;

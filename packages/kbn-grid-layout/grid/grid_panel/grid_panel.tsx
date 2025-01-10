@@ -82,18 +82,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
-
-        // expanded panel styles
-        [data-expanded-panel-id]:not([data-expanded-panel-id='${panelId}']) & {
-          // hide the non-expanded panels
-          position: absolute;
-          top: -9999px;
-          left: -9999px;
-          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-        }
-        [data-expanded-panel-id='${panelId}'] & {
-          height: 100% !important;
-        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -167,7 +155,26 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
+        /**
+         * This subscription adds and/or removes the necessary attribute for expanded panel styling
+         */
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+          (expandedPanelId) => {
+            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const panel = gridLayout[rowIndex].panels[panelId];
+            if (!ref || !panel) return;
+
+            if (expandedPanelId && expandedPanelId === panelId) {
+              ref.setAttribute('data-expanded-panel', '');
+            } else {
+              ref.removeAttribute('data-expanded-panel');
+            }
+          }
+        );
+
         return () => {
+          expandedPanelSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
         };
       },
