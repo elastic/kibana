@@ -16,7 +16,6 @@ export enum RiskScoreEntity {
 export const SERVICE_RISK_SCORE_ENTITY = 'service';
 
 export interface InitRiskEngineResult {
-  legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;
