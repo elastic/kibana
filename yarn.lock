@@ -4173,7 +4173,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
 
@@ -6522,10 +6522,6 @@
   uid ""
 
 "@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
@@ -12352,11 +12348,6 @@
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.12.0.tgz#2b35eccfcee7d38cd72ad99232fbd58bffb3c84d"
   integrity sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==
-
-"@types/scheduler@^0.23.0":
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.23.0.tgz#0a6655b3e2708eaabca00b7372fafd7a792a7b09"
-  integrity sha512-YIoDCTH3Af6XM5VuwGG/QL/CJqga1Zm3NkU3HZ4ZHK2fRMPYP1VczsTUqtsf43PH/iJNVlPHAo2oWX7BSdB2Hw==
 
 "@types/seedrandom@>=2.0.0 <4.0.0":
   version "2.4.28"
