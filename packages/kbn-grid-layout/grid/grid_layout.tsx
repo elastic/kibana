@@ -197,9 +197,10 @@ export const GridLayout = ({
 
 const singleColumnStyles = css`
   .kbnGridRow {
-    grid-template-columns: 100% !important;
-    grid-template-rows: auto !important;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
     grid-auto-flow: row;
+    grid-auto-rows: auto;
   }
 
   .kbnGridPanel {
