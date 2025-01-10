@@ -124,8 +124,8 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
+  apiPublishesDescription,
+  apiPublishesWritableDescription,
   getDescription,
   type PublishesDescription,
   type PublishesWritableDescription,

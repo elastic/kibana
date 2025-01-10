@@ -22,7 +22,7 @@ export type PublishesWritableDescription = PublishesDescription & {
   setDescription: (newTitle: string | undefined) => void;
 };
 
-export const apiPublishesPanelDescription = (
+export const apiPublishesDescription = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDescription => {
   return Boolean(
@@ -30,11 +30,11 @@ export const apiPublishesPanelDescription = (
   );
 };
 
-export const apiPublishesWritablePanelDescription = (
+export const apiPublishesWritableDescription = (
   unknownApi: null | unknown
 ): unknownApi is PublishesWritableDescription => {
   return (
-    apiPublishesPanelDescription(unknownApi) &&
+    apiPublishesDescription(unknownApi) &&
     (unknownApi as PublishesWritableDescription).setDescription !== undefined &&
     typeof (unknownApi as PublishesWritableDescription).setDescription === 'function'
   );

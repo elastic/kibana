@@ -263,8 +263,8 @@ describe('Dashboard link component', () => {
 
   test('current dashboard is not a clickable href', async () => {
     const parentApi = createMockLinksParent({});
-    parentApi.savedObjectId = new BehaviorSubject<string | undefined>('123');
-    parentApi.panelTitle = new BehaviorSubject<string | undefined>('current dashboard');
+    parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
+    parentApi.title$ = new BehaviorSubject<string | undefined>('current dashboard');
 
     render(
       <DashboardLinkComponent
@@ -367,7 +367,7 @@ describe('Dashboard link component', () => {
   test('can override link label for the current dashboard', async () => {
     const customLabel = 'my new label for the current dashboard';
     const parentApi = createMockLinksParent({});
-    parentApi.savedObjectId = new BehaviorSubject<string | undefined>('123');
+    parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
 
     render(
       <DashboardLinkComponent

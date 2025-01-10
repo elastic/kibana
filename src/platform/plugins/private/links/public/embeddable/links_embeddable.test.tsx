@@ -218,8 +218,8 @@ describe('getLinksEmbeddableFactory', () => {
           references: [],
         });
         expect(api.libraryId$.value).toBe('123');
-        expect(api.defaultPanelTitle!.value).toBe('links 001');
-        expect(api.defaultPanelDescription!.value).toBe('some links');
+        expect(api.defaultTitle$?.value).toBe('links 001');
+        expect(api.defaultDescription$?.value).toBe('some links');
       });
     });
 

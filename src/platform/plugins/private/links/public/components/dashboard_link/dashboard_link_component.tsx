@@ -46,9 +46,9 @@ export const DashboardLinkComponent = ({
     filters,
     query,
   ] = useBatchedPublishingSubjects(
-    parentApi.savedObjectId,
-    parentApi.panelTitle,
-    parentApi.panelDescription,
+    parentApi.savedObjectId$,
+    parentApi.title$,
+    parentApi.description$,
     parentApi.timeRange$,
     parentApi.filters$,
     parentApi.query$
