@@ -18,6 +18,7 @@ import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
 import { type EntityTypeCheckOptions } from '../../../common/rt_types';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 interface Props {
   loading: boolean;
@@ -28,8 +29,6 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
   onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
-  definitionIndexPatterns: string[];
-  isIndexPatternsLoading: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -43,10 +42,9 @@ export function EntitiesGrid({
   onChangePage,
   onChangeSort,
   onFilterByType,
-  definitionIndexPatterns,
-  isIndexPatternsLoading,
 }: Props) {
   const [showActions, setShowActions] = useState<boolean>(true);
+  const { loading: isIndexPatternsLoading } = useUnifiedSearchContext();
 
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
@@ -128,7 +126,6 @@ export function EntitiesGrid({
           ) : (
             <EntityActions
               entity={entity}
-              definitionIndexPatterns={definitionIndexPatterns}
               isIndexPatternsLoading={isIndexPatternsLoading}
               setShowActions={setShowActions}
             />
@@ -137,7 +134,7 @@ export function EntitiesGrid({
           return null;
       }
     },
-    [definitionIndexPatterns, entities, isIndexPatternsLoading, onFilterByType]
+    [entities, isIndexPatternsLoading, onFilterByType]
   );
 
   if (loading) {

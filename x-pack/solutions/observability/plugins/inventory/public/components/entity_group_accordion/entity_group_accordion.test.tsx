@@ -30,8 +30,6 @@ describe('EntityGroupAccordion', () => {
         groupValue={props.groups[0]['entity.type']}
         groupCount={props.groups[0].count}
         groupLabel={props.groups[0].label}
-        definitionIndexPatterns={[]}
-        isIndexPatternsLoading={false}
       />
     );
     expect(screen.getByText(props.groups[0].label)).toBeInTheDocument();

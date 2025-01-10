@@ -18,7 +18,6 @@ export function InventoryPage() {
     value,
     refresh,
     loading,
-    definitionIndexPatterns,
     loading: isIndexPatternsLoading,
   } = useUnifiedSearchContext();
 
@@ -48,9 +47,7 @@ export function InventoryPage() {
             groupValue={entityType.id}
             groupLabel={entityType.display_name}
             groupCount={entityType.count}
-            isLoading={loading}
-            definitionIndexPatterns={definitionIndexPatterns.definitionIndexPatterns[entityType.id]}
-            isIndexPatternsLoading={isIndexPatternsLoading}
+            isLoading={loading || isIndexPatternsLoading}
           />
         );
       })}

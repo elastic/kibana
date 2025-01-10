@@ -7,7 +7,7 @@
 import { useInventoryAbortableAsync } from './use_inventory_abortable_async';
 import { useKibana } from './use_kibana';
 
-export const useFetchEntityDefinitionIndexPattern = (types: string) => {
+export const useFetchEntityDefinitionIndexPattern = (type?: string) => {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
@@ -17,7 +17,7 @@ export const useFetchEntityDefinitionIndexPattern = (types: string) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entity/definitions/sources', {
         params: {
           query: {
-            types,
+            type,
           },
         },
         signal,

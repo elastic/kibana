@@ -21,7 +21,6 @@ interface EntityGridStoriesArgs {
 }
 
 const entityTypeOptions = ['host', 'container', 'service'];
-const definitionIndexPatterns = ['filebeat-*', 'logs-*', 'metrics-*', 'metricbeat-*'];
 
 const stories: Meta<EntityGridStoriesArgs> = {
   title: 'app/inventory/entities_grid',
@@ -33,7 +32,6 @@ const stories: Meta<EntityGridStoriesArgs> = {
       control: {
         type: 'select',
       },
-      isIndexPatternsLoading: false,
     },
   },
   args: { entityType: undefined },
@@ -41,7 +39,7 @@ const stories: Meta<EntityGridStoriesArgs> = {
 
 export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [{ entityType, isIndexPatternsLoading }, updateArgs] = useArgs();
+  const [{ entityType }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
@@ -82,8 +80,6 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
           onChangeSort={setSort}
           pageIndex={pageIndex}
           onFilterByType={() => {}}
-          definitionIndexPatterns={definitionIndexPatterns}
-          isIndexPatternsLoading={isIndexPatternsLoading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -96,7 +92,6 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
   });
-  const [{ isIndexPatternsLoading }] = useArgs();
 
   return (
     <EntitiesGrid
@@ -108,8 +103,6 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
       onChangeSort={setSort}
       pageIndex={pageIndex}
       onFilterByType={() => {}}
-      definitionIndexPatterns={definitionIndexPatterns}
-      isIndexPatternsLoading={isIndexPatternsLoading}
     />
   );
 };

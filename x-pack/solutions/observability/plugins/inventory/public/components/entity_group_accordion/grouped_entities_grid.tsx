@@ -23,15 +23,9 @@ import { EntitiesGrid } from '../entities_grid';
 
 interface Props {
   groupValue: string;
-  definitionIndexPatterns: string[];
-  isIndexPatternsLoading: boolean;
 }
 
-export function GroupedEntitiesGrid({
-  groupValue,
-  definitionIndexPatterns,
-  isIndexPatternsLoading,
-}: Props) {
+export function GroupedEntitiesGrid({ groupValue }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery } = query;
   const { pagination, entityTypes } = useInventoryDecodedQueryParams();
@@ -114,8 +108,6 @@ export function GroupedEntitiesGrid({
       onChangeSort={handleSortChange}
       pageIndex={pageIndex}
       onFilterByType={handleEntityTypeFilter}
-      definitionIndexPatterns={definitionIndexPatterns}
-      isIndexPatternsLoading={isIndexPatternsLoading}
     />
   );
 }

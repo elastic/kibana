@@ -9,9 +9,9 @@ import { createInventoryServerRoute } from '../create_inventory_server_route';
 
 export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entity/definitions/sources',
-  params: t.type({
-    query: t.type({
-      types: t.string,
+  params: t.partial({
+    query: t.partial({
+      type: t.string, // TODO: remove
     }),
   }),
   options: {
@@ -22,26 +22,25 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
       context.core,
       plugins.entityManager.start(),
     ]);
-    const { types } = params.query;
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
 
-    const entityDefinitionIndexPatterns = await Promise.all(
-      types.split(',').map(async (type) => {
-        const entityDefinitionsSource = await entityManagerClient.v2.readSourceDefinitions({
-          type,
-        });
-        return entityDefinitionsSource.reduce(
-          (acc, { ['type_id']: typeId, index_patterns: indexPatterns }) => (
-            (acc[typeId] = indexPatterns), acc
-          ),
-          {} as Record<string, string[]>
-        );
-      })
-    );
+    const entityDefinitionsSource = await entityManagerClient.v2.readSourceDefinitions({});
+
+    const allEntityDefinitionIndexPatterns = entityDefinitionsSource.map((source) => ({
+      [source.type_id]: [
+        ...new Set(
+          entityDefinitionsSource
+            .filter((sourceToFilter) => sourceToFilter.type_id === source.type_id)
+            .flatMap((filteredSource) => filteredSource.index_patterns)
+        ),
+      ],
+    }));
 
     return {
       definitionIndexPatterns: {
-        ...Object.fromEntries(entityDefinitionIndexPatterns.flatMap(Object.entries)),
+        ...Object.fromEntries(
+          Array.from(new Set(allEntityDefinitionIndexPatterns)).flatMap(Object.entries)
+        ),
       },
     };
   },
