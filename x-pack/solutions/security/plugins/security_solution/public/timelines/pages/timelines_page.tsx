@@ -19,6 +19,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
+import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -38,7 +39,7 @@ export const TimelinesPage = React.memo(() => {
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
   return (
-    <>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>
       {indicesExist ? (
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
@@ -73,9 +74,7 @@ export const TimelinesPage = React.memo(() => {
       ) : (
         <EmptyPrompt />
       )}
-
-      <SpyRoute pageName={SecurityPageName.timelines} />
-    </>
+    </SecurityRoutePageWrapper>
   );
 });
 
