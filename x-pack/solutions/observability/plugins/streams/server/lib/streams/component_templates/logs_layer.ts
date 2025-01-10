@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesIndexSettings,
+  IndicesDataStreamLifecycle,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSettings: IndicesIndexSettings = {
   index: {
-    lifecycle: {
-      name: 'logs',
-    },
+    mode: 'logsdb',
     codec: 'best_compression',
     mapping: {
       total_fields: {
@@ -21,3 +22,5 @@ export const logsSettings: IndicesIndexSettings = {
     },
   },
 };
+
+export const logsLifecycle: IndicesDataStreamLifecycle = {};
