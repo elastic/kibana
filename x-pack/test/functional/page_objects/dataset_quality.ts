@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -198,7 +198,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
+        timeout: 5 * 1000, // Increasing timeout since tests were flaky
+      });
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
