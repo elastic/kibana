@@ -670,6 +670,13 @@ export const ACTION_TYPE_MODAL_FILTER_ALL = i18n.translate(
   }
 );
 
+export const ACTION_TYPE_MODAL_FILTER_LIST_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.actionTypeModalFilterListTitle',
+  {
+    defaultMessage: 'Filter',
+  }
+);
+
 export const ACTION_TYPE_MODAL_EMPTY_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.actionTypeModalEmptyTitle',
   {

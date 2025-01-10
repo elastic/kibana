@@ -32,8 +32,26 @@
 
 }
 
-@container (max-width: 575px) { /* stylelint-disable-line */
+[class*="showForContainer"] {
+  display: none;
+}
+
+@container (max-width: 767px) and (min-width: 575px) { /* stylelint-disable-line */
   .hideForContainer--s {
     display: none;
+  }
+
+  .showForContainer--s {
+    display: initial !important;
+  }
+}
+
+@container (max-width: 574px) { /* stylelint-disable-line */
+  .hideForContainer--xs {
+    display: none;
+  }
+
+  .showForContainer--xs {
+    display: initial !important;
   }
 }

@@ -14,9 +14,11 @@ import {
   EuiFacetButton,
   EuiFacetGroup,
   EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
@@ -24,6 +26,9 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  EuiSelectable,
+  EuiSelectableProps,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
@@ -35,6 +40,7 @@ import {
   ACTION_TYPE_MODAL_EMPTY_TEXT,
   ACTION_TYPE_MODAL_EMPTY_TITLE,
   ACTION_TYPE_MODAL_FILTER_ALL,
+  ACTION_TYPE_MODAL_FILTER_LIST_TITLE,
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
 } from '../translations';
@@ -53,8 +59,11 @@ export const RuleActionsConnectorsBody = ({
 }: RuleActionsConnectorsBodyProps) => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedConnectorType, setSelectedConnectorType] = useState<string>('all');
+  const [isConenctorFilterPopoverOpen, setIsConenctorFilterPopoverOpen] = useState<boolean>(false);
 
   const { euiTheme } = useEuiTheme();
+
+  const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
 
   const {
     plugins: { actionTypeRegistry },
@@ -147,7 +156,7 @@ export const RuleActionsConnectorsBody = ({
     (id: string) => () => {
       setSelectedConnectorType((prev) => {
         if (prev === id) {
-          return '';
+          return 'all';
         }
         return id;
       });
@@ -250,6 +259,57 @@ export const RuleActionsConnectorsBody = ({
       </EuiFacetGroup>
     );
   }, [availableConnectors, connectorsMap, selectedConnectorType, onConnectorOptionSelect]);
+
+  const toggleFilterPopover = useCallback(() => {
+    setIsConenctorFilterPopoverOpen((prev) => !prev);
+  }, []);
+  const closeFilterPopover = useCallback(() => {
+    setIsConenctorFilterPopoverOpen(false);
+  }, []);
+  const connectorFilterButton = useMemo(() => {
+    const button = (
+      <EuiFilterButton
+        iconType="arrowDown"
+        badgeColor="accent"
+        hasActiveFilters={selectedConnectorType !== 'all'}
+        numActiveFilters={selectedConnectorType !== 'all' ? 1 : undefined}
+        onClick={toggleFilterPopover}
+        isSelected={isConenctorFilterPopoverOpen}
+      >
+        {ACTION_TYPE_MODAL_FILTER_LIST_TITLE}
+      </EuiFilterButton>
+    );
+
+    const options: EuiSelectableProps['options'] = Object.values(connectorsMap)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(({ actionTypeId, name }) => ({
+        label: name,
+        checked: selectedConnectorType === actionTypeId ? 'on' : undefined,
+        onClick: onConnectorOptionSelect(actionTypeId),
+      }));
+
+    return (
+      <EuiFilterGroup style={{ width: '100%' }}>
+        <EuiPopover
+          button={button}
+          closePopover={closeFilterPopover}
+          isOpen={isConenctorFilterPopoverOpen}
+          panelPaddingSize="none"
+        >
+          <EuiSelectable singleSelection options={options}>
+            {(list) => <div style={{ width: 400 }}>{list}</div>}
+          </EuiSelectable>
+        </EuiPopover>
+      </EuiFilterGroup>
+    );
+  }, [
+    closeFilterPopover,
+    connectorsMap,
+    isConenctorFilterPopoverOpen,
+    onConnectorOptionSelect,
+    toggleFilterPopover,
+    selectedConnectorType,
+  ]);
 
   const connectorCards = useMemo(() => {
     if (!filteredConnectors.length) {
@@ -357,24 +417,37 @@ export const RuleActionsConnectorsBody = ({
       <EuiFlexGroup direction="column" style={{ overflow: responsiveOverflow, height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiFieldSearch
-                data-test-subj="ruleActionsConnectorsModalSearch"
-                placeholder={MODAL_SEARCH_PLACEHOLDER}
-                value={searchValue}
-                onChange={onSearchChange}
-              />
-            </EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
+              <EuiFlexItem grow={3}>
+                <EuiFieldSearch
+                  fullWidth={
+                    /* TODO Determine this using @container breakpoints once we have a better helper function for
+                     * determining the size of a CSS @container. This works in practice because when the action connector
+                     * UI is displayed in a modal, a screen breakpoint of 'm' is equivalent to a container breakpoint of 's',
+                     * but we should replace this with a more robust solution in the future. This may not be very easy until
+                     * https://github.com/w3c/csswg-drafts/issues/6205 is resolved, but we could theoretically hack something
+                     * together using showForContainer classes and React refs.
+                     */
+                    ['m', 's', 'xs'].includes(currentBreakpoint)
+                  }
+                  data-test-subj="ruleActionsConnectorsModalSearch"
+                  placeholder={MODAL_SEARCH_PLACEHOLDER}
+                  value={searchValue}
+                  onChange={onSearchChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem className="showForContainer--s showForContainer--xs">
+                {connectorFilterButton}
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="none" />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem style={{ overflow: responsiveOverflow }}>
           <EuiFlexGroup style={{ overflow: responsiveOverflow }}>
-            <EuiHideFor sizes={['s', 'xs']}>
-              <EuiFlexItem className="hideForContainer--s" grow={1}>
-                {connectorFacetButtons}
-              </EuiFlexItem>
-            </EuiHideFor>
+            <EuiFlexItem className="hideForContainer--s hideForContainer--xs" grow={1}>
+              {connectorFacetButtons}
+            </EuiFlexItem>
             <EuiFlexItem
               grow={3}
               style={{
