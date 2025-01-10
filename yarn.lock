@@ -3208,6 +3208,14 @@
     "@hapi/boom" "^10.0.1"
     "@hapi/hoek" "^11.0.2"
 
+"@hapi/bounce@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@hapi/bounce/-/bounce-3.0.2.tgz#6499a1e2db6a699e2c8d284045af46b9d8d9d57d"
+  integrity sha512-d0XmlTi3H9HFDHhQLjg4F4auL1EY3Wqj7j7/hGDhFFe6xAbnm3qiGrXeT93zZnPH8gH+SKAFYiRzu26xkXcH3g==
+  dependencies:
+    "@hapi/boom" "^10.0.1"
+    "@hapi/hoek" "^11.0.2"
+
 "@hapi/bourne@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@hapi/bourne/-/bourne-3.0.0.tgz#f11fdf7dda62fe8e336fa7c6642d9041f30356d7"
@@ -3278,7 +3286,7 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@^21.1.0", "@hapi/hapi@^21.3.10":
+"@hapi/hapi@^21.1.0":
   version "21.3.10"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.3.10.tgz#0357db7ca49415e50e5df80ba50ad3964f2a62f3"
   integrity sha512-CmEcmTREW394MaGGKvWpoOK4rG8tKlpZLs30tbaBzhCrhiL2Ti/HARek9w+8Ya4nMBGcd+kDAzvU44OX8Ms0Jg==
@@ -3302,6 +3310,30 @@
     "@hapi/topo" "^6.0.1"
     "@hapi/validate" "^2.0.1"
 
+"@hapi/hapi@^21.3.12":
+  version "21.3.12"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.3.12.tgz#a9c48869199d15c22e53d9c22153c9323919e5a0"
+  integrity sha512-GCUP12dkb3QMjpFl+wEFO73nqKRmsnD5um/QDOn6lj2GjGBrDXPcT194mNARO+PPNXZOR4KmvIpHt/lceUncfg==
+  dependencies:
+    "@hapi/accept" "^6.0.3"
+    "@hapi/ammo" "^6.0.1"
+    "@hapi/boom" "^10.0.1"
+    "@hapi/bounce" "^3.0.2"
+    "@hapi/call" "^9.0.1"
+    "@hapi/catbox" "^12.1.1"
+    "@hapi/catbox-memory" "^6.0.2"
+    "@hapi/heavy" "^8.0.1"
+    "@hapi/hoek" "^11.0.6"
+    "@hapi/mimos" "^7.0.1"
+    "@hapi/podium" "^5.0.1"
+    "@hapi/shot" "^6.0.1"
+    "@hapi/somever" "^4.1.1"
+    "@hapi/statehood" "^8.1.1"
+    "@hapi/subtext" "^8.1.0"
+    "@hapi/teamwork" "^6.0.0"
+    "@hapi/topo" "^6.0.2"
+    "@hapi/validate" "^2.0.1"
+
 "@hapi/heavy@^8.0.1":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@hapi/heavy/-/heavy-8.0.1.tgz#e2be4a6a249005b5a587f7604aafa8ed02461fb6"
@@ -3315,6 +3347,11 @@
   version "11.0.4"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-11.0.4.tgz#42a7f244fd3dd777792bfb74b8c6340ae9182f37"
   integrity sha512-PnsP5d4q7289pS2T2EgGz147BFJ2Jpb4yrEdkpz2IhgEUzos1S7HTl7ezWh1yfYzYlj89KzLdCRkqsP6SIryeQ==
+
+"@hapi/hoek@^11.0.6", "@hapi/hoek@^11.0.7":
+  version "11.0.7"
+  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-11.0.7.tgz#56a920793e0a42d10e530da9a64cc0d3919c4002"
+  integrity sha512-HV5undWkKzcB4RZUusqOpcgxOaq6VOAH7zhhIr2g3G8NF/MlFO75SjOr2NfuSx0Mh40+1FqCkagKLJRykUWoFQ==
 
 "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.3.0":
   version "9.3.0"
@@ -3434,7 +3471,7 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hapi/topo@^6.0.1":
+"@hapi/topo@^6.0.1", "@hapi/topo@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/topo/-/topo-6.0.2.tgz#f219c1c60da8430228af4c1f2e40c32a0d84bbb4"
   integrity sha512-KR3rD5inZbGMrHmgPxsJ9dbi6zEK+C3ZwUwTa+eMwWLz7oijWUTWD2pMSNNYJAU6Qq+65NkxXjqHr/7LM2Xkqg==
