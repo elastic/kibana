@@ -130,6 +130,9 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                     defaultMessage: 'Select a single value',
                   }
                 )}
+                inputPopoverProps={{
+                  className: controlPanelClassName,
+                }}
                 data-test-subj="esqlControlValuesDropdown"
                 singleSelection={{ asPlainText: true }}
                 options={availableOptions.map((option) => ({ label: option }))}
