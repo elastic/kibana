@@ -3430,6 +3430,62 @@ Object {
 exports[`Connector type config checks detect connector type changes for: .crowdstrike 4`] = `
 Object {
   "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 7`] = `
+Object {
+  "flags": Object {
+    "error": [Function],
+  },
+  "metas": Array [
+    Object {
+      "x-oas-any-type": true,
+    },
+  ],
+  "type": "any",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 8`] = `
+Object {
+  "flags": Object {
     "default": Object {
       "special": "deep",
     },
@@ -3456,7 +3512,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3499,7 +3555,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 10`] = `
 Object {
   "flags": Object {
     "default": Object {
