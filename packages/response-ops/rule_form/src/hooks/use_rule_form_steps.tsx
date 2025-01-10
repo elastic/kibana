@@ -172,6 +172,16 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
   return { steps, stepOrder };
 };
 
+const ReportOnBlur: React.FC<PropsWithChildren<{ stepId: RuleFormStepId; onBlur: () => void }>> = ({
+  onBlur,
+  stepId,
+  children,
+}) => (
+  <div data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`} onBlur={onBlur}>
+    {children}
+  </div>
+);
+
 interface RuleFormVerticalSteps {
   steps: EuiStepsProps['steps'];
 }
@@ -185,26 +195,6 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
     )
   );
 
-  const ReportOnBlur: React.FC<PropsWithChildren<{ stepId: RuleFormStepId }>> = useMemo(
-    () =>
-      ({ stepId, children }) =>
-        (
-          <div
-            data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
-            onBlur={() =>
-              !touchedSteps[stepId] &&
-              setTouchedSteps((prevTouchedSteps) => ({
-                ...prevTouchedSteps,
-                [stepId]: true,
-              }))
-            }
-          >
-            {children}
-          </div>
-        ),
-    [touchedSteps]
-  );
-
   const { steps, stepOrder } = useCommonRuleFormSteps({ touchedSteps });
 
   const mappedSteps = useMemo(() => {
@@ -214,12 +204,25 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
         return step
           ? {
               ...step,
-              children: <ReportOnBlur stepId={stepId}>{step.children}</ReportOnBlur>,
+              children: (
+                <ReportOnBlur
+                  onBlur={() =>
+                    !touchedSteps[stepId] &&
+                    setTouchedSteps((prevTouchedSteps) => ({
+                      ...prevTouchedSteps,
+                      [stepId]: true,
+                    }))
+                  }
+                  stepId={stepId}
+                >
+                  {step.children}
+                </ReportOnBlur>
+              ),
             }
           : null;
       })
       .filter(Boolean) as EuiStepsProps['steps'];
-  }, [steps, stepOrder, ReportOnBlur]);
+  }, [steps, stepOrder, touchedSteps]);
 
   return { steps: mappedSteps };
 };
