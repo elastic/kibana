@@ -102,15 +102,15 @@ export const createDetectionIndex = async (
   const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
   if (await templateNeedsUpdate({ alias: index, esClient })) {
-    const reIndexedIndices = await getMigratedToV8Indices({ index, esClient });
+    const reIndexedIndexPatterns = await getReIndexedV8IndexPatterns({ index, esClient });
     const template = getSignalsTemplate(index, aadIndexAliasName, spaceId) as Record<
       string,
       unknown
     >;
 
     // addresses https://github.com/elastic/security-team/issues/11440
-    if (reIndexedIndices.length > 0 && Array.isArray(template.index_patterns)) {
-      template.index_patterns.push(...reIndexedIndices);
+    if (reIndexedIndexPatterns.length > 0 && Array.isArray(template.index_patterns)) {
+      template.index_patterns.push(...reIndexedIndexPatterns);
     }
 
     await esClient.indices.putIndexTemplate({
@@ -222,10 +222,10 @@ const addIndexAliases = async ({
 };
 
 /**
- * checks if indices under alias were migrated from v7 to v8( prefixed with '.reindexed-v8-')
- * returns wildcard index patterns to cover these indices and possible rollovers
+ * checks if indices under alias were reIndexed from v7 to v8(prefixed with '.reindexed-v8-')
+ * returns wildcard index patterns to include these indices and possible rollovers in index template
  */
-const getMigratedToV8Indices = async ({
+const getReIndexedV8IndexPatterns = async ({
   esClient,
   index,
 }: {
