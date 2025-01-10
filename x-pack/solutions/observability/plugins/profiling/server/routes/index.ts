@@ -8,14 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { ProfilingConfig } from '..';
-import {
+import type { ProfilingConfig } from '..';
+import type {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
   TelemetryUsageCounter,
 } from '../types';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerTopNFunctionsAPMTransactionsRoute } from './apm';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';

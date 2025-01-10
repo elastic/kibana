@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/public/types';
+import type { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/public/types';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
 export async function registerAssistantFunctions({

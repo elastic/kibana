@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionRegistrationParameters } from '.';
+import type { FunctionRegistrationParameters } from '.';
 import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 import { getMlClient } from '../lib/helpers/get_ml_client';

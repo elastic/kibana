@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { MissingGroupsRecord } from './check_missing_group';
+import type { MissingGroupsRecord } from './check_missing_group';
 
 export const convertStringsToMissingGroupsRecord = (
   missingGroups: Array<string | MissingGroupsRecord>

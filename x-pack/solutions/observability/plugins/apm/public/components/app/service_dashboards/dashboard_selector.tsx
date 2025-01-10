@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MergedServiceDashboard } from '.';
+import type { MergedServiceDashboard } from '.';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 interface Props {

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {

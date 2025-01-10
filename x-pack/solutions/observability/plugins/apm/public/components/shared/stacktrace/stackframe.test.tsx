@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { mountWithTheme } from '../../../utils/test_helpers';
 import { Stackframe as StackframeComponent } from './stackframe';
 import stacktracesMock from './__fixtures__/stacktraces.json';

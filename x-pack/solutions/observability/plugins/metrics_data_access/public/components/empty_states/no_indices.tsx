@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import { EuiEmptyPromptProps } from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {

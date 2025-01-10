@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { ApmPluginSetupDeps } from '../../../plugin';
+import type { Capabilities } from '@kbn/core/public';
+import type { ApmPluginSetupDeps } from '../../../plugin';
 
 export const getAlertingCapabilities = (
   plugins: ApmPluginSetupDeps,

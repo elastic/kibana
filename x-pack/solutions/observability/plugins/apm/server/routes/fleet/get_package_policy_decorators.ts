@@ -7,10 +7,10 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get } from 'lodash';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/es_fields/apm';
-import { ArtifactSourceMap } from './source_maps';
+import type { ArtifactSourceMap } from './source_maps';
 
 // agent config
 export const AGENT_CONFIG_PATH = `inputs[0].config['apm-server'].value.agent_config`;

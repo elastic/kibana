@@ -18,12 +18,12 @@ import {
   SPAN_TYPE,
   TRACE_ID,
 } from '../../../common/es_fields/apm';
-import {
+import type {
   ConnectionNode,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { calculateDocsPerShard } from './calculate_docs_per_shard';
 
 const SCRIPTED_METRICS_FIELDS_TO_COPY = [

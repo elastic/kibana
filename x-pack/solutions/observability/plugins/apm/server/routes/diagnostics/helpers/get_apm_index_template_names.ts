@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 
 const suffix = 'template';
 export function getApmIndexTemplateNames() {

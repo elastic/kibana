@@ -12,9 +12,9 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { Coordinate } from '../../../../typings/timeseries';
+import type { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -28,7 +28,7 @@ import {
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;

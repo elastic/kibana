@@ -18,9 +18,10 @@ import {
   isTailBasedSamplingValid,
 } from './settings_definition/tail_sampling_settings';
 import { getTLSSettings, isTLSFormValid } from './settings_definition/tls_settings';
-import { SettingsForm, SettingsSection } from './settings_form';
+import type { SettingsSection } from './settings_form';
+import { SettingsForm } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
-import { PackagePolicyVars } from './typings';
+import type { PackagePolicyVars } from './typings';
 
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;

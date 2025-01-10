@@ -9,7 +9,8 @@ import DateMath from '@kbn/datemath';
 import * as t from 'io-ts';
 import createContainer from 'constate';
 import type { TimeRange } from '@kbn/es-query';
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   type MetricsExplorerChartOptions,
   type MetricsExplorerOptions,

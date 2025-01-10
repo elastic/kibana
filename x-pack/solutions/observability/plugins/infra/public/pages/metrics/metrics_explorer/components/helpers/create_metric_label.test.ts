@@ -6,7 +6,7 @@
  */
 
 import { createMetricLabel } from './create_metric_label';
-import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 
 describe('createMetricLabel()', () => {
   it('should work with metrics with fields', () => {

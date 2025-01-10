@@ -13,7 +13,7 @@ import {
   createBackingIndexNameWithoutVersion,
   getDataStreamSettingsOfEarliestIndex,
   rolloverDataStream,
-} from './utils/es_utils';
+} from './utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 

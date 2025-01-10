@@ -6,12 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { sumBy, values } from 'lodash';
-import { RouteRegisterParameters } from '..';
+import type { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
-import {
-  IndexLifecyclePhaseSelectOption,
-  StorageExplorerSummaryAPIResponse,
-} from '../../../common/storage_explorer';
+import type { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
+import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { getClient } from '../compat';
 import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
 import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';

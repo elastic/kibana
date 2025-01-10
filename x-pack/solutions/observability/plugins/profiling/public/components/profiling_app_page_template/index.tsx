@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import type { EuiPageHeaderContentProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageHeaderContentProps,
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
@@ -116,7 +115,6 @@ export function ProfilingAppPageTemplate({
           <EuiFlexItem grow={false}>
             <EuiPanel hasShadow={false} color="subdued">
               <PrimaryProfilingSearchBar />
-              <EuiHorizontalRule />
             </EuiPanel>
           </EuiFlexItem>
         )}

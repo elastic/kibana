@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 
 export enum ApmOnboardingLocatorCategory {
   Apm = 'application',
