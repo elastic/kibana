@@ -18,17 +18,27 @@ import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
-import { getUnitedEntityDefinition } from './united_entity_definitions';
+import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 
-const unitedDefinition = getUnitedEntityDefinition({
-  entityType: 'host',
-  namespace: 'test',
-  fieldHistoryLength: 10,
-  indexPatterns: [],
-  syncDelay: '1m',
-  frequency: '1m',
-});
-const definition: EntityDefinition = unitedDefinition.entityManagerDefinition;
+const definition: EntityDefinition = convertToEntityManagerDefinition(
+  {
+    id: 'host_engine',
+    entityType: 'host',
+    pipeline: [],
+    version: '0.0.1',
+    fields: [],
+    identityField: 'host.name',
+    indexMappings: {},
+    indexPatterns: [],
+    settings: {
+      syncDelay: '1m',
+      frequency: '1m',
+      timestampField: '@timestamp',
+      lookbackPeriod: '24h',
+    },
+  },
+  { namespace: 'test', filter: '' }
+);
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();

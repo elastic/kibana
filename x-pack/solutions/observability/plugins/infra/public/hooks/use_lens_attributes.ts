@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -65,12 +65,12 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
         timeRange,
         query,
         filters,
-        searchSessionId,
+        lastReloadRequestTime,
       }: {
         timeRange: TimeRange;
         filters: Filter[];
         query: Query | AggregateQuery;
-        searchSessionId?: string;
+        lastReloadRequestTime?: number;
       }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
@@ -80,7 +80,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
               id: '',
               timeRange,
               attributes: injectedAttributes,
-              searchSessionId,
+              lastReloadRequestTime,
             },
             {
               openInNewTab: true,
@@ -96,15 +96,15 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       timeRange,
       filters = [],
       query = { language: 'kuery', query: '' },
-      searchSessionId,
+      lastReloadRequestTime,
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
       query?: Query | AggregateQuery;
-      searchSessionId?: string;
+      lastReloadRequestTime?: number;
     }) => {
       const openInLens = getOpenInLensAction(
-        openInLensAction({ timeRange, filters, query, searchSessionId })
+        openInLensAction({ timeRange, filters, query, lastReloadRequestTime })
       );
       return [openInLens];
     },

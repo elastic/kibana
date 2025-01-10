@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo, useState } from 'react';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
-import {
+import type {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
-  getLogAlertsChartPreviewDataRequestPayloadRT,
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
+} from '../../../../../../common/http_api';
+import {
+  getLogAlertsChartPreviewDataRequestPayloadRT,
   getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
 } from '../../../../../../common/http_api';
-import { ExecutionTimeRange } from '../../../../../types';
+import type { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../hooks/use_tracked_promise';
 
 interface Options {

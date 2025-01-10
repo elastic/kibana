@@ -6,14 +6,14 @@
     - 'x-pack/plugins/drilldowns/**/*.*'
     - 'x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
-    - 'src/plugins/expressions/**/*.*'
+    - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
-    - 'x-pack/plugins/observability_solution/apm/**/*.*'
+    - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'packages/kbn-apm-synthtrace/**/*.*'
     - 'packages/kbn-apm-synthtrace-client/**/*.*'
-    - 'packages/kbn-apm-utils/**/*.*'
+    - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'

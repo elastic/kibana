@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 
 export function useSorting<T>(defaultSorting: CriteriaWithPagination<T>['sort']) {
   const [sorting, setSorting] = useState<CriteriaWithPagination<T>['sort']>(defaultSorting);

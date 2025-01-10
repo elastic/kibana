@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
+import type { SectionLinkProps } from '@kbn/observability-shared-plugin/public';
 import {
   Section,
-  SectionLinkProps,
   SectionTitle,
   SectionSubtitle,
   SectionLinks,
@@ -26,11 +26,18 @@ import {
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  getLogsLocatorFromUrlService,
+  getNodeQuery,
+  getTimeRange,
+} from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
+import type {
+  InfraWaffleMapNode,
+  InfraWaffleMapOptions,
+} from '../../../../../common/inventory/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -49,7 +56,7 @@ export const NodeContextMenu = withEuiTheme(
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
     const { application, share } = services;
-    const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
+    const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
@@ -116,10 +123,12 @@ export const NodeContextMenu = withEuiTheme(
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      href: nodeLogsLocator.getRedirectUrl({
-        nodeField: findInventoryFields(nodeType).id,
-        nodeId: node.id,
-        time: currentTime,
+      href: logsLocator.getRedirectUrl({
+        query: getNodeQuery({
+          nodeField: findInventoryFields(nodeType).id,
+          nodeId: node.id,
+        }),
+        timeRange: getTimeRange(currentTime),
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
       isDisabled: !showLogsLink,

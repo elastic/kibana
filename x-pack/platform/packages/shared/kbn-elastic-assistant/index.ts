@@ -71,9 +71,6 @@ export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 
-/** Default Elastic AI Assistant logo, can be removed once included in EUI **/
-export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
-
 export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
 
 export {

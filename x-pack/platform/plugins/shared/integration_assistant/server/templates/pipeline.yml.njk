@@ -53,7 +53,8 @@ processors:
         - {{ format }}
       {% endfor %}
       tag: date_processor_{{ value.field}}
-      if: "ctx.{{ value.if }} != null"{% endif %}
+      if: |-
+        {{ value.if }} != null{% endif %}
   {% if key == 'convert' %}
   - {{ key }}:
       field: {{ value.field }}

@@ -6,11 +6,23 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import './shard_allocation.scss';
+
 import { ClusterView } from './components/cluster_view';
+
+const clusterStyle = ({ euiTheme }) => css`
+  th {
+    text-align: left;
+  }
+
+  td:first-child {
+    width: calc(${euiTheme.base} * 12.5);
+  }
+`;
 
 export const ShardAllocation = (props) => {
   const types = [
@@ -59,7 +71,7 @@ export const ShardAllocation = (props) => {
   ];
 
   return (
-    <div className="monCluster">
+    <div css={clusterStyle}>
       <EuiTitle>
         <h1>
           <FormattedMessage

@@ -23,6 +23,8 @@ import {
   SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
+  SIEM_RULE_MIGRATION_RETRY_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -39,6 +41,10 @@ import type {
   UpsertRuleMigrationResourcesResponse,
   GetRuleMigrationPrebuiltRulesResponse,
   UpdateRuleMigrationResponse,
+  RetryRuleMigrationRequestBody,
+  StartRuleMigrationResponse,
+  RetryRuleMigrationResponse,
+  GetRuleMigrationIntegrationsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -146,13 +152,50 @@ export const startRuleMigration = async ({
   connectorId,
   langSmithOptions,
   signal,
-}: StartRuleMigrationParams): Promise<GetAllStatsRuleMigrationResponse> => {
+}: StartRuleMigrationParams): Promise<StartRuleMigrationResponse> => {
   const body: StartRuleMigrationRequestBody = { connector_id: connectorId };
   if (langSmithOptions) {
     body.langsmith_options = langSmithOptions;
   }
-  return KibanaServices.get().http.put<GetAllStatsRuleMigrationResponse>(
+  return KibanaServices.get().http.put<StartRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
+  );
+};
+
+export interface RetryRuleMigrationParams {
+  /** `id` of the migration to reprocess rules for */
+  migrationId: string;
+  /** The connector id to use for the reprocessing */
+  connectorId: string;
+  /** Optional LangSmithOptions to use for the for the reprocessing */
+  langSmithOptions?: LangSmithOptions;
+  /** Optional indicator to retry only failed rules */
+  failed?: boolean;
+  /** Optional indicator to retry only not fully translated rules */
+  notFullyTranslated?: boolean;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Starts a reprocessing of migration rules in a specific migration. */
+export const retryRuleMigration = async ({
+  migrationId,
+  connectorId,
+  langSmithOptions,
+  failed,
+  notFullyTranslated,
+  signal,
+}: RetryRuleMigrationParams): Promise<RetryRuleMigrationResponse> => {
+  const body: RetryRuleMigrationRequestBody = {
+    connector_id: connectorId,
+    failed,
+    not_fully_translated: notFullyTranslated,
+  };
+  if (langSmithOptions) {
+    body.langsmith_options = langSmithOptions;
+  }
+  return KibanaServices.get().http.put<RetryRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_RETRY_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };
@@ -275,6 +318,20 @@ export const getRuleMigrationsPrebuiltRules = async ({
 }: GetRuleMigrationsPrebuiltRulesParams): Promise<GetRuleMigrationPrebuiltRulesResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationPrebuiltRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
+  );
+};
+
+export interface GetIntegrationsParams {
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves existing integrations. */
+export const getIntegrations = async ({
+  signal,
+}: GetIntegrationsParams): Promise<GetRuleMigrationIntegrationsResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationIntegrationsResponse>(
+    SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
     { version: '1', signal }
   );
 };
