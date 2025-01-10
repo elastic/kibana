@@ -93,6 +93,13 @@ export const useIndexData = (
   const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
   const abortController = useRef(new AbortController());
 
+  // To be used for data grid column selection
+  // and will be applied to doc and chart queries.
+  const combinedRuntimeMappings = useMemo(
+    () => getCombinedRuntimeMappings(dataView, runtimeMappings),
+    [dataView, runtimeMappings]
+  );
+
   useEffect(() => {
     async function fetchPopulatedFields() {
       if (abortController.current) {
@@ -110,6 +117,7 @@ export const useIndexData = (
           indexFilter: {
             bool: { must: { match_all: {} } },
           },
+          runtimeMappings: combinedRuntimeMappings,
           abortSignal: abortController.current.signal,
         });
 
@@ -133,13 +141,6 @@ export const useIndexData = (
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // To be used for data grid column selection
-  // and will be applied to doc and chart queries.
-  const combinedRuntimeMappings = useMemo(
-    () => getCombinedRuntimeMappings(dataView, runtimeMappings),
-    [dataView, runtimeMappings]
-  );
 
   // Available data grid columns, will be a combination of index pattern and runtime fields.
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);

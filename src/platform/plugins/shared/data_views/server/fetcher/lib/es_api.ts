@@ -8,7 +8,10 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  ExpandWildcard,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -50,6 +53,7 @@ interface FieldCapsApiParams {
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
 }
 
@@ -78,6 +82,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    runtimeMappings,
     abortSignal,
   } = params;
   try {
@@ -90,6 +95,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         expand_wildcards: expandWildcards,
         types: fieldTypes,
         include_empty_fields: includeEmptyFields ?? true,
+        runtime_mappings: runtimeMappings,
         ...fieldCapsOptions,
       },
       { meta: true, signal: abortSignal }

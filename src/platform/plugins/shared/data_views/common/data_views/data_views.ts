@@ -593,7 +593,7 @@ export class DataViewsService {
   };
 
   /**
-   * Get field list by providing an index patttern (or spec).
+   * Get field list by providing an index pattern (or spec).
    * @param options options for getting field list
    * @returns FieldSpec[]
    */

@@ -29,6 +29,19 @@ async function sha1(str: string) {
   }
 }
 
+function getFieldsForWildcardRequestBody(options: GetFieldsOptions) {
+  const { indexFilter, runtimeMappings } = options;
+
+  if (!indexFilter && !runtimeMappings) {
+    return undefined;
+  }
+
+  return JSON.stringify({
+    ...(indexFilter && { index_filter: indexFilter }),
+    ...(runtimeMappings && { runtime_mappings: runtimeMappings }),
+  });
+}
+
 /**
  * Data Views API Client - client implementation
  */
@@ -135,7 +148,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
-      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
+      getFieldsForWildcardRequestBody(options),
       forceRefresh,
       abortSignal
     ).then((response) => {

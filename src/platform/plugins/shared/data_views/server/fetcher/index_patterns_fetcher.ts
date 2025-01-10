@@ -83,6 +83,7 @@ export class IndexPatternsFetcher {
     fieldTypes?: string[];
     includeEmptyFields?: boolean;
     abortSignal?: AbortSignal;
+    runtimeMappings?: estypes.MappingRuntimeFields;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const {
       pattern,
@@ -95,6 +96,7 @@ export class IndexPatternsFetcher {
       fieldTypes,
       includeEmptyFields,
       abortSignal,
+      runtimeMappings,
     } = options;
     const allowNoIndices = fieldCapsOptions?.allow_no_indices || this.allowNoIndices;
 
@@ -114,6 +116,7 @@ export class IndexPatternsFetcher {
       expandWildcards,
       fieldTypes,
       includeEmptyFields,
+      runtimeMappings,
       abortSignal,
     });
 

@@ -56,7 +56,19 @@ export const parseFields = (fields: string | string[], fldName: string): string[
 
 const access = 'internal';
 
-export type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
+export type IBody =
+  | {
+      index_filter?: estypes.QueryDslQueryContainer;
+      runtime_mappings?: estypes.MappingRuntimeFields;
+    }
+  | undefined;
+
+export const bodySchema = schema.maybe(
+  schema.object({
+    index_filter: schema.maybe(schema.any()),
+    runtime_mappings: schema.maybe(schema.any()),
+  })
+);
 export interface IQuery {
   pattern: string;
   meta_fields: string | string[];
@@ -125,7 +137,7 @@ export const validate: VersionedRouteValidation<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
-    body: schema.maybe(schema.object({ index_filter: schema.any() })),
+    body: bodySchema,
   },
   response: {
     200: {
@@ -163,6 +175,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
     // not available to get request
     const indexFilter = request.body?.index_filter;
+    const runtimeMappings = request.body?.runtime_mappings;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
@@ -189,6 +202,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         indexFilter,
         allowHidden,
         includeEmptyFields,
+        runtimeMappings,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
         abortSignal,
       });

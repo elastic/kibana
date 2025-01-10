@@ -9,7 +9,10 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  ExpandWildcard,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
@@ -30,6 +33,7 @@ interface FieldCapabilitiesParams {
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
 }
 
@@ -55,6 +59,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    runtimeMappings,
     abortSignal,
   } = params;
 
@@ -68,6 +73,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     expandWildcards,
     fieldTypes,
     includeEmptyFields,
+    runtimeMappings,
     abortSignal,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);

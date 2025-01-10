@@ -105,6 +105,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
             {
               includeEmptyFields: false,
               indexFilter,
+              runtimeMappings: dataView.getRuntimeMappings(),
               abortSignal: abortController.current.signal,
             }
           );
