@@ -22,8 +22,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import useUnmount from 'react-use/lib/useUnmount';
-import useLatest from 'react-use/lib/useLatest';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -43,7 +41,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import { useRootProfile } from '../../context_awareness';
+import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -73,7 +71,6 @@ export function DiscoverMainRoute({
     dataViewEditor,
     share,
     getScopedHistory,
-    dataViews,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -234,34 +231,9 @@ export function DiscoverMainRoute({
   );
 
   const rootProfileState = useRootProfile();
-  const [prevProfileDataViewIds, setPrevProfileDataViewIds] = useState<string[]>([]);
-
-  const initializeProfileDataViews = useLatest(async () => {
-    if (rootProfileState.rootProfileLoading) {
-      return;
-    }
-
-    const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
-    const profileDataViews = await Promise.all(
-      profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
-    );
-    const currentDataViews = stateContainer.internalState.getState().adHocDataViews;
-    const newDataViews = currentDataViews
-      .filter((dataView) => !prevProfileDataViewIds.includes(dataView.id!))
-      .concat(profileDataViews);
-
-    for (const prevId of prevProfileDataViewIds) {
-      dataViews.clearInstanceCache(prevId);
-    }
-
-    setPrevProfileDataViewIds(profileDataViews.map((dataView) => dataView.id!));
-    stateContainer.internalState.transitions.setAdHocDataViews(newDataViews);
-  });
-
-  useUnmount(() => {
-    for (const prevId of prevProfileDataViewIds) {
-      dataViews.clearInstanceCache(prevId);
-    }
+  const { initializeProfileDataViews } = useDefaultAdHocDataViews({
+    stateContainer,
+    rootProfileState,
   });
 
   useEffect(() => {
@@ -278,7 +250,7 @@ export function DiscoverMainRoute({
       });
       setError(undefined);
 
-      await initializeProfileDataViews.current();
+      await initializeProfileDataViews();
 
       if (savedSearchId) {
         await loadSavedSearch();

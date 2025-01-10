@@ -14,20 +14,26 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
 
 /**
+ * The root profile state
+ */
+export type RootProfileState =
+  | { rootProfileLoading: true }
+  | {
+      rootProfileLoading: false;
+      AppWrapper: Profile['getRenderAppWrapper'];
+      getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
+    };
+
+/**
  * Hook to trigger and wait for root profile resolution
  * @param options Options object
  * @returns The root profile state
  */
 export const useRootProfile = () => {
   const { profilesManager, core } = useDiscoverServices();
-  const [rootProfileState, setRootProfileState] = useState<
-    | { rootProfileLoading: true }
-    | {
-        rootProfileLoading: false;
-        AppWrapper: Profile['getRenderAppWrapper'];
-        getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
-      }
-  >({ rootProfileLoading: true });
+  const [rootProfileState, setRootProfileState] = useState<RootProfileState>({
+    rootProfileLoading: true,
+  });
 
   useEffect(() => {
     const subscription = core.chrome
