@@ -57,7 +57,6 @@ export function fetchEsql({
     filters,
     timeRange,
     dataView,
-    inspectorAdapters,
     data,
   });
   return textBasedQueryStateToAstWithValidation(props)
@@ -127,7 +126,6 @@ export function getTextBasedQueryStateToAstProps({
   filters?: Filter[];
   timeRange?: TimeRange;
   dataView: DataView;
-  inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
 }) {
   return {
