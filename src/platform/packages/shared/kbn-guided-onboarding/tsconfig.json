@@ -4,17 +4,21 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
     ]
   },
   "include": [
     "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/navigation-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react",
+    "@kbn/cloud",
+    "@kbn/analytics",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

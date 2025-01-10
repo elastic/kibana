@@ -13,8 +13,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/navigation-plugin",
-  ]
+  "kbn_references": []
 }

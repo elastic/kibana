@@ -1,20 +1,23 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "react",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/navigation-plugin",
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/serverless-types",
   ]
 }

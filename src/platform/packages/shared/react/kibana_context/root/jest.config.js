@@ -8,12 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
-<<<<<<<< HEAD:packages/kbn-chart-icons/jest.config.js
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-chart-icons'],
-========
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-item-buffer'],
->>>>>>>> 64b6a1a5e7f7 (Sustainable Kibana Architecture: Move the rest of shared-ux modules (#205924)):src/platform/packages/private/kbn-item-buffer/jest.config.js
+  preset: '@kbn/test',
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/react/kibana_context/root'],
 };
