@@ -10,6 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
 import { useBatchedPublishingSubjects, PublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
@@ -107,6 +108,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         }
       );
 
+      const inputCss = css`
+        .euiComboBox__inputWrap {
+          box-shadow: none;
+        }
+      `;
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
@@ -131,7 +137,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                   }
                 )}
                 inputPopoverProps={{
-                  className: controlPanelClassName,
+                  css: inputCss,
+                  className: 'esqlControlValuesCombobox',
                 }}
                 data-test-subj="esqlControlValuesDropdown"
                 singleSelection={{ asPlainText: true }}

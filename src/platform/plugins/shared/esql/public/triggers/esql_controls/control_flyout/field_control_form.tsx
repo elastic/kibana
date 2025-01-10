@@ -206,7 +206,7 @@ export function FieldControlForm({
 
   return (
     <>
-      <Header />
+      <Header isInEditMode={isControlInEditMode} />
       <EuiFlyoutBody
         css={css`
           ${styling}

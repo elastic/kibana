@@ -266,16 +266,20 @@ export function ControlWidth({
   );
 }
 
-export function Header() {
+export function Header({ isInEditMode }: { isInEditMode: boolean }) {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <h2>
-              {i18n.translate('esql.flyout.title', {
-                defaultMessage: 'Create ES|QL control',
-              })}
+              {isInEditMode
+                ? i18n.translate('esql.flyout.editTitle', {
+                    defaultMessage: 'Edit ES|QL control',
+                  })
+                : i18n.translate('esql.flyout.title', {
+                    defaultMessage: 'Create ES|QL control',
+                  })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>

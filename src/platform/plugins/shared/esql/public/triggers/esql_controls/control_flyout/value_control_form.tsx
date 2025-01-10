@@ -324,7 +324,7 @@ export function ValueControlForm({
 
   return (
     <>
-      <Header />
+      <Header isInEditMode={isControlInEditMode} />
       <EuiFlyoutBody
         css={css`
           ${styling}
