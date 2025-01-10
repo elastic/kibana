@@ -15,7 +15,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { SavedObjectsBulkGetObject } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectsRawDocSource, type SavedObject } from '@kbn/core-saved-objects-server';
@@ -149,14 +149,12 @@ describe('#bulkGet', () => {
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
-            docs: objects.map(({ type, id }) =>
-              expect.objectContaining({
-                _index,
-                _id: getId(type, id),
-              })
-            ),
-          },
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
         }),
         expect.anything()
       );

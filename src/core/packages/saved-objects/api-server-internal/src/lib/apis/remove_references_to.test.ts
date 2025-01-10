@@ -15,7 +15,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -106,9 +106,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess(client, repository, type, id, { type });
 
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({ ...query }),
-          }),
+          expect.objectContaining({ ...query }),
           expect.anything()
         );
       });
@@ -139,13 +137,11 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess(client, repository, type, id);
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              script: expect.objectContaining({
-                params: {
-                  type,
-                  id,
-                },
-              }),
+            script: expect.objectContaining({
+              params: {
+                type,
+                id,
+              },
             }),
           }),
           expect.anything()
@@ -270,11 +266,10 @@ describe('SavedObjectsRepository', () => {
         const client = apiExecutionContext.client;
         expect(client.updateByQuery).toHaveBeenCalledTimes(1);
         expect(client.updateByQuery).toHaveBeenLastCalledWith(
-          {
+          expect.objectContaining({
             refresh: false,
             index: indices,
-            body: expect.any(Object),
-          },
+          }),
           { ignore: [404], meta: true }
         );
       });
