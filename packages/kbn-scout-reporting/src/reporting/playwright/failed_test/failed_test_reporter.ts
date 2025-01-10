@@ -26,15 +26,16 @@ import {
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
 import type { TestFailure } from '../../report';
-import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
-import { stripRunCommand, stripFilePath } from '../common/strip_utils';
 import { ScoutFailureReport } from '../../report';
+import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
 import {
   getRunTarget,
   getPluginManifestData,
   parseStdout,
   generateTestRunId,
   getTestIDForTitle,
+  stripRunCommand,
+  stripFilePath,
 } from '../common';
 
 /**

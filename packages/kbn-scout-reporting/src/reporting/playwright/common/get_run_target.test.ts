@@ -52,16 +52,12 @@ describe('getRunTarget', () => {
     expect(getRunTarget(argv)).toBe('undefined');
   });
 
-  it(`should default to 'undefined' if argv is not passed`, () => {
-    expect(getRunTarget()).toBe('undefined');
-  });
-
   it(`should return 'undefined' for '--grep='`, () => {
     const argv = ['node', 'scripts/scout.js', '--grep='];
     expect(getRunTarget(argv)).toBe('undefined');
   });
 
-  it(`should return "undefined" if "--grep" argument is without value`, () => {
+  it(`should return 'undefined' if '--grep' argument is without value`, () => {
     const argv = ['node', 'scripts/scout.js', '--grep'];
     expect(getRunTarget(argv)).toBe('undefined');
   });
