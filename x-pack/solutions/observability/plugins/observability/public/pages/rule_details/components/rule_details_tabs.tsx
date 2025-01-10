@@ -92,6 +92,7 @@ export function RuleDetailsTabs({
             onEsQueryChange={onEsQueryChange}
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
             defaultFilters={ruleFilters.current}
+            disableLocalStorageSync={true}
           />
           <EuiSpacer size="s" />
 

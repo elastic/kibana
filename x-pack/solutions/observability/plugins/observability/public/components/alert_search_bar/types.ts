@@ -63,6 +63,7 @@ export interface ObservabilityAlertSearchBarProps
   onFilterControlsChange: (controlConfigs: Filter[]) => void;
   savedQuery?: SavedQuery;
   showFilterBar?: boolean;
+  disableLocalStorageSync?: boolean;
 }
 
 export interface AlertSearchBarContainerState {

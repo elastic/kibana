@@ -129,6 +129,7 @@ export function InternalRelatedAlerts({ alert }: Props) {
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
           defaultFilters={defaultFilters.current}
+          disableLocalStorageSync={true}
           defaultState={{
             ...defaultState,
             kuery,

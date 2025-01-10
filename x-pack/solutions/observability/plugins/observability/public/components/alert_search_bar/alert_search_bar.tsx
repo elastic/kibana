@@ -25,6 +25,7 @@ const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQ
 export function ObservabilityAlertSearchBar({
   appName,
   defaultFilters = EMPTY_FILTERS,
+  disableLocalStorageSync,
   onEsQueryChange,
   onKueryChange,
   onRangeFromChange,
@@ -168,6 +169,7 @@ export function ObservabilityAlertSearchBar({
           filters={[...filters, ...defaultFilters]}
           onFiltersChange={onFilterControlsChange}
           storageKey={filterControlsStorageKey}
+          disableLocalStorageSync={disableLocalStorageSync}
           services={{
             http,
             notifications,
