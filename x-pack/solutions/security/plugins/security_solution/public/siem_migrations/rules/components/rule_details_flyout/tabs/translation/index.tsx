@@ -102,6 +102,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                       ruleName={ruleMigration.original_rule.title}
                       query={originalQuery}
                       canEdit={false}
+                      isOriginalQuery
                     />
                   </EuiFlexItem>
                   <EuiFlexItem

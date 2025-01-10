@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
@@ -32,12 +31,13 @@ interface MigrationRuleQueryProps {
   title: string;
   ruleName?: string;
   query: string;
+  isOriginalQuery?: boolean;
   canEdit?: boolean;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
-  ({ title, ruleName, query, canEdit, onTranslationUpdate }) => {
+  ({ title, ruleName, query, canEdit, isOriginalQuery, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
 
     const formDefaultValue: RuleTranslationSchema = useMemo(() => {
@@ -108,15 +108,17 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
           <EuiTitle size="xxs">
             <h3>{ruleName}</h3>
           </EuiTitle>
-          {/* <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="xs">{query}</EuiMarkdownFormat> */}
           <EuiSpacer size="m" />
-          <EuiCodeBlock language={canEdit ? 'sql' : 'splunk-spl'} fontSize="s" paddingSize="s">
+          <EuiCodeBlock
+            language={isOriginalQuery ? 'splunk-spl' : 'sql'}
+            fontSize="s"
+            paddingSize="s"
+          >
             {query}
           </EuiCodeBlock>
         </>
       );
-    }, [canEdit, editMode, onEdit, query, ruleName]);
+    }, [canEdit, editMode, isOriginalQuery, onEdit, query, ruleName]);
 
     const editQueryComponent = useMemo(() => {
       if (!editMode) {
