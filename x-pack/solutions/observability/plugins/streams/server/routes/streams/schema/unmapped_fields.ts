@@ -78,7 +78,7 @@ export const unmappedFieldsRoute = createServerRoute({
       }
 
       const { ancestors } = await readAncestors({
-        id: params.path.id,
+        name: params.path.id,
         scopedClusterClient,
       });
 

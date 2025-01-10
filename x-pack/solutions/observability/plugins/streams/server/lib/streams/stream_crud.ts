@@ -402,7 +402,7 @@ async function getUnmanagedElasticsearchAssets({
 }
 
 interface ReadAncestorsParams extends BaseParams {
-  id: string;
+  name: string;
 }
 
 export interface ReadAncestorsResponse {
@@ -410,10 +410,10 @@ export interface ReadAncestorsResponse {
 }
 
 export async function readAncestors({
-  id,
+  name,
   scopedClusterClient,
 }: ReadAncestorsParams): Promise<{ ancestors: WiredStreamDefinition[] }> {
-  const ancestorIds = getAncestors(id);
+  const ancestorIds = getAncestors(name);
 
   return {
     ancestors: await Promise.all(
@@ -430,10 +430,10 @@ export async function readAncestors({
 }
 
 interface ReadDescendantsParams extends BaseParams {
-  id: string;
+  name: string;
 }
 
-export async function readDescendants({ id, scopedClusterClient }: ReadDescendantsParams) {
+export async function readDescendants({ name, scopedClusterClient }: ReadDescendantsParams) {
   const response = await scopedClusterClient.asInternalUser.search<WiredStreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
@@ -442,12 +442,12 @@ export async function readDescendants({ id, scopedClusterClient }: ReadDescendan
         bool: {
           filter: {
             prefix: {
-              id,
+              name,
             },
           },
           must_not: {
             term: {
-              id,
+              name,
             },
           },
         },
@@ -459,25 +459,25 @@ export async function readDescendants({ id, scopedClusterClient }: ReadDescendan
 
 export async function validateAncestorFields(
   scopedClusterClient: IScopedClusterClient,
-  id: string,
+  name: string,
   fields: FieldDefinition
 ) {
   const { ancestors } = await readAncestors({
-    id,
+    name,
     scopedClusterClient,
   });
   for (const ancestor of ancestors) {
-    for (const name in fields) {
+    for (const fieldName in fields) {
       if (
-        Object.hasOwn(fields, name) &&
+        Object.hasOwn(fields, fieldName) &&
         isWiredReadStream(ancestor) &&
         Object.entries(ancestor.stream.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
-            attr.type !== fields[name].type && ancestorFieldName === name
+            attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
         )
       ) {
         throw new MalformedFields(
-          `Field ${name} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
         );
       }
     }
@@ -486,20 +486,20 @@ export async function validateAncestorFields(
 
 export async function validateDescendantFields(
   scopedClusterClient: IScopedClusterClient,
-  id: string,
+  name: string,
   fields: FieldDefinition
 ) {
   const descendants = await readDescendants({
-    id,
+    name,
     scopedClusterClient,
   });
   for (const descendant of descendants) {
-    for (const name in fields) {
+    for (const fieldName in fields) {
       if (
-        Object.hasOwn(fields, name) &&
+        Object.hasOwn(fields, fieldName) &&
         Object.entries(descendant.stream.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
-            attr.type !== fields[name].type && descendantFieldName === name
+            attr.type !== fields[fieldName].type && descendantFieldName === fieldName
         )
       ) {
         throw new MalformedFields(
