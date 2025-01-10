@@ -33,6 +33,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../rule_creation/components/threshold_alert_suppression_edit';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -195,7 +196,7 @@ export const mockRuleWithEverything = (id: string): RuleResponse => ({
 });
 
 // TODO: update types mapping
-export const mockAboutStepRule = (): AboutStepRule => ({
+export const mockAboutStepRule = (euiTheme: EuiThemeComputed): AboutStepRule => ({
   author: ['Elastic'],
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
@@ -205,7 +206,11 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   name: 'Query with rule-id',
   description: '24/7',
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  severity: {
+    value: 'low',
+    mapping: fillEmptySeverityMappings([], euiTheme),
+    isMappingChecked: false,
+  },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],

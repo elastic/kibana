@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
@@ -32,6 +32,7 @@ import {
   useExpandableFlyoutState,
   useExpandableFlyoutHistory,
 } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 
 jest.mock('../../document_details/shared/hooks/use_rule_details_link');
 
@@ -67,6 +68,9 @@ const renderRulePanel = (isPreviewMode = false) =>
   );
 
 describe('<RulePanel />', () => {
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
@@ -80,7 +84,7 @@ describe('<RulePanel />', () => {
       isExistingRule: true,
     });
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule(),
+      aboutRuleData: mockAboutStepRule(euiTheme),
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },

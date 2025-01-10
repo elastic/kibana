@@ -147,7 +147,7 @@ describe('StepAboutRuleComponent', () => {
     const wrapper = shallow(
       <StepAboutRuleReadOnly
         addPadding={false}
-        defaultValues={mockAboutStepRule()}
+        defaultValues={mockAboutStepRule(euiTheme)}
         descriptionColumns="multi"
       />
     );

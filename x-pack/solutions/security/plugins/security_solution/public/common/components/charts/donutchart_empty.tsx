@@ -13,6 +13,11 @@ interface DonutChartEmptyProps {
   donutWidth?: number;
 }
 
+/*
+ ** @deprecated
+ */
+export const emptyDonutColor = '#FAFBFD';
+
 const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({
   size = 90,
   donutWidth = 20,

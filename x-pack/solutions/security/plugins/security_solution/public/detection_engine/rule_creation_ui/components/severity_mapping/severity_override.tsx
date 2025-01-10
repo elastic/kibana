@@ -14,6 +14,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -22,7 +23,7 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 import type { Severity, SeverityMappingItem } from '@kbn/securitysolution-io-ts-alerting-types';
-import { severityOptions } from '../step_about_rule/data';
+import { getSeverityOptions } from '../step_about_rule/data';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as styles from './styles';
 import * as i18n from './translations';
@@ -157,6 +158,9 @@ function SeverityMappingRow({
     },
     [index, severityMappingItem.severity, onFieldMatchValueChange]
   );
+
+  const { euiTheme } = useEuiTheme();
+  const severityOptions = useMemo(() => getSeverityOptions(euiTheme), [euiTheme]);
 
   return (
     <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
