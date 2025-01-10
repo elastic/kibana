@@ -44,9 +44,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         value: initialState.selectedOptions[0],
         type: initialState.variableType,
       });
-      const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(initialState.selectedOptions?.length)
-      );
+      const hasSelections$ = new BehaviorSubject<boolean>(false);
       const defaultControl = initializeDefaultControlApi({ ...initialState });
 
       const selections = initializeESQLControlSelections(initialState);
