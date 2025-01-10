@@ -272,6 +272,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Asset Inventory feature
    */
   assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions client
+   */
+  responseActionsMSDefenderEndpointEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
