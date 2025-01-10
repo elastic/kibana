@@ -81,7 +81,7 @@ export function getPageApi() {
     boolean | undefined
   >(
     { children$ },
-    'dataLoading',
+    'dataLoading$',
     apiPublishesDataLoading,
     undefined,
     // flatten method

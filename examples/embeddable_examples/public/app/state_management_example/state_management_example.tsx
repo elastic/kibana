@@ -40,10 +40,10 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    if (!bookApi || !bookApi.unsavedChanges) {
+    if (!bookApi || !bookApi.unsavedChanges$) {
       return;
     }
-    const subscription = bookApi.unsavedChanges.subscribe((unsavedChanges) => {
+    const subscription = bookApi.unsavedChanges$.subscribe((unsavedChanges) => {
       setHasUnsavedChanges(unsavedChanges !== undefined);
       unsavedChangesSessionStorage.save(unsavedChanges ?? {});
     });
