@@ -6,17 +6,26 @@
  */
 
 import { sha256 } from 'js-sha256';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 export type LookupData = object[];
 
 export class RuleMigrationsDataLookupsClient {
+  protected esClient: ElasticsearchClient;
+
   constructor(
-    protected username: string,
-    protected esClient: ElasticsearchClient,
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
     protected logger: Logger
-  ) {}
+  ) {
+    this.esClient = esScopedClient.asInternalUser;
+  }
 
   async create(lookupName: string, data: LookupData): Promise<string> {
     const indexName = `lookup_${lookupName}`;
