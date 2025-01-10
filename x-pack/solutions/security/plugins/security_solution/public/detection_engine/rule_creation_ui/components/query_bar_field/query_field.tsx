@@ -175,8 +175,8 @@ export const QueryBarField = ({
   // if saved query fetched, reset values in queryBar input and filters to saved query's values
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
-      const newFiledValue = savedQueryToFieldValue(savedQuery);
-      setFieldValue(newFiledValue);
+      const newFieldValue = savedQueryToFieldValue(savedQuery);
+      setFieldValue(newFieldValue);
     }
   }, [resetToSavedQuery, savedQuery, setFieldValue]);
 
