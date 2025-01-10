@@ -25,7 +25,7 @@
         "tags": [],
         "label": "Sha256",
         "description": [],
-        "path": "packages/kbn-crypto-browser/src/sha256.ts",
+        "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -62,7 +62,7 @@
                 "text": "Sha256"
               }
             ],
-            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -76,7 +76,7 @@
                 "signature": [
                   "string | Buffer"
                 ],
-                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -91,7 +91,7 @@
                 "signature": [
                   "BufferEncoding | undefined"
                 ],
-                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -109,7 +109,7 @@
             "signature": [
               "(encoding: BufferEncoding) => string"
             ],
-            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -123,7 +123,7 @@
                 "signature": [
                   "BufferEncoding"
                 ],
-                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -141,7 +141,7 @@
             "signature": [
               "(M: Buffer) => void"
             ],
-            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -155,7 +155,7 @@
                 "signature": [
                   "Buffer"
                 ],
-                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -173,7 +173,7 @@
             "signature": [
               "() => Buffer"
             ],
-            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

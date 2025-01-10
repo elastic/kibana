@@ -79,6 +79,7 @@
     "@kbn/core-rendering-browser",
     "@kbn/charts-theme",
     "@kbn/charts-plugin",
+    "@kbn/response-ops-rule-params",
   ],
   "exclude": ["target/**/*"]
 }

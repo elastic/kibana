@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAlertsV1 } from '../../../common/http_api';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 
 import { getChartPreviewData } from '../../lib/alerting/log_threshold/log_threshold_chart_preview';
 

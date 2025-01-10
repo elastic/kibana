@@ -2024,6 +2024,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.isEmbeddableApiContext",
+        "type": "Function",
+        "tags": [],
+        "label": "isEmbeddableApiContext",
+        "description": [],
+        "signature": [
+          "(context: unknown) => context is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.isEmbeddableApiContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.runComparators",
         "type": "Function",
         "tags": [],
@@ -2837,7 +2877,7 @@
         "tags": [],
         "label": "EmbeddableApiContext",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/index.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2853,7 +2893,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/index.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3190,13 +3230,7 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
@@ -3495,35 +3529,19 @@
         "references": [
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
           },
           {
             "plugin": "maps",
@@ -3540,6 +3558,22 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/library_transforms.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
           }
         ],
         "children": [
@@ -3845,7 +3879,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+              "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
@@ -8168,7 +8202,7 @@
           "------------------------------------------------------------------------------------------\nPerformance Tracking Types\n------------------------------------------------------------------------------------------"
         ],
         "signature": [
-          "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+          "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,
