@@ -95,6 +95,7 @@ export async function executeAction({
         overlayRef.close();
       },
       outsideClickCloses: true,
+      maxWidth: 800,
     }
   );
 }
