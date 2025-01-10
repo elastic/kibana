@@ -797,8 +797,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
-                    <RuleGaps ruleId={ruleId} />
-                    <EuiSpacer size="xl" />
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>

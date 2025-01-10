@@ -67,8 +67,3 @@ export const findGapsParamsSchema = schema.object(
     },
   }
 );
-
-export const findGapByIdParamsSchema = schema.object({
-  gapId: schema.string(),
-  ruleId: schema.string(),
-});
