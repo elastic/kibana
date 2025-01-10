@@ -199,7 +199,11 @@ export function ValueControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      setVariableName(String(e.target.value).replace('?', ''));
+      let text = String(e.target.value).replace('?', '');
+      if (text.charAt(0) === '_') {
+        text = text.substring(1);
+      }
+      setVariableName(text);
     },
     []
   );
