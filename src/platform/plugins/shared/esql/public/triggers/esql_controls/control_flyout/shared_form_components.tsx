@@ -31,6 +31,7 @@ import {
 } from '@elastic/eui';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { EsqlControlType } from '../types';
+import { TooltipWrapper } from './tooltip_wrapper';
 
 const controlTypeOptions = [
   {
@@ -94,32 +95,46 @@ export function ControlType({
   );
 
   return (
-    <EuiFormRow
-      label={i18n.translate('esql.flyout.controlTypeOptionsOptions.label', {
-        defaultMessage: 'Type',
-      })}
-      fullWidth
-    >
-      <EuiComboBox
-        aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-          defaultMessage: 'Select a control type',
+    <>
+      <TooltipWrapper
+        tooltipContent={i18n.translate('esql.flyout.controlTypeOptionsOptions.disabledTooltip', {
+          defaultMessage:
+            'There is no way to get fields or functions values from an ES|QL query at the moment.',
         })}
-        placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-          defaultMessage: 'Select a control type',
-        })}
-        singleSelection={{ asPlainText: true }}
-        options={controlTypeOptions}
-        selectedOptions={[controlFlyoutType]}
-        onChange={onTypeChange}
-        fullWidth
-        isDisabled={isDisabled}
-        compressed
-        data-test-subj="esqlControlTypeDropdown"
-        inputPopoverProps={{
-          'data-test-subj': 'esqlControlTypeInputPopover',
+        condition={isDisabled}
+        anchorProps={{
+          css: { width: '100%' },
         }}
-      />
-    </EuiFormRow>
+      >
+        <EuiFormRow
+          label={i18n.translate('esql.flyout.controlTypeOptionsOptions.label', {
+            defaultMessage: 'Type',
+          })}
+          fullWidth
+        >
+          <EuiComboBox
+            aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
+              defaultMessage: 'Select a control type',
+            })}
+            placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
+              defaultMessage: 'Select a control type',
+            })}
+            singleSelection={{ asPlainText: true }}
+            options={controlTypeOptions}
+            selectedOptions={[controlFlyoutType]}
+            onChange={onTypeChange}
+            fullWidth
+            isDisabled={isDisabled}
+            compressed
+            data-test-subj="esqlControlTypeDropdown"
+            inputPopoverProps={{
+              'data-test-subj': 'esqlControlTypeInputPopover',
+            }}
+          />
+        </EuiFormRow>
+      </TooltipWrapper>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 
@@ -132,6 +147,12 @@ export function VariableName({
   isControlInEditMode: boolean;
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const genericContent = i18n.translate('esql.flyout.variableName.helpText', {
+    defaultMessage: 'This name will be prefaced with an "?" in the editor',
+  });
+  const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
+    defaultMessage: 'You can’t edit a control name after it’s been created.',
+  });
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
@@ -159,9 +180,9 @@ export function VariableName({
       }
     >
       <EuiToolTip
-        content={i18n.translate('esql.flyout.variableName.helpText', {
-          defaultMessage: 'This name will be prefaced with an "?" in the editor',
-        })}
+        content={
+          isControlInEditMode ? `${genericContent} ${isDisabledTooltipText}` : genericContent
+        }
         css={css`
           width: 100%;
         `}
