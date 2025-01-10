@@ -26,7 +26,7 @@ export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const { indicesExist } = useSourcererDataView();
   const {
-    timelinePrivileges: { crud: canWriteTimeline, read: canReadTimeline },
+    timelinePrivileges: { crud: canWriteTimeline },
   } = useUserPrivileges();
 
   const [isImportDataModalOpen, setImportDataModal] = useState<boolean>(false);
@@ -54,11 +54,10 @@ export const TimelinesPage = React.memo(() => {
                   </EuiButton>
                 </EuiFlexItem>
               )}
-              {canReadTimeline && (
-                <EuiFlexItem data-test-subj="timelines-page-new">
-                  <NewTimelineButton type={timelineType} />
-                </EuiFlexItem>
-              )}
+
+              <EuiFlexItem data-test-subj="timelines-page-new">
+                <NewTimelineButton type={timelineType} />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
 

@@ -37,7 +37,6 @@ describe('TimelinesPage', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
-        read: true,
       },
     });
 
@@ -56,7 +55,6 @@ describe('TimelinesPage', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
-        read: true,
       },
     });
 
