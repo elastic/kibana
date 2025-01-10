@@ -81,11 +81,6 @@ export function defineQueryRolesRoutes({
 
         const nonReservedRolesQuery = [
           {
-            term: {
-              'metadata._reserved': false,
-            },
-          },
-          {
             bool: {
               must_not: {
                 exists: {

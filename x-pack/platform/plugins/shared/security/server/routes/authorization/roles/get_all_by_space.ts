@@ -57,11 +57,6 @@ export function defineGetAllRolesBySpaceRoutes({
                     },
                   },
                   {
-                    term: {
-                      'metadata._reserved': false,
-                    },
-                  },
-                  {
                     bool: {
                       must_not: {
                         exists: {
