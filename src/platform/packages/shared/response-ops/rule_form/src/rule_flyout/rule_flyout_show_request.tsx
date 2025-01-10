@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 import {
@@ -55,6 +56,7 @@ export const RuleFlyoutShowRequest = ({ isEdit, onClose }: RuleFlyoutShowRequest
         <p>
           <EuiText color="subdued">{SHOW_REQUEST_MODAL_SUBTITLE(isEdit)}</EuiText>
         </p>
+        <EuiSpacer />
         <RequestCodeBlock isEdit={isEdit} data-test-subj="flyoutRequestCodeBlock" />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
