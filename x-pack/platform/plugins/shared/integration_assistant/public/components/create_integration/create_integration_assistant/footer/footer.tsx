@@ -25,24 +25,9 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
 });
 AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 
-// Generation button for Step 5
-const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
-  if (!isGenerating) {
-    return <>{i18n.ANALYZE_CEL}</>;
-  }
-  return (
-    <>
-      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
-      {i18n.LOADING}
-    </>
-  );
-});
-AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
-
 interface FooterProps {
   isGenerating?: State['isGenerating'];
   isAnalyzeStep?: boolean;
-  isAnalyzeCelStep?: boolean;
   isLastStep?: boolean;
   isNextStepEnabled?: boolean;
   isNextAddingToElastic?: boolean;
@@ -54,7 +39,6 @@ export const Footer = React.memo<FooterProps>(
   ({
     isGenerating = false,
     isAnalyzeStep = false,
-    isAnalyzeCelStep = false,
     isLastStep = false,
     isNextStepEnabled = false,
     isNextAddingToElastic = false,
@@ -67,10 +51,8 @@ export const Footer = React.memo<FooterProps>(
           i18n.ADD_TO_ELASTIC
         ) : isAnalyzeStep ? (
           <AnalyzeButtonText isGenerating={isGenerating} />
-        ) : isAnalyzeCelStep ? (
-          <AnalyzeCelButtonText isGenerating={isGenerating} />
         ) : null,
-      [isNextAddingToElastic, isAnalyzeStep, isGenerating, isAnalyzeCelStep]
+      [isNextAddingToElastic, isAnalyzeStep, isGenerating]
     );
 
     return isLastStep ? (

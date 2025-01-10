@@ -23,13 +23,14 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import { type CelInputRequestBody } from '../../../../../../common';
-import { runCelGraph } from '../../../../../common/lib/api';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
-import type { State } from '../../state';
+import { getLangSmithOptions } from '../../../../../../../common/lib/lang_smith';
+import { type CelInputRequestBody } from '../../../../../../../../common';
+import { runCelGraph } from '../../../../../../../common/lib/api';
+import { useKibana } from '../../../../../../../common/hooks/use_kibana';
+import type { State } from '../../../../state';
 import * as i18n from './translations';
-import { useTelemetry } from '../../../telemetry';
+import { useTelemetry } from '../../../../../telemetry';
+import { getAuthDetails, reduceSpecComponents } from '../../../../../../../util/oas';
 
 export type OnComplete = (result: State['celInputResult']) => void;
 
@@ -47,7 +48,6 @@ export const useGeneration = ({
   const { http, notifications } = useKibana().services;
   const [error, setError] = useState<null | string>(null);
   const [isRequesting, setIsRequesting] = useState<boolean>(true);
-
   useEffect(() => {
     if (
       !isRequesting ||
@@ -64,10 +64,39 @@ export const useGeneration = ({
 
     (async () => {
       try {
-        const apiDefinition = integrationSettings.apiDefinition;
+        const oas = integrationSettings.apiSpec;
+        if (!oas) {
+          throw new Error('Missing OpenAPI spec');
+        }
+
+        if (!integrationSettings.celPath || !integrationSettings.celAuth) {
+          throw new Error('Missing path and auth selections');
+        }
+
+        const path = integrationSettings.celPath;
+        const auth = integrationSettings.celAuth;
+
+        const endpointOperation = oas?.operation(path, 'get');
+        if (!endpointOperation) {
+          throw new Error('Selected path is not found in OpenApi specification');
+        }
+
+        const authOptions = endpointOperation?.prepareSecurity();
+        const endpointAuth = getAuthDetails(integrationSettings.celAuth, authOptions);
+
+        const schemas = reduceSpecComponents(oas, path);
+
         const celRequest: CelInputRequestBody = {
-          dataStreamName: integrationSettings.dataStreamName ?? '',
-          apiDefinition: apiDefinition ?? '',
+          dataStreamTitle: integrationSettings.dataStreamTitle ?? '',
+          celDetails: {
+            path,
+            auth,
+            openApiDetails: {
+              operation: JSON.stringify(endpointOperation.schema),
+              auth: JSON.stringify(endpointAuth ?? {}),
+              schemas: JSON.stringify(schemas ?? {}),
+            },
+          },
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -86,9 +115,13 @@ export const useGeneration = ({
         });
 
         const result = {
+          authType: integrationSettings.celAuth,
           program: celGraphResult.results.program,
+          needsAuthConfigBlock: celGraphResult?.results.needsAuthConfigBlock,
           stateSettings: celGraphResult.results.stateSettings,
+          configFields: celGraphResult.results.configFields,
           redactVars: celGraphResult.results.redactVars,
+          url: oas.url(),
         };
 
         onComplete(result);
