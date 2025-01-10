@@ -1836,7 +1836,7 @@
     "source-map": "^0.7.4",
     "string-replace-loader": "^2.2.0",
     "style-loader": "^1.1.3",
-    "stylelint": "^14.9.1",
+    "stylelint": "^14.16.1",
     "stylelint-scss": "^4.3.0",
     "superagent": "^10.1.1",
     "supertest": "^7.0.0",
