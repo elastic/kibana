@@ -86,17 +86,21 @@ const PacksTableComponent = () => {
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (agentPolicyIds: any) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
     []
   );
 
   const renderQueries = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (queries: any) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
     []
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderActive = useCallback((_: any, item: any) => <ActiveStateSwitch item={item} />, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
@@ -122,6 +126,7 @@ const PacksTableComponent = () => {
   );
 
   const renderPlayAction = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
         defaultMessage: 'Run {packName}',

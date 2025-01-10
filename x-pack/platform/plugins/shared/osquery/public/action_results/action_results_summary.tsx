@@ -79,11 +79,14 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   }, [edges, error, expired]);
 
   const renderAgentIdColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (agentId: any) => <AgentIdToName agentId={agentId} />,
     []
   );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderRowsColumn = useCallback((rowsCount: any) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (_: any, item: any) => {
       if (item.fields['error.skipped']) {
         return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {

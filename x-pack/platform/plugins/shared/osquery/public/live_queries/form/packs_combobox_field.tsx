@@ -58,6 +58,7 @@ export const PacksComboBoxField = ({
   >([]);
 
   const handlePackChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newSelectedOptions: any) => {
       if (!newSelectedOptions.length) {
         setSelectedOptions(newSelectedOptions);
@@ -86,6 +87,7 @@ export const PacksComboBoxField = ({
   );
 
   const renderOption = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ({ value: option }: any) => (
       <EuiFlexGroup
         gutterSize="none"

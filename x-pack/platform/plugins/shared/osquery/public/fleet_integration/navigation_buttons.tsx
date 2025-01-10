@@ -40,6 +40,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   );
 
   const liveQueryClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
@@ -58,6 +59,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   });
 
   const packsClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();

@@ -157,6 +157,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   } | null>(null);
 
   const handleQueryFlyoutOpen = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => () => {
       setQueryDetailsFlyoutOpen(item);
     },
@@ -179,6 +180,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderQueryColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (query: string, item: any) => {
       const singleLine = removeMultilines(query);
       const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
@@ -201,6 +203,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     return <DocsColumnResults count={item?.docs ?? 0} isLive={isLive} />;
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderAgentsColumn = useCallback((item: any) => {
     if (!item.action_id) return;
 
@@ -214,16 +217,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => <PackViewInDiscoverAction item={item} />,
     []
   );
 
   const renderLensResultsAction = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => <PackViewInLensAction item={item} />,
     []
   );
 
   const getHandleErrorsToggle = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
         const itemIdToExpandedRowMapValues = { ...prevValue };
@@ -255,6 +261,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderToggleResultsAction = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) =>
       item?.action_id && data?.length && data.length > 1 ? (
         <EuiButtonIcon

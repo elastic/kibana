@@ -82,6 +82,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     [resetField]
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleToggle = useCallback((isOpen: any) => {
     const newState = isOpen ? 'open' : 'closed';
     setAdvancedContentState(newState);

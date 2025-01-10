@@ -139,6 +139,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const { ecsMappingArray: watchedEcsMapping } = watch();
   const handleChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newSelectedOptions: any) => {
       setSelected(newSelectedOptions);
       ECSField.onChange(newSelectedOptions[0]?.label ?? '');
@@ -148,6 +149,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   // TODO: Create own component for this.
   const renderOption = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (option: any, searchValue: any, contentClassName: any) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
@@ -386,6 +388,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
 
   const renderOsqueryOption = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (option: any, searchValue: any, contentClassName: any) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
@@ -411,6 +414,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   const handleKeyChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newSelectedOptions: any) => {
       setSelected(newSelectedOptions);
       resultField.onChange(
@@ -438,6 +442,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
 
   const onTypeChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newType: any) => {
       if (newType !== resultTypeField.value) {
         resultTypeField.onChange(newType);
@@ -502,7 +507,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   useEffect(() => {
     // @ts-expect-error hard to type to satisfy TS, but it represents proper types
-    setSelected((_: OsquerySchemaOption[]): OsquerySchemaOption[] | Array<{ label: string }> => {
+    setSelected((): OsquerySchemaOption[] | Array<{ label: string }> => {
       if (!resultField.value?.length) return [];
 
       // Static array values
@@ -571,7 +576,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent, deepEqual);
 
 export interface ECSMappingEditorFieldProps {
-  euiFieldProps?: EuiComboBoxProps<{}>;
+  euiFieldProps?: EuiComboBoxProps<unknown>;
 }
 
 interface ECSMappingEditorFormProps {
@@ -785,7 +790,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     try {
       ast = sqliteParser(oneLineQuery)?.statement?.[0];
-    } catch (e) {
+    } catch {
       return;
     }
 

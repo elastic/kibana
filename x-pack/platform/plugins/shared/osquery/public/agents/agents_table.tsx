@@ -173,6 +173,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderOption = useCallback((option: any, searchVal: any, contentClassName: any) => {
     const { label, value } = option;
 

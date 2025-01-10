@@ -73,7 +73,7 @@ export const configProtectedKeysValidator = (
   let configJSON;
   try {
     configJSON = JSON.parse(value as string);
-  } catch (e) {
+  } catch {
     return;
   }
 
@@ -109,7 +109,7 @@ export const packConfigFilesValidator = (
   let configJSON;
   try {
     configJSON = JSON.parse(value as string);
-  } catch (e) {
+  } catch {
     return;
   }
 
@@ -204,12 +204,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   );
 
   const handleConfigUpload = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newConfig: any) => {
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;
         // eslint-disable-next-line no-empty
-      } catch (e) {}
+      } catch {}
 
       if (newConfig) {
         setFieldValue(
@@ -240,7 +241,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         try {
           parsedConfig = JSON.parse(config);
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch {}
 
         if (isEmpty(parsedConfig)) {
           unset(draft, 'inputs[0].config');
@@ -281,7 +282,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
             setAgentlessPolicyIds(policyIdsWithNoAgent);
           }
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch {}
       };
 
       const fetchAgentPolicyDetails = async () => {
@@ -302,7 +303,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               setAgentPolicies(policiesWithoutAgent);
             }
             // eslint-disable-next-line no-empty
-          } catch (e) {}
+          } catch {}
         }
       };
 

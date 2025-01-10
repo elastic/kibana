@@ -41,6 +41,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       event.preventDefault();
 

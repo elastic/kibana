@@ -72,6 +72,7 @@ export const QueryPackSelectable = ({
   });
 
   const handleChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (type: any) => {
       setQueryType(type);
     },

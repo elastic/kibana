@@ -39,7 +39,7 @@ const checkAgentsLength = (agentsSelection: AgentSelection) => {
   });
 };
 
-const AgentsTableFieldComponent: React.FC<{}> = () => {
+const AgentsTableFieldComponent: React.FC<unknown> = () => {
   const {
     field: { onChange, value },
     fieldState: { error },

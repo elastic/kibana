@@ -35,6 +35,7 @@ const OsqueryAppEmptyStateComponent = () => {
   );
 
   const integrationClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();

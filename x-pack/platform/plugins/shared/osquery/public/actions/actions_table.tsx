@@ -66,6 +66,7 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
 
@@ -73,6 +74,7 @@ const ActionsTableComponent = () => {
     setPageSize(size);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
@@ -97,26 +99,31 @@ const ActionsTableComponent = () => {
   }, []);
 
   const renderAgentsColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>,
     []
   );
 
   const renderCreatedByColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
     []
   );
 
   const renderTimestampColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
     []
   );
 
   const renderActionsColumn = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
     []
   );
 
   const handlePlayClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => () => {
       const packId = item._source.pack_id;
 
@@ -158,6 +165,7 @@ const ActionsTableComponent = () => {
     [push]
   );
   const renderPlayButton = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
         defaultMessage: 'Run query',
@@ -180,6 +188,7 @@ const ActionsTableComponent = () => {
   const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
 
   const isPlayButtonAvailable = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => {
       if (item.fields.pack_id?.length) {
         return (
@@ -266,6 +275,7 @@ const ActionsTableComponent = () => {
   );
 
   const rowProps = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data: any) => ({
       'data-test-subj': `row-${data._source.action_id}`,
     }),

@@ -74,6 +74,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   });
 
   const handleChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newValue: any) => {
       if (newValue === SNAPSHOT_OPTION.value) {
         onSnapshotChange(true);
