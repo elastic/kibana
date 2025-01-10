@@ -13,6 +13,13 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
   router.post(
     {
       path: '/api/saved_objects_tagging/tags/create',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because the tags client internals leverages the SO client',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
