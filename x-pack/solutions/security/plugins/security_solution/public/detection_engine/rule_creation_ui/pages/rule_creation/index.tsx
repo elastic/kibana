@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiResizableContainer,
   EuiFlexItem,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -67,7 +66,7 @@ import {
   defaultSchedule,
   defaultThreatMatchSchedule,
   ruleStepsOrder,
-  getStepAboutDefaultValue,
+  stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import {
@@ -112,7 +111,6 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const [
     {
       loading: userInfoLoading,
@@ -166,8 +164,6 @@ const CreateRulePageComponent: React.FC = () => {
     [kibanaAbsoluteUrl]
   );
 
-  const aboutStepDefault = useMemo(() => getStepAboutDefaultValue(euiTheme), [euiTheme]);
-
   const {
     defineStepForm,
     defineStepData,
@@ -179,7 +175,7 @@ const CreateRulePageComponent: React.FC = () => {
     actionsStepData,
   } = useRuleForms({
     defineStepDefault,
-    aboutStepDefault,
+    aboutStepDefault: stepAboutDefaultValue,
     scheduleStepDefault: defaultSchedule,
     actionsStepDefault,
   });

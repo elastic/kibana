@@ -108,7 +108,7 @@ describe('helpers', () => {
     let mockThreat: Threat;
 
     beforeEach(() => {
-      mockThreat = mockAboutStepRule().threat[0];
+      mockThreat = mockAboutStepRule.threat[0];
     });
 
     test('filters out fields with empty tactics', () => {
@@ -727,7 +727,7 @@ describe('helpers', () => {
     let mockData: AboutStepRule;
 
     beforeEach(() => {
-      mockData = mockAboutStepRule();
+      mockData = mockAboutStepRule;
     });
 
     test('returns formatted object as AboutStepRuleJson', () => {
@@ -1182,7 +1182,7 @@ describe('helpers', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeEach(() => {
-      mockAbout = mockAboutStepRule();
+      mockAbout = mockAboutStepRule;
       mockDefine = mockDefineStepRule();
       mockSchedule = mockScheduleStepRule();
       mockActions = mockActionsStepRule();

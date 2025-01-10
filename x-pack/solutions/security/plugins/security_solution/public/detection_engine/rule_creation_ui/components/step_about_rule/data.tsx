@@ -29,25 +29,32 @@ const StyledEuiHealth = styled(EuiHealth)`
   line-height: inherit;
 `;
 
+export enum SeverityLevel {
+  low = 'low',
+  medium = 'medium',
+  high = 'high',
+  critical = 'critical',
+}
+
 export const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionItem[] = (
   euiTheme
 ) => {
   const palette = getRiskSeverityColors(euiTheme);
   return [
     {
-      value: 'low',
+      value: SeverityLevel.low,
       inputDisplay: <StyledEuiHealth color={palette.low}>{I18n.LOW}</StyledEuiHealth>,
     },
     {
-      value: 'medium',
+      value: SeverityLevel.medium,
       inputDisplay: <StyledEuiHealth color={palette.medium}>{I18n.MEDIUM}</StyledEuiHealth>,
     },
     {
-      value: 'high',
+      value: SeverityLevel.high,
       inputDisplay: <StyledEuiHealth color={palette.high}>{I18n.HIGH}</StyledEuiHealth>,
     },
     {
-      value: 'critical',
+      value: SeverityLevel.critical,
       inputDisplay: <StyledEuiHealth color={palette.critical}>{I18n.CRITICAL}</StyledEuiHealth>,
     },
   ];

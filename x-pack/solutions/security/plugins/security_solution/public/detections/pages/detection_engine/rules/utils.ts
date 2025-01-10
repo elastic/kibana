@@ -6,7 +6,6 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { DEFAULT_THREAT_MAPPING_VALUE } from '../../../../detection_engine/rule_creation/components/threat_match_mapping_edit';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
@@ -80,9 +79,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
 };
 
-export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStepRule = (
-  euiTheme
-) => ({
+export const stepAboutDefaultValue: AboutStepRule = {
   author: [],
   name: '',
   description: '',
@@ -90,7 +87,7 @@ export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStep
   isBuildingBlock: false,
   severity: {
     value: 'low',
-    mapping: fillEmptySeverityMappings([], euiTheme),
+    mapping: fillEmptySeverityMappings([]),
     isMappingChecked: false,
   },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
@@ -107,7 +104,7 @@ export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStep
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
   maxSignals: DEFAULT_MAX_SIGNALS,
-});
+};
 
 const DEFAULT_INTERVAL = '5m';
 const DEFAULT_FROM = '1m';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
@@ -18,9 +17,7 @@ export const threatDefault = [
   },
 ];
 
-export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStepRule = (
-  euiTheme
-) => ({
+export const stepAboutDefaultValue: AboutStepRule = {
   author: [],
   name: '',
   description: '',
@@ -28,7 +25,7 @@ export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStep
   isBuildingBlock: false,
   severity: {
     value: 'low',
-    mapping: fillEmptySeverityMappings([], euiTheme),
+    mapping: fillEmptySeverityMappings([]),
     isMappingChecked: false,
   },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
@@ -43,4 +40,4 @@ export const getStepAboutDefaultValue: (euiTheme: EuiThemeComputed) => AboutStep
   note: '',
   maxSignals: DEFAULT_MAX_SIGNALS,
   setup: '',
-});
+};

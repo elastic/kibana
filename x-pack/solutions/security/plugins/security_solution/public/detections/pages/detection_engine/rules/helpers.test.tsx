@@ -156,7 +156,7 @@ describe('rule helpers', () => {
         ruleNameOverride: 'message',
         severity: {
           value: 'low',
-          mapping: fillEmptySeverityMappings([], euiTheme),
+          mapping: fillEmptySeverityMappings([]),
           isMappingChecked: false,
         },
         tags: ['tag1', 'tag2'],
