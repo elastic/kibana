@@ -273,7 +273,7 @@ const createVagrantVm = async ({
 
   try {
     const vagrantUpResponse = (
-      await execa.command(`vagrant init hashicorp/precise32 && vagrant up`, {
+      await execa.command(`vagrant up`, {
         env: {
           VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
           VAGRANT_CWD,
@@ -359,10 +359,7 @@ export const createVagrantHostVmClient = (
   };
 
   const start = async () => {
-    const response = await execa.command(
-      `vagrant init hashicorp/precise32 && vagrant up`,
-      execaOptions
-    );
+    const response = await execa.command(`vagrant up`, execaOptions);
     log.verbose('vagrant up response:\n', response);
   };
 
