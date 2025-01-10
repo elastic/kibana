@@ -16,7 +16,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const kibanaAccessControlTags = ['access:generateReport'];
+  const kibanaAccessControlTags = ['generateReport'];
 
   const registerPublicPostGenerationEndpoint = () => {
     const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;
@@ -25,12 +25,14 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
         path,
         security: {
           authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
+            requiredPrivileges: kibanaAccessControlTags,
           },
         },
         validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'public' },
+        options: {
+          tags: kibanaAccessControlTags.map((controlAccessTag) => `access:${controlAccessTag}`),
+          access: 'public',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
