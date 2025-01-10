@@ -131,21 +131,16 @@ export const hasReadIndexPrivileges = async (args: {
   return warningMessage;
 };
 
-export const warnIfUnmatchedIndexPatterns = async (args: {
+export const checkUnmatchedIndexPatterns = async (args: {
   indexPatterns: string[];
   existingIndices: string[];
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<string | undefined> => {
-  const { indexPatterns, existingIndices, ruleExecutionLogger } = args;
-  const unmatchedIndexPatterns = indexPatterns.filter((index) => !existingIndices.includes(index));
   let warningMessage: string | undefined;
+  const { indexPatterns, existingIndices } = args;
+  const unmatchedIndexPatterns = indexPatterns.filter((index) => !existingIndices.includes(index));
 
   if (unmatchedIndexPatterns.length > 0) {
     warningMessage = `Indexes matching "${unmatchedIndexPatterns.join()}" were not found.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningMessage,
-    });
   }
 
   return warningMessage;

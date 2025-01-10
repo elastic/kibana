@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           const lastExecution = body?.execution_summary?.last_execution;
 
-          expect(lastExecution.message).to.eql(
+          expect(lastExecution.message).to.contain(
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["non-existent-index"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
 
