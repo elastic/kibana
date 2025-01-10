@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { ReviewCelStep } from './review_cel_step';
-export * from './is_step_ready';
+import type { IntegrationSettings } from '../../../../types';
+
+export const isCelInputStepReadyToComplete = (
+  integrationSettings: IntegrationSettings | undefined
+) => Boolean(integrationSettings?.dataStreamTitle && integrationSettings?.apiSpec);
