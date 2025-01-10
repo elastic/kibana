@@ -16,10 +16,9 @@ import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 interface Props {
   entity: InventoryEntity;
   setShowActions: Dispatch<SetStateAction<boolean>>;
-  isIndexPatternsLoading: boolean;
 }
 
-export const EntityActions = ({ entity, setShowActions, isIndexPatternsLoading }: Props) => {
+export const EntityActions = ({ entity, setShowActions }: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
   const actionButtonTestSubject = entity.entityDisplayName
     ? `inventoryEntityActionsButton-${entity.entityDisplayName}`
@@ -28,27 +27,23 @@ export const EntityActions = ({ entity, setShowActions, isIndexPatternsLoading }
   const { getDiscoverEntitiesRedirectUrl } = useDiscoverRedirect(entity);
   const discoverUrl = getDiscoverEntitiesRedirectUrl();
 
-  const actions: React.ReactElement[] = [];
+  const actions = [
+    <EuiContextMenuItem
+      data-test-subj="inventoryEntityActionExploreInDiscover"
+      key={`exploreInDiscover-${entity.entityDisplayName}`}
+      color="text"
+      icon="discoverApp"
+      href={discoverUrl}
+    >
+      {i18n.translate('xpack.inventory.entityActions.exploreInDiscoverLink', {
+        defaultMessage: 'Explore in Discover',
+      })}
+    </EuiContextMenuItem>,
+  ];
 
-  if (!discoverUrl && !isIndexPatternsLoading) {
+  if (!discoverUrl) {
     setShowActions(false);
     return null;
-  }
-
-  if (!isIndexPatternsLoading) {
-    actions.push(
-      <EuiContextMenuItem
-        data-test-subj="inventoryEntityActionExploreInDiscover"
-        key={`exploreInDiscover-${entity.entityDisplayName}`}
-        color="text"
-        icon="discoverApp"
-        href={discoverUrl}
-      >
-        {i18n.translate('xpack.inventory.entityActions.exploreInDiscoverLink', {
-          defaultMessage: 'Explore in Discover',
-        })}
-      </EuiContextMenuItem>
-    );
   }
 
   return (
@@ -66,7 +61,6 @@ export const EntityActions = ({ entity, setShowActions, isIndexPatternsLoading }
           iconType="boxesHorizontal"
           color="text"
           onClick={togglePopover}
-          isLoading={isIndexPatternsLoading}
         />
       }
       closePopover={closePopover}

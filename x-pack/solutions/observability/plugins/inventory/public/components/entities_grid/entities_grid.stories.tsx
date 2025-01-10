@@ -17,7 +17,6 @@ import { entitiesMock } from './mock/entities_mock';
 
 interface EntityGridStoriesArgs {
   entityType?: string;
-  isIndexPatternsLoading?: boolean;
 }
 
 const entityTypeOptions = ['host', 'container', 'service'];
