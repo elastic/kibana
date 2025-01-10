@@ -42,11 +42,13 @@ export function WelcomeMessageKnowledgeBase({
 
   const [pollKnowledgeBaseStatus, setPollKnowledgeBaseStatus] = useState(false);
 
-  // installing state when the inference endpoint is being created and the model is being deployed
-  const isInstalling =
-    knowledgeBase.isInstalling ||
-    (knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.ready === false);
-
+  const inferenceEndpointIsInstalling = knowledgeBase.isInstalling;
+  // inference created and model deployed
+  const modelIsReady = knowledgeBase.status.value?.ready;
+  const modelDeploymentInProgress =
+    !modelIsReady && knowledgeBase.status.value?.model_stats?.deployment_state === 'starting';
+  // installing state is when the inference endpoint is being created or it's already been created and the model is being deployed
+  const isInstalling = inferenceEndpointIsInstalling || modelDeploymentInProgress;
   // start polling kb status if inference endpoint is being created or has been created but model isn't ready
   useEffect(() => {
     if (isInstalling) {
@@ -56,19 +58,19 @@ export function WelcomeMessageKnowledgeBase({
 
   // When the knowledge base is installed and ready, show a success message for 3 seconds
   useEffect(() => {
-    if (previouslyNotInstalled && knowledgeBase.status.value?.ready) {
+    if (previouslyNotInstalled && modelIsReady) {
       setTimeoutTime(3000);
       reset();
       setShowHasBeenInstalled(true);
     }
-  }, [knowledgeBase.status.value?.ready, previouslyNotInstalled, reset]);
+  }, [modelIsReady, previouslyNotInstalled, reset]);
 
   // When the knowledge base is ready, stop polling for status
   useEffect(() => {
-    if (knowledgeBase.status.value?.ready) {
+    if (modelIsReady) {
       setPollKnowledgeBaseStatus(false);
     }
-  }, [pollKnowledgeBaseStatus, knowledgeBase.status.value?.ready]);
+  }, [pollKnowledgeBaseStatus, modelIsReady]);
 
   // poll for knowledge base status every 5 seconds
   useInterval(
@@ -84,7 +86,7 @@ export function WelcomeMessageKnowledgeBase({
     setIsPopoverOpen(false);
     await knowledgeBase.install();
   };
-  return knowledgeBase.status.value?.ready !== undefined ? (
+  return modelIsReady !== undefined ? (
     <>
       {isInstalling ? (
         <>
@@ -110,10 +112,13 @@ export function WelcomeMessageKnowledgeBase({
       ) : null}
 
       {
-        // already has a connector and kb is not installing
-        // and has an install error (timeout, etc) or inference endpoint has not been created
+        // already has a connector setup and kb is not currently installing
+        // and has an inference install error (timeout, etc) or model is not ready
+        // if the model is not ready and they are not installing this likely the user
+        // has a preconfigured connector and we prompt to install or there was a problem
+        // deploying the model
         connectors.connectors?.length && !isInstalling ? (
-          knowledgeBase.installError || !knowledgeBase.status.value.endpoint ? (
+          knowledgeBase.installError || !modelIsReady ? (
             <>
               <EuiText color="subdued" size="s">
                 {i18n.translate(
