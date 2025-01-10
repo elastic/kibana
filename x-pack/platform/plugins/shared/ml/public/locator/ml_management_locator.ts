@@ -6,7 +6,7 @@
  */
 
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { MlLocatorParams } from '../../common/types/locator';
@@ -33,7 +33,7 @@ export class MlManagementLocatorInternal {
   private _locator: LocatorPublic<SerializableRecord> | undefined;
   private _sectionId: string = 'ml';
 
-  constructor(share: SharePublicStart) {
+  constructor(share: SharePublicStart | SharePublicSetup) {
     this._locator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
   }
 
@@ -97,7 +97,7 @@ export class MlManagementLocatorInternal {
     return path;
   };
 
-  public readonly getUrl = async (params: MlLocatorParams, appId: string) => {
+  public readonly getUrl = async (params: MlLocatorParams, appId: string = 'anomaly_detection') => {
     const path = this.getPath(params);
     const url = await this._locator?.getUrl({
       sectionId: this._sectionId,
@@ -106,7 +106,10 @@ export class MlManagementLocatorInternal {
     return { path, url };
   };
 
-  public readonly getRedirectUrl = async (params: MlLocatorParams, appId: string) => {
+  public readonly getRedirectUrl = async (
+    params: MlLocatorParams,
+    appId: string = 'anomaly_detection'
+  ) => {
     const path = this.getPath(params);
     const url = await this._locator?.getRedirectUrl({
       sectionId: this._sectionId,
@@ -115,7 +118,7 @@ export class MlManagementLocatorInternal {
     return { path, url };
   };
 
-  public readonly navigate = async (path: string, appId: string) => {
+  public readonly navigate = async (path: string, appId: string = 'anomaly_detection') => {
     await this._locator?.navigate({
       sectionId: this._sectionId,
       appId: `${appId}/${path}`,

@@ -87,7 +87,7 @@ export const useCreateAndNavigateToMlLink = (
 
       // TODO: fix ts only interpreting it as MlUrlGenericState if pageState is passed
       // @ts-ignore
-      let url = await mlLocator.getUrl({ page: _page, pageState });
+      const url = await mlLocator.getUrl({ page: _page, pageState });
 
       await navigateToUrl(url);
     },
@@ -99,12 +99,11 @@ export const useCreateAndNavigateToMlLink = (
   return useCallback(() => redirectToMlPage(page), [redirectToMlPage, page]);
 };
 
-
 export const useCreateAndNavigateToManagementMlLink = (
   page: MlLocatorParams['page'],
-  appId: string,
+  appId: string
 ): (() => Promise<void>) => {
-  const MlManagementLocatorInternal = useMlManagementLocatorInternal();
+  const mlManagementLocatorInternal = useMlManagementLocatorInternal();
   const [globalState] = useUrlState('_g');
 
   const {
@@ -124,8 +123,8 @@ export const useCreateAndNavigateToManagementMlLink = (
             }
           : undefined;
 
-      const { path } = await MlManagementLocatorInternal.getUrl({ page: _page, pageState }, appId);
-      await MlManagementLocatorInternal.navigate(path, appId);
+      const { path } = await mlManagementLocatorInternal.getUrl({ page: _page, pageState }, appId);
+      await mlManagementLocatorInternal.navigate(path, appId);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [MlManagementLocatorInternal, navigateToUrl]

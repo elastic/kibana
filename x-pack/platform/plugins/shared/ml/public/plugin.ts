@@ -18,6 +18,7 @@ import { take } from 'rxjs';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -75,6 +76,7 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -126,6 +128,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
+  private managementLocator: undefined | typeof MlManagementLocatorInternal;
+
   private sharedMlServices: MlSharedServices | undefined;
 
   private isServerless: boolean = false;
@@ -167,7 +171,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(
     core: MlCoreSetup,
     pluginsSetup: MlSetupDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: typeof MlManagementLocatorInternal;
+    elasticModels?: ElasticModels;
+  } {
     this.sharedMlServices = getMlSharedServices(core.http);
     const deps = {
       // embeddable: pluginsSetup.embeddable,
@@ -229,6 +237,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+      // @ts-ignore - TODO: fix
+      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
     if (pluginsSetup.management) {
@@ -330,6 +340,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices.elasticModels,
     };
   }
@@ -339,12 +350,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     deps: MlStartDependencies
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: typeof MlManagementLocatorInternal;
     elasticModels?: ElasticModels;
     mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices?.elasticModels,
       mlApi: this.sharedMlServices?.mlApi,
       components: {
