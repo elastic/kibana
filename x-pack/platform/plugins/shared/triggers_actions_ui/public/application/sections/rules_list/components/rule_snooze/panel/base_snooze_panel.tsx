@@ -216,35 +216,30 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   const isActive = schedule.id && activeSnoozes.includes(schedule.id);
                   return (
                     <EuiFlexItem key={`snooze-${schedule.id}`}>
-                      <button
+                      <EuiButton
+                        size="s"
+                        color={isActive ? euiTheme.colors.textAccent : euiTheme.colors.textSubdued}
+                        onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                        iconType={isActive ? 'bellSlash' : 'calendar'}
+                        iconSide="left"
                         style={{
                           paddingLeft: '9px',
                           paddingRight: '9px',
-                          height: '36px',
-                          // Replicate euiPanel--accent vs euiPanel--subdued
-                          // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
-                          color: isActive
-                            ? euiTheme.colors.textAccent
-                            : euiTheme.colors.textSubdued,
                           backgroundColor: isActive
                             ? euiTheme.colors.backgroundLightAccent
                             : euiTheme.colors.body,
                         }}
-                        className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
-                        onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                        fullWidth={true}
                       >
                         <EuiFlexGroup alignItems="center">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type={isActive ? 'bellSlash' : 'calendar'} />
-                          </EuiFlexItem>
-                          <EuiFlexItem style={{ textAlign: 'left' }}>
                             {scheduleSummary(schedule as SnoozeSchedule)}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon type="arrowRight" />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      </button>
+                      </EuiButton>
                     </EuiFlexItem>
                   );
                 })}
