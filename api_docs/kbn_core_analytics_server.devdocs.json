@@ -1821,10 +1821,6 @@
                 "path": "src/core/packages/chrome/browser-internal/src/register_analytics_context_provider.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/elasticsearch/server-internal/src/register_analytics_context_provider.ts"
               },
@@ -1871,6 +1867,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "spaces",
