@@ -15,7 +15,7 @@
           "Props",
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,7 +63,7 @@
             "text": "EventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,7 +77,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,7 +92,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -114,7 +114,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -148,7 +148,7 @@
             "text": "AccessorConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,7 +168,7 @@
                 "text": "EventAnnotationConfig"
               }
             ],
-            "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +202,7 @@
             "text": "PointInTimeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -257,7 +257,7 @@
             "text": "QueryPointEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -278,7 +278,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -312,7 +312,7 @@
             "text": "RangeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,7 +333,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -351,7 +351,7 @@
         "tags": [],
         "label": "EventAnnotationServiceType",
         "description": [],
-        "path": "packages/kbn-event-annotation-components/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -373,7 +373,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -387,7 +387,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
             "signature": [
               "(title: string) => Promise<boolean>"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -419,7 +419,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -445,7 +445,7 @@
               },
               "[]; }>"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -459,7 +459,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,7 +474,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -489,7 +489,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -504,7 +504,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -522,7 +522,7 @@
             "signature": [
               "(ids: string[]) => Promise<void>"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -536,7 +536,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -562,7 +562,7 @@
               },
               ") => Promise<{ id: string; }>"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -582,7 +582,7 @@
                     "text": "EventAnnotationGroupConfig"
                   }
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -608,7 +608,7 @@
               },
               ", savedObjectId: string) => Promise<void>"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -628,7 +628,7 @@
                     "text": "EventAnnotationGroupConfig"
                   }
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -643,7 +643,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -677,7 +677,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -698,7 +698,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -732,7 +732,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -743,7 +743,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -754,7 +754,7 @@
                     "tags": [],
                     "label": "interval",
                     "description": [],
-                    "path": "packages/kbn-event-annotation-components/types.ts",
+                    "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -776,7 +776,7 @@
                       },
                       ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
                     ],
-                    "path": "packages/kbn-event-annotation-components/types.ts",
+                    "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -811,7 +811,7 @@
               },
               ">; }) => void; onCreateNew: () => void; }) => JSX.Element"
             ],
-            "path": "packages/kbn-event-annotation-components/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -822,7 +822,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "path": "packages/kbn-event-annotation-components/types.ts",
+                "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -836,7 +836,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "packages/kbn-event-annotation-components/types.ts",
+                    "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -866,7 +866,7 @@
                       },
                       ">; }) => void"
                     ],
-                    "path": "packages/kbn-event-annotation-components/types.ts",
+                    "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -877,7 +877,7 @@
                         "tags": [],
                         "label": "value",
                         "description": [],
-                        "path": "packages/kbn-event-annotation-components/types.ts",
+                        "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -888,7 +888,7 @@
                             "tags": [],
                             "label": "id",
                             "description": [],
-                            "path": "packages/kbn-event-annotation-components/types.ts",
+                            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           },
@@ -899,7 +899,7 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "path": "packages/kbn-event-annotation-components/types.ts",
+                            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           },
@@ -910,7 +910,7 @@
                             "tags": [],
                             "label": "fullName",
                             "description": [],
-                            "path": "packages/kbn-event-annotation-components/types.ts",
+                            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           },
@@ -939,7 +939,7 @@
                               },
                               ">"
                             ],
-                            "path": "packages/kbn-event-annotation-components/types.ts",
+                            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -958,7 +958,7 @@
                     "signature": [
                       "() => void"
                     ],
-                    "path": "packages/kbn-event-annotation-components/types.ts",
+                    "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [],
@@ -993,7 +993,7 @@
           },
           "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
-        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1005,7 +1005,7 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1017,7 +1017,7 @@
         "tags": [],
         "label": "defaultAnnotationLabel",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1032,7 +1032,7 @@
         "signature": [
           "\"#F04E981A\""
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1047,7 +1047,7 @@
         "signature": [
           "\"event-annotations\""
         ],
-        "path": "packages/kbn-event-annotation-components/constants.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
