@@ -123,7 +123,7 @@ export function FieldControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      setVariableName(e.target.value);
+      setVariableName(String(e.target.value).replace('?', ''));
     },
     []
   );
