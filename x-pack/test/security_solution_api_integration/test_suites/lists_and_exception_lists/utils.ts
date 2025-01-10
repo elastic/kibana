@@ -663,7 +663,7 @@ export const createListItemBypassingChecks = async ({
 };
 
 /**
- * helper function that set up items and lists policy and index template
+ * Creates policies and index templates for both the Lists and List Items indices.
  */
 const configurePolicyAndIndexTemplate = async (es: Client) => {
   await setPolicy(es, '.lists-default', testPolicy);
