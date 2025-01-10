@@ -8,7 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
@@ -136,6 +136,13 @@ export const useRowHeight = ({
     },
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
+
+  // it's necessary to set correct row height value to input when only URL changes, but onChangeRowHeightLines does not fire
+  useEffect(() => {
+    if (rowHeight === RowHeightMode.custom) {
+      setLineCountInput(rowHeightState && rowHeightState > 0 ? rowHeightState : configRowHeight);
+    }
+  }, [rowHeightState, configRowHeight, rowHeight]);
 
   return {
     rowHeight,
