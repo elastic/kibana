@@ -35,13 +35,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
@@ -105,13 +99,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsExtensions",
-                "text": "SavedObjectsExtensions"
-              },
+              "SavedObjectsExtensions",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
@@ -129,13 +117,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsEncryptionExtension",
-                "text": "ISavedObjectsEncryptionExtension"
-              },
+              "ISavedObjectsEncryptionExtension",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
@@ -153,13 +135,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsSecurityExtension",
-                "text": "ISavedObjectsSecurityExtension"
-              },
+              "ISavedObjectsSecurityExtension",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
@@ -177,13 +153,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsSpacesExtension",
-                "text": "ISavedObjectsSpacesExtension"
-              },
+              "ISavedObjectsSpacesExtension",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
@@ -215,13 +185,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              },
+              "ISavedObjectsRepository",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",

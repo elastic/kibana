@@ -8,7 +8,8 @@
     "public/**/*",
     "../../../../../typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "e2e/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -37,13 +38,14 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/discover-plugin",
-    "@kbn/utility-types",
     "@kbn/spaces-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/logs-shared-plugin",
+    "@kbn/tooling-log"
   ],
   "exclude": [
     "target/**/*"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { FindActionResult } from '@kbn/actions-plugin/server';
-import { isSupportedConnectorType } from '../../../common/connectors';
+import { isSupportedConnector } from '@kbn/inference-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
@@ -37,8 +37,7 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
 
     return connectors.filter(
       (connector) =>
-        availableTypes.includes(connector.actionTypeId) &&
-        isSupportedConnectorType(connector.actionTypeId)
+        availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector)
     );
   },
 });

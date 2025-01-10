@@ -11,9 +11,10 @@ import {
   type MetricsAPITimerange,
   isBasicMetricAgg,
 } from '@kbn/metrics-data-access-plugin/common';
-import { ESSearchClient } from '../../../lib/metrics/types';
+import type { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
-import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
+import type { InfraSnapshotRequestOptions } from './get_metrics_aggregations';
+import { getMetricsAggregations } from './get_metrics_aggregations';
 import { getDatasetForField } from './get_dataset_for_field';
 
 const DEFAULT_LOOKBACK_SIZE = 5;

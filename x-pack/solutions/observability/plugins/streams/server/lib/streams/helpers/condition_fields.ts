@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import { Condition, FilterCondition } from '../../../../common/types';
-import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
-
-export function isComplete(condition: Condition): boolean {
-  if (isFilterCondition(condition)) {
-    return condition.field !== undefined && condition.field !== '';
-  }
-  if (isAndCondition(condition)) {
-    return condition.and.every(isComplete);
-  }
-  if (isOrCondition(condition)) {
-    return condition.or.every(isComplete);
-  }
-  return false;
-}
+import {
+  Condition,
+  FilterCondition,
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
+} from '@kbn/streams-schema';
 
 export function getFields(
   condition: Condition

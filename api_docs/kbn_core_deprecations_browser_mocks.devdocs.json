@@ -35,13 +35,7 @@
                 "text": "PublicMethodsOf"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreDeprecationsBrowserInternalPluginApi",
-                "section": "def-public.DeprecationsService",
-                "text": "DeprecationsService"
-              },
+              "DeprecationsService",
               ">>"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
@@ -75,13 +69,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-public.DeprecationsServiceStart",
-                "text": "DeprecationsServiceStart"
-              },
+              "DeprecationsServiceStart",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
