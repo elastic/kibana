@@ -42,7 +42,7 @@ export const getDefaultFormData = ({
   ruleTypeId: RuleFormData['ruleTypeId'];
   name: RuleFormData['name'];
   consumer: RuleFormData['consumer'];
-  actions: RuleFormData['actions'];
+  actions?: RuleFormData['actions'];
   schedule?: RuleFormData['schedule'];
 }) => {
   return {
@@ -54,7 +54,7 @@ export const getDefaultFormData = ({
     consumer,
     ruleTypeId,
     name,
-    actions,
+    actions: actions ?? [],
     alertDelay: { active: 1 },
   };
 };
@@ -74,3 +74,9 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 
 export const CREATE_RULE_ROUTE = '/rule/create/:ruleTypeId' as const;
 export const EDIT_RULE_ROUTE = '/rule/edit/:id' as const;
+
+export enum RuleFormStepId {
+  DEFINITION = 'rule-definition',
+  ACTIONS = 'rule-actions',
+  DETAILS = 'rule-details',
+}
