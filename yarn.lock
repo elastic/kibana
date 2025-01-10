@@ -5208,7 +5208,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server-mocks@link:packages/core/user-settings/core-user-settings-server-mocks":
+"@kbn/core-user-settings-server-mocks@link:src/core/packages/user-settings/server-mocks":
   version "0.0.0"
   uid ""
 
