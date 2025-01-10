@@ -6,7 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSkeletonText, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSkeletonText,
+  EuiText,
+  EuiCodeBlock,
+} from '@elastic/eui';
 
 import type { ConnectorTypes } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
@@ -15,7 +22,7 @@ import { getConnectorIcon } from '../utils';
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
   title: string;
-  listItems: Array<{ title: string; description: React.ReactNode }>;
+  listItems: Array<{ title: string; description: React.ReactNode; displayAsCodeBlock?: boolean }>;
   isLoading: boolean;
 }
 
@@ -47,12 +54,28 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
         </EuiFlexGroup>
         <EuiFlexItem data-test-subj="connector-card-details">
           {listItems.length > 0 &&
-            listItems.map((item, i) => (
-              <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
-                <strong>{`${item.title}: `}</strong>
-                {`${item.description}`}
-              </EuiText>
-            ))}
+            listItems.map((item, i) =>
+              item.displayAsCodeBlock ? (
+                <>
+                  <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
+                    <strong>{`${item.title}:`}</strong>
+                  </EuiText>
+                  <EuiCodeBlock
+                    data-test-subj="card-list-code-block"
+                    language="json"
+                    fontSize="s"
+                    paddingSize="s"
+                  >
+                    {`${item.description}`}
+                  </EuiCodeBlock>
+                </>
+              ) : (
+                <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
+                  <strong>{`${item.title}: `}</strong>
+                  {`${item.description}`}
+                </EuiText>
+              )
+            )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiSkeletonText>

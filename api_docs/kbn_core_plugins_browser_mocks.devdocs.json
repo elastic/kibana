@@ -85,13 +85,7 @@
                 "text": "BuildFlavor"
               },
               " | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-plugins-browser",
-                "scope": "public",
-                "docId": "kibKbnCorePluginsBrowserPluginApi",
-                "section": "def-public.PluginInitializerContext",
-                "text": "PluginInitializerContext"
-              },
+              "PluginInitializerContext",
               "<object>"
             ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",

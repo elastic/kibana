@@ -7,13 +7,13 @@
 
 import { first } from 'lodash';
 import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
-import {
+import type {
   ProcessListAPIChartRequest,
   ProcessListAPIChartQueryAggregation,
   ProcessListAPIRow,
   ProcessListAPIChartResponse,
 } from '../../../common/http_api';
-import { ESSearchClient } from '../metrics/types';
+import type { ESSearchClient } from '../metrics/types';
 
 export const getProcessListChart = async (
   search: ESSearchClient,

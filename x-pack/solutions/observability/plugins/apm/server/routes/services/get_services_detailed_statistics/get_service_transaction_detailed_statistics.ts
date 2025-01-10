@@ -7,15 +7,15 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
-import { RollupInterval } from '../../../../common/rollup';
+import type { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,

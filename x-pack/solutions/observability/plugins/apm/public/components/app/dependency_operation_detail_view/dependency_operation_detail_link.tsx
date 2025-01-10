@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 
 type Query = TypeOf<ApmRoutes, '/dependencies/operation'>['query'];
 

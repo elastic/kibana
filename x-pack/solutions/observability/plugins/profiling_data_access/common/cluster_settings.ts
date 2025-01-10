@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartialSetupState, ProfilingSetupOptions } from './setup';
+import type { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export const MAX_BUCKETS = 150000;
 

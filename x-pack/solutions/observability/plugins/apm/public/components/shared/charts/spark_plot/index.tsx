@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { PartialTheme } from '@elastic/charts';
 import {
   AreaSeries,
   BarSeries,
   Chart,
   CurveType,
   LineSeries,
-  PartialTheme,
   ScaleType,
   Settings,
   Tooltip,
@@ -20,7 +20,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from
 import React from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Coordinate } from '../../../../../typings/timeseries';
+import type { Coordinate } from '../../../../../typings/timeseries';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 

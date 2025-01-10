@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { CheckAll } from './check_all';
 import { CheckStatus } from './check_status';
@@ -30,10 +30,12 @@ import { getSummaryTableMarkdownHeader, getSummaryTableMarkdownRow } from '../..
 import { ERROR, ERRORS, PATTERN } from './translations';
 import { INDEX } from '../../translations';
 
-const StyledActionsContainerFlexItem = styled(EuiFlexItem)`
-  margin-top: auto;
-  padding-bottom: 3px;
-`;
+const styles = {
+  actionsContainer: css({
+    marginTop: 'auto',
+    paddingBottom: '3px',
+  }),
+};
 
 export const getResultsSortedByDocsCount = (
   results: Record<string, DataQualityCheckResult> | undefined
@@ -218,13 +220,13 @@ const SummaryActionsComponent: React.FC = () => {
           />
         </EuiFlexItem>
 
-        <StyledActionsContainerFlexItem grow={false}>
+        <EuiFlexItem css={styles.actionsContainer} grow={false}>
           <Actions
             showAddToNewCaseAction={true}
             showCopyToClipboardAction={true}
             markdownComment={markdownComment}
           />
-        </StyledActionsContainerFlexItem>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

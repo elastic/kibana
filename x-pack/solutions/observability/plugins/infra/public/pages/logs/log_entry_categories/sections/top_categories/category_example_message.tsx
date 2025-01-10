@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
+import type { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryColumn,
   LogEntryContextMenu,
@@ -23,9 +23,9 @@ import {
   getFriendlyNameForPartitionId,
   partitionField,
 } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
+import type { TimeRange } from '../../../../../../common/time';
 import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
-import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
@@ -115,8 +115,8 @@ export const CategoryExampleMessage: React.FunctionComponent<{
             onClose={closeMenu}
             items={[
               {
-                label: i18n.translate('xpack.infra.logs.categoryExample.viewInStreamText', {
-                  defaultMessage: 'View in stream',
+                label: i18n.translate('xpack.infra.logs.categoryExample.viewInDiscoverText', {
+                  defaultMessage: 'View in Discover',
                 }),
                 onClick: viewInStreamLinkProps.onClick!,
                 href: viewInStreamLinkProps.href,

@@ -12,12 +12,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '@kbn/io-ts-utils';
-import {
-  InfraMetadataFeature,
-  InfraMetadataRequestRT,
-  InfraMetadataRT,
-} from '../../../common/http_api/metadata_api';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraMetadataFeature } from '../../../common/http_api/metadata_api';
+import { InfraMetadataRequestRT, InfraMetadataRT } from '../../../common/http_api/metadata_api';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';

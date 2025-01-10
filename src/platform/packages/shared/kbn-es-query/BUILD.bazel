@@ -24,7 +24,7 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//packages/kbn-i18n",
+  "//src/platform/packages/shared/kbn-i18n",
   "@npm//@elastic/elasticsearch",
   "@npm//load-json-file",
   "@npm//lodash",

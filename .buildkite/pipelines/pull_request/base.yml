@@ -136,7 +136,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       preemptible: true
       diskSizeGb: 75
     key: build_api_docs

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { merge } from 'lodash';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
@@ -17,7 +17,8 @@ import {
   INDEX,
 } from '../../../../common/es_fields/apm';
 import { getApmIndexPatterns } from './get_indices';
-import { getTypedSearch, TypedSearch } from '../../../utils/create_typed_es_client';
+import type { TypedSearch } from '../../../utils/create_typed_es_client';
+import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export interface ApmEvent {
   legacy?: boolean;

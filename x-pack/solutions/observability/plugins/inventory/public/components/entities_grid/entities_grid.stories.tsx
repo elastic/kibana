@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react';
+import type { EuiDataGridSorting } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { Meta, Story } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';

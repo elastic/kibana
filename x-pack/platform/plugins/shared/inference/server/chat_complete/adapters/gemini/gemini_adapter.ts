@@ -196,11 +196,21 @@ function messageToGeminiMapper() {
       case MessageRole.User:
         const userMessage: GeminiMessage = {
           role: 'user',
-          parts: [
-            {
-              text: message.content,
-            },
-          ],
+          parts: (typeof message.content === 'string' ? [message.content] : message.content).map(
+            (contentPart) => {
+              if (typeof contentPart === 'string') {
+                return { text: contentPart } satisfies Gemini.TextPart;
+              } else if (contentPart.type === 'text') {
+                return { text: contentPart.text } satisfies Gemini.TextPart;
+              }
+              return {
+                inlineData: {
+                  data: contentPart.source.data,
+                  mimeType: contentPart.source.mimeType,
+                },
+              } satisfies Gemini.InlineDataPart;
+            }
+          ),
         };
         return userMessage;
 

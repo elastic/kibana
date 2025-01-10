@@ -113,9 +113,21 @@ const sortingOptionsMap: {
   [key: string]: (direction?: estypes.SortOrder) => estypes.SortCombinations[];
 } = {
   'elastic_rule.title': sortingOptions.name,
-  'elastic_rule.severity': sortingOptions.severity,
-  'elastic_rule.prebuilt_rule_id': sortingOptions.matchedPrebuiltRule,
-  translation_result: sortingOptions.status,
+  'elastic_rule.severity': (direction?: estypes.SortOrder) => [
+    ...sortingOptions.severity(direction),
+    ...sortingOptions.status('desc'),
+    ...sortingOptions.matchedPrebuiltRule('desc'),
+  ],
+  'elastic_rule.prebuilt_rule_id': (direction?: estypes.SortOrder) => [
+    ...sortingOptions.matchedPrebuiltRule(direction),
+    ...sortingOptions.status('desc'),
+    ...sortingOptions.severity('desc'),
+  ],
+  translation_result: (direction?: estypes.SortOrder) => [
+    ...sortingOptions.status(direction),
+    ...sortingOptions.matchedPrebuiltRule('desc'),
+    ...sortingOptions.severity('desc'),
+  ],
   updated_at: sortingOptions.updated,
 };
 

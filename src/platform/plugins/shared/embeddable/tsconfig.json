@@ -12,7 +12,6 @@
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/i18n",
-    "@kbn/std",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
