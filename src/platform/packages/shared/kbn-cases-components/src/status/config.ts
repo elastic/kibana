@@ -17,7 +17,7 @@ export const getStatusConfiguration = () => ({
     icon: 'folderOpen' as const,
   },
   [CaseStatuses['in-progress']]: {
-    color: 'warning',
+    color: 'hollow',
     label: i18n.IN_PROGRESS,
     icon: 'folderExclamation' as const,
   },
