@@ -71,12 +71,7 @@ export const RulePage = (props: RulePageProps) => {
     }
   }, [touched, onCancel]);
 
-  const { isConnectorsScreenVisible, isShowRequestScreenVisible, setIsConnectorsScreenVisible } =
-    useRuleFormScreenContext();
-  const onCloseConnectorsModal = useCallback(
-    () => setIsConnectorsScreenVisible(false),
-    [setIsConnectorsScreenVisible]
-  );
+  const { isConnectorsScreenVisible, isShowRequestScreenVisible } = useRuleFormScreenContext();
 
   const hasActionsDisabled = useMemo(() => {
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
@@ -159,7 +154,7 @@ export const RulePage = (props: RulePageProps) => {
           <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
         </EuiConfirmModal>
       )}
-      {isConnectorsScreenVisible && <RuleActionsConnectorsModal onClose={onCloseConnectorsModal} />}
+      {isConnectorsScreenVisible && <RuleActionsConnectorsModal />}
       {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
     </>
   );

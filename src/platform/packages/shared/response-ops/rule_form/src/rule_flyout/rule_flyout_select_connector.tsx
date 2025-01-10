@@ -49,7 +49,7 @@ export const RuleFlyoutSelectConnector = ({ onClose }: RuleFlyoutSelectConnector
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <RuleActionsConnectorsBody onClose={onClose} />
+        <RuleActionsConnectorsBody onSelectConnector={onClose} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty

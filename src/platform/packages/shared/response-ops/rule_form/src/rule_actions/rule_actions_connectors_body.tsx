@@ -49,12 +49,12 @@ import { getDefaultParams } from '../utils';
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
 export interface RuleActionsConnectorsBodyProps {
-  onClose: () => void;
+  onSelectConnector: (connector?: ActionConnector) => void;
   responsiveOverflow?: 'auto' | 'hidden';
 }
 
 export const RuleActionsConnectorsBody = ({
-  onClose,
+  onSelectConnector,
   responsiveOverflow = 'auto',
 }: RuleActionsConnectorsBodyProps) => {
   const [searchValue, setSearchValue] = useState<string>('');
@@ -75,7 +75,7 @@ export const RuleActionsConnectorsBody = ({
 
   const dispatch = useRuleFormDispatch();
 
-  const onSelectConnector = useCallback(
+  const onSelectConnectorInternal = useCallback(
     async (connector: ActionConnector) => {
       const { id, actionTypeId } = connector;
       const uuid = uuidv4();
@@ -113,9 +113,10 @@ export const RuleActionsConnectorsBody = ({
         },
       });
 
-      onClose();
+      // Send connector to onSelectConnector mainly for testing purposes, dispatch handles form data updates
+      onSelectConnector(connector);
     },
-    [dispatch, onClose, selectedRuleType, actionTypeRegistry]
+    [dispatch, onSelectConnector, selectedRuleType, actionTypeRegistry]
   );
 
   const preconfiguredConnectors = useMemo(() => {
@@ -385,7 +386,7 @@ export const RuleActionsConnectorsBody = ({
                   </EuiText>
                 </>
               }
-              onClick={() => onSelectConnector(connector)}
+              onClick={() => onSelectConnectorInternal(connector)}
             />
           );
 
@@ -408,7 +409,7 @@ export const RuleActionsConnectorsBody = ({
     filteredConnectors,
     actionTypeRegistry,
     connectorTypes,
-    onSelectConnector,
+    onSelectConnectorInternal,
     onClearFilters,
   ]);
 
