@@ -90,7 +90,7 @@ export const extractRuleEsqlQuery = (
 const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterArray => {
   if (filters && filters.length > 0) {
     return (filters as Filter[]).map((filter) => {
-      if (filter.meta.alias == null) {
+      if (filter?.meta.alias == null) {
         return { ...filter, meta: { ...filter.meta, alias: undefined } };
       }
       return filter;
