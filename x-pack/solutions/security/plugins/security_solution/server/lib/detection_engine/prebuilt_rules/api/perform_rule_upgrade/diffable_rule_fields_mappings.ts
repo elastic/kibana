@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { get, has } from 'lodash';
+import type { RuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 import type {
-  RuleSchedule,
   DataSourceIndexPatterns,
   DataSourceDataView,
   InlineKqlQuery,
