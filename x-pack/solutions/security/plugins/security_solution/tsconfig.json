@@ -232,6 +232,7 @@
     "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
+    "@kbn/charts-theme",
     "@kbn/product-doc-base-plugin"
   ]
 }
