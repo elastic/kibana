@@ -10,14 +10,20 @@ echo '--- Lint: stylelint'
 node scripts/stylelint
 echo "stylelint ✅"
 
+echo '--- Debug: clean caches'
+apt-get clean
+rm -rf /var/cache/*
+rm -rf ~/.cache/*
+rm -rf /tmp/*
+
 echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache --fix
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 16 node scripts/eslint --no-cache --fix
 else
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 16 node scripts/eslint --no-cache
 fi
 
 eslint_exit=$?
