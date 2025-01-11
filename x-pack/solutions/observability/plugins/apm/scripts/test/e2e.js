@@ -60,7 +60,7 @@ if (cypressCliArgs.grep) {
 
 const spawnArgs = [
   `${REPO_ROOT}/scripts/${ftrScript}`,
-  `--config=../../../../test/apm_cypress/cli_config.ts`,
+  `--config=../../../../../test/apm_cypress/cli_config.ts`,
   `--kibana-install-dir=${argv.kibanaInstallDir}`,
   ...(argv.bail ? [`--bail`] : []),
 ];
