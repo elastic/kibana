@@ -39,7 +39,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
   useEsqlAvailability: jest.fn().mockReturnValue({
     isEsqlAdvancedSettingEnabled: true,
-    isTimelineEsqlEnabledByFeatureFlag: true,
   }),
 }));
 
@@ -73,22 +72,6 @@ describe('Timeline', () => {
       it('should not show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isEsqlAdvancedSettingEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: true,
-        });
-        render(
-          <TestProviders>
-            <TabsContent {...defaultProps} />
-          </TestProviders>
-        );
-
-        await waitFor(() => {
-          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
-        });
-      });
-      it('should not show the esql tab when the esql is disabled by feature flag', async () => {
-        useEsqlAvailabilityMock.mockReturnValue({
-          isEsqlAdvancedSettingEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: false,
         });
         render(
           <TestProviders>
@@ -113,7 +96,6 @@ describe('Timeline', () => {
       it('should show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isESQLTabInTimelineEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: true,
         });
 
         render(
@@ -124,23 +106,6 @@ describe('Timeline', () => {
 
         await waitFor(() => {
           expect(screen.queryByTestId(esqlTabSubj)).toBeVisible();
-        });
-      });
-
-      it('should not show the esql tab when the esql is disabled by the feature flag', async () => {
-        useEsqlAvailabilityMock.mockReturnValue({
-          isESQLTabInTimelineEnabled: true,
-          isTimelineEsqlEnabledByFeatureFlag: false,
-        });
-
-        render(
-          <TestProviders store={mockStore}>
-            <TabsContent {...defaultProps} />
-          </TestProviders>
-        );
-
-        await waitFor(() => {
-          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
         });
       });
     });
