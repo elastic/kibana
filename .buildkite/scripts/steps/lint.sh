@@ -11,10 +11,10 @@ node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Debug: clean caches'
-apt-get clean
-rm -rf /var/cache/*
-rm -rf ~/.cache/*
-rm -rf /tmp/*
+sudo apt-get clean
+sudo rm -rf /var/cache/*
+sudo rm -rf ~/.cache/*
+sudo rm -rf /tmp/*
 
 echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
