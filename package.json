@@ -117,7 +117,7 @@
     "@elastic/ecs": "^8.11.5",
     "@elastic/elasticsearch": "^8.16.0",
     "@elastic/ems-client": "8.6.2",
-    "@elastic/eui": "98.2.1-borealis.2",
+    "@elastic/eui": "./elastic-eui-98.2.1-borealis.3.tgz",
     "@elastic/eui-theme-borealis": "0.0.7",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "^1.2.3",
