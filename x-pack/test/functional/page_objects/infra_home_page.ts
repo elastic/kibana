@@ -420,7 +420,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async closeAlertFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
-      await testSubjects.click('confirmModalConfirmButton');
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
     },
 
     async waitForTourStep(tourStep: string) {
