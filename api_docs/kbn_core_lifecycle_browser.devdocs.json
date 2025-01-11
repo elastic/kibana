@@ -347,13 +347,7 @@
               "{@link ChromeStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,

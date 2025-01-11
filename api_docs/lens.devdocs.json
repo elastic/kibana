@@ -16476,7 +16476,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\""
+          "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -23553,7 +23553,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"left\" | \"auto\""
+          "\"right\" | \"bottom\" | \"auto\" | \"left\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
         "deprecated": false,

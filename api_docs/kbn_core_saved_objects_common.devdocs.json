@@ -1256,22 +1256,6 @@
             "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
@@ -2131,6 +2115,46 @@
             "path": "src/platform/plugins/shared/expressions/common/executor/executor.ts"
           },
           {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
           },
@@ -2149,46 +2173,6 @@
           {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "uiActionsEnhanced",

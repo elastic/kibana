@@ -1504,21 +1504,9 @@
         ],
         "signature": [
           "(extraCrumbs: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeBreadcrumb",
-            "text": "ChromeBreadcrumb"
-          },
+          "ChromeBreadcrumb",
           "[], options?: { app?: { id: string; label: string; } | undefined; breadcrumbsAppendExtension?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeBreadcrumbsAppendExtension",
-            "text": "ChromeBreadcrumbsAppendExtension"
-          },
+          "ChromeBreadcrumbsAppendExtension",
           " | undefined; serverless?: ",
           {
             "pluginId": "serverless",
@@ -1541,13 +1529,7 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -1588,13 +1570,7 @@
                 "label": "breadcrumbsAppendExtension",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                    "text": "ChromeBreadcrumbsAppendExtension"
-                  },
+                  "ChromeBreadcrumbsAppendExtension",
                   " | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",

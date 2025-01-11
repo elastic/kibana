@@ -4246,14 +4246,6 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
@@ -4272,6 +4264,14 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/search_strategy/search_strategy.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
                 "plugin": "cases",
