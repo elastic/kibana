@@ -34,7 +34,6 @@ import {
 } from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 
@@ -62,8 +61,6 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
   const { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const { setDiscoverAppState } = useDiscoverState();
-
-  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
@@ -245,10 +242,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
     : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
   const isDisabled = !isTimelineBottomBarVisible;
 
-  if (
-    (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') &&
-    isEsqlTabInTimelineDisabled
-  ) {
+  if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
     return null;
   }
 
