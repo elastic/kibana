@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { DARK_THEME } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
@@ -132,8 +132,7 @@ export const MetricItem = ({
                 });
               }
             }}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={DARK_THEME}
+            baseTheme={useElasticChartsTheme()}
             locale={i18n.getLocale()}
           />
           <Metric
