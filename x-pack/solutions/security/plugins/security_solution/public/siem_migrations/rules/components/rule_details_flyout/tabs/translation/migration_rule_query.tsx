@@ -31,13 +31,13 @@ interface MigrationRuleQueryProps {
   title: string;
   ruleName?: string;
   query: string;
-  isOriginalQuery?: boolean;
+  queryLanguage: string;
   canEdit?: boolean;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
-  ({ title, ruleName, query, canEdit, isOriginalQuery, onTranslationUpdate }) => {
+  ({ title, ruleName, query, canEdit, queryLanguage, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
 
     const formDefaultValue: RuleTranslationSchema = useMemo(() => {
@@ -70,6 +70,13 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
         setEditMode(false);
       }
     }, [form, onTranslationUpdate]);
+
+    const codeBlockLanguage = useMemo(() => {
+      if (queryLanguage === 'spl') {
+        return 'splunk-spl';
+      }
+      return 'sql';
+    }, [queryLanguage]);
 
     const headerComponent = useMemo(() => {
       return (
@@ -109,16 +116,12 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
             <h3>{ruleName}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiCodeBlock
-            language={isOriginalQuery ? 'splunk-spl' : 'sql'}
-            fontSize="s"
-            paddingSize="s"
-          >
+          <EuiCodeBlock language={codeBlockLanguage} fontSize="s" paddingSize="s">
             {query}
           </EuiCodeBlock>
         </>
       );
-    }, [canEdit, editMode, isOriginalQuery, onEdit, query, ruleName]);
+    }, [editMode, canEdit, onEdit, ruleName, codeBlockLanguage, query]);
 
     const editQueryComponent = useMemo(() => {
       if (!editMode) {
