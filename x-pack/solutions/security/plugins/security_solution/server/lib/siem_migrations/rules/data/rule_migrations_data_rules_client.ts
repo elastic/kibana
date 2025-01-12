@@ -68,6 +68,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
     const createdAt = new Date().toISOString();
@@ -81,8 +82,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
               ...ruleMigration,
               '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
-              created_by: this.username,
-              updated_by: this.username,
+              created_by: profileId,
+              updated_by: profileId,
               updated_at: createdAt,
             },
           ]),
@@ -97,6 +98,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Updates an array of rule migrations to be processed */
   async update(ruleMigrations: UpdateRuleMigrationData[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let ruleMigrationsSlice: UpdateRuleMigrationData[];
     const updatedAt = new Date().toISOString();
@@ -119,7 +121,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
                   elastic_rule: elasticRule,
                   translation_result:
                     translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
-                  updated_by: this.username,
+                  updated_by: profileId,
                   updated_at: updatedAt,
                 },
               },
@@ -178,6 +180,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
 
     const storedRuleMigrations = await this.esClient
@@ -196,7 +199,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         operations: storedRuleMigrations.flatMap(({ id, status }) => [
           { update: { _id: id, _index: index } },
           {
-            doc: { status, updated_by: this.username, updated_at: new Date().toISOString() },
+            doc: { status, updated_by: profileId, updated_at: new Date().toISOString() },
           },
         ]),
       })
@@ -213,10 +216,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
   async saveCompleted({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.COMPLETED,
-      updated_by: this.username,
+      updated_by: profileId,
       updated_at: new Date().toISOString(),
     };
     await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
@@ -228,10 +232,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Updates one rule migration with the provided data and sets the status to `failed` */
   async saveError({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.FAILED,
-      updated_by: this.username,
+      updated_by: profileId,
       updated_at: new Date().toISOString(),
     };
     await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
