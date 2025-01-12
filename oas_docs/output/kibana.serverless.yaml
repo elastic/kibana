@@ -12085,6 +12085,23 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        resources:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            requests:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                              required:
+                                - memory
+                                - cpu
+                          required:
+                            - requests
                         revision:
                           type: number
                         schema_version:
@@ -12329,6 +12346,23 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                resources:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    requests:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                      required:
+                        - memory
+                        - cpu
+                  required:
+                    - requests
                 space_ids:
                   items:
                     type: string
@@ -12788,6 +12822,23 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      resources:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          requests:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                            required:
+                              - memory
+                              - cpu
+                        required:
+                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -13333,6 +13384,23 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        resources:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            requests:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                              required:
+                                - memory
+                                - cpu
+                          required:
+                            - requests
                         revision:
                           type: number
                         schema_version:
@@ -13857,6 +13925,23 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      resources:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          requests:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                            required:
+                              - memory
+                              - cpu
+                        required:
+                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -14099,6 +14184,23 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                resources:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    requests:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                      required:
+                        - memory
+                        - cpu
+                  required:
+                    - requests
                 space_ids:
                   items:
                     type: string
@@ -14558,6 +14660,23 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      resources:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          requests:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                            required:
+                              - memory
+                              - cpu
+                        required:
+                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -15102,6 +15221,23 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      resources:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          requests:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                            required:
+                              - memory
+                              - cpu
+                        required:
+                          - requests
                       revision:
                         type: number
                       schema_version:
