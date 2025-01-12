@@ -1,4 +1,4 @@
-# Upgrading prebuilt rules one-by-one with preview
+# Upgrading prebuilt rules one-by-one after preview
 
 This is an upgrading prebuilt rules after preview workflow test plan.
 
@@ -114,6 +114,21 @@ Examples:
 
 * Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
 ```
+
+- User should be able to upgrade a prebuilt rule with upgrades in the following non-customizable fields
+
+```Gherkin
+Examples:
+│ Field name                        │ Diffable rule field     │
+---------------------------------------------------------------
+│ Rule type                         │ type                    │
+│ Rule version                      │ version                 │
+│ Rule signature id*                │ rule_id                 │
+* Rule signature id stays unchanged after rule upgrades.
+```
+
+- Any other rule and alerting framework fields non involved in the rule upgrade workflow like `enabled` or
+  `exceptions` should stay unchanged after rule upgrade.
 
 ## Scenarios
 
@@ -347,6 +362,55 @@ Examples:
  - Original customization, a diff between original and customized field values
 ```
 
+### Field editing
+
+#### Validation blocks saving field form when value is invalid
+
+**Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
+
+```Gherkin
+Given a prebuilt rule installed
+And <field> corresponds to a <diff case>
+And <field> appears in the Rule Update Flyout
+When user edits <field>'s in a <field> form
+And enters an invalid value
+Then Save button should be disabled
+And user should not be able to save the <field> form until a valid value is entered
+
+Examples:
+<field> = all customizable fields
+
+<diff case>
+ - AAB = a customized field that has doesn't have an upgrade
+ - ABA = a non-customized field that has an upgrade
+ - ABB = a customized field diff that has a matching upgrade
+ - ABC solvable = customized field diff that has an upgrade with a solvable conflict
+ - ABC non-solvable = customized field diff that has an upgrade with a non-solvable conflict
+```
+
+#### Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View
+
+**Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
+
+```Gherkin
+Given a prebuilt rule installed
+And <field> corresponds to a <diff case>
+And <field> appears in the Rule Update Flyout
+When user opens a <field> form
+And saves the form without changes
+Then <field> Diff View should not have any new lines added up or removed
+
+Examples:
+<field> = all customizable fields
+
+<diff case>
+ - AAB = a customized field that has doesn't have an upgrade
+ - ABA = a non-customized field that has an upgrade
+ - ABB = a customized field diff that has a matching upgrade
+ - ABC solvable = customized field diff that has an upgrade with a solvable conflict
+ - ABC non-solvable = customized field diff that has an upgrade with a non-solvable conflict
+```
+
 ### Rule upgrade after field preview
 
 #### Non-customized rule upgrade after preview (AAB diff case)
@@ -551,7 +615,7 @@ Examples:
 <field> = all customizable fields, but always mergeable fields "tags", "references", "threat_index", "new_terms_fields"
 ```
 
-### Misc
+### Rule type upgrade
 
 #### Non-customized rule upgrade to a different rule type after preview
 
@@ -590,4 +654,34 @@ And upgraded prebuilt rule should be removed from the table
 When user opens rule details page for that prebuilt rule
 Then user should see <field> has changed its type
 And has upgraded field values
+```
+
+### Concurrency control
+
+#### User gets notified after someone edited a rule being previewed
+
+**Automation**: 1 Cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule has an upgrade
+And <userA> opened Rule Update Preview
+And saved custom field values via field forms
+When <userB> edits the same rule providing changed field values
+Then <userA> should see a notification that rule has been edited
+And saved custom field values got discarded
+```
+
+#### User gets notified after a new rule versions is released
+
+**Automation**: 1 Cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule has an upgrade
+And user opened Rule Update Preview
+And saved custom field values via field forms
+When a new version of the same rule gets available
+Then user should see a notification that a new rule version was detected
+And saved custom field values got discarded
 ```
