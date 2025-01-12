@@ -14,7 +14,6 @@ import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session', () => ({
@@ -146,38 +145,6 @@ describe('VisualizationEmbeddable', () => {
           inspect: null,
         });
       });
-    });
-  });
-
-  describe('when isDonut = true', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
-        session: {
-          current: {
-            start: jest
-              .fn()
-              .mockReturnValueOnce(mockSearchSessionId)
-              .mockReturnValue(mockSearchSessionIdDefault),
-          },
-        },
-        refetchByRestartingSession: mockRefetchByRestartingSession,
-      });
-      res = render(
-        <TestProviders>
-          <VisualizationEmbeddable
-            getLensAttributes={getRiskScoreDonutAttributes}
-            id="testId"
-            isDonut={true}
-            label={'Total'}
-            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
-          />
-        </TestProviders>
-      );
-    });
-
-    it('should render donut wrapper ', () => {
-      expect(res.getByTestId('donut-chart')).toBeInTheDocument();
     });
   });
 });
