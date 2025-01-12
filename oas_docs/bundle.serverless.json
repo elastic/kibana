@@ -9848,6 +9848,31 @@
                               }
                             ]
                           },
+                          "resources": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "requests": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "cpu": {
+                                    "type": "string"
+                                  },
+                                  "memory": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "memory",
+                                  "cpu"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "requests"
+                            ],
+                            "type": "object"
+                          },
                           "revision": {
                             "type": "number"
                           },
@@ -10202,6 +10227,31 @@
                     "additionalProperties": {},
                     "description": "Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.",
                     "nullable": true,
+                    "type": "object"
+                  },
+                  "resources": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "requests": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "cpu": {
+                            "type": "string"
+                          },
+                          "memory": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "memory",
+                          "cpu"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "requests"
+                    ],
                     "type": "object"
                   },
                   "space_ids": {
@@ -10860,6 +10910,31 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "resources": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "requests": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "cpu": {
+                                  "type": "string"
+                                },
+                                "memory": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "memory",
+                                "cpu"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "requests"
+                          ],
+                          "type": "object"
                         },
                         "revision": {
                           "type": "number"
@@ -11645,6 +11720,31 @@
                                 "type": "array"
                               }
                             ]
+                          },
+                          "resources": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "requests": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "cpu": {
+                                    "type": "string"
+                                  },
+                                  "memory": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "memory",
+                                  "cpu"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "requests"
+                            ],
+                            "type": "object"
                           },
                           "revision": {
                             "type": "number"
@@ -12667,6 +12767,31 @@
                             }
                           ]
                         },
+                        "resources": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "requests": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "cpu": {
+                                  "type": "string"
+                                },
+                                "memory": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "memory",
+                                "cpu"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "requests"
+                          ],
+                          "type": "object"
+                        },
                         "revision": {
                           "type": "number"
                         },
@@ -13019,6 +13144,31 @@
                     "additionalProperties": {},
                     "description": "Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.",
                     "nullable": true,
+                    "type": "object"
+                  },
+                  "resources": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "requests": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "cpu": {
+                            "type": "string"
+                          },
+                          "memory": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "memory",
+                          "cpu"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "requests"
+                    ],
                     "type": "object"
                   },
                   "space_ids": {
@@ -13677,6 +13827,31 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "resources": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "requests": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "cpu": {
+                                  "type": "string"
+                                },
+                                "memory": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "memory",
+                                "cpu"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "requests"
+                          ],
+                          "type": "object"
                         },
                         "revision": {
                           "type": "number"
@@ -14462,6 +14637,31 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "resources": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "requests": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "cpu": {
+                                  "type": "string"
+                                },
+                                "memory": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "memory",
+                                "cpu"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "requests"
+                          ],
+                          "type": "object"
                         },
                         "revision": {
                           "type": "number"
