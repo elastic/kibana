@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
+import { expandedPanelGridHeightStyles } from './expanded_panel_styles';
 
 export const GridHeightSmoother = ({
   children,
@@ -74,13 +75,8 @@ export const GridHeightSmoother = ({
         overflow-anchor: none;
         transition: height 500ms linear;
 
-        &:has(.kbnGrid--hasExpandedPanel) {
-          height: 100% !important;
-          position: relative;
-          transition: none;
-          // switch to padding so that the panel does not extend the height of the parent
-          margin: 0px;
-          padding: calc(var(--kbnGridGutterSize) * 1px);
+        &:has([data-expanded-panel-id]) {
+          ${expandedPanelGridHeightStyles}
         }
       `}
     >

@@ -16,6 +16,7 @@ import { css } from '@emotion/react';
 import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
+import { expandedPanelStyles } from '../expanded_panel_styles';
 
 export interface GridPanelProps {
   panelId: string;
@@ -82,6 +83,10 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+
+        [data-expanded-panel-id='${panelId}'] & {
+          ${expandedPanelStyles}
+        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -155,26 +160,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
-        /**
-         * This subscription adds and/or removes the necessary attribute for expanded panel styling
-         */
-        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
-          (expandedPanelId) => {
-            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-            const panel = gridLayout[rowIndex].panels[panelId];
-            if (!ref || !panel) return;
-
-            if (expandedPanelId && expandedPanelId === panelId) {
-              ref.setAttribute('data-expanded-panel', '');
-            } else {
-              ref.removeAttribute('data-expanded-panel');
-            }
-          }
-        );
-
         return () => {
-          expandedPanelSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
         };
       },

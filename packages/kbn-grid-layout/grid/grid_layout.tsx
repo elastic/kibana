@@ -20,6 +20,7 @@ import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
+import { expandedPanelLayoutStyles } from './expanded_panel_styles';
 
 export interface GridLayoutProps {
   layout: GridLayoutData;
@@ -128,12 +129,14 @@ export const GridLayout = ({
       }
 
       if (currentExpandedPanelId) {
-        layoutRef.current?.classList.add('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
-      } else if (currentAccessMode === 'VIEW') {
+        layoutRef.current?.setAttribute('data-expanded-panel-id', currentExpandedPanelId);
         layoutRef.current?.classList.add('kbnGrid--static');
-        layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
+      } else if (currentAccessMode === 'VIEW') {
+        layoutRef.current?.removeAttribute('data-expanded-panel-id');
+        layoutRef.current?.classList.add('kbnGrid--static');
       } else {
-        layoutRef.current?.classList.remove('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
+        layoutRef.current?.removeAttribute('data-expanded-panel-id');
+        layoutRef.current?.classList.remove('kbnGrid--static');
       }
     });
 
@@ -179,8 +182,8 @@ export const GridLayout = ({
         }}
         className="kbnGrid"
         css={css`
-          &.kbnGrid--hasExpandedPanel {
-            ${expandedPanelStyles}
+          &[data-expanded-panel-id] {
+            ${expandedPanelLayoutStyles}
           }
           &.kbnGrid--mobileView {
             ${singleColumnStyles}
@@ -203,39 +206,5 @@ const singleColumnStyles = css`
 
   .kbnGridPanel {
     grid-area: unset !important;
-  }
-`;
-
-const expandedPanelStyles = css`
-  height: 100%;
-
-  & .kbnGridRowContainer:has(.kbnGridPanel[data-expanded-panel]) {
-    // targets the grid row container that contains the expanded panel
-    .kbnGridRowHeader {
-      height: 0px; // used instead of 'display: none' due to a11y concerns
-    }
-    .kbnGridRow {
-      display: block !important; // overwrite grid display
-      height: 100%;
-      .kbnGridPanel {
-        &[data-expanded-panel] {
-          height: 100% !important;
-        }
-        &:not([data-expanded-panel]) {
-          // hide the non-expanded panels
-          position: absolute;
-          top: -9999px;
-          left: -9999px;
-          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-        }
-      }
-    }
-  }
-
-  & .kbnGridRowContainer:not(:has(.kbnGridPanel[data-expanded-panel])) {
-    // targets the grid row containers that **do not** contain the expanded panel
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
   }
 `;
