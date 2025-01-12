@@ -98,6 +98,15 @@ export const INTERNAL_ALERTING_GAPS_API_PATH =
 export const INTERNAL_ALERTING_GAPS_FIND_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_find` as const;
 
+export const INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_rules` as const;
+
+export const INTERNAL_ALERTING_GAPS_GET_INFO_BY_RULE_IDS_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_gaps_info_by_rule_ids` as const;
+
+export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
+
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
 export const ENABLE_MAINTENANCE_WINDOWS = true;

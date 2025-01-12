@@ -54,6 +54,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'runSoon',
     'scheduleBackfill',
     'deleteBackfill',
+    'fillGaps',
   ],
   alert: ['update'],
 };

@@ -72,9 +72,11 @@ import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
 import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
 import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
 
-// Gaps API
+// Gaps ApI
 import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
-
+import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
+import { getRulesWithGapsRoute } from './gaps/apis/get_rules_with_gaps/get_rules_with_gaps_route';
+import { getGapsInfoByRuleIdsRoute } from './gaps/apis/get_gaps_info_by_rule_ids/get_gaps_info_by_rule_ids_route';
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -151,6 +153,9 @@ export function defineRoutes(opts: RouteOptions) {
 
   // Gaps APIs
   findGapsRoute(router, licenseState);
+  fillGapByIdRoute(router, licenseState);
+  getRulesWithGapsRoute(router, licenseState);
+  getGapsInfoByRuleIdsRoute(router, licenseState);
 
   // Other APIs
   registerFieldsRoute(router, licenseState);
