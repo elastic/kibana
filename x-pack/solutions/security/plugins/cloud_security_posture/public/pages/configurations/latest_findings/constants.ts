@@ -25,7 +25,7 @@ export const MISCONFIGURATIONS_GROUPS_UNIT = (
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
 
   switch (selectedGroup) {
-    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_ID:
       return i18n.translate('xpack.csp.findings.groupUnit.resource', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {resource} other {resources}}`,
@@ -78,10 +78,10 @@ export const NULL_GROUPING_MESSAGES = {
 
 export const defaultGroupingOptions: GroupOption[] = [
   {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
-      defaultMessage: 'Resource',
+    label: i18n.translate('xpack.csp.findings.latestFindings.groupByResourceId', {
+      defaultMessage: 'Resource ID',
     }),
-    key: FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,
+    key: FINDINGS_GROUPING_OPTIONS.RESOURCE_ID,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {

@@ -31,10 +31,10 @@ import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
-  selectedGroup,
-  bucket,
-  nullGroupMessage,
-  isLoading
+  selectedGroup: string,
+  bucket: RawBucket<FindingsGroupingAggregation>,
+  nullGroupMessage: string | undefined,
+  isLoading: boolean | undefined
 ) => {
   if (isLoading) {
     return <LoadingGroup />;
@@ -45,8 +45,20 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
   );
 
+  const getGroupPanelTitle = () => {
+    if (bucket.resourceName?.buckets) {
+      return (
+        <>
+          <strong>{bucket.resourceName.buckets[0]?.key}</strong> - {bucket.key_as_string}
+        </>
+      );
+    }
+
+    return <strong>{bucket.key_as_string}</strong>;
+  };
+
   switch (selectedGroup) {
-    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_ID:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
       ) : (
@@ -66,7 +78,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     `}
                     title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
+                    {getGroupPanelTitle()}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
