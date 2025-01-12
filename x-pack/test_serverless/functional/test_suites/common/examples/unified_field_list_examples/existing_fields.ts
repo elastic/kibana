@@ -12,7 +12,14 @@ const TEST_START_TIME = 'Jan 2, 2021 @ 00:00:00.000';
 const TEST_END_TIME = 'Jan 2, 2022 @ 00:00:00.000';
 const metaFields = ['_id', '_index', '_score', '_ignored'];
 
-const fieldsWithData = ['ts', 'filter_field', 'textfield1', 'data_view_runtime_field'];
+const fieldsWithData = [
+  'ts',
+  'filter_field',
+  'textfield1',
+  'textfield2',
+  'mapping_runtime_field',
+  'data_view_runtime_field',
+];
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
