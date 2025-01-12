@@ -181,12 +181,12 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events[3].properties).to.eql({
+        expect(events[2].properties).to.eql({
           contextLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
         });
 
-        expect(events.length).to.be(4);
+        expect(events.length).to.be(3);
       });
 
       it('should send EBT events when a different document profile gets resolved', async () => {
@@ -214,7 +214,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(4);
+        expect(events.length).to.be(3);
 
         expect(events[events.length - 1].properties).to.eql({
           contextLevel: 'documentLevel',

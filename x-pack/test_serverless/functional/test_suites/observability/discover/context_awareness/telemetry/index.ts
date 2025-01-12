@@ -27,6 +27,9 @@ export default function ({
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
       });
+      await kibanaServer.uiSettings.update({
+        defaultIndex: '',
+      });
     });
 
     after(async () => {
