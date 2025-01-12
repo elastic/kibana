@@ -31,7 +31,13 @@ export default function ({
       });
 
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.createIndexPattern('blogs', null);
+      await PageObjects.settings.createIndexPattern(
+        'blogs',
+        null,
+        true,
+        'default_all_data_id',
+        'default:all-data'
+      );
       await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
     });
 
