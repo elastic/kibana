@@ -6,7 +6,7 @@
  */
 
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
@@ -28,12 +28,12 @@ const INTEGRATIONS = integrationsFile as RuleMigrationIntegration[];
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
   constructor(
     getIndexName: IndexNameProvider,
-    username: string,
-    esClient: ElasticsearchClient,
+    currentUser: AuthenticatedUser,
+    esScopedClient: IScopedClusterClient,
     logger: Logger,
     private packageService?: PackageService
   ) {
-    super(getIndexName, username, esClient, logger);
+    super(getIndexName, currentUser, esScopedClient, logger);
   }
 
   async getIntegrationPackages(): Promise<PackageList | undefined> {

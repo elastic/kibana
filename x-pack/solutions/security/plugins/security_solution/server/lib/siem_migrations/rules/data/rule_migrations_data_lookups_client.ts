@@ -6,15 +6,15 @@
  */
 
 import { sha256 } from 'js-sha256';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 export type LookupData = object[];
 
 export class RuleMigrationsDataLookupsClient {
   constructor(
-    protected username: string,
-    protected esClient: ElasticsearchClient,
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
     protected logger: Logger
   ) {}
 
@@ -22,7 +22,7 @@ export class RuleMigrationsDataLookupsClient {
     const indexName = `lookup_${lookupName}`;
     try {
       await this.executeEs(() =>
-        this.esClient.indices.create({
+        this.esScopedClient.asCurrentUser.indices.create({
           index: indexName,
           settings: { index: { mode: 'lookup' } },
           mappings: { dynamic: 'runtime' },
@@ -48,7 +48,9 @@ export class RuleMigrationsDataLookupsClient {
     ]);
 
     try {
-      await this.executeEs(() => this.esClient.bulk({ index: indexName, body }));
+      await this.executeEs(() =>
+        this.esScopedClient.asCurrentUser.bulk({ index: indexName, body })
+      );
     } catch (error) {
       if (error?.statusCode !== 404) {
         this.logger.error(`Error indexing data for lookup index ${indexName} - ${error.message}`);
