@@ -132,6 +132,14 @@ export const AgentPolicyBaseSchema = {
       }
     )
   ),
+  resources: schema.maybe(
+    schema.object({
+      requests: schema.object({
+        memory: schema.string(),
+        cpu: schema.string(),
+      }),
+    })
+  ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
     schema.object({
