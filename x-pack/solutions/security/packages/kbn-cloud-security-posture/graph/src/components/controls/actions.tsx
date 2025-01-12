@@ -161,6 +161,7 @@ export const Actions = ({
                   // After a button click we wish to remove the focus from the button so the tooltip won't appear
                   // Since it causes the position of the button to shift,
                   // the tooltip is hanging out there at the wrong position
+                  // https://github.com/elastic/eui/issues/8266
                   event.currentTarget?.blur();
                 }}
               >

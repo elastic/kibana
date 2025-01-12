@@ -17,7 +17,7 @@ export const AnimatedSearchBarContainer = styled.div`
   display: grid;
   grid-template-rows: 1fr;
   border-top: ${() => useBorder()};
-  padding: 8px 0;
+  padding: 16px 8px;
 
   &.toggled-off {
     padding: 0;
@@ -37,6 +37,7 @@ export const AnimatedSearchBarContainer = styled.div`
 
   & > div {
     overflow: hidden;
+    padding: 0;
 
     ${euiCanAnimate} {
       ${() => {

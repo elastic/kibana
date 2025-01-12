@@ -321,6 +321,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           gutterSize="none"
           css={css`
             height: 100%;
+
+            .react-flow__panel {
+              margin-right: 8px;
+            }
           `}
         >
           {dataView && (
