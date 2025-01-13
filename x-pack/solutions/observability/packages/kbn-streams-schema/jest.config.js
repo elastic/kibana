@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { ProductName } from './product';
-
-export const LATEST_MANIFEST_FORMAT_VERSION = '2.0.0';
-
-export interface ArtifactManifest {
-  formatVersion: string;
-  productName: ProductName;
-  productVersion: string;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-streams-schema'],
+};
