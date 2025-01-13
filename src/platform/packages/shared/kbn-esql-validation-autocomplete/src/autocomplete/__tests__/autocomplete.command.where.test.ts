@@ -246,7 +246,6 @@ describe('WHERE <expression>', () => {
     test('suggestions after IN', async () => {
       const { assertSuggestions } = await setup();
 
-      // @TODO: fix this test
       await assertSuggestions('from index | WHERE doubleField in /', ['( $0 )']);
       await assertSuggestions('from index | WHERE doubleField not in /', ['( $0 )']);
       await assertSuggestions(

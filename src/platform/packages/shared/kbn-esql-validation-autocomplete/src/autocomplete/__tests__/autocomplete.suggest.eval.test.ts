@@ -75,7 +75,6 @@ describe('autocomplete.suggest', () => {
         'RLIKE $0',
         'IN $0',
       ]);
-      // @TODO: fix this test
       await assertSuggestions('from index | EVAL doubleField in /', ['( $0 )']);
       await assertSuggestions(
         'from index | EVAL doubleField in (/)',

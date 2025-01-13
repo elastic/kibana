@@ -112,7 +112,6 @@ export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinit
   }));
 }
 
-const leftHandSideParamName = new Set(['left', 'field', 'lhs']);
 export function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
@@ -120,9 +119,7 @@ export function getSupportedTypesForBinaryOperators(
   // Retrieve list of all 'right' supported types that match the left hand side of the function
   return fnDef && Array.isArray(fnDef?.signatures)
     ? fnDef.signatures
-        .filter(({ params }) =>
-          params.find((p) => leftHandSideParamName.has(p.name) && p.type === previousType)
-        )
+        .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
         .map(({ params }) => params[1].type)
     : [previousType];
 }
