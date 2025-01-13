@@ -46,7 +46,7 @@ import { UnsavedPanelState } from '../dashboard_container/types';
 import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
-import { placeClonePanel } from '../dashboard_container/panel_placement';
+import { placeClonePanel } from '../dashboard_container/panel_placement/place_clone_panel_strategy';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,

@@ -28,10 +28,8 @@ import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { DASHBOARD_ACTION_GROUP } from '.';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-
-export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
+import { ACTION_COPY_TO_DASHBOARD, DASHBOARD_ACTION_GROUP } from './consts';
 
 export interface DashboardCopyToCapabilities {
   canCreateNew: boolean;

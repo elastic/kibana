@@ -62,10 +62,7 @@ import type {
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import {
-  DashboardAppLocatorDefinition,
-  type DashboardAppLocator,
-} from './dashboard_app/locator/locator';
+import type { DashboardAppLocator } from './dashboard_app/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
@@ -79,7 +76,8 @@ import {
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { buildAllDashboardActions } from './dashboard_actions';
+import { registerActions } from './dashboard_actions/register_actions';
+import { getLocator } from './dashboard_app/locator/get_locator';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -127,11 +125,11 @@ export interface DashboardStartDependencies {
 }
 
 export interface DashboardSetup {
-  locator?: DashboardAppLocator;
+  getLocator: () => Promise<DashboardAppLocator | undefined>;
 }
 
 export interface DashboardStart {
-  locator?: DashboardAppLocator;
+  getLocator: () => Promise<DashboardAppLocator | undefined>;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
@@ -152,7 +150,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -165,24 +162,6 @@ export class DashboardPlugin
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
-
-    if (share) {
-      this.locator = share.url.locators.create(
-        new DashboardAppLocatorDefinition({
-          useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
-          getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
-              untilPluginStartServicesReady(),
-            ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
-          },
-        })
-      );
-    }
 
     const {
       appMounted,
@@ -319,7 +298,7 @@ export class DashboardPlugin
     });
 
     return {
-      locator: this.locator,
+      getLocator,
     };
   }
 
@@ -327,14 +306,14 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     untilPluginStartServicesReady().then(() => {
-      buildAllDashboardActions({
+      registerActions({
         plugins,
         allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
       });
     });
 
     return {
-      locator: this.locator,
+      getLocator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
