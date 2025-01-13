@@ -11,7 +11,7 @@ import {
   ProjectMonitorsRequest,
   PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
