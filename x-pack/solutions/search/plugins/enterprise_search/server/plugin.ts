@@ -69,7 +69,6 @@ import {
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
@@ -78,7 +77,6 @@ import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
-import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 
@@ -287,9 +285,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     };
 
     registerConfigDataRoute(dependencies);
-    registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);

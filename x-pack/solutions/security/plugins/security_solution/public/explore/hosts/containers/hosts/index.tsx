@@ -22,7 +22,6 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export const ID = 'hostsAllQuery';
 
@@ -61,9 +60,6 @@ export const useAllHost = ({
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
-
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
 
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
 
@@ -130,9 +126,6 @@ export const useAllHost = ({
   );
 
   useEffect(() => {
-    if (riskScoreStatusLoading) {
-      return;
-    }
     setHostRequest((prevRequest) => {
       const myRequest: HostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
@@ -149,25 +142,13 @@ export const useAllHost = ({
           direction,
           field: sortField,
         },
-        isNewRiskScoreModuleInstalled,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    direction,
-    endDate,
-    filterQuery,
-    indexNames,
-    limit,
-    startDate,
-    sortField,
-    isNewRiskScoreModuleInstalled,
-    riskScoreStatusLoading,
-  ]);
+  }, [activePage, direction, endDate, filterQuery, indexNames, limit, startDate, sortField]);
 
   useEffect(() => {
     if (!skip && hostsRequest) {
