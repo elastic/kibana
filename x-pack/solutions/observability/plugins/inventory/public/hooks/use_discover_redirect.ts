@@ -6,7 +6,7 @@
  */
 import { useCallback } from 'react';
 import type { InventoryEntity } from '../../common/entities';
-import { useAdHocDataView } from './use_adhoc_data_view';
+// import { useAdHocDataView } from './use_adhoc_data_view';
 import { useKibana } from './use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search_context';
 
@@ -14,8 +14,8 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
-  const { definitionIndexPatterns } = useUnifiedSearchContext();
-  const { dataView } = useAdHocDataView(definitionIndexPatterns[entity.entityType].join(',') ?? '');
+  const { discoverDataview } = useUnifiedSearchContext();
+  const { dataView } = discoverDataview;
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
@@ -25,15 +25,15 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
         })
       : '';
 
-    return application.capabilities.discover?.show
+    return application.capabilities.discover?.show || !dataView
       ? discoverLocator?.getRedirectUrl({
-          indexPatternId: dataView?.id ?? '',
+          dataViewId: dataView?.id ?? '',
           query: { query: entityKqlFilter, language: 'kuery' },
         })
       : undefined;
   }, [
     application.capabilities.discover?.show,
-    dataView?.id,
+    dataView,
     discoverLocator,
     entity,
     entityManager.entityClient,

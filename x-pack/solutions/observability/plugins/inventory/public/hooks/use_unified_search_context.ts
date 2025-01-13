@@ -25,6 +25,7 @@ function useUnifiedSearch() {
   const { entityTypes } = useInventoryDecodedQueryParams();
   const { definitionIndexPatterns, isIndexPatternsLoading } =
     useFetchEntityDefinitionIndexPattern();
+  const [singleEntityType, setSingleEntityType] = useState<string>('');
 
   const { value, refresh, loading } = useInventoryAbortableAsync(
     ({ signal }) => {
@@ -56,6 +57,10 @@ function useUnifiedSearch() {
   }, [definitionIndexPatterns, entityTypeIds]);
 
   const { dataView } = useAdHocDataView(allDefinitionIndexPatterns ?? '');
+  const discoverDataview = useAdHocDataView(
+    (definitionIndexPatterns[singleEntityType ?? ''] ?? []).join(',') ?? ''
+  );
+
   const [refreshSubject$] = useState<Subject<void>>(new Subject());
 
   return {
@@ -65,6 +70,8 @@ function useUnifiedSearch() {
     loading: loading || isIndexPatternsLoading,
     refresh,
     value,
+    discoverDataview,
+    setSingleEntityType,
   };
 }
 
