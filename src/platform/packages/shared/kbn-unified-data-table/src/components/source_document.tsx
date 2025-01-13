@@ -39,6 +39,7 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
+  uiSearchTerm,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -51,6 +52,7 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
+  uiSearchTerm?: string;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -58,6 +60,8 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+
+  // TODO: what if the match is cut off by the cell height configuration?
 
   return (
     <EuiDescriptionList
@@ -72,12 +76,23 @@ export function SourceDocument({
         if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
-            <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-              {fieldDisplayName}
-            </EuiDescriptionListTitle>
+            <EuiDescriptionListTitle
+              className="unifiedDataTable__descriptionListTitle"
+              dangerouslySetInnerHTML={{
+                __html: row.highlightSearchTermsInFormattedValue({
+                  formattedFieldValue: fieldDisplayName, // TODO: escape the dysplay name too
+                  uiSearchTerm,
+                }),
+              }}
+            />
             <EuiDescriptionListDescription
               className="unifiedDataTable__descriptionListDescription"
-              dangerouslySetInnerHTML={{ __html: value }}
+              dangerouslySetInnerHTML={{
+                __html: row.highlightSearchTermsInFormattedValue({
+                  formattedFieldValue: value,
+                  uiSearchTerm,
+                }),
+              }}
             />
           </Fragment>
         );

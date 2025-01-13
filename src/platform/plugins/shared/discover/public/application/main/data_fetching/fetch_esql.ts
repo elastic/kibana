@@ -17,7 +17,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ProfilesManager } from '../../../context_awareness';
 
@@ -81,11 +81,11 @@ export function fetchEsql({
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
-              const record: DataTableRecord = {
+              const record: DataTableRecord = new DataTableRecord({
                 id: String(idx),
                 raw: row,
                 flattened: row,
-              };
+              });
 
               return profilesManager.resolveDocumentProfile({ record });
             });

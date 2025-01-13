@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -62,6 +61,7 @@ export const getRenderCellValueFn = ({
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
+    const { uiSearchTerm } = ctx;
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -83,6 +83,7 @@ export const getRenderCellValueFn = ({
 
     const CustomCellRenderer = externalCustomRenderers?.[columnId];
 
+    // TODO: what to do with highlights here?
     if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
@@ -108,6 +109,7 @@ export const getRenderCellValueFn = ({
      * when using the fields api this code is used to show top level objects
      * this is used for legacy stuff like displaying products of our ecommerce dataset
      */
+    // TODO: does it need an update?
     const useTopLevelObjectColumns = Boolean(
       !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
@@ -121,6 +123,7 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
+        uiSearchTerm,
       });
     }
 
@@ -136,26 +139,16 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
+          uiSearchTerm={uiSearchTerm}
         />
       );
     }
 
-    const { uiSearchTerm } = ctx;
-    const formattedFieldValueAsHtml = formatFieldValue(
-      row.flattened[columnId],
-      row.raw,
-      fieldFormats,
+    const formattedFieldValue = row.formatAndCacheFieldValue({
       dataView,
-      field
-    );
-    let matchIndex = 0;
-    const fieldValue = uiSearchTerm?.length
-      ? formattedFieldValueAsHtml.replace(
-          new RegExp(uiSearchTerm, 'gi'), // TODO: escape the input as it would be passed to html
-          (match) =>
-            `<span class="unifiedDataTable__findMatch" data-match-index="${matchIndex++}">${match}</span>`
-        )
-      : formattedFieldValueAsHtml;
+      fieldName: columnId,
+      fieldFormats,
+    });
 
     return (
       <span
@@ -163,7 +156,7 @@ export const getRenderCellValueFn = ({
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: fieldValue,
+          __html: row.highlightSearchTermsInFormattedValue({ formattedFieldValue, uiSearchTerm }),
         }}
       />
     );
@@ -189,6 +182,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
+  uiSearchTerm,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -197,6 +191,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  uiSearchTerm: string | undefined;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -234,14 +229,14 @@ function renderPopoverContent({
             // formatFieldValue guarantees sanitized values
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
-              __html: formatFieldValue(
-                // TODO: update too
-                row.flattened[columnId],
-                row.raw,
-                fieldFormats,
-                dataView,
-                field
-              ),
+              __html: row.highlightSearchTermsInFormattedValue({
+                formattedFieldValue: row.formatAndCacheFieldValue({
+                  dataView,
+                  fieldName: columnId,
+                  fieldFormats,
+                }),
+                uiSearchTerm,
+              }),
             }}
           />
         </DataTablePopoverCellValue>
