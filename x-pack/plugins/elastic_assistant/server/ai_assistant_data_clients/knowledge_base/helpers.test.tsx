@@ -238,6 +238,7 @@ describe('getStructuredToolForIndexEntry', () => {
         type: 'index',
         name: `1bad-name?`,
       }) as IndexEntry,
+      elserId: 'hi',
       esClient: mockEsClient,
       logger: mockLogger,
     });
@@ -252,6 +253,7 @@ describe('getStructuredToolForIndexEntry', () => {
         type: 'index',
         name: `-testing`,
       }) as IndexEntry,
+      elserId: 'hi',
       esClient: mockEsClient,
       logger: mockLogger,
     });
