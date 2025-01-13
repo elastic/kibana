@@ -408,9 +408,9 @@ describe('useUserProfileForm', () => {
           <UserProfile user={nonCloudUser} data={data} />
         </Providers>
       );
-      expect(testWrapper.exists('div[data-test-subj="userRoles"]')).toBeTruthy();
+      expect(testWrapper.exists('dl[data-test-subj="userRoles"]')).toBeTruthy();
 
-      expect(testWrapper.exists('EuiButtonEmpty[data-test-subj="userRolesExpand"]')).toBeFalsy();
+      expect(testWrapper.exists('button[data-test-subj="userRolesExpand"]')).toBeFalsy();
       expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
     });
 
@@ -438,9 +438,7 @@ describe('useUserProfileForm', () => {
 
       const extraRoles = nonCloudUser.roles.splice(3);
 
-      const userRolesExpandButton = testWrapper.find(
-        'EuiButtonEmpty[data-test-subj="userRolesExpand"]'
-      );
+      const userRolesExpandButton = testWrapper.find('button[data-test-subj="userRolesExpand"]');
 
       expect(userRolesExpandButton).toBeTruthy();
       expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length}`);

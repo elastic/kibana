@@ -14,6 +14,7 @@ import {
   EuiCallOut,
   EuiColorPicker,
   EuiDescribedFormGroup,
+  EuiDescriptionList,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +22,9 @@ import {
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiTextTruncate,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -662,15 +662,22 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
 
   const renderMoreRoles = () => {
     const button = (
-      <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
-        <EuiBadge>
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.rolesCountLabel"
-            defaultMessage="+{count}"
-            values={{ count: remainingRoles.length }}
-          />
-        </EuiBadge>
-      </EuiButtonEmpty>
+      <EuiBadge
+        onClick={onButtonClick}
+        data-test-subj="userRolesExpand"
+        onClickAriaLabel={i18n.translate(
+          'xpack.security.accountManagement.userProfile.showMoreRolesHelpText',
+          {
+            defaultMessage: 'Show more roles',
+          }
+        )}
+      >
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.rolesCountLabel"
+          defaultMessage="+{count}"
+          values={{ count: remainingRoles.length }}
+        />
+      </EuiBadge>
     );
     return (
       <EuiPopover
@@ -743,6 +750,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 id={titleId}
                 css={pageHeaderCSS}
                 pageTitle={user.username}
+                alignItems="bottom"
                 pageTitleProps={{
                   'data-test-subj': 'username',
                   'aria-label': i18n.translate(
@@ -752,30 +760,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     }
                   ),
                 }}
-                rightSideItems={[
-                  <EuiFlexGroup direction="column" data-test-subj="userRoles" gutterSize="s">
-                    <EuiFlexItem>
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.rolesLabel"
-                        defaultMessage="{roles, plural,
-                        one {Role}
-                        other {Roles}
-                        }"
-                        values={{ roles: user.roles.length }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UserRoles user={user} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>,
-                ]}
-              >
-                <EuiPageHeaderSection>
-                  <EuiFlexGroup direction="column" gutterSize="s">
+                description={
+                  <EuiText component="span">
                     {user.full_name && (
-                      <EuiTextTruncate
-                        text={user.full_name}
-                        data-test-subj="full_name"
+                      <EuiText
+                        component="span"
                         aria-label={i18n.translate(
                           'xpack.security.accountManagement.userProfile.fullNameHelpText',
                           {
@@ -783,12 +772,14 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                               'Please contact an administrator to change your full name.',
                           }
                         )}
-                      />
+                      >
+                        {user.full_name}
+                      </EuiText>
                     )}
+                    {user.full_name && user.email && <EuiText component="span">, </EuiText>}
                     {user.email && (
-                      <EuiTextTruncate
-                        text={user.email}
-                        data-test-subj="email"
+                      <EuiText
+                        component="span"
                         aria-label={i18n.translate(
                           'xpack.security.accountManagement.userProfile.emailHelpText',
                           {
@@ -796,11 +787,35 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                               'Please contact an administrator to change your email address.',
                           }
                         )}
-                      />
+                      >
+                        {user.email}
+                      </EuiText>
                     )}
-                  </EuiFlexGroup>
-                </EuiPageHeaderSection>
-              </KibanaPageTemplate.Header>
+                  </EuiText>
+                }
+                rightSideItems={[
+                  <EuiDescriptionList
+                    type="column"
+                    data-test-subj="userRoles"
+                    listItems={[
+                      {
+                        title: (
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.rolesLabel"
+                            defaultMessage="{roles, plural,
+                            one {Role}
+                            other {Roles}
+                            }"
+                            values={{ roles: user.roles.length }}
+                          />
+                        ),
+                        description: <UserRoles user={user} />,
+                      },
+                    ]}
+                    compressed
+                  />,
+                ]}
+              />
               <KibanaPageTemplate.Section>
                 <Form aria-labelledby={titleId}>
                   <UserDetailsEditor user={user} />
