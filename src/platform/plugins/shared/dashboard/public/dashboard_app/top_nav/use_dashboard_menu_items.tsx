@@ -72,9 +72,7 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi
-      .runQuickSave()
-      .then(() => setTimeout(() => setIsSaveInProgress(false), 100));
+    dashboardApi.runQuickSave().then(() => setTimeout(() => setIsSaveInProgress(false), 100));
   }, [dashboardApi]);
 
   /**

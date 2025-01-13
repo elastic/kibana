@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardContainerInput } from '../common';
-
 export const LANDING_PAGE_PATH = '/list';
 
 export const DASHBOARD_APP_ID = 'dashboards';
@@ -21,27 +19,3 @@ export enum PanelPlacementStrategy {
   /** Look for the smallest y and x value where the default panel will fit. */
   findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
 }
-
-// ------------------------------------------------------------------
-// Default State
-// ------------------------------------------------------------------
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
-  viewMode: 'view',
-  timeRestore: false,
-  query: { query: '', language: 'kuery' },
-  description: '',
-  filters: [],
-  panels: {},
-  title: '',
-  tags: [],
-  executionContext: {
-    type: 'dashboard',
-  },
-
-  // options
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-  hidePanelTitles: false,
-};
