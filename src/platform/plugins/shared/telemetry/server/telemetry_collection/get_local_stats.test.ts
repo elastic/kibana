@@ -8,7 +8,7 @@
  */
 
 import { merge, omit } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
