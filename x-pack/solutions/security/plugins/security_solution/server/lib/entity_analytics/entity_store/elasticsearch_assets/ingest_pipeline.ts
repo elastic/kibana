@@ -78,7 +78,7 @@ const buildIngestPipeline = ({
     {
       enrich: {
         policy_name: enrichPolicyName,
-        field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+        field: description.identityField,
         target_field: ENRICH_FIELD,
       },
     },

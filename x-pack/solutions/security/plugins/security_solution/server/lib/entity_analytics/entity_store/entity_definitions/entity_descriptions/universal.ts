@@ -74,7 +74,7 @@ const entityMetadataExtractorProcessor = {
 export const universalEntityEngineDescription: EntityDescription = {
   version: UNIVERSAL_DEFINITION_VERSION,
   entityType: 'universal',
-  identityFields: [UNIVERSAL_IDENTITY_FIELD],
+  identityField: UNIVERSAL_IDENTITY_FIELD,
   fields: [newestValue({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
     timestampField: 'event.ingested',

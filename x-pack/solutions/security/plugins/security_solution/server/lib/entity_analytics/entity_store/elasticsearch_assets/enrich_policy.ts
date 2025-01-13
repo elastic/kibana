@@ -44,7 +44,7 @@ export const createFieldRetentionEnrichPolicy = async ({
     }),
     match: {
       indices: getEntitiesIndexName(description.entityType, options.namespace),
-      match_field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+      match_field: description.identityField,
       enrich_fields: enrichFields,
     },
   });

@@ -20,7 +20,7 @@ export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
-  identityFields: string[];
+  identityField: string;
 
   /**
    * Default static index patterns to use as the source of entity data.
