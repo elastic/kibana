@@ -1877,6 +1877,7 @@ describe('Response actions history', () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+        responseActionsMSDefenderEndpointEnabled: true,
       });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1891,6 +1892,7 @@ describe('Response actions history', () => {
         'Elastic Defend',
         'SentinelOne',
         'Crowdstrike',
+        'microsoft_defender_endpoint',
         'Triggered by rule',
         'Triggered manually',
       ]);

@@ -178,6 +178,28 @@ const getStepTitle = (
     );
   }
 
+  if (step === ReindexStep.indexSettingsRestored) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.indexSettingsRestoredStepTitle"
+        defaultMessage="Copying original index settings from {indexName} to {reindexName}."
+        values={{
+          indexName: <EuiCode>{meta.indexName}</EuiCode>,
+          reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.indexSettingsRestoredStepTitle"
+        defaultMessage="Copy original index settings from {indexName} to {reindexName}."
+        values={{
+          indexName: <EuiCode>{meta.indexName}</EuiCode>,
+          reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
+        }}
+      />
+    );
+  }
+
   if (step === ReindexStep.aliasCreated) {
     return inProgress ? (
       <FormattedMessage
@@ -339,6 +361,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     getProgressStep(ReindexStep.readonly),
     getProgressStep(ReindexStep.newIndexCreated),
     reindexingDocsStep,
+    getProgressStep(ReindexStep.indexSettingsRestored),
     getProgressStep(ReindexStep.aliasCreated),
     getProgressStep(ReindexStep.originalIndexDeleted),
   ];

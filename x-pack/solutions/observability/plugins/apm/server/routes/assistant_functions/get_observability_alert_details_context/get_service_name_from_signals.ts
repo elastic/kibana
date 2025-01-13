@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import type * as t from 'io-ts';
 import moment from 'moment';
-import type { ESSearchRequest } from '@kbn/es-types';
 import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';

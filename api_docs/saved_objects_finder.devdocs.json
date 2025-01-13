@@ -434,12 +434,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/source_picker.tsx"
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/wizard/search_selection/search_selection.tsx"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/components/source_picker.tsx"
               }
             ]
           }
@@ -548,7 +548,7 @@
         "signature": [
           "\"savedObjects:listingLimit\""
         ],
-        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -563,7 +563,7 @@
         "signature": [
           "\"savedObjects:perPage\""
         ],
-        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
