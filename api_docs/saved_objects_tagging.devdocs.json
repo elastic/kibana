@@ -23,7 +23,7 @@
           "text": "SavedObjectsTaggingApi"
         }
       ],
-      "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -41,7 +41,7 @@
         "tags": [],
         "label": "CreateTagAssignmentServiceOptions",
         "description": [],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
             "signature": [
               "SavedObjectsClientContract"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -69,7 +69,7 @@
         "tags": [],
         "label": "CreateTagClientOptions",
         "description": [],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,7 +83,7 @@
             "signature": [
               "SavedObjectsClientContract"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -109,7 +109,7 @@
           "UpdateTagAssignmentsOptions",
           ") => Promise<void>; }"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/services/assignments/assignment_service.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/services/assignments/assignment_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,7 +123,7 @@
       "tags": [],
       "label": "SavedObjectTaggingStart",
       "description": [],
-      "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -154,7 +154,7 @@
               "text": "ITagsClient"
             }
           ],
-          "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -174,7 +174,7 @@
                   "text": "CreateTagClientOptions"
                 }
               ],
-              "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -209,7 +209,7 @@
               "text": "IAssignmentService"
             }
           ],
-          "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -229,7 +229,7 @@
                   "text": "CreateTagAssignmentServiceOptions"
                 }
               ],
-              "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -264,7 +264,7 @@
             "text": "TagsCapabilities"
           }
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -278,7 +278,7 @@
             "signature": [
               "Capabilities"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -297,7 +297,7 @@
         "signature": [
           "(color: string) => string | undefined"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -311,7 +311,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -330,7 +330,7 @@
         "signature": [
           "(description: string) => string | undefined"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -344,7 +344,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -363,7 +363,7 @@
         "signature": [
           "(name: string) => string | undefined"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -377,7 +377,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,7 +397,7 @@
         "description": [
           "\nRepresent the UI capabilities for the `savedObjectsTagging` section of `Capabilities`"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -408,7 +408,7 @@
             "tags": [],
             "label": "view",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,7 +419,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,7 +430,7 @@
             "tags": [],
             "label": "edit",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,7 +441,7 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,7 +452,7 @@
             "tags": [],
             "label": "assign",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -463,7 +463,7 @@
             "tags": [],
             "label": "viewConnections",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -477,7 +477,7 @@
         "tags": [],
         "label": "TagValidation",
         "description": [],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -488,7 +488,7 @@
             "tags": [],
             "label": "valid",
             "description": [],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -502,7 +502,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,7 +516,7 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; color?: string | undefined; description?: string | undefined; managed?: string | undefined; }"
             ],
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -536,7 +536,7 @@
         "signature": [
           "100"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -553,7 +553,7 @@
         "signature": [
           "\"savedObjectsTagging\""
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -570,7 +570,7 @@
         "signature": [
           "\"tags\""
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -585,7 +585,7 @@
         "signature": [
           "50"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -600,7 +600,7 @@
         "signature": [
           "2"
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/validation.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -617,7 +617,7 @@
         "signature": [
           "\"tag\""
         ],
-        "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

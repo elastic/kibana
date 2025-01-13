@@ -2762,7 +2762,7 @@
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "packages/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
               }
             ]
           },

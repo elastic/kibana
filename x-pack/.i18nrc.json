@@ -53,7 +53,7 @@
       "platform/plugins/private/global_search_bar"
     ],
     "xpack.graph": [
-      "plugins/graph"
+      "platform/plugins/private/graph"
     ],
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
@@ -72,7 +72,7 @@
     "xpack.investigate": "solutions/observability/plugins/investigate",
     "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
-    "xpack.lens": "plugins/lens",
+    "xpack.lens": "platform/plugins/shared/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "platform/plugins/shared/licensing",
@@ -159,7 +159,7 @@
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "platform/plugins/shared/spaces",
     "xpack.savedObjectsTagging": [
-      "platform/plugins/private/saved_objects_tagging"
+      "platform/plugins/shared/saved_objects_tagging"
     ],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
@@ -176,7 +176,7 @@
     "xpack.ux": [
       "solutions/observability/plugins/ux"
     ],
-    "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
+    "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
     "xpack.watcher": "platform/plugins/private/watcher"
   },
   "exclude": [

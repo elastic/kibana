@@ -32,9 +32,9 @@ export const useCardStyles = () => {
 
     ${isDarkMode
       ? `
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBasePlain};
           box-shadow: none;
-          border: 1px solid ${euiTheme.colors.mediumShade};
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
         `
       : ''}
   `;
