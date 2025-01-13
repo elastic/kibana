@@ -201,7 +201,12 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      lookbackPeriod = '24h',
+      filter = '',
+      fieldHistoryLength = 10,
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -222,7 +227,11 @@ export class EntityStoreDataClient {
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          { indexPattern, lookbackPeriod, filter, fieldHistoryLength },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -280,7 +289,12 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      lookbackPeriod = '24h',
+    }: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
@@ -333,6 +347,7 @@ export class EntityStoreDataClient {
     const descriptor = await this.engineClient.init(entityType, {
       filter,
       fieldHistoryLength,
+      lookbackPeriod,
       indexPattern,
     });
     this.log('debug', entityType, `Initialized engine saved object`);
@@ -340,6 +355,7 @@ export class EntityStoreDataClient {
     this.asyncSetup(
       entityType,
       fieldHistoryLength,
+      lookbackPeriod,
       this.options.taskManager,
       indexPattern,
       filter,
@@ -355,6 +371,7 @@ export class EntityStoreDataClient {
   private async asyncSetup(
     entityType: EntityType,
     fieldHistoryLength: number,
+    lookbackPeriod: string,
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
@@ -369,7 +386,7 @@ export class EntityStoreDataClient {
       const description = createEngineDescription({
         entityType,
         namespace,
-        requestParams: { indexPattern, fieldHistoryLength },
+        requestParams: { indexPattern, fieldHistoryLength, lookbackPeriod },
         defaultIndexPatterns,
         config,
       });

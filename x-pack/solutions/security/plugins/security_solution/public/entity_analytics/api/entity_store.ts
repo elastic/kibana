@@ -25,7 +25,7 @@ export const useEntityStoreRoutes = () => {
 
   return useMemo(() => {
     const enableEntityStore = async (
-      options: InitEntityStoreRequestBody = { fieldHistoryLength: 10 }
+      options: InitEntityStoreRequestBody = { fieldHistoryLength: 10, lookbackPeriod: '24h' 
     ) => {
       return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
         method: 'POST',

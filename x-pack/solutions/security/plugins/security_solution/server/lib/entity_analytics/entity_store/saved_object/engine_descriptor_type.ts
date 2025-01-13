@@ -30,6 +30,9 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
       type: 'integer',
       index: false,
     },
+    lookbackPeriod: {
+      type: 'keyword',
+    },
   },
 };
 

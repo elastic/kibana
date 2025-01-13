@@ -33,6 +33,7 @@ export const InitEntityEngineRequestBody = z.object({
    * The number of historical values to keep for each field.
    */
   fieldHistoryLength: z.number().int().optional().default(10),
+  lookbackPeriod: z.string().optional().default('24h'),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
 });
