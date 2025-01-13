@@ -80,6 +80,7 @@
     "@kbn/ebt-tools",
     "@kbn/core-rendering-browser",
     "@kbn/response-ops-rule-params",
+    "@kbn/charts-theme"
   ],
   "exclude": ["target/**/*"]
 }
