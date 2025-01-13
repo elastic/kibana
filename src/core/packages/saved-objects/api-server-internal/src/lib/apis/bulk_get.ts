@@ -83,7 +83,9 @@ export const performBulkGet = async <T>(
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
-      const { type, id, fields } = object;
+      const { type, id, fields = [] } = object;
+      const nameAttribute = registry.getNameAttribute(type);
+      const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
 
       let error: DecoratedError | undefined;
       if (!allowedTypes.includes(type)) {
@@ -107,7 +109,10 @@ export const performBulkGet = async <T>(
       return right({
         type,
         id,
-        fields,
+        fields: [
+          ...fields,
+          ...(securityExtension && securityExtension.includeSavedObjectNames() ? nameFields : []),
+        ],
         namespaces,
         esRequestIndex: bulkGetRequestIndexCounter++,
       });
@@ -170,6 +175,17 @@ export const performBulkGet = async <T>(
     // @ts-expect-error MultiGetHit._source is optional
     const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
 
+    const savedObject = docNotFound
+      ? ({
+          id,
+          type,
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        } as any as SavedObject<T>)
+      : // @ts-expect-error MultiGetHit._source is optional
+        getSavedObjectFromSource(registry, type, id, doc, {
+          migrationVersionCompatibility,
+        });
+
     authObjects.push({
       type,
       id,
@@ -177,20 +193,12 @@ export const performBulkGet = async <T>(
       // @ts-expect-error MultiGetHit._source is optional
       existingNamespaces: doc?._source?.namespaces ?? [],
       error: docNotFound,
+      name: !docNotFound
+        ? SavedObjectsUtils.getName(savedObject, registry.getNameAttribute(type))
+        : undefined,
     });
 
-    if (docNotFound) {
-      return {
-        id,
-        type,
-        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-      } as any as SavedObject<T>;
-    }
-
-    // @ts-expect-error MultiGetHit._source is optional
-    return getSavedObjectFromSource(registry, type, id, doc, {
-      migrationVersionCompatibility,
-    });
+    return savedObject;
   });
 
   const authorizationResult = await securityExtension?.authorizeBulkGet({
