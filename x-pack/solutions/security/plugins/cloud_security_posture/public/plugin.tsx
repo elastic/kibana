@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { lazy, Suspense } from 'react';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -16,6 +16,12 @@ import type { CspRouterProps } from './application/csp_router';
 import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDeps } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
+import {
+  type CSPUIConfigType,
+  type ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')
@@ -42,13 +48,22 @@ export class CspPlugin
     >
 {
   private isCloudEnabled?: boolean;
+  private config: CSPUIConfigType;
+  private experimentalFeatures: ExperimentalFeatures;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<CSPUIConfigType>();
+
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || []
+    )?.features;
+  }
 
   public setup(
     _core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
-
     if (plugins.usageCollection) uiMetricService.setup(plugins.usageCollection);
 
     // Return methods that should be available to other plugins
@@ -56,6 +71,7 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',
