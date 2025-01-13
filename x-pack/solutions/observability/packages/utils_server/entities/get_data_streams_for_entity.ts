@@ -54,15 +54,16 @@ export async function getDataStreamsForEntity({
   });
 
   const dataStreams = uniq(
-    compact(
-      await resolveIndexResponse.indices.flatMap((idx) => {
-        const remoteCluster = extractRemoteCluster(idx.name);
+    compact([
+      ...resolveIndexResponse.indices.flatMap((idx) => {
+        const remoteCluster = idx.name.includes(':') ? idx.name.split(':')[0] : null;
         if (remoteCluster) {
           return `${remoteCluster}:${idx.data_stream}`;
         }
         return idx.data_stream;
-      })
-    )
+      }),
+      ...resolveIndexResponse.data_streams.map((ds) => ds.name),
+    ])
   );
 
   return {
