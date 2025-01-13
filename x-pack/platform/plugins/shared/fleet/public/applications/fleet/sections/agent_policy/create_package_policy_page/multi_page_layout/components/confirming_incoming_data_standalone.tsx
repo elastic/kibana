@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiCallOut, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,8 +14,9 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingDataStandalone: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingDataStandalone: React.FunctionComponent<PropsWithChildren<Props>> = ({
   troubleshootLink,
+  children,
 }) => {
   return (
     <>
@@ -45,6 +47,7 @@ export const ConfirmIncomingDataStandalone: React.FunctionComponent<Props> = ({
           />
         </EuiCallOut>
       </EuiText>
+      {children}
     </>
   );
 };

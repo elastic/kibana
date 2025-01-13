@@ -20,12 +20,13 @@ import { OnboardingContextProvider } from './onboarding_context';
 import { OnboardingAVCBanner } from './onboarding_banner';
 import { OnboardingRoute } from './onboarding_route';
 import { OnboardingFooter } from './onboarding_footer';
+import type { StartPlugins } from '../../types';
 
 const topicPathParam = `:topicId(${Object.values(OnboardingTopicId) // any topics
   .filter((val) => val !== OnboardingTopicId.default) // except "default"
   .join('|')})?`; // optional parameter
 
-export const OnboardingPage = React.memo(() => {
+export const OnboardingPage = React.memo((plugins: StartPlugins) => {
   const spaceId = useSpaceId();
   const { euiTheme } = useEuiTheme();
 

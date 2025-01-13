@@ -66,6 +66,7 @@ export interface IntegrationCardItem {
   url: string;
   version: string;
   type?: string;
+  pkgkey?: string;
 }
 
 export const mapToCard = ({
@@ -91,6 +92,9 @@ export const mapToCard = ({
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
+
+  const pkgkey = item.name ? `${item.name}-${version}` : undefined;
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -103,9 +107,8 @@ export const mapToCard = ({
 
       isReauthorizationRequired = hasDeferredInstallations(item);
     }
-
     const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
+      pkgkey,
       ...(item.integration ? { integration: item.integration } : {}),
     });
 
@@ -136,6 +139,7 @@ export const mapToCard = ({
     isUnverified,
     isUpdateAvailable,
     extraLabelsBadges,
+    pkgkey,
   };
 
   if (item.type === 'integration') {

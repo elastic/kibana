@@ -61,7 +61,7 @@ const createMultipassVm = async ({
   log.info(`Creating VM [${name}] using multipass`);
 
   const createResponse = await execa.command(
-    `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory}`
+    `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory} --network en0`
   );
 
   log.verbose(`VM [${name}] created successfully using multipass.`, createResponse);

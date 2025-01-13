@@ -48,6 +48,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     onClick: React.ReactEventHandler;
   }>;
   children: React.ReactNode;
+  withHeader?: boolean;
 }> = memo(
   ({
     from,
@@ -59,6 +60,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     children,
     'data-test-subj': dataTestSubj,
     tabs = [],
+    withHeader = true,
   }) => {
     const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
@@ -252,7 +254,8 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     ) : undefined;
 
     const maxWidth = 800;
-    return (
+
+    return withHeader ? (
       <WithHeaderLayout
         restrictHeaderWidth={maxWidth}
         restrictWidth={maxWidth}
@@ -264,6 +267,8 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       >
         {children}
       </WithHeaderLayout>
+    ) : (
+      children
     );
   }
 );

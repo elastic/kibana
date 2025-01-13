@@ -28,11 +28,15 @@ interface UseCancelParams {
 }
 
 export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
-  const { from, pkgkey, agentPolicyId } = params;
+  const { from, pkgkey: pkgkeyParam, agentPolicyId } = params;
   const {
     application: { navigateToApp },
   } = useStartServices();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
+  const pkgkey = useMemo(
+    () => pkgkeyParam || routeState?.pkgkey,
+    [pkgkeyParam, routeState?.pkgkey]
+  );
   const { getHref } = useLink();
 
   const cancelClickHandler = useCallback(
