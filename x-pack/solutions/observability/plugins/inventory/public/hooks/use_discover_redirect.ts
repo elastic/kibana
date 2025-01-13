@@ -15,7 +15,7 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
     services: { share, application, entityManager },
   } = useKibana();
   const { entityDefinitions, isEntityDefinitionLoading } = useFetchEntityDefinition(
-    entity.entityDefinitionId
+    entity.entityDefinitionId as string
   );
 
   const title = useMemo(
@@ -33,10 +33,7 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
     const entityKqlFilter = entity
       ? entityManager.entityClient.asKqlFilter({
-          entity: {
-            identity_fields: entity.entityIdentityFields,
-          },
-          ...entity,
+          entity,
         })
       : '';
 
