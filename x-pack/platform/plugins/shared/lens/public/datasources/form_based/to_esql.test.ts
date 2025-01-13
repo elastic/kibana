@@ -10,21 +10,25 @@ import { getESQLForLayer } from './to_esql';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { DateHistogramIndexPatternColumn } from '../..';
 
+const defaultUiSettingsGet = (key: string) => {
+  switch (key) {
+    case 'dateFormat':
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    case 'dateFormat:scaled':
+      return [[]];
+    case 'dateFormat:tz':
+      return 'UTC';
+    case 'histogram:barTarget':
+      return 50;
+    case 'histogram:maxBars':
+      return 100;
+  }
+};
+
 describe('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
-    switch (key) {
-      case 'dateFormat':
-        return 'MMM D, YYYY @ HH:mm:ss.SSS';
-      case 'dateFormat:scaled':
-        return [[]];
-      case 'dateFormat:tz':
-        return 'UTC';
-      case 'histogram:barTarget':
-        return 50;
-      case 'histogram:maxBars':
-        return 100;
-    }
+    return defaultUiSettingsGet(key);
   });
 
   const layer = {
@@ -238,7 +242,7 @@ describe('to_esql', () => {
   it('should return undefined if timezone is not UTC', () => {
     uiSettings.get.mockImplementation((key: string) => {
       if (key === 'dateFormat:tz') return 'America/Chicago';
-      return uiSettings.get(key);
+      return defaultUiSettingsGet(key);
     });
 
     const esql = getESQLForLayer(
@@ -281,7 +285,7 @@ describe('to_esql', () => {
   it('should work with iana timezones that fall udner utc+0', () => {
     uiSettings.get.mockImplementation((key: string) => {
       if (key === 'dateFormat:tz') return 'Europe/London';
-      return uiSettings.get(key);
+      return defaultUiSettingsGet(key);
     });
 
     const esql = getESQLForLayer(
@@ -318,7 +322,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(esql?.esql).toEqual(
       `FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(\`order_date\`, 30 minutes) | SORT order_date ASC`
     );
   });

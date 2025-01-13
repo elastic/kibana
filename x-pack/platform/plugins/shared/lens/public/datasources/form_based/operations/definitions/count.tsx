@@ -201,7 +201,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       esql = `COUNT(${sanitazeESQLInput(field.name)})`;
     }
     if (column.filter) {
-      if (column.filter.language === 'kquery') return undefined;
       return undefined;
     }
 
