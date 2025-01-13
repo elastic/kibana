@@ -28,6 +28,7 @@ const createRegistryMock = (): jest.Mocked<
     isHiddenFromHttpApis: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
+    getNameAttribute: jest.fn(),
   };
 
   mock.getVisibleTypes.mockReturnValue([]);
@@ -45,6 +46,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
   mock.getVisibleToHttpApisTypes.mockReturnValue(false);
+  mock.getNameAttribute.mockReturnValue(undefined);
 
   return mock;
 };

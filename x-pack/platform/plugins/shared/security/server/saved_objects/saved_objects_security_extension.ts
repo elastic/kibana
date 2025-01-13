@@ -1188,6 +1188,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const redactedSpacesWithMatchingAliases = getRedactedSpaces(spacesWithMatchingAliases);
       const redactedSpacesWithMatchingOrigins = getRedactedSpaces(spacesWithMatchingOrigins);
       const { name, ...normalizedObject } = obj;
+
       return {
         ...normalizedObject,
         spaces: redactedSpaces,
