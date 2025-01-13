@@ -156,9 +156,7 @@ export const VulnerabilitiesPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >
       <EuiFlexGroup gutterSize="none">
-        <VulnerabilitiesCount
-          vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)}
-        />
+        <VulnerabilitiesCount vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)} />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

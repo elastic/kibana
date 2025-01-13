@@ -6,7 +6,10 @@
  */
 import { type TypeOf } from '@kbn/config-schema';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { CspFinding, MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
+import type {
+  CspFinding,
+  MisconfigurationEvaluationStatus,
+} from '@kbn/cloud-security-posture-common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';

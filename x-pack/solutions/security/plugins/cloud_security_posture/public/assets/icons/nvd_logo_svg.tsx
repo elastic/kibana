@@ -8,7 +8,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 
-// TODO: replace fullShade with a proper color token, see https://github.com/elastic/kibana/issues/199715#issuecomment-2535949093 
+// TODO: replace fullShade with a proper color token, see https://github.com/elastic/kibana/issues/199715#issuecomment-2535949093
 export const NvdLogo = () => {
   const { euiTheme } = useEuiTheme();
 
