@@ -75,6 +75,7 @@ src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-e
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
+packages/kbn-charts-theme @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
@@ -942,6 +943,7 @@ packages/kbn-storybook @elastic/kibana-operations
 x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
 x-pack/packages/kbn-streams-schema @elastic/streams-program-team
+packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team

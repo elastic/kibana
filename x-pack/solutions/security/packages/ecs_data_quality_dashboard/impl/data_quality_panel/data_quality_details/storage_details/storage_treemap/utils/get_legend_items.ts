@@ -14,9 +14,15 @@ import { getPatternDocsCount, getPatternSizeInBytes } from './stats';
 export const getLegendItemsForPattern = ({
   pattern,
   flattenedBuckets,
+  successColor,
+  dangerColor,
+  primaryColor,
 }: {
   pattern: string;
   flattenedBuckets: FlattenedBucket[];
+  successColor: string;
+  dangerColor: string;
+  primaryColor: string;
 }): LegendItem[] =>
   orderBy(
     ['sizeInBytes'],
@@ -24,7 +30,7 @@ export const getLegendItemsForPattern = ({
     flattenedBuckets
       .filter((x) => x.pattern === pattern)
       .map((flattenedBucket) => ({
-        color: getFillColor(flattenedBucket.incompatible),
+        color: getFillColor(flattenedBucket.incompatible, successColor, dangerColor, primaryColor),
         ilmPhase: flattenedBucket.ilmPhase ?? null,
         index: flattenedBucket.indexName ?? null,
         pattern: flattenedBucket.pattern,
@@ -52,16 +58,28 @@ export const getLegendItems = ({
   patterns,
   flattenedBuckets,
   patternRollups,
+  successColor,
+  dangerColor,
+  primaryColor,
 }: {
   patterns: string[];
   flattenedBuckets: FlattenedBucket[];
   patternRollups: Record<string, PatternRollup>;
+  successColor: string;
+  dangerColor: string;
+  primaryColor: string;
 }): LegendItem[] =>
   patterns.reduce<LegendItem[]>(
     (acc, pattern) => [
       ...acc,
       getPatternLegendItem({ pattern, patternRollups }),
-      ...getLegendItemsForPattern({ pattern, flattenedBuckets }),
+      ...getLegendItemsForPattern({
+        pattern,
+        flattenedBuckets,
+        successColor,
+        dangerColor,
+        primaryColor,
+      }),
     ],
     []
   );
