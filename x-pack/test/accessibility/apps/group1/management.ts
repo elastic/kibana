@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'indexPatternFieldEditorObjects',
     'indexManagement',
-    'searchIndexDetailsPage',
   ]);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -53,23 +52,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             it('index details - overview', async () => {
               await PageObjects.settings.clickIndexManagement();
               await PageObjects.indexManagement.clickIndexAt(0);
-              await PageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
               await a11y.testAppSnapshot();
             });
 
             it('index details - settings', async () => {
-              await PageObjects.searchIndexDetailsPage.changeTab('settingsTab');
+              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
               await a11y.testAppSnapshot();
             });
 
             it('index details - edit settings', async () => {
-              await PageObjects.searchIndexDetailsPage.changeTab('settingsTab');
+              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
               await PageObjects.indexManagement.clickIndexDetailsEditSettingsSwitch();
               await a11y.testAppSnapshot();
             });
 
             it('index details - mappings', async () => {
-              await PageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+              await PageObjects.indexManagement.clickIndexDetailsTab('mappings');
+              await a11y.testAppSnapshot();
+            });
+
+            it('index details - stats', async () => {
+              await PageObjects.indexManagement.clickIndexDetailsTab('stats');
               await a11y.testAppSnapshot();
             });
           });
