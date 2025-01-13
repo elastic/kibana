@@ -62,7 +62,7 @@ x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
-src/plugins/bfetch @elastic/appex-sharedux
+src/platform/plugins/shared/bfetch @elastic/appex-sharedux
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation

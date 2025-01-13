@@ -196,7 +196,7 @@
     "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
     "@kbn/bfetch-error": "link:src/platform/packages/shared/kbn-bfetch-error",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
-    "@kbn/bfetch-plugin": "link:src/plugins/bfetch",
+    "@kbn/bfetch-plugin": "link:src/platform/plugins/shared/bfetch",
     "@kbn/calculate-auto": "link:src/platform/packages/shared/kbn-calculate-auto",
     "@kbn/calculate-width-from-char-count": "link:src/platform/packages/shared/kbn-calculate-width-from-char-count",
     "@kbn/canvas-plugin": "link:x-pack/platform/plugins/private/canvas",
