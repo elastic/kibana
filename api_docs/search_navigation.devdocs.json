@@ -332,13 +332,7 @@
           "description": [],
           "signature": [
             "{ setSearchBreadCrumbs: (breadcrumbs: ",
-            {
-              "pluginId": "@kbn/core-chrome-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-public.ChromeBreadcrumb",
-              "text": "ChromeBreadcrumb"
-            },
+            "ChromeBreadcrumb",
             "[], options?: ",
             "SearchNavigationSetBreadcrumbsOptions",
             " | undefined) => void; clearBreadcrumbs: () => void; }"
