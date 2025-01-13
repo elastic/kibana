@@ -127,10 +127,10 @@ describe('allHosts search strategy', () => {
       await allHosts.parse({ ...mockOptions, pagination }, mockSearchStrategyResponse, mockedDeps);
 
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
-        defaultIndex: ['ml_host_risk_score_latest_test-space'],
+        defaultIndex: ['risk-score.risk-score-latest-test-space'],
         filterQuery: { terms: { 'host.name': [hostName] } },
         riskScoreEntity: RiskScoreEntity.host,
-        factoryQueryType: expect.stringContaining('RiskScore'),
+        factoryQueryType: 'hostsRiskScore',
       });
     });
 
