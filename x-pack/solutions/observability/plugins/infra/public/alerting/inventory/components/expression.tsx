@@ -53,6 +53,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -143,29 +144,30 @@ export const Expressions: React.FC<Props> = (props) => {
           const newSearchSource = data.search.searchSource.createEmpty();
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
+          let metricsDataView;
+
           try {
-            const infraRulesDataViewExists =
-              (await data.dataViews.find('infra_rules_data_view')).length > 0;
-            const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-
-            const metricsDataView = infraRulesDataViewExists
-              ? await data.dataViews.get('infra_rules_data_view')
-              : defaultDataViewExists
-              ? await data.dataViews.getDefaultDataView()
-              : undefined;
-
-            if (metricsDataView) {
-              newSearchSource.setField('index', metricsDataView);
-              setDataView(metricsDataView);
+            metricsDataView = await data.dataViews.get('infra_rules_data_view');
+          } catch (error: any) {
+            if (!(error instanceof SavedObjectNotFound)) {
+              setParamsError(error);
+            } else {
+              const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
+              metricsDataView = defaultDataViewExists
+                ? await data.dataViews.getDefaultDataView()
+                : undefined;
             }
-
-            initialSearchConfiguration = getSearchConfiguration(
-              newSearchSource.getSerializedFields(),
-              setParamsWarning
-            );
-          } catch (error) {
-            setParamsError(error);
           }
+
+          if (metricsDataView) {
+            newSearchSource.setField('index', metricsDataView);
+            setDataView(metricsDataView);
+          }
+
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
       }
 

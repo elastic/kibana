@@ -39,6 +39,7 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/format
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import type { MetricsExplorerFields } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -104,29 +105,30 @@ export const Expressions: React.FC<Props> = (props) => {
           const newSearchSource = data.search.searchSource.createEmpty();
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
+          let metricsDataView;
+
           try {
-            const infraRulesDataViewExists =
-              (await data.dataViews.find('infra_rules_data_view')).length > 0;
-            const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-
-            const metricsDataView = infraRulesDataViewExists
-              ? await data.dataViews.get('infra_rules_data_view')
-              : defaultDataViewExists
-              ? await data.dataViews.getDefaultDataView()
-              : undefined;
-
-            if (metricsDataView) {
-              newSearchSource.setField('index', metricsDataView);
-              setDataView(metricsDataView);
+            metricsDataView = await data.dataViews.get('infra_rules_data_view');
+          } catch (error: any) {
+            if (!(error instanceof SavedObjectNotFound)) {
+              setParamsError(error);
+            } else {
+              const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
+              metricsDataView = defaultDataViewExists
+                ? await data.dataViews.getDefaultDataView()
+                : undefined;
             }
-
-            initialSearchConfiguration = getSearchConfiguration(
-              newSearchSource.getSerializedFields(),
-              setParamsWarning
-            );
-          } catch (error) {
-            setParamsError(error);
           }
+
+          if (metricsDataView) {
+            newSearchSource.setField('index', metricsDataView);
+            setDataView(metricsDataView);
+          }
+
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
       }
 
