@@ -86,6 +86,7 @@
     "@kbn/search-navigation",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
+    "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
   ]
 }
