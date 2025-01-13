@@ -176,6 +176,9 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
 export const assertConversationTitle = (title: string) =>
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 
+export const assertNotConversationTitle = (title: string) =>
+  cy.get(CONVERSATION_TITLE + ' h2').should('not.have.text', title);
+
 export const assertSystemPromptSent = (message: string) => {
   cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
 };

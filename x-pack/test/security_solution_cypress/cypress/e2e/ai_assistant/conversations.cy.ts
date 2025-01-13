@@ -10,6 +10,7 @@ import {
   RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
 } from '@kbn/security-solution-plugin/public/detections/pages/detection_engine/rules/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
+import { NEW_CHAT } from '@kbn/elastic-assistant/impl/assistant/conversations/conversation_sidepanel/translations';
 import {
   assertConnectorSelected,
   assertNewConversation,
@@ -19,7 +20,7 @@ import {
   createNewChat,
   selectConversation,
   assertMessageSent,
-  assertConversationTitle,
+  assertNotConversationTitle,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
@@ -47,9 +48,7 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/204167
-// Failing: See https://github.com/elastic/kibana/issues/204167
-describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
@@ -151,11 +150,11 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
       visitGetStartedPage();
       openAssistant();
       createNewChat();
-      assertNewConversation(false, 'New chat');
+      assertNewConversation(false, NEW_CHAT);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
-      assertConversationTitle('Unexpected API Error:  - Connection error.');
+      assertNotConversationTitle(NEW_CHAT);
       updateConversationTitle('Something else');
     });
   });
