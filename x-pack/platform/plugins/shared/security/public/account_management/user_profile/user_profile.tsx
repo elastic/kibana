@@ -764,6 +764,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   <EuiText component="span">
                     {user.full_name && (
                       <EuiText
+                        data-test-subj="full_name"
                         component="span"
                         aria-label={i18n.translate(
                           'xpack.security.accountManagement.userProfile.fullNameLabel',
@@ -778,6 +779,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     {user.full_name && user.email && <EuiText component="span">, </EuiText>}
                     {user.email && (
                       <EuiText
+                        data-test-subj="email"
                         component="span"
                         aria-label={i18n.translate(
                           'xpack.security.accountManagement.userProfile.emailLabel',
