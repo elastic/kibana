@@ -62,7 +62,7 @@
     "fieldFormats": "src/platform/plugins/shared/field_formats",
     "files": "src/platform/plugins/shared/files",
     "filesManagement": "src/platform/plugins/private/files_management",
-    "flot": "packages/kbn-flot-charts/lib",
+    "flot": "src/platform/packages/shared/kbn-flot-charts/lib",
     "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "src/platform/packages/shared/kbn-grouping/src",
     "alertsGrouping": "x-pack/solutions/observability/packages/kbn-alerts-grouping",

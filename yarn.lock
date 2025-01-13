@@ -5788,7 +5788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/flot-charts@link:packages/kbn-flot-charts":
+"@kbn/flot-charts@link:src/platform/packages/shared/kbn-flot-charts":
   version "0.0.0"
   uid ""
 
