@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { createFilter } from '../../../common/containers/helpers';
-import type { EntityType } from '../../../../common/search_strategy';
+import type {
+  EntityType,
+  RiskScoreSortField,
+  RiskScoreStrategyResponse,
+  StrategyResponseType,
+} from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

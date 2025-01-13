@@ -65,7 +65,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
+    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 

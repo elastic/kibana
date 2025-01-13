@@ -27,7 +27,7 @@ import type { RiskSeverity, UserRiskScore } from '../../../../../../common/searc
 import {
   EntityType,
   buildUserNamesFilter,
-  getUserRiskIndex,
+  getRiskIndex,
 } from '../../../../../../common/search_strategy';
 import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
@@ -126,7 +126,7 @@ export async function getUserRiskData(
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId, true)],
+        defaultIndex: [getRiskIndex(spaceId, true)],
         filterQuery: buildUserNamesFilter(userNames),
         riskScoreEntity: EntityType.user,
       })

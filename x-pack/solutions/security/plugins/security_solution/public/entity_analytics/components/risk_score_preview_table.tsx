@@ -13,7 +13,7 @@ import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
 import { EntityDetailsLink } from '../../common/components/links';
-import { EntityType } from '../../../common/entity_analytics/types';
+import type { EntityType } from '../../../common/entity_analytics/types';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
@@ -75,10 +75,7 @@ export const RiskScorePreviewTable = ({
 
   return (
     <EuiInMemoryTable<EntityRiskScoreRecord>
-      data-test-subj={
-        // TODO support service entity type
-        type === EntityType.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
-      }
+      data-test-subj={`${type}-risk-preview-table`}
       responsiveBreakpoint={false}
       items={items}
       columns={columns}

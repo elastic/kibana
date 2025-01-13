@@ -12,11 +12,7 @@ import {
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
 
-export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
-  return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
-};
-
-export const getUserRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+export const getRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
   return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
 };
 

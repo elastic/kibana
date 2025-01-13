@@ -116,7 +116,6 @@ describe('allHosts search strategy', () => {
         defaultIndex: ['risk-score.risk-score-latest-test-space'],
         filterQuery: { terms: { 'user.name': userName } },
         riskScoreEntity: EntityType.user,
-        factoryQueryType: 'usersRiskScore',
       });
     });
 

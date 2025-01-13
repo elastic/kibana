@@ -23,7 +23,7 @@ import type {
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
   EntityType,
-  getHostRiskIndex,
+  getRiskIndex,
   buildHostNamesFilter,
 } from '../../../../../../common/search_strategy';
 
@@ -121,7 +121,7 @@ export async function getHostRiskData(
   try {
     const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getHostRiskIndex(spaceId, true)],
+        defaultIndex: [getRiskIndex(spaceId, true)],
         filterQuery: buildHostNamesFilter(hostNames),
         riskScoreEntity: EntityType.host,
       })

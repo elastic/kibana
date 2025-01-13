@@ -15,6 +15,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: jest.fn(),
 }));
@@ -176,7 +177,7 @@ describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s',
     expect(mockSearch).toHaveBeenCalledTimes(1);
     expect(mockSearch).toHaveBeenCalledWith({
       defaultIndex: [`risk-score.risk-score-latest-default`],
-      factoryQueryType: `${riskEntity}sRiskScore`,
+      factoryQueryType: EntityRiskQueries.list,
       riskScoreEntity: riskEntity,
       includeAlertsCount: false,
     });
