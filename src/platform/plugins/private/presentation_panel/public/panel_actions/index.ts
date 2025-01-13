@@ -8,15 +8,6 @@
  */
 
 export {
-  ACTION_CUSTOMIZE_PANEL,
-  CustomizePanelAction,
-  CustomTimeRangeBadge,
-} from './customize_panel_action';
-export { EditPanelAction } from './edit_panel_action/edit_panel_action';
-export { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';
-export { getEditPanelAction } from './panel_actions';
-export { RemovePanelAction } from './remove_panel_action/remove_panel_action';
-export {
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
   panelBadgeTrigger,
