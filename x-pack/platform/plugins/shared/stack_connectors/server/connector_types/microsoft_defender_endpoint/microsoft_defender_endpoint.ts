@@ -193,7 +193,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         oDataQueryOptions.$filter += `${key} ${isArrayValue ? 'in' : 'eq'} ${
           isArrayValue
             ? '(' + value.map((valueString) => `'${valueString}'`).join(',') + ')'
-            : value
+            : `'${value}'`
         }`;
       }
     }
