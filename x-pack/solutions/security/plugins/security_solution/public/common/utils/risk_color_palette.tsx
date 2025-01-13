@@ -11,8 +11,7 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useMemo } from 'react';
 
 export const getRiskSeverityColors = (euiTheme: EuiThemeComputed) => {
-  if (euiTheme.flags.hasVisColorAdjustment) {
-    // Amsterdam
+  if (euiTheme.themeName === 'EUI_THEME_AMSTERDAM') {
     return {
       low: euiTheme.colors.vis.euiColorVis0,
       medium: euiTheme.colors.vis.euiColorVis5,
