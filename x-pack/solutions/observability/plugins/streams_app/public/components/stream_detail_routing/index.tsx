@@ -37,9 +37,10 @@ import {
   StreamChild,
   ReadStreamDefinition,
   WiredStreamConfigDefinition,
+  isRoot,
+  isDescendandOf,
 } from '@kbn/streams-schema';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { isDescendandOf, isRoot } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -738,7 +739,7 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
     <>
       {!isRoot(definition.name) && (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
+          <EuiFlexGroup gutterSize="xs" wrap>
             {definition.name.split('.').map((part, i, parts) => {
               const parentId = parts.slice(0, i + 1).join('.');
               if (parentId === definition.name) {
@@ -782,38 +783,6 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
         </EuiPanel>
       </EuiFlexItem>
     </>
-  );
-}
-
-function PreviousStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
-  const router = useStreamsAppRouter();
-
-  const parentId = definition.name.split('.').slice(0, -1).join('.');
-  if (parentId === '') {
-    return null;
-  }
-
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="streamsAppPreviousStreamEntryPreviousStreamButton"
-            href={router.link('/{key}/{tab}/{subtab}', {
-              path: {
-                key: parentId,
-                tab: 'management',
-                subtab: 'route',
-              },
-            })}
-          >
-            {i18n.translate('xpack.streams.streamDetailRouting.previousStream', {
-              defaultMessage: '.. (Previous stream)',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
   );
 }
 
