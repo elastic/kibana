@@ -88,7 +88,7 @@ describe('Incompatible embeddables', () => {
 
 describe('Compatible embeddables', () => {
   beforeAll(() => {
-    dashboardApi.viewMode.next('edit');
+    dashboardApi.viewMode$.next('edit');
   });
 
   test('Action is compatible with embeddables that are editable', async () => {
