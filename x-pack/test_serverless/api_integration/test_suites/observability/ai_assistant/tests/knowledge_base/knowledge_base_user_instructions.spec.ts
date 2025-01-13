@@ -247,12 +247,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const interceptPromises = [
-          proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
-          proxy
-            .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-            .completeAfterIntercept(),
-        ];
+        const interceptPromise = proxy
+          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .completeAfterIntercept();
 
         const messages: Message[] = [
           {
@@ -297,8 +294,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        // wait for all interceptors to be settled
-        await Promise.all(interceptPromises);
+        await interceptPromise;
 
         const conversation = res.body;
         return conversation;
@@ -317,6 +313,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         proxy.close();
+        await clearKnowledgeBase(es);
+        await clearConversations(es);
         await deleteActionConnector({
           supertest: supertestWithoutAuth,
           connectorId,

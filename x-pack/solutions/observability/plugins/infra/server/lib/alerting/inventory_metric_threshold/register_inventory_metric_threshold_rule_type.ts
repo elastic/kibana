@@ -7,12 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  GetViewInAppRelativeUrlFnOpts,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { metricInventoryThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/metric_inventory_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import { InfraBackendLibs, InfraLocators } from '../../infra_types';
+import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,

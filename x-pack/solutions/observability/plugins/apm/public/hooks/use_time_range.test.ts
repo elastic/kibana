@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
 
 describe('useTimeRange', () => {

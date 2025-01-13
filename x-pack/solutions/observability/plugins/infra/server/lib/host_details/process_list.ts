@@ -6,8 +6,11 @@
  */
 
 import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
-import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
-import { ESSearchClient } from '../metrics/types';
+import type {
+  ProcessListAPIRequest,
+  ProcessListAPIQueryAggregation,
+} from '../../../common/http_api';
+import type { ESSearchClient } from '../metrics/types';
 import type { InfraSourceConfiguration } from '../sources';
 
 const TOP_N = 10;

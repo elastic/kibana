@@ -8,7 +8,8 @@
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
-import { RouteBreadcrumbsContext, Breadcrumb } from '.';
+import type { Breadcrumb } from '.';
+import { RouteBreadcrumbsContext } from '.';
 
 export function useRouteBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
   const api = useContext(RouteBreadcrumbsContext);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { DiscoverLink } from './discover_link';
 

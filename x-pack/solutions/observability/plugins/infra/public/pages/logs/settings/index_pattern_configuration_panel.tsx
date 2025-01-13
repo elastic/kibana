@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { LogDataViewReference } from '@kbn/logs-shared-plugin/common';
-import { FormElement } from './form_elements';
+import type { LogDataViewReference } from '@kbn/logs-shared-plugin/common';
+import type { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const IndexPatternConfigurationPanel: React.FC<{
   isLoading: boolean;

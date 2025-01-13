@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getDomainTZ, getTimeTicksTZ, getTimeZone } from './timezone';
 
 describe('Timezone helper', () => {

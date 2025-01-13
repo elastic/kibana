@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { LogThresholdAlertReporter } from './log_threshold_executor';
 import {
   getGroupedESQuery,
   processUngroupedResults,
   processGroupByResults,
-  LogThresholdAlertReporter,
   getUngroupedESQuery,
 } from './log_threshold_executor';
-import {
-  Comparator,
+import type {
   RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
+import { Comparator } from '../../../../common/alerting/logs/log_threshold';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   positiveComparators,

@@ -5,27 +5,18 @@
  * 2.0.
  */
 
-import {
-  Chart,
-  Datum,
-  Flame,
-  FlameLayerValue,
-  FlameSpec,
-  PartialTheme,
-  Settings,
-  Tooltip,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import type { Datum, FlameLayerValue, FlameSpec, PartialTheme } from '@elastic/charts';
+import { Chart, Flame, Settings, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Maybe } from '@kbn/observability-plugin/common/typings';
+import type { Maybe } from '@kbn/observability-plugin/common/typings';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import React, { useEffect, useMemo, useState } from 'react';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { Frame } from '../frame_information_window';
+import type { Frame } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
-import { ComparisonMode } from '../normalization_menu';
+import type { ComparisonMode } from '../normalization_menu';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
 import { FlameGraphLegend } from './flame_graph_legend';
 

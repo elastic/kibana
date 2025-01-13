@@ -15,7 +15,7 @@ import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
 import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
 
-import { InventoryMetrics } from '../../types';
+import type { InventoryMetrics } from '../../types';
 
 const awsEC2SnapshotMetrics = { cpu, rx, tx, diskIOReadBytes, diskIOWriteBytes };
 

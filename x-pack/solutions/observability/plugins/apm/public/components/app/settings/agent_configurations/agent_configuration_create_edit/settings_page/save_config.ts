@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from '@kbn/core/public';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   getOptionLabel,
   omitAllOption,

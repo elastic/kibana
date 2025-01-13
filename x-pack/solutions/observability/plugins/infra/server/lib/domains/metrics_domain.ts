@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
-import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
+import type {
+  InfraMetricsAdapter,
+  InfraMetricsRequestOptions,
+} from '../adapters/metrics/adapter_types';
+import type { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export class InfraMetricsDomain {
   private adapter: InfraMetricsAdapter;
