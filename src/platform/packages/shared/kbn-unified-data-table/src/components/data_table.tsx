@@ -94,6 +94,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { SearchControl } from './search_control';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -650,6 +651,12 @@ export const UnifiedDataTable = ({
     onUpdatePageIndex,
   ]);
 
+  const [uiSearchTerm, setUISearchTerm] = useState('');
+
+  const uiSearchControl = useMemo(() => {
+    return <SearchControl uiSearchTerm={uiSearchTerm} onChange={setUISearchTerm} />;
+  }, [uiSearchTerm, setUISearchTerm]);
+
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
       expanded: expandedDoc,
@@ -664,6 +671,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
       pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
+      uiSearchTerm,
     }),
     [
       componentsTourSteps,
@@ -678,6 +686,7 @@ export const UnifiedDataTable = ({
       selectedDocsState,
       paginationObj,
       valueToStringConverter,
+      uiSearchTerm,
     ]
   );
 
@@ -989,10 +998,11 @@ export const UnifiedDataTable = ({
               toolbarProps,
               gridProps: {
                 additionalControls,
+                uiSearchControl,
               },
             })
         : undefined,
-    [renderCustomToolbar, additionalControls]
+    [renderCustomToolbar, additionalControls, uiSearchControl]
   );
 
   const showDisplaySelector = useMemo(():

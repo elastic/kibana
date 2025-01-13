@@ -27,6 +27,7 @@ export interface DataTableContext {
   isPlainRecord?: boolean;
   pageIndex: number | undefined; // undefined when the pagination is disabled
   pageSize: number | undefined;
+  uiSearchTerm: string | undefined;
 }
 
 const defaultContext = {} as unknown as DataTableContext;

@@ -140,13 +140,30 @@ export const getRenderCellValueFn = ({
       );
     }
 
+    const { uiSearchTerm } = ctx;
+    const formattedFieldValueAsHtml = formatFieldValue(
+      row.flattened[columnId],
+      row.raw,
+      fieldFormats,
+      dataView,
+      field
+    );
+    let matchIndex = 0;
+    const fieldValue = uiSearchTerm?.length
+      ? formattedFieldValueAsHtml.replace(
+          new RegExp(uiSearchTerm, 'gi'), // TODO: escape the input as it would be passed to html
+          (match) =>
+            `<span class="unifiedDataTable__findMatch" data-match-index="${matchIndex++}">${match}</span>`
+        )
+      : formattedFieldValueAsHtml;
+
     return (
       <span
         className={CELL_CLASS}
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
+          __html: fieldValue,
         }}
       />
     );
@@ -218,6 +235,7 @@ function renderPopoverContent({
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: formatFieldValue(
+                // TODO: update too
                 row.flattened[columnId],
                 row.raw,
                 fieldFormats,

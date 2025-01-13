@@ -15,6 +15,7 @@ export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
     additionalControls?: React.ReactNode;
+    uiSearchControl?: React.ReactNode;
   };
 }
 
@@ -41,7 +42,7 @@ export const internalRenderCustomToolbar = (
       keyboardShortcutsControl,
       displayControl,
     },
-    gridProps: { additionalControls },
+    gridProps: { additionalControls, uiSearchControl },
   } = props;
 
   const buttons = hasRoomForGridControls ? (
@@ -90,6 +91,7 @@ export const internalRenderCustomToolbar = (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {Boolean(leftSide) && buttons}
+            {Boolean(uiSearchControl) && <EuiFlexItem grow={false}>{uiSearchControl}</EuiFlexItem>}
             {(keyboardShortcutsControl || displayControl || fullScreenControl) && (
               <EuiFlexItem grow={false}>
                 <div className="unifiedDataTableToolbarControlGroup">
