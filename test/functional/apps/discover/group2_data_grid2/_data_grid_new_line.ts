@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
-      await dataGrid.changeRowHeightValue('Auto fit');
+      await dataGrid.changeRowHeightValue('Auto');
       await dataGrid.clickGridSettings();
 
       cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -96,8 +96,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
-      await dataGrid.changeRowHeightValue('Single');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto');
+      await dataGrid.changeRowHeightValue('Custom');
+      await dataGrid.changeCustomRowHeightNumber(1);
       await dataGrid.clickGridSettings();
 
       cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
