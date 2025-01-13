@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { SCOUT_REPORTER_ES_URL, SCOUT_REPORTER_ES_API_KEY } from '@kbn/scout-info';
 import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from './common';
 
@@ -20,13 +21,13 @@ export const uploadEvents: Command<void> = {
     string: ['eventLogPath', 'esURL', 'esAPIKey'],
     boolean: ['verifyTLSCerts'],
     default: {
-      esURL: process.env.ES_URL,
-      esAPIKey: process.env.ES_API_KEY,
+      esURL: SCOUT_REPORTER_ES_URL,
+      esAPIKey: SCOUT_REPORTER_ES_API_KEY,
     },
     help: `
     --eventLogPath    (required)  Path to the event log to upload
-    --esURL           (required)  Elasticsearch URL [env: ES_URL]
-    --esAPIKey        (required)  Elasticsearch API Key [env: ES_API_KEY]
+    --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --verifyTLSCerts  (optional)  Verify TLS certificates
     `,
   },
