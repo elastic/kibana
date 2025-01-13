@@ -9,7 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { setupNodeEvents } from './setup_cypress_node_events';
 
 export default defineCypressConfig({
-  reporter: '../../../../../node_modules/cypress-multi-reporters',
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: './reporter_config.json',
   },
