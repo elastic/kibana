@@ -70,11 +70,3 @@ export async function getDataStreamsForEntity({
     dataStreams,
   };
 }
-
-const extractRemoteCluster = (index: string) => {
-  const match = index.match(/^([^:]+):/);
-  if (!match) {
-    return null;
-  }
-  return match[1];
-};
