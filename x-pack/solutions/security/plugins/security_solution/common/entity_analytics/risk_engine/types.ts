@@ -8,7 +8,6 @@
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
 
 export interface InitRiskEngineResult {
-  legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;

@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskDetailsTabBody } from '.';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/search_strategy';
 import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
@@ -45,7 +45,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
       isInspected: false,
       totalCount: 0,
       refetch: jest.fn(),
-      isModuleEnabled: true,
+      hasEngineBeenInstalled: true,
     });
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
   });

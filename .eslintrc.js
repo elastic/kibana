@@ -127,7 +127,7 @@ const VENN_DIAGRAM_HEADER = `
   * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
   * and may include modifications made by Elasticsearch B.V.
   * Elasticsearch B.V. licenses this file to you under the MIT License.
-  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  * See \`x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
   */
 `;
 
@@ -183,7 +183,7 @@ const DEV_PATTERNS = [
   ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
-  'packages/kbn-interpreter/tasks/**/*',
+  'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
   'x-pack/performance/**/*',
@@ -599,7 +599,9 @@ module.exports = {
      * venn.js fork requires special license headers
      */
     {
-      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -1585,7 +1587,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1801,7 +1803,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },

@@ -56,7 +56,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: false,
 };
@@ -91,14 +91,14 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
     });
 
     it('renders enable button when module is disable', () => {
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
       );
 
-      expect(getByTestId(`enable_${riskEntity}_risk_score`)).toBeInTheDocument();
+      expect(getByTestId(`enable_risk_score`)).toBeInTheDocument();
     });
 
     it("doesn't render enable button when module is enable", () => {
@@ -108,7 +108,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         </TestProviders>
       );
 
-      expect(queryByTestId(`enable_${riskEntity}_risk_score`)).not.toBeInTheDocument();
+      expect(queryByTestId(`enable_risk_score`)).not.toBeInTheDocument();
     });
 
     it('queries when toggleStatus is true', () => {

@@ -9,22 +9,18 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
-import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { createFilter } from '../../../common/containers/helpers';
-import type {
-  RiskScoreSortField,
-  StrategyResponseType,
-  EntityType,
-  RiskScoreStrategyResponse,
-} from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
-
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useEntityRiskIndex } from './use_risk_score_index';
+import { useGetDefaultRiskIndex } from '../../hooks/use_get_default_risk_index';
+import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useRiskEngineStatus } from './use_risk_engine_status';
 
 export interface RiskScoreState<T extends EntityType> {
   data: RiskScoreStrategyResponse<T>['data'];
@@ -32,9 +28,8 @@ export interface RiskScoreState<T extends EntityType> {
   isInspected: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  isModuleEnabled: boolean;
   isAuthorized: boolean;
-  isDeprecated: boolean;
+  hasEngineBeenInstalled: boolean;
   loading: boolean;
   error: unknown;
 }
@@ -73,22 +68,15 @@ export const useRiskScore = <T extends EntityType>({
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const defaultIndex = useEntityRiskIndex(riskEntity, onlyLatest);
-
+  const defaultIndex = useGetDefaultRiskIndex(riskEntity, onlyLatest);
   const factoryQueryType = EntityRiskQueries.list;
-
   const { querySize, cursorStart } = pagination || {};
-
   const { addError } = useAppToasts();
-
-  const {
-    isDeprecated,
-    isEnabled,
-    isAuthorized,
-    isLoading: isDeprecatedLoading,
-    refetch: refetchDeprecated,
-  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
-
+  const { isPlatinumOrTrialLicense } = useMlCapabilities();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const hasEngineBeenInstalled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const {
     loading,
     result: response,
@@ -99,15 +87,14 @@ export const useRiskScore = <T extends EntityType>({
   } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
-    abort: skip,
+    abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
     showErrorToast: false,
   });
   const refetchAll = useCallback(() => {
     if (defaultIndex) {
-      refetchDeprecated(defaultIndex);
       refetch();
     }
-  }, [defaultIndex, refetch, refetchDeprecated]);
+  }, [defaultIndex, refetch]);
 
   const riskScoreResponse = useMemo(
     () => ({
@@ -116,19 +103,17 @@ export const useRiskScore = <T extends EntityType>({
       refetch: refetchAll,
       totalCount: response.totalCount,
       isAuthorized,
-      isDeprecated,
-      isModuleEnabled: isEnabled,
       isInspected: false,
+      hasEngineBeenInstalled,
       error,
     }),
     [
-      inspect,
-      isDeprecated,
-      isEnabled,
-      isAuthorized,
-      refetchAll,
       response.data,
       response.totalCount,
+      inspect,
+      refetchAll,
+      isAuthorized,
+      hasEngineBeenInstalled,
       error,
     ]
   );
@@ -185,19 +170,12 @@ export const useRiskScore = <T extends EntityType>({
   }, [addError, error]);
 
   useEffect(() => {
-    if (
-      !skip &&
-      !isDeprecatedLoading &&
-      riskScoreRequest != null &&
-      isAuthorized &&
-      isEnabled &&
-      !isDeprecated
-    ) {
+    if (!skip && riskScoreRequest != null && isAuthorized && hasEngineBeenInstalled) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
+  }, [hasEngineBeenInstalled, isAuthorized, riskScoreRequest, search, skip]);
 
-  const result = { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+  const result = { ...riskScoreResponse, loading: loading || isStatusLoading };
 
   return result;
 };

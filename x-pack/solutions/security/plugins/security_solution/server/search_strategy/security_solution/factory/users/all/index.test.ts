@@ -11,7 +11,6 @@ import * as buildQuery from './query.all_users.dsl';
 import { allUsers } from '.';
 import { mockDeps, mockOptions, mockSearchStrategyResponse } from './__mocks__';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
-
 import { get } from 'lodash/fp';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
@@ -114,9 +113,10 @@ describe('allHosts search strategy', () => {
       await allUsers.parse({ ...mockOptions, pagination }, mockSearchStrategyResponse, mockedDeps);
 
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
-        defaultIndex: ['ml_user_risk_score_latest_test-space'],
+        defaultIndex: ['risk-score.risk-score-latest-test-space'],
         filterQuery: { terms: { 'user.name': userName } },
         riskScoreEntity: EntityType.user,
+        factoryQueryType: 'usersRiskScore',
       });
     });
 

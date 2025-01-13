@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -15,31 +15,17 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { hostsModel, hostsSelectors } from '../../../explore/hosts/store';
 import { usersSelectors } from '../../../explore/users/store';
-import { RiskInformationButtonEmpty } from '../risk_information';
-import * as i18n from './translations';
-
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { RiskScoreOverTime } from '../risk_score_over_time';
-import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import {
-  buildEntityNameFilter,
-  type HostRiskScore,
-  type UserRiskScore,
-} from '../../../../common/search_strategy';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { buildEntityNameFilter, EntityType } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
-import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
-import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
-import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from '../risk_score_update_panel';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
-import { getRiskyEntityDashboardTitle } from '../risk_score/constants';
+import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -47,20 +33,14 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const RiskDetailsTabBodyComponent = <T extends EntityType>({
-  entityName,
-  startDate,
-  endDate,
-  setQuery,
-  deleteQuery,
-  riskEntity,
-}: Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-  entityName: string;
-  riskEntity: T;
-}) => {
+const RiskDetailsTabBodyComponent: React.FC<
+  Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+    entityName: string;
+    riskEntity: EntityType;
+  }
+> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
   const queryId = useMemo(
     () =>
-      // TODO Add support for services on a follow-up PR
       riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
@@ -68,13 +48,10 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    // TODO Add support for services on a follow-up PR
     riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
-
-  const buttonHref = useDashboardHref({ title: getRiskyEntityDashboardTitle(riskEntity) });
 
   const timerange = useMemo(
     () => ({
@@ -84,36 +61,21 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
     [startDate, endDate]
   );
 
-  const { toggleStatus: overTimeToggleStatus, setToggleStatus: setOverTimeToggleStatus } =
-    useQueryToggle(`${queryId} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
+    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore<T>({
+  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,
-    skip: !overTimeToggleStatus && !contributorsToggleStatus,
+    skip: !contributorsToggleStatus,
     timerange,
   });
-
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-
-  const rules = useMemo(() => {
-    const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
-    if (lastRiskItem) {
-      // TODO Add support for services on a follow-up PR
-      return riskEntity === EntityType.host
-        ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
-        : (lastRiskItem as UserRiskScore).user.risk.rule_risks;
-    }
-    return [];
-  }, [data, riskEntity]);
 
   useQueryInspector({
     queryId,
@@ -129,13 +91,6 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
       setContributorsToggleStatus(status);
     },
     [setContributorsToggleStatus]
-  );
-
-  const toggleOverTimeQuery = useCallback(
-    (status: boolean) => {
-      setOverTimeToggleStatus(status);
-    },
-    [setOverTimeToggleStatus]
   );
 
   const privileges = useMissingRiskEnginePrivileges();
@@ -154,87 +109,32 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
   }
 
   const status = {
-    isDisabled: !isModuleEnabled && !loading,
-    isDeprecated: isDeprecated && !loading,
+    isDisabled: !hasEngineBeenInstalled && !loading,
   };
 
-  if (status.isDisabled || status.isDeprecated) {
-    return (
-      <EnableRiskScore
-        {...status}
-        entityType={riskEntity}
-        refetch={refetch}
-        timerange={timerange}
-      />
-    );
+  if (status.isDisabled) {
+    return <EnableRiskScore {...status} entityType={riskEntity} />;
   }
 
-  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refetch} />;
+  if (hasEngineBeenInstalled && severitySelectionRedux.length === 0 && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={riskEntity} />;
   }
 
   return (
     <>
-      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
-      {riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ? (
-        <StyledEuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            {data?.[0] && (
-              <TopRiskScoreContributorsAlerts
-                toggleStatus={contributorsToggleStatus}
-                toggleQuery={toggleContributorsQuery}
-                riskScore={data[0]}
-                riskEntity={riskEntity}
-                loading={loading}
-              />
-            )}
-          </EuiFlexItem>
-        </StyledEuiFlexGroup>
-      ) : (
-        <>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={2}>
-              <RiskScoreOverTime
-                from={startDate}
-                queryId={queryId}
-                riskEntity={riskEntity}
-                title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-                to={endDate}
-                toggleQuery={toggleOverTimeQuery}
-                toggleStatus={overTimeToggleStatus}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={1}>
-              <TopRiskScoreContributors
-                loading={loading}
-                queryId={queryId}
-                toggleStatus={contributorsToggleStatus}
-                toggleQuery={toggleContributorsQuery}
-                rules={rules}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <StyledEuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                href={buttonHref}
-                isDisabled={!buttonHref}
-                data-test-subj={`risky-${riskEntity}s-view-dashboard-button`}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {i18n.VIEW_DASHBOARD_BUTTON}
-              </EuiButton>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <RiskInformationButtonEmpty riskEntity={riskEntity} />
-            </EuiFlexItem>
-          </StyledEuiFlexGroup>
-        </>
-      )}
+      <StyledEuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {data?.[0] && (
+            <TopRiskScoreContributorsAlerts
+              toggleStatus={contributorsToggleStatus}
+              toggleQuery={toggleContributorsQuery}
+              riskScore={data[0]}
+              riskEntity={riskEntity}
+              loading={loading}
+            />
+          )}
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
     </>
   );
 };
