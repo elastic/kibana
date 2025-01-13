@@ -72,7 +72,9 @@ export const AxisLabelOrientationSelector: React.FunctionComponent<
           orientationOptions[0].id
         }
         onChange={(optionId: string) => {
-          const newOrientation = orientationOptions.find(({ id }) => id === optionId)!.value;
+          const newOrientation =
+            orientationOptions.find(({ id }) => id === optionId)?.value ??
+            orientationOptions[0].value;
           setLabelOrientation(newOrientation);
         }}
       />
