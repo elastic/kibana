@@ -17,6 +17,8 @@ import {
   datasources,
   ScoutEventsReport,
   ScoutReportEventAction,
+  ScoutTestRunInfo,
+  uploadScoutReportEvents,
 } from '@kbn/scout-reporting';
 import {
   getOwningTeamsForPath,
@@ -24,6 +26,7 @@ import {
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
+import { Config as FTRConfig } from '../../config';
 
 /**
  * Configuration options for the Scout Mocha reporter
@@ -41,9 +44,14 @@ export class ScoutFTRReporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutEventsReport;
+  private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
-  constructor(private runner: Runner, private reporterOptions: ScoutFTRReporterOptions = {}) {
+  constructor(
+    private runner: Runner,
+    config: FTRConfig,
+    private reporterOptions: ScoutFTRReporterOptions = {}
+  ) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
@@ -55,6 +63,10 @@ export class ScoutFTRReporter {
 
     this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
+    this.baseTestRunInfo = {
+      id: this.runId,
+      config: { file: { path: config.path, owner: this.getFileOwners(config.path) } },
+    };
 
     // Register event listeners
     for (const [eventName, listener] of Object.entries({
@@ -89,9 +101,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       event: {
         action: ScoutReportEventAction.RUN_BEGIN,
       },
@@ -108,9 +118,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
@@ -119,13 +127,13 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
+        file: {
+          path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
+          owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
+        },
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
-      },
-      file: {
-        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-        owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
       },
     });
   };
@@ -140,9 +148,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
@@ -151,6 +157,10 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
+        file: {
+          path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
+          owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
+        },
         status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
       },
@@ -161,14 +171,10 @@ export class ScoutFTRReporter {
           stack_trace: test.err?.stack,
         },
       },
-      file: {
-        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-        owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
-      },
     });
   };
 
-  onRunEnd = () => {
+  onRunEnd = async () => {
     /**
      * Root suite execution has ended
      */
@@ -179,7 +185,7 @@ export class ScoutFTRReporter {
         type: 'ftr',
       },
       test_run: {
-        id: this.runId,
+        ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
       },

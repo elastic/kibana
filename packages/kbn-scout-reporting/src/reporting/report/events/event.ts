@@ -46,10 +46,21 @@ export interface ScoutReporterInfo {
 }
 
 /**
+ * Scout file info
+ */
+export interface ScoutFileInfo {
+  path: string;
+  owner: string | string[];
+}
+
+/**
  * Scout test run info
  */
 export interface ScoutTestRunInfo {
   id: string;
+  config?: {
+    file?: ScoutFileInfo;
+  };
   status?: string;
   duration?: number;
 }
@@ -81,14 +92,7 @@ export interface ScoutTestInfo {
     category?: string;
     duration?: number;
   };
-}
-
-/**
- * Scout file info
- */
-export interface ScoutFileInfo {
-  path: string;
-  owner: string | string[];
+  file?: ScoutFileInfo;
 }
 
 /**
@@ -99,7 +103,6 @@ export interface ScoutReportEvent {
   buildkite?: BuildkiteMetadata;
   host?: HostMetadata;
   event: ScoutReportEventInfo;
-  file?: ScoutFileInfo;
   labels?: { [id: string]: string };
   reporter: ScoutReporterInfo;
   test_run: ScoutTestRunInfo;

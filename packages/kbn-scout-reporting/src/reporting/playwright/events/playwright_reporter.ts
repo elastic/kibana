@@ -41,6 +41,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutEventsReport;
+  private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -54,6 +55,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
+    this.baseTestRunInfo = { id: this.runId };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -74,16 +76,32 @@ export class ScoutPlaywrightReporter implements Reporter {
     return false;
   }
 
-  onBegin(config: FullConfig, suite: Suite) {
+  onBegin(config: FullConfig, _: Suite) {
+    // Enrich base test run info with config file info
+    let configInfo: ScoutTestRunInfo['config'];
+
+    if (config.configFile !== undefined) {
+      configInfo = {
+        file: {
+          path: config.configFile,
+          owner: this.getFileOwners(config.configFile),
+        },
+      };
+    }
+
+    this.baseTestRunInfo = {
+      ...this.baseTestRunInfo,
+      config: configInfo,
+    };
+
+    // Log event
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       event: {
         action: ScoutReportEventAction.RUN_BEGIN,
       },
@@ -98,9 +116,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent.titlePath().join(' '),
         type: test.parent.type,
@@ -111,18 +127,18 @@ export class ScoutPlaywrightReporter implements Reporter {
         tags: test.tags,
         annotations: test.annotations,
         expected_status: test.expectedStatus,
+        file: {
+          path: path.relative(REPO_ROOT, test.location.file),
+          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+        },
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
       },
-      file: {
-        path: path.relative(REPO_ROOT, test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-      },
     });
   }
 
-  onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+  onStepBegin(test: TestCase, _: TestResult, step: TestStep) {
     this.report.logEvent({
       '@timestamp': step.startTime,
       ...environmentMetadata,
@@ -130,9 +146,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent.titlePath().join(' '),
         type: test.parent.type,
@@ -147,27 +161,25 @@ export class ScoutPlaywrightReporter implements Reporter {
           title: step.titlePath().join(' '),
           category: step.category,
         },
+        file: {
+          path: path.relative(REPO_ROOT, test.location.file),
+          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+        },
       },
       event: {
         action: ScoutReportEventAction.TEST_STEP_BEGIN,
       },
-      file: {
-        path: path.relative(REPO_ROOT, test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-      },
     });
   }
 
-  onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+  onStepEnd(test: TestCase, _: TestResult, step: TestStep) {
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent.titlePath().join(' '),
         type: test.parent.type,
@@ -183,6 +195,10 @@ export class ScoutPlaywrightReporter implements Reporter {
           category: step.category,
           duration: step.duration,
         },
+        file: {
+          path: path.relative(REPO_ROOT, test.location.file),
+          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+        },
       },
       event: {
         action: ScoutReportEventAction.TEST_STEP_END,
@@ -190,10 +206,6 @@ export class ScoutPlaywrightReporter implements Reporter {
           message: step.error?.message ? stripANSI(step.error.message) : undefined,
           stack_trace: step.error?.stack ? stripANSI(step.error.stack) : undefined,
         },
-      },
-      file: {
-        path: path.relative(REPO_ROOT, test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       },
     });
   }
@@ -205,9 +217,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent.titlePath().join(' '),
         type: test.parent.type,
@@ -220,6 +230,10 @@ export class ScoutPlaywrightReporter implements Reporter {
         expected_status: test.expectedStatus,
         status: result.status,
         duration: result.duration,
+        file: {
+          path: path.relative(REPO_ROOT, test.location.file),
+          owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+        },
       },
       event: {
         action: ScoutReportEventAction.TEST_END,
@@ -228,14 +242,10 @@ export class ScoutPlaywrightReporter implements Reporter {
           stack_trace: result.error?.stack ? stripANSI(result.error.stack) : undefined,
         },
       },
-      file: {
-        path: path.relative(REPO_ROOT, test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-      },
     });
   }
 
-  onEnd(result: FullResult) {
+  async onEnd(result: FullResult) {
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -243,7 +253,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         type: 'playwright',
       },
       test_run: {
-        id: this.runId,
+        ...this.baseTestRunInfo,
         status: result.status,
         duration: result.duration,
       },
@@ -252,7 +262,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
     });
 
-    // Save & conclude the report
+    // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
     } finally {
@@ -271,9 +281,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         name: this.name,
         type: 'playwright',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       event: {
         action: ScoutReportEventAction.ERROR,
         error: {
