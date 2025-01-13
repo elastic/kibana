@@ -2014,6 +2014,10 @@
         "index": false,
         "type": "flattened"
       },
+      "resources": {
+        "index": false,
+        "type": "object"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
