@@ -22,7 +22,10 @@ export interface RuleMigrationsPanelsProps {
 }
 export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
   ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard }) => {
-    const latestMigrationsStats = useMemo(() => migrationsStats.reverse(), [migrationsStats]);
+    const latestMigrationsStats = useMemo(
+      () => migrationsStats.slice().reverse(),
+      [migrationsStats]
+    );
 
     const [expandedCardId, setExpandedCardId] = useState<string | undefined>(() => {
       if (latestMigrationsStats[0]?.status === SiemMigrationTaskStatus.FINISHED) {
