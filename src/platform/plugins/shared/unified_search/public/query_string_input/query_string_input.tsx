@@ -359,7 +359,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
   private onQueryStringChange = (value: string) => {
     this.setState({
-      isSuggestionsVisible: false,
+      isSuggestionsVisible: true,
       index: null,
       suggestionLimit: 50,
     });
@@ -418,18 +418,20 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
-          if (isSuggestionsVisible && index !== null) {
-            event.preventDefault();
-            this.incrementIndex(index);
-            // Note to engineers. `isSuggestionVisible` does not mean the suggestions are visible.
-            // This should likely be fixed, it's more that suggestions can be shown.
-          } else if ((isSuggestionsVisible && index == null) || this.getQueryString() === '') {
-            event.preventDefault();
-            this.setState({ isSuggestionsVisible: true, index: 0 });
+          if (event.altKey) {
+            if (isSuggestionsVisible && index !== null) {
+              event.preventDefault();
+              this.incrementIndex(index);
+              // Note to engineers. `isSuggestionVisible` does not mean the suggestions are visible.
+              // This should likely be fixed, it's more that suggestions can be shown.
+            } else if ((isSuggestionsVisible && index == null) || this.getQueryString() === '') {
+              event.preventDefault();
+              this.setState({ isSuggestionsVisible: true, index: 0 });
+            }
           }
           break;
         case KEY_CODES.UP:
-          if (isSuggestionsVisible && index !== null) {
+          if (event.altKey && isSuggestionsVisible && index !== null) {
             event.preventDefault();
             this.decrementIndex(index);
           }
