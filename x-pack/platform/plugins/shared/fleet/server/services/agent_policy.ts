@@ -505,7 +505,7 @@ class AgentPolicyService {
     return agentPolicy;
   }
 
-  public async getByIDs(
+  public async getByIds(
     soClient: SavedObjectsClientContract,
     ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
@@ -1332,7 +1332,7 @@ class AgentPolicyService {
       });
     }
 
-    const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
+    const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
     const fullPolicies = await pMap(
       agentPolicyIds,
