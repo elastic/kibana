@@ -199,17 +199,20 @@ export class RCAKibanaClient extends KibanaClient {
 
         return {
           response: {
-            body: new ReadableStream({
+            body: new ReadableStream<Uint8Array>({
               start(controller) {
-                response.data.on('data', (chunk) => {
+                response.data.on('data', (chunk: Buffer) => {
+                  that.log.info(`Analyzing root cause...`);
                   controller.enqueue(chunk);
                 });
 
                 response.data.on('end', () => {
+                  that.log.info(`Root cause analysis completed`);
                   controller.close();
                 });
 
-                response.data.on('error', (err) => {
+                response.data.on('error', (err: Error) => {
+                  that.log.error(`Error while analyzing root cause: ${err}`);
                   controller.error(err);
                 });
               },
@@ -220,7 +223,7 @@ export class RCAKibanaClient extends KibanaClient {
 
       const events = await lastValueFrom(chat$);
 
-      return events.map((event) => event.event);
+      return events.map((event) => event.event) as RootCauseAnalysisEvent[];
     }
 
     return {
@@ -270,7 +273,7 @@ export class RCAKibanaClient extends KibanaClient {
           from,
           to,
           alert,
-        });
+        }) as Promise<RootCauseAnalysisEvent[]>;
       },
     };
   }
