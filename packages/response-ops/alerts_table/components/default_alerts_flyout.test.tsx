@@ -12,10 +12,16 @@ import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { AlertsTableFlyoutBaseProps, FlyoutSectionProps } from '../types';
+import {
+  AdditionalContext,
+  AlertsTableFlyoutBaseProps,
+  FlyoutSectionProps,
+  RenderContext,
+} from '../types';
 import { DefaultAlertsFlyoutBody } from './default_alerts_flyout';
 import { createPartialObjectMock } from '../utils/test';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 const columns = [
   {
@@ -88,21 +94,26 @@ const tabsData = [
   { name: 'Table', subj: 'tableTab' },
 ];
 
+const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
+  services: {
+    http: httpServiceMock.createStartContract(),
+    fieldFormats: fieldFormatsMock,
+  },
+});
+
 describe('DefaultAlertsFlyout', () => {
   let wrapper: ReactWrapper;
   beforeAll(async () => {
     wrapper = mount(
-      <DefaultAlertsFlyoutBody
-        {...createPartialObjectMock<FlyoutSectionProps>({
-          alert,
-          isLoading: false,
-          columns,
-          services: {
-            http: httpServiceMock.createStartContract(),
-            fieldFormats: fieldFormatsMock,
-          },
-        })}
-      />
+      <AlertsTableContextProvider value={context}>
+        <DefaultAlertsFlyoutBody
+          {...createPartialObjectMock<FlyoutSectionProps>({
+            alert,
+            isLoading: false,
+            columns,
+          })}
+        />
+      </AlertsTableContextProvider>
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
   });

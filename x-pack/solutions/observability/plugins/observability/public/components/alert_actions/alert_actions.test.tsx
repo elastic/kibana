@@ -27,6 +27,8 @@ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { GetObservabilityAlertsTableProp } from '../..';
+import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
+import { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -114,7 +116,6 @@ describe('ObservabilityActions component', () => {
       | 'observabilityRuleTypeRegistry'
       | 'openAlertInFlyout'
       | 'refresh'
-      | 'services'
     > = {
       tableId: pageId,
       config,
@@ -127,6 +128,9 @@ describe('ObservabilityActions component', () => {
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       openAlertInFlyout: jest.fn(),
       refresh,
+    };
+
+    const context = {
       services: {
         http: mockKibana.services.http,
         data: mockKibana.services.data,
@@ -137,17 +141,19 @@ describe('ObservabilityActions component', () => {
         licensing: mockLicensing,
         fieldFormats: fieldFormatsMock,
       },
-    };
+    } as unknown as RenderContext<AdditionalContext>;
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-          <AlertActions
-            {...(props as unknown as ComponentProps<
-              GetObservabilityAlertsTableProp<'renderActionsCell'>
-            >)}
-          />
-        </QueryClientProvider>
+        <AlertsTableContextProvider value={context}>
+          <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+            <AlertActions
+              {...(props as unknown as ComponentProps<
+                GetObservabilityAlertsTableProp<'renderActionsCell'>
+              >)}
+            />
+          </QueryClientProvider>
+        </AlertsTableContextProvider>
       </Router>
     );
     await act(async () => {
