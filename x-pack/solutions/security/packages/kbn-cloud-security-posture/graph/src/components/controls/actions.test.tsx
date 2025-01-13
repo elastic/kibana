@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { Actions, ActionsProps } from './actions';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import { Actions, ActionsProps } from './actions';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
+
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
 
 const defaultProps: ActionsProps = {
   showToggleSearch: true,
@@ -89,13 +92,82 @@ describe('Actions component', () => {
     expect(getByText('5')).toBeInTheDocument();
   });
 
-  it('renders "9" in search filter counter badge when searchFilterCounter is equal to 9', () => {
-    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 9 });
-    expect(getByText('9')).toBeInTheDocument();
+  it('renders "99" in search filter counter badge when searchFilterCounter is equal to 99', () => {
+    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 99 });
+    expect(getByText('99')).toBeInTheDocument();
   });
 
-  it('renders "9+" in search filter counter badge when searchFilterCounter is greater than 9', () => {
-    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 10 });
-    expect(getByText('9+')).toBeInTheDocument();
+  it('renders "99+" in search filter counter badge when searchFilterCounter is greater than 99', () => {
+    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 100 });
+    expect(getByText('99+')).toBeInTheDocument();
+  });
+
+  describe('search bar tour', () => {
+    it('opens the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is true', () => {
+      const setShouldShowSearchBarButtonTourMock = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
+      const { getByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 3,
+      });
+
+      expect(getByText('Adjust correlation with search')).toBeInTheDocument();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
+
+    it('does not open the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is false', () => {
+      const setShouldShowSearchBarButtonTourMock = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([false, setShouldShowSearchBarButtonTourMock]);
+      const { queryByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 2,
+      });
+
+      expect(queryByText('Adjust correlation with search')).not.toBeInTheDocument();
+      expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
+    });
+
+    it('should not show the tour if user already toggled the search bar', () => {
+      const setShouldShowSearchBarButtonTourMock = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
+      const { getByTestId } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 0,
+      });
+      expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
+
+      fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
+
+      expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
+
+    it('closes the search bar tour when the search toggle button is clicked', async () => {
+      let shouldShowSearchBarButtonTourState = true;
+      const setShouldShowSearchBarButtonTourMock = jest.fn(
+        (value: boolean) => (shouldShowSearchBarButtonTourState = value)
+      );
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowSearchBarButtonTourState,
+        setShouldShowSearchBarButtonTourMock,
+      ]);
+      const { getByTestId, getByText, queryByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 1,
+      });
+
+      expect(getByText('Adjust correlation with search')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
+
+      waitFor(() => {
+        expect(queryByText('Adjust correlation with search')).not.toBeInTheDocument();
+      });
+
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
   });
 });

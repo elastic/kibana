@@ -99,10 +99,10 @@ export const Actions = ({
   const [searchToggled, setSearchToggled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (searchFilterCounter === 1 && shouldShowSearchBarButtonTour) {
+    if (searchFilterCounter > 0 && shouldShowSearchBarButtonTour) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);
-    } else if ((searchFilterCounter > 0 && shouldShowSearchBarButtonTour) || searchToggled) {
+    } else if (searchToggled) {
       // User already used the search bar, so we don't need to show the tour
       setShouldShowSearchBarButtonTour(false);
     }

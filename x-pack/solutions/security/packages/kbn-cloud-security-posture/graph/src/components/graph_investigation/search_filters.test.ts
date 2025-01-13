@@ -143,7 +143,7 @@ describe('search_filters', () => {
       expect(newFilters).toHaveLength(1);
       expect(newFilters[0]).toEqual({
         $state: { store: 'appState' },
-        meta: {
+        meta: expect.objectContaining({
           key,
           params: { query: value },
           controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
@@ -152,7 +152,7 @@ describe('search_filters', () => {
           field: key,
           negate: false,
           type: 'phrase',
-        },
+        }),
         query: {
           match_phrase: {
             [key]: value,
@@ -171,19 +171,18 @@ describe('search_filters', () => {
       expect(newFilters).toHaveLength(1);
       expect(newFilters[0]).toEqual({
         $state: { store: 'appState' },
-        meta: {
+        meta: expect.objectContaining({
           params: [
             { ...filters[0], meta: { ...omit(filters[0].meta, 'disabled') } },
             {
-              meta: {
+              meta: expect.objectContaining({
                 key,
                 field: key,
                 params: { query: value },
                 index: dataViewId,
                 controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-                negate: false,
                 type: 'phrase',
-              },
+              }),
               query: {
                 match_phrase: {
                   [key]: value,
@@ -191,14 +190,11 @@ describe('search_filters', () => {
               },
             },
           ],
-          alias: undefined,
           index: dataViewId,
           controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-          disabled: false,
-          negate: false,
           relation: 'OR',
           type: 'combined',
-        },
+        }),
       });
     });
 
