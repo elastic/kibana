@@ -493,10 +493,11 @@ export class Plugin
       },
       getAddRuleFlyout: (props) => {
         return getAddRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
-          connectorServices: this.connectorServices!,
+          plugins: {
+            ...props,
+            actionTypeRegistry: this.actionTypeRegistry,
+            ruleTypeRegistry: this.ruleTypeRegistry,
+          },
         });
       },
       getEditRuleFlyout: (props) => {

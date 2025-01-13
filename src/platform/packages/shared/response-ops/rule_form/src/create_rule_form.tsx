@@ -16,6 +16,7 @@ import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from './common/hooks';
 import { RulePage } from './rule_page';
+import { RuleFlyout } from './rule_flyout';
 import {
   RuleFormCircuitBreakerError,
   RuleFormErrorPromptWrapper,
@@ -44,6 +45,7 @@ export interface CreateRuleFormProps {
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
+  isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
 }
@@ -60,6 +62,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
+    isFlyout,
     onCancel,
     onSubmit,
   } = props;
@@ -156,6 +159,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     );
   }
 
+  const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
+
   return (
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
@@ -198,7 +203,12 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           }),
         }}
       >
-        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
+        <RuleFormUIComponent
+          isEdit={false}
+          isSaving={isSaving}
+          onCancel={onCancel}
+          onSave={onSave}
+        />
       </RuleFormStateProvider>
     </div>
   );

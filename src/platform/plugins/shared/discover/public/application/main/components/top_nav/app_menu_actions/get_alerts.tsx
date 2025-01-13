@@ -9,6 +9,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
+import { RuleForm } from '@kbn/response-ops-rule-form';
 import { i18n } from '@kbn/i18n';
 import {
   AppMenuActionId,
@@ -78,6 +79,8 @@ const CreateAlertFlyout: React.FC<{
     }),
     [adHocDataViews]
   );
+
+  return <RuleForm isFlyout plugins={services} />;
 
   return triggersActionsUi?.getAddRuleFlyout({
     metadata: discoverMetadata,

@@ -75,6 +75,8 @@ export const RuleFormRoute = () => {
           actionTypeRegistry,
           ...startServices,
         }}
+        id={id}
+        ruleTypeId={ruleTypeId}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

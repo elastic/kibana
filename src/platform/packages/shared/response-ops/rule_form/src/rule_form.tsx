@@ -10,7 +10,6 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
 import {
@@ -25,16 +24,15 @@ const queryClient = new QueryClient();
 
 export interface RuleFormProps {
   plugins: RuleFormPlugins;
+  id?: string;
+  ruleTypeId?: string;
+  isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins: _plugins, onCancel, onSubmit } = props;
-  const { id, ruleTypeId } = useParams<{
-    id?: string;
-    ruleTypeId?: string;
-  }>();
+  const { plugins: _plugins, onCancel, onSubmit, id, ruleTypeId, isFlyout } = props;
 
   const {
     http,
@@ -71,7 +69,15 @@ export const RuleForm = (props: RuleFormProps) => {
       actionTypeRegistry,
     };
     if (id) {
-      return <EditRuleForm id={id} plugins={plugins} onCancel={onCancel} onSubmit={onSubmit} />;
+      return (
+        <EditRuleForm
+          id={id}
+          plugins={plugins}
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          isFlyout={isFlyout}
+        />
+      );
     }
     if (ruleTypeId) {
       return (
@@ -80,6 +86,7 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          isFlyout={isFlyout}
         />
       );
     }
@@ -112,6 +119,7 @@ export const RuleForm = (props: RuleFormProps) => {
     actionTypeRegistry,
     id,
     ruleTypeId,
+    isFlyout,
     onCancel,
     onSubmit,
   ]);

@@ -14,6 +14,7 @@ import type { RuleFormData, RuleFormPlugins } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from './common/hooks';
 import { RulePage } from './rule_page';
+import { RuleFlyout } from './rule_flyout';
 import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
@@ -32,6 +33,7 @@ export interface EditRuleFormProps {
   plugins: RuleFormPlugins;
   showMustacheAutocompleteSwitch?: boolean;
   connectorFeatureId?: string;
+  isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
 }
@@ -44,6 +46,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     connectorFeatureId = 'alerting',
     onCancel,
     onSubmit,
+    isFlyout,
   } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
   const { toasts } = notifications;
@@ -179,6 +182,8 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     return action;
   });
 
+  const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
+
   return (
     <div data-test-subj="editRuleForm">
       <RuleFormStateProvider
@@ -211,7 +216,12 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           showMustacheAutocompleteSwitch,
         }}
       >
-        <RulePage isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+        <RuleFormUIComponent
+          isEdit={true}
+          isSaving={isSaving}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
       </RuleFormStateProvider>
     </div>
   );
