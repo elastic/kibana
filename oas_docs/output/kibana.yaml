@@ -5415,11 +5415,23 @@ paths:
                   per_page: 10
                   records:
                     - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
                       criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
                       id_field: host.name
                       id_value: my_other_host
                     - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
                       criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
                       id_field: host.name
                       id_value: my_host
                   total: 2
@@ -54012,7 +54024,13 @@ components:
             - '@timestamp'
       example:
         '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
         criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
         id_field: host.name
         id_value: my_host
     Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts:
