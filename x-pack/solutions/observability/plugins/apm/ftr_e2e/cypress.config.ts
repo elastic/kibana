@@ -30,5 +30,6 @@ export default defineCypressConfig({
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalMemoryManagement: true,
+    experimentalRunAllSpecs: true,
   },
 });
