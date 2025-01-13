@@ -4140,7 +4140,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/charts-theme@link:packages/kbn-charts-theme":
+"@kbn/charts-theme@link:src/platform/packages/shared/kbn-charts-theme":
   version "0.0.0"
   uid ""
 
