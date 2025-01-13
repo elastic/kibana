@@ -69,9 +69,9 @@ export const getSearchEmbeddableFactory = ({
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       /** One Discover context awareness */
-      const solutionNavId = await firstValueFrom(
-        discoverServices.core.chrome.getActiveSolutionNavId$()
-      );
+      const solutionNavId =
+        initialState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
+        (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
       const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
