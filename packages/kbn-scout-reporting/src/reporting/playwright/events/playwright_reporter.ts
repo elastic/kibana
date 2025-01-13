@@ -265,6 +265,10 @@ export class ScoutPlaywrightReporter implements Reporter {
     // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
+      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
+    } catch (e) {
+      // Log the error but don't propagate it
+      this.log.error(e);
     } finally {
       this.report.conclude();
     }
