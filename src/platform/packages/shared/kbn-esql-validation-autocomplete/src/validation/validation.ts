@@ -635,7 +635,6 @@ function validateFunction({
     }
   }
   // Retrieve unique of types that are compatiable for the current arg
-  // const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
 
   for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
