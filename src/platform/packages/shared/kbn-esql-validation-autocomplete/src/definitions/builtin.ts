@@ -451,7 +451,7 @@ const notInFunctions: FunctionDefinition[] = [
   //
   // we need to revisit with more robust validation
   type: 'builtin',
-  ignoreAsSuggestion: true,
+  ignoreAsSuggestion: /not/.test(name),
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],

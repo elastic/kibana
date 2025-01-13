@@ -385,18 +385,14 @@
     {
       "query": "row var = 1 in (\"a\", \"b\", \"c\")",
       "error": [
-        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
       ],
       "warning": []
     },
     {
       "query": "row var = 5 in (\"a\", \"b\", \"c\")",
       "error": [
-        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
       ],
       "warning": []
     },
@@ -6935,9 +6931,7 @@
     {
       "query": "from a_index | eval 1 in (\"a\", \"b\", \"c\")",
       "error": [
-        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
-        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
       ],
       "warning": []
     },

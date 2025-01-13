@@ -12,7 +12,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, Signature } from '../src/definitions/types';
+import { FunctionDefinition, FunctionParameterType, Signature } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -632,7 +632,7 @@ const enrichOperators = (
     const isInOperator = op.name === 'in';
     const isLikeOperator = /like/i.test(op.name);
 
-    const signatures = op.signatures.map((s) => ({
+    let signatures = op.signatures.map((s) => ({
       ...s,
       // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
       params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
@@ -657,6 +657,18 @@ const enrichOperators = (
     }
     if (isInOperator || isLikeOperator) {
       supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
+    }
+    if (isInOperator) {
+      // Override the signatures to be array types instead of singular
+      // i.e. right: 'keyword' -> right: 'keyword[]'
+      // so that in would open up ($0)
+      signatures = signatures.map((s) => ({
+        ...s,
+        params: s.params.map((p, idx) => ({
+          ...p,
+          type: `${p.type}${idx === 1 ? '[]' : ''}` as FunctionParameterType,
+        })),
+      }));
     }
     if (
       Object.hasOwn(operatorsMeta, op.name) &&

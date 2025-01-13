@@ -1845,7 +1845,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_point',
+          type: 'cartesian_point[]',
           optional: false,
         },
       ],
@@ -2834,7 +2834,7 @@ const matchOperatorDefinition: FunctionDefinition = {
   name: 'match_operator',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_operator', {
     defaultMessage:
-      'Performs a match query on the specified field. Returns true if the provided query matches the row.',
+      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on text fields, as well as other field types like boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
   preview: true,
   alias: undefined,

@@ -98,6 +98,7 @@ const arrayTypes = [
   'geo_point[]',
   'geo_shape[]',
   'version[]',
+  'date_nanos[]',
 ] as const;
 
 export type ArrayType = (typeof arrayTypes)[number];

@@ -1500,6 +1500,16 @@ const dateFormatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'dateFormat',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
           type: 'keyword',
           optional: true,
         },
@@ -3524,7 +3534,7 @@ const matchDefinition: FunctionDefinition = {
   name: 'match',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
     defaultMessage:
-      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on text fields, as well as other field types like boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
+      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like  text and  semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
   preview: true,
   alias: undefined,
