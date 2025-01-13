@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
@@ -163,7 +163,6 @@ export const useTimelineEventsHandler = ({
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
