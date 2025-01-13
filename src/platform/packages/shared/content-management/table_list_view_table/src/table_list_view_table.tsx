@@ -299,7 +299,7 @@ const urlStateSerializer = (updated: {
 const tableColumnMetadata = {
   title: {
     field: 'attributes.title',
-    name: 'Name, description, tags',
+    name: 'Name',
   },
   updatedAt: {
     field: 'updatedAt',
@@ -421,7 +421,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageIndex: 0,
         totalItemCount: 0,
         pageSize: initialPageSize,
-        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort((a, b) => Number(a) - Number(b)),
       },
       tableSort: initialSort.tableSort,
       sortColumnChanged: !initialSort.isDefault,
@@ -606,7 +606,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
-            defaultMessage: 'Name, description, tags',
+            defaultMessage: 'Name',
           }),
         sortable: true,
         render: (field: keyof T, record: T) => {
@@ -696,7 +696,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (item) => Boolean(tableItemsRowActions[item.id]?.edit?.enabled),
+          available: (item) => tableItemsRowActions[item.id]?.edit?.enabled !== false,
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -722,7 +722,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'iInCircle',
+          icon: 'controlsVertical',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,

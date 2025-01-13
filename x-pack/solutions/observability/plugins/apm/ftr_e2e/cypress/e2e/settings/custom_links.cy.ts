@@ -109,13 +109,11 @@ describe('Custom links', () => {
       cy.visitKibana(basePath);
       cy.getByTestSubj('editCustomLink').click();
       cy.contains('Delete').click();
+      cy.getByTestSubj('customLinksEmptyPrompt').should('be.visible');
     });
 
     it('clears filter values when field is selected', () => {
       cy.visitKibana(basePath);
-
-      // wait for empty prompt
-      cy.getByTestSubj('customLinksEmptyPrompt').should('be.visible');
 
       cy.contains('Create custom link').click();
       cy.getByTestSubj('filter-0').select('service.name');
