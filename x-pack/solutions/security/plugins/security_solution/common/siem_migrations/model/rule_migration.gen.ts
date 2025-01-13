@@ -353,6 +353,14 @@ export const UpdateRuleMigrationData = z.object({
 });
 
 /**
+ * Indicates the filter to retry the migrations rules translation
+ */
+export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
+export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
+export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
+
+/**
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
