@@ -16,6 +16,7 @@ import React, {
   useState,
 } from 'react';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
+import { useGetGapsInfoByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_info_by_rule_id';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -186,6 +187,9 @@ interface RulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
+const start = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
+const end = new Date().toISOString();
+
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
@@ -209,6 +213,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+    ruleIds: [],
+    searchGapsStart: '',
+    searchGapsEnd: '',
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -316,16 +323,36 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     { enabled: rules.length > 0 }
   );
 
-  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+  const {
+    data: rulesGapInfoByRuleIds,
+    isLoading: isGapInfoLoading,
+    isFetching: isGapInfoFetching,
+    isError: isGapInfoFetchError,
+    refetch: refetchGapInfo,
+  } = useGetGapsInfoByRuleIds(
+    {
+      ruleIds: rules.map((x) => x.id),
+      start: filterOptions.searchGapsStart,
+      end: filterOptions.searchGapsEnd,
+    },
+    {
+      enabled:
+        rules.length > 0 &&
+        Boolean(filterOptions.searchGapsStart) &&
+        Boolean(filterOptions.searchGapsEnd),
+    }
+  );
+
+  const refetchRulesAndRelatedData = useCallback(async () => {
     const response = await refetch();
     await refetchSnoozeSettings();
-
+    await refetchGapInfo();
     return response;
-  }, [refetch, refetchSnoozeSettings]);
+  }, [refetch, refetchSnoozeSettings, refetchGapInfo]);
 
   const actions = useMemo(
     () => ({
-      reFetchRules: refetchRulesAndSnoozeSettings,
+      reFetchRules: refetchRulesAndRelatedData,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -339,7 +366,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetchRulesAndSnoozeSettings,
+      refetchRulesAndRelatedData,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -354,10 +381,20 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
+  const enrichedRules = useMemo(() => {
+    return rules.map((rule) => {
+      const gapInfo = rulesGapInfoByRuleIds?.data?.find((x) => x.rule_id === rule.id);
+      return {
+        ...rule,
+        gap_info: gapInfo,
+      };
+    });
+  }, [rules, rulesGapInfoByRuleIds]);
+
   const providerValue = useMemo(() => {
     return {
       state: {
-        rules,
+        rules: enrichedRules,
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
@@ -392,7 +429,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       actions,
     };
   }, [
-    rules,
+    enrichedRules,
     rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
