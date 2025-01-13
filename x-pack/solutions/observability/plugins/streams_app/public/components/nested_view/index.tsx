@@ -18,7 +18,7 @@ export function NestedView({
 }: {
   children: React.ReactNode;
   last?: boolean;
-  isBeingDragged: boolean;
+  isBeingDragged?: boolean;
 }) {
   return isBeingDragged ? (
     <>{children}</>
