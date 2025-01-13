@@ -21,7 +21,18 @@ describe('autocomplete.suggest', () => {
           .map((s) => [s.label, s.text, s.detail]);
 
         expect(filtered.map((s) => s[0])).toEqual(['LOOKUP JOIN']);
+
+        // TODO: Uncomment when other join types are implemented
         // expect(filtered.map((s) => s[0])).toEqual(['LEFT JOIN', 'RIGHT JOIN', 'LOOKUP JOIN']);
+      });
+
+      test('can infer full command name based on the unique command type', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LOOKU/');
+        const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LOOKUP JOIN');
+
+        expect(filtered[0].label).toBe('LOOKUP JOIN');
       });
 
       test('suggests command on first character', async () => {
@@ -33,29 +44,22 @@ describe('autocomplete.suggest', () => {
         expect(filtered[0].label).toBe('LOOKUP JOIN');
       });
 
-      test('returns command description', async () => {
+      test('returns command description, correct type, and suggestion continuation', async () => {
         const { suggest } = await setup();
 
         const suggestions = await suggest('FROM index | LOOKUP J/');
-        const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LOOKUP JOIN');
 
-        expect(filtered[0].label).toBe('LOOKUP JOIN');
-        expect(filtered[0].detail).toBe('Join with a "lookup" mode index');
+        expect(suggestions[0]).toMatchObject({
+          label: 'LOOKUP JOIN',
+          text: 'LOOKUP JOIN $0',
+          detail: 'Join with a "lookup" mode index',
+          kind: 'Keyword',
+        });
       });
-
-      // test.only('suggests all command types', async () => {
-      //   const { suggest } = await setup();
-
-      //   const suggestions = await suggest('FROM index | L/');
-      //   console.log(suggestions);
-      //   const filtered = suggestions.filter((s) => s.label.toUpperCase() === 'LEFT JOIN');
-
-      //   expect(filtered[0].label).toBe('LEFT JOIN');
-      // });
     });
 
     describe('... <index> ...', () => {
-      test('can suggest lookup indices', async () => {
+      test('can suggest lookup indices (and aliases)', async () => {
         const { suggest } = await setup();
 
         const suggestions = await suggest('FROM index | LEFT JOIN /');
@@ -73,54 +77,29 @@ describe('autocomplete.suggest', () => {
         const { suggest } = await setup();
 
         const suggestions = await suggest('FROM index | LEFT JOIN /');
-        const labels = suggestions.map((s) => s.label);
+        const indices: string[] = suggestions
+          .filter((s) => s.detail === 'Index')
+          .map((s) => s.label)
+          .sort();
+        const aliases: string[] = suggestions
+          .filter((s) => s.detail === 'Alias')
+          .map((s) => s.label)
+          .sort();
+
+        expect(indices).toEqual(['join_index', 'join_index_with_alias']);
+        expect(aliases).toEqual(['join_index_alias_1', 'join_index_alias_2']);
       });
     });
-
-    // describe('... = <alias> ...', () => {
-    //   test('suggests "ON" command option', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | FROM join_index AS abc /', ['ON']);
-    //   });
-    // });
 
     describe('... ON <condition>', () => {
       test('shows "ON" keyword suggestion', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM index | LEFT JOIN /');
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index /');
         const labels = suggestions.map((s) => s.label);
+
+        expect(labels).toEqual(['ON']);
       });
-
-      //   test('suggests comma after first condition was entered', async () => {
-      //     const { assertSuggestions } = await setup();
-
-      //     await assertSuggestions('FROM index | FROM join_index AS abc ON a = b/', [',']);
-      //   });
     });
-
-    // describe('... <index> ...', () => {
-    //   test('suggests valid join indices', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | LEFT JOIN /', joinIndices);
-    //     await assertSuggestions('FROM index | right join /', joinIndices);
-    //     await assertSuggestions('FROM index | RIGHT JOIN j/', joinIndices);
-    //   });
-
-    //   test('after index suggests "AS" expression', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | FROM join_index /', ['AS']);
-    //     // ...
-    //   });
-
-    //   test('suggests "ON" command option', async () => {
-    //     const { assertSuggestions } = await setup();
-
-    //     await assertSuggestions('FROM index | FROM join_index /', ['ON']);
-    //   });
-    // });
   });
 });

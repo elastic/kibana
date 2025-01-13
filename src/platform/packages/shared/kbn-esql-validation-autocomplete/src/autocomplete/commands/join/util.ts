@@ -89,7 +89,7 @@ export const joinIndicesToSuggestions = (
       for (const alias of index.aliases) {
         aliasSuggestions.push({
           label: alias,
-          text: alias + ' ',
+          text: alias + ' $0',
           kind: 'Issue',
           detail: i18n.translate(
             'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.alias',

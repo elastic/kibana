@@ -73,7 +73,7 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
         ([mnemonic, description], i) =>
           ({
             label: mnemonic,
-            text: mnemonic,
+            text: mnemonic + ' $0',
             detail: description,
             kind: 'Keyword',
             sortText: `${i}-MNEMONIC`,

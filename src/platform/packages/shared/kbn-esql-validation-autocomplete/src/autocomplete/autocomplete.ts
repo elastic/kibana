@@ -209,7 +209,10 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (astContext.type === 'expression') {
+  if (
+    astContext.type === 'expression' ||
+    (astContext.type === 'option' && astContext.command?.name === 'join')
+  ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
