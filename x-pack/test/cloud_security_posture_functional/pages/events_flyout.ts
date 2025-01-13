@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('admin@example.com');

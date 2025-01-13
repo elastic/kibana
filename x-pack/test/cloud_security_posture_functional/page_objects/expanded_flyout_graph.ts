@@ -20,6 +20,7 @@ const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_INVESTIGATION_TEST_I
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsOnEntity`;
 const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover`;
 const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowEventsWithThisAction`;
+const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSearch`;
 const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID = `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
@@ -42,6 +43,10 @@ export class ExpandedFlyoutGraph extends FtrService {
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
     expect(nodes.length).to.be(expected);
+  }
+
+  async toggleSearchBar(): Promise<void> {
+    await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
   }
 
   async selectNode(nodeId: string): Promise<WebElementWrapper> {
