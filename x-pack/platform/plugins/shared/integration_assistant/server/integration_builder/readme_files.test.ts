@@ -270,7 +270,7 @@ describe('createReadme', () => {
     );
   });
 
-  it('Should not call ssl template if input can be configured with ssl', () => {
+  it('Should not call ssl template if input cannot be configured with ssl', () => {
     const dataStreams = [
       {
         name: 'example-datastream',
