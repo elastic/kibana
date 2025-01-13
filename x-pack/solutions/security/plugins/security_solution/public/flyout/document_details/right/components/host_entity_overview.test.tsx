@@ -26,11 +26,7 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
@@ -86,9 +82,6 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
@@ -124,7 +117,6 @@ const renderHostEntityContent = () =>
 describe('<HostEntityContent />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
@@ -204,28 +196,9 @@ describe('<HostEntityContent />', () => {
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('should navigate to left panel entities tab when clicking on title when feature flag is off', () => {
+    it('should open host preview when clicking on title', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-
-      const { getByTestId } = renderHostEntityContent();
-
-      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
-      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsLeftPanelKey,
-        path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-        params: {
-          id: panelContextValue.eventId,
-          indexName: panelContextValue.indexName,
-          scopeId: panelContextValue.scopeId,
-        },
-      });
-    });
-
-    it('should open host preview when clicking on title when feature flag is on', () => {
-      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
       const { getByTestId } = renderHostEntityContent();
 

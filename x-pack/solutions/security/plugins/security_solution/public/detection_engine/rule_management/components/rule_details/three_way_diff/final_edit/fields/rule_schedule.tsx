@@ -10,8 +10,8 @@ import { parseDuration } from '@kbn/alerting-plugin/common';
 import { type FormSchema, type FormData, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_schedule_rule/schema';
 import type { RuleSchedule } from '../../../../../../../../common/api/detection_engine';
-import { ScheduleItem } from '../../../../../../rule_creation/components/schedule_item_form';
 import { secondsToDurationString } from '../../../../../../../detections/pages/detection_engine/rules/helpers';
+import { ScheduleItemField } from '../../../../../../rule_creation/components/schedule_item_field';
 
 export const ruleScheduleSchema = {
   interval: schema.interval,
@@ -28,8 +28,8 @@ const componentProps = {
 export function RuleScheduleEdit(): JSX.Element {
   return (
     <>
-      <UseField path="interval" component={ScheduleItem} componentProps={componentProps} />
-      <UseField path="from" component={ScheduleItem} componentProps={componentProps} />
+      <UseField path="interval" component={ScheduleItemField} componentProps={componentProps} />
+      <UseField path="from" component={ScheduleItemField} componentProps={componentProps} />
     </>
   );
 }

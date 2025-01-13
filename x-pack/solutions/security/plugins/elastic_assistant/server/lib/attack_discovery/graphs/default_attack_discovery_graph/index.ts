@@ -26,12 +26,15 @@ import type { GraphState } from './types';
 export interface GetDefaultAttackDiscoveryGraphParams {
   alertsIndexPattern?: string;
   anonymizationFields: AnonymizationFieldResponse[];
+  end?: string;
   esClient: ElasticsearchClient;
+  filter?: Record<string, unknown>;
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size: number;
+  start?: string;
 }
 
 export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDiscoveryGraph>;
@@ -46,19 +49,22 @@ export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDisc
 export const getDefaultAttackDiscoveryGraph = ({
   alertsIndexPattern,
   anonymizationFields,
+  end,
   esClient,
+  filter,
   llm,
   logger,
   onNewReplacements,
   replacements,
   size,
+  start,
 }: GetDefaultAttackDiscoveryGraphParams): CompiledStateGraph<
   GraphState,
   Partial<GraphState>,
   'generate' | 'refine' | 'retrieve_anonymized_alerts' | '__start__'
 > => {
   try {
-    const graphState = getDefaultGraphState();
+    const graphState = getDefaultGraphState({ end, filter, start });
 
     // get nodes:
     const retrieveAnonymizedAlertsNode = getRetrieveAnonymizedAlertsNode({

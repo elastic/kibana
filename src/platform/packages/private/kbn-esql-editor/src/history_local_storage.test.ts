@@ -8,15 +8,28 @@
  */
 import { addQueriesToCache, getCachedQueries } from './history_local_storage';
 
+class LocalStorageMock {
+  public store: Record<string, unknown>;
+  constructor(defaultStore: Record<string, unknown>) {
+    this.store = defaultStore;
+  }
+  clear() {
+    this.store = {};
+  }
+  getItem(key: string) {
+    return this.store[key] || null;
+  }
+  setItem(key: string, value: unknown) {
+    this.store[key] = String(value);
+  }
+}
+
 describe('history local storage', function () {
-  const mockGetItem = jest.fn();
-  const mockSetItem = jest.fn();
+  const storage = new LocalStorageMock({}) as unknown as Storage;
   Object.defineProperty(window, 'localStorage', {
-    value: {
-      getItem: (...args: string[]) => mockGetItem(...args),
-      setItem: (...args: string[]) => mockSetItem(...args),
-    },
+    value: storage,
   });
+
   it('should add queries to cache correctly ', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights | limit 10',
@@ -37,11 +50,6 @@ describe('history local storage', function () {
     expect(historyItems.length).toBe(2);
     expect(historyItems[1].timeRan).toBeDefined();
     expect(historyItems[1].status).toBe('success');
-
-    expect(mockSetItem).toHaveBeenCalledWith(
-      'QUERY_HISTORY_ITEM_KEY',
-      JSON.stringify(historyItems)
-    );
   });
 
   it('should update queries to cache correctly if they are the same with different format', function () {
@@ -54,11 +62,6 @@ describe('history local storage', function () {
     expect(historyItems.length).toBe(2);
     expect(historyItems[1].timeRan).toBeDefined();
     expect(historyItems[1].status).toBe('success');
-
-    expect(mockSetItem).toHaveBeenCalledWith(
-      'QUERY_HISTORY_ITEM_KEY',
-      JSON.stringify(historyItems)
-    );
   });
 
   it('should allow maximum x queries ', function () {

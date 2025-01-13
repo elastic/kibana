@@ -16,6 +16,12 @@ interface Props {
 }
 
 export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
+  // exclude alerting rules from the JSON
+  if ('alerting_rules' in json) {
+    const { alerting_rules: alertingRules, ...rest } = json;
+    json = rest;
+  }
+
   return (
     <div data-test-subj="transformJsonTabContent">
       <EuiFlexGroup>

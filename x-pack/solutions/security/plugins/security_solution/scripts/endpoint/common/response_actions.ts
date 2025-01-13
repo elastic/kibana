@@ -27,6 +27,7 @@ import type {
   ResponseActionGetFileParameters,
   EndpointActionResponseDataOutput,
   ResponseActionScanOutputContent,
+  ResponseActionRunScriptOutputContent,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -138,6 +139,15 @@ export const sendEndpointActionResponse = async (
             .content as unknown as ResponseActionExecuteOutputContent
         ).stderr = 'execute command timed out';
       }
+      if (
+        endpointResponse.EndpointActions.data.command === 'runscript' &&
+        endpointResponse.EndpointActions.data.output
+      ) {
+        (
+          endpointResponse.EndpointActions.data.output
+            .content as unknown as ResponseActionRunScriptOutputContent
+        ).stderr = 'runscript command timed out';
+      }
     }
 
     await esClient.index({
@@ -230,7 +240,7 @@ export const sendEndpointActionResponse = async (
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
-      // https://github.com/elastic/kibana/blob/main/src/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
+      // https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
       await esClient
         .index(
           {

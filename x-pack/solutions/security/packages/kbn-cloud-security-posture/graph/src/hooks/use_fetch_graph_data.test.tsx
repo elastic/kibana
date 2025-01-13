@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFetchGraphData } from './use_fetch_graph_data';
 
-const mockUseQuery = jest.fn();
+const mockUseQuery = jest.fn((...args: unknown[]) => ({
+  isLoading: true,
+  data: null,
+  isError: false,
+  isFetching: true,
+}));
 
 jest.mock('@tanstack/react-query', () => {
   return {
@@ -33,7 +38,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -52,7 +57,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -75,7 +80,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -98,7 +103,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },

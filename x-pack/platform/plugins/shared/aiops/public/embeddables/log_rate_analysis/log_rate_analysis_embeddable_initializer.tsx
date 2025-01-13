@@ -11,6 +11,7 @@ import { pick } from 'lodash';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
+  useEuiTheme,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -25,7 +26,6 @@ import {
 } from '@elastic/eui';
 
 import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -56,6 +56,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   onPreview,
   isNewPanel,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const isMounted = useMountedState();
 
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
@@ -136,7 +137,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
         hasBorder={true}
         css={{
           pointerEvents: 'auto',
-          backgroundColor: euiThemeVars.euiColorEmptyShade,
+          backgroundColor: euiTheme.colors.emptyShade,
         }}
       >
         <EuiTitle size="s" data-test-subj="inlineEditingFlyoutLabel">

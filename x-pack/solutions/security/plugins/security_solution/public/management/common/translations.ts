@@ -279,7 +279,7 @@ Command Examples for Running Scripts:
 
 3. Executes a raw script provided entirely within the "--Raw" flag.
 
-   runscript --Raw="Get-ChildItem."
+   runscript --Raw=\`\`\`Get-ChildItem.\`\`\`
 
 4. Executes a script located on the remote host at the specified path with the provided command-line arguments.
 

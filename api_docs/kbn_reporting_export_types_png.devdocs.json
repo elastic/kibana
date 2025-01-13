@@ -67,7 +67,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,7 +78,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,7 +89,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,7 +100,7 @@
             "tags": [],
             "label": "jobType",
             "description": [],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,7 +114,7 @@
             "signature": [
               "\"base64\""
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +128,7 @@
             "signature": [
               "\"png\""
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -142,7 +142,7 @@
             "signature": [
               "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -156,7 +156,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -169,14 +169,8 @@
                 "description": [],
                 "signature": [
                   "[core: ",
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "CoreSetup",
+                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -193,13 +187,7 @@
                     "text": "Logger"
                   },
                   ", context: ",
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
@@ -210,7 +198,7 @@
                   },
                   "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -260,7 +248,7 @@
               "CsvPagingStrategy",
               " | undefined; }>"
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -280,7 +268,7 @@
                     "text": "JobParamsPNGV2"
                   }
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -324,7 +312,7 @@
               "TaskRunResult",
               ">"
             ],
-            "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -338,7 +326,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -359,7 +347,7 @@
                     "text": "TaskPayloadPNGV2"
                   }
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -374,7 +362,7 @@
                 "signature": [
                   "TaskInstanceFields"
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -395,7 +383,7 @@
                     "text": "CancellationToken"
                   }
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -410,7 +398,7 @@
                 "signature": [
                   "Writable"
                 ],
-                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

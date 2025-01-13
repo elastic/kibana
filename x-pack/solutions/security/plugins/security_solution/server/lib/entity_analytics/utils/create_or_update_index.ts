@@ -13,7 +13,7 @@ import type {
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 /**
- * It's check for index existatnce, and create index
+ * It's check for index existence, and create index
  * or update existing index mappings
  */
 export const createOrUpdateIndex = async ({

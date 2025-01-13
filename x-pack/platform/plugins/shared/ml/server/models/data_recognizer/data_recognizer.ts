@@ -870,8 +870,8 @@ export class DataRecognizer {
     );
     if (applyToAllSpaces === true) {
       const canCreateGlobalJobs = await this._mlSavedObjectService.canCreateGlobalMlSavedObjects(
-        'anomaly-detector',
-        this._request
+        this._request,
+        'anomaly-detector'
       );
       if (canCreateGlobalJobs === true) {
         await this._mlSavedObjectService.updateJobsSpaces(
