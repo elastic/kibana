@@ -138,7 +138,7 @@ export const AgentPolicyBaseSchema = {
         schema.object({
           memory: schema.maybe(schema.string()),
           cpu: schema.maybe(schema.string()),
-        }),
+        })
       ),
     })
   ),
