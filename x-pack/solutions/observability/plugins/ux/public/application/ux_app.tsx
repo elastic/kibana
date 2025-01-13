@@ -9,7 +9,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { EuiThemeProvider } from '@elastic/eui';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
@@ -72,11 +71,9 @@ function UxApp() {
   ]);
 
   return (
-    <EuiThemeProvider>
-      <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-        <RumHome />
-      </div>
-    </EuiThemeProvider>
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome />
+    </div>
   );
 }
 
