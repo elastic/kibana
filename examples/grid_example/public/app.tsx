@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -227,41 +228,54 @@ export const GridExample = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <div
+
+          <GridLayout
+            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+            expandedPanelId={expandedPanelId}
+            layout={currentLayout}
+            gridSettings={{
+              gutterSize: DASHBOARD_MARGIN_SIZE,
+              rowHeight: DASHBOARD_GRID_HEIGHT,
+              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+            }}
+            renderPanelContents={renderPanelContents}
+            onLayoutChange={(newLayout) => {
+              const { panels, rows } = gridLayoutToDashboardPanelMap(
+                mockDashboardApi.panels$.getValue(),
+                newLayout
+              );
+              mockDashboardApi.panels$.next(panels);
+              mockDashboardApi.rows$.next(rows);
+            }}
             css={css`
               .kbnGridLayout--targettedRow {
                 background-position: top - ${DASHBOARD_MARGIN_SIZE / 2}px left -
                   ${DASHBOARD_MARGIN_SIZE / 2}px;
                 background-size: calc((var(--kbnGridColumnWidth) + ${DASHBOARD_MARGIN_SIZE}) * 1px)
                   ${DASHBOARD_GRID_HEIGHT + DASHBOARD_MARGIN_SIZE}px;
-                background-image: radial-gradient(
-                  at top left,
-                  ${euiTheme.colors.accentSecondary} 2px,
-                  transparent 2px
-                );
+                background-image: linear-gradient(
+                    to right,
+                    ${euiTheme.colors.backgroundLightAccentSecondary} 1px,
+                    transparent 1px
+                  ),
+                  linear-gradient(
+                    to bottom,
+                    ${euiTheme.colors.backgroundLightAccentSecondary} 1px,
+                    transparent 1px
+                  );
+                background-color: ${transparentize(
+                  euiTheme.colors.backgroundLightAccentSecondary,
+                  0.25
+                )};
+              }
+
+              .kbnGridLayout--dragPreview {
+                border-radius: ${euiTheme.border.radius};
+                background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
+                transition: opacity 100ms linear;
               }
             `}
-          >
-            <GridLayout
-              accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
-              expandedPanelId={expandedPanelId}
-              layout={currentLayout}
-              gridSettings={{
-                gutterSize: DASHBOARD_MARGIN_SIZE,
-                rowHeight: DASHBOARD_GRID_HEIGHT,
-                columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-              }}
-              renderPanelContents={renderPanelContents}
-              onLayoutChange={(newLayout) => {
-                const { panels, rows } = gridLayoutToDashboardPanelMap(
-                  mockDashboardApi.panels$.getValue(),
-                  newLayout
-                );
-                mockDashboardApi.panels$.next(panels);
-                mockDashboardApi.rows$.next(rows);
-              }}
-            />
-          </div>
+          />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </KibanaRenderContextProvider>

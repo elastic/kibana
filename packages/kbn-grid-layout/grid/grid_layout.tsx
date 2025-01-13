@@ -31,6 +31,7 @@ export interface GridLayoutProps {
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
+  className?: string; // this makes it so that custom CSS can be passed via Emotion
 }
 
 export const GridLayout = ({
@@ -40,6 +41,7 @@ export const GridLayout = ({
   onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
+  className,
 }: GridLayoutProps) => {
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
@@ -138,7 +140,7 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
-  const gridClassNames = classNames('kbnGrid', {
+  const gridClassNames = classNames('kbnGrid', className, {
     'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
     'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
   });
