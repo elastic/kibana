@@ -283,11 +283,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRequests: 2,
       });
 
-      it(`should send requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 1, async () => {
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await discover.toggleChartVisibility();
+          // show chart
           await discover.toggleChartVisibility();
         });
-        await expectSearches(type, 3, async () => {
+      });
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await discover.toggleChartVisibility();
+        await timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await expectSearches(type, 1, async () => {
+          // show chart
           await discover.toggleChartVisibility();
         });
       });
