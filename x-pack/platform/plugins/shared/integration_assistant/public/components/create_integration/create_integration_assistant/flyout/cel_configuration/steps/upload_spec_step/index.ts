@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { CelConfirmStep } from './cel_confirm_step';
+export { UploadSpecStep } from './upload_spec_step';
 export * from './is_step_ready';

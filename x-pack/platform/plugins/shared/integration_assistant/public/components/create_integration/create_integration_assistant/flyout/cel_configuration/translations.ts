@@ -16,22 +16,28 @@ export const OPEN_API_SPEC_TITLE = i18n.translate(
     defaultMessage: 'OpenAPI spec',
   }
 );
+export const UPLOAD_SPEC_TITLE = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.createCel.uploadSpecTitle',
+  {
+    defaultMessage: 'Upload OpenAPI Specification',
+  }
+);
+export const CONFIRM_SETTINGS_TITLE = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.createCel.confirmSettingsTitle',
+  {
+    defaultMessage: 'Choose API endpoint and Authentication method',
+  }
+);
 
 /**
  * footer
  */
-export const LOADING = i18n.translate('xpack.integrationAssistant.celFlyout.footer.loading', {
-  defaultMessage: 'Loading',
-});
-export const ANALYZE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.analyze', {
-  defaultMessage: 'Analyze',
-});
-export const SAVE_AND_CONTINUE = i18n.translate(
+export const SAVE_CONFIG = i18n.translate(
   'xpack.integrationAssistant.celFlyout.footer.saveAndContinue',
   {
-    defaultMessage: 'Save & Continue',
+    defaultMessage: 'Save Configuration',
   }
 );
-export const CLOSE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.close', {
-  defaultMessage: 'Close',
+export const CANCEL = i18n.translate('xpack.integrationAssistant.celFlyout.footer.cancel', {
+  defaultMessage: 'Cancel',
 });

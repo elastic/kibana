@@ -110,7 +110,7 @@ export const ADD_OPEN_API_SPEC_BUTTON = i18n.translate(
 export const OPEN_API_SPEC_BUTTON_CONFIGURED = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.openApiSpecButtonConfigured',
   {
-    defaultMessage: 'OpenAPI spec file successfully configured',
+    defaultMessage: 'OpenAPI spec file configured',
   }
 );
 export const EDIT_OPEN_API_SPEC_BUTTON = i18n.translate(

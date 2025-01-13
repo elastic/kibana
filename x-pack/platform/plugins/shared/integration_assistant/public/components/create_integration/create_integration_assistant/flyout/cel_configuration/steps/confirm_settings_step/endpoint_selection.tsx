@@ -24,7 +24,7 @@ import type { IntegrationSettings } from '../../../../types';
 const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
   const pathObjs = integrationSettings?.apiSpec?.getPaths();
   if (!pathObjs) {
-    throw new Error('Unable to parse path options from OpenAPI spec');
+    return [];
   }
   return Object.keys(pathObjs).filter((path) => pathObjs[path].get);
 };
@@ -35,6 +35,7 @@ interface EndpointSelectionProps {
   selectedPath: string | undefined;
   selectedOtherPath: string | undefined;
   useOtherEndpoint: boolean;
+  isGenerating: boolean;
   onChangeSuggestedPath(id: string): void;
   onChangeOtherPath(path: EuiComboBoxOptionOption[]): void;
 }
@@ -47,6 +48,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     selectedOtherPath,
     useOtherEndpoint,
     onChangeSuggestedPath,
+    isGenerating,
     onChangeOtherPath,
   }) => {
     const allPaths = loadPaths(integrationSettings);
