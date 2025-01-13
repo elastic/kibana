@@ -110,7 +110,7 @@ xjsonRules.json_root = [
   buildSqlStartRule(),
   // @ts-expect-error include a rule to start painless highlighting
   buildPainlessStartRule(),
-  // @ts-expect-error include a rule to start painless highlighting
+  // @ts-expect-error include a rule to start esql highlighting
   buildEsqlStartRule(),
   ...xjsonRules.json_root,
 ];
