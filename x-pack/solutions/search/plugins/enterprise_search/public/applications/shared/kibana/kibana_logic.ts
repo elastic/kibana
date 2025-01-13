@@ -23,6 +23,7 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -52,6 +53,7 @@ export interface KibanaLogicProps {
   coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  fleet?: FleetStart;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -84,12 +86,15 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  fleet: FleetStart | null;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
+  isAgentlessEnabled: boolean;
   isCloud: boolean;
+  isServerless: boolean;
   isSidebarEnabled: boolean;
   kibanaVersion: string | null;
   lens: LensPublicStart | null;
@@ -123,6 +128,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    fleet: [props.fleet || null, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
     getNavLinks: [props.getNavLinks, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
@@ -159,9 +165,19 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
   }),
   selectors: ({ selectors }) => ({
+    isAgentlessEnabled: [
+      () => [selectors.cloud, selectors.fleet],
+      (cloud?: CloudSetup & CloudStart, fleet?: FleetStart) =>
+        (cloud?.isCloudEnabled || cloud?.isServerlessEnabled) &&
+        fleet?.config?.agentless?.enabled === true,
+    ],
     isCloud: [
       () => [selectors.cloud],
       (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isCloudEnabled),
+    ],
+    isServerless: [
+      () => [selectors.cloud],
+      (cloud?: CloudSetup | CloudStart) => Boolean(cloud?.isServerlessEnabled),
     ],
   }),
 });
