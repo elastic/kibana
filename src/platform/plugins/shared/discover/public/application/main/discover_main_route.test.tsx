@@ -51,6 +51,7 @@ jest.mock('../../context_awareness', () => {
     useRootProfile: () => ({
       rootProfileLoading: mockRootProfileLoading,
       AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
+      getDefaultAdHocDataViews: () => [],
     }),
   };
 });
