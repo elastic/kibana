@@ -10,6 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
+import inquirer from 'inquirer';
 import normalizePath from 'normalize-path';
 import globby from 'globby';
 import { ESLint } from 'eslint';
@@ -19,7 +20,7 @@ import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-erro
 import { sortPackageJson } from '@kbn/sort-package-json';
 
 import { validateElasticTeam } from '../lib/validate_elastic_team';
-import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
+import { PKG_TEMPLATE_DIR, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
 
@@ -65,28 +66,7 @@ export const PackageCommand: GenerateCommand = {
     }
 
     const web = !!flags.web;
-    const dev = !!flags.dev;
-
-    const packageDir = flags.dir
-      ? Path.resolve(`${flags.dir}`)
-      : Path.resolve(ROOT_PKG_DIR, pkgId.slice(1).replace('/', '-'));
-    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
-
-    try {
-      await Fsp.readdir(packageDir);
-      if (!!flags.force) {
-        await Fsp.rm(packageDir, { recursive: true });
-        log.warning('deleted existing package at', packageDir);
-      } else {
-        throw createFailError(
-          `Package dir [${packageDir}] already exists, either choose a new package name, or pass --force to delete the package and regenerate it`
-        );
-      }
-    } catch (error) {
-      if (isFailError(error)) {
-        throw error;
-      }
-    }
+    const devOnly = !!flags.dev;
 
     const owner =
       flags.owner ||
@@ -103,6 +83,70 @@ export const PackageCommand: GenerateCommand = {
       }));
     if (typeof owner !== 'string' || !owner.startsWith('@')) {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
+    }
+
+    const { group } = await inquirer.prompt<{
+      group: 'platform' | 'observability' | 'security' | 'search';
+    }>({
+      type: 'list',
+      choices: [
+        { name: 'Platform', value: 'platform' },
+        { name: 'Observability', value: 'observability' },
+        { name: 'Security', value: 'security' },
+        { name: 'Search', value: 'search' },
+      ],
+      name: 'group',
+      message: `What group is this package part of?`,
+    });
+
+    let xpack: boolean;
+    if (group === 'platform') {
+      const resXpack = await inquirer.prompt<{ xpack: boolean }>({
+        type: 'list',
+        choices: [
+          { name: 'Yes', value: true },
+          { name: 'No', value: false },
+        ],
+        name: 'xpack',
+        message: `Does this package have x-pack licensed code?`,
+      });
+      xpack = resXpack.xpack;
+    } else {
+      xpack = true;
+    }
+
+    const { visibility } = await inquirer.prompt<{
+      visibility: 'private' | 'shared';
+    }>({
+      type: 'list',
+      choices: [
+        { name: 'Private', value: 'private' },
+        { name: 'Shared', value: 'shared' },
+      ],
+      name: 'visibility',
+      message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
+    });
+
+    const packageDir = flags.dir
+      ? Path.resolve(`${flags.dir}`)
+      : determinePackageDir({ pkgId, devOnly, group, visibility, xpack });
+
+    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
+
+    try {
+      await Fsp.readdir(packageDir);
+      if (!!flags.force) {
+        await Fsp.rm(packageDir, { recursive: true });
+        log.warning('deleted existing package at', packageDir);
+      } else {
+        throw createFailError(
+          `Package dir [${packageDir}] already exists, either choose a new package name, or pass --force to delete the package and regenerate it`
+        );
+      }
+    } catch (error) {
+      if (isFailError(error)) {
+        throw error;
+      }
     }
 
     const templateFiles = await globby('**/*', {
@@ -143,8 +187,10 @@ export const PackageCommand: GenerateCommand = {
         pkg: {
           id: pkgId,
           web,
-          dev,
+          dev: devOnly,
           owner,
+          group,
+          visibility,
           directoryName: Path.basename(normalizedRepoRelativeDir),
           normalizedRepoRelativeDir,
         },
@@ -165,7 +211,7 @@ export const PackageCommand: GenerateCommand = {
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));
 
-    const [addDeps, removeDeps] = dev
+    const [addDeps, removeDeps] = devOnly
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
