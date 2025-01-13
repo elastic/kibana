@@ -47,6 +47,10 @@ describe('handleStreamResponse', () => {
     };
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should handle stream correctly', async () => {
     expect.assertions(3);
     const data = ['Hello', 'World'];
@@ -66,33 +70,5 @@ describe('handleStreamResponse', () => {
     expect(reader.read).toHaveBeenCalledTimes(3);
     expect(response.ok).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('should handle decoding errors', async () => {
-    expect.assertions(3);
-    // @ts-ignore
-    jest.spyOn(global, 'TextDecoder').mockImplementation(() => ({
-      decode: jest.fn(() => {
-        throw new Error('Test error');
-      }),
-    }));
-    const reader = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({ done: false, value: null })
-        .mockResolvedValueOnce({ done: true }),
-    };
-
-    stream.getReader.mockReturnValue(reader);
-
-    // @ts-ignore
-    await handleStreamResponse({ stream, request, response, logger, maxTimeoutMs: 0 });
-    await new Promise((r) => setTimeout(r, 100));
-
-    expect(reader.read).toHaveBeenCalledTimes(2);
-    expect(logger.error).toHaveBeenCalled();
-    expect(response.ok).toHaveBeenCalled();
-
-    jest.restoreAllMocks();
   });
 });

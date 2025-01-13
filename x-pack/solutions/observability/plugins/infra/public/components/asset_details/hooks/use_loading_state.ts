@@ -26,7 +26,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
 export type RequestState = 'running' | 'done' | 'error';
 const WAIT_MS = 1000;
@@ -37,15 +37,15 @@ export const useLoadingState = () => {
   const {
     data: { search },
   } = services;
-  const { updateSearchSessionId } = useSearchSessionContext();
+  const { updateReloadRequestTime } = useReloadRequestTimeContext();
 
   const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const requestsCount$ = useMemo(() => new BehaviorSubject(0), []);
   const requestState$ = useMemo(() => new BehaviorSubject<RequestState | null>(null), []);
 
   useEffect(() => {
-    updateSearchSessionId();
-  }, [updateSearchSessionId]);
+    updateReloadRequestTime();
+  }, [updateReloadRequestTime]);
 
   const waitUntilRequestsCompletes$ = useCallback(
     () =>
@@ -140,7 +140,7 @@ export const useLoadingState = () => {
             // This will only be called when Lens is used in the Asset Details page
             return waitUntilNextSessionCompletes$(search.session).pipe(
               tap(() => {
-                updateSearchSessionId();
+                updateReloadRequestTime();
               })
             );
           }
@@ -149,7 +149,7 @@ export const useLoadingState = () => {
           return of(null).pipe(
             tap(() => {
               if (!isAutoRefreshRequestPending) {
-                updateSearchSessionId();
+                updateReloadRequestTime();
               }
             })
           );
@@ -169,7 +169,7 @@ export const useLoadingState = () => {
     requestState$,
     requestsCount$,
     search.session,
-    updateSearchSessionId,
+    updateReloadRequestTime,
     waitUntilRequestsCompletes$,
   ]);
 

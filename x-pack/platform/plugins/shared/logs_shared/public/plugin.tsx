@@ -6,11 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import {
-  LogsLocatorDefinition,
-  NodeLogsLocatorDefinition,
-  TraceLogsLocatorDefinition,
-} from '../common/locators';
+import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
@@ -28,24 +24,21 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     this.logViews = new LogViewsService();
   }
 
-  public setup(_: LogsSharedClientCoreSetup, pluginsSetup: LogsSharedClientSetupDeps) {
+  public setup(coreSetup: LogsSharedClientCoreSetup, pluginsSetup: LogsSharedClientSetupDeps) {
     const logViews = this.logViews.setup();
 
     const logsLocator = pluginsSetup.share.url.locators.create(
-      new LogsLocatorDefinition(pluginsSetup.share.url.locators)
-    );
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition(pluginsSetup.share.url.locators)
-    );
-
-    const traceLogsLocator = pluginsSetup.share.url.locators.create(
-      new TraceLogsLocatorDefinition(pluginsSetup.share.url.locators)
+      new LogsLocatorDefinition({
+        locators: pluginsSetup.share.url.locators,
+        getLogSourcesService: async () => {
+          const [_, pluginsStart] = await coreSetup.getStartServices();
+          return pluginsStart.logsDataAccess.services.logSourcesService;
+        },
+      })
     );
 
     const locators = {
       logsLocator,
-      nodeLogsLocator,
-      traceLogsLocator,
     };
 
     return { logViews, locators };

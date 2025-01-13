@@ -6,32 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { threatMap } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMap } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
- *
- * @param patterns DataViewBase containing available fields on rule index
- * @param item item entry
- * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: DataViewBase,
-  threatIndexPatterns: DataViewBase,
+  dataView: DataViewBase,
+  threatDataView: DataViewBase,
   item: Entry,
   itemIndex: number,
   uuidGen: () => string = uuidv4
 ): FormattedEntry => {
-  const { fields } = indexPattern;
-  const { fields: threatFields } = threatIndexPatterns;
+  const { fields } = dataView;
+  const { fields: threatFields } = threatDataView;
   const field = item.field;
   const threatField = item.value;
   const [foundField] = fields.filter(({ name }) => field != null && field === name);
@@ -39,11 +31,20 @@ export const getFormattedEntry = (
     ({ name }) => threatField != null && threatField === name
   );
   const maybeId: typeof item & { id?: string } = item;
+
+  // Fallback to a string field when field isn't found in known fields.
+  // It's required for showing field's value when appropriate data is missing in ES.
   return {
     id: maybeId.id ?? uuidGen(),
-    field: foundField,
+    field: foundField ?? {
+      name: field,
+      type: 'string',
+    },
     type: 'mapping',
-    value: threatFoundField,
+    value: threatFoundField ?? {
+      name: threatField,
+      type: 'string',
+    },
     entryIndex: itemIndex,
   };
 };
@@ -128,7 +129,7 @@ export const getEntryOnThreatFieldChange = (
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry => {
+export const createAndNewEntryItem = (): EmptyEntry => {
   return addIdToItem({
     field: '',
     type: 'mapping',
@@ -136,7 +137,7 @@ export const getDefaultEmptyEntry = (): EmptyEntry => {
   });
 };
 
-export const getNewItem = (): ThreatMap => {
+export const createOrNewEntryItem = (): ThreatMap => {
   return addIdToItem({
     entries: [
       addIdToItem({
@@ -146,17 +147,6 @@ export const getNewItem = (): ThreatMap => {
       }),
     ],
   });
-};
-
-export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
-  return items.reduce<ThreatMapping>((acc, item) => {
-    const newItem = { ...item, entries: item.entries };
-    if (threatMap.is(newItem)) {
-      return [...acc, newItem];
-    } else {
-      return acc;
-    }
-  }, []);
 };
 
 /**
@@ -181,37 +171,4 @@ export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
     items[0].entries[0].field === '' &&
     items[0].entries[0].value === ''
   );
-};
-
-export const customValidators = {
-  forbiddenField: (
-    value: unknown,
-    forbiddenString: string
-  ): ReturnType<ValidationFunc<{}, ERROR_CODE>> => {
-    let match: boolean;
-
-    if (typeof value === 'string') {
-      match = value === forbiddenString;
-    } else if (Array.isArray(value)) {
-      match = !!value.find((item) => item === forbiddenString);
-    } else {
-      match = false;
-    }
-
-    if (match) {
-      return {
-        code: 'ERR_FIELD_FORMAT',
-        message: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError',
-          {
-            defaultMessage:
-              'The index pattern cannot be { forbiddenString }. Please choose a more specific index pattern.',
-            values: {
-              forbiddenString,
-            },
-          }
-        ),
-      };
-    }
-  },
 };

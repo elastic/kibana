@@ -1277,13 +1277,7 @@
             "label": "user",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",

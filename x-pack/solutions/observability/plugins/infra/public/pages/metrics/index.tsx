@@ -35,7 +35,7 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { SearchSessionProvider } from '../../hooks/use_search_session';
+import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
@@ -75,7 +75,7 @@ export const InfrastructurePage = () => {
     <EuiErrorBoundary>
       <ReactQueryProvider>
         <AlertPrefillProvider>
-          <SearchSessionProvider>
+          <ReloadRequestTimeProvider>
             <InfraMLCapabilitiesProvider>
               <HelpCenterContent
                 feedbackLink="https://discuss.elastic.co/c/metrics"
@@ -142,7 +142,7 @@ export const InfrastructurePage = () => {
                 />
               </Routes>
             </InfraMLCapabilitiesProvider>
-          </SearchSessionProvider>
+          </ReloadRequestTimeProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
     </EuiErrorBoundary>

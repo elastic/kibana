@@ -120,7 +120,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -128,7 +128,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -136,7 +136,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -144,7 +144,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
         "deprecated": false,
@@ -167,7 +167,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -175,7 +175,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -183,7 +183,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
+          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; } | { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }; condition?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -191,7 +191,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; }[]; }; }; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
         "deprecated": false,

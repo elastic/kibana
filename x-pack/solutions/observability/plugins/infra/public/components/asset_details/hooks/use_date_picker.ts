@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { BehaviorSubject } from 'rxjs';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
 import { getDefaultDateRange, toTimestampRange } from '../utils';
@@ -22,7 +22,7 @@ export function useDatePicker({
   dateRange = getDefaultDateRange(),
   autoRefresh,
 }: UseDateRangeProviderProps) {
-  const { updateSearchSessionId } = useSearchSessionContext();
+  const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const autoRefreshTick$ = useMemo(() => new BehaviorSubject(null), []);
   const autoRefreshConfig$ = useMemo(
     () => new BehaviorSubject<UseDateRangeProviderProps['autoRefresh'] | undefined>(undefined),
@@ -52,9 +52,9 @@ export function useDatePicker({
     (newDateRange: TimeRange) => {
       setUrlState({ dateRange: newDateRange });
       setParsedDateRange(parseDateRange(newDateRange));
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setUrlState, updateSearchSessionId]
+    [setUrlState, updateReloadRequestTime]
   );
 
   const onRefresh = useCallback(

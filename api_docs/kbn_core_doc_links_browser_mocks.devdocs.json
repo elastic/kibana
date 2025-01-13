@@ -59,13 +59,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "packages/core/doc-links/core-doc-links-browser-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,

@@ -35,17 +35,28 @@ export const rRuleRequestSchema = schema.object({
     })
   ),
   byweekday: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      validate: createValidateRecurrenceBy('byweekday'),
-    })
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('MO'),
+        schema.literal('TU'),
+        schema.literal('WE'),
+        schema.literal('TH'),
+        schema.literal('FR'),
+        schema.literal('SA'),
+        schema.literal('SU'),
+      ]),
+      {
+        validate: createValidateRecurrenceBy('byweekday'),
+      }
+    )
   ),
   bymonthday: schema.maybe(
-    schema.arrayOf(schema.number(), {
+    schema.arrayOf(schema.number({ min: 1, max: 31 }), {
       validate: createValidateRecurrenceBy('bymonthday'),
     })
   ),
   bymonth: schema.maybe(
-    schema.arrayOf(schema.number(), {
+    schema.arrayOf(schema.number({ min: 1, max: 12 }), {
       validate: createValidateRecurrenceBy('bymonth'),
     })
   ),

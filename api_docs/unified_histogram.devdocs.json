@@ -933,13 +933,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -1043,13 +1037,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -1341,13 +1329,7 @@
             "description": [],
             "signature": [
               "{ title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsXY\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1381,13 +1363,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1407,13 +1383,7 @@
                 "text": "XYState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsPie\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1447,13 +1417,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1467,13 +1431,7 @@
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1507,13 +1465,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1533,13 +1485,7 @@
                 "text": "HeatmapVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsGauge\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1573,13 +1519,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1599,13 +1539,7 @@
                 "text": "GaugeVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1639,13 +1573,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1665,13 +1593,7 @@
                 "text": "DatatableVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1705,13 +1627,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1731,13 +1647,7 @@
                 "text": "LegacyMetricState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1771,13 +1681,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1797,13 +1701,7 @@
                 "text": "MetricVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: string; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1837,13 +1735,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
