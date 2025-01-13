@@ -6,16 +6,12 @@
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/data-service",
     "@kbn/data-views-plugin",
@@ -27,7 +23,6 @@
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/i18n-react",
-    "@kbn/navigation-plugin",
-    "@kbn/ui-theme"
+    "@kbn/navigation-plugin"
   ]
 }
