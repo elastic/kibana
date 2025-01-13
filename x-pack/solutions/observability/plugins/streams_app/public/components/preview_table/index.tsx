@@ -6,21 +6,23 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
 
 export function PreviewTable({
   documents,
   displayColumns,
+  height,
 }: {
   documents: unknown[];
   displayColumns?: string[];
+  height?: CSSProperties['height'];
 }) {
-  const [height, setHeight] = useState('100px');
+  const [computedHeight, setComputedHeight] = useState('100px');
   useEffect(() => {
     // set height to 100% after a short delay otherwise it doesn't calculate correctly
     // TODO: figure out a better way to do this
     setTimeout(() => {
-      setHeight(`100%`);
+      setComputedHeight(`100%`);
     }, 50);
   }, []);
 
@@ -59,7 +61,7 @@ export function PreviewTable({
       }}
       toolbarVisibility={false}
       rowCount={documents.length}
-      height={height}
+      height={height ?? computedHeight}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
