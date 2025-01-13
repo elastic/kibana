@@ -22,9 +22,9 @@ import {
   IngestReadStreamDefinition,
   isWiredReadStream,
   WiredReadStreamDefinition,
+  getAncestors,
 } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { getAncestors } from '@kbn/streams-schema/src/helpers/hierarchy';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';

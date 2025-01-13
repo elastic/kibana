@@ -9,8 +9,7 @@ import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { isWiredReadStream } from '@kbn/streams-schema';
-import { getParentId } from '@kbn/streams-schema/src/helpers/hierarchy';
+import { getParentId, isWiredReadStream } from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
