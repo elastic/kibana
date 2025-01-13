@@ -5200,7 +5200,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server-internal@link:packages/core/user-settings/core-user-settings-server-internal":
+"@kbn/core-user-settings-server-internal@link:src/core/packages/user-settings/server-internal":
   version "0.0.0"
   uid ""
 
