@@ -42,7 +42,8 @@ describe(
 
     it('should substitute parameters in investigation guide', () => {
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
+      // TODO changed for testing purposes - to be reverted
+      cy.getBySel('securitySossssssslutionFlyoutInvestigationGuideButton').click();
       // Flakes at times if the button is only clicked once
       cy.contains('Get processes').should('be.visible').dblclick({ force: true });
       // Cypress can properly reads the fields when the codeEditor is interacted with first
