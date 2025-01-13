@@ -886,13 +886,7 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1482,13 +1476,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1502,13 +1490,7 @@
             "label": "settings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
