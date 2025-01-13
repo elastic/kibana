@@ -9,4 +9,4 @@ export {
   InferenceChatModel,
   type InferenceChatModelParams,
   type InferenceChatModelCallOptions,
-} from './src/chat_model';
+} from './inference_chat_model';
