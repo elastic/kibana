@@ -169,8 +169,8 @@ export function useSetupTechnology({
 }
 
 const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
+  // TODO: https://github.com/elastic/kibana/issues/205761
   // placegolder for the logic to determine if the agentless setup is the default
-  // return packageInfo ? false : false;
   return false;
 };
 
