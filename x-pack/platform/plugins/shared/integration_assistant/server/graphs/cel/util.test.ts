@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { getRedactVariables, getStateVarsAndDefaultValues } from './util';
+import {
+  getRedactVariables,
+  getStateVarsAndDefaultValues,
+  getStateVarsConfigDetails,
+} from './util';
 import {
   celStateDetailsMockedResponse,
   celStateSettings,
   celRedact,
+  celConfigFields,
 } from '../../../__jest__/fixtures/cel';
 
 describe('getCelInputDetails', () => {
@@ -25,5 +30,10 @@ describe('getCelInputDetails', () => {
   it('getStateVarsAndDefaultValues', () => {
     const result = getStateVarsAndDefaultValues(celStateDetailsMockedResponse);
     expect(result).toStrictEqual(celStateSettings);
+  });
+
+  it('getStateVarsConfigDetails', () => {
+    const result = getStateVarsConfigDetails(celStateDetailsMockedResponse);
+    expect(result).toStrictEqual(celConfigFields);
   });
 });
