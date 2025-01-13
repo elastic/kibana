@@ -621,43 +621,47 @@ function ChildStreamList({
         <CurrentStreamEntry definition={definition} />
         <EuiDragDropContext onDragEnd={onChildStreamDragEnd} onDragStart={onChildStreamDragStart}>
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
-            {childStreams.map((child, i) => (
-              <EuiDraggable
-                key={child.name}
-                index={i}
-                draggableId={child.name}
-                hasInteractiveChildren={true}
-                customDragHandle={true}
-                spacing="none"
-              >
-                {(provided) => (
-                  <NestedView key={i} isBeingDragged={draggingChildStream === child.name}>
-                    <RoutingStreamEntry
-                      draggableProvided={provided}
-                      child={
-                        !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
-                          ? childUnderEdit.child
-                          : child
-                      }
-                      edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
-                      onEditStateChange={() => {
-                        if (child.name === childUnderEdit?.child.name) {
-                          setChildUnderEdit(undefined);
-                        } else {
-                          setChildUnderEdit({ isNew: false, child });
-                        }
-                      }}
-                      onChildChange={(newChild) => {
-                        setChildUnderEdit({
-                          isNew: false,
-                          child: newChild,
-                        });
-                      }}
-                    />
-                  </NestedView>
-                )}
-              </EuiDraggable>
-            ))}
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {childStreams.map((child, i) => (
+                <EuiFlexItem key={`${child.name}-${i}-flex-item`} grow={false}>
+                  <EuiDraggable
+                    key={child.name}
+                    index={i}
+                    draggableId={child.name}
+                    hasInteractiveChildren={true}
+                    customDragHandle={true}
+                    spacing="none"
+                  >
+                    {(provided) => (
+                      <NestedView key={i} isBeingDragged={draggingChildStream === child.name}>
+                        <RoutingStreamEntry
+                          draggableProvided={provided}
+                          child={
+                            !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
+                              ? childUnderEdit.child
+                              : child
+                          }
+                          edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
+                          onEditStateChange={() => {
+                            if (child.name === childUnderEdit?.child.name) {
+                              setChildUnderEdit(undefined);
+                            } else {
+                              setChildUnderEdit({ isNew: false, child });
+                            }
+                          }}
+                          onChildChange={(newChild) => {
+                            setChildUnderEdit({
+                              isNew: false,
+                              child: newChild,
+                            });
+                          }}
+                        />
+                      </NestedView>
+                    )}
+                  </EuiDraggable>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
         {childUnderEdit?.isNew ? (
