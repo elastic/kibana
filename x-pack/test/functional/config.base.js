@@ -621,7 +621,7 @@ export default async function ({ readConfigFile }) {
             ],
             indices: [
               {
-                names: ['*'],
+                names: ['monitor'],
                 privileges: ['all'],
               },
             ],

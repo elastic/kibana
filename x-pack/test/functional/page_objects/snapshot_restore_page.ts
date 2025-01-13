@@ -255,5 +255,22 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
         return await testSubjects.isDisplayed('repositoryList');
       });
     },
+
+    async refreshWhileSnapshotIsInProgress() {
+      let isInProgress = true;
+      while (isInProgress) {
+        const table = await testSubjects.find('snapshotTable');
+        const rows = await table.findAllByTestSubject('row');
+        const snapshotState = await (
+          await rows[0].findByTestSubject('snapshotState')
+        ).getVisibleText();
+
+        if (snapshotState === 'In progress') {
+          await testSubjects.click('reloadButton');
+        } else {
+          isInProgress = false;
+        }
+      }
+    },
   };
 }

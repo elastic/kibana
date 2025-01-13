@@ -33,7 +33,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         },
       });
-      await pageObjects.common.sleep(20000);
     });
 
     describe('Snapshot', () => {
@@ -43,9 +42,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           snapshot: 'my-snapshot',
           repository: REPOSITORY,
         });
-
-        // Wait for snapshot to be ready
-        await pageObjects.common.sleep(2000);
 
         // Refresh page so that the snapshot shows up in the snapshots table
         await browser.refresh();
@@ -59,7 +55,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Renders the Snapshot restore form', async () => {
+        await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         const snapshots = await pageObjects.snapshotRestore.getSnapshotList();
+
         const snapshotRestoreButton = await snapshots[0].snapshotRestore;
         // Open the Snapshot restore form
         await snapshotRestoreButton.click();
@@ -139,16 +139,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.snapshotRestore.clickConfirmationModal();
         await pageObjects.snapshotRestore.closeFlyout();
 
-        // Wait for snapshot to be ready
-        await pageObjects.common.sleep(2000);
-
         // Open snapshot info flyout
         await pageObjects.snapshotRestore.navToSnapshots(false);
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('snapshotList')).to.be(true);
 
-        // Reload page to make sure snapshot is complete
-        await testSubjects.click('reloadButton');
+        await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify that one snapshot has been created
@@ -238,7 +234,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await es.snapshot.delete({
           snapshot: `${snapshotPrefx}-*`,
-          repository: REPOSITORY,
+          repository: sourceOnlyRepository,
         });
         await es.snapshot.deleteRepository({
           name: sourceOnlyRepository,
