@@ -343,7 +343,7 @@ src/core/packages/user-profile/server-internal @elastic/kibana-core
 src/core/packages/user-profile/server-mocks @elastic/kibana-core
 src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
-packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
+src/core/packages/user-settings/server-mocks @elastic/kibana-security
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
