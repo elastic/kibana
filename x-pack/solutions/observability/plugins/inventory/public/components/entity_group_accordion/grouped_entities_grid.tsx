@@ -49,7 +49,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
             sortDirection,
             sortField,
             kuery,
-            entityTypes: groupValue?.length ? JSON.stringify([groupValue]) : undefined,
+            entityType: groupValue,
           },
         },
         signal,
