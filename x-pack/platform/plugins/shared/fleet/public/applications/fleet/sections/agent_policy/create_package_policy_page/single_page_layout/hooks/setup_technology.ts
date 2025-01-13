@@ -100,12 +100,7 @@ export function useSetupTechnology({
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
-
-      if (setupTechnology === SetupTechnology.AGENTLESS) {
-        setSelectedPolicyTab(SelectedPolicyTab.NEW);
-      } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
-        setSelectedPolicyTab(SelectedPolicyTab.NEW);
-      }
+      setSelectedPolicyTab(SelectedPolicyTab.NEW);
       setSelectedSetupTechnology(setupTechnology);
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
@@ -170,7 +165,7 @@ export function useSetupTechnology({
 
 const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
   // TODO: https://github.com/elastic/kibana/issues/205761
-  // placegolder for the logic to determine if the agentless setup is the default
+  // placeholder for the logic to determine if the agentless setup is the default
   return false;
 };
 
