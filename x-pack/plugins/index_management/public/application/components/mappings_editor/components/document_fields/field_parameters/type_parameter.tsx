@@ -24,6 +24,7 @@ interface Props {
   isMultiField?: boolean | null;
   showDocLink?: boolean;
   isSemanticTextEnabled?: boolean;
+  fieldTypeInputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 export const TypeParameter = ({
@@ -31,6 +32,7 @@ export const TypeParameter = ({
   isRootLevelField,
   showDocLink = false,
   isSemanticTextEnabled = true,
+  fieldTypeInputRef,
 }: Props) => {
   const fieldTypeOptions = useMemo(() => {
     let options = isMultiField
@@ -97,6 +99,9 @@ export const TypeParameter = ({
               onChange={typeField.setValue}
               isClearable={false}
               data-test-subj="fieldType"
+              inputRef={(input) => {
+                if (fieldTypeInputRef) fieldTypeInputRef.current = input;
+              }}
             />
           </EuiFormRow>
         );

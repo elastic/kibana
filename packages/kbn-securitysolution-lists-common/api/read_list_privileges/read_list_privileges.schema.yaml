@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListPrivileges
       x-codegen-enabled: true
-      summary: Gets list privileges
+      summary: Get list privileges
       responses:
         200:
           description: Successful response

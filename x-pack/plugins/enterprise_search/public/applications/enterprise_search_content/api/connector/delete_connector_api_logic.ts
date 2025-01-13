@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import { DeleteConnectorResponse } from '../../../../../common/types/connectors';
 
@@ -12,30 +13,42 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface DeleteConnectorApiLogicArgs {
   connectorId: string;
+  connectorName: string;
   shouldDeleteIndex: boolean;
 }
 
 export interface DeleteConnectorApiLogicResponse {
-  acknowledged: boolean;
+  connectorName: string;
 }
 
 export const deleteConnector = async ({
   connectorId,
+  connectorName,
   shouldDeleteIndex = false,
-}: DeleteConnectorApiLogicArgs) => {
-  return await HttpLogic.values.http.delete(
-    `/internal/enterprise_search/connectors/${connectorId}`,
-    {
-      query: {
-        shouldDeleteIndex,
-      },
-    }
-  );
+}: DeleteConnectorApiLogicArgs): Promise<DeleteConnectorApiLogicResponse> => {
+  await HttpLogic.values.http.delete(`/internal/enterprise_search/connectors/${connectorId}`, {
+    query: {
+      shouldDeleteIndex,
+    },
+  });
+  return { connectorName };
 };
 
 export const DeleteConnectorApiLogic = createApiLogic(
   ['delete_connector_api_logic'],
-  deleteConnector
+  deleteConnector,
+  {
+    showSuccessFlashFn: ({ connectorName }) =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.deleteConnector.successToast.title',
+        {
+          defaultMessage: 'The connector {connectorName} was successfully deleted',
+          values: {
+            connectorName,
+          },
+        }
+      ),
+  }
 );
 
 export type DeleteConnectorApiLogicActions = Actions<

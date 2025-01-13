@@ -47,7 +47,8 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/204167
+describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();

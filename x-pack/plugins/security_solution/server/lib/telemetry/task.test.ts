@@ -16,6 +16,7 @@ import {
   createMockTaskMetrics,
   createMockSecurityTelemetryTask,
 } from './__mocks__';
+import { newTelemetryLogger } from './helpers';
 
 describe('test security telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -66,7 +67,7 @@ describe('test security telemetry task', () => {
 
     expect(mockTelemetryTaskConfig.runTask).toHaveBeenCalledWith(
       telemetryTask.getTaskId(),
-      logger,
+      newTelemetryLogger(logger.get('task')),
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
       mockTaskMetrics,

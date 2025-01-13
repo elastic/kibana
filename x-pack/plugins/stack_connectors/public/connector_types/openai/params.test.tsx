@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
-import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
+import { DEFAULT_URL, getDefaultBody } from './constants';
 
 const messageVariables = [
   {
@@ -73,14 +73,15 @@ describe('Gen AI Params Fields renders', () => {
       );
       expect(editAction).toHaveBeenCalledTimes(2);
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
+      const body = getDefaultBody(actionConnector.config);
       if (apiProvider === OpenAiProviderType.OpenAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body }, 0);
       }
       if (apiProvider === OpenAiProviderType.AzureAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body }, 0);
       }
       if (apiProvider === OpenAiProviderType.Other) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body }, 0);
       }
     }
   );

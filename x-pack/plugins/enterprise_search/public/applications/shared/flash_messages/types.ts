@@ -19,7 +19,9 @@ export interface IFlashMessage {
 
 // @see EuiGlobalToastListToast for more props
 export interface ToastOptions {
+  'aria-live'?: 'assertive' | 'polite'; // Defaults to 'polite'
   iconType?: string;
+  role?: string; // Defaults to the log role. The alert role can be considered only if all toasts in this list will require immediate user attention.
   text?: string; // Additional text below the message/title, same as EuiToast['text']
   toastLifeTimeMs?: number; // Allows customizing per-toast timeout
 }

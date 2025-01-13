@@ -11,23 +11,48 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
+import { Config } from './types';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
   'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/chat/completions?api-version={api-version}' as const;
 
-export const DEFAULT_BODY = `{
+const DEFAULT_BODY = `{
     "messages": [{
         "role":"user",
         "content":"Hello world"
     }]
 }`;
-export const DEFAULT_BODY_AZURE = `{
+const DEFAULT_BODY_AZURE = `{
     "messages": [{
         "role":"user",
         "content":"Hello world"
     }]
 }`;
+const DEFAULT_BODY_OTHER = (defaultModel: string) => `{
+    "model": "${defaultModel}",
+    "messages": [{
+        "role":"user",
+        "content":"Hello world"
+    }]
+}`;
+
+export const getDefaultBody = (config?: Config) => {
+  if (!config) {
+    // default to OpenAiProviderType.OpenAi sample data
+    return DEFAULT_BODY;
+  }
+  if (config?.apiProvider === OpenAiProviderType.Other) {
+    // update sample data if Other (OpenAI Compatible Service)
+    return config.defaultModel ? DEFAULT_BODY_OTHER(config.defaultModel) : DEFAULT_BODY;
+  }
+  if (config?.apiProvider === OpenAiProviderType.AzureAi) {
+    // update sample data if AzureAi
+    return DEFAULT_BODY_AZURE;
+  }
+  // default to OpenAiProviderType.OpenAi sample data
+  return DEFAULT_BODY;
+};
 
 export const openAiConfig: ConfigFieldSchema[] = [
   {

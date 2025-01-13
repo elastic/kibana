@@ -120,7 +120,12 @@ tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
     x-displayName: Security AI assistant
-  - description: You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.
+  - description: |
+      Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
+      > warn
+      > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
+
+      > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
@@ -132,10 +137,67 @@ tags:
   - description: ''
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
-  - description: Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
+  - description: |
+      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
+
+      Exceptions are made up of:
+
+      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
+      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
+
+      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
+      > info
+      > You cannot use lists with endpoint rule exceptions.
+
+      > info
+      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
+
+      ## Exceptions requirements
+
+      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: |
+      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
+
+      Lists are made up of:
+
+      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
+          * `boolean`
+          * `byte`
+          * `date`
+          * `date_nanos`
+          * `date_range`
+          * `double`
+          * `double_range`
+          * `float`
+          * `float_range`
+          * `half_float`
+          * `integer`
+          * `integer_range`
+          * `ip`
+          * `ip_range`
+          * `keyword`
+          * `long`
+          * `long_range`
+          * `short`
+          * `text`
+      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
+
+      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
+      1. `192.168.1.1`
+      2. `192.168.1.3`
+      3. `192.168.1.18`
+      4. `192.168.1.12`
+      5. `192.168.1.7`
+
+      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
+      > info
+      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
+
+      ## Lists requirements
+
+      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
@@ -6052,7 +6114,7 @@ paths:
         - APM annotations
   /api/asset_criticality:
     delete:
-      description: Delete the asset criticality record for a specific asset if it exists.
+      description: Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -6094,11 +6156,11 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Delete Criticality Record
+      summary: Delete an asset criticality record
       tags:
         - Security Entity Analytics API
     get:
-      description: Get the criticality record for a specific asset.
+      description: Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -6125,11 +6187,14 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
-      summary: Get Criticality Record
+      summary: Get an asset criticality record
       tags:
         - Security Entity Analytics API
     post:
-      description: Create or update a criticality record for a specific asset.
+      description: |
+        Create or update an asset criticality record for a specific entity.
+
+        If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -6154,12 +6219,15 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Upsert Criticality Record
+      summary: Upsert an asset criticality record
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
-      description: Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+      description: |
+        Bulk upsert up to 1000 asset criticality records.
+
+        If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -6210,7 +6278,7 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
-      summary: Bulk Upsert Asset Criticality Records
+      summary: Bulk upsert asset criticality records
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/list:
@@ -6286,7 +6354,7 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
-      summary: List Asset Criticality Records
+      summary: List asset criticality records
       tags:
         - Security Entity Analytics API
   /api/cases:
@@ -8719,6 +8787,7 @@ paths:
         - Security Detections API
   /api/detection_engine/rules/{id}/exceptions:
     post:
+      description: Create exception items that apply to a single detection rule.
       operationId: CreateRuleExceptionListItems
       parameters:
         - description: Detection rule's identifier
@@ -8776,7 +8845,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates rule exception list items
+      summary: Create rule exception list items
       tags:
         - Security Exceptions API
   /api/detection_engine/rules/prepackaged:
@@ -9461,7 +9530,7 @@ paths:
         - saved objects
   /api/endpoint_list:
     post:
-      description: Creates an endpoint list or does nothing if the list already exists
+      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -9496,11 +9565,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list
+      summary: Create an endpoint exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
+      description: Delete an endpoint exception list item using the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -9554,10 +9624,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Deletes an endpoint list item
+      summary: Delete an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
+      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -9613,10 +9684,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Reads an endpoint list item
+      summary: Get an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
+      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -9691,10 +9763,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list item
+      summary: Create an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
+      description: Update an endpoint exception list item using the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -9774,11 +9847,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Updates an endpoint list item
+      summary: Update an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
+      description: Get a list of all endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -9878,7 +9952,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Finds endpoint list items
+      summary: Get endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -10802,6 +10876,7 @@ paths:
         - Security Entity Analytics API
   /api/exception_lists:
     delete:
+      description: Delete an exception list using the `id` or `list_id` field.
       operationId: DeleteExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -10861,10 +10936,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes an exception list
+      summary: Delete an exception list
       tags:
         - Security Exceptions API
     get:
+      description: Get the details of an exception list using the `id` or `list_id` field.
       operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -10924,10 +11000,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves an exception list using its `id` or `list_id` field
+      summary: Get exception list details
       tags:
         - Security Exceptions API
     post:
+      description: |
+        An exception list groups exception items and can be associated with detection rules. You can assign detection rules with multiple exception lists.
+        > info
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateExceptionList
       requestBody:
         content:
@@ -11001,10 +11081,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates an exception list
+      summary: Create an exception list
       tags:
         - Security Exceptions API
     put:
+      description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
       requestBody:
         content:
@@ -11081,11 +11162,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates an exception list
+      summary: Update an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_duplicate:
     post:
+      description: Duplicate an existing exception list.
       operationId: DuplicateExceptionList
       parameters:
         - description: Exception list's human identifier
@@ -11148,12 +11230,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Duplicates an exception list
+      summary: Duplicate an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_export:
     post:
-      description: Exports an exception list and its associated items to an .ndjson file
+      description: Export an exception list and its associated items to an NDJSON file.
       operationId: ExportExceptionList
       parameters:
         - description: Exception list's identifier
@@ -11224,11 +11306,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Exports an exception list
+      summary: Export an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_find:
     get:
+      description: Get a list of all exception lists.
       operationId: FindExceptionLists
       parameters:
         - description: |
@@ -11336,12 +11419,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds exception lists
+      summary: Get exception lists
       tags:
         - Security Exceptions API
   /api/exception_lists/_import:
     post:
-      description: Imports an exception list and associated items
+      description: Import an exception list and its associated items from an NDJSON file.
       operationId: ImportExceptionList
       parameters:
         - description: |
@@ -11445,11 +11528,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Imports an exception list
+      summary: Import an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/items:
     delete:
+      description: Delete an exception list item using the `id` or `item_id` field.
       operationId: DeleteExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11509,10 +11593,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes an exception list item
+      summary: Delete an exception list item
       tags:
         - Security Exceptions API
     get:
+      description: Get the details of an exception list item using the `id` or `item_id` field.
       operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11572,10 +11657,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets an exception list item
+      summary: Get an exception list item
       tags:
         - Security Exceptions API
     post:
+      description: |
+        Create an exception item and associate it with the specified exception list.
+        > info
+        > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
       requestBody:
         content:
@@ -11659,10 +11748,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates an exception list item
+      summary: Create an exception list item
       tags:
         - Security Exceptions API
     put:
+      description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
       requestBody:
         content:
@@ -11750,11 +11840,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates an exception list item
+      summary: Update an exception list item
       tags:
         - Security Exceptions API
   /api/exception_lists/items/_find:
     get:
+      description: Get a list of all exception list items in the specified list.
       operationId: FindExceptionListItems
       parameters:
         - description: List's id
@@ -11882,11 +11973,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds exception list items
+      summary: Get exception list items
       tags:
         - Security Exceptions API
   /api/exception_lists/summary:
     get:
+      description: Get a summary of the specified exception list.
       operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
@@ -11965,11 +12057,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves an exception list summary
+      summary: Get an exception list summary
       tags:
         - Security Exceptions API
   /api/exceptions/shared:
     post:
+      description: |
+        An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
+        > info
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateSharedExceptionList
       requestBody:
         content:
@@ -12024,7 +12120,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a shared exception list
+      summary: Create a shared exception list
       tags:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
@@ -15671,6 +15767,10 @@ paths:
         - Fleet uninstall tokens
   /api/lists:
     delete:
+      description: |
+        Delete a list using the list ID.
+        > info
+        > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
         - description: List's `id` value
@@ -15730,10 +15830,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes a list
+      summary: Delete a list
       tags:
         - Security Lists API
     get:
+      description: Get the details of a list using the list ID.
       operationId: ReadList
       parameters:
         - description: List's `id` value
@@ -15781,10 +15882,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves a list using its id field
+      summary: Get list details
       tags:
         - Security Lists API
     patch:
+      description: Update specific fields of an existing list using the list ID.
       operationId: PatchList
       requestBody:
         content:
@@ -15848,10 +15950,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Patches a list
+      summary: Patch a list
       tags:
         - Security Lists API
     post:
+      description: Create a new list.
       operationId: CreateList
       requestBody:
         content:
@@ -15922,10 +16025,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a list
+      summary: Create a list
       tags:
         - Security Lists API
     put:
+      description: |
+        Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` value.
       operationId: UpdateList
       requestBody:
         content:
@@ -15991,11 +16098,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates a list
+      summary: Update a list
       tags:
         - Security Lists API
   /api/lists/_find:
     get:
+      description: Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
       operationId: FindLists
       parameters:
         - description: The page number to return
@@ -16097,11 +16205,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds lists
+      summary: Get lists
       tags:
         - Security Lists API
   /api/lists/index:
     delete:
+      description: Delete the `.lists` and `.items` data streams.
       operationId: DeleteListIndex
       responses:
         '200':
@@ -16147,10 +16256,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes list data streams
+      summary: Delete list data streams
       tags:
         - Security Lists API
     get:
+      description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
       responses:
         '200':
@@ -16199,10 +16309,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Get list data stream existence status
+      summary: Get status of list data streams
       tags:
         - Security Lists API
     post:
+      description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -16248,11 +16359,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates necessary list data streams
+      summary: Create list data streams
       tags:
         - Security Lists API
   /api/lists/items:
     delete:
+      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -16327,10 +16439,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes a list item
+      summary: Delete a list item
       tags:
         - Security Lists API
     get:
+      description: Get the details of a list item.
       operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -16394,10 +16507,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets a list item
+      summary: Get a list item
       tags:
         - Security Lists API
     patch:
+      description: Update specific fields of an existing list item using the list item ID.
       operationId: PatchListItem
       requestBody:
         content:
@@ -16463,10 +16577,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Patches a list item
+      summary: Patch a list item
       tags:
         - Security Lists API
     post:
+      description: |
+        Create a list item and associate it with the specified list.
+
+        All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+        > info
+        > Before creating a list item, you must create a list.
       operationId: CreateListItem
       requestBody:
         content:
@@ -16533,10 +16653,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a list item
+      summary: Create a list item
       tags:
         - Security Lists API
     put:
+      description: |
+        Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` value.
       operationId: UpdateListItem
       requestBody:
         content:
@@ -16596,12 +16720,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates a list item
+      summary: Update a list item
       tags:
         - Security Lists API
   /api/lists/items/_export:
     post:
-      description: Exports list item values from the specified list
+      description: Export list item values from the specified list.
       operationId: ExportListItems
       parameters:
         - description: List's id to export
@@ -16651,11 +16775,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Exports list items
+      summary: Export list items
       tags:
         - Security Lists API
   /api/lists/items/_find:
     get:
+      description: Get all list items in the specified list.
       operationId: FindListItems
       parameters:
         - description: List's id
@@ -16763,13 +16888,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds list items
+      summary: Get list items
       tags:
         - Security Lists API
   /api/lists/items/_import:
     post:
       description: |
-        Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+        Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
         You can import items to a new or existing list.
       operationId: ImportListItems
@@ -16862,7 +16987,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Imports list items
+      summary: Import list items
       tags:
         - Security Lists API
   /api/lists/privileges:
@@ -16912,7 +17037,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets list privileges
+      summary: Get list privileges
       tags:
         - Security Lists API
   /api/ml/saved_objects/sync:
@@ -16943,6 +17068,7 @@ paths:
         - ml
   /api/note:
     delete:
+      description: Delete a note from a Timeline using the note ID.
       operationId: DeleteNote
       requestBody:
         content:
@@ -16966,7 +17092,7 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: The id of the note to delete.
+        description: The ID of the note to delete.
         required: true
       responses:
         '200':
@@ -16978,11 +17104,11 @@ paths:
                   data:
                     type: object
           description: Indicates the note was successfully deleted.
-      summary: Deletes a note from a timeline.
+      summary: Delete a note
       tags:
         - Security Timeline API
     get:
-      description: Gets notes
+      description: Get all notes for a given document.
       operationId: GetNotes
       parameters:
         - in: query
@@ -17041,10 +17167,11 @@ paths:
                   - $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
                   - type: object
           description: Indicates the requested notes were returned.
-      summary: Get all notes for a given document.
+      summary: Get notes
       tags:
         - Security Timeline API
     patch:
+      description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -17074,7 +17201,7 @@ paths:
                   type: string
               required:
                 - note
-        description: The note to persist or update along with additional metadata.
+        description: The note to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -17093,7 +17220,7 @@ paths:
                 required:
                   - data
           description: Indicates the note was successfully created.
-      summary: Persists a note to a timeline.
+      summary: Add or update a note
       tags:
         - Security Timeline API
   /api/osquery/live_queries:
@@ -17404,6 +17531,7 @@ paths:
         - Security Osquery API
   /api/pinned_event:
     patch:
+      description: Pin an event to an existing Timeline.
       operationId: PersistPinnedEventRoute
       requestBody:
         content:
@@ -17421,7 +17549,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: The pinned event to persist or update along with additional metadata.
+        description: The pinned event to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -17439,8 +17567,8 @@ paths:
                       - persistPinnedEventOnTimeline
                 required:
                   - data
-          description: Indicate the event was successfully pinned in the timeline.
-      summary: Persists a pinned event to a timeline.
+          description: Indicates the event was successfully pinned to the Timeline.
+      summary: Pin an event
       tags:
         - Security Timeline API
   /api/risk_score/engine/dangerously_delete_data:
@@ -17474,6 +17602,7 @@ paths:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
+      description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -17497,7 +17626,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
-      summary: Schedule the risk engine to run as soon as possible
+      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
   /api/saved_objects/_bulk_create:
@@ -19947,6 +20076,7 @@ paths:
         - system
   /api/timeline:
     delete:
+      description: Delete one or more Timelines or Timeline templates.
       operationId: DeleteTimelines
       requestBody:
         content:
@@ -19965,7 +20095,7 @@ paths:
                   type: array
               required:
                 - savedObjectIds
-        description: The ids of the timelines or timeline templates to delete.
+        description: The IDs of the Timelines or Timeline templates to delete.
         required: true
       responses:
         '200':
@@ -19983,11 +20113,12 @@ paths:
                       - deleteTimeline
                 required:
                   - data
-          description: Indicates the timeline was successfully deleted.
-      summary: Deletes one or more timelines or timeline templates.
+          description: Indicates the Timeline was successfully deleted.
+      summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
     get:
+      description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
         - description: The ID of the template timeline to retrieve
@@ -19995,7 +20126,7 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-        - description: The ID of the timeline to retrieve
+        - description: The ID of the Timeline to retrieve.
           in: query
           name: id
           schema:
@@ -20019,12 +20150,12 @@ paths:
                       - data
                   - additionalProperties: false
                     type: object
-          description: Indicates that the (template) timeline was found and returned.
-      summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+          description: Indicates that the (template) Timeline was found and returned.
+      summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
     patch:
-      description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+      description: Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
       operationId: PatchTimeline
       requestBody:
         content:
@@ -20044,7 +20175,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: The timeline updates along with the timeline ID and version.
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
         '200':
@@ -20052,7 +20183,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -20063,11 +20194,12 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the user does not have the required access to create a draft timeline.
-      summary: Updates an existing timeline.
+          description: Indicates that the user does not have the required access to create a draft Timeline.
+      summary: Update a Timeline
       tags:
         - Security Timeline API
     post:
+      description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
       requestBody:
         content:
@@ -20097,7 +20229,7 @@ paths:
                   type: string
               required:
                 - timeline
-        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        description: The required Timeline fields used to create a new Timeline, along with optional fields that will be created if not provided.
         required: true
       responses:
         '200':
@@ -20105,7 +20237,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates the timeline was successfully created.
+          description: Indicates the Timeline was successfully created.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -20116,8 +20248,8 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that there was an error in the timeline creation.
-      summary: Creates a new timeline.
+          description: Indicates that there was an error in the Timeline creation.
+      summary: Create a Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_copy:
@@ -20151,6 +20283,7 @@ paths:
         - Security Timeline API
   /api/timeline/_draft:
     get:
+      description: Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
         - in: query
@@ -20164,7 +20297,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully retrieved.
+          description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20175,7 +20308,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: If a draft timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft timeline.
+          description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20186,13 +20319,15 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: This should never happen, but if a draft timeline was not found and we attempted to create one, it indicates that there is already a draft timeline with the given timelineId.
-      summary: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
+          description: This should never happen, but if a draft Timeline was not found and we attempted to create one, it indicates that there is already a draft Timeline with the given `timelineId`.
+      summary: Get draft Timeline or Timeline template details
       tags:
         - Security Timeline API
     post:
       description: |
-        Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+        Create a clean draft Timeline or Timeline template for the current user.
+        > info
+        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -20204,7 +20339,7 @@ paths:
                   $ref: '#/components/schemas/Security_Timeline_API_TimelineType'
               required:
                 - timelineType
-        description: The type of timeline to create. Valid values are `default` and `template`.
+        description: The type of Timeline to create. Valid values are `default` and `template`.
         required: true
       responses:
         '200':
@@ -20212,7 +20347,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20223,7 +20358,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: Indicates that the user does not have the required permissions to create a draft timeline.
+          description: Indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20234,12 +20369,13 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: Indicates that there is already a draft timeline with the given timelineId.
-      summary: Retrieves a draft timeline or timeline template.
+          description: Indicates that there is already a draft Timeline with the given `timelineId`.
+      summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_export:
     post:
+      description: Export Timelines as an NDJSON file.
       operationId: ExportTimelines
       parameters:
         - description: The name of the file to export
@@ -20259,16 +20395,16 @@ paths:
                     type: string
                   nullable: true
                   type: array
-        description: The ids of the timelines to export
+        description: The IDs of the Timelines to export.
         required: true
       responses:
         '200':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
               schema:
-                description: NDJSON of the exported timelines
+                description: NDJSON of the exported Timelines
                 type: string
-          description: Indicates the timelines were successfully exported
+          description: Indicates the Timelines were successfully exported.
         '400':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
@@ -20279,12 +20415,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded
-      summary: Exports timelines as an NDJSON file
+          description: Indicates that the export size limit was exceeded.
+      summary: Export Timelines
       tags:
         - Security Timeline API
   /api/timeline/_favorite:
     patch:
+      description: Favorite a Timeline or Timeline template for the current user.
       operationId: PersistFavoriteRoute
       requestBody:
         content:
@@ -20309,7 +20446,7 @@ paths:
                 - templateTimelineId
                 - templateTimelineVersion
                 - timelineType
-        description: The required fields used to favorite a (template) timeline.
+        description: The required fields used to favorite a (template) Timeline.
         required: true
       responses:
         '200':
@@ -20339,11 +20476,12 @@ paths:
                   statusCode:
                     type: number
           description: Indicates the user does not have the required permissions to persist the favorite status.
-      summary: Persists a given users favorite status of a timeline.
+      summary: Favorite a Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_import:
     post:
+      description: Import Timelines.
       operationId: ImportTimelines
       requestBody:
         content:
@@ -20359,7 +20497,7 @@ paths:
                   type: string
               required:
                 - file
-        description: The timelines to import as a readable stream.
+        description: The Timelines to import as a readable stream.
         required: true
       responses:
         '200':
@@ -20367,7 +20505,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the import of timelines was successful.
+          description: Indicates the import of Timelines was successful.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -20380,7 +20518,7 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
+          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -20404,12 +20542,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of timelines was unsuccessful.
-      summary: Imports timelines.
+          description: Indicates the import of Timelines was unsuccessful.
+      summary: Import Timelines
       tags:
         - Security Timeline API
   /api/timeline/_prepackaged:
     post:
+      description: Install or update prepackaged Timelines.
       operationId: InstallPrepackedTimelines
       requestBody:
         content:
@@ -20436,7 +20575,7 @@ paths:
                 - timelinesToInstall
                 - timelinesToUpdate
                 - prepackagedTimelines
-        description: The timelines to install or update.
+        description: The Timelines to install or update.
         required: true
       responses:
         '200':
@@ -20444,7 +20583,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20455,8 +20594,8 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
-      summary: Installs prepackaged timelines.
+          description: Indicates the installation of prepackaged Timelines was unsuccessful.
+      summary: Install prepackaged Timelines
       tags:
         - Security Timeline API
   /api/timeline/resolve:
@@ -20487,16 +20626,17 @@ paths:
                       - data
                   - additionalProperties: false
                     type: object
-          description: The (template) timeline has been found
+          description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) timeline was not found
-      summary: Get an existing saved timeline or timeline template.
+          description: The (template) Timeline was not found
+      summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timelines:
     get:
+      description: Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
         - description: If true, only timelines that are marked as favorites by the user are returned.
@@ -20570,7 +20710,7 @@ paths:
                 required:
                   - timeline
                   - totalCount
-          description: Indicates that the (template) timelines were found and returned.
+          description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -20582,7 +20722,7 @@ paths:
                   statusCode:
                     type: number
           description: Bad request. The user supplied invalid data.
-      summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
+      summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
   /s/{spaceId}/api/observability/slos:
@@ -31238,9 +31378,9 @@ components:
         - assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_AI_Assistant_API_NormalizedAnonymizationFieldError:
       type: object
@@ -34182,9 +34322,9 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateFields'
     Security_Detections_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Detections_API_NormalizedRuleAction:
       additionalProperties: false
@@ -37393,9 +37533,9 @@ components:
         - text
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -37707,9 +37847,9 @@ components:
       required:
         - hostStatuses
     Security_Endpoint_Management_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Management_API_NoParametersRequestSchema:
       type: object
@@ -38847,9 +38987,9 @@ components:
         - text
       type: string
     Security_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -39093,9 +39233,9 @@ components:
         - text
       type: string
     Security_Lists_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Lists_API_PlatformErrorResponse:
       type: object

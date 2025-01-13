@@ -142,14 +142,14 @@ To match indices starting with `logstash-`, but exclude those starting with `log
 all clusters having a name starting with `cluster_`:
 
 ```ts
-`cluster_*:logstash-*,cluster_*:-logstash-old*`
+cluster_*:logstash-*,cluster_*:-logstash-old*
 ```
 
 Excluding a cluster avoids sending any network calls to that cluster.
 To exclude a cluster with the name `cluster_one`:
 
 ```ts
-`cluster_*:logstash-*,-cluster_one:*`
+cluster_*:logstash-*,-cluster_one:*
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and

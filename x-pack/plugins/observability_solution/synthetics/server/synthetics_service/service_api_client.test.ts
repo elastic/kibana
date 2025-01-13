@@ -470,6 +470,61 @@ describe('callAPI', () => {
       url: 'https://service.dev/monitors/sync',
     });
   });
+
+  it('splits the payload into multiple requests if the payload is too large', async () => {
+    const requests: number[] = [];
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockImplementation((req: any) => {
+      requests.push(req.data.monitors.length);
+      if (req.data.monitors.length > 100) {
+        // throw 413 error
+        return Promise.reject({ response: { status: 413 } });
+      }
+
+      return Promise.resolve({} as any);
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as SyntheticsServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    const monitors = new Array(250).fill({
+      ...request1[0],
+      locations: [
+        {
+          id: 'us_central',
+          isServiceManaged: true,
+        },
+      ],
+    });
+
+    await apiClient.syncMonitors({
+      monitors,
+      output,
+      license: licenseMock.license,
+      location: {
+        id: 'us_central',
+        url: 'https://service.dev',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    });
+
+    expect(axiosSpy).toHaveBeenCalledTimes(7);
+    expect(requests).toEqual([250, 125, 125, 63, 62, 63, 62]);
+  });
 });
 
 const testLocations: PublicLocations = [

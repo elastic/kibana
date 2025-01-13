@@ -58,7 +58,7 @@ const featuresList = {
         'Did you know the new self-managed Elastic open crawler is now available? You can keep your web content in sync with your search-optimized indices!',
     }),
     title: i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.webCrawler.featureName', {
-      defaultMessage: 'Web crawler',
+      defaultMessage: 'Web Crawler',
     }),
   },
   analyticsAndLogs: {

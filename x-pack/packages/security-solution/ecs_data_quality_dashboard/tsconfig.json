@@ -26,5 +26,7 @@
     "@kbn/core",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/react-kibana-context-render",
   ]
 }

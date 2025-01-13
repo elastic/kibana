@@ -298,9 +298,34 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
                   <Controller
                     control={control}
                     name={`url_filters.${index}.pattern`}
-                    render={({ field }) => (
+                    rules={{
+                      validate: (rule) => {
+                        if (!rule?.trim()) {
+                          return i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fieldInput.requiredError',
+                            {
+                              defaultMessage: 'A value is required.',
+                            }
+                          );
+                        }
+
+                        if (rule[0] !== '/') {
+                          return i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fieldInput.slashMissingError',
+                            {
+                              defaultMessage: 'Value must begin with a /.',
+                            }
+                          );
+                        }
+
+                        return true;
+                      },
+                    }}
+                    render={({ field, fieldState: { error, isTouched } }) => (
                       <>
                         <EuiFormRow
+                          isInvalid={!!error && isTouched}
+                          error={error?.message}
                           label={i18n.translate(
                             'xpack.enterpriseSearch.content.indices.extractionRules.editRule.url.urlFilter.',
                             {
@@ -311,6 +336,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
                           <EuiFieldText
                             data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-urlPattern"
                             fullWidth
+                            isInvalid={!!error && isTouched}
                             placeholder={i18n.translate(
                               'xpack.enterpriseSearch.content.indices.extractionRules.editRule.url.urlFilters.patternPlaceholder',
                               {
@@ -414,7 +440,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
                 data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-saveExtractionRule"
                 type="submit"
                 onClick={() => saveRule({ ...getValues() })}
-                disabled={!formState.isValid}
+                disabled={!formState.isValid || !rulesFields || rulesFields.length === 0}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.extractionRules.editRule.saveButtonLabel',

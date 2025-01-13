@@ -8,45 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
 
-const EMBED_TAB_ACTIONS = {
-  SET_EMBED_URL: 'SET_EMBED_URL',
-  SET_IS_NOT_SAVED: 'SET_IS_NOT_SAVED',
-};
-
 type IEmbedTab = IModalTabDeclaration<{ url: string; isNotSaved: boolean }>;
 
-const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '', isNotSaved: false }, action) => {
-  switch (action.type) {
-    case EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED:
-      return {
-        ...state,
-        isNotSaved: action.payload,
-      };
-    case EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED:
-      return {
-        ...state,
-        isNotSaved: action.payload,
-      };
-    default:
-      return state;
-  }
-};
-
 const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch }) => {
-  const { embedUrlParamExtensions, shareableUrlForSavedObject, shareableUrl, objectType, isDirty } =
+  const { embedUrlParamExtensions, shareableUrlForSavedObject, shareableUrl, objectType } =
     useShareTabsContext()!;
-
-  const setIsNotSaved = useCallback(() => {
-    dispatch({
-      type: EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED,
-      payload: objectType === 'dashboard' ? isDirty : false,
-    });
-  }, [dispatch, objectType, isDirty]);
 
   return (
     <EmbedContent
@@ -55,8 +26,6 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         shareableUrlForSavedObject,
         shareableUrl,
         objectType,
-        isNotSaved: state?.isNotSaved,
-        setIsNotSaved,
       }}
     />
   );
@@ -67,6 +36,5 @@ export const embedTab: IEmbedTab = {
   name: i18n.translate('share.contextMenu.embedCodeTab', {
     defaultMessage: 'Embed',
   }),
-  reducer: embedTabReducer,
   content: EmbedTabContent,
 };

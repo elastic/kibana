@@ -24,9 +24,10 @@ import type {
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
+  CrowdstrikeApiDoNotValidateResponsesSchema,
+  CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -174,7 +175,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
           'Content-Type': 'application/x-www-form-urlencoded',
           authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
         },
-        responseSchema: CrowdstrikeGetTokenResponseSchema,
+        responseSchema:
+          CrowdstrikeApiDoNotValidateResponsesSchema as unknown as typeof CrowdstrikeGetTokenResponseSchema,
       },
       connectorUsageCollector
     );
@@ -210,7 +212,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
           // where the external system might add/remove/change values in the response that we have no
           // control over.
           responseSchema:
-            RelaxedCrowdstrikeBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
+            CrowdstrikeApiDoNotValidateResponsesSchema as unknown as SubActionRequestParams<R>['responseSchema'],
           headers: {
             ...req.headers,
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,

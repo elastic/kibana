@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPackage, renderPackageManifestYAML } from './build_integration';
+import { buildPackage, isValidName, renderPackageManifestYAML } from './build_integration';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
 import { generateUniqueId, ensureDirSync, createSync } from '../util';
 import { createDataStream } from './data_stream';
@@ -39,6 +39,7 @@ jest.mock('adm-zip', () => {
   return jest.fn().mockImplementation(() => ({
     addLocalFolder: jest.fn(),
     toBuffer: jest.fn(),
+    addFile: jest.fn(),
   }));
 });
 
@@ -46,8 +47,8 @@ describe('buildPackage', () => {
   const packagePath = `${mockedDataPath}/integration-assistant-${mockedId}`;
   const integrationPath = `${packagePath}/integration-1.0.0`;
 
-  const firstDatastreamName = 'datastream_1';
-  const secondDatastreamName = 'datastream_2';
+  const firstDatastreamName = 'datastream_one';
+  const secondDatastreamName = 'datastream_two';
 
   const firstDataStreamInputTypes: InputType[] = ['filestream', 'kafka'];
   const secondDataStreamInputTypes: InputType[] = ['kafka'];
@@ -74,8 +75,8 @@ describe('buildPackage', () => {
 
   const firstDataStream: DataStream = {
     name: firstDatastreamName,
-    title: 'Datastream_1',
-    description: 'Datastream_1 description',
+    title: 'datastream_one',
+    description: 'datastream_one description',
     inputTypes: firstDataStreamInputTypes,
     docs: firstDataStreamDocs,
     rawSamples: ['{"test1": "test1"}'],
@@ -85,8 +86,8 @@ describe('buildPackage', () => {
 
   const secondDataStream: DataStream = {
     name: secondDatastreamName,
-    title: 'Datastream_2',
-    description: 'Datastream_2 description',
+    title: 'datastream_two',
+    description: 'datastream_two description',
     inputTypes: secondDataStreamInputTypes,
     docs: secondDataStreamDocs,
     rawSamples: ['{"test1": "test1"}'],
@@ -121,15 +122,6 @@ describe('buildPackage', () => {
 
     // Manifest files
     expect(createSync).toHaveBeenCalledWith(`${integrationPath}/manifest.yml`, expect.any(String));
-  });
-
-  it('Should create logo files if info is present in the integration', async () => {
-    testIntegration.logo = 'logo';
-
-    await buildPackage(testIntegration);
-
-    expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/img`);
-    expect(createSync).toHaveBeenCalledWith(`${integrationPath}/img/logo.svg`, expect.any(Buffer));
   });
 
   it('Should not create logo files if info is not present in the integration', async () => {
@@ -186,19 +178,19 @@ describe('buildPackage', () => {
   it('Should call createReadme once with sorted fields', async () => {
     jest.clearAllMocks();
 
-    const firstDSFieldsMapping = [{ name: 'name a', description: 'description 1', type: 'type 1' }];
+    const firstDSFieldsMapping = [{ name: 'name_a', description: 'description 1', type: 'type 1' }];
 
     const firstDataStreamFields = [
-      { name: 'name b', description: 'description 1', type: 'type 1' },
+      { name: 'name_b', description: 'description 1', type: 'type 1' },
     ];
 
     const secondDSFieldsMapping = [
-      { name: 'name c', description: 'description 2', type: 'type 2' },
-      { name: 'name e', description: 'description 3', type: 'type 3' },
+      { name: 'name_c', description: 'description 2', type: 'type 2' },
+      { name: 'name_e', description: 'description 3', type: 'type 3' },
     ];
 
     const secondDataStreamFields = [
-      { name: 'name d', description: 'description 2', type: 'type 2' },
+      { name: 'name_d', description: 'description 2', type: 'type 2' },
     ];
 
     (createFieldMapping as jest.Mock).mockReturnValueOnce(firstDSFieldsMapping);
@@ -213,17 +205,17 @@ describe('buildPackage', () => {
       {
         datastream: firstDatastreamName,
         fields: [
-          { name: 'name a', description: 'description 1', type: 'type 1' },
+          { name: 'name_a', description: 'description 1', type: 'type 1' },
 
-          { name: 'name b', description: 'description 1', type: 'type 1' },
+          { name: 'name_b', description: 'description 1', type: 'type 1' },
         ],
       },
       {
         datastream: secondDatastreamName,
         fields: [
-          { name: 'name c', description: 'description 2', type: 'type 2' },
-          { name: 'name d', description: 'description 2', type: 'type 2' },
-          { name: 'name e', description: 'description 3', type: 'type 3' },
+          { name: 'name_c', description: 'description 2', type: 'type 2' },
+          { name: 'name_d', description: 'description 2', type: 'type 2' },
+          { name: 'name_e', description: 'description 3', type: 'type 3' },
         ],
       },
     ]);
@@ -234,13 +226,13 @@ describe('renderPackageManifestYAML', () => {
   test('generates the package manifest correctly', () => {
     const integration: Integration = {
       title: 'Sample Integration',
-      name: 'sample-integration',
+      name: 'sample_integration',
       description:
         '  This is a sample integration\n\nWith multiple lines   and    weird  spacing. \n\n  And more lines  ',
       logo: 'some-logo.png',
       dataStreams: [
         {
-          name: 'data-stream-1',
+          name: 'data_stream_one',
           title: 'Data Stream 1',
           description: 'This is data stream 1',
           inputTypes: ['filestream'],
@@ -252,7 +244,7 @@ describe('renderPackageManifestYAML', () => {
           samplesFormat: { name: 'ndjson', multiline: false },
         },
         {
-          name: 'data-stream-2',
+          name: 'data_stream_two',
           title: 'Data Stream 2',
           description:
             'This is data stream 2\nWith multiple lines of description\nBut otherwise, nothing special',
@@ -285,5 +277,55 @@ describe('renderPackageManifestYAML', () => {
       size: '32x32',
       type: 'image/svg+xml',
     });
+  });
+});
+
+describe('isValidName', () => {
+  it('should return true for valid names', () => {
+    expect(isValidName('validname')).toBe(true);
+    expect(isValidName('valid_name')).toBe(true);
+    expect(isValidName('anothervalidname')).toBe(true);
+  });
+
+  it('should return false for empty string', () => {
+    expect(isValidName('')).toBe(false);
+  });
+
+  it('should return false for names with spaces', () => {
+    expect(isValidName('invalid name')).toBe(false);
+    expect(isValidName(' invalid')).toBe(false);
+    expect(isValidName('invalid ')).toBe(false);
+    expect(isValidName('invalid name with spaces')).toBe(false);
+  });
+
+  it('should return false for names with special characters', () => {
+    expect(isValidName('invalid@name')).toBe(false);
+    expect(isValidName('invalid#name')).toBe(false);
+    expect(isValidName('invalid$name')).toBe(false);
+    expect(isValidName('invalid%name')).toBe(false);
+    expect(isValidName('invalid^name')).toBe(false);
+    expect(isValidName('invalid&name')).toBe(false);
+    expect(isValidName('invalid*name')).toBe(false);
+    expect(isValidName('invalid(name')).toBe(false);
+    expect(isValidName('invalid/name')).toBe(false);
+  });
+
+  it('should return false for names with dashes', () => {
+    expect(isValidName('invalid-name')).toBe(false);
+    expect(isValidName('invalid-name-with-dashes')).toBe(false);
+  });
+
+  it('should return false for names with periods', () => {
+    expect(isValidName('invalid.name')).toBe(false);
+    expect(isValidName('invalid.name.with.periods')).toBe(false);
+  });
+
+  it('should return false for names with mixed invalid characters', () => {
+    expect(isValidName('invalid@name#with$special%characters')).toBe(false);
+    expect(isValidName('invalid name with spaces and 123')).toBe(false);
+  });
+
+  it('should return false for names with empty string', () => {
+    expect(isValidName('')).toBe(false);
   });
 });

@@ -11,7 +11,7 @@ import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesUnsavedChanges<Runtime extends object = object> {
   unsavedChanges: PublishingSubject<Partial<Runtime> | undefined>;
-  resetUnsavedChanges: () => void;
+  resetUnsavedChanges: () => boolean;
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {

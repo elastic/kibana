@@ -14,11 +14,11 @@ import { waitFor } from '@testing-library/react';
 describe('childrenUnsavedChanges$', () => {
   const child1Api = {
     unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => undefined,
+    resetUnsavedChanges: () => true,
   };
   const child2Api = {
     unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => undefined,
+    resetUnsavedChanges: () => true,
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const onFireMock = jest.fn();
@@ -99,7 +99,7 @@ describe('childrenUnsavedChanges$', () => {
       ...children$.value,
       child3: {
         unsavedChanges: new BehaviorSubject<object | undefined>({ key1: 'modified value' }),
-        resetUnsavedChanges: () => undefined,
+        resetUnsavedChanges: () => true,
       },
     });
 

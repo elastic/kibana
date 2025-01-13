@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -23,8 +23,8 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
@@ -39,8 +39,6 @@ import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/desc
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
-import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
@@ -59,6 +57,7 @@ import {
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from './use_default_index_pattern';
+import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -83,16 +82,34 @@ export const Filters = ({
   index,
   'data-test-subj': dataTestSubj,
 }: FiltersProps) => {
-  const flattenedFilters = mapAndFlattenFilters(filters);
-
   const defaultIndexPattern = useDefaultIndexPattern();
+  const useDataViewParams = dataViewId
+    ? { dataViewId }
+    : { indexPatterns: index ?? defaultIndexPattern };
+  const { dataView } = useDataView(useDataViewParams);
+  const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
+  const searchBarFilters = useMemo(() => {
+    if (!index || isDataView(index) || isEsql) {
+      return filters;
+    }
+    const filtersWithUpdatedMetaIndex = filters.map((filter) => {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: index.join(','),
+        },
+      };
+    });
 
-  const { indexPattern } = useRuleIndexPattern({
-    dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-    index: index ?? defaultIndexPattern,
-    dataViewId,
-  });
+    return filtersWithUpdatedMetaIndex;
+  }, [filters, index, isEsql]);
 
+  if (!dataView) {
+    return null;
+  }
+
+  const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
   const styles = filtersStyles;
 
   return (
@@ -103,7 +120,7 @@ export const Filters = ({
       responsive={false}
       gutterSize="xs"
     >
-      <FilterItems filters={flattenedFilters} indexPatterns={[indexPattern as DataView]} readOnly />
+      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 };

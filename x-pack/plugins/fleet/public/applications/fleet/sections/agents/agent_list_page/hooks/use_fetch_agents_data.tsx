@@ -228,7 +228,6 @@ export function useFetchAgentsData() {
               full: false,
             }),
             sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
             }),
             sendGetActionStatus({

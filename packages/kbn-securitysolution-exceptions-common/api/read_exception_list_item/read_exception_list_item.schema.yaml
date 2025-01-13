@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadExceptionListItem
       x-codegen-enabled: true
-      summary: Gets an exception list item
+      summary: Get an exception list item
+      description: Get the details of an exception list item using the `id` or `item_id` field.
       parameters:
         - name: id
           in: query

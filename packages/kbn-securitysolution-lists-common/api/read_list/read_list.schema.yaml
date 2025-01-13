@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadList
       x-codegen-enabled: true
-      summary: Retrieves a list using its id field
+      summary: Get list details
+      description: Get the details of a list using the list ID.
       parameters:
         - name: id
           in: query

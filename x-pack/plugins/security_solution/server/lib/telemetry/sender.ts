@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AxiosInstance } from 'axios';
@@ -88,6 +88,11 @@ export interface ITelemetryEventsSender {
    * Updates the default queue configuration.
    */
   updateDefaultQueueConfig: (config: QueueConfig) => void;
+
+  /**
+   * Reports EBT events
+   */
+  reportEBT: <T>(eventTypeOpts: EventTypeOpts<T>, eventData: T) => void;
 }
 
 export class TelemetryEventsSender implements ITelemetryEventsSender {
@@ -270,12 +275,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       const telemetryUrl = await this.fetchTelemetryPingUrl();
       const resp = await axios.get(telemetryUrl, { timeout: 3000 });
       if (resp.status === 200) {
-        this.logger.l('[Security Telemetry] elastic telemetry services are reachable');
+        this.logger.debug('Elastic telemetry services are reachable');
         return true;
       }
 
       return false;
-    } catch (_err) {
+    } catch (e) {
+      this.logger.warn('Error pinging telemetry services', {
+        error: e.message,
+      } as LogMeta);
+
       return false;
     }
   }
@@ -424,6 +433,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public updateDefaultQueueConfig(config: QueueConfig): void {
     this.getAsyncTelemetrySender().updateDefaultQueueConfig(config);
+  }
+
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
+    this.getAsyncTelemetrySender().reportEBT(eventTypeOpts, eventData);
   }
 
   private getAsyncTelemetrySender(): IAsyncTelemetryEventsSender {

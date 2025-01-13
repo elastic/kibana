@@ -10,6 +10,7 @@ import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
 import { safeDump } from 'js-yaml';
+import { NAME_REGEX_PATTERN } from '../../common/constants';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
@@ -34,6 +35,12 @@ function configureNunjucks() {
 export async function buildPackage(integration: Integration): Promise<Buffer> {
   configureNunjucks();
 
+  if (!isValidName(integration.name)) {
+    throw new Error(
+      `Invalid integration name: ${integration.name}, Should only contain letters, numbers and underscores`
+    );
+  }
+
   const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
   const packageDirectoryName = `${integration.name}-${initialVersion}`;
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
@@ -41,6 +48,11 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
   const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
     const dataStreamName = dataStream.name;
+    if (!isValidName(dataStreamName)) {
+      throw new Error(
+        `Invalid datastream name: ${dataStreamName}, Should only contain letters, numbers and underscores`
+      );
+    }
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
     const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
@@ -60,12 +72,13 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   });
 
   createReadme(packageDir, integration.name, fieldsPerDatastream);
-  const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
-
+  const zipBuffer = await createZipArchive(integration, workingDir, packageDirectoryName);
   removeDirSync(workingDir);
   return zipBuffer;
 }
-
+export function isValidName(input: string): boolean {
+  return input.length > 0 && NAME_REGEX_PATTERN.test(input);
+}
 function createDirectories(
   workingDir: string,
   integration: Integration,
@@ -84,17 +97,6 @@ function createPackage(packageDir: string, integration: Integration): void {
   createPackageManifest(packageDir, integration);
   //  Skipping creation of system tests temporarily for custom package generation
   //  createPackageSystemTests(packageDir, integration);
-  if (integration?.logo !== undefined) {
-    createLogo(packageDir, integration.logo);
-  }
-}
-
-function createLogo(packageDir: string, logo: string): void {
-  const logoDir = joinPath(packageDir, 'img');
-  ensureDirSync(logoDir);
-
-  const buffer = Buffer.from(logo, 'base64');
-  createSync(joinPath(logoDir, 'logo.svg'), buffer);
 }
 
 function createBuildFile(packageDir: string): void {
@@ -113,10 +115,20 @@ function createChangelog(packageDir: string): void {
   createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
-async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {
+async function createZipArchive(
+  integration: Integration,
+  workingDir: string,
+  packageDirectoryName: string
+): Promise<Buffer> {
   const tmpPackageDir = joinPath(workingDir, packageDirectoryName);
   const zip = new AdmZip();
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
+
+  if (integration.logo) {
+    const logoDir = joinPath(packageDirectoryName, 'img/logo.svg');
+    const logoBuffer = Buffer.from(integration.logo, 'base64');
+    zip.addFile(logoDir, logoBuffer);
+  }
   const buffer = zip.toBuffer();
   return buffer;
 }
