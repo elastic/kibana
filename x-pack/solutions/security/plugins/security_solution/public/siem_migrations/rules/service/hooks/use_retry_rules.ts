@@ -9,7 +9,7 @@ import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from './common/api_request_reducer';
-import type { RetryRuleMigrationFilter } from '../../types';
+import type { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
 
 export const RETRY_RULE_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.retryMigrationRulesSuccess',
@@ -20,7 +20,7 @@ export const RETRY_RULE_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Error retrying a rule migration.' }
 );
 
-export type RetryRuleMigration = (migrationId: string, filter?: RetryRuleMigrationFilter) => void;
+export type RetryRuleMigration = (migrationId: string, filter?: SiemMigrationRetryFilter) => void;
 export type OnSuccess = () => void;
 
 export const useRetryRuleMigration = (onSuccess?: OnSuccess) => {

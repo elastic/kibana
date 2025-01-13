@@ -25,6 +25,7 @@ import type {
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
@@ -40,7 +41,7 @@ import {
   retryRuleMigration,
   getIntegrations,
 } from '../api';
-import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
+import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -145,7 +146,7 @@ export class SiemRulesMigrationsService {
 
   public async retryRuleMigration(
     migrationId: string,
-    filter?: RetryRuleMigrationFilter
+    filter?: SiemMigrationRetryFilter
   ): Promise<RetryRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
@@ -165,7 +166,7 @@ export class SiemRulesMigrationsService {
       migrationId,
       connectorId,
       langSmithOptions,
-      ...filter,
+      filter,
     });
     this.startPolling();
     return result;

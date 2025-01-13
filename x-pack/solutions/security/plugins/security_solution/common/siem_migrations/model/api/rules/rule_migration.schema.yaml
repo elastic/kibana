@@ -164,6 +164,36 @@ paths:
             items:
               description: The rule migration id
               $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_prebuilt
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
 
       responses:
         200:
@@ -335,12 +365,8 @@ paths:
                   $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
                 langsmith_options:
                   $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
-                failed:
-                  type: boolean
-                  description: The indicator to retry only failed rules
-                not_fully_translated:
-                  type: boolean
-                  description: The indicator to retry only not fully translated rules
+                filter:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
       responses:
         200:
           description: Indicates the migration retry request has been processed successfully.

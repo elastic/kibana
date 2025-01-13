@@ -32,9 +32,15 @@ import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_preb
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  RuleTranslationResult,
+  SiemMigrationRetryFilter,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
+import type { FilterOptions } from './filters';
+import { MigrationRulesFilter } from './filters';
+import { convertFilterOptions } from './helpers';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -75,6 +81,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
+    // Filters
+    const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
+
     const { data: translationStats, isLoading: isStatsLoading } =
       useGetMigrationTranslationStats(migrationId);
 
@@ -91,6 +100,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       sortField,
       sortDirection,
       searchTerm,
+      ...convertFilterOptions(filterOptions),
     });
 
     const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
@@ -199,7 +209,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, { failed: true });
+      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
     }, [migrationId, retryRuleMigration]);
 
     const isLoading =
@@ -309,6 +319,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
                   <EuiFlexItem>
                     <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <MigrationRulesFilter
+                      filterOptions={filterOptions}
+                      onFilterOptionsChanged={setFilterOptions}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <BulkActions

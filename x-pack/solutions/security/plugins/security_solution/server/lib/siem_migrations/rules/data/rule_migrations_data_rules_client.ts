@@ -41,11 +41,13 @@ export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
+  installed?: boolean;
   installable?: boolean;
   prebuilt?: boolean;
-  custom?: boolean;
   failed?: boolean;
-  notFullyTranslated?: boolean;
+  fullyTranslated?: boolean;
+  partiallyTranslated?: boolean;
+  untranslatable?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -408,12 +410,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     {
       status,
       ids,
+      installed,
       installable,
       prebuilt,
-      custom,
       searchTerm,
       failed,
-      notFullyTranslated,
+      fullyTranslated,
+      partiallyTranslated,
+      untranslatable,
     }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
@@ -427,23 +431,43 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     if (ids) {
       filter.push({ terms: { _id: ids } });
     }
-    if (installable) {
-      filter.push(...searchConditions.isInstallable());
-    }
-    if (prebuilt) {
-      filter.push(searchConditions.isPrebuilt());
-    }
-    if (custom) {
-      filter.push(searchConditions.isCustom());
-    }
     if (searchTerm?.length) {
       filter.push(searchConditions.matchTitle(searchTerm));
     }
-    if (failed) {
-      filter.push(searchConditions.isFailed());
+    if (installed === true) {
+      filter.push(searchConditions.isInstalled());
+    } else if (installed === false) {
+      filter.push(searchConditions.isNotInstalled());
     }
-    if (notFullyTranslated) {
+    if (installable === true) {
+      filter.push(...searchConditions.isInstallable());
+    } else if (installable === false) {
+      filter.push(...searchConditions.isNotInstallable());
+    }
+    if (prebuilt === true) {
+      filter.push(searchConditions.isPrebuilt());
+    } else if (prebuilt === false) {
+      filter.push(searchConditions.isCustom());
+    }
+    if (failed === true) {
+      filter.push(searchConditions.isFailed());
+    } else if (failed === false) {
+      filter.push(searchConditions.isNotFailed());
+    }
+    if (fullyTranslated === true) {
+      filter.push(searchConditions.isFullyTranslated());
+    } else if (fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
+    }
+    if (partiallyTranslated === true) {
+      filter.push(searchConditions.isPartiallyTranslated());
+    } else if (partiallyTranslated === false) {
+      filter.push(searchConditions.isNotPartiallyTranslated());
+    }
+    if (untranslatable === true) {
+      filter.push(searchConditions.isUntranslatable());
+    } else if (untranslatable === false) {
+      filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };
   }

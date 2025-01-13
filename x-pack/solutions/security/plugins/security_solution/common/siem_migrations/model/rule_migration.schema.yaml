@@ -320,6 +320,13 @@ components:
           description: The comments for the migration including a summary from the LLM in markdown.
           $ref: '#/components/schemas/RuleMigrationComments'
 
+    RuleMigrationRetryFilter:
+      type: string
+      description: Indicates the filter to retry the migrations rules translation
+      enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
+        - failed
+        - not_fully_translated
+
     ## Rule migration resources
 
     RuleMigrationResourceType:
