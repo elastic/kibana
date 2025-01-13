@@ -16,10 +16,8 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 
 export type CreateRuleMigrationResourceInput = Pick<
   RuleMigrationResource,
-  'migration_id' | 'type' | 'name' | 'metadata'
-> & {
-  content?: string;
-};
+  'migration_id' | 'type' | 'name' | 'content' | 'metadata'
+>;
 export interface RuleMigrationResourceFilters {
   type?: RuleMigrationResourceType;
   names?: string[];
