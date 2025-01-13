@@ -7,8 +7,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
-import { MachineLearningProvider } from '../../../api_integration/services/ml';
-import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
+import { MachineLearningProvider } from '../../../../../services/ml';
+import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
 export const TINY_ELSER = {
   ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
@@ -35,6 +35,17 @@ export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
 
 export async function clearKnowledgeBase(es: Client) {
   const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
+
+  return es.deleteByQuery({
+    index: KB_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+    refresh: true,
+  });
+}
+
+export async function clearConversations(es: Client) {
+  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
 
   return es.deleteByQuery({
     index: KB_INDEX,
