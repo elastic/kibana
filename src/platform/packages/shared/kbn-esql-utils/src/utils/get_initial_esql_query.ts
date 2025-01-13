@@ -17,7 +17,7 @@ const getFilterBySearchText = (query?: Query) => {
   const searchTextFunc =
     query.language === 'kuery' ? 'KQL' : query.language === 'lucene' ? 'QSTR' : '';
 
-  if (searchTextFunc) {
+  if (searchTextFunc && query.query) {
     return `${searchTextFunc}("""${query.query}""")`;
   }
   return '';
