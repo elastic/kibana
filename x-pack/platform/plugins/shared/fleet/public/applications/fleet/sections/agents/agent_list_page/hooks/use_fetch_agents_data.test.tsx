@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable ban/ban */
-/* eslint-disable jest/no-focused-tests */
+
 
 import { act, waitFor } from '@testing-library/react';
 
@@ -122,7 +122,7 @@ function blocked(fn: any) {
   }, interval);
 }
 
-describe.only('Attempt to reproduce test flakiness', () => {
+describe('Attempt to reproduce test flakiness', () => {
   for (let i = 0; i < 5000; i++) {
     describe(`useFetchAgentsData - ${i + 1}`, () => {
       let interval: any;
