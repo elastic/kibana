@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep } from 'lodash';
-import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
 import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   ChildFieldName,
