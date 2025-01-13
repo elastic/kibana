@@ -57,7 +57,7 @@ export const buildEsqlRules = (esqlRoot: string = 'esql_root') => {
 };
 
 /*
- * These language attributes need to be added to the console language definition for sql tokenizer
+ * These language attributes need to be added to the console language definition for esql tokenizer
  * to work correctly.
  */
 export const esqlLanguageAttributes = { keywords, builtinFunctions };
