@@ -423,8 +423,18 @@ export const mockState: State = {
     logSamples: rawSamples,
   },
   isGenerating: false,
-  hasCelInput: false,
   result,
+  showCelCreateFlyout: false,
+  isFlyoutGenerating: false,
+  celInputResult: {
+    url: 'https://sample.com',
+    program: 'line1\nline2',
+    authType: 'basic',
+    stateSettings: { setting1: 100, setting2: '' },
+    redactVars: ['setting2'],
+    configFields: { setting1: {}, setting2: {} },
+    needsAuthConfigBlock: false,
+  },
 };
 
 export const mockActions: Actions = {
@@ -432,8 +442,9 @@ export const mockActions: Actions = {
   setConnector: jest.fn(),
   setIntegrationSettings: jest.fn(),
   setIsGenerating: jest.fn(),
-  setHasCelInput: jest.fn(),
   setResult: jest.fn(),
   setCelInputResult: jest.fn(),
+  setShowCelCreateFlyout: jest.fn(),
+  setIsFlyoutGenerating: jest.fn(),
   completeStep: jest.fn(),
 };
