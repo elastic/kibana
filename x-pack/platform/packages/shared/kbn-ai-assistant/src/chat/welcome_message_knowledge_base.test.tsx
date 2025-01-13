@@ -13,6 +13,24 @@ import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
 describe('WelcomeMessageKnowledgeBase', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  type StatusType = NonNullable<UseKnowledgeBaseResult['status']['value']>;
+  type EndpointType = StatusType['endpoint'];
+  const endpoint: EndpointType = {
+    inference_id: 'obs_ai_assistant_kb_inference',
+    task_type: 'sparse_embedding',
+    service: 'elasticsearch',
+    service_settings: {
+      num_threads: 1,
+      model_id: '.elser_model_2',
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 1,
+      },
+    },
+  };
   const initKnowledgeBase: UseKnowledgeBaseResult = {
     isInstalling: false,
     install: jest.fn(),
@@ -83,15 +101,40 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     expect(screen.getByText('Setting up Knowledge base', { exact: false })).toBeInTheDocument();
   });
-  it('renders "Setting up Knowledge base" message while while model is being deployed', () => {
+  it('renders "Setting up Knowledge base" message while while model is being deployed without deployment or allocation state yet being reported', () => {
     renderComponent({
       knowledgeBase: {
         isInstalling: false,
         status: {
           value: {
+            endpoint,
             ready: false,
             enabled: true,
-            model_stats: { deployment_state: 'starting', allocation_state: 'starting' },
+            model_stats: { allocation_count: 0 },
+          },
+          loading: false,
+          refresh: jest.fn(),
+        },
+      },
+      connectors: defaultConnectors,
+    });
+    expect(
+      screen.getByText('We are setting up your knowledge base', { exact: false })
+    ).toBeInTheDocument();
+  });
+  it('renders "Setting up Knowledge base" message while while model is being deployed and starting', () => {
+    renderComponent({
+      knowledgeBase: {
+        isInstalling: false,
+        status: {
+          value: {
+            endpoint,
+            ready: false,
+            enabled: true,
+            model_stats: {
+              deployment_state: 'starting',
+              allocation_state: 'starting',
+            },
           },
           loading: false,
           refresh: jest.fn(),
@@ -104,7 +147,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       screen.getByText('We are setting up your knowledge base', { exact: false })
     ).toBeInTheDocument();
   });
-  it('renders success message if knowledge base was previously not installed but is now ready, then hides it (two-step render)', async () => {
+  it('displays success message after installation and hides it after timeout', async () => {
     jest.useFakeTimers();
 
     // Step 1: Initially not installed
@@ -122,13 +165,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
           knowledgeBase={{
             ...initKnowledgeBase,
             status: {
+              ...initKnowledgeBase.status,
               value: {
                 ready: true,
                 enabled: true,
                 model_stats: { deployment_state: 'started', allocation_state: 'started' },
               },
-              loading: false,
-              refresh: jest.fn(),
             },
           }}
           connectors={defaultConnectors}
@@ -145,7 +187,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
 
     // now it should be gone
-    expect(screen.queryByText(/Knowledge base successfully installed/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Knowledge base successfully installed')).toBeNull();
   });
 
   it('renders no install messages when model has been installed and ready', () => {
@@ -154,13 +196,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
       knowledgeBase: {
         isInstalling: false,
         status: {
+          ...initKnowledgeBase.status,
           value: {
             ready: true,
             enabled: true,
             model_stats: { deployment_state: 'started', allocation_state: 'started' },
           },
-          loading: false,
-          refresh: jest.fn(),
         },
       },
       connectors: defaultConnectors,
@@ -183,6 +224,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     expect(screen.getByText('Install Knowledge base', { exact: false })).toBeInTheDocument();
     expect(screen.getByText('Inspect issues', { exact: false })).toBeInTheDocument();
   });
+
   it('renders knowledge base install and model state inspect when not installing and no errors', () => {
     // this can happen when you have a preconfigured connector,
     // we don't automatically install in this case and just show the same UI as if there was an issue/error
@@ -205,13 +247,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
       knowledgeBase: {
         isInstalling: false,
         status: {
+          ...initKnowledgeBase.status,
           value: {
             ready: false,
             enabled: true,
             model_stats: { deployment_state: 'failed', allocation_state: 'started' },
           },
-          loading: false,
-          refresh: jest.fn(),
         },
       },
       connectors: defaultConnectors,

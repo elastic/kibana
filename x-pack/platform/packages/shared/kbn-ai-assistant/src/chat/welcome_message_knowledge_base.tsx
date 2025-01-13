@@ -42,12 +42,18 @@ export function WelcomeMessageKnowledgeBase({
 
   const [pollKnowledgeBaseStatus, setPollKnowledgeBaseStatus] = useState(false);
 
+  // Tracks whether the inference endpoint creation process has started
   const inferenceEndpointIsInstalling = knowledgeBase.isInstalling;
-  // inference created and model deployed
-  const modelIsReady = knowledgeBase.status.value?.ready;
-  const modelDeploymentInProgress =
-    !modelIsReady && knowledgeBase.status.value?.model_stats?.deployment_state === 'starting';
-  // installing state is when the inference endpoint is being created or it's already been created and the model is being deployed
+
+  // Tracks whether the model is fully ready
+  const modelIsReady = knowledgeBase.status.value?.ready === true;
+
+  // Determines if the model deployment is still in progress
+  // This happens when the model is not ready but the endpoint exists
+  const modelDeploymentInProgress = !modelIsReady && !!knowledgeBase.status.value?.endpoint;
+
+  // Determines if the overall installation process is ongoing
+  // Covers both the endpoint setup phase and the model deployment phase
   const isInstalling = inferenceEndpointIsInstalling || modelDeploymentInProgress;
   // start polling kb status if inference endpoint is being created or has been created but model isn't ready
   useEffect(() => {
@@ -112,12 +118,11 @@ export function WelcomeMessageKnowledgeBase({
       ) : null}
 
       {
-        // already has a connector setup and kb is not currently installing
+        // not currently installing
         // and has an inference install error (timeout, etc) or model is not ready
-        // if the model is not ready and they are not installing this likely the user
-        // has a preconfigured connector and we prompt to install or there was a problem
-        // deploying the model
-        connectors.connectors?.length && !isInstalling ? (
+        // this state is when the user has a preconfigured connector and we prompt to install
+        // or there was a problem deploying the model
+        !isInstalling ? (
           knowledgeBase.installError || !modelIsReady ? (
             <>
               <EuiText color="subdued" size="s">
