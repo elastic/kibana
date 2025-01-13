@@ -111,6 +111,7 @@ export const useGridLayoutEvents = ({
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
 
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
+      const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 3;
 
       const previewRect = {
         left: isResize
@@ -118,7 +119,10 @@ export const useGridLayoutEvents = ({
           : pointerClientPixel.x - interactionEvent.pointerOffsets.left,
         top: isResize ? panelRect.top : pointerClientPixel.y - interactionEvent.pointerOffsets.top,
         bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
-        right: pointerClientPixel.x - interactionEvent.pointerOffsets.right,
+        right:
+          isResize && isTouchEvent(e)
+            ? Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth)
+            : pointerClientPixel.x - interactionEvent.pointerOffsets.right,
       };
 
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
