@@ -6,10 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { enableStreams, fetchDocument, forkStream, indexDocument } from './helpers/requests';
+import {
+  IndicesGetResponse,
+  ClusterGetComponentTemplateResponse,
+  IndicesGetIndexTemplateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  disableStreams,
+  enableStreams,
+  fetchDocument,
+  forkStream,
+  indexDocument,
+} from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { cleanUpRootStream } from './helpers/cleanup';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -17,18 +28,78 @@ export default function ({ getService }: FtrProviderContext) {
   const retryService = getService('retry');
   const logger = getService('log');
 
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
+
+  type Resources = [
+    IndicesGetResponse,
+    ClusterGetComponentTemplateResponse,
+    IndicesGetIndexTemplateResponse
+  ];
+
+  function getResources(): Promise<Resources> {
+    return Promise.all([
+      esClient.indices.get({
+        index: ['logs*', '-logs-*'],
+      }),
+      esClient.cluster.getComponentTemplate({
+        name: 'logs*',
+      }),
+      esClient.indices.getIndexTemplate({
+        name: 'logs*',
+      }),
+    ]);
+  }
+
   describe('Basic functionality', () => {
-    after(async () => {
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
+    async function getEnabled() {
+      const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
+      return response.body.enabled;
+    }
+
+    describe('initially', () => {
+      let resources: Resources;
+
+      before(async () => {
+        resources = await getResources();
+      });
+
+      it('is not enabled', async () => {
+        expect(await getEnabled()).to.eql(false);
+      });
+
+      describe('after enabling', () => {
+        before(async () => {
+          await enableStreams(apiClient);
+        });
+
+        it('is enabled', async () => {
+          await disableStreams(apiClient);
+        });
+
+        describe('after disabling', () => {
+          before(async () => {
+            await disableStreams(apiClient);
+          });
+
+          it('cleans up all the resources', async () => {
+            expect(await getResources()).to.eql(resources);
+          });
+
+          it('is disabled', async () => {
+            expect(await getEnabled()).to.eql(false);
+          });
+        });
       });
     });
 
     // Note: Each step is dependent on the previous
     describe('Full flow', () => {
-      it('Enable streams', async () => {
-        await enableStreams(supertest);
+      before(async () => {
+        await enableStreams(apiClient);
+      });
+
+      after(async () => {
+        await disableStreams(apiClient);
       });
 
       it('Index a JSON document to logs, should go to logs', async () => {

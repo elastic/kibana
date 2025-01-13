@@ -7,11 +7,17 @@
 
 import { StreamDefinition } from '@kbn/streams-schema';
 
-export function isDescendandOf(parent: StreamDefinition, child: StreamDefinition) {
+export function isDescendandOf(
+  parent: Pick<StreamDefinition, 'name'>,
+  child: Pick<StreamDefinition, 'name'>
+) {
   return child.name.startsWith(parent.name);
 }
 
-export function isChildOf(parent: StreamDefinition, child: StreamDefinition) {
+export function isChildOf(
+  parent: Pick<StreamDefinition, 'name'>,
+  child: Pick<StreamDefinition, 'name'>
+) {
   return (
     isDescendandOf(parent, child) &&
     child.name.split('.').length === parent.name.split('.').length + 1

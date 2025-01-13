@@ -8,10 +8,16 @@
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
-import { enableStreams, fetchDocument, indexDocument, putStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  fetchDocument,
+  indexDocument,
+  putStream,
+} from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { cleanUpRootStream } from './helpers/cleanup';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -19,16 +25,15 @@ export default function ({ getService }: FtrProviderContext) {
   const retryService = getService('retry');
   const logger = getService('log');
 
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
+
   describe('Enrichment', () => {
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
     });
 
     after(async () => {
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
+      await disableStreams(apiClient);
     });
 
     it('Place processing steps', async () => {
@@ -81,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
-      const response = await putStream(supertest, 'logs', body);
+      const response = await putStream(apiClient, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
     });
 

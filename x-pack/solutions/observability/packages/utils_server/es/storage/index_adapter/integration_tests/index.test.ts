@@ -51,7 +51,6 @@ describe('StorageIndexAdapter', () => {
       properties: {
         foo: {
           type: 'keyword',
-          required: true,
         },
       },
     },
@@ -397,6 +396,13 @@ describe('StorageIndexAdapter', () => {
   async function createServers() {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
+      settings: {
+        kbn: {
+          cliArgs: {
+            oss: false,
+          },
+        },
+      },
     });
 
     esServer = await startES();

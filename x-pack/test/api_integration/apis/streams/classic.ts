@@ -8,9 +8,8 @@
 import expect from '@kbn/expect';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { cleanUpRootStream } from './helpers/cleanup';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
-import { fetchDocument, indexDocument } from './helpers/requests';
+import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,14 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Classic streams', () => {
     before(async () => {
-      await apiClient.fetch('POST /api/streams/_enable');
+      await enableStreams(apiClient);
     });
 
     after(async () => {
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
+      await disableStreams(apiClient);
     });
 
     it('Shows non-wired data streams', async () => {

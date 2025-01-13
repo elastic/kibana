@@ -10,11 +10,14 @@ import { Agent } from 'supertest';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StreamConfigDefinition } from '@kbn/streams-schema';
+import { StreamsSupertestRepositoryClient } from './repository_client';
 
-export async function enableStreams(supertest: Agent) {
-  const req = supertest.post('/api/streams/_enable').set('kbn-xsrf', 'xxx');
-  const response = await req.send().expect(200);
-  return response.body;
+export async function enableStreams(client: StreamsSupertestRepositoryClient) {
+  await client.fetch('POST /api/streams/_enable').expect(200);
+}
+
+export async function disableStreams(client: StreamsSupertestRepositoryClient) {
+  await client.fetch('POST /api/streams/_disable').expect(200);
 }
 
 export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
@@ -37,10 +40,22 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
   return response.body;
 }
 
-export async function putStream(supertest: Agent, name: string, body: StreamConfigDefinition) {
-  const req = supertest.put(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
-  const response = await req.send(body).expect(200);
-  return response.body;
+export async function putStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: StreamConfigDefinition
+) {
+  return await apiClient
+    .fetch('PUT /api/streams/{id}', {
+      params: {
+        path: {
+          id: name,
+        },
+        body,
+      },
+    })
+    .expect(200)
+    .then((response) => response.body);
 }
 
 export async function getStream(supertest: Agent, name: string) {

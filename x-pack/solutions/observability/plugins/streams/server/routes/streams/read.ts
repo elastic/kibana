@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { notFound, internal } from '@hapi/boom';
+import { internal, notFound } from '@hapi/boom';
 import {
   FieldDefinitionConfig,
-  isWiredStream,
   ReadStreamDefinition,
   WiredReadStreamDefinition,
+  isWiredStream,
 } from '@kbn/streams-schema';
-import { createServerRoute } from '../create_server_route';
+import { z } from '@kbn/zod';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { readAncestors, readStream } from '../../lib/streams/stream_crud';
+import { createServerRoute } from '../create_server_route';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -34,32 +33,32 @@ export const readStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
-      const streamEntity = await readStream({
-        scopedClusterClient,
-        id: params.path.id,
-      });
-      const dashboards = await assetClient.getAssetIds({
-        entityId: streamEntity.name,
-        entityType: 'stream',
-        assetType: 'dashboard',
+      const { assetClient, streamsClient } = await getScopedClients({
+        request,
       });
 
-      if (!isWiredStream(streamEntity)) {
+      const name = params.path.id;
+
+      const [streamDefinition, dashboards, ancestors] = await Promise.all([
+        streamsClient.getStream(name),
+        assetClient.getAssetIds({
+          entityId: name,
+          entityType: 'stream',
+          assetType: 'dashboard',
+        }),
+        streamsClient.getAncestors(name),
+      ]);
+
+      if (!isWiredStream(streamDefinition)) {
         return {
-          ...streamEntity,
+          ...streamDefinition,
           dashboards,
           inherited_fields: {},
         };
       }
 
-      const { ancestors } = await readAncestors({
-        id: streamEntity.name,
-        scopedClusterClient,
-      });
-
       const body: WiredReadStreamDefinition = {
-        ...streamEntity,
+        ...streamDefinition,
         dashboards,
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
