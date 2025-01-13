@@ -645,7 +645,7 @@
     "@kbn/maps-custom-raster-source-plugin": "link:x-pack/examples/third_party_maps_source_example",
     "@kbn/maps-ems-plugin": "link:src/platform/plugins/private/maps_ems",
     "@kbn/maps-plugin": "link:x-pack/platform/plugins/shared/maps",
-    "@kbn/maps-vector-tile-utils": "link:x-pack/packages/maps/vector_tile_utils",
+    "@kbn/maps-vector-tile-utils": "link:x-pack/platform/packages/private/maps/vector_tile_utils",
     "@kbn/metrics-data-access-plugin": "link:x-pack/solutions/observability/plugins/metrics_data_access",
     "@kbn/ml-agg-utils": "link:x-pack/platform/packages/private/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/platform/packages/shared/ml/anomaly_utils",

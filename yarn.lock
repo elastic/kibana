@@ -6296,7 +6296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-vector-tile-utils@link:x-pack/packages/maps/vector_tile_utils":
+"@kbn/maps-vector-tile-utils@link:x-pack/platform/packages/private/maps/vector_tile_utils":
   version "0.0.0"
   uid ""
 
