@@ -26,7 +26,15 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
         path,
         security: {
           authz: {
-            requiredPrivileges: kibanaAccessControlTags,
+            ...(kibanaAccessControlTags.length
+              ? {
+                  requiredPrivileges: kibanaAccessControlTags,
+                }
+              : {
+                  enabled: false,
+                  reason:
+                    'This route is opted out from authorization because of the kibana access control flag',
+                }),
           },
         },
         validate: RequestHandler.getValidation(),
