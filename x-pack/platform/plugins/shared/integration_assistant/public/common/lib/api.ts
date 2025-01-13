@@ -20,6 +20,8 @@ import type {
   AnalyzeLogsResponse,
   CelInputRequestBody,
   CelInputResponse,
+  AnalyzeApiRequestBody,
+  AnalyzeApiResponse,
 } from '../../../common';
 import {
   INTEGRATION_BUILDER_PATH,
@@ -29,7 +31,11 @@ import {
   CEL_INPUT_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
 } from '../../../common';
-import { ANALYZE_LOGS_PATH, FLEET_PACKAGES_PATH } from '../../../common/constants';
+import {
+  ANALYZE_API_PATH,
+  ANALYZE_LOGS_PATH,
+  FLEET_PACKAGES_PATH,
+} from '../../../common/constants';
 
 export interface EpmPackageResponse {
   items: [{ id: string; type: string }];
@@ -46,6 +52,16 @@ export interface RequestDeps {
   http: HttpSetup;
   abortSignal: AbortSignal;
 }
+
+export const runAnalyzeApiGraph = async (
+  body: AnalyzeApiRequestBody,
+  { http, abortSignal }: RequestDeps
+): Promise<AnalyzeApiResponse> =>
+  http.post<AnalyzeApiResponse>(ANALYZE_API_PATH, {
+    headers: defaultHeaders,
+    body: JSON.stringify(body),
+    signal: abortSignal,
+  });
 
 export const runAnalyzeLogsGraph = async (
   body: AnalyzeLogsRequestBody,
