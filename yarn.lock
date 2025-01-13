@@ -4228,10 +4228,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor-mock@link:src/platform/packages/shared/shared-ux/code_editor/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/code-editor@link:src/platform/packages/shared/shared-ux/code_editor/impl":
   version "0.0.0"
   uid ""
@@ -4448,10 +4444,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-mocks@link:src/core/packages/custom-branding/browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-custom-branding-browser@link:src/core/packages/custom-branding/browser":
   version "0.0.0"
   uid ""
@@ -4461,10 +4453,6 @@
   uid ""
 
 "@kbn/core-custom-branding-server-internal@link:src/core/packages/custom-branding/server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-custom-branding-server-mocks@link:src/core/packages/custom-branding/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -6816,10 +6804,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-mocks-server@link:src/platform/packages/private/kbn-reporting/mocks_server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-plugin@link:x-pack/platform/plugins/private/reporting":
   version "0.0.0"
   uid ""
@@ -7340,10 +7324,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-mocks@link:src/platform/packages/shared/shared-ux/card/no_data/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-card-no-data-types@link:src/platform/packages/shared/shared-ux/card/no_data/types":
   version "0.0.0"
   uid ""
@@ -7364,15 +7344,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-mocks@link:src/platform/packages/shared/shared-ux/file/image/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-file-image@link:src/platform/packages/shared/shared-ux/file/image/impl":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-file-mocks@link:src/platform/packages/shared/shared-ux/file/mocks":
   version "0.0.0"
   uid ""
 
@@ -7392,19 +7364,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-mocks@link:src/platform/packages/shared/shared-ux/link/redirect_app/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-link-redirect-app-types@link:src/platform/packages/shared/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-link-redirect-app@link:src/platform/packages/shared/shared-ux/link/redirect_app/impl":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-markdown-mocks@link:src/platform/packages/shared/shared-ux/markdown/mocks":
   version "0.0.0"
   uid ""
 
@@ -7416,19 +7380,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-mocks@link:src/platform/packages/private/shared-ux/page/analytics_no_data/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-page-analytics-no-data-types@link:src/platform/packages/private/shared-ux/page/analytics_no_data/types":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-page-analytics-no-data@link:src/platform/packages/private/shared-ux/page/analytics_no_data/impl":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-page-kibana-no-data-mocks@link:src/platform/packages/private/shared-ux/page/kibana_no_data/mocks":
   version "0.0.0"
   uid ""
 
@@ -7440,10 +7396,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-mocks@link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-page-kibana-template-types@link:src/platform/packages/shared/shared-ux/page/kibana_template/types":
   version "0.0.0"
   uid ""
@@ -7452,19 +7404,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config-mocks@link:src/platform/packages/shared/shared-ux/page/no_data_config/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-page-no-data-config-types@link:src/platform/packages/shared/shared-ux/page/no_data_config/types":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-page-no-data-config@link:src/platform/packages/shared/shared-ux/page/no_data_config/impl":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-page-no-data-mocks@link:src/platform/packages/shared/shared-ux/page/no_data/mocks":
   version "0.0.0"
   uid ""
 
@@ -7480,10 +7424,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views-mocks@link:src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-prompt-no-data-views-types@link:src/platform/packages/shared/shared-ux/prompt/no_data_views/types":
   version "0.0.0"
   uid ""
@@ -7496,23 +7436,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-mocks@link:src/platform/packages/shared/shared-ux/router/mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-router-types@link:src/platform/packages/shared/shared-ux/router/types":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-router@link:src/platform/packages/shared/shared-ux/router/impl":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-storybook-config@link:src/platform/packages/private/shared-ux/storybook/config":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-storybook-mock@link:src/platform/packages/shared/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
