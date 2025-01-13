@@ -2079,13 +2079,7 @@
                 "text": "FieldFormatsStart"
               },
               "; uiSettings: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; dataViewFieldEditor?: ",
               {
                 "pluginId": "dataViewFieldEditor",

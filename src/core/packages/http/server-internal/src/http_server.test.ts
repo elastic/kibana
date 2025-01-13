@@ -1777,3 +1777,72 @@ describe('configuration change', () => {
     );
   });
 });
+
+test('exposes authentication details of incoming request to a route handler', async () => {
+  const { registerRouter, registerAuth, server: innerServer } = await server.setup({ config$ });
+
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authc: { enabled: false, reason: 'test' },
+        authz: { enabled: false, reason: 'test' },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+  router.get(
+    {
+      path: '/foo',
+      validate: false,
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'test' },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+  // mocking to have `authRegistered` filed set to true
+  registerAuth((req, res) => res.unauthorized());
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, {
+      method: 'get',
+      path: '/',
+      routePath: '/',
+      options: {
+        authRequired: false,
+        xsrfRequired: false,
+        access: 'internal',
+        tags: [],
+        timeout: {},
+        security: {
+          authc: { enabled: false, reason: 'test' },
+          authz: { enabled: false, reason: 'test' },
+        },
+      },
+    });
+  await supertest(innerServer.listener)
+    .get('/foo')
+    .expect(200, {
+      method: 'get',
+      path: '/foo',
+      routePath: '/foo',
+      options: {
+        authRequired: 'optional',
+        xsrfRequired: false,
+        access: 'internal',
+        tags: [],
+        timeout: {},
+        security: {
+          authc: { enabled: 'optional' },
+          authz: { enabled: false, reason: 'test' },
+        },
+      },
+    });
+});

@@ -65,7 +65,7 @@
             "section": "def-common.TopNFunctions",
             "text": "TopNFunctions"
           },
-          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationField, limit, totalSeconds, }: ",
+          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationFields, limit, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {

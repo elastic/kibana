@@ -8,6 +8,9 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import { SessionViewPanelProvider } from './document_details/session_view/context';
+import type { SessionViewPanelProps } from './document_details/session_view';
+import { SessionViewPanel } from './document_details/session_view';
 import type { NetworkExpandableFlyoutProps } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
@@ -17,6 +20,7 @@ import {
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
+  DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -102,6 +106,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: DocumentDetailsAnalyzerPanelKey,
     component: (props) => (
       <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: DocumentDetailsSessionViewPanelKey,
+    component: (props) => (
+      <SessionViewPanelProvider {...(props as SessionViewPanelProps).params}>
+        <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
+      </SessionViewPanelProvider>
     ),
   },
   {

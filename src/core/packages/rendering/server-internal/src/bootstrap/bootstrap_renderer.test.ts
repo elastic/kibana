@@ -342,6 +342,31 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
+        name: 'borealis',
+        darkMode: false,
+      });
+    });
+
+    it('calls getThemeTag with `v8` theme name when buildFlavor is `serverless`', async () => {
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo: {
+          ...packageInfo,
+          buildFlavor: 'serverless',
+        },
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
         name: 'v8',
         darkMode: false,
       });

@@ -903,7 +903,7 @@
             "references": [
               {
                 "plugin": "@kbn/reporting-public",
-                "path": "packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
+                "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
               },
               {
                 "plugin": "discover",

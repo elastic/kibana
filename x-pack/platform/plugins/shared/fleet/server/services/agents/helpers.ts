@@ -65,6 +65,7 @@ export function searchHitToAgent(
     enrolled_at: hit._source?.enrolled_at!,
     unenrolled_at: hit._source?.unenrolled_at!,
     unenrollment_started_at: hit._source?.unenrollment_started_at,
+    audit_unenrolled_reason: hit._source?.audit_unenrolled_reason!,
     upgraded_at: hit._source?.upgraded_at,
     upgrade_started_at: hit._source?.upgrade_started_at,
     upgrade_details: hit._source?.upgrade_details,
@@ -106,7 +107,6 @@ export function searchHitToAgent(
   } else {
     agent.status = hit.fields.status[0];
   }
-
   return agent;
 }
 
