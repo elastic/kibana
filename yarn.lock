@@ -8535,10 +8535,10 @@
   resolved "https://registry.yarnpkg.com/@msgpackr-extract/msgpackr-extract-win32-x64/-/msgpackr-extract-win32-x64-3.0.2.tgz#0f164b726869f71da3c594171df5ebc1c4b0a407"
   integrity sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==
 
-"@mswjs/http-middleware@^0.10.1":
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.2.tgz#553c4c5961d0c5a01ff511e607593177309d80c4"
-  integrity sha512-mgBUsindC0L30bzqFkHn9PgiKowhCndBV8m1SRY2ZFT1hHw1y+AEyVo2PFh5NfdSNrCruweZaM1A/Nx7raUFNA==
+"@mswjs/http-middleware@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
+  integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
   dependencies:
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
