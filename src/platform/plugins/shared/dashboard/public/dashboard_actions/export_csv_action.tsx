@@ -25,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
-import { ACTION_EXPORT_CSV } from './consts';
+import { ACTION_EXPORT_CSV } from './constants';
 
 export type ExportContext = EmbeddableApiContext & {
   // used for testing

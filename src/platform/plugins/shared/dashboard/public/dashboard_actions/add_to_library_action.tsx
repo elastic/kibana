@@ -39,7 +39,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
-import { ACTION_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type AddPanelToLibraryActionApi = CanAccessViewMode &
   HasType &

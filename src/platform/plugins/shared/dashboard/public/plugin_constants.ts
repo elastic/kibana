@@ -15,17 +15,6 @@ export const DASHBOARD_APP_ID = 'dashboards';
 export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 export const SEARCH_SESSION_ID = 'searchSessionId';
 
-// ------------------------------------------------------------------
-// Grid
-// ------------------------------------------------------------------
-export const DEFAULT_PANEL_HEIGHT = 15;
-export const DASHBOARD_MARGIN_SIZE = 8;
-export const DASHBOARD_GRID_HEIGHT = 20;
-export const DASHBOARD_GRID_COLUMN_COUNT = 48;
-export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
-
-export const CHANGE_CHECK_DEBOUNCE = 100;
-
 export enum PanelPlacementStrategy {
   /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
   placeAtTop = 'placeAtTop',

@@ -28,7 +28,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationPopover } from './filters_notification_popover';
-import { BADGE_FILTERS_NOTIFICATION } from './consts';
+import { BADGE_FILTERS_NOTIFICATION } from './constants';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &

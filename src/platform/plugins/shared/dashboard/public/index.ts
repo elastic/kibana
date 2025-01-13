@@ -13,9 +13,9 @@ import { DashboardPlugin } from './plugin';
 export {
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
-  DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
 } from './plugin_constants';
+export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/content_management';
 export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export { LazyDashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';

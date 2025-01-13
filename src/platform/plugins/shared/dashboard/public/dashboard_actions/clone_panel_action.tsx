@@ -21,7 +21,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
-import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ClonePanelActionApi = CanAccessViewMode &
   HasUniqueId &

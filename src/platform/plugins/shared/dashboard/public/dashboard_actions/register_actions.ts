@@ -19,7 +19,7 @@ import {
   ACTION_LEGACY_UNLINK_FROM_LIBRARY,
   ACTION_UNLINK_FROM_LIBRARY,
   BADGE_FILTERS_NOTIFICATION,
-} from './consts';
+} from './constants';
 
 export const registerActions = async ({
   plugins,

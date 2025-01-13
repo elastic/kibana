@@ -21,7 +21,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 import { coreServices } from '../services/kibana_services';
-import { ACTION_LEGACY_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_LEGACY_ADD_TO_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type LegacyAddPanelToLibraryActionApi = CanAccessViewMode &
   HasLegacyLibraryTransforms &

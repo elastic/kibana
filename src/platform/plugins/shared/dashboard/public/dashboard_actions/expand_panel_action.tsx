@@ -19,7 +19,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { skip } from 'rxjs';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
-import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 

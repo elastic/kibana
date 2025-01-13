@@ -9,7 +9,8 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '../../plugin_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management';
+import { PanelPlacementStrategy } from '../../plugin_constants';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (

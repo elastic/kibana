@@ -21,7 +21,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
 import { coreServices } from '../services/kibana_services';
-import { ACTION_LEGACY_UNLINK_FROM_LIBRARY, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_LEGACY_UNLINK_FROM_LIBRARY, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type LegacyUnlinkPanelFromLibraryActionApi = CanAccessViewMode &
   HasLegacyLibraryTransforms &

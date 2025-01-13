@@ -28,7 +28,7 @@ import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import { ACTION_COPY_TO_DASHBOARD, DASHBOARD_ACTION_GROUP } from './consts';
+import { ACTION_COPY_TO_DASHBOARD, DASHBOARD_ACTION_GROUP } from './constants';
 
 export interface DashboardCopyToCapabilities {
   canCreateNew: boolean;
