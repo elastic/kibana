@@ -235,4 +235,17 @@ describe('getStructuredToolForIndexEntry', () => {
     const nameRegex = /^[a-zA-Z0-9_-]+$/;
     expect(tool.lc_kwargs.name).toMatch(nameRegex);
   });
+
+  it('dashes get removed before `a` is prepended', () => {
+    const tool = getStructuredToolForIndexEntry({
+      indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        name: `-testing`,
+      }) as IndexEntry,
+      esClient: mockEsClient,
+      logger: mockLogger,
+    });
+
+    expect(tool.lc_kwargs.name).toMatch('testing');
+  });
 });
