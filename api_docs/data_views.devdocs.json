@@ -425,31 +425,31 @@
             "references": [
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -8191,31 +8191,31 @@
             "references": [
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -11351,19 +11351,19 @@
         "references": [
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
           }
         ],
         "children": [
@@ -11483,19 +11483,19 @@
         "references": [
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
           }
         ],
         "children": [
@@ -13712,59 +13712,47 @@
             "references": [
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts"
+                "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
+                "path": "src/platform/plugins/shared/data/common/search/search_source/fetch/get_search_params.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/tabify/response_writer.ts"
+                "path": "src/platform/plugins/shared/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+                "path": "src/platform/plugins/shared/data/common/search/tabify/response_writer.ts"
               },
               {
                 "plugin": "@kbn/search-errors",
                 "path": "src/platform/packages/shared/kbn-search-errors/src/painless_error.tsx"
               },
               {
-                "plugin": "savedObjectsManagement",
-                "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+                "plugin": "savedObjectsManagement",
+                "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
+                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+                "plugin": "unifiedSearch",
+                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
                 "plugin": "@kbn/unified-field-list",
@@ -13780,15 +13768,11 @@
               },
               {
                 "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+                "path": "x-pack/platform/plugins/shared/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "controls",
@@ -13879,6 +13863,18 @@
                 "path": "x-pack/platform/plugins/private/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
@@ -13947,6 +13943,10 @@
                 "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
@@ -13960,15 +13960,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/common/index_patterns_utils.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/common/index_patterns_utils.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "uptime",
@@ -14032,103 +14032,11 @@
               },
               {
                 "plugin": "eventAnnotationListing",
-                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+                "path": "src/platform/plugins/private/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
               },
               {
                 "plugin": "eventAnnotationListing",
-                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/agg_select.tsx"
-              },
-              {
-                "plugin": "visTypeTimelion",
-                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
-              },
-              {
-                "plugin": "visTypeTimelion",
-                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
-              },
-              {
-                "plugin": "visTypeVega",
-                "path": "src/plugins/vis_types/vega/public/data_model/search_api.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+                "path": "src/platform/plugins/private/event_annotation_listing/public/components/table_list.tsx"
               },
               {
                 "plugin": "inputControlVis",
@@ -14137,6 +14045,18 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/platform/plugins/private/input_control_vis/public/control/range_control_factory.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/platform/plugins/private/vis_default_editor/public/components/agg_select.tsx"
               },
               {
                 "plugin": "dataViewManagement",
@@ -14161,6 +14081,86 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/platform/plugins/private/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/platform/plugins/private/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/platform/plugins/private/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/platform/plugins/private/vis_types/vega/public/data_model/search_api.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/agg_config.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_terms.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/multi_terms.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/rare_terms.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/terms.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/terms.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
               }
             ]
           },
@@ -16562,31 +16562,31 @@
             "references": [
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+                "path": "x-pack/platform/plugins/private/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
+                "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -25667,20 +25667,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
                 "plugin": "fleet",
@@ -25697,90 +25697,6 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
                 "plugin": "alerting",
