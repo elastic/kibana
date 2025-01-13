@@ -15,7 +15,6 @@ export class MapsPage {
 
   async goto() {
     await this.page.gotoApp('maps');
-    await this.waitForRenderCompletion();
   }
 
   async waitForRenderCompletion(selector: string = RENDER_COMPLETE_SELECTOR) {
