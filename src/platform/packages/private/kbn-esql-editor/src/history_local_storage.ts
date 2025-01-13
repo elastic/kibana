@@ -74,10 +74,8 @@ export const addQueriesToCache = (
   const trimmedQueryString = getTrimmedQuery(itemToAddOrUpdate.queryString);
 
   if (itemToAddOrUpdate.queryString) {
-    const existingQueryItem = cachedQueries.get(trimmedQueryString);
-    const updatedItem = existingQueryItem ?? itemToAddOrUpdate;
     cachedQueries.set(trimmedQueryString, {
-      ...updatedItem,
+      ...itemToAddOrUpdate,
       timeRan: new Date().toISOString(),
     });
   }
