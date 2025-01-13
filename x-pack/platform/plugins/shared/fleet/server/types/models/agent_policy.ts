@@ -144,7 +144,7 @@ export const AgentPolicyBaseSchema = {
           ),
         })
       ),
-    }),
+    })
   ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
