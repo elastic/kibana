@@ -163,7 +163,7 @@ export class UsageCountersService {
     counters: UsageCounters.v1.CounterMetric[],
     soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
   ) {
-    const backoffDelay = (attempt: number) => Math.pow(2, attempt) * 10; // exponential backoff
+    const backoffDelay = (attempt: number) => Math.pow(2, attempt) * 10; // exponential backoff: 20ms, 40ms, 80ms, 150ms etc
     return Rx.forkJoin(
       counters.map((metric) =>
         Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
