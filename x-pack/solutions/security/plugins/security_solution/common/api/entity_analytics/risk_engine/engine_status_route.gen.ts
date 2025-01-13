@@ -43,7 +43,6 @@ export const RiskEngineTaskStatus = z.object({
 
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
 export const RiskEngineStatusResponse = z.object({
-  legacy_risk_engine_status: RiskEngineStatus,
   risk_engine_status: RiskEngineStatus,
   risk_engine_task_status: RiskEngineTaskStatus.optional(),
 });
