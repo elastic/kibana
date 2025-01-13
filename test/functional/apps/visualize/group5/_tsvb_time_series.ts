@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/206380
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -309,7 +308,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
-          expect(areaColors).to.eql(['#54b399', '#6092c0']);
+          expect(areaColors).to.eql(['#16c5c0', '#a6edea']); // borealis vis colors
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
         });
