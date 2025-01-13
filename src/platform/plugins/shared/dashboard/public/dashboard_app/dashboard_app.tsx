@@ -20,11 +20,7 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { SharedDashboardState } from '../../common';
-import {
-  DASHBOARD_APP_ID,
-  DASHBOARD_STATE_STORAGE_KEY,
-  createDashboardEditUrl,
-} from '../dashboard_constants';
+import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -52,6 +48,7 @@ import {
 } from './url/search_sessions_integration';
 import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
 import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 
 export interface DashboardAppProps {
   history: History;

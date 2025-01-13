@@ -15,7 +15,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
+import { CHANGE_CHECK_DEBOUNCE } from '../../plugin_constants';
 import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';

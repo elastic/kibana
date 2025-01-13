@@ -11,12 +11,11 @@ import { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
 export {
-  createDashboardEditUrl,
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
   DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
-} from './dashboard_constants';
+} from './plugin_constants';
 export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export { LazyDashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';

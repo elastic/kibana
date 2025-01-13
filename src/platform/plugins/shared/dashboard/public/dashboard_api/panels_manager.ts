@@ -36,11 +36,11 @@ import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
 import { runPanelPlacementStrategy } from '../dashboard_container/panel_placement/place_new_panel_strategies';
 import {
-  DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   PanelPlacementStrategy,
-} from '../dashboard_constants';
+} from '../plugin_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DashboardState } from './types';

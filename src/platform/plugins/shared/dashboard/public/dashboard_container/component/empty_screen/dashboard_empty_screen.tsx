@@ -23,7 +23,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../../../utils/telemetry_constants';
 import {
   coreServices,
   dataService,

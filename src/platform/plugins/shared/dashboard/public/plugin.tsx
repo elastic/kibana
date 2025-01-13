@@ -72,7 +72,7 @@ import {
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './dashboard_constants';
+} from './plugin_constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
