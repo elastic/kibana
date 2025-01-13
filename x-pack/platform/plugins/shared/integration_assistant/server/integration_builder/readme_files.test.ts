@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream } from '@kbn/integration-assistant-plugin/common';
+import { DataStream } from '../../common';
 import { configure, Environment } from 'nunjucks';
 import { join as joinPath } from 'path';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
