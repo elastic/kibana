@@ -122,7 +122,6 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const DRAG_OUTLINE = `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`;
   const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
   const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
 
@@ -498,10 +497,6 @@ export const PresentationPanelHoverActions = ({
         position: relative;
         height: 100%;
 
-        .kbnGridLayout--activePanel & .embPanel {
-          outline: ${DRAG_OUTLINE} !important;
-        }
-
         .embPanel {
           ${showBorder
             ? `
@@ -569,11 +564,6 @@ export const PresentationPanelHoverActions = ({
               css={css`
                 border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
                 ${borderStyles}
-
-                .kbnGridLayout--activePanel & {
-                  border: ${DRAG_OUTLINE} !important;
-                  border-bottom: 0px solid !important;
-                }
               `}
             >
               {dragHandle}
@@ -593,11 +583,6 @@ export const PresentationPanelHoverActions = ({
               css={css`
                 border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
                 ${borderStyles}
-
-                .kbnGridLayout--activePanel & {
-                  border: ${DRAG_OUTLINE} !important;
-                  border-bottom: 0px solid !important;
-                }
               `}
             >
               {viewMode === 'edit' && combineHoverActions && dragHandle}

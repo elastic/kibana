@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +21,7 @@ export const ResizeHandle = ({
   const { euiTheme } = useEuiTheme();
   return (
     <button
-      className="kbnGridPanel__resizeHandle"
+      className="kbnGridPanel--resizeHandle"
       onMouseDown={(e) => {
         interactionStart('resize', e);
       }}
@@ -49,14 +48,8 @@ export const ResizeHandle = ({
         height: ${euiTheme.size.l};
         z-index: ${euiTheme.levels.toast};
         transition: opacity 0.2s, border 0.2s;
-        border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
-        border-right: 2px solid ${euiTheme.colors.accentSecondary};
         &:hover,
         &:focus {
-          outline-style: none !important;
-          opacity: 1;
-          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
           cursor: se-resize;
         }
         .kbnGrid--static & {
