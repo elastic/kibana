@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useMemo } from 'react';
-import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
@@ -50,13 +50,9 @@ export interface RuleDetailsProps {
  * Rule details content on the right section of expandable flyout
  */
 export const PanelContent = memo(({ rule }: RuleDetailsProps) => {
-  const { euiTheme } = useEuiTheme();
   const { ruleActionsData } = useMemo(
-    () =>
-      rule != null
-        ? getStepsData({ rule, detailsView: true, euiTheme })
-        : { ruleActionsData: null },
-    [rule, euiTheme]
+    () => (rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null }),
+    [rule]
   );
 
   const hasNotificationActions = useMemo(
