@@ -420,7 +420,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the timelion visualization and the timelion backend.
 
 
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/vis_types/timeseries[visTypeTimeseries]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timeseries[visTypeTimeseries]
 |WARNING: Missing README.
 
 

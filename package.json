@@ -1013,7 +1013,7 @@
     "@kbn/vis-type-table-plugin": "link:src/platform/plugins/private/vis_types/table",
     "@kbn/vis-type-tagcloud-plugin": "link:src/platform/plugins/private/vis_types/tagcloud",
     "@kbn/vis-type-timelion-plugin": "link:src/platform/plugins/private/vis_types/timelion",
-    "@kbn/vis-type-timeseries-plugin": "link:src/platform/plugins/shared/vis_types/timeseries",
+    "@kbn/vis-type-timeseries-plugin": "link:src/platform/plugins/private/vis_types/timeseries",
     "@kbn/vis-type-vega-plugin": "link:src/platform/plugins/private/vis_types/vega",
     "@kbn/vis-type-vislib-plugin": "link:src/platform/plugins/private/vis_types/vislib",
     "@kbn/vis-type-xy-plugin": "link:src/platform/plugins/private/vis_types/xy",

@@ -7960,7 +7960,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timeseries-plugin@link:src/platform/plugins/shared/vis_types/timeseries":
+"@kbn/vis-type-timeseries-plugin@link:src/platform/plugins/private/vis_types/timeseries":
   version "0.0.0"
   uid ""
 
