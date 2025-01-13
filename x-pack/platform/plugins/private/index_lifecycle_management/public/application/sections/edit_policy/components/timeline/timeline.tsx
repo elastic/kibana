@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+/** @jsx jsx */
+// Needed for for testing out the css prop feature. See: https://emotion.sh/docs/css-prop#jsx-pragma
+import { css, jsx } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { FunctionComponent, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiIconTip,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { useKibana } from '../../../../../shared_imports';
 
@@ -135,6 +145,17 @@ export const Timeline: FunctionComponent<Props> = memo(
         : undefined,
     };
 
+    const { euiTheme } = useEuiTheme();
+
+    const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+    const timelineIconColors = {
+      hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+      warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+      cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+      frozen: euiTheme.colors.vis.euiColorVis4,
+    };
+
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
@@ -188,7 +209,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                     data-test-subj="ilmTimelinePhase-hot"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
-                    <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
+                    <div
+                      className={`ilmTimeline__colorBar `}
+                      css={css`
+                        background-color: ${timelineIconColors.hot};
+                      `}
+                    />
                     <TimelinePhaseText
                       phaseName={i18nTexts.hotPhase}
                       durationInPhase={getDurationInPhaseContent('hot')}
@@ -199,7 +225,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-warm"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
+                      <div
+                        className={`ilmTimeline__colorBar`}
+                        css={css`
+                          background-color: ${timelineIconColors.warm};
+                        `}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.warmPhase}
                         durationInPhase={getDurationInPhaseContent('warm')}
@@ -211,7 +242,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-cold"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
+                      <div
+                        className={`ilmTimeline__colorBar`}
+                        css={css`
+                          background-color: ${timelineIconColors.cold};
+                        `}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.coldPhase}
                         durationInPhase={getDurationInPhaseContent('cold')}
@@ -223,7 +259,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-frozen"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
+                      <div
+                        className="ilmTimeline__colorBar"
+                        css={css`
+                          background-color: ${timelineIconColors.frozen};
+                        `}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.frozenPhase}
                         durationInPhase={getDurationInPhaseContent('frozen')}

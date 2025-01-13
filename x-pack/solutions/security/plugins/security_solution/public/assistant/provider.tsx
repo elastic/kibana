@@ -144,7 +144,18 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
     chrome,
+    productDocBase,
   } = useKibana().services;
+
+  let inferenceEnabled = false;
+  try {
+    actionTypeRegistry.get('.inference');
+    inferenceEnabled = true;
+  } catch (e) {
+    // swallow error
+    // inferenceEnabled will be false
+  }
+
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
@@ -223,7 +234,9 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
+      inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
+      productDocBase={productDocBase}
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
