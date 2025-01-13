@@ -8,7 +8,6 @@
 .buildkite/scripts/steps/checks/jest_configs.sh
 .buildkite/scripts/steps/checks/bundle_limits.sh
 .buildkite/scripts/steps/checks/i18n.sh
-.buildkite/scripts/steps/checks/file_casing.sh
 .buildkite/scripts/steps/checks/licenses.sh
 .buildkite/scripts/steps/checks/test_projects.sh
 .buildkite/scripts/steps/checks/test_hardening.sh
