@@ -10,7 +10,7 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
@@ -30,12 +30,7 @@ import {
 } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import {
-  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-  addFilter,
-  containsFilter,
-  removeFilter,
-} from './search_filters';
+import { addFilter, containsFilter, removeFilter } from './search_filters';
 import { NodeToggleAction } from './graph_node_expand_popover';
 
 const useGraphPopovers = (
@@ -300,20 +295,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [data?.nodes]);
 
     const searchFilterCounter = useMemo(() => {
-      const controlledFilter = searchFilters.find(
-        (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
-      );
+      const filtersCount = searchFilters.reduce((sum, filter) => {
+        if (isCombinedFilter(filter)) {
+          return sum + filter.meta.params.length;
+        }
 
-      const controlledFilterCount =
-        controlledFilter && Array.isArray(controlledFilter.meta?.params)
-          ? controlledFilter.meta.params.length
-          : 0;
+        return sum + 1;
+      }, 0);
+
       const queryCounter = kquery.query.trim().length > 0 ? 1 : 0;
-      return (
-        searchFilters.length +
-        (controlledFilterCount > 1 ? controlledFilterCount - 1 : 0) +
-        queryCounter
-      );
+      return filtersCount + queryCounter;
     }, [kquery.query, searchFilters]);
 
     return (

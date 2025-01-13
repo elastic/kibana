@@ -13,7 +13,10 @@ import {
   isFilter,
 } from '@kbn/es-query';
 import type { Filter, PhraseFilter } from '@kbn/es-query';
-import type { PhraseFilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type {
+  CombinedFilter,
+  PhraseFilterMetaParams,
+} from '@kbn/es-query/src/filters/build_filters';
 
 export const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -37,7 +40,11 @@ const buildPhraseFilter = (field: string, value: string, dataViewId?: string): P
   },
 });
 
-const filterHasKeyAndValue = (filter: Filter, key: string, value: string) => {
+const filterHasKeyAndValue = (filter: Filter, key: string, value: string): boolean => {
+  if (isCombinedFilter(filter)) {
+    return filter.meta.params.some((param) => filterHasKeyAndValue(param, key, value));
+  }
+
   return filter.meta.key === key && (filter.meta.params as PhraseFilterMetaParams)?.query === value;
 };
 
@@ -50,19 +57,7 @@ const filterHasKeyAndValue = (filter: Filter, key: string, value: string) => {
  * @returns true if the filters do contain the filter, false if they don't.
  */
 export const containsFilter = (filters: Filter[], key: string, value: string): boolean => {
-  const controlledFilter = filters.find(
-    (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
-  );
-
-  if (!controlledFilter) {
-    return filters.some((filter) => filterHasKeyAndValue(filter, key, value));
-  }
-
-  if (isCombinedFilter(controlledFilter)) {
-    return controlledFilter.meta.params.some((param) => filterHasKeyAndValue(param, key, value));
-  }
-
-  return filterHasKeyAndValue(controlledFilter, key, value);
+  return filters.some((filter) => filterHasKeyAndValue(filter, key, value));
 };
 
 /**
@@ -124,35 +119,39 @@ export const addFilter = (dataViewId: string, prev: Filter[], key: string, value
   }
 };
 
-export const removeFilter = (filters: Filter[], key: string, value: string) => {
-  const controlledFilter = filters.find(
-    (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
-  );
+const removeFilterFromCombinedFilter = (filter: CombinedFilter, key: string, value: string) => {
+  const newCombinedFilter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      params: filter.meta.params.filter(
+        (param: Filter) => !filterHasKeyAndValue(param, key, value)
+      ),
+    },
+  };
 
-  if (!controlledFilter) {
-    return filters.filter((filter) => !filterHasKeyAndValue(filter, key, value));
+  if (newCombinedFilter.meta.params.length === 1) {
+    return newCombinedFilter.meta.params[0];
+  } else if (newCombinedFilter.meta.params.length === 0) {
+    return null;
+  } else {
+    return newCombinedFilter;
   }
+};
 
-  if (isCombinedFilter(controlledFilter)) {
-    const filteredControlledFilter = {
-      ...controlledFilter,
-      meta: {
-        ...controlledFilter.meta,
-        params: controlledFilter.meta.params.filter(
-          (param) => !filterHasKeyAndValue(param, key, value)
-        ),
-      },
-    };
+export const removeFilter = (filters: Filter[], key: string, value: string) => {
+  const matchedFilter = filters.filter((filter) => filterHasKeyAndValue(filter, key, value));
 
-    if (filteredControlledFilter.meta.params.length === 0) {
-      return filters.filter((filter) => filter !== controlledFilter);
+  if (matchedFilter.length > 0 && isCombinedFilter(matchedFilter[0])) {
+    const newCombinedFilter = removeFilterFromCombinedFilter(matchedFilter[0], key, value);
+
+    if (!newCombinedFilter) {
+      return filters.filter((filter) => filter !== matchedFilter[0]);
     }
 
-    return [filteredControlledFilter, ...filters.filter((filter) => filter !== controlledFilter)];
-  }
-
-  if (filterHasKeyAndValue(controlledFilter, key, value)) {
-    return filters.filter((filter) => filter !== controlledFilter);
+    return filters.map((filter) => (filter === matchedFilter[0] ? newCombinedFilter : filter));
+  } else if (matchedFilter.length > 0) {
+    return filters.filter((filter) => filter !== matchedFilter[0]);
   }
 
   return filters;
