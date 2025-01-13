@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Role } from '@kbn/security-plugin-types-common';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
@@ -102,9 +104,9 @@ export const samlAuthentication = async (
       roleDescriptor,
       roleName,
     }: {
-      roleDescriptor: { kibana: any; elasticsearch: any };
+      roleDescriptor: { kibana: Role['kibana']; elasticsearch: Role['elasticsearch'] };
       roleName: string;
-    }): Promise<any> => {
+    }): Promise<{ status: number; data: Role }> => {
       const customRoleDescriptors = {
         kibana: roleDescriptor.kibana,
         elasticsearch: roleDescriptor.elasticsearch ?? [],
@@ -125,7 +127,9 @@ export const samlAuthentication = async (
         data: response.data,
       };
     },
-    deleteServerlessCustomRole: async (roleName: string): Promise<any> => {
+    deleteServerlessCustomRole: async (
+      roleName: string
+    ): Promise<{ status: number; data: unknown }> => {
       const response = await axios.delete(`${kbnHost}/api/security/role/${roleName}`, {
         headers: {
           ...INTERNAL_REQUEST_HEADERS,
