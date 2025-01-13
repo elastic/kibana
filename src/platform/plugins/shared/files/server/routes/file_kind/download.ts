@@ -59,9 +59,13 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
       {
         path: FILES_API_ROUTES.fileKind.getDownloadRoute(fileKind.id),
         validate: { ...rt },
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.download.requiredPrivileges,
+          },
+        },
         options: {
-          tags: fileKind.http.download.tags,
-          access: 'public', // the endpoint is used by <img src=""/> and should work without any special headers
+          access: 'public', // The endpoint is used by <img src=""/> and should work without any special headers,
         },
       },
       handler
