@@ -30,6 +30,8 @@ const STATIC_FILE_EXT =
     .split('|')
     .map((e) => `.${e}`);
 
+const IS_REACT_18 = process.env.REACT_18 === 'true';
+
 /**
  * @param {string} request
  * @param {import('resolve').SyncOpts} options
@@ -67,6 +69,18 @@ module.exports = (request, options) => {
 
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
+  }
+
+  // routes tests to the react-18 alias package
+  if (IS_REACT_18) {
+    // routes tests to the react-18 alias package
+    if (/^react?(\/[\s\S]*)?$/.test(request)) {
+      return module.exports(request.replace('react', 'react-18'), options);
+    }
+
+    if (/^react-dom?(\/[\s\S]*)?$/.test(request)) {
+      return module.exports(request.replace('react-dom', 'react-dom-18'), options);
+    }
   }
 
   const reqExt = Path.extname(request);

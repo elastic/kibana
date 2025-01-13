@@ -16,7 +16,7 @@ const REPO_NAME = 'test_repo';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const { createRepository, createPolicy, deletePolicy, cleanupPolicies, getPolicy } =
+  const { createRepository, createPolicy, deletePolicy, cleanupPolicies, getPolicy, startSlm } =
     registerEsHelpers(getService);
 
   describe('SLM policies', function () {
@@ -226,6 +226,30 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'my_snapshot',
           schedule: '0 30 1 * * ?',
           repository: REPO_NAME,
+        });
+      });
+    });
+
+    describe('Show info', () => {
+      before(async () => {
+        // Make sure SLM is running
+        try {
+          await startSlm();
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error starting Slm');
+          throw err;
+        }
+      });
+
+      it('should get slm status', async () => {
+        const { body } = await supertest
+          .get(`${API_BASE_PATH}/policies/slm_status`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          operation_mode: 'RUNNING',
         });
       });
     });

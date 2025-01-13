@@ -14,13 +14,7 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(parameters: GetDefinitionParams<T>) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -39,7 +33,7 @@
           },
           "<T> | null>"
         ],
-        "path": "packages/kbn-management/settings/field_definition/get_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +49,7 @@
             "signature": [
               "GetDefinitionParams<T>"
             ],
-            "path": "packages/kbn-management/settings/field_definition/get_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,13 +77,7 @@
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>>, client: SettingsClient) => ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -99,16 +87,10 @@
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>[]"
         ],
-        "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definitions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,16 +113,10 @@
                 "text": "UiSettingMetadata"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>>"
             ],
-            "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definitions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -157,7 +133,7 @@
             "signature": [
               "SettingsClient"
             ],
-            "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definitions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -187,7 +163,7 @@
             "text": "ArrayFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -203,7 +179,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -231,7 +207,7 @@
             "text": "ArrayUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,7 +223,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -275,7 +251,7 @@
             "text": "BooleanFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +267,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,7 +295,7 @@
             "text": "BooleanUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -335,7 +311,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -363,7 +339,7 @@
             "text": "ColorFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -379,7 +355,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -407,7 +383,7 @@
             "text": "ColorUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -423,7 +399,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -451,7 +427,7 @@
             "text": "ImageFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +443,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -495,7 +471,7 @@
             "text": "ImageUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -511,7 +487,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -539,7 +515,7 @@
             "text": "JsonFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -555,7 +531,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -583,7 +559,7 @@
             "text": "JsonUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -599,7 +575,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -627,7 +603,7 @@
             "text": "MarkdownFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -643,7 +619,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -671,7 +647,7 @@
             "text": "MarkdownUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -687,7 +663,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -715,7 +691,7 @@
             "text": "NumberFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -731,7 +707,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -759,7 +735,7 @@
             "text": "NumberUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -775,7 +751,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -803,7 +779,7 @@
             "text": "SelectFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -819,7 +795,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -847,7 +823,7 @@
             "text": "SelectUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -863,7 +839,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -891,7 +867,7 @@
             "text": "StringFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -907,7 +883,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -935,7 +911,7 @@
             "text": "StringUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -951,7 +927,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -979,7 +955,7 @@
             "text": "UndefinedFieldDefinition"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -995,7 +971,7 @@
             "signature": [
               "Definition"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1023,7 +999,7 @@
             "text": "UndefinedUnsavedFieldChange"
           }
         ],
-        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1039,7 +1015,7 @@
             "signature": [
               "Change | undefined"
             ],
-            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

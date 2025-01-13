@@ -31,7 +31,6 @@ export const applyIngestProcessorToDoc = async (
 
   const firstDoc = res.docs?.[0];
 
-  // @ts-expect-error error is not in the types
   const error = firstDoc?.error;
   if (error) {
     log.error('Full painless error below: ');

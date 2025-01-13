@@ -23,6 +23,7 @@ import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { User } from '../../common/users/users';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -232,12 +233,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const interceptPromises = [
-          proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
-          proxy
-            .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-            .completeAfterIntercept(),
-        ];
+        const interceptPromise = proxy
+          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .completeAfterIntercept();
 
         const messages: Message[] = [
           {
@@ -282,8 +280,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        // wait for all interceptors to be settled
-        await Promise.all(interceptPromises);
+        await interceptPromise;
 
         const conversation = res.body;
         return conversation;
@@ -296,6 +293,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         proxy.close();
+        await clearKnowledgeBase(es);
+        await clearConversations(es);
         await deleteActionConnector({ supertest, connectorId, log });
       });
 
@@ -360,6 +359,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const res2 = await updateInstruction('');
         expect(res2).to.be('');
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('PUT /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+              params: {
+                body: {
+                  id: 'test-instruction',
+                  text: 'Test user instruction',
+                  public: true,
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
       });
     });
   });

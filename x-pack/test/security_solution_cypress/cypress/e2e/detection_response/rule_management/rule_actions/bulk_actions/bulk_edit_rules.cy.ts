@@ -240,7 +240,7 @@ describe(
 
             // user can proceed with custom rule editing
             cy.get(MODAL_CONFIRMATION_BTN)
-              .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
+              .should('have.text', `Edit ${existedRulesRows.length} rules`)
               .click();
 
             // action should finish

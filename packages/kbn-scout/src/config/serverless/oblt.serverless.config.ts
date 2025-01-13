@@ -8,9 +8,9 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
-import { ScoutLoaderConfig } from '../../types';
+import { ScoutServerConfig } from '../../types';
 
-export const servers: ScoutLoaderConfig = {
+export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
@@ -22,6 +22,7 @@ export const servers: ScoutLoaderConfig = {
     ],
   },
   kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=oblt',

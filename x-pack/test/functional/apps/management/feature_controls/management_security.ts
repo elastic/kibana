@@ -72,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'triggersActions',
             'cases',
             'triggersActionsConnectors',
+            'reporting',
             'jobsListLink',
             'maintenanceWindows',
           ],
@@ -81,8 +82,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           sectionLinks: [
             'dataViews',
             'filesManagement',
-            'aiAssistantManagementSelection',
             'objects',
+            'aiAssistantManagementSelection',
             'tags',
             'search_sessions',
             'spaces',

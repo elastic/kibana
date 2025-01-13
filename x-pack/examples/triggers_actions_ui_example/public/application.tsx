@@ -21,7 +21,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
+import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -45,6 +45,7 @@ export interface TriggersActionsUiExampleComponentParams {
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -63,12 +64,11 @@ const TriggersActionsUiExampleApp = ({
   notifications,
   settings,
   docLinks,
-  i18n,
-  theme,
   data,
   charts,
   dataViews,
   unifiedSearch,
+  ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router history={history}>
@@ -184,7 +184,7 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={createRuleRoute}
+            path={CREATE_RULE_ROUTE}
             render={() => (
               <Page title="Rule Create">
                 <RuleForm
@@ -193,8 +193,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    i18n,
-                    theme,
                     charts,
                     data,
                     dataViews,
@@ -202,6 +200,7 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
                 />
               </Page>
@@ -209,7 +208,7 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={editRuleRoute}
+            path={EDIT_RULE_ROUTE}
             render={() => (
               <Page title="Rule Edit">
                 <RuleForm
@@ -218,8 +217,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    theme,
-                    i18n,
                     charts,
                     data,
                     dataViews,
@@ -227,6 +224,7 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
                 />
               </Page>
@@ -245,7 +243,6 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme, settings } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -263,19 +260,13 @@ export const renderApp = (
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
-              http={http}
-              notifications={notifications}
-              application={application}
-              docLinks={docLinks}
-              i18n={i18n}
-              theme={theme}
-              settings={settings}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              {...core}
             />
           </IntlProvider>
         </QueryClientProvider>

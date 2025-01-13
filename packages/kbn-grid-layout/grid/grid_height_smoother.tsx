@@ -10,7 +10,6 @@
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -30,6 +29,7 @@ export const GridHeightSmoother = ({
       }
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
@@ -42,6 +42,7 @@ export const GridHeightSmoother = ({
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
+      smoothHeightRef.current.style.userSelect = 'none';
     });
 
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
@@ -49,19 +50,9 @@ export const GridHeightSmoother = ({
         if (!smoothHeightRef.current) return;
 
         if (expandedPanelId) {
-          const smoothHeightRefY =
-            smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-          const gutterSize = parseFloat(euiThemeVars.euiSizeL);
-
-          // When panel is expanded, ensure the page occupies the full viewport height
-          // If the parent element is a flex container (preferred approach):
-          smoothHeightRef.current.style.flexBasis = `100%`;
-
-          // fallback in case parent is not a flex container (less reliable if shifts happen after the time we calculate smoothHeightRefY)
-          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px`;
+          smoothHeightRef.current.style.height = `100%`;
           smoothHeightRef.current.style.transition = 'none';
         } else {
-          smoothHeightRef.current.style.flexBasis = '';
           smoothHeightRef.current.style.height = '';
           smoothHeightRef.current.style.transition = '';
         }
@@ -78,6 +69,8 @@ export const GridHeightSmoother = ({
     <div
       ref={smoothHeightRef}
       css={css`
+        // the guttersize cannot currently change, so it's safe to set it just once
+        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize};
         overflow-anchor: none;
         transition: height 500ms linear;
       `}
