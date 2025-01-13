@@ -766,12 +766,12 @@
                 "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
-                "plugin": "imageEmbeddable",
-                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
-              },
-              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
               }
             ],
             "children": [
