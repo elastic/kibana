@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
-
-export type AnyApiAction = Action<EmbeddableApiContext>;
+export const ACTION_EDIT_PANEL = 'editPanel';
