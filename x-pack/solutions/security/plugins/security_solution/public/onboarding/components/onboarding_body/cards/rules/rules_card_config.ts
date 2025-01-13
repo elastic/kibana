@@ -52,4 +52,4 @@ export const RULES_CARD_ITEMS: CardSelectorAssetListItem[] = [
 
 export const RULES_CARD_ITEMS_BY_ID = Object.fromEntries(
   RULES_CARD_ITEMS.map((card) => [card.id, card])
-) as Record<CardSelectorAssetListItem['id'], CardSelectorAssetListItem>;
+);

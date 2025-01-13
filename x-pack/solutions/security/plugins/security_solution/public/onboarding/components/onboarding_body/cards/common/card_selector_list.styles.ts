@@ -6,11 +6,10 @@
  */
 
 import { css } from '@emotion/css';
-import { useEuiTheme, useEuiBackgroundColor } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 export const useCardSelectorListStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const itemBackgroundColor = useEuiBackgroundColor('primary');
 
   return css`
     .cardSelectorTitle {
@@ -23,7 +22,7 @@ export const useCardSelectorListStyles = () => {
     }
     .selectedCardPanelItem {
       border: 1px solid ${euiTheme.colors.primary};
-      background-color: ${itemBackgroundColor};
+      background-color: ${euiTheme.colors.backgroundBasePrimary};
     }
   `;
 };

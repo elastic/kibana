@@ -31,13 +31,14 @@ export const RulesCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
 
-  const [toggleIdSelected, setStoredSelectedRulesCardItemId] = useStoredSelectedCardItemId(
+  const [selectedAlertId, setSelectedAlertId] = useStoredSelectedCardItemId(
     'rules',
     spaceId,
     DEFAULT_RULES_CARD_ITEM_SELECTED.id
   );
-  const [selectedCardItem, setSelectedCardItem] = useState<CardSelectorAssetListItem>(
-    RULES_CARD_ITEMS_BY_ID[toggleIdSelected]
+  const selectedCardItem = useMemo<CardSelectorAssetListItem>(
+    () => RULES_CARD_ITEMS_BY_ID[selectedAlertId],
+    [selectedAlertId]
   );
 
   const isIntegrationsCardComplete = useMemo(
@@ -56,10 +57,9 @@ export const RulesCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedCardItem(RULES_CARD_ITEMS_BY_ID[item.id]);
-      setStoredSelectedRulesCardItemId(item.id);
+      setSelectedAlertId(item.id);
     },
-    [setStoredSelectedRulesCardItemId]
+    [setSelectedAlertId]
   );
 
   return (

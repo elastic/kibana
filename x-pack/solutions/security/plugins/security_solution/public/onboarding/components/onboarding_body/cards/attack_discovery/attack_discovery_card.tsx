@@ -28,14 +28,17 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
       setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
     }, [setExpandedCardId]);
 
+    const asset = useMemo(
+      () => ({
+        type: CardAssetType.image,
+        source: attackDiscoveryImageSrc,
+        alt: i18n.ATTACK_DISCOVERY_CARD_TITLE,
+      }),
+      []
+    );
+
     return (
-      <OnboardingCardContentAssetPanel
-        asset={{
-          type: CardAssetType.image,
-          source: attackDiscoveryImageSrc,
-          alt: i18n.ATTACK_DISCOVERY_CARD_TITLE,
-        }}
-      >
+      <OnboardingCardContentAssetPanel asset={asset}>
         <EuiFlexGroup
           direction="column"
           gutterSize="xl"

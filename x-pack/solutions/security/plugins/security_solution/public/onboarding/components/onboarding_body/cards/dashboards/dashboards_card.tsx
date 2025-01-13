@@ -21,6 +21,7 @@ import { DASHBOARDS_CARD_ITEMS_BY_ID, DASHBOARDS_CARD_ITEMS } from './dashboards
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
 import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
+import type { CardSelectorAssetListItem } from '../types';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -29,14 +30,17 @@ export const DashboardsCard: OnboardingCardComponent = ({
   isCardAvailable,
 }) => {
   const { spaceId } = useOnboardingContext();
-  const [toggleIdSelected, setStoredSelectedDashboardsCardItemId] = useStoredSelectedCardItemId(
+
+  const [selectedAlertId, setSelectedAlertId] = useStoredSelectedCardItemId(
     'dashboards',
     spaceId,
     DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id
   );
-  const [selectedCardItem, setSelectedCardItem] = useState(
-    DASHBOARDS_CARD_ITEMS_BY_ID[toggleIdSelected]
+  const selectedCardItem = useMemo<CardSelectorAssetListItem>(
+    () => DASHBOARDS_CARD_ITEMS_BY_ID[selectedAlertId],
+    [selectedAlertId]
   );
+
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -53,10 +57,9 @@ export const DashboardsCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedCardItem(DASHBOARDS_CARD_ITEMS_BY_ID[item.id]);
-      setStoredSelectedDashboardsCardItemId(item.id);
+      setSelectedAlertId(item.id);
     },
-    [setStoredSelectedDashboardsCardItemId]
+    [setSelectedAlertId]
   );
 
   return (

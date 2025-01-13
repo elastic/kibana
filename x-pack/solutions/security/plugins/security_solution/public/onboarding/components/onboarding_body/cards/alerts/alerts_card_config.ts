@@ -95,4 +95,4 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
 
 export const ALERTS_CARD_ITEMS_BY_ID = Object.fromEntries(
   ALERTS_CARD_ITEMS.map((card) => [card.id, card])
-) as Record<CardSelectorAssetListItem['id'], CardSelectorAssetListItem>;
+);
