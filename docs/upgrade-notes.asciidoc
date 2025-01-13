@@ -159,7 +159,8 @@ We would love to discuss your use case.
 *Details* +
 --
 The original host and risk score modules have been superseded since v8.10.0 by the Risk Engine.
-In 9.0.0 these modules are no longer be supported, the scores no longer display in the UI 
+
+In 9.0.0 these modules are no longer supported, the scores no longer display in the UI 
 and all UI controls associated with managing or upgrading the legacy modules have been removed.
 --
 *Impact* +
