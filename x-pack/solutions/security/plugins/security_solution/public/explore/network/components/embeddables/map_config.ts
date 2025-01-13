@@ -16,7 +16,6 @@ import type {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
-const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
@@ -159,56 +158,60 @@ export const getSourceLayer = (
   indexPatternId: string,
   parentId: string,
   layerDetails: LayerMappingDetails
-) => ({
-  sourceDescriptor: {
-    id: uuidv4(),
-    type: 'ES_SEARCH',
-    applyGlobalQuery: true,
-    geoField: layerDetails.geoField,
-    filterByMapBounds: false,
-    tooltipProperties: layerDetails.tooltipProperties,
-    useTopHits: false,
-    topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId,
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: euiVisColorPalette[1] },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: '#FFFFFF' },
-      },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
-        type: 'STATIC',
-        options: { orientation: 0 },
-      },
-      symbolizeAs: {
-        options: { value: 'icon' },
-      },
-      icon: {
-        type: 'STATIC',
-        options: { value: 'home' },
+) => {
+  const euiVisColorPalette = euiPaletteColorBlind();
+
+  return {
+    sourceDescriptor: {
+      id: uuidv4(),
+      type: 'ES_SEARCH',
+      applyGlobalQuery: true,
+      geoField: layerDetails.geoField,
+      filterByMapBounds: false,
+      tooltipProperties: layerDetails.tooltipProperties,
+      useTopHits: false,
+      topHitsTimeField: '@timestamp',
+      topHitsSize: 1,
+      indexPatternId,
+    },
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: { color: euiVisColorPalette[1] },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: { color: '#FFFFFF' },
+        },
+        lineWidth: { type: 'STATIC', options: { size: 2 } },
+        iconSize: { type: 'STATIC', options: { size: 8 } },
+        iconOrientation: {
+          type: 'STATIC',
+          options: { orientation: 0 },
+        },
+        symbolizeAs: {
+          options: { value: 'icon' },
+        },
+        icon: {
+          type: 'STATIC',
+          options: { value: 'home' },
+        },
       },
     },
-  },
-  id: uuidv4(),
-  parent: parentId,
-  label: `${indexPatternTitle} | ${layerDetails.label}`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 1,
-  visible: true,
-  type: LAYER_TYPE.GEOJSON_VECTOR,
-  query: { query: '', language: 'kuery' },
-  joins: [],
-});
+    id: uuidv4(),
+    parent: parentId,
+    label: `${indexPatternTitle} | ${layerDetails.label}`,
+    minZoom: 0,
+    maxZoom: 24,
+    alpha: 1,
+    visible: true,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
+    query: { query: '', language: 'kuery' },
+    joins: [],
+  };
+};
 
 /**
  * Returns Document Data Source layer configuration ('destination.geo.location') for the given
@@ -225,56 +228,60 @@ export const getDestinationLayer = (
   indexPatternId: string,
   parentId: string,
   layerDetails: LayerMappingDetails
-) => ({
-  sourceDescriptor: {
-    id: uuidv4(),
-    type: 'ES_SEARCH',
-    scalingType: SCALING_TYPES.LIMIT,
-    applyGlobalQuery: true,
-    geoField: layerDetails.geoField,
-    filterByMapBounds: true,
-    tooltipProperties: layerDetails.tooltipProperties,
-    useTopHits: false,
-    topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId,
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: euiVisColorPalette[2] },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: '#FFFFFF' },
-      },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
-        type: 'STATIC',
-        options: { orientation: 0 },
-      },
-      symbolizeAs: {
-        options: { value: 'icon' },
-      },
-      icon: {
-        type: 'STATIC',
-        options: { value: 'marker' },
+) => {
+  const euiVisColorPalette = euiPaletteColorBlind();
+
+  return {
+    sourceDescriptor: {
+      id: uuidv4(),
+      type: 'ES_SEARCH',
+      scalingType: SCALING_TYPES.LIMIT,
+      applyGlobalQuery: true,
+      geoField: layerDetails.geoField,
+      filterByMapBounds: true,
+      tooltipProperties: layerDetails.tooltipProperties,
+      useTopHits: false,
+      topHitsTimeField: '@timestamp',
+      topHitsSize: 1,
+      indexPatternId,
+    },
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: { color: euiVisColorPalette[2] },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: { color: '#FFFFFF' },
+        },
+        lineWidth: { type: 'STATIC', options: { size: 2 } },
+        iconSize: { type: 'STATIC', options: { size: 8 } },
+        iconOrientation: {
+          type: 'STATIC',
+          options: { orientation: 0 },
+        },
+        symbolizeAs: {
+          options: { value: 'icon' },
+        },
+        icon: {
+          type: 'STATIC',
+          options: { value: 'marker' },
+        },
       },
     },
-  },
-  id: uuidv4(),
-  parent: parentId,
-  label: `${indexPatternTitle} | ${layerDetails.label}`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 1,
-  visible: true,
-  type: LAYER_TYPE.GEOJSON_VECTOR,
-  query: { query: '', language: 'kuery' },
-});
+    id: uuidv4(),
+    parent: parentId,
+    label: `${indexPatternTitle} | ${layerDetails.label}`,
+    minZoom: 0,
+    maxZoom: 24,
+    alpha: 1,
+    visible: true,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
+    query: { query: '', language: 'kuery' },
+  };
+};
 
 /**
  * Returns Point-to-point Data Source layer configuration ('source.geo.location' &
@@ -290,75 +297,79 @@ export const getLineLayer = (
   indexPatternId: string,
   parentId: string,
   layerDetails: LayerMapping
-) => ({
-  sourceDescriptor: {
-    type: SOURCE_TYPES.ES_PEW_PEW,
-    applyGlobalQuery: true,
-    id: uuidv4(),
-    indexPatternId,
-    sourceGeoField: layerDetails.source.geoField,
-    destGeoField: layerDetails.destination.geoField,
-    metrics: [
-      {
-        type: 'sum',
-        field: layerDetails.source.metricField,
-        label: layerDetails.source.metricField,
-      },
-      {
-        type: 'sum',
-        field: layerDetails.destination.metricField,
-        label: layerDetails.destination.metricField,
-      },
-    ],
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: '#1EA593' },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: euiVisColorPalette[1] },
-      },
-      lineWidth: {
-        type: 'DYNAMIC',
-        options: {
-          field: {
-            label: 'count',
-            name: 'doc_count',
-            origin: 'source',
-          },
-          minSize: 1,
-          maxSize: 8,
-          fieldMetaOptions: {
-            isEnabled: true,
-            sigma: 3,
+) => {
+  const euiVisColorPalette = euiPaletteColorBlind();
+
+  return {
+    sourceDescriptor: {
+      type: SOURCE_TYPES.ES_PEW_PEW,
+      applyGlobalQuery: true,
+      id: uuidv4(),
+      indexPatternId,
+      sourceGeoField: layerDetails.source.geoField,
+      destGeoField: layerDetails.destination.geoField,
+      metrics: [
+        {
+          type: 'sum',
+          field: layerDetails.source.metricField,
+          label: layerDetails.source.metricField,
+        },
+        {
+          type: 'sum',
+          field: layerDetails.destination.metricField,
+          label: layerDetails.destination.metricField,
+        },
+      ],
+    },
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: { color: '#1EA593' },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: { color: euiVisColorPalette[1] },
+        },
+        lineWidth: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'count',
+              name: 'doc_count',
+              origin: 'source',
+            },
+            minSize: 1,
+            maxSize: 8,
+            fieldMetaOptions: {
+              isEnabled: true,
+              sigma: 3,
+            },
           },
         },
-      },
-      iconSize: { type: 'STATIC', options: { size: 10 } },
-      iconOrientation: {
-        type: 'STATIC',
-        options: { orientation: 0 },
-      },
-      symbolizeAs: {
-        options: { value: 'icon' },
-      },
-      icon: {
-        type: 'STATIC',
-        options: { value: 'airfield' },
+        iconSize: { type: 'STATIC', options: { size: 10 } },
+        iconOrientation: {
+          type: 'STATIC',
+          options: { orientation: 0 },
+        },
+        symbolizeAs: {
+          options: { value: 'icon' },
+        },
+        icon: {
+          type: 'STATIC',
+          options: { value: 'airfield' },
+        },
       },
     },
-  },
-  id: uuidv4(),
-  parent: parentId,
-  label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 0.5,
-  visible: true,
-  type: LAYER_TYPE.GEOJSON_VECTOR,
-  query: { query: '', language: 'kuery' },
-});
+    id: uuidv4(),
+    parent: parentId,
+    label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
+    minZoom: 0,
+    maxZoom: 24,
+    alpha: 0.5,
+    visible: true,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
+    query: { query: '', language: 'kuery' },
+  };
+};
