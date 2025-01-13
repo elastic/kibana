@@ -20,6 +20,7 @@ import {
 import { getPosition, joinIndicesToSuggestions } from './util';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 const getFullCommandMnemonics = (
   definition: CommandDefinition<string>
@@ -81,6 +82,7 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
           } as SuggestionRawDefinition)
       );
     }
+
     case 'after_mnemonic':
     case 'index': {
       const joinIndices = await callbacks?.getJoinIndices?.();
@@ -91,6 +93,7 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
 
       return joinIndicesToSuggestions(joinIndices.indices);
     }
+
     case 'after_index': {
       const suggestion: SuggestionRawDefinition = {
         label: 'ON',
@@ -108,15 +111,35 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
 
       return [suggestion];
     }
+
+    case 'after_on': {
+      const fields = await getColumnsByType(['any'], [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
+
+      return fields;
+    }
+
+    case 'condition': {
+      const endingWhitespaceRegex = /(?<comma>,)?(?<whitespace>\s{0,99})$/;
+      const match = commandText.match(endingWhitespaceRegex);
+      const commaIsLastToken = !!match?.groups?.comma;
+
+      if (commaIsLastToken) {
+        const fields = await getColumnsByType(['any'], [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        });
+
+        return fields;
+      }
+
+      return [pipeCompleteItem, commaCompleteItem];
+    }
   }
 
   const suggestions: SuggestionRawDefinition[] = [];
-  const fields = await getColumnsByType(['any'], [], {
-    advanceCursor: true,
-    openSuggestions: true,
-  });
-
-  suggestions.push(...fields);
 
   return suggestions;
 };

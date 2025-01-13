@@ -112,6 +112,36 @@ describe('autocomplete.suggest', () => {
 
         expect(labels).toEqual(expected);
       });
+
+      test('more field suggestions after comma', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON stringField, /');
+        const labels = suggestions.map((s) => s.text).sort();
+        const expected = getFieldNamesByType('any')
+          .sort()
+          .map((field) => field + ' ');
+
+        expect(labels).toEqual(expected);
+      });
+
+      test('suggests pipe and comma after a field', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON stringField /');
+        const labels = suggestions.map((s) => s.label).sort();
+
+        expect(labels).toEqual([',', '|']);
+      });
+
+      test('suggests pipe and comma after a field (no space)', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON stringField/');
+        const labels = suggestions.map((s) => s.label).sort();
+
+        expect(labels).toEqual([',', '|']);
+      });
     });
   });
 });
