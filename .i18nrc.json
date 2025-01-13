@@ -166,7 +166,7 @@
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "src/platform/packages/private/kbn-managed-content-badge",
-    "responseOpsRuleForm": "packages/response-ops/rule_form"
+    "responseOpsRuleForm": "src/platform/packages/shared/response-ops/rule_form"
   },
   "translations": []
 }
