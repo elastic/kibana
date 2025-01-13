@@ -8,12 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects([
-    'common',
-    'indexManagement',
-    'header',
-    'searchIndexDetailsPage',
-  ]);
+  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const log = getService('log');
   const security = getService('security');
 
@@ -23,16 +18,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexManagement');
     });
 
-    it.skip('Navigates to the index details page from the home page', async () => {
+    it('Navigates to the index details page from the home page', async () => {
       await log.debug('Navigating to the index details page');
 
       // display hidden indices to have some rows in the indices table
       await pageObjects.indexManagement.toggleHiddenIndices();
       // click the first index in the table and wait for the index details page
-      await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
-        0
-      );
-      await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
+      await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
     });
   });
 };

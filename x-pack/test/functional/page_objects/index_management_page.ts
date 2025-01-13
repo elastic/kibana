@@ -82,6 +82,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
+      await retry.waitFor('details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+      });
     },
 
     async performIndexAction(action: string) {
