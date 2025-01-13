@@ -28,8 +28,8 @@ export const isDefaultMetricType = (metricType: string) =>
   DEFAULT_METRIC_TYPES.includes(metricType);
 
 export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<MetricTypes, string>>({
-  storage_retained: 'Data Retained in Storage',
   ingest_rate: 'Data Ingested',
+  storage_retained: 'Data Retained in Storage',
   search_vcu: 'Search VCU',
   ingest_vcu: 'Ingest VCU',
   ml_vcu: 'ML VCU',
@@ -40,8 +40,8 @@ export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<Met
 });
 
 export const METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP = Object.freeze<Record<string, MetricTypes>>({
-  'Data Retained in Storage': 'storage_retained',
   'Data Ingested': 'ingest_rate',
+  'Data Retained in Storage': 'storage_retained',
   'Search VCU': 'search_vcu',
   'Ingest VCU': 'ingest_vcu',
   'ML VCU': 'ml_vcu',

@@ -6,7 +6,7 @@
  */
 
 import { last, omit } from 'lodash';
-import { defer, switchMap, throwError } from 'rxjs';
+import { defer, switchMap, throwError, identity } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
@@ -17,9 +17,13 @@ import {
   ChatCompleteOptions,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
+import {
+  getInferenceExecutor,
+  chunksIntoMessage,
+  streamToResponse,
+  handleCancellation,
+} from './utils';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -37,18 +41,16 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     system,
     functionCalling,
     stream,
+    abortSignal,
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
     ToolOptions,
     boolean
   > => {
-    const obs$ = defer(async () => {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      const connector = await getConnectorById({ connectorId, actionsClient });
-      const executor = createInferenceExecutor({ actionsClient, connector });
-      return { executor, connector };
+    const inference$ = defer(async () => {
+      return await getInferenceExecutor({ connectorId, request, actions });
     }).pipe(
-      switchMap(({ executor, connector }) => {
-        const connectorType = connector.type;
+      switchMap((executor) => {
+        const connectorType = executor.getConnector().type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
         const messagesWithoutData = messages.map((message) => omit(message, 'data'));
@@ -80,21 +82,20 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           tools,
           logger,
           functionCalling,
+          abortSignal,
         });
       }),
       chunksIntoMessage({
-        toolOptions: {
-          toolChoice,
-          tools,
-        },
+        toolOptions: { toolChoice, tools },
         logger,
-      })
+      }),
+      abortSignal ? handleCancellation(abortSignal) : identity
     );
 
     if (stream) {
-      return obs$;
+      return inference$;
     } else {
-      return streamToResponse(obs$);
+      return streamToResponse(inference$);
     }
   };
 }

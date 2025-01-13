@@ -2,12 +2,10 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 18000
+  aiops: 32733
   alerting: 106936
   apm: 64385
-  assetInventory: 18478
   banners: 17946
-  bfetch: 22837
   canvas: 29355
   cases: 180037
   charts: 55000
@@ -17,8 +15,8 @@ pageLoadAssetSize:
   cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
-  cloudSecurityPosture: 19109
-  console: 46091
+  cloudSecurityPosture: 34398
+  console: 61298
   contentManagement: 16254
   controls: 60000
   core: 564663
@@ -65,7 +63,7 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
-  fieldFormats: 65209
+  fieldFormats: 80485
   fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
@@ -149,6 +147,7 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
   securitySolutionEss: 31781

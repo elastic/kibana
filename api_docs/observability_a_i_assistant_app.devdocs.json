@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantAppPublicSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantAppPublicStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -44,7 +44,7 @@
             "RootCauseAnalysisEvent",
             "[] | undefined; completeInBackground: boolean; onStartAnalysisClick: () => void; onStopAnalysisClick: () => void; onResetAnalysisClick: () => void; onClearAnalysisClick: () => void; onCompleteInBackgroundClick: () => void; loading: boolean; error?: Error | undefined; }>"
           ],
-          "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -86,7 +86,7 @@
         "signature": [
           "\"changes\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/changes/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/changes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,7 +101,7 @@
         "signature": [
           "\"query\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -115,7 +115,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantAppServerStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -129,7 +129,7 @@
       "tags": [],
       "label": "ObservabilityAIAssistantAppServerSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

@@ -28,6 +28,7 @@ import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/co
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
@@ -138,9 +139,14 @@ import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-soluti
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
 import {
+  RetryRuleMigrationRequestParamsInput,
+  RetryRuleMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
+import { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -313,6 +319,20 @@ If asset criticality records already exist for the specified entities, those rec
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Configuring the Risk Engine Saved Object
+     */
+    configureRiskEngineSavedObject(
+      props: ConfigureRiskEngineSavedObjectProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .patch(routeWithNamespace('/api/risk_score/engine/saved_object/configure', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
       * Copies and returns a timeline or timeline template.
@@ -960,6 +980,16 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves all related integrations
+     */
+    getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves all available prebuilt rules (installed and installable)
      */
     getRuleMigrationPrebuiltRules(
@@ -1387,6 +1417,22 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Retries a SIEM rules migration using the migration id provided
+     */
+    retryRuleMigration(props: RetryRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/retry', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     riskEngineGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/internal/risk_engine/privileges', kibanaSpace))
@@ -1402,6 +1448,17 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object)
         .query(props.query);
+    },
+    /**
+     * Run a shell command on an endpoint.
+     */
+    runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/endpoint/action/runscript', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -1634,6 +1691,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
 }
+export interface ConfigureRiskEngineSavedObjectProps {
+  body: ConfigureRiskEngineSavedObjectRequestBodyInput;
+}
 export interface CopyTimelineProps {
   body: CopyTimelineRequestBodyInput;
 }
@@ -1857,9 +1917,16 @@ export interface ReadRuleProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface RetryRuleMigrationProps {
+  params: RetryRuleMigrationRequestParamsInput;
+  body: RetryRuleMigrationRequestBodyInput;
+}
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
+}
+export interface RunScriptActionProps {
+  body: RunScriptActionRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;

@@ -12,6 +12,7 @@ import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
+import { mockUseKibana, generateDataStreams } from '../mocks';
 
 jest.mock('../../utils/use_breadcrumbs', () => {
   return {
@@ -60,60 +61,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
-            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
-              const x = {
-                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-                'timepicker:quickRanges': [
-                  {
-                    from: 'now/d',
-                    to: 'now/d',
-                    display: 'Today',
-                  },
-                  {
-                    from: 'now/w',
-                    to: 'now/w',
-                    display: 'This week',
-                  },
-                  {
-                    from: 'now-15m',
-                    to: 'now',
-                    display: 'Last 15 minutes',
-                  },
-                  {
-                    from: 'now-30m',
-                    to: 'now',
-                    display: 'Last 30 minutes',
-                  },
-                  {
-                    from: 'now-1h',
-                    to: 'now',
-                    display: 'Last 1 hour',
-                  },
-                  {
-                    from: 'now-24h',
-                    to: 'now',
-                    display: 'Last 24 hours',
-                  },
-                  {
-                    from: 'now-7d',
-                    to: 'now',
-                    display: 'Last 7 days',
-                  },
-                ],
-              };
-              return x[k];
-            };
-            return get(key);
-          }),
-        },
-      },
-    }),
+    useKibana: () => mockUseKibana,
   };
 });
+
 const mockUseGetDataUsageMetrics = useGetDataUsageMetrics as jest.Mock;
 const mockUseGetDataUsageDataStreams = useGetDataUsageDataStreams as jest.Mock;
 const mockServices = mockCore.createStart();
@@ -130,13 +81,6 @@ const getBaseMockedDataUsageMetrics = () => ({
   isFetching: false,
   refetch: jest.fn(),
 });
-
-const generateDataStreams = (count: number) => {
-  return Array.from({ length: count }, (_, i) => ({
-    name: `.ds-${i}`,
-    storageSizeBytes: 1024 ** 2 * (22 / 7),
-  }));
-};
 
 describe('DataUsageMetrics', () => {
   let user: UserEvent;
@@ -228,14 +172,14 @@ describe('DataUsageMetrics', () => {
     expect(toggleFilterButton).toHaveTextContent('Data streams10');
     await user.click(toggleFilterButton);
     const allFilterOptions = getAllByTestId('dataStreams-filter-option');
-    // deselect 9 options
-    for (let i = 0; i < allFilterOptions.length; i++) {
+    // deselect 3 options
+    for (let i = 0; i < 3; i++) {
       await user.click(allFilterOptions[i]);
     }
 
-    expect(toggleFilterButton).toHaveTextContent('Data streams1');
+    expect(toggleFilterButton).toHaveTextContent('Data streams7');
     expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
-      '1 active filters'
+      '7 active filters'
     );
   });
 

@@ -81,6 +81,11 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       },
     });
 
+    const isSelectAllDisabled = useMemo(
+      () => options.length === 0 || (hasActiveFilters && numFilters === 0),
+      [hasActiveFilters, numFilters, options.length]
+    );
+
     const addHeightToPopover = useMemo(
       () => isDataStreamsFilter && numFilters + numActiveFilters > 15,
       [isDataStreamsFilter, numFilters, numActiveFilters]
@@ -107,7 +112,12 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     const sortedDataStreamsFilterOptions = useMemo(() => {
       if (shouldPinSelectedDataStreams() || areDataStreamsSelectedOnMount) {
         // pin checked items to the top
-        return orderBy('checked', 'asc', items);
+        const sorted = orderBy(
+          'checked',
+          'asc',
+          items.filter((item) => !item.isGroupLabel)
+        );
+        return [...items.filter((item) => item.isGroupLabel), ...sorted];
       }
       // return options as are for other filters
       return items;
@@ -155,14 +165,25 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     );
 
     const onSelectAll = useCallback(() => {
-      const allItems: FilterItems = items.map((item) => {
-        return {
-          ...item,
-          checked: 'on',
-        };
-      });
+      const allItems: FilterItems = items.reduce<FilterItems>((acc, item) => {
+        if (!item.isGroupLabel) {
+          acc.push({
+            ...item,
+            checked: 'on',
+          });
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
       setItems(allItems);
-      const optionsToSelect = allItems.map((i) => i.label);
+      const optionsToSelect = allItems.reduce<string[]>((acc, i) => {
+        if (i.checked) {
+          acc.push(i.label);
+        }
+        return acc;
+      }, []);
       onChangeFilterOptions(optionsToSelect);
 
       if (isDataStreamsFilter) {
@@ -260,7 +281,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                       data-test-subj={getTestId(`${filterName}-selectAllButton`)}
                       icon="check"
                       label={UX_LABELS.filterSelectAll}
-                      isDisabled={hasActiveFilters && numFilters === 0}
+                      isDisabled={isSelectAllDisabled}
                       onClick={onSelectAll}
                     />
                   </EuiFlexItem>

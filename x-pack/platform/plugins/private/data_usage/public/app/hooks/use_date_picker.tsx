@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { DateRangePickerValues } from '../components/filters/date_picker';
-import { DEFAULT_DATE_RANGE_OPTIONS } from '../../../common/utils';
+import { DEFAULT_DATE_RANGE_OPTIONS, isDateRangeValid } from '../../../common/utils';
 
 export const useDateRangePicker = () => {
   const {
@@ -85,5 +85,14 @@ export const useDateRangePicker = () => {
     ]
   );
 
-  return { dateRangePickerState, onRefreshChange, onTimeChange };
+  const isValidDateRange = useMemo(
+    () =>
+      isDateRangeValid({
+        start: dateRangePickerState.startDate,
+        end: dateRangePickerState.endDate,
+      }),
+    [dateRangePickerState.endDate, dateRangePickerState.startDate]
+  );
+
+  return { dateRangePickerState, isValidDateRange, onRefreshChange, onTimeChange };
 };

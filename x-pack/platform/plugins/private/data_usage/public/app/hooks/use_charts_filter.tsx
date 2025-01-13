@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { EuiIconTip } from '@elastic/eui';
 import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import {
   METRIC_TYPE_VALUES,
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   isDefaultMetricType,
 } from '../../../common/rest_types';
-import { FILTER_NAMES } from '../../translations';
+import { FILTER_NAMES, UX_LABELS } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
 import { ChartsFilterProps } from '../components/filters/charts_filter';
@@ -68,41 +69,80 @@ export const useChartsFilter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // filter options
-  const [items, setItems] = useState<FilterItems>(
-    isMetricTypesFilter
-      ? METRIC_TYPE_VALUES.map((metricType) => ({
-          key: metricType,
-          label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
-          checked: selectedMetricTypesFromUrl
-            ? selectedMetricTypesFromUrl.includes(metricType)
-              ? 'on'
-              : undefined
-            : isDefaultMetricType(metricType) // default metrics are selected by default
+  const initialSelectedOptions = useMemo(() => {
+    if (isMetricTypesFilter) {
+      return METRIC_TYPE_VALUES.map((metricType) => ({
+        key: metricType,
+        label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
+        checked: selectedMetricTypesFromUrl
+          ? selectedMetricTypesFromUrl.includes(metricType)
             ? 'on'
-            : undefined,
-          'data-test-subj': `${filterOptions.filterName}-filter-option`,
-        }))
-      : isDataStreamsFilter && !!filterOptions.options.length
-      ? filterOptions.options?.map((filterOption, i) => ({
-          key: filterOption,
-          label: filterOption,
-          append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
-          checked: selectedDataStreamsFromUrl
-            ? selectedDataStreamsFromUrl.includes(filterOption)
-              ? 'on'
-              : undefined
-            : i < DEFAULT_SELECTED_OPTIONS
-            ? 'on'
-            : undefined,
-          'data-test-subj': `${filterOptions.filterName}-filter-option`,
-        }))
-      : []
-  );
+            : undefined
+          : isDefaultMetricType(metricType) // default metrics are selected by default
+          ? 'on'
+          : undefined,
+        'data-test-subj': `${filterOptions.filterName}-filter-option`,
+      })) as FilterItems;
+    }
+    let dataStreamOptions: FilterItems = [];
 
-  const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
+    if (isDataStreamsFilter && !!filterOptions.options.length) {
+      dataStreamOptions = filterOptions.options?.map((filterOption, i) => ({
+        key: filterOption,
+        label: filterOption,
+        append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
+        checked: selectedDataStreamsFromUrl
+          ? selectedDataStreamsFromUrl.includes(filterOption)
+            ? 'on'
+            : undefined
+          : i < DEFAULT_SELECTED_OPTIONS
+          ? 'on'
+          : undefined,
+        'data-test-subj': `${filterOptions.filterName}-filter-option`,
+        truncationProps: {
+          truncation: 'start',
+          truncationOffset: 15,
+        },
+      }));
+    }
+
+    return [
+      {
+        label: UX_LABELS.filters.dataStreams.label,
+        append: (
+          <span css={{ display: 'flex', alignItems: 'flex-end', marginLeft: 'auto' }}>
+            {UX_LABELS.filters.dataStreams.append}
+            <EuiIconTip
+              content={UX_LABELS.filters.dataStreams.appendTooltip}
+              type="iInCircle"
+              color="subdued"
+              css={{ alignContent: 'flex-start', justifyContent: 'flex-start' }}
+            />
+          </span>
+        ),
+        isGroupLabel: true,
+        'data-test-subj': `${filterOptions.filterName}-group-label`,
+      },
+      ...dataStreamOptions,
+    ];
+  }, [
+    filterOptions.appendOptions,
+    filterOptions.filterName,
+    filterOptions.options,
+    isDataStreamsFilter,
+    isMetricTypesFilter,
+    selectedDataStreamsFromUrl,
+    selectedMetricTypesFromUrl,
+  ]);
+  // filter options
+  const [items, setItems] = useState<FilterItems>(initialSelectedOptions);
+
+  const hasActiveFilters = useMemo(
+    () => !!items.find((item) => !item.isGroupLabel && item.checked === 'on'),
+    [items]
+  );
   const numActiveFilters = useMemo(
-    () => items.filter((item) => item.checked === 'on').length,
+    () => items.filter((item) => !item.isGroupLabel && item.checked === 'on').length,
     [items]
   );
   const numFilters = useMemo(

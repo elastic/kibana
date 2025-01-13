@@ -19,6 +19,7 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   recentlyUsedDateRanges: [],
 });
 
+export type ParsedDate = ReturnType<typeof momentDateParser>;
 export const momentDateParser = (date: string) => dateMath.parse(date);
 export const transformToUTCtime = ({
   start,
@@ -50,6 +51,6 @@ export const isDateRangeValid = ({ start, end }: { start: string; end: string })
   return (
     startDate.isSameOrAfter(minDate, 's') &&
     endDate.isSameOrBefore(maxDate, 's') &&
-    startDate <= endDate
+    startDate.isBefore(endDate, 's')
   );
 };
