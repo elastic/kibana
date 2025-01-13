@@ -12,9 +12,7 @@
     "__jest__/**/*",
     "../../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -44,6 +42,6 @@
     "@kbn/utils",
     "@kbn/zod",
     "@kbn/tooling-log",
-    "@kbn/ai-assistant-icon",
+    "@kbn/ai-assistant-icon"
   ]
 }
