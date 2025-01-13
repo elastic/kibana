@@ -93,6 +93,7 @@ export type TestSubjects =
   | 'requestBody'
   | 'editDataRetentionButton'
   | 'bulkEditDataRetentionButton'
+  | 'dataStreamActionsPopoverButton'
   | 'errorWhenCreatingCallout'
   | 'manageDataStreamButton'
   | 'dataRetentionValue'
