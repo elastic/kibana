@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -140,7 +139,7 @@ export const rangeOperation: OperationDefinition<
     };
   },
   toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
-    return;
+    return undefined;
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
