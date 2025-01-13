@@ -52,10 +52,17 @@ interface ApiDefinitionInputProps {
   showValidation: boolean;
   isGenerating: boolean;
   onUploadSpecFileSuccessful: () => void;
+  onClearSuccess: () => void;
 }
 
 export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
-  ({ integrationSettings, showValidation, isGenerating, onUploadSpecFileSuccessful }) => {
+  ({
+    integrationSettings,
+    showValidation,
+    isGenerating,
+    onUploadSpecFileSuccessful,
+    onClearSuccess,
+  }) => {
     const { setIntegrationSettings } = useActions();
     const [uploadedFile, setUploadedFile] = useState<FileList | undefined>(undefined);
     const [isParsing, setIsParsing] = useState(false);
@@ -65,6 +72,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
       (files: FileList | null) => {
         if (!files || files.length === 0) {
           setUploadedFile(undefined);
+          onClearSuccess();
           return;
         }
 
@@ -133,7 +141,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
         reader.readAsText(apiDefinitionFile);
         onUploadSpecFileSuccessful();
       },
-      [integrationSettings, setIntegrationSettings, setIsParsing, onUploadSpecFileSuccessful]
+      [setIntegrationSettings, integrationSettings, onUploadSpecFileSuccessful, onClearSuccess]
     );
 
     return (
