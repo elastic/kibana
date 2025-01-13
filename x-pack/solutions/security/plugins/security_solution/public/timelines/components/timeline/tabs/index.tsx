@@ -107,20 +107,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const { isTimelineEsqlEnabledByFeatureFlag, isEsqlAdvancedSettingEnabled } =
-      useEsqlAvailability();
+    const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
     const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
       selectTimelineESQLSavedSearchId(state, timelineId)
     );
-    const shouldShowESQLTab = useMemo(() => {
-      // disabling esql feature from feature flag should unequivocally hide the tab
-      // irrespective of the fact that the advanced setting is enabled or
-      // not or existing esql query is present or not
-      if (!isTimelineEsqlEnabledByFeatureFlag) {
-        return false;
-      }
-      return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-    }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+    const shouldShowESQLTab = useMemo(
+      () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+      [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+    );
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -246,8 +240,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getAppNotes = useMemo(() => getNotesSelector(), []);
   const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
   const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
-  const { isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag } =
-    useEsqlAvailability();
+  const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
 
   const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
     selectTimelineESQLSavedSearchId(state, timelineId)
@@ -263,15 +256,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
-  const shouldShowESQLTab = useMemo(() => {
-    // disabling esql feature from feature flag should unequivocally hide the tab
-    // irrespective of the fact that the advanced setting is enabled or
-    // not or existing esql query is present or not
-    if (!isTimelineEsqlEnabledByFeatureFlag) {
-      return false;
-    }
-    return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-  }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+  const shouldShowESQLTab = useMemo(
+    () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+    [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+  );
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
