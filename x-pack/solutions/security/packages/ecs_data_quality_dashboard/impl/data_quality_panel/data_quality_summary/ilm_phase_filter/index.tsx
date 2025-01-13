@@ -8,6 +8,7 @@
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFormControlLayout,
   EuiFormLabel,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -22,17 +23,17 @@ import {
   SELECT_ONE_OR_MORE_ILM_PHASES,
 } from '../../translations';
 import { useDataQualityContext } from '../../data_quality_context';
-import { StyledFormControlLayout, StyledOption, StyledOptionLabel } from './styles';
+import { formControlLayoutCss, optionCss, optionLabelCss } from './styles';
 
 const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
 ): React.ReactNode => (
   <EuiToolTip content={`${option.label}: ${getIlmPhaseDescription(option.label)}`}>
-    <StyledOption>
-      <StyledOptionLabel>{`${option.label}`}</StyledOptionLabel>
+    <div css={optionCss}>
+      <span css={optionLabelCss}>{`${option.label}`}</span>
       {': '}
       <span>{getIlmPhaseDescription(option.label)}</span>
-    </StyledOption>
+    </div>
   </EuiToolTip>
 );
 
@@ -53,7 +54,7 @@ const IlmPhaseFilterComponent: React.FC = () => {
 
   return (
     <EuiToolTip display="block" content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-      <StyledFormControlLayout fullWidth={true} prepend={ilmFormLabel}>
+      <EuiFormControlLayout css={formControlLayoutCss} fullWidth={true} prepend={ilmFormLabel}>
         <EuiComboBox
           id={labelInputId}
           data-test-subj="selectIlmPhases"
@@ -64,7 +65,7 @@ const IlmPhaseFilterComponent: React.FC = () => {
           options={ilmPhaseOptionsStatic}
           onChange={handleSetSelectedOptions}
         />
-      </StyledFormControlLayout>
+      </EuiFormControlLayout>
     </EuiToolTip>
   );
 };

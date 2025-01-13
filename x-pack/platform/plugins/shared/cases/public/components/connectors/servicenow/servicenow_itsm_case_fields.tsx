@@ -22,6 +22,8 @@ import { useGetChoices } from './use_get_choices';
 import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 import { DeprecatedCallout } from '../deprecated_callout';
+import { validateJSON } from './validate_json';
+import { JsonEditorField } from './json_editor_field';
 
 const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -201,6 +203,33 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
                   disabled: isLoadingChoices,
                   isLoading: isLoadingChoices,
                 },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.additionalFields"
+              component={JsonEditorField}
+              config={{
+                label: i18n.ADDITIONAL_FIELDS_LABEL,
+                validations: [
+                  {
+                    validator: validateJSON,
+                  },
+                ],
+              }}
+              componentProps={{
+                euiCodeEditorProps: {
+                  fullWidth: true,
+                  height: '200px',
+                  options: {
+                    fontSize: '12px',
+                    renderValidationDecorations: 'off',
+                  },
+                },
+                dataTestSubj: 'additionalFieldsEditor',
               }}
             />
           </EuiFlexItem>

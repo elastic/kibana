@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
+import React from 'react';
 import { ServiceTabEmptyState } from '.';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 

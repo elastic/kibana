@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SetupDataCollectionInstructions } from './get_cloud_setup_instructions';
+import type { SetupDataCollectionInstructions } from './get_cloud_setup_instructions';
 
 export function getSelfManagedInstructions({
   stackVersion,

@@ -7,13 +7,13 @@
 
 import { createMemoryHistory } from 'history';
 import rison from '@kbn/rison';
-import { IBasePath } from '@kbn/core/public';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { IBasePath } from '@kbn/core/public';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
-import { apmRouter as apmRouterBase, ApmRouter } from '../../routing/apm_route_config';
-import { logsLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { apmRouter as apmRouterBase, type ApmRouter } from '../../routing/apm_route_config';
+import { logsLocatorMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
+import type {
   AssetDetailsLocatorParams,
   AssetDetailsLocator,
 } from '@kbn/observability-shared-plugin/common';
@@ -23,7 +23,6 @@ const apmRouter = {
   link: (...args: [any]) => `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
 
-const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
 const uptimeLocator = sharePluginMock.createLocator();
 
 const mockAssetDetailsLocator = {
@@ -35,9 +34,8 @@ const mockAssetDetailsLocator = {
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
-const expectLogsLocatorsToBeCalled = () => {
-  expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
-  expect(traceLogsLocator.getRedirectUrl).toBeCalledTimes(1);
+const expectLogsLocatorToBeCalled = () => {
+  expect(logsLocatorMock.getRedirectUrl).toBeCalledTimes(4);
 };
 
 const expectUptimeLocatorToBeCalled = () => {
@@ -76,7 +74,7 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        logsLocators: logsLocatorsMock,
+        logsLocator: logsLocatorMock,
         uptimeLocator,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
@@ -128,7 +126,7 @@ describe('Transaction action menu', () => {
       ],
     ]);
     expectUptimeLocatorToBeCalled();
-    expectLogsLocatorsToBeCalled();
+    expectLogsLocatorToBeCalled();
   });
 
   it('shows pod and required sections only', () => {
@@ -146,7 +144,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         uptimeLocator,
-        logsLocators: logsLocatorsMock,
+        logsLocator: logsLocatorMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -215,7 +213,7 @@ describe('Transaction action menu', () => {
       ],
     ]);
     expectUptimeLocatorToBeCalled();
-    expectLogsLocatorsToBeCalled();
+    expectLogsLocatorToBeCalled();
   });
 
   it('shows host and required sections only', () => {
@@ -233,7 +231,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         uptimeLocator,
-        logsLocators: logsLocatorsMock,
+        logsLocator: logsLocatorMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -302,6 +300,6 @@ describe('Transaction action menu', () => {
       ],
     ]);
     expectUptimeLocatorToBeCalled();
-    expectLogsLocatorsToBeCalled();
+    expectLogsLocatorToBeCalled();
   });
 });

@@ -337,6 +337,9 @@ export interface DocLinks {
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
   };
+  readonly server: {
+    readonly protocol: string;
+  };
   readonly securitySolution: {
     readonly aiAssistant: string;
     readonly artifactControl: string;
@@ -684,6 +687,9 @@ export interface DocLinks {
   };
   readonly cases: {
     readonly legacyApiDeprecations: string;
+  };
+  readonly synonyms: {
+    readonly synonymsAPIDocumentation: string;
   };
 }
 

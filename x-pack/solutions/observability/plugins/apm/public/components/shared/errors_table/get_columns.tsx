@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import styled from '@emotion/styled';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { asInteger } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
 import { ErrorDetailLink } from '../links/apm/error_detail_link';
@@ -20,7 +21,7 @@ import { ErrorOverviewLink } from '../links/apm/error_overview_link';
 import { TimestampTooltip } from '../timestamp_tooltip';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 
 const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};

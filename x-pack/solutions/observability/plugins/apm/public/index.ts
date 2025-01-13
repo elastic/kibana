@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { ApmPluginSetup, ApmPluginStart } from './plugin';
+import { ApmPlugin } from './plugin';
 
 export interface ConfigSchema {
   serviceMapEnabled: boolean;

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { ResolvedDataView } from '../../../utils/data_view';
+import type { ResolvedDataView } from '../../../utils/data_view';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { type FieldSpec } from '@kbn/data-views-plugin/common';
 
 const mockDataView = {
   id: 'mock-id',

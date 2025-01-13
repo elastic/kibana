@@ -10,6 +10,9 @@ export {
   ChatCompletionEventType,
   ToolChoiceType,
   type Message,
+  type MessageContentImage,
+  type MessageContentText,
+  type MessageContent,
   type AssistantMessage,
   type ToolMessage,
   type UserMessage,
@@ -101,3 +104,4 @@ export {
   isSupportedConnector,
   type InferenceConnector,
 } from './src/connectors';
+export { defaultInferenceEndpoints } from './src/inference_endpoints';

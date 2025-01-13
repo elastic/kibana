@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -17,7 +17,7 @@ import { useMetricsDataViewContext } from '../../../../../containers/metrics_sou
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { searchSessionId } = useSearchSessionContext();
+  const { reloadRequestTime } = useReloadRequestTimeContext();
   const { hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
@@ -60,14 +60,14 @@ export const KpiCharts = () => {
         });
   };
 
-  // prevents requestTs and searchCriteria state from reloading the chart
+  // prevents requests and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
     dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
-    searchSessionId,
+    reloadRequestTime,
     getSubtitle,
   });
 
@@ -77,7 +77,7 @@ export const KpiCharts = () => {
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
-      searchSessionId={afterLoadedState.searchSessionId}
+      lastReloadRequestTime={afterLoadedState.reloadRequestTime}
       getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
     />

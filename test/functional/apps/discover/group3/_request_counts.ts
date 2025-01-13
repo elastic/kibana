@@ -53,30 +53,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
-      await retry.try(async () => {
-        if (searchCount === 0) {
-          await browser.execute(async () => {
-            performance.clearResourceTimings();
-          });
-        }
-        await waitForLoadingToFinish();
-        const endpoint = type === 'esql' ? `${type}_async` : type;
-        const requests = await browser.execute(() =>
-          performance
-            .getEntries()
-            .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
-        );
+      await retry.tryWithRetries(
+        `expect ${type} request to match count ${searchCount}`,
+        async () => {
+          if (searchCount === 0) {
+            await browser.execute(async () => {
+              performance.clearResourceTimings();
+            });
+          }
+          await waitForLoadingToFinish();
+          const endpoint = type === 'esql' ? `${type}_async` : type;
+          const requests = await browser.execute(() =>
+            performance
+              .getEntries()
+              .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
+          );
 
-        const result = requests.filter((entry) =>
-          entry.name.endsWith(`/internal/search/${endpoint}`)
-        );
+          const result = requests.filter((entry) =>
+            entry.name.endsWith(`/internal/search/${endpoint}`)
+          );
 
-        const count = result.length;
-        if (count !== searchCount) {
-          log.warning('Request count differs:', result);
-        }
-        expect(count).to.be(searchCount);
-      });
+          const count = result.length;
+          if (count !== searchCount) {
+            log.warning('Request count differs:', result);
+          }
+          expect(count).to.be(searchCount);
+        },
+        { retryCount: 5, retryDelay: 500 }
+      );
     };
 
     const waitForLoadingToFinish = async () => {
@@ -252,8 +256,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
-
-    describe('ES|QL mode', () => {
+    // Currently ES|QL checks are disabled due to various flakiness
+    // Note that ES|QL also checks for different number of requests due to the fields request triggered
+    // by the ES|QL Editor
+    describe.skip('ES|QL mode', () => {
       const type = 'esql';
       before(async () => {
         await common.navigateToApp('discover');

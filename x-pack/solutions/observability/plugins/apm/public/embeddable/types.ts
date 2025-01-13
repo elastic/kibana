@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { ApmPluginStartDeps, ApmPluginSetupDeps } from '../plugin';

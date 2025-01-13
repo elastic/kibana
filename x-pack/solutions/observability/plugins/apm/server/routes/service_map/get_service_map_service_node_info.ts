@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { NodeStats } from '../../../common/service_map';
+import type { NodeStats } from '../../../common/service_map';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -26,7 +26,7 @@ import {
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { systemMemory, cgroupMemory } from '../metrics/by_agent/shared/memory';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 

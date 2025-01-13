@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
-import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';

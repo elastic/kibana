@@ -67,9 +67,9 @@ describe('fetchEsql', () => {
   });
 
   it('should use inputTimeRange if provided', () => {
-    const inputTimeRange: TimeRange = { from: 'now-15m', to: 'now' };
-    const result = getTextBasedQueryStateToAstProps({ ...fetchEsqlMockProps, inputTimeRange });
-    expect(result.time).toEqual(inputTimeRange);
+    const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
+    const result = getTextBasedQueryStateToAstProps({ ...fetchEsqlMockProps, timeRange });
+    expect(result.time).toEqual(timeRange);
   });
 
   it('should use absolute time from data if inputTimeRange is not provided', () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
+import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { isCustomMetricRate, isInterfaceRateAgg, isMetricRate, isRate } from './is_rate';
-import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
+import type { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 const customMaxMetricMock: SnapshotCustomMetricInput = {
   type: 'custom',

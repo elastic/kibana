@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '@kbn/es-types';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
 import { afterKeyObjectRT } from '../../../../common/http_api';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
+import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
 import { calculateBucketSize } from './calculate_bucket_size';

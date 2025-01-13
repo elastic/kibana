@@ -32,7 +32,7 @@ export function fetchEsql({
   query,
   inputQuery,
   filters,
-  inputTimeRange,
+  timeRange,
   dataView,
   abortSignal,
   inspectorAdapters,
@@ -43,7 +43,7 @@ export function fetchEsql({
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
-  inputTimeRange?: TimeRange;
+  timeRange?: TimeRange;
   dataView: DataView;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
@@ -55,9 +55,8 @@ export function fetchEsql({
     query,
     inputQuery,
     filters,
-    inputTimeRange,
+    timeRange,
     dataView,
-    inspectorAdapters,
     data,
   });
   return textBasedQueryStateToAstWithValidation(props)
@@ -118,23 +117,21 @@ export function getTextBasedQueryStateToAstProps({
   query,
   inputQuery,
   filters,
-  inputTimeRange,
+  timeRange,
   dataView,
   data,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
-  inputTimeRange?: TimeRange;
+  timeRange?: TimeRange;
   dataView: DataView;
-  inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
 }) {
-  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
   return {
     filters,
     query,
-    time: timeRange,
+    time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
     timeFieldName: dataView.timeFieldName,
     inputQuery,
     titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {

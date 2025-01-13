@@ -14,15 +14,11 @@ import {
   profilingAzureCostDiscountRate,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
-import {
-  AggregationField,
-  convertTonsToKgs,
-  ESTopNFunctions,
-  TopNFunctions,
-} from '@kbn/profiling-utils';
-import { RegisterServicesParams } from '../register_services';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import type { AggregationField, ESTopNFunctions, TopNFunctions } from '@kbn/profiling-utils';
+import { convertTonsToKgs } from '@kbn/profiling-utils';
+import type { RegisterServicesParams } from '../register_services';
 import { percentToFactor } from '../../utils/percent_to_factor';
 
 export interface FetchFunctionsParams {
@@ -31,7 +27,7 @@ export interface FetchFunctionsParams {
   indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
-  aggregationField?: AggregationField;
+  aggregationFields?: AggregationField[];
   limit?: number;
   totalSeconds: number;
 }
@@ -45,7 +41,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     indices,
     stacktraceIdsField,
     query,
-    aggregationField,
+    aggregationFields,
     limit,
     totalSeconds,
   }: FetchFunctionsParams) => {
@@ -76,7 +72,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       query,
       indices,
       stacktraceIdsField,
-      aggregationField,
+      aggregationFields,
       co2PerKWH,
       datacenterPUE,
       pervCPUWattX86,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { keyBy } from 'lodash';
-import { APMPluginStartDependencies } from '../../types';
+import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 
