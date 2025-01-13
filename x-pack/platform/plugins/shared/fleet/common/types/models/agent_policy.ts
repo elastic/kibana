@@ -45,9 +45,9 @@ export interface NewAgentPolicy {
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
   resources?: {
-    requests: {
-      memory: string;
-      cpu: string;
+    requests?: {
+      memory?: string;
+      cpu?: string;
     };
   };
   monitoring_pprof_enabled?: boolean;

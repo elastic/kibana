@@ -134,10 +134,12 @@ export const AgentPolicyBaseSchema = {
   ),
   resources: schema.maybe(
     schema.object({
-      requests: schema.object({
-        memory: schema.string(),
-        cpu: schema.string(),
-      }),
+      requests: schema.maybe(
+        schema.object({
+          memory: schema.maybe(schema.string()),
+          cpu: schema.maybe(schema.string()),
+        }),
+      ),
     })
   ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),

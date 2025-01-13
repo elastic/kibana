@@ -66,9 +66,9 @@ export interface AgentPolicySOAttributes {
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
   resources?: {
-    requests: {
-      memory: string;
-      cpu: string;
+    requests?: {
+      memory?: string;
+      cpu?: string;
     };
   };
   version?: string;
