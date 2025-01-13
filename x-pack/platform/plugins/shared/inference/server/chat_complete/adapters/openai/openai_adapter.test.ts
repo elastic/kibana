@@ -15,7 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
-import { openAIAdapter } from '.';
+import { openAIAdapter } from './openai_adapter';
 
 function createOpenAIChunk({
   delta,
@@ -77,6 +77,7 @@ describe('openAIAdapter', () => {
         };
       });
     });
+
     it('correctly formats messages ', () => {
       openAIAdapter.chatComplete({
         ...defaultArgs,
@@ -112,6 +113,86 @@ describe('openAIAdapter', () => {
         },
         {
           content: 'another question',
+          role: 'user',
+        },
+      ]);
+    });
+
+    it('correctly formats messages with content parts', () => {
+      openAIAdapter.chatComplete({
+        executor: executorMock,
+        logger,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'text',
+                text: 'question',
+              },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: {
+                  data: 'aaaaaa',
+                  mimeType: 'image/png',
+                },
+              },
+              {
+                type: 'image',
+                source: {
+                  data: 'bbbbbb',
+                  mimeType: 'image/png',
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const {
+        body: { messages },
+      } = getRequest();
+
+      expect(messages).toEqual([
+        {
+          content: [
+            {
+              text: 'question',
+              type: 'text',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          content: 'answer',
+          role: 'assistant',
+        },
+        {
+          content: [
+            {
+              type: 'image_url',
+              image_url: {
+                url: 'aaaaaa',
+              },
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: 'bbbbbb',
+              },
+            },
+          ],
           role: 'user',
         },
       ]);
@@ -253,6 +334,25 @@ describe('openAIAdapter', () => {
 
       expect(getRequest().stream).toBe(true);
       expect(getRequest().body.stream).toBe(true);
+    });
+
+    it('propagates the abort signal when provided', () => {
+      const abortController = new AbortController();
+
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        abortSignal: abortController.signal,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'stream',
+        subActionParams: expect.objectContaining({
+          signal: abortController.signal,
+        }),
+      });
     });
   });
 

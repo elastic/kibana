@@ -256,7 +256,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Users and roles' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
 
@@ -281,7 +280,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'project_settings_project_nav',
         'ml:modelManagement',
         'management',
-        'cloudLinkUserAndRoles',
         'cloudLinkDeployment',
         'cloudLinkBilling',
       ]);

@@ -21,7 +21,7 @@
           },
           " extends Partial<IngestPipelinesBaseParams>"
         ],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
               },
               ".LIST"
             ],
-            "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+            "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -58,7 +58,7 @@
         "tags": [],
         "label": "INGEST_PIPELINES_PAGES",
         "description": [],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -75,7 +75,7 @@
         "signature": [
           "\"INGEST_PIPELINES_APP_LOCATOR\""
         ],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

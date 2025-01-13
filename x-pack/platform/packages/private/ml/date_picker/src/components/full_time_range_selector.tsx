@@ -220,7 +220,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   }, [frozenDataPreference, showFrozenDataTierChoice]);
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs">
+    <EuiFlexGroup responsive={false} gutterSize="s">
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}

@@ -43,6 +43,9 @@ function checkLikeNode(node: ESQLLikeOperator): QueryCorrection[] {
   likeExpression.value = likeExpression.value
     .replaceAll(/(?<!\\)%/g, '*')
     .replaceAll(/(?<!\\)_/g, '?');
+  likeExpression.valueUnquoted = likeExpression.valueUnquoted
+    .replaceAll(/(?<!\\)%/g, '*')
+    .replaceAll(/(?<!\\)_/g, '?');
 
   if (likeExpression.value !== initialValue) {
     likeExpression.name = likeExpression.value;

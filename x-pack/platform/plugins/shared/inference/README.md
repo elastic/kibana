@@ -221,6 +221,75 @@ const toolCall = toolCalls[0];
 // process the tool call and eventually continue the conversation with the LLM
 ```
 
+#### Request cancellation
+
+Request cancellation can be done by passing an abort signal when calling the API. Firing the signal
+before the request completes will cause the abortion, and the API call will throw an error.
+
+```ts
+const abortController = new AbortController();
+
+const chatResponse = await inferenceClient.chatComplete({
+  connectorId: 'some-gen-ai-connector',
+  abortSignal: abortController.signal,
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+
+// from elsewhere / before the request completes and the promise resolves:
+
+abortController.abort();
+```
+
+The `isInferenceRequestAbortedError` helper function, exposed from `@kbn/inference-common`, can be used easily identify those errors:
+
+```ts
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
+
+try {
+  const abortController = new AbortController();
+  const chatResponse = await inferenceClient.chatComplete({
+    connectorId: 'some-gen-ai-connector',
+    abortSignal: abortController.signal,
+    messages: [{ role: MessageRole.User, content: 'Do something' }],
+  });
+} catch(e) {
+  if(isInferenceRequestAbortedError(e)) {
+    // request was aborted, do something
+  } else {
+    // was another error, do something else
+  }
+}
+```
+
+The approach is very similar for stream mode:
+
+```ts
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
+
+const abortController = new AbortController();
+const events$ = inferenceClient.chatComplete({
+  stream: true,
+  connectorId: 'some-gen-ai-connector',
+  abortSignal: abortController.signal,
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+
+events$.subscribe({
+  next: (event) => {
+    // do something
+  },
+  error: (err) => {
+    if(isInferenceRequestAbortedError(e)) {
+      // request was aborted, do something
+    } else {
+      // was another error, do something else
+    }
+  }
+});
+
+abortController.abort();
+```
+
 ### `output` API
 
 `output` is a wrapper around the `chatComplete` API that is catered towards a specific use case: having the LLM output a structured response, based on a schema.

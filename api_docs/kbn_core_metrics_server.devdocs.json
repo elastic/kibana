@@ -21,7 +21,7 @@
         "description": [
           "\nMetrics related to the elasticsearch clients"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,7 +34,7 @@
             "description": [
               "Total number of active sockets (all nodes, all connections)"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47,7 +47,7 @@
             "description": [
               "Total number of available sockets (alive but idle, all nodes, all connections)"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "description": [
               "Total number of queued requests (all nodes, all connections)"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -77,16 +77,10 @@
           "\nCreating a new instance from EventLoopDelaysMonitor will\nautomatically start tracking event loop delays.\nSee {@link IntervalHistogram}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "server",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-server.IEventLoopDelaysMonitor",
-            "text": "IEventLoopDelaysMonitor"
-          },
+          "IEventLoopDelaysMonitor",
           "<T>"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+        "path": "src/core/packages/metrics/server/src/collectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -102,7 +96,7 @@
             "signature": [
               "() => T"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+            "path": "src/core/packages/metrics/server/src/collectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,7 +114,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+            "path": "src/core/packages/metrics/server/src/collectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -138,7 +132,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+            "path": "src/core/packages/metrics/server/src/collectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -156,7 +150,7 @@
         "description": [
           "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in milliseconds.\n"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,7 +161,7 @@
             "tags": [],
             "label": "fromTimestamp",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,7 +172,7 @@
             "tags": [],
             "label": "lastUpdatedAt",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +183,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -200,7 +194,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,7 +205,7 @@
             "tags": [],
             "label": "mean",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,7 +216,7 @@
             "tags": [],
             "label": "exceeds",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -233,7 +227,7 @@
             "tags": [],
             "label": "stddev",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -247,7 +241,7 @@
             "signature": [
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -264,16 +258,10 @@
           "Base interface for all metrics gatherers"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "server",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-server.MetricsCollector",
-            "text": "MetricsCollector"
-          },
+          "MetricsCollector",
           "<T>"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+        "path": "src/core/packages/metrics/server/src/collectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -297,7 +285,7 @@
               },
               "<T>"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+            "path": "src/core/packages/metrics/server/src/collectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -315,7 +303,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
+            "path": "src/core/packages/metrics/server/src/collectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -333,7 +321,7 @@
         "description": [
           "\nAPIs to retrieves metrics gathered and exposed by the core platform.\n"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
+        "path": "src/core/packages/metrics/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -346,7 +334,7 @@
             "description": [
               "Interval metrics are collected in milliseconds"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
+            "path": "src/core/packages/metrics/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,16 +351,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.OpsMetrics",
-                "text": "OpsMetrics"
-              },
+              "OpsMetrics",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
+            "path": "src/core/packages/metrics/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -390,7 +372,7 @@
         "description": [
           "\nRegroups metrics gathered by all the collectors.\nThis contains metrics about the os/runtime, the kibana process and the http server.\n"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -406,7 +388,7 @@
             "signature": [
               "Date"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,15 +402,9 @@
               "\nMetrics related to the elasticsearch client"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.ElasticsearchClientsMetrics",
-                "text": "ElasticsearchClientsMetrics"
-              }
+              "ElasticsearchClientsMetrics"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,15 +418,9 @@
               "\nProcess related metrics."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              }
+              "OpsProcessMetrics"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -464,16 +434,10 @@
               "Process related metrics. Reports an array of objects for each kibana pid."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               "[]"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,15 +451,9 @@
               "OS related metrics"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.OpsOsMetrics",
-                "text": "OpsOsMetrics"
-              }
+              "OpsOsMetrics"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -511,7 +469,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -527,7 +485,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +498,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -556,7 +514,7 @@
         "description": [
           "\nOS related metrics"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,7 +530,7 @@
             "signature": [
               "\"android\" | \"linux\" | \"aix\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -585,7 +543,7 @@
             "description": [
               "The os platform release, prefixed by the platform name"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -601,7 +559,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -617,7 +575,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,7 +591,7 @@
             "signature": [
               "{ '1m': number; '5m': number; '15m': number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -649,7 +607,7 @@
             "signature": [
               "{ total_in_bytes: number; free_in_bytes: number; used_in_bytes: number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,7 +620,7 @@
             "description": [
               "the OS uptime"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -678,7 +636,7 @@
             "signature": [
               "{ control_group: string; usage_nanos: number; } | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,7 +652,7 @@
             "signature": [
               "{ control_group: string; cfs_period_micros: number; cfs_quota_micros: number; stat: { number_of_elapsed_periods: number; number_of_times_throttled: number; time_throttled_nanos: number; }; } | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,7 +668,7 @@
             "signature": [
               "{ current_in_bytes: number; swap_current_in_bytes: number; } | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -726,7 +684,7 @@
         "description": [
           "\nProcess related metrics"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -739,7 +697,7 @@
             "description": [
               "pid of the kibana process"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -755,7 +713,7 @@
             "signature": [
               "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; external_in_bytes: number; array_buffers_in_bytes: number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,7 +726,7 @@
             "description": [
               "max event loop delay since last collection"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,15 +740,9 @@
               "node event loop delay histogram since last collection"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -806,7 +758,7 @@
             "signature": [
               "EventLoopUtilization"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -819,7 +771,7 @@
             "description": [
               "uptime of the kibana process"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -835,7 +787,7 @@
         "description": [
           "\nserver related metrics"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -851,7 +803,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -867,7 +819,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -880,7 +832,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -902,7 +854,7 @@
         "signature": [
           "\"none\" | \"mixed\" | \"http\" | \"https\""
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "path": "src/core/packages/metrics/server/src/metrics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -917,15 +869,9 @@
           "\n{@inheritdoc MetricsServiceSetup}\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "server",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-server.MetricsServiceSetup",
-            "text": "MetricsServiceSetup"
-          }
+          "MetricsServiceSetup"
         ],
-        "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
+        "path": "src/core/packages/metrics/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

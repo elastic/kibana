@@ -13,13 +13,7 @@ export const BASE_FOLDER = process.cwd() + '/';
 export const BASE_FOLDER_DEPTH = process.cwd().split('/').length;
 export const KIBANA_FOLDER = process.cwd().split('/').pop()!;
 export const EXCLUDED_MODULES = ['@kbn/core'];
-export const TARGET_FOLDERS = [
-  'src/platform/plugins/',
-  'src/platform/packages/',
-  'x-pack/platform/plugins/',
-  'x-pack/platform/packages/',
-  'x-pack/solutions/',
-];
+
 export const EXTENSIONS = [
   'eslintignore',
   'gitignore',
@@ -33,8 +27,10 @@ export const EXTENSIONS = [
   'mdz',
   'asciidoc',
   'sh',
+  'snap',
   'ts',
   'jsonc',
+  'xml',
   'yaml',
   'yml',
 ];

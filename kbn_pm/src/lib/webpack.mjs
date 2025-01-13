@@ -21,9 +21,10 @@ export async function buildPackage(packageName, { quiet, reactVersion }) {
   await run('yarn', ['build'], {
     env: {
       ...process.env,
+      REPO_ROOT,
       REACT_VERSION: reactVersion,
     },
-    cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+    cwd: path.resolve(REPO_ROOT, packageName),
     pipe: !quiet,
   });
 }

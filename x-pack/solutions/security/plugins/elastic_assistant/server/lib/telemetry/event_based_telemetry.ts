@@ -77,13 +77,16 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   actionTypeId: string;
   isEnabledKnowledgeBase: boolean;
   durationMs: number;
-  ['toolsInvoked.AlertCountsTool']?: number;
-  ['toolsInvoked.NaturalLanguageESQLTool']?: number;
-  ['toolsInvoked.KnowledgeBaseRetrievalTool']?: number;
-  ['toolsInvoked.KnowledgeBaseWriteTool']?: number;
-  ['toolsInvoked.OpenAndAcknowledgedAlertsTool']?: number;
-  ['toolsInvoked.SecurityLabsKnowledgeBaseTool']?: number;
-  ['toolsInvoked.CustomTool']?: number;
+  toolsInvoked: {
+    AlertCountsTool?: number;
+    NaturalLanguageESQLTool?: number;
+    KnowledgeBaseRetrievalTool?: number;
+    KnowledgeBaseWriteTool?: number;
+    OpenAndAcknowledgedAlertsTool?: number;
+    SecurityLabsKnowledgeBaseTool?: number;
+    ProductDocumentationTool?: number;
+    CustomTool?: number;
+  };
   model?: string;
   isOssModel?: boolean;
 }> = {
@@ -127,53 +130,64 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         description: 'The duration of the request.',
       },
     },
-    'toolsInvoked.AlertCountsTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.NaturalLanguageESQLTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.KnowledgeBaseRetrievalTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.KnowledgeBaseWriteTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.OpenAndAcknowledgedAlertsTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.SecurityLabsKnowledgeBaseTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
-      },
-    },
-    'toolsInvoked.CustomTool': {
-      type: 'long',
-      _meta: {
-        description: 'Number of times tool was invoked.',
-        optional: true,
+    toolsInvoked: {
+      properties: {
+        AlertCountsTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        NaturalLanguageESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        ProductDocumentationTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        KnowledgeBaseRetrievalTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        KnowledgeBaseWriteTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        OpenAndAcknowledgedAlertsTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        SecurityLabsKnowledgeBaseTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        CustomTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
       },
     },
   },

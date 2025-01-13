@@ -178,6 +178,7 @@ enabled:
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts

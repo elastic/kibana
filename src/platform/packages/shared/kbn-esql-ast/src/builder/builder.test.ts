@@ -224,12 +224,13 @@ describe('literal', () => {
       const node = Builder.expression.literal.string('abc');
       const text = BasicPrettyPrinter.expression(node);
 
-      expect(text).toBe('"""abc"""');
+      expect(text).toBe('"abc"');
       expect(node).toMatchObject({
         type: 'literal',
         literalType: 'keyword',
-        name: '"""abc"""',
-        value: '"""abc"""',
+        name: '"abc"',
+        value: '"abc"',
+        valueUnquoted: 'abc',
       });
     });
   });
@@ -260,7 +261,7 @@ describe('literal', () => {
       });
       const text = BasicPrettyPrinter.expression(node);
 
-      expect(text).toBe('["""a""", """b""", """c"""]');
+      expect(text).toBe('["a", "b", "c"]');
     });
 
     test('integer list', () => {

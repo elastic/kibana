@@ -94,7 +94,11 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+      const packageNames = [
+        'src/platform/packages/private/kbn-ui-shared-deps-npm',
+        'src/platform/packages/private/kbn-ui-shared-deps-src',
+        'src/platform/packages/shared/kbn-monaco',
+      ];
       for (const pkg of packageNames) {
         await buildPackage(pkg, { quiet, reactVersion });
       }

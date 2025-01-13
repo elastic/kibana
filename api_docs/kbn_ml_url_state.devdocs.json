@@ -20,10 +20,10 @@
     "classes": [
       {
         "parentPluginId": "@kbn/ml-url-state",
-        "id": "def-common.PageUrlStateService",
+        "id": "def-common.UrlStateService",
         "type": "Class",
         "tags": [],
-        "label": "PageUrlStateService",
+        "label": "UrlStateService",
         "description": [
           "\nService for managing URL state of particular page."
         ],
@@ -32,8 +32,8 @@
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T>"
         ],
@@ -43,10 +43,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState$",
+            "id": "def-common.UrlStateService.getUrlState$",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState$",
+            "label": "getUrlState$",
             "description": [
               "\nProvides updates for the page URL state."
             ],
@@ -63,10 +63,10 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState",
+            "id": "def-common.UrlStateService.getUrlState",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState",
+            "label": "getUrlState",
             "description": [],
             "signature": [
               "() => T | null"
@@ -79,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.updateUrlState",
+            "id": "def-common.UrlStateService.updateUrlState",
             "type": "Function",
             "tags": [],
             "label": "updateUrlState",
@@ -93,7 +93,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$1",
+                "id": "def-common.UrlStateService.updateUrlState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "update",
@@ -108,7 +108,7 @@
               },
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$2",
+                "id": "def-common.UrlStateService.updateUrlState.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "replaceState",
@@ -126,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setCurrentState",
+            "id": "def-common.UrlStateService.setCurrentState",
             "type": "Function",
             "tags": [],
             "label": "setCurrentState",
@@ -142,7 +142,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setCurrentState.$1",
+                "id": "def-common.UrlStateService.setCurrentState.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "currentState",
@@ -160,7 +160,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setUpdateCallback",
+            "id": "def-common.UrlStateService.setUpdateCallback",
             "type": "Function",
             "tags": [],
             "label": "setUpdateCallback",
@@ -176,7 +176,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setUpdateCallback.$1",
+                "id": "def-common.UrlStateService.setUpdateCallback.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -363,8 +363,8 @@
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T[\"pageUrlState\"]>]"
         ],
