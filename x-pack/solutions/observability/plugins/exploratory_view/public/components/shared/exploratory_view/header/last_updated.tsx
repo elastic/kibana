@@ -7,9 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import styled from '@emotion/styled';
-import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ChartCreationInfo } from './chart_creation_info';
 
 export interface ChartTimeRange {
@@ -18,12 +18,10 @@ export interface ChartTimeRange {
   from?: number;
 }
 
-interface Props {
-  chartTimeRange?: ChartTimeRange;
-}
+export function LastUpdated() {
+  const { chartTimeRangeContext } = useSeriesStorage();
 
-export function LastUpdated({ chartTimeRange }: Props) {
-  const { lastUpdated } = chartTimeRange || {};
+  const { lastUpdated } = chartTimeRangeContext || {};
   const [refresh, setRefresh] = useState(() => Date.now());
 
   useEffect(() => {
@@ -48,24 +46,23 @@ export function LastUpdated({ chartTimeRange }: Props) {
   const isDanger = moment().diff(moment(lastUpdated), 'minute') > 10;
 
   return (
-    <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
-      <EuiToolTip position="top" content={<ChartCreationInfo {...chartTimeRange} />}>
-        <IconWrapper>
+    <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={<ChartCreationInfo {...chartTimeRangeContext} />}>
           <EuiIcon type="iInCircle" />
-        </IconWrapper>
-      </EuiToolTip>{' '}
-      <FormattedMessage
-        id="xpack.exploratoryView.expView.lastUpdated.label"
-        defaultMessage="Last Updated: {updatedDate}"
-        values={{
-          updatedDate: moment(lastUpdated).from(refresh),
-        }}
-      />
-    </EuiText>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
+          <FormattedMessage
+            id="xpack.exploratoryView.expView.lastUpdated.label"
+            defaultMessage="Last Updated: {updatedDate}"
+            values={{
+              updatedDate: moment(lastUpdated).from(refresh),
+            }}
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
-
-const IconWrapper = styled.div`
-  display: inline-block;
-  min-width: 30vw;
-`;

@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -84,17 +83,15 @@ export const renderApp = ({
             }}
           >
             <Router history={history}>
-              <EuiThemeProvider>
-                <div className={APP_WRAPPER_CLASS} data-test-subj="exploratoryViewMainContainer">
-                  <RedirectAppLinks
-                    coreStart={{
-                      application: core.application,
-                    }}
-                  >
-                    <App startServices={core} />
-                  </RedirectAppLinks>
-                </div>
-              </EuiThemeProvider>
+              <div className={APP_WRAPPER_CLASS} data-test-subj="exploratoryViewMainContainer">
+                <RedirectAppLinks
+                  coreStart={{
+                    application: core.application,
+                  }}
+                >
+                  <App startServices={core} />
+                </RedirectAppLinks>
+              </div>
             </Router>
           </PluginContext.Provider>
         </KibanaContextProvider>
