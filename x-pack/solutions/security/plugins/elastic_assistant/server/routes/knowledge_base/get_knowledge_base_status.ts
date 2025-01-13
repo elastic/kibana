@@ -26,7 +26,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       security: {
         authz: {

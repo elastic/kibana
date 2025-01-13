@@ -28,7 +28,7 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       security: {
         authz: {

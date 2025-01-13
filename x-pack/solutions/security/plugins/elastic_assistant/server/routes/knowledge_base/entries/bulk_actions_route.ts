@@ -167,7 +167,7 @@ const buildBulkResponse = (
 export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
       security: {
         authz: {

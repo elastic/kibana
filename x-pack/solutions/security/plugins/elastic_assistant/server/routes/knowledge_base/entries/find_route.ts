@@ -31,7 +31,7 @@ import { SECURITY_LABS_RESOURCE } from '../constants';
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
       security: {
         authz: {
