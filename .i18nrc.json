@@ -9,7 +9,7 @@
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
     "bfetch": "src/plugins/bfetch",
-    "bfetchError": "packages/kbn-bfetch-error",
+    "bfetchError": "src/platform/packages/shared/kbn-bfetch-error",
     "cases": ["src/platform/packages/shared/kbn-cases-components"],
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",

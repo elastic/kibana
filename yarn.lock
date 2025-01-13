@@ -4080,7 +4080,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-error@link:packages/kbn-bfetch-error":
+"@kbn/bfetch-error@link:src/platform/packages/shared/kbn-bfetch-error":
   version "0.0.0"
   uid ""
 
