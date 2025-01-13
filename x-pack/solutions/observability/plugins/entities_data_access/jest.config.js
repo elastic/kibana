@@ -10,7 +10,5 @@ const path = require('path');
 module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../../../..'),
-  roots: [
-    '<rootDir>/x-pack/solutions/observability/plugins/entities_data_access',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/entities_data_access'],
 };
