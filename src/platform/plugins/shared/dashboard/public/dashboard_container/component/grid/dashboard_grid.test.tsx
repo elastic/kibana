@@ -27,15 +27,11 @@ jest.mock('./dashboard_grid_item', () => {
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
         const dashboardApi = mockUseDashboardApi();
-        // const expandedPanelId = dashboardApi.expandedPanelId.getValue();
-        // const focusedPanelId = dashboardApi.focusedPanelId$.getValue();
 
         const [expandedPanelId, focusedPanelId] = mockUseBatchedPublishingSubjects(
           dashboardApi.expandedPanelId,
           dashboardApi.focusedPanelId$
         );
-
-        // console.log(expandedPanelId, focusedPanelId);
 
         const className = `${
           expandedPanelId === undefined
