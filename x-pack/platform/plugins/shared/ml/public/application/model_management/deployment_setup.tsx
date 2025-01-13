@@ -52,7 +52,7 @@ import {
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
-import { useTrainedModelsService } from './trained_models_service';
+
 import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
 

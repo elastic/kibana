@@ -12,7 +12,7 @@ import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { isBaseNLPModelItem } from '../../../common/types/trained_models';
 import { getModelStateColor } from './get_model_state';
-import { useTrainedModelsService } from './trained_models_service';
+import { useTrainedModelsService } from './hooks/use_trained_models_service';
 
 export const ModelStatusIndicator = ({ modelId }: { modelId: string }) => {
   const trainedModelsService = useTrainedModelsService();

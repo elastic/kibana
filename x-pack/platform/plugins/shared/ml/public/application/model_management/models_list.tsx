@@ -39,7 +39,6 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import type { ScopedHistory } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
@@ -69,7 +68,7 @@ import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
-import { useTrainedModelsService } from './trained_models_service';
+import { useTrainedModelsService } from './hooks/use_trained_models_service';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -97,7 +96,6 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
 });
 
 interface Props {
-  history: ScopedHistory<unknown>;
   pageState?: ListingPageUrlState;
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
@@ -105,14 +103,11 @@ interface Props {
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
-  history,
 }) => {
   const {
     services: {
-      application: { capabilities, navigateToUrl },
+      application: { capabilities },
       docLinks,
-      overlays,
-      http,
     },
   } = useMlKibana();
 
@@ -127,22 +122,7 @@ export const ModelsList: FC<Props> = ({
   // Navigation blocker when there are active operations
   useUnsavedChangesPrompt({
     hasUnsavedChanges: activeOperations.length > 0,
-    openConfirm: overlays.openConfirm,
-    history,
-    http,
-    navigateToUrl,
-    messageText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageMessage', {
-      defaultMessage: 'You have active operations. Are you sure you want to leave this page?',
-    }),
-    titleText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageTitle', {
-      defaultMessage: 'You have active operations',
-    }),
-    confirmButtonText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageConfirmButton', {
-      defaultMessage: 'Leave',
-    }),
-    cancelButtonText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageCancelButton', {
-      defaultMessage: 'Cancel',
-    }),
+    blockSpaNavigation: false,
   });
 
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
@@ -191,7 +171,7 @@ export const ModelsList: FC<Props> = ({
   }, [items]);
 
   const fetchModels = useCallback(() => {
-    trainedModelsService.fetchModels$().subscribe({
+    const fetchSubscription = trainedModelsService.fetchModels$().subscribe({
       error: (error) => {
         displayErrorToast(
           error,
@@ -201,9 +181,10 @@ export const ModelsList: FC<Props> = ({
         );
       },
     });
+
+    return fetchSubscription;
   }, [displayErrorToast, trainedModelsService]);
 
-  // TODO: Figure out a better hook to check for deep changes in items
   useEffect(() => {
     // Update expanded rows when items change
     setItemIdToExpandedRowMap((prevMap) => {
@@ -220,13 +201,14 @@ export const ModelsList: FC<Props> = ({
     function updateOnTimerRefresh() {
       if (!refresh) return;
 
-      fetchModels();
+      const fetchSubscription = fetchModels();
 
       return () => {
-        trainedModelsService.destroy();
+        fetchSubscription.unsubscribe();
       };
     },
-    [fetchModels, refresh, trainedModelsService]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [refresh]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {

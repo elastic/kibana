@@ -40,7 +40,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
-import { useTrainedModelsService } from './trained_models_service';
+import { useTrainedModelsService } from './hooks/use_trained_models_service';
 
 export function useModelActions({
   onDfaTestAction,

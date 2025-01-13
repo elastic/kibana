@@ -33,10 +33,7 @@ import type {
   CommonDeploymentParams,
   AdaptiveAllocationsParams,
 } from '../services/ml_api_service/trained_models';
-import {
-  useTrainedModelsApiService,
-  type TrainedModelsApiService,
-} from '../services/ml_api_service/trained_models';
+import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
@@ -320,24 +317,6 @@ export class TrainedModelsService {
     this._modelItems$.complete();
     this.downloadStatus$.complete();
     this.stopPolling$.complete();
+    this._activeOperations$.complete();
   }
 }
-
-// Retain singleton instance of TrainedModelsService
-let trainedModelsService: TrainedModelsService | null = null;
-export const TrainedModelsServiceFactory = (trainedModelsApiService: TrainedModelsApiService) => {
-  if (!trainedModelsService) {
-    trainedModelsService = new TrainedModelsService(trainedModelsApiService);
-  }
-  return trainedModelsService;
-};
-
-export const useTrainedModelsService = () => {
-  const trainedModelsApiService = useTrainedModelsApiService();
-
-  if (!trainedModelsService) {
-    trainedModelsService = TrainedModelsServiceFactory(trainedModelsApiService);
-  }
-
-  return trainedModelsService;
-};
