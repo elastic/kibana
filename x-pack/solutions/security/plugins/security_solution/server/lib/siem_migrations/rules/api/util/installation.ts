@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { UpdateRuleMigrationData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
@@ -17,13 +17,12 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import type { StoredRuleMigration } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
-  MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
-  MAX_TRANSLATED_RULES_TO_INSTALL,
-} from '../constants';
-import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../../common/siem_migrations/rules/utils';
+import { getAllMigrationRules } from './get_all_rules';
+
+const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigration[],
@@ -53,12 +52,18 @@ const installPrebuiltRules = async (
   );
 
   // Install prebuilt rules
-  // TODO: we need to do an error handling which can happen during the rule installation
-  const { results: newlyInstalledRules } = await createPrebuiltRules(
-    detectionRulesClient,
-    installable
+  const { results: newlyInstalledRules, errors: installPrebuiltRulesErrors } =
+    await createPrebuiltRules(detectionRulesClient, installable);
+  if (installPrebuiltRulesErrors.length > 0) {
+    throw new AggregateError(installPrebuiltRulesErrors, 'Error installing prebuilt rules');
+  }
+
+  const { error: installTimelinesErrors } = await performTimelinesInstallation(
+    securitySolutionContext
   );
-  await performTimelinesInstallation(securitySolutionContext);
+  if (installTimelinesErrors?.length) {
+    throw new AggregateError(installTimelinesErrors, 'Error installing prepackaged timelines');
+  }
 
   const installedRules = [
     ...alreadyInstalledRules,
@@ -87,8 +92,7 @@ const installPrebuiltRules = async (
 export const installCustomRules = async (
   rulesToInstall: StoredRuleMigration[],
   enabled: boolean,
-  detectionRulesClient: IDetectionRulesClient,
-  logger: Logger
+  detectionRulesClient: IDetectionRulesClient
 ): Promise<UpdateRuleMigrationData[]> => {
   const rulesToUpdate: UpdateRuleMigrationData[] = [];
   const createCustomRulesOutcome = await initPromisePool({
@@ -114,12 +118,7 @@ export const installCustomRules = async (
     },
   });
   if (createCustomRulesOutcome.errors) {
-    // TODO: we need to do an error handling which can happen during the rule creation
-    logger.debug(
-      `Failed to create some of the rules because of errors: ${JSON.stringify(
-        createCustomRulesOutcome.errors
-      )}`
-    );
+    throw new AggregateError(createCustomRulesOutcome.errors, 'Error installing custom rules');
   }
   return rulesToUpdate;
 };
@@ -155,11 +154,6 @@ interface InstallTranslatedProps {
    * The saved objects client
    */
   savedObjectsClient: SavedObjectsClientContract;
-
-  /**
-   * The logger
-   */
-  logger: Logger;
 }
 
 export const installTranslated = async ({
@@ -169,31 +163,33 @@ export const installTranslated = async ({
   securitySolutionContext,
   rulesClient,
   savedObjectsClient,
-  logger,
 }: InstallTranslatedProps) => {
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
-  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get(migrationId, {
-    filters: { ids, installable: true },
-    from: 0,
-    size: MAX_TRANSLATED_RULES_TO_INSTALL,
+  if (ids?.length) {
+    const notFullyTranslatedRules = await getAllMigrationRules({
+      migrationId,
+      filters: { ids, notFullyTranslated: true },
+      securitySolutionContext,
+    });
+    if (notFullyTranslatedRules.length) {
+      const ruleIds = notFullyTranslatedRules.map((rule) => rule.id);
+      throw new Error(`Cannot install rules that are not fully translated: ${ruleIds.join()}`);
+    }
+  }
+
+  const prebuiltRulesToInstall = await getAllMigrationRules({
+    migrationId,
+    filters: { ids, installable: true, prebuilt: true },
+    securitySolutionContext,
   });
 
-  const { customRulesToInstall, prebuiltRulesToInstall } = rulesToInstall.reduce(
-    (acc, item) => {
-      if (item.elastic_rule?.prebuilt_rule_id) {
-        acc.prebuiltRulesToInstall.push(item);
-      } else {
-        acc.customRulesToInstall.push(item);
-      }
-      return acc;
-    },
-    { customRulesToInstall: [], prebuiltRulesToInstall: [] } as {
-      customRulesToInstall: StoredRuleMigration[];
-      prebuiltRulesToInstall: StoredRuleMigration[];
-    }
-  );
+  const customRulesToInstall = await getAllMigrationRules({
+    migrationId,
+    filters: { ids, installable: true, custom: true },
+    securitySolutionContext,
+  });
 
   const updatedPrebuiltRules = await installPrebuiltRules(
     prebuiltRulesToInstall,
@@ -207,8 +203,7 @@ export const installTranslated = async ({
   const updatedCustomRules = await installCustomRules(
     customRulesToInstall,
     enabled,
-    detectionRulesClient,
-    logger
+    detectionRulesClient
   );
 
   const rulesToUpdate: UpdateRuleMigrationData[] = [...updatedPrebuiltRules, ...updatedCustomRules];

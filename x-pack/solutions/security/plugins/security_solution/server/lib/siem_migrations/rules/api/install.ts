@@ -56,7 +56,6 @@ export const registerSiemRuleMigrationsInstallRoute = (
               securitySolutionContext,
               savedObjectsClient,
               rulesClient,
-              logger,
             });
 
             return res.ok({ body: { installed: true } });
