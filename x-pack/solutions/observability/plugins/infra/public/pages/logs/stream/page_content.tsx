@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
-import { VisiblePositions } from '../../../observability_logs/log_stream_position_state';
-import { TimeKey } from '../../../../common/time';
+import type { VisiblePositions } from '../../../observability_logs/log_stream_position_state';
+import type { TimeKey } from '../../../../common/time';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import {
+import type {
   LogStreamPageCallbacks,
   LogStreamPageState,
-  useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
 import { InvalidStateCallout } from '../../../observability_logs/xstate_helpers';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { LogStreamPageTemplate } from './components/stream_page_template';

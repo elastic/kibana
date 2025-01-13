@@ -7,11 +7,11 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { toMetricOpt } from '../../../../../common/snapshot_metric_i18n';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { ContentTabIds } from '../../types';
+import type { ContentTabIds } from '../../types';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 export const HOST_LEGACY_METRICS_DOC_HREF = 'https://ela.st/host-metrics-legacy';

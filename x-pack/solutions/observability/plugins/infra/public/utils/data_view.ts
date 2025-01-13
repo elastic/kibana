@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataView, DataViewsContract, type FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import { type FieldSpec } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 
 export interface ResolvedDataView {

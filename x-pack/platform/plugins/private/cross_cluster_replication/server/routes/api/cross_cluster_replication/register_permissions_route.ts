@@ -19,6 +19,12 @@ export const registerPermissionsRoute = ({
   router.get(
     {
       path: addBasePath('/permissions'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {

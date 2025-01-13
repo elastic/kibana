@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { dashboardRoutes } from './dashboards/route';
 import { esqlRoutes } from './esql/route';
 import { deleteStreamRoute } from './streams/delete';
+import { streamDetailRoute } from './streams/details';
 import { disableStreamsRoute } from './streams/disable';
 import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
@@ -30,7 +32,9 @@ export const streamsRouteRepository = {
   ...streamsStatusRoutes,
   ...esqlRoutes,
   ...disableStreamsRoute,
+  ...dashboardRoutes,
   ...sampleStreamRoute,
+  ...streamDetailRoute,
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
 };

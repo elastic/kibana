@@ -476,6 +476,43 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.CustomLangModuleType.languageThemeResolver",
+            "type": "Function",
+            "tags": [],
+            "label": "languageThemeResolver",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "editor",
+              ".IStandaloneThemeData"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.CustomLangModuleType.languageThemeResolver.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "packages/kbn-monaco/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1282,13 +1319,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CODE_EDITOR_DARK_THEME_ID",
+        "id": "def-common.CODE_EDITOR_DEFAULT_THEME_ID",
         "type": "string",
         "tags": [],
-        "label": "CODE_EDITOR_DARK_THEME_ID",
+        "label": "CODE_EDITOR_DEFAULT_THEME_ID",
         "description": [],
         "signature": [
-          "\"codeEditorDarkTheme\""
+          "\"codeEditorDefaultTheme\""
         ],
         "path": "packages/kbn-monaco/src/code_editor/constants.ts",
         "deprecated": false,
@@ -1297,43 +1334,13 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CODE_EDITOR_DARK_THEME_TRANSPARENT_ID",
+        "id": "def-common.CODE_EDITOR_TRANSPARENT_THEME_ID",
         "type": "string",
         "tags": [],
-        "label": "CODE_EDITOR_DARK_THEME_TRANSPARENT_ID",
+        "label": "CODE_EDITOR_TRANSPARENT_THEME_ID",
         "description": [],
         "signature": [
-          "\"codeEditorDarkTransparentTheme\""
-        ],
-        "path": "packages/kbn-monaco/src/code_editor/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CODE_EDITOR_LIGHT_THEME_ID",
-        "type": "string",
-        "tags": [],
-        "label": "CODE_EDITOR_LIGHT_THEME_ID",
-        "description": [],
-        "signature": [
-          "\"codeEditorLightTheme\""
-        ],
-        "path": "packages/kbn-monaco/src/code_editor/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID",
-        "type": "string",
-        "tags": [],
-        "label": "CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID",
-        "description": [],
-        "signature": [
-          "\"codeEditorLightTransparentTheme\""
+          "\"codeEditorTransparentTheme\""
         ],
         "path": "packages/kbn-monaco/src/code_editor/constants.ts",
         "deprecated": false,
@@ -1378,9 +1385,9 @@
         "label": "CONSOLE_THEME_ID",
         "description": [],
         "signature": [
-          "\"consoleTheme\""
+          "\"console\""
         ],
-        "path": "packages/kbn-monaco/src/console/constants.ts",
+        "path": "packages/kbn-monaco/src/console/language.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1479,6 +1486,138 @@
     "objects": [
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "packages/kbn-monaco/src/monaco_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "packages/kbn-monaco/src/monaco_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.defaultThemesResolvers",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultThemesResolvers",
+        "description": [],
+        "path": "packages/kbn-monaco/src/code_editor/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.defaultThemesResolvers.CODE_EDITOR_DEFAULT_THEME_ID",
+            "type": "Function",
+            "tags": [],
+            "label": "[CODE_EDITOR_DEFAULT_THEME_ID]",
+            "description": [],
+            "signature": [
+              "({ euiTheme }: ",
+              "UseEuiTheme",
+              "<{}>, backgroundColor?: string | undefined) => ",
+              "editor",
+              ".IStandaloneThemeData"
+            ],
+            "path": "packages/kbn-monaco/src/code_editor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.defaultThemesResolvers.CODE_EDITOR_DEFAULT_THEME_ID.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "packages/kbn-monaco/src/code_editor/theme.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.defaultThemesResolvers.CODE_EDITOR_DEFAULT_THEME_ID.$2",
+                "type": "string",
+                "tags": [],
+                "label": "backgroundColor",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-monaco/src/code_editor/theme.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.defaultThemesResolvers.CODE_EDITOR_TRANSPARENT_THEME_ID",
+            "type": "Function",
+            "tags": [],
+            "label": "[CODE_EDITOR_TRANSPARENT_THEME_ID]",
+            "description": [],
+            "signature": [
+              "(euiTheme: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "editor",
+              ".IStandaloneThemeData"
+            ],
+            "path": "packages/kbn-monaco/src/code_editor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.defaultThemesResolvers.CODE_EDITOR_TRANSPARENT_THEME_ID.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "euiTheme",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "packages/kbn-monaco/src/code_editor/theme.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQLLang",
         "type": "Object",
         "tags": [],
@@ -1514,6 +1653,42 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.languageThemeResolver",
+            "type": "Function",
+            "tags": [],
+            "label": "languageThemeResolver",
+            "description": [],
+            "signature": [
+              "({ euiTheme, colorMode, }: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "editor",
+              ".IStandaloneThemeData"
+            ],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.languageThemeResolver.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "packages/kbn-monaco/src/esql/lib/esql_theme.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/monaco",

@@ -8,7 +8,10 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
-import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
+import type {
+  LogEntriesSummaryHighlightsBucket,
+  LogEntryTime,
+} from '@kbn/logs-shared-plugin/common';
 import * as React from 'react';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
 

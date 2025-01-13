@@ -29,6 +29,12 @@ export function registerPostOneApplyLatestMappings({
   router.post(
     {
       path: addBasePath('/data_streams/{name}/mappings_from_template'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {
@@ -79,6 +85,12 @@ export function registerPostOneRollover({
   router.post(
     {
       path: addBasePath('/data_streams/{name}/rollover'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {

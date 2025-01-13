@@ -5,16 +5,33 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../../common/types';
+import {
+  isDissectProcessor,
+  isGrokProcessor,
+  ProcessingDefinition,
+  StreamDefinition,
+} from '@kbn/streams-schema';
+import { get } from 'lodash';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
 
+function getProcessorType(processor: ProcessingDefinition) {
+  if (isGrokProcessor(processor.config)) {
+    return 'grok';
+  }
+  if (isDissectProcessor(processor.config)) {
+    return 'dissect';
+  }
+  throw new Error('Unknown processor type');
+}
+
 function generateProcessingSteps(definition: StreamDefinition) {
-  return definition.processing.map((processor) => {
-    const { type, ...config } = processor.config;
+  return definition.stream.ingest.processing.map((processor) => {
+    const type = getProcessorType(processor);
+    const config = get(processor.config, type);
     return {
       [type]: {
         ...config,
@@ -28,7 +45,7 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
   return {
     id: getProcessingPipelineName(id),
     processors: [
-      ...(isRoot(definition.id) ? logsDefaultPipelineProcessors : []),
+      ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
       ...generateProcessingSteps(definition),
       {
         pipeline: {
@@ -49,7 +66,7 @@ export function generateClassicIngestPipelineBody(definition: StreamDefinition) 
   return {
     processors: generateProcessingSteps(definition),
     _meta: {
-      description: `Stream-managed pipeline for the ${definition.id} stream`,
+      description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

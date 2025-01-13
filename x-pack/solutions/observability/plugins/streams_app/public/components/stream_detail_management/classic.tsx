@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
@@ -60,13 +60,13 @@ export function ClassicStreamDetailManagement({
   return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
 }
 
-function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition }) {
+function UnmanagedStreamOverview({ definition }: { definition: ReadStreamDefinition }) {
   const {
     core: {
       http: { basePath },
     },
   } = useKibana();
-  const groupedAssets = (definition.unmanaged_elasticsearch_assets ?? []).reduce((acc, asset) => {
+  const groupedAssets = (definition.elasticsearch_assets ?? []).reduce((acc, asset) => {
     const title = assetToTitle(asset);
     if (title) {
       acc[title] = acc[title] ?? [];

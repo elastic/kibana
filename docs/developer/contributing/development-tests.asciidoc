@@ -33,27 +33,27 @@ Kibana primarily uses Jest for unit testing. Each plugin or package defines a `j
 
 [source,bash]
 ----
-yarn jest --config src/plugins/dashboard/jest.config.js
+yarn jest --config src/platform/plugins/shared/dashboard/jest.config.js
 ----
 
 A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use `yarn test:jest`. Like the Jest CLI, you can also supply a path to determine which tests to run.
 
 [source,bash]
 ----
-kibana/src/plugins/dashboard/server$ yarn test:jest #or
-kibana/src/plugins/dashboard$ yarn test:jest server #or
-kibana$ yarn test:jest src/plugins/dashboard/server
+kibana/src/platform/plugins/shared/dashboard/server$ yarn test:jest #or
+kibana/src/platform/plugins/shared/dashboard$ yarn test:jest server #or
+kibana$ yarn test:jest src/platform/plugins/shared/dashboard/server
 ----
 
 Any additional options supplied to `test:jest` will be passed onto the Jest CLI with the resulting Jest command always being outputted.
 
 [source,bash]
 ----
-kibana/src/plugins/dashboard/server$ yarn test:jest --coverage
+kibana/src/platform/plugins/shared/dashboard/server$ yarn test:jest --coverage
 
 # is equivalent to
 
-yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/plugins/dashboard/jest.config.js server
+yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/platform/plugins/shared/dashboard/jest.config.js server
 ----
 
 You can generate code coverage report for a single plugin.

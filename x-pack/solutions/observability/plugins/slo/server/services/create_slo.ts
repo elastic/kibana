@@ -100,14 +100,14 @@ export class CreateSLO {
       ]);
     } catch (err) {
       this.logger.error(
-        `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
+        `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error('Rollback operation failed', rollbackErr);
+          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 

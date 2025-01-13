@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../../common/types';
+import { StreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
@@ -16,17 +16,17 @@ interface GenerateReroutePipelineParams {
 
 export async function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
-    id: getReroutePipelineName(definition.id),
-    processors: definition.children.map((child) => {
+    id: getReroutePipelineName(definition.name),
+    processors: definition.stream.ingest.routing.map((child) => {
       return {
         reroute: {
-          destination: child.id,
+          destination: child.name,
           if: conditionToPainless(child.condition),
         },
       };
     }),
     _meta: {
-      description: `Reoute pipeline for the ${definition.id} stream`,
+      description: `Reoute pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

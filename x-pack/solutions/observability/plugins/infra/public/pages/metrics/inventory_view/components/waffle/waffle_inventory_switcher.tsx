@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
 
