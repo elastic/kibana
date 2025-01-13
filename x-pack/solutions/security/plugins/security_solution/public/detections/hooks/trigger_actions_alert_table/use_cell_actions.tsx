@@ -8,7 +8,7 @@
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import type { RenderContext } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';

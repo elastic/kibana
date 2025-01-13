@@ -48,7 +48,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
     _id: (alert as Ecs)._id,
     _index: (alert as Ecs)._index,
     ecs: alert as Ecs,
-    data: legacyAlert,
+    data: legacyAlert as TimelineItem['data'],
   };
 
   return (
