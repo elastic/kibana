@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
@@ -36,7 +36,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(ReadKnowledgeBaseRequestParams),

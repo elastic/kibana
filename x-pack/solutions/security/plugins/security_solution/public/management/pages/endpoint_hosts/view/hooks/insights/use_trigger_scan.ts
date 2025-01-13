@@ -8,9 +8,9 @@
 import { useMutation } from '@tanstack/react-query';
 import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
 import {
+  API_VERSIONS,
   DEFEND_INSIGHTS,
   DefendInsightTypeEnum,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
@@ -36,7 +36,7 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
   return useMutation<DefendInsightsResponse, { body?: { error: string } }, UseTriggerScanPayload>(
     ({ endpointId, connectorId, actionTypeId }: UseTriggerScanPayload) =>
       http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           endpointIds: [endpointId],
           insightType: DefendInsightTypeEnum.incompatible_antivirus,

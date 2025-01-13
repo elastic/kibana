@@ -15,7 +15,7 @@ import type {
 import {
   AttackDiscoveryCancelResponse,
   AttackDiscoveryGetResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import moment from 'moment';
@@ -126,7 +126,7 @@ export const usePollApi = ({
         `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
         {
           method: 'POST',
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
         }
       );
       const parsedResponse = AttackDiscoveryCancelResponse.safeParse(rawResponse);
@@ -159,7 +159,7 @@ export const usePollApi = ({
         `/internal/elastic_assistant/attack_discovery/${connectorId}`,
         {
           method: 'GET',
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
         }
       );
 

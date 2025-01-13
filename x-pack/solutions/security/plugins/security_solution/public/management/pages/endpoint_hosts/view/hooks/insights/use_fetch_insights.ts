@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { ActionType } from '../../../../../../../common/endpoint/types/workflow_insights';
@@ -27,7 +27,7 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
     async () => {
       try {
         const result = await http.get<SecurityWorkflowInsight[]>(WORKFLOW_INSIGHTS_ROUTE, {
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
           query: {
             actionTypes: JSON.stringify([ActionType.Refreshed]),
             targetIds: JSON.stringify([endpointId]),

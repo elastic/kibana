@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   GetKnowledgeBaseIndicesResponse,
 } from '@kbn/elastic-assistant-common';
@@ -34,7 +34,7 @@ export const getKnowledgeBaseIndicesRoute = (router: ElasticAssistantPluginRoute
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: false,
       },
       async (context, _, response): Promise<IKibanaResponse<GetKnowledgeBaseIndicesResponse>> => {
