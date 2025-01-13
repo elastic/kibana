@@ -327,8 +327,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
     };
-
-    if (spaceIds && spaceIds.length > 1 && authorizedSpaces) {
+    // Update spaces if there is more than one space ID assigned to that policy or if there the space that policy is created is different than the current space
+    if (
+      spaceIds &&
+      authorizedSpaces &&
+      (spaceIds.length > 1 || (spaceIds.length === 0 && spaceIds[0]) !== spaceId)
+    ) {
       await updateAgentPolicySpaces({
         agentPolicyId: agentPolicy.id,
         currentSpaceId: spaceId,

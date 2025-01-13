@@ -8,8 +8,8 @@
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
 import { load } from 'js-yaml';
-import type { DataStream } from '../../common';
-import { DEFAULT_CEL_PROGRAM } from './constants';
+import type { CelInput, DataStream } from '../../common';
+import { CEL_EXISTING_AUTH_CONFIG_FIELDS, DEFAULT_CEL_PROGRAM, DEFAULT_URL } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
 import { Field } from '../util/samples';
 
@@ -40,22 +40,7 @@ export function createDataStream(
     } as object;
 
     if (inputType === 'cel') {
-      if (dataStream.celInput != null) {
-        // Map the generated CEL config items into the template
-        const cel = dataStream.celInput;
-        mappedValues = {
-          ...mappedValues,
-          // Ready the program for printing with correct indentation
-          program: cel.program.split('\n'),
-          state: cel.stateSettings,
-          redact: cel.redactVars,
-        };
-      } else {
-        mappedValues = {
-          ...mappedValues,
-          program: DEFAULT_CEL_PROGRAM.split('\n'),
-        };
-      }
+      mappedValues = prepareCelValues(mappedValues, dataStream.celInput);
     }
 
     const dataStreamManifest = nunjucks.render(
@@ -126,4 +111,38 @@ function createPipelineTests(
     `test-${formattedPackageName}-${formattedDataStreamName}.log`
   );
   createSync(testFileName, rawSamples.join('\n'));
+}
+
+function prepareCelValues(mappedValues: object, celInput: CelInput | undefined) {
+  if (celInput != null) {
+    // Ready the program for printing with correct indentation
+    const programLines = celInput.program.split('\n');
+    // We don't want to double include the config fields in the state or any of the templated auth fields
+    const initialState = Object.entries(celInput.stateSettings).filter(
+      ([key]) =>
+        !Object.keys(celInput.configFields).includes(key) &&
+        !CEL_EXISTING_AUTH_CONFIG_FIELDS.includes(key)
+    );
+    const configSettingsNeeded = Object.entries(celInput.configFields).filter(
+      ([key]) => !CEL_EXISTING_AUTH_CONFIG_FIELDS.includes(key)
+    );
+
+    return {
+      ...mappedValues,
+      program: programLines,
+      state: initialState,
+      configFields: configSettingsNeeded,
+      redact: celInput.redactVars,
+      auth: celInput.authType,
+      url: celInput.url,
+      showAll: false,
+    };
+  } else {
+    return {
+      ...mappedValues,
+      program: DEFAULT_CEL_PROGRAM.split('\n'),
+      url: DEFAULT_URL,
+      showAll: true,
+    };
+  }
 }
