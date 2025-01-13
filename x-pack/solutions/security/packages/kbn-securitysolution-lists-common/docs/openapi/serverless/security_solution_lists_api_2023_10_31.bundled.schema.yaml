@@ -541,11 +541,11 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              description: Latest list of bad ips
-              id: ip_list
-              name: Bad ips - updated
             schema:
+              example:
+                description: Latest list of bad ips
+                id: ip_list
+                name: Bad ips - updated
               type: object
               properties:
                 _version:

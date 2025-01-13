@@ -38,10 +38,10 @@ paths:
                 - id
                 - name
                 - description
-            example:
-              id: ip_list
-              name: Bad ips - updated
-              description: Latest list of bad ips
+              example:
+                id: ip_list
+                name: Bad ips - updated
+                description: Latest list of bad ips
       responses:
         200:
           description: Successful response
