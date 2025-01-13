@@ -103,6 +103,7 @@ export const PackageCommand: GenerateCommand = {
     if (group === 'platform') {
       const resXpack = await inquirer.prompt<{ xpack: boolean }>({
         type: 'list',
+        default: false,
         choices: [
           { name: 'Yes', value: true },
           { name: 'No', value: false },
