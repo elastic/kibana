@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal } from '@hapi/boom';
-import { SecurityException } from '../../lib/streams/errors';
-import { createServerRoute } from '../create_server_route';
-import { streamsEnabled, syncStream } from '../../lib/streams/stream_crud';
-import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
-import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
+import { SecurityException } from '../../../lib/streams/errors';
+import { createServerRoute } from '../../create_server_route';
+import { streamsEnabled, syncStream } from '../../../lib/streams/stream_crud';
+import { rootStreamDefinition } from '../../../lib/streams/root_stream_definition';
+import { createStreamsIndex } from '../../../lib/streams/internal_stream_mapping';
+import { deleteStream } from '../crud/route';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable',
@@ -56,3 +57,35 @@ export const enableStreamsRoute = createServerRoute({
     }
   },
 });
+
+export const disableStreamsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/_disable',
+  params: z.object({}),
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['streams_write'],
+    },
+  },
+  handler: async ({ request, logger, getScopedClients }): Promise<{ acknowledged: true }> => {
+    try {
+      const { scopedClusterClient } = await getScopedClients({ request });
+
+      await deleteStream(scopedClusterClient, 'logs', logger);
+
+      return { acknowledged: true };
+    } catch (e) {
+      if (e instanceof SecurityException) {
+        throw badRequest(e);
+      }
+      throw internal(e);
+    }
+  },
+});
+
+export const enablementRoutes = {
+  ...enableStreamsRoute,
+  ...disableStreamsRoute,
+};
