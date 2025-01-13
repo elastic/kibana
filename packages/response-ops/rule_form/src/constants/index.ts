@@ -74,3 +74,9 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 
 export const CREATE_RULE_ROUTE = '/rule/create/:ruleTypeId' as const;
 export const EDIT_RULE_ROUTE = '/rule/edit/:id' as const;
+
+export enum RuleFormStepId {
+  DEFINITION = 'rule-definition',
+  ACTIONS = 'rule-actions',
+  DETAILS = 'rule-details',
+}
