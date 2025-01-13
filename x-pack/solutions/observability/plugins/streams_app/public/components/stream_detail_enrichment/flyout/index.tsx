@@ -19,6 +19,7 @@ import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
+import { useProcessorSimulationGate } from '../hooks/use_processor_simulation_gate';
 
 const ProcessorOutcomePreview = dynamic(() =>
   import(/* webpackChunkName: "management_processor_outcome" */ './processor_outcome_preview').then(
@@ -29,11 +30,11 @@ const ProcessorOutcomePreview = dynamic(() =>
 );
 
 export interface ProcessorFlyoutProps {
+  definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
-  definition: ReadStreamDefinition;
   onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
@@ -58,11 +59,15 @@ export function AddProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
+  const simulate = useProcessorSimulationGate({ definition });
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    onAddProcessor(processingDefinition, data.detected_fields);
-    onClose();
+    simulate(processingDefinition).then(() => {
+      onAddProcessor(processingDefinition, data.detected_fields);
+      onClose();
+    });
   };
 
   return (
@@ -100,6 +105,7 @@ export function AddProcessorFlyout({
 }
 
 export function EditProcessorFlyout({
+  definition,
   onClose,
   onDeleteProcessor,
   onUpdateProcessor,
@@ -119,11 +125,15 @@ export function EditProcessorFlyout({
     [defaultValues, formFields]
   );
 
+  const simulate = useProcessorSimulationGate({ definition });
+
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
-    onClose();
+    simulate(processingDefinition).then(() => {
+      onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
+      onClose();
+    });
   };
 
   const handleProcessorDelete = () => {
