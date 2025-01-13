@@ -8858,10 +8858,10 @@
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.5.0.tgz#5fda73aa125dfb5729f5dd7362df00b6dca23a24"
   integrity sha512-dRBJjnYhEa6XoF9BNf9sW4sHuXmigfBbbatA5djbRXRBDExrXsMydMpEWQqKYhd7XwdwFatuh2q+UkVbXriUKA==
 
-"@openfeature/launchdarkly-client-provider@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.0.tgz#47ad29671529595314fdb9497d078be0a744e006"
-  integrity sha512-iFe27RbuUxv4hDGJDmWJnxs5gpzU2d1xTxrGu/8z0gcbtXUAaYM6s4kglf63V2QzWV/Grot6P6bwSLlqeSDwMw==
+"@openfeature/launchdarkly-client-provider@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.1.tgz#bc978efa17cd4a17a308d2ec4ed71ca3d72a895d"
+  integrity sha512-noMT21f0DB28qteUtj+Wy/D44XkARJg70FZWKeZ7IFyDxWOs7PTBoXU8gNbFGoCADfAj4QBfN/tg61jeqajmHA==
   dependencies:
     lodash.isempty "4.4.0"
 
