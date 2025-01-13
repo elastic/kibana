@@ -15,18 +15,20 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
   UpdateRuleMigrationData,
   RuleMigrationTaskStats,
   OriginalRule,
   RuleMigration,
+  RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
+  RuleMigrationResourceBase,
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
@@ -62,6 +64,12 @@ export const GetRuleMigrationRequestQuery = z.object({
   sort_direction: z.enum(['asc', 'desc']).optional(),
   search_term: z.string().optional(),
   ids: ArrayFromString(NonEmptyString).optional(),
+  is_prebuilt: BooleanFromString.optional(),
+  is_installed: BooleanFromString.optional(),
+  is_fully_translated: BooleanFromString.optional(),
+  is_partially_translated: BooleanFromString.optional(),
+  is_untranslatable: BooleanFromString.optional(),
+  is_failed: BooleanFromString.optional(),
 });
 export type GetRuleMigrationRequestQueryInput = z.input<typeof GetRuleMigrationRequestQuery>;
 
@@ -147,7 +155,7 @@ export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
 export type GetRuleMigrationResourcesMissingResponse = z.infer<
   typeof GetRuleMigrationResourcesMissingResponse
 >;
-export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceData);
+export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceBase);
 
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({
@@ -233,14 +241,7 @@ export type RetryRuleMigrationRequestBody = z.infer<typeof RetryRuleMigrationReq
 export const RetryRuleMigrationRequestBody = z.object({
   connector_id: ConnectorId,
   langsmith_options: LangSmithOptions.optional(),
-  /**
-   * The indicator to retry only failed rules
-   */
-  failed: z.boolean().optional(),
-  /**
-   * The indicator to retry only not fully translated rules
-   */
-  not_fully_translated: z.boolean().optional(),
+  filter: RuleMigrationRetryFilter.optional(),
 });
 export type RetryRuleMigrationRequestBodyInput = z.input<typeof RetryRuleMigrationRequestBody>;
 
