@@ -12,32 +12,54 @@ import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   type UiSettingsParams,
+  type ThemeName,
   parseThemeTags,
   SUPPORTED_THEME_NAMES,
+  DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 
-function getThemeInfo(options: GetThemeSettingsOptions) {
-  if (options?.isDist ?? true) {
-    return {
-      defaultDarkMode: false,
-    };
-  }
-
-  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
-  return {
-    defaultDarkMode: themeTags[0].endsWith('dark'),
-  };
+interface ThemeInfo {
+  defaultDarkMode: boolean;
+  defaultThemeName: ThemeName;
 }
 
-interface GetThemeSettingsOptions {
-  isDist?: boolean;
-  isThemeSwitcherEnabled?: boolean;
+const getThemeInfo = ({ isDist, isServerless }: GetThemeSettingsOptions): ThemeInfo => {
+  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
+
+  const themeInfo: ThemeInfo = {
+    defaultDarkMode: false,
+    defaultThemeName: DEFAULT_THEME_NAME,
+  };
+
+  if (!isDist) {
+    // Allow environment-specific config when not building for distribution
+    themeInfo.defaultDarkMode = themeTags[0]?.endsWith('dark') || false;
+  }
+
+  if (!isServerless) {
+    // Default to Borealis theme in non-serverless
+    themeInfo.defaultThemeName = 'borealis';
+  }
+
+  return themeInfo;
+};
+
+export interface GetThemeSettingsOptions {
+  isServerless: boolean;
+  isDist: boolean;
+  isThemeSwitcherEnabled: boolean | undefined;
 }
 
 export const getThemeSettings = (
-  options: GetThemeSettingsOptions = {}
+  options: GetThemeSettingsOptions
 ): Record<string, UiSettingsParams> => {
-  const { defaultDarkMode } = getThemeInfo(options);
+  const { defaultDarkMode, defaultThemeName } = getThemeInfo(options);
+
+  // Make `theme:name` readonly in serverless unless the theme switcher is enabled
+  let isThemeNameReadonly = options.isServerless;
+  if (options.isThemeSwitcherEnabled !== undefined) {
+    isThemeNameReadonly = !options.isThemeSwitcherEnabled;
+  }
 
   return {
     'theme:darkMode': {
@@ -109,10 +131,8 @@ export const getThemeSettings = (
           defaultMessage: 'Borealis',
         }),
       },
-      value: 'amsterdam',
-      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
-        ? !options.isThemeSwitcherEnabled
-        : true,
+      value: defaultThemeName,
+      readonly: isThemeNameReadonly,
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),

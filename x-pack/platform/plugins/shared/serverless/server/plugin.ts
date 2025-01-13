@@ -71,6 +71,13 @@ export class ServerlessPlugin
       router.post<void, void, SwitchReqBody>(
         {
           path: API_SWITCH_PROJECT,
+          security: {
+            authz: {
+              enabled: false,
+              reason:
+                'This route is opted out from authorization, because it is only used in development',
+            },
+          },
           validate: {
             body: switchBodySchema,
           },

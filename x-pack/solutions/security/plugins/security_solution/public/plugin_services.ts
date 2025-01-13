@@ -153,6 +153,7 @@ export class PluginServices {
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
+      productDocBase: startPlugins.productDocBase,
       siemMigrations: await createSiemMigrationsService(coreStart, startPlugins),
       ...(params && {
         onAppLeave: params.onAppLeave,

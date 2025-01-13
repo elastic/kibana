@@ -6,7 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';

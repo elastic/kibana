@@ -16,13 +16,13 @@ export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 export async function createInferenceEndpoint({
   esClient,
   logger,
-  modelId = '.elser_model_2',
+  modelId,
 }: {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
   logger: Logger;
-  modelId: string | undefined;
+  modelId: string;
 }) {
   try {
     logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);

@@ -141,7 +141,7 @@ export function mockDataPlugin(
     },
     search: createMockSearchService(),
     nowProvider: {
-      get: jest.fn(),
+      get: jest.fn(() => new Date()),
     },
     fieldFormats: {
       deserialize: jest.fn(),

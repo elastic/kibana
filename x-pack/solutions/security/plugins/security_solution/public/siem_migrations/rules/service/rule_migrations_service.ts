@@ -15,7 +15,7 @@ import {
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
@@ -187,7 +187,7 @@ export class SiemRulesMigrationsService {
     return results;
   }
 
-  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceData[]> {
+  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceBase[]> {
     return getMissingResources({ migrationId });
   }
 

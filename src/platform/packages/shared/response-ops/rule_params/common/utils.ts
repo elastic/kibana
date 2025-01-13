@@ -8,7 +8,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+
+export const jobsSelectionSchema = schema.object(
+  {
+    jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    groupIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  },
+  {
+    validate: (v) => {
+      if (!v.jobIds?.length && !v.groupIds?.length) {
+        return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
+          defaultMessage: 'Job selection is required',
+        });
+      }
+    },
+  }
+);
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({

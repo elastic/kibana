@@ -62,8 +62,6 @@ export class MonacoEditorService extends FtrService {
         nthIndex,
         value
       );
-    });
-    await this.retry.try(async () => {
       const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
       expect(newCodeEditorValue).equal(
         value,

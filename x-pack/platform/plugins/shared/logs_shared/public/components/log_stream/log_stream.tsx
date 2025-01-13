@@ -8,7 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -297,9 +297,9 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   );
 };
 
-const LogStreamContainer = euiStyled.div`
+const LogStreamContainer = styled.div`
   display: flex;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
 `;
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(

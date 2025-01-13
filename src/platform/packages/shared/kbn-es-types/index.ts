@@ -13,7 +13,6 @@ export type {
   SearchHit,
   ESSearchResponse,
   ESSearchRequest,
-  ESSearchRequestWithoutBody,
   ESSourceOptions,
   InferSearchResponseOf,
   AggregationResultOf,

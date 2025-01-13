@@ -214,14 +214,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await changeColorMode('dark');
         await refreshPage();
         const colorModeTag = await PageObjects.userProfiles.getThemeTag();
-        expect(colorModeTag).to.be('v8dark');
+        expect(colorModeTag).to.be('borealisdark');
       });
 
       it('can change the color mode to light', async () => {
         await changeColorMode('light');
         await refreshPage();
         const colorModeTag = await PageObjects.userProfiles.getThemeTag();
-        expect(colorModeTag).to.be('v8light');
+        expect(colorModeTag).to.be('borealislight');
       });
 
       it('can change the color mode to space_default', async () => {
@@ -231,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           await refreshPage();
           const colorModeTag = await PageObjects.userProfiles.getThemeTag();
-          expect(colorModeTag).to.be('v8light');
+          expect(colorModeTag).to.be('borealislight');
         }
 
         // Change the space default dark mode to "enabled"
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           await refreshPage();
           const colorModeTag = await PageObjects.userProfiles.getThemeTag();
-          expect(colorModeTag).to.be('v8light');
+          expect(colorModeTag).to.be('borealislight');
         }
 
         await changeColorMode('space_default');
@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           await refreshPage();
           const colorModeTag = await PageObjects.userProfiles.getThemeTag();
-          expect(colorModeTag).to.be('v8dark'); // We are now in dark mode
+          expect(colorModeTag).to.be('borealisdark'); // We are now in dark mode
         }
       });
     });

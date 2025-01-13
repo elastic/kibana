@@ -18,7 +18,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   SavedObjectsBulkDeleteObject,
@@ -131,9 +131,9 @@ describe('#bulkDelete', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const { type, id } of objects) {
-        body.push({
+        operations.push({
           [method]: {
             _index,
             _id: getId(type, id),
@@ -143,7 +143,7 @@ describe('#bulkDelete', () => {
       }
 
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -202,9 +202,9 @@ describe('#bulkDelete', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const { type, id } of objects) {
-        body.push({
+        operations.push({
           [method]: {
             _index,
             _id: getId(type, id),
@@ -213,7 +213,7 @@ describe('#bulkDelete', () => {
         });
       }
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -266,7 +266,7 @@ describe('#bulkDelete', () => {
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: { docs } }),
+          expect.objectContaining({ docs }),
           expect.anything()
         );
       });

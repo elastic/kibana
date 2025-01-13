@@ -13,6 +13,7 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import {
+  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
@@ -22,7 +23,6 @@ import {
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -88,7 +88,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,

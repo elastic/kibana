@@ -68,11 +68,11 @@ export class SiemRuleMigrationsService {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
-    const esClient = this.esClusterClient.asInternalUser;
+    const esScopedClient = this.esClusterClient.asScoped(request);
     const dataClient = this.dataService.createClient({
       spaceId,
       currentUser,
-      esClient,
+      esScopedClient,
       packageService,
     });
     const taskClient = this.taskService.createClient({ currentUser, dataClient });

@@ -31,7 +31,6 @@ describe('Source Viewer component', () => {
         index={'index1'}
         dataView={mockDataView}
         width={123}
-        hasLineNumbers={true}
         onRefresh={() => {}}
       />
     );
@@ -48,7 +47,6 @@ describe('Source Viewer component', () => {
         index={'index1'}
         dataView={mockDataView}
         width={123}
-        hasLineNumbers={true}
         onRefresh={() => {}}
       />
     );
@@ -86,7 +84,6 @@ describe('Source Viewer component', () => {
         index={'index1'}
         dataView={mockDataView}
         width={123}
-        hasLineNumbers={true}
         onRefresh={() => {}}
       />
     );
@@ -94,5 +91,7 @@ describe('Source Viewer component', () => {
     expect(jsonCodeEditor).not.toBe(null);
     expect(jsonCodeEditor.props().jsonValue).toContain('_source');
     expect(jsonCodeEditor.props().jsonValue).not.toContain('_score');
+    expect(jsonCodeEditor.props().hasLineNumbers).toBe(true);
+    expect(jsonCodeEditor.props().enableFindAction).toBe(true);
   });
 });

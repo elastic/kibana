@@ -4,7 +4,7 @@ The CASE function accepts pairs of conditions and values. It returns the value t
 
 ## Syntax
 
-`CASE(condition, trueValue)`
+`CASE(condition, trueValue, elseValue)`
 
 ### Parameters
 
@@ -16,16 +16,20 @@ A condition to evaluate.
 
 The value that is returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
 
+#### elseValue
+
+The value that will be returned when no condition evaluates to `true`.
+
 ## Examples
 
-Determine whether employees are monolingual, bilingual, or polyglot:
+In this example, employees are categorized as monolingual, bilingual, or polyglot depending on how many languages they speak:
 
 ```esql
 FROM employees
 | EVAL type = CASE(
     languages <= 1, "monolingual",
     languages <= 2, "bilingual",
-     "polyglot")
+    "polyglot")
 | KEEP emp_no, languages, type
 ```
 
@@ -46,6 +50,6 @@ Calculate an hourly error rate as a percentage of the total number of log messag
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) by hour
+| STATS error_rate = AVG(error) BY hour
 | SORT hour
 ```

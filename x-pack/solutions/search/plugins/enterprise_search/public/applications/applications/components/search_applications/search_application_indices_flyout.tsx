@@ -25,14 +25,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-
 import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
-import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
+import { SearchApplicationViewIndexLink } from '../search_application/search_application_view_index_link';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
@@ -58,16 +55,11 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         }
       ),
       render: (indexName: string) => (
-        <EuiLinkTo
-          data-test-subj="search-application-index-link"
-          data-telemetry-id="entSearchApplications-list-viewIndex"
-          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
-            indexName,
-          })}`}
-          shouldNotCreateHref
-        >
-          {indexName}
-        </EuiLinkTo>
+        <SearchApplicationViewIndexLink
+          indexName={indexName}
+          dataTestSubj="search-application-index-link"
+          dataTelemetryId="entSearchApplications-list-viewIndex"
+        />
       ),
       sortable: true,
       truncateText: true,

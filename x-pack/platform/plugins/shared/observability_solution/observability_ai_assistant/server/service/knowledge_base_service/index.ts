@@ -58,7 +58,7 @@ export class KnowledgeBaseService {
       asCurrentUser: ElasticsearchClient;
       asInternalUser: ElasticsearchClient;
     },
-    modelId: string | undefined
+    modelId: string
   ) {
     await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });

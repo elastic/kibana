@@ -29,6 +29,7 @@ interface JsonCodeEditorCommonProps {
   height?: string | number;
   hasLineNumbers?: boolean;
   hideCopyButton?: boolean;
+  enableFindAction?: boolean;
 }
 
 export const JsonCodeEditorCommon = ({
@@ -38,6 +39,7 @@ export const JsonCodeEditorCommon = ({
   hasLineNumbers,
   onEditorDidMount,
   hideCopyButton,
+  enableFindAction,
 }: JsonCodeEditorCommonProps) => {
   if (jsonValue === '') {
     return null;
@@ -66,6 +68,7 @@ export const JsonCodeEditorCommon = ({
         wordWrap: 'on',
         wrappingIndent: 'indent',
       }}
+      enableFindAction={enableFindAction}
     />
   );
   if (hideCopyButton) {

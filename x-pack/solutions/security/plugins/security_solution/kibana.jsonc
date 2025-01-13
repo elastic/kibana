@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "actions",
-      "assetInventory",
       "alerting",
       "cases",
       "cloud",
@@ -60,7 +59,8 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

@@ -16,12 +16,13 @@ export const getLLMType = (actionTypeId: string): string | undefined => {
     [`.gen-ai`]: `openai`,
     [`.bedrock`]: `bedrock`,
     [`.gemini`]: `gemini`,
+    [`.inference`]: `inference`,
   };
   return llmTypeDictionary[actionTypeId];
 };
 
 export const getLLMClass = (llmType?: string) =>
-  llmType === 'openai'
+  llmType === 'openai' || llmType === 'inference'
     ? ActionsClientChatOpenAI
     : llmType === 'bedrock'
     ? ActionsClientBedrockChatModel

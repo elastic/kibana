@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject } from 'rxjs';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
@@ -99,9 +97,8 @@ function getWarningMessages(
 export function buildUserMessagesHelpers(
   api: LensApi,
   internalApi: LensInternalApi,
-  { coreStart, data, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
+  { coreStart, data, visualizationMap, datasourceMap, spaces }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
-  spaces?: SpacesApi,
   metaInfo?: SharingSavedObjectProps
 ): {
   getUserMessages: UserMessagesGetter;
@@ -268,9 +265,9 @@ export function buildUserMessagesHelpers(
         addLog(`Blocking error: ${error?.message}`);
       }
 
-      if (error?.message !== api.blockingError.getValue()?.message) {
+      if (error?.message !== internalApi.blockingError$.getValue()?.message) {
         const finalError = error?.message === '' ? undefined : error;
-        (api.blockingError as BehaviorSubject<Error | undefined>).next(finalError);
+        internalApi.updateBlockingError(finalError);
       }
     },
     updateWarnings: () => {

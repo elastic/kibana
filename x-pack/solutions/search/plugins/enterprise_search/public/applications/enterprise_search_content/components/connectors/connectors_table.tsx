@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -32,6 +32,8 @@ import {
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
+import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_details/connector_view_search_indices_details';
+
 import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 
@@ -57,7 +59,12 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   isLoading,
   onDelete,
 }) => {
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { navigateToUrl, share } = useValues(KibanaLogic);
+  const searchIndicesLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+    [share]
+  );
+
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     ...(!isCrawler
       ? [
@@ -88,12 +95,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: ConnectorViewItem) =>
         connector.index_name ? (
-          connector.indexExists ? (
-            <EuiLinkTo
-              to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: connector.index_name })}
-            >
-              {connector.index_name}
-            </EuiLinkTo>
+          connector.indexExists && searchIndicesLocator ? (
+            <ConnectorViewIndexLink indexName={connector.index_name} />
           ) : (
             connector.index_name
           )

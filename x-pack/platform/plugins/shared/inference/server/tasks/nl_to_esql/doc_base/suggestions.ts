@@ -13,6 +13,11 @@ const suggestions: Suggestion[] = [
       return ['BUCKET'];
     }
   },
+  (keywords) => {
+    if (keywords.includes('TO_DATETIME')) {
+      return ['DATE_PARSE'];
+    }
+  },
 ];
 
 /**

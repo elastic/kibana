@@ -15,11 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiFontSize,
-  useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionButtonIcon } from './dimension_button_icon';
 import { PaletteIndicator } from './palette_indicator';
 import type { AccessorConfig, Message } from './types';
@@ -54,22 +53,22 @@ function DimensionButtonImpl({
   message,
   ...otherProps // from Drag&Drop integration
 }: DimensionButtonProps) {
+  const { euiTheme } = useEuiTheme();
   return (
     <div
       {...otherProps}
       css={css`
-        ${useEuiShadow('xs')}
         ${useEuiFontSize('s')}
-        border-radius: ${euiThemeVars.euiBorderRadius};
+        border-radius: ${euiTheme.border.radius};
         position: relative;
         line-height: 1;
         overflow: hidden;
         display: flex;
         align-items: center;
-        gap: ${euiThemeVars.euiSizeS};
-        min-height: ${euiThemeVars.euiSizeXL};
-        padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
-        background: ${euiThemeVars.euiColorEmptyShade};
+        gap: ${euiTheme.size.s};
+        min-height: ${euiTheme.size.xl};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
@@ -118,8 +117,8 @@ function DimensionButtonImpl({
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`
-          color: ${euiThemeVars.euiTextSubduedColor};
-          transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+          color: ${euiTheme.colors.textSubdued}
+          transition: ${euiTheme.animation.fast} ease-in-out;
           transition-property: color, opacity, background-color, transform;
           opacity: 0;
 
@@ -129,7 +128,7 @@ function DimensionButtonImpl({
           }
           &:hover,
           &:focus {
-            color: ${euiThemeVars.euiColorDangerText};
+            color: ${euiTheme.colors.textDanger};
           }
         `}
       />

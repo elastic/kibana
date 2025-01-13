@@ -29,6 +29,7 @@ describe('Testing cel handler', () => {
     const response = await handleGetStateDetails({ state, model });
     expect(response.stateSettings).toStrictEqual(celExpectedResults.stateSettings);
     expect(response.redactVars).toStrictEqual(celExpectedResults.redactVars);
+    expect(response.configFields).toStrictEqual(celExpectedResults.configFields);
     expect(response.lastExecutedChain).toBe('getStateDetails');
   });
 });

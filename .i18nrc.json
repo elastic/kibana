@@ -65,9 +65,9 @@
     "grouping": "src/platform/packages/shared/kbn-grouping/src",
     "alertsGrouping": "x-pack/solutions/observability/packages/kbn-alerts-grouping",
     "guidedOnboarding": "src/platform/plugins/shared/guided_onboarding",
-    "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
+    "guidedOnboardingPackage": "src/platform/packages/shared/kbn-guided-onboarding",
     "home": "src/platform/plugins/shared/home",
-    "homePackages": "packages/home",
+    "homePackages": "src/platform/packages/shared/home",
     "indexPatternEditor": "src/platform/plugins/shared/data_view_editor",
     "indexPatternFieldEditor": "src/platform/plugins/shared/data_view_field_editor",
     "indexPatternManagement": "src/platform/plugins/shared/data_view_management",
@@ -99,7 +99,7 @@
     "newsfeed": "src/platform/plugins/shared/newsfeed",
     "presentationUtil": "src/platform/plugins/shared/presentation_util",
     "randomSampling": "x-pack/platform/packages/private/kbn-random-sampling",
-    "reactPackages": "packages/react",
+    "reactPackages": ["src/platform/packages/shared/react", "src/platform/packages/private/react"],
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
@@ -166,7 +166,7 @@
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "src/platform/packages/private/kbn-managed-content-badge",
-    "responseOpsRuleForm": "packages/response-ops/rule_form"
+    "responseOpsRuleForm": "src/platform/packages/shared/response-ops/rule_form"
   },
   "translations": []
 }

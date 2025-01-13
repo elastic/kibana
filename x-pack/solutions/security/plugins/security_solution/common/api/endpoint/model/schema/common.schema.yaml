@@ -141,10 +141,12 @@ components:
       description: Optional parameters object
     AgentTypes:
       type: string
+      description: The host agent type (optional). Defaults to endpoint.
       enum:
         - endpoint
         - sentinel_one
         - crowdstrike
+        - microsoft_defender_endpoint
 
     BaseActionSchema:
       x-inline: true

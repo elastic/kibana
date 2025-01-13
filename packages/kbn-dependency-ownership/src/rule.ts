@@ -32,8 +32,11 @@ export function packageFilter(pkg: string) {
   return (
     // @kbn-* packages are internal to this repo, and do not require ownership via renovate
     !pkg.startsWith('@kbn/') &&
-    // The EUI team owns the EUI package, and it is not covered by renovate
-    pkg !== '@elastic/eui'
+    // The EUI team owns the EUI packages, and are not covered by renovate
+    pkg !== '@elastic/eui' &&
+    pkg !== '@elastic/eui-theme-borealis' &&
+    // Operations owns node, and is not covered by renovate
+    pkg !== '@types/node'
   );
 }
 

@@ -16,14 +16,13 @@ import { Context } from './context';
 import { FrameHeading } from './frame_heading';
 import { Variables } from './variables';
 
-const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
+const ContextContainer = styled.div`
   position: relative;
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
   font-size: ${() => useEuiFontSize('s').fontSize};
   border: ${({ theme }) => theme.euiTheme.border.thin};
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
-  background: ${({ isLibraryFrame, theme }) =>
-    isLibraryFrame ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
+  background: ${({ theme }) => theme.euiTheme.colors.emptyShade};
 `;
 
 // Indent the non-context frames the same amount as the accordion control
@@ -72,12 +71,8 @@ export function Stackframe({
       id={id}
       initialIsOpen={initialIsOpen}
     >
-      <ContextContainer isLibraryFrame={isLibraryFrame}>
-        <Context
-          stackframe={stackframe}
-          codeLanguage={codeLanguage}
-          isLibraryFrame={isLibraryFrame}
-        />
+      <ContextContainer>
+        <Context stackframe={stackframe} codeLanguage={codeLanguage} />
       </ContextContainer>
       <Variables vars={stackframe.vars} />
     </EuiAccordion>

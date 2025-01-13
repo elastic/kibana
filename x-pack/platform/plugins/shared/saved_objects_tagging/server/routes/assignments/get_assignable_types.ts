@@ -12,6 +12,13 @@ export const registerGetAssignableTypesRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/internal/saved_objects_tagging/assignments/_assignable_types',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as there is a separate authorization check within the assignment service.',
+        },
+      },
       validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {

@@ -1,0 +1,22 @@
+# SPACE
+
+The SPACE function creates a string composed of a specific number of spaces.
+
+## Syntax
+
+`SPACE(number)`
+
+### Parameters
+
+#### number
+
+The number of spaces the function should generate. 
+
+## Examples
+
+This example demonstrates how to use the SPACE function to insert a space into a string:
+
+```esql
+ROW message = CONCAT("Hello", SPACE(1), "World!");
+```
+In this example, the SPACE function creates a single space, which is then used to separate the words "Hello" and "World!" in the resulting string. If desired, the `number` parameter could be adjusted in order to generate more spaces.

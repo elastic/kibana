@@ -53,7 +53,7 @@ export const FieldsBucketContainer = ({
           >
             <EuiIcon
               size="s"
-              color={euiTheme.colors[isNotDraggable ? 'disabled' : 'text']}
+              color={isNotDraggable ? euiTheme.colors.textDisabled : euiTheme.colors.textParagraph}
               type="grab"
               aria-label={i18n.translate(
                 'visualizationUiComponents.fieldsBucketContainer.dragToReorder',

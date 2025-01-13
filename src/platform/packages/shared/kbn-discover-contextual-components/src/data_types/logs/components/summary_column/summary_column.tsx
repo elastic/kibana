@@ -98,14 +98,19 @@ const SummaryCell = ({
   );
 };
 
-const SummaryCellPopover = (props: AllSummaryColumnProps) => {
+export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core } = props;
 
   const resourceFields = createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
+    includeFormattedValue: true,
+  });
+  const messageCodeBlockProps = formattedValue
+    ? { language: 'json', children: formattedValue }
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
   const shouldRenderContent = Boolean(field && value);
 
   const shouldRenderSource = !shouldRenderContent;
@@ -142,11 +147,9 @@ const SummaryCellPopover = (props: AllSummaryColumnProps) => {
               overflowHeight={100}
               paddingSize="s"
               isCopyable
-              language="txt"
               fontSize="s"
-            >
-              {value}
-            </EuiCodeBlock>
+              {...messageCodeBlockProps}
+            />
           </EuiFlexGroup>
         )}
         {shouldRenderSource && (

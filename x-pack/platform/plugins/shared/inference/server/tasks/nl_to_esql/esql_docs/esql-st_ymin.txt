@@ -1,0 +1,27 @@
+# ST_YMIN
+
+The ST_YMIN function extracts the smallest value of the `y` coordinates from the provided geometry.
+
+## Syntax
+
+`ST_YMIN(point)`
+
+### Parameters
+
+#### point
+
+A given expression of types `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function will also return `null`.
+
+## Examples
+
+This example demonstrates how to extract the minimum `y` coordinate from a geographical boundary outline:
+
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL envelope = ST_ENVELOPE(city_boundary)
+| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
+| KEEP abbrev, airport, xmin, xmax, ymin, ymax
+```
+
+In the case of `geo_point` or `geo_shape`, using the ST_YMIN function is equivalent to retrieving the minimum `latitude` value.

@@ -38,18 +38,20 @@ deprecations are discovered as data is migrated. Starting in 7.x, deprecation lo
 Elasticsearch deprecations can be handled in a number of ways:
 
 * **Reindexing.** When a user's index contains deprecations (e.g. mappings) a reindex solves them. The Upgrade Assistant only automates reindexing for indices. For example, if you are currently on 7.x, and want to migrate to 8.0, but you still have indices that were created on 6.x. For this scenario, the user will see a "Reindex" button that they can click, which will perform the reindex.
-  * Reindexing is an idempotent action in Upgrade Assistant. It works like this ([overview in code](https://github.com/elastic/kibana/blob/b320a37d8b703b2fa101a93b6971b36ee2c37f06/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts#L498-L540)):
+  * Reindexing is an idempotent action in Upgrade Assistant. It works like this ([overview in code](https://github.com/elastic/kibana/blob/5c13e901ac1bf01bcbcca1d4103c43438ee8f6e6/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts#L503-L545)):
     1. Set a write-block on the original index, no new data can be written during reindexing.
-    2. Create a target index with the following name `reindexed-v{majorVersion}-{originalIndex}`. E.g., if `my-index` is the original, the target will be named `reindexed-v8-my-index`.
+    2. Create a target index with the following name `reindexed-v{majorVersion}-{originalIndex}`. E.g., if `my-index` is the original, the target will be named `reindexed-v8-my-index`.    
+      **NOTE:** It overrides the index settings `number_of_replicas` and `refresh_interval` for reindexing performance. They are restored after completion.
     3. [Reindex](https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html) from the original index to the target index. Kibana will continuously report reindexing status.
-    4. Once reindexing is done, in one atomic operation via the aliases API:
-      1. Create an alias from the original index to the target index. All existing aliases referencing the original index will be re-pointed to the target index. E.g., `my-index` will be an alias referencing `reindexed-v8-my-index`.
-      2. Delete the original index.
-      3. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users. This and other index settings are inherited from the original.
-    5. The Upgrade Assistant's reindex action is complete at this point.
+    4. Restores the original `number_of_replicas` and `refresh_interval` index settings.
+    5. Once reindexing is done, in one atomic operation via the aliases API:
+       1. Create an alias from the original index to the target index. All existing aliases referencing the original index will be re-pointed to the target index. E.g., `my-index` will be an alias referencing `reindexed-v8-my-index`.
+       2. Delete the original index.
+       3. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users. This and other index settings are inherited from the original.
+    6. The Upgrade Assistant's reindex action is complete at this point.
        1. If the original index was closed before reindexing, the new target will also be closed at this point.
 
-    Currently reindexing deprecations are only enabled for major version upgrades  by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
+    Currently, reindexing deprecations are only enabled for major version upgrades by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
 
 Reindexing at the moment includes some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 * **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. Migrating system indices should only be enabled for major version upgrades. This is controlled by the config `featureSet.migrateSystemIndices` which hides the second step from the UA UI for migrating system indices.
@@ -334,7 +336,7 @@ For a complete list of Kibana deprecations, refer to the [8.0 Kibana deprecation
 
 This is a non-exhaustive list of different error scenarios in Upgrade Assistant. It's recommended to use the [tweak browser extension](https://chrome.google.com/webstore/detail/tweak-mock-api-calls/feahianecghpnipmhphmfgmpdodhcapi?hl=en), or something similar, to mock the API calls.
 
-- **Error loading deprecation logging status.** Mock a `404` status code to `GET /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/545c1420c285af8f5eee56f414bd6eca735aea11/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L70) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
+- **Error loading deprecation logging status.** Mock a `404` status code to `GET /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/5c13e901ac1bf01bcbcca1d4103c43438ee8f6e6/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L71) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
 - **Error updating deprecation logging status.** Mock a `404` status code to `PUT /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/545c1420c285af8f5eee56f414bd6eca735aea11/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L77) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
 - **Unauthorized error fetching ES deprecations.** Mock a `403` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 403 }`
 - **Partially upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": false } }`

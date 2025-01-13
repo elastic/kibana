@@ -10,7 +10,12 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import SummaryColumn, { SummaryColumnFactoryDeps, SummaryColumnProps } from './summary_column';
+import SummaryColumn, {
+  AllSummaryColumnProps,
+  SummaryCellPopover,
+  SummaryColumnFactoryDeps,
+  SummaryColumnProps,
+} from './summary_column';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -18,32 +23,46 @@ import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiCodeBlock: ({
+    children,
+    dangerouslySetInnerHTML,
+  }: {
+    children?: string;
+    dangerouslySetInnerHTML?: { __html: string };
+  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+}));
+
+const getSummaryProps = (
+  record: DataTableRecord,
+  opts: Partial<SummaryColumnProps & SummaryColumnFactoryDeps> = {}
+): AllSummaryColumnProps => ({
+  rowIndex: 0,
+  colIndex: 0,
+  columnId: '_source',
+  isExpandable: true,
+  isExpanded: false,
+  isDetails: false,
+  row: record,
+  dataView: dataViewMock,
+  fieldFormats: fieldFormatsMock,
+  setCellProps: () => {},
+  closePopover: () => {},
+  density: DataGridDensity.COMPACT,
+  rowHeight: ROWS_HEIGHT_OPTIONS.single,
+  onFilter: jest.fn(),
+  shouldShowFieldHandler: () => true,
+  core: corePluginMock.createStart(),
+  share: sharePluginMock.createStartContract(),
+  ...opts,
+});
+
 const renderSummary = (
   record: DataTableRecord,
   opts: Partial<SummaryColumnProps & SummaryColumnFactoryDeps> = {}
 ) => {
-  render(
-    <SummaryColumn
-      rowIndex={0}
-      colIndex={0}
-      columnId="_source"
-      isExpandable={true}
-      isExpanded={false}
-      isDetails={false}
-      row={record}
-      dataView={dataViewMock}
-      fieldFormats={fieldFormatsMock}
-      setCellProps={() => {}}
-      closePopover={() => {}}
-      density={DataGridDensity.COMPACT}
-      rowHeight={ROWS_HEIGHT_OPTIONS.single}
-      onFilter={jest.fn()}
-      shouldShowFieldHandler={() => true}
-      core={corePluginMock.createStart()}
-      share={sharePluginMock.createStartContract()}
-      {...opts}
-    />
-  );
+  render(<SummaryColumn {...getSummaryProps(record, opts)} />);
 };
 
 const getBaseRecord = (overrides: Record<string, unknown> = {}) =>
@@ -172,5 +191,20 @@ describe('SummaryColumn', () => {
         recordWithoutMessage.flattened[constants.EVENT_ORIGINAL_FIELD] as string
       );
     });
+  });
+});
+
+describe('SummaryCellPopover', () => {
+  it('should render message value', async () => {
+    const message = 'This is a message';
+    render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+  });
+
+  it('should render formatted JSON message value', async () => {
+    const json = { foo: { bar: true } };
+    const message = JSON.stringify(json);
+    render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
   });
 });

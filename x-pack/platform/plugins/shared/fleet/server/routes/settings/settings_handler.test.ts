@@ -42,7 +42,7 @@ jest.mock('../../services', () => ({
   },
   agentPolicyService: {
     get: jest.fn(),
-    getByIDs: jest.fn(),
+    getByIds: jest.fn(),
   },
 }));
 

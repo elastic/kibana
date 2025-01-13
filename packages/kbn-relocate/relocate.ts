@@ -102,6 +102,7 @@ export interface RelocateModulesParams {
 const findModules = ({ teams, paths, included, excluded }: FindModulesParams, log: ToolingLog) => {
   // get all modules
   const modules = getPackages(REPO_ROOT);
+  const moduleFilters = teams.length > 0 || paths.length > 0 || included.length > 0;
 
   // find modules selected by user filters
   return (
@@ -121,6 +122,7 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
       // the module is under the umbrella specified by the user
       .filter(
         (module) =>
+          !moduleFilters ||
           included.includes(module.id) ||
           teams.some((team) => belongsTo(module, team)) ||
           paths.some((path) => module.directory.includes(path))

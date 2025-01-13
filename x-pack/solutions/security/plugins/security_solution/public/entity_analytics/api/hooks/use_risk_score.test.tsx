@@ -8,13 +8,21 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useRiskScore } from './use_risk_score';
 import { TestProviders } from '../../../common/mock';
-
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
-import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { useRiskEngineStatus } from './use_risk_engine_status';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics';
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: jest.fn(),
+}));
+
+jest.mock('../../../helper_hooks', () => ({
+  useHasSecurityCapability: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
@@ -24,38 +32,27 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
 }));
 
 jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('./use_risk_score_feature_status');
+jest.mock('./use_risk_engine_status', () => ({
+  useRiskEngineStatus: jest.fn(),
+}));
 
-jest.mock('./use_risk_engine_status');
-
-const mockUseIsNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled as jest.Mock;
-const mockUseRiskScoreFeatureStatus = useRiskScoreFeatureStatus as jest.Mock;
+const mockUseMlCapabilities = useMlCapabilities as jest.Mock;
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
+const mockUseRiskEngineStatus = useRiskEngineStatus as jest.Mock;
 const mockSearch = jest.fn();
 
 let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
-const defaultRiskScoreModuleStatus = {
-  isLoading: false,
-  installed: false,
-};
-
-const defaultFeatureStatus = {
-  isLoading: false,
-  isDeprecated: false,
-  isAuthorized: true,
-  isEnabled: true,
-  refetch: () => {},
-};
 const defaultRisk = {
   data: undefined,
+  error: undefined,
   inspect: {},
   isInspected: false,
   isAuthorized: true,
-  isModuleEnabled: true,
-  isDeprecated: false,
+  hasEngineBeenInstalled: false,
   totalCount: 0,
 };
+
 const defaultSearchResponse = {
   loading: false,
   result: {
@@ -67,6 +64,25 @@ const defaultSearchResponse = {
   inspect: {},
   error: undefined,
 };
+
+const makeLicenseInvalid = () => {
+  mockUseMlCapabilities.mockClear();
+  mockUseMlCapabilities.mockReturnValue({
+    isPlatinumOrTrialLicense: false,
+  });
+};
+
+const mockRiskEngineStatus = (status: RiskEngineStatusResponse['risk_engine_status']) => {
+  mockUseRiskEngineStatus.mockClear();
+  mockUseRiskEngineStatus.mockReturnValue({
+    data: {
+      risk_engine_status: status,
+      risk_engine_task_status: { status: 'idle', runAt: '2021-09-29T15:00:00Z' },
+    } as RiskEngineStatusResponse,
+    isLoading: false,
+    isFetching: false,
+  });
+};
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'useRiskScore entityType: %s',
   (riskEntity) => {
@@ -74,32 +90,15 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       jest.clearAllMocks();
       appToastsMock = useAppToastsMock.create();
       (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-      mockUseRiskScoreFeatureStatus.mockReturnValue(defaultFeatureStatus);
       mockUseSearchStrategy.mockReturnValue(defaultSearchResponse);
-      mockUseIsNewRiskScoreModuleInstalled.mockReturnValue(defaultRiskScoreModuleStatus);
+      mockUseMlCapabilities.mockReturnValue({
+        isPlatinumOrTrialLicense: true,
+      });
     });
 
     test('does not search if license is not valid', () => {
-      mockUseRiskScoreFeatureStatus.mockReturnValue({
-        ...defaultFeatureStatus,
-        isAuthorized: false,
-      });
-      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).not.toHaveBeenCalled();
-      expect(result.current).toEqual({
-        loading: false,
-        ...defaultRisk,
-        isAuthorized: false,
-        refetch: result.current.refetch,
-      });
-    });
-    test('does not search if feature is not enabled', () => {
-      mockUseRiskScoreFeatureStatus.mockReturnValue({
-        ...defaultFeatureStatus,
-        isEnabled: false,
-      });
+      makeLicenseInvalid();
+      mockRiskEngineStatus('ENABLED');
 
       const { result } = renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
@@ -108,34 +107,26 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isModuleEnabled: false,
+        hasEngineBeenInstalled: true,
+        isAuthorized: false,
         refetch: result.current.refetch,
       });
     });
-
-    test('does not search if index is deprecated ', () => {
-      mockUseRiskScoreFeatureStatus.mockReturnValue({
-        ...defaultFeatureStatus,
-        isDeprecated: true,
-      });
-      const { result } = renderHook(() => useRiskScore({ riskEntity, skip: true }), {
+    test('does not search if engine is not installed', () => {
+      mockRiskEngineStatus('NOT_INSTALLED');
+      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
       });
       expect(mockSearch).not.toHaveBeenCalled();
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isDeprecated: true,
         refetch: result.current.refetch,
       });
     });
 
     test('handle index not found error', () => {
-      mockUseRiskScoreFeatureStatus.mockReturnValue({
-        ...defaultFeatureStatus,
-        isDeprecated: false,
-        isEnabled: false,
-      });
+      mockRiskEngineStatus('ENABLED');
       mockUseSearchStrategy.mockReturnValue({
         ...defaultSearchResponse,
         error: {
@@ -152,7 +143,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isModuleEnabled: false,
+        hasEngineBeenInstalled: true,
         refetch: result.current.refetch,
         error: {
           attributes: {
@@ -165,6 +156,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
     });
 
     test('show error toast', () => {
+      mockRiskEngineStatus('ENABLED');
       const error = new Error();
       mockUseSearchStrategy.mockReturnValue({
         ...defaultSearchResponse,
@@ -178,40 +170,23 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       });
     });
 
-    test('runs search if feature is enabled and not deprecated', () => {
+    test('runs search if engine is enabled', () => {
+      mockRiskEngineStatus('ENABLED');
       renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
       });
-
       expect(mockSearch).toHaveBeenCalledTimes(1);
       expect(mockSearch).toHaveBeenCalledWith({
-        defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
+        defaultIndex: [`risk-score.risk-score-latest-default`],
         factoryQueryType: `${riskEntity}sRiskScore`,
         riskScoreEntity: riskEntity,
         includeAlertsCount: false,
       });
     });
 
-    test('runs search with new index if feature is enabled and not deprecated and new module installed', () => {
-      mockUseIsNewRiskScoreModuleInstalled.mockReturnValue({
-        ...defaultRiskScoreModuleStatus,
-        installed: true,
-      });
+    test('returns result', async () => {
+      mockRiskEngineStatus('ENABLED');
 
-      renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-
-      expect(mockSearch).toHaveBeenCalledTimes(1);
-      expect(mockSearch).toHaveBeenCalledWith({
-        defaultIndex: ['risk-score.risk-score-latest-default'],
-        factoryQueryType: `${riskEntity}sRiskScore`,
-        riskScoreEntity: riskEntity,
-        includeAlertsCount: false,
-      });
-    });
-
-    test('return result', async () => {
       mockUseSearchStrategy.mockReturnValue({
         ...defaultSearchResponse,
         result: {
@@ -226,6 +201,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         expect(result.current).toEqual({
           loading: false,
           ...defaultRisk,
+          hasEngineBeenInstalled: true,
           data: [],
           refetch: result.current.refetch,
         });

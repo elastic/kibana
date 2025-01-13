@@ -327,11 +327,11 @@ components:
       description: The type of the rule migration resource.
       enum:
         - macro # Reusable part a query that can be customized and called from multiple rules
-        - list # A list of values that can be used inside queries reused in different rules
+        - lookup # A list of values that can be used inside queries as data enrichment or data source
 
-    RuleMigrationResourceData:
+    RuleMigrationResourceBase:
       type: object
-      description: The rule migration resource data provided by the vendor.
+      description: The rule migration resource basic information.
       required:
         - type
         - name
@@ -341,17 +341,31 @@ components:
         name:
           type: string
           description: The resource name identifier.
+
+    RuleMigrationResourceContent:
+      type: object
+      required:
+        - content
+      properties:
         content:
           type: string
-          description: The resource content value.
+          description: The resource content value. Can be an empty string.
         metadata:
           type: object
           description: The resource arbitrary metadata.
 
+    RuleMigrationResourceData:
+      description: The rule migration resource data.
+      allOf:
+        - $ref: '#/components/schemas/RuleMigrationResourceBase'
+        - $ref: '#/components/schemas/RuleMigrationResourceContent'
+
     RuleMigrationResource:
       description: The rule migration resource document object.
       allOf:
-        - $ref: '#/components/schemas/RuleMigrationResourceData'
+        - $ref: '#/components/schemas/RuleMigrationResourceBase'
+        - $ref: '#/components/schemas/RuleMigrationResourceContent'
+          x-modify: partial
         - type: object
           required:
             - id

@@ -19,7 +19,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: true,
 };
@@ -46,7 +46,7 @@ describe('Host Summary Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+    mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
   });
 
   test('it renders the default Host Summary', () => {

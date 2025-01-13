@@ -38,14 +38,16 @@ The following aggregation functions are supported:
 - `MIN`
 - `PERCENTILE`
 - `ST_CENTROID_AGG`
+- `STD_DEV`
 - `SUM`
 - `TOP`
 - `VALUES`
 - `WEIGHTED_AVG`
 
-> Note: `STATS` without any groups is significantly faster than adding a group.
+The following grouping functions are supported:
 
-> Note: Grouping on a single expression is currently much more optimized than grouping on many expressions. In some tests, grouping on a single `keyword` column was found to be five times faster than grouping on two `keyword` columns. Do not attempt to work around this by combining the two columns together with a function like `CONCAT` and then grouping - this will not be faster.
+- `BUCKET`
+- `CATEGORIZE`
 
 ## Examples
 
@@ -123,11 +125,16 @@ FROM employees
 | EVAL avg_salary_rounded = ROUND(`AVG(salary)`)
 ```
 
+STATS works with grouping functions such as BUCKET, e.g. grouping data based on their timestamp:
+
+```esql
+FROM sample_data
+| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
+| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour)
+```
+
 ## Notes
 
 - If multiple columns share the same name, all but the rightmost column with this name are ignored.
-
-### Limitations
-
-- **Performance**: `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
-- **Multivalue Fields**: If the grouping key is multivalued, the input row is included in all groups.
+- `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
+- If the grouping key is multivalued, the input row is included in all groups.

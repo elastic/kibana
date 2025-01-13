@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
@@ -56,6 +58,9 @@ export interface ResponseActionsClientOptionsMock extends ResponseActionsClientO
   esClient: ElasticsearchClientMock;
   casesClient?: CasesClientMock;
 }
+
+export type NormalizedExternalConnectorClientMock =
+  DeeplyMockedKeys<NormalizedExternalConnectorClient>;
 
 const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> => {
   return {
@@ -305,7 +310,7 @@ const createConnectorActionsClientMock = ({
 
 const createNormalizedExternalConnectorClientMock = (
   connectorActionsClientMock: ActionsClientMock = createConnectorActionsClientMock()
-): DeeplyMockedKeys<NormalizedExternalConnectorClient> => {
+): NormalizedExternalConnectorClientMock => {
   const normalizedClient = new NormalizedExternalConnectorClient(
     connectorActionsClientMock,
     loggingSystemMock.createLogger()
@@ -314,7 +319,31 @@ const createNormalizedExternalConnectorClientMock = (
   jest.spyOn(normalizedClient, 'execute');
   jest.spyOn(normalizedClient, 'setup');
 
-  return normalizedClient as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
+  return normalizedClient as NormalizedExternalConnectorClientMock;
+};
+
+const setConnectorActionsClientExecuteResponseMock = (
+  connectorActionsClient: ActionsClientMock | NormalizedExternalConnectorClientMock,
+  subAction: string,
+  response: any
+): void => {
+  const executeMockFn = (connectorActionsClient.execute as jest.Mock).getMockImplementation();
+
+  (connectorActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
+    if (options.params.subAction === subAction) {
+      return responseActionsClientMock.createConnectorActionExecuteResponse({
+        data: response,
+      });
+    }
+
+    if (executeMockFn) {
+      return executeMockFn(options);
+    }
+
+    return responseActionsClientMock.createConnectorActionExecuteResponse({
+      data: {},
+    });
+  });
 };
 
 export const responseActionsClientMock = Object.freeze({
@@ -341,4 +370,5 @@ export const responseActionsClientMock = Object.freeze({
   /** Create a mock connector instance */
   createConnector: createConnectorMock,
   createConnectorActionExecuteResponse: createConnectorActionExecuteResponseMock,
+  setConnectorActionsClientExecuteResponse: setConnectorActionsClientExecuteResponseMock,
 });

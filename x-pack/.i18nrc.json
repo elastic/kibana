@@ -176,7 +176,7 @@
     "xpack.ux": [
       "solutions/observability/plugins/ux"
     ],
-    "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
+    "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
     "xpack.watcher": "platform/plugins/private/watcher"
   },
   "exclude": [

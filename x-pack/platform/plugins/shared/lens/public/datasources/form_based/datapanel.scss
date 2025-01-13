@@ -2,6 +2,14 @@
   width: 100%;
   height: 100%;
   padding: $euiSize $euiSize 0;
+  .unifiedFieldListItemButton.kbnFieldButton {
+    background: none;
+    box-shadow: none;
+    margin-bottom: calc($euiSizeXS / 2);
+  }
+  .unifiedFieldListItemButton__dragging {
+    background: $euiColorBackgroundBasePlain;
+  }
 }
 
 .lnsInnerIndexPatternDataPanel__switcher {

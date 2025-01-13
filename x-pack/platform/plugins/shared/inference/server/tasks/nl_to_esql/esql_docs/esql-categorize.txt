@@ -1,0 +1,30 @@
+# CATEGORIZE
+
+The `CATEGORIZE` function organizes textual data into groups of similar format.
+
+> **Note:** The `CATEGORIZE` function is currently in technical preview and may undergo changes or be removed in future releases.
+
+## Syntax
+
+`CATEGORIZE(field)`
+
+### Parameters
+
+#### field
+
+The expression that is to be categorized.
+
+## Examples
+
+The following example demonstrates how to use `CATEGORIZE` to group server log messages into categories and then aggregate their counts.
+
+```esql
+FROM sample_data
+| STATS count = COUNT() BY category=CATEGORIZE(message)
+```
+
+## Limitations
+
+- `CATEGORIZE` can't be used within other expressions
+- `CATEGORIZE` can't be used with multiple groupings
+- `CATEGORIZE` can't be used or referenced within aggregate functions

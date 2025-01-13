@@ -13,7 +13,8 @@ export interface State {
   connector?: AIConnector;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
-  hasCelInput: boolean;
+  showCelCreateFlyout: boolean;
+  isFlyoutGenerating: boolean;
   result?: {
     pipeline: Pipeline;
     docs: Docs;
@@ -27,7 +28,8 @@ export const initialState: State = {
   connector: undefined,
   integrationSettings: undefined,
   isGenerating: false,
-  hasCelInput: false,
+  showCelCreateFlyout: false,
+  isFlyoutGenerating: false,
   result: undefined,
 };
 
@@ -36,7 +38,8 @@ type Action =
   | { type: 'SET_CONNECTOR'; payload: State['connector'] }
   | { type: 'SET_INTEGRATION_SETTINGS'; payload: State['integrationSettings'] }
   | { type: 'SET_IS_GENERATING'; payload: State['isGenerating'] }
-  | { type: 'SET_HAS_CEL_INPUT'; payload: State['hasCelInput'] }
+  | { type: 'SET_SHOW_CEL_CREATE_FLYOUT'; payload: State['showCelCreateFlyout'] }
+  | { type: 'SET_IS_FLYOUT_GENERATING'; payload: State['isFlyoutGenerating'] }
   | { type: 'SET_GENERATED_RESULT'; payload: State['result'] }
   | { type: 'SET_CEL_INPUT_RESULT'; payload: State['celInputResult'] };
 
@@ -55,8 +58,10 @@ export const reducer = (state: State, action: Action): State => {
       return { ...state, integrationSettings: action.payload };
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
-    case 'SET_HAS_CEL_INPUT':
-      return { ...state, hasCelInput: action.payload };
+    case 'SET_SHOW_CEL_CREATE_FLYOUT':
+      return { ...state, showCelCreateFlyout: action.payload };
+    case 'SET_IS_FLYOUT_GENERATING':
+      return { ...state, isFlyoutGenerating: action.payload };
     case 'SET_GENERATED_RESULT':
       return {
         ...state,
@@ -75,8 +80,9 @@ export interface Actions {
   setConnector: (payload: State['connector']) => void;
   setIntegrationSettings: (payload: State['integrationSettings']) => void;
   setIsGenerating: (payload: State['isGenerating']) => void;
-  setHasCelInput: (payload: State['hasCelInput']) => void;
   setResult: (payload: State['result']) => void;
+  setShowCelCreateFlyout: (payload: State['showCelCreateFlyout']) => void;
+  setIsFlyoutGenerating: (payload: State['isFlyoutGenerating']) => void;
   setCelInputResult: (payload: State['celInputResult']) => void;
   completeStep: () => void;
 }

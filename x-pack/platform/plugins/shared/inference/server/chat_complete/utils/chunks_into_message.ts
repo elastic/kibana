@@ -67,6 +67,9 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
             { content: '', tool_calls: [] as UnvalidatedToolCall[] }
           );
 
+          // some models (Claude not to name it) can have their toolCall index not start at 0, so we remove the null elements
+          concatenatedChunk.tool_calls = concatenatedChunk.tool_calls.filter((call) => !!call);
+
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
           const validatedToolCalls = validateToolCalls<TToolOptions>({

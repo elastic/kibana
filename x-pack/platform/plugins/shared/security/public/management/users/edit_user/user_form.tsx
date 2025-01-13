@@ -272,7 +272,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             isLoading={form.isValidating}
             isInvalid={form.touched.username && !!form.errors.username}
             disabled={disabled || !isNewUser}
-            onChange={eventHandlers.onChange}
+            onChange={disabled || !isNewUser ? undefined : eventHandlers.onChange}
             onBlur={eventHandlers.onBlur}
           />
         </EuiFormRow>

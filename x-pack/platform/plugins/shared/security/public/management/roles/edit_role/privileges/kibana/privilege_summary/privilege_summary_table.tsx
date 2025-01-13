@@ -48,14 +48,31 @@ function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
 }
 
-function showPrivilege(allSpacesSelected: boolean, primaryFeature?: PrimaryFeaturePrivilege) {
+function showPrivilege({
+  allSpacesSelected,
+  primaryFeature,
+  globalPrimaryFeature,
+}: {
+  allSpacesSelected: boolean;
+  primaryFeature?: PrimaryFeaturePrivilege;
+  globalPrimaryFeature?: PrimaryFeaturePrivilege;
+}) {
   if (
     primaryFeature?.name == null ||
     primaryFeature?.disabled ||
-    (primaryFeature.requireAllSpaces && !allSpacesSelected)
+    (primaryFeature?.requireAllSpaces && !allSpacesSelected)
   ) {
     return 'None';
   }
+
+  // If primary feature requires all spaces we cannot rely on primaryFeature.name.
+  // Example:
+  // primaryFeature: feature with requireAllSpaces in space-a has all privileges set to All
+  // globalPrimaryFeature: feature in *AllSpaces has privileges set to Read (this is the correct one to display)
+  if (primaryFeature?.requireAllSpaces && allSpacesSelected) {
+    return globalPrimaryFeature?.name ?? 'None';
+  }
+
   return primaryFeature?.name;
 }
 
@@ -127,6 +144,15 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
     }
     return 0;
   });
+
+  const globalRawPrivilege = rawKibanaPrivileges.find((entry) =>
+    isGlobalPrivilegeDefinition(entry)
+  );
+
+  const globalPrivilege = globalRawPrivilege
+    ? calculator.getEffectiveFeaturePrivileges(globalRawPrivilege)
+    : null;
+
   const privilegeColumns = rawKibanaPrivileges.map((entry) => {
     const key = getColumnKey(entry);
     return {
@@ -161,10 +187,11 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               hasCustomizedSubFeaturePrivileges ? 'additionalPrivilegesGranted' : ''
             }`}
           >
-            {showPrivilege(
-              props.spaces.some((space) => space.id === ALL_SPACES_ID),
-              primary
-            )}{' '}
+            {showPrivilege({
+              allSpacesSelected: props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              primaryFeature: primary,
+              globalPrimaryFeature: globalPrivilege?.[record.featureId]?.primary,
+            })}{' '}
             {iconTip}
           </span>
         );
@@ -178,12 +205,14 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   }
   columns.push(featureColumn, ...privilegeColumns);
 
-  const privileges = rawKibanaPrivileges.reduce((acc, entry) => {
+  const privileges = rawKibanaPrivileges.reduce<
+    Record<string, [string[], EffectiveFeaturePrivileges]>
+  >((acc, entry) => {
     return {
       ...acc,
-      [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
+      [getColumnKey(entry)]: [entry.spaces, calculator.getEffectiveFeaturePrivileges(entry)],
     };
-  }, {} as Record<string, EffectiveFeaturePrivileges>);
+  }, {});
 
   const accordions: any[] = [];
 
@@ -210,11 +239,15 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       </EuiFlexGroup>
     );
 
+    const categoryPrivileges = Object.fromEntries(
+      Object.entries(privileges).map(([key, [, featurePrivileges]]) => [key, featurePrivileges])
+    );
+
     const categoryItems = featuresInCategory.map((feature) => {
       return {
         feature,
         featureId: feature.id,
-        ...privileges,
+        ...categoryPrivileges,
       };
     });
 
@@ -241,7 +274,10 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               [featureId]: (
                 <PrivilegeSummaryExpandedRow
                   feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
-                  effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
+                  effectiveFeaturePrivileges={Object.values(privileges).map(([spaces, privs]) => [
+                    spaces,
+                    privs[featureId],
+                  ])}
                 />
               ),
             };

@@ -9,5 +9,4 @@
  * Exporting versioned APIs types
  */
 export * from './latest';
-export * as logEntriesV1 from './log_entries/v1';
 export * as logViewsV1 from './log_views/v1';

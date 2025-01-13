@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '@elastic/eui';
 
-export const HEALTH_HEX_CODES = {
-  successful: euiThemeVars.euiColorSuccess,
-  partial: euiThemeVars.euiColorWarning,
-  skipped: '#DA8B45',
-  failed: euiThemeVars.euiColorDanger,
-};
+export function useHealthHexCodes() {
+  const { euiTheme } = useEuiTheme();
+  return {
+    successful: euiTheme.colors.backgroundFilledSuccess,
+    partial: euiTheme.colors.backgroundLightWarning,
+    skipped: euiTheme.colors.backgroundFilledWarning,
+    failed: euiTheme.colors.backgroundFilledDanger,
+  };
+}
 
-export function getHeathBarLinearGradient(
+export function useHeathBarLinearGradient(
   successful: number,
   partial: number,
   skipped: number,
   failed: number
 ) {
+  const healthHexCodes = useHealthHexCodes();
+
   const total = successful + partial + skipped + failed;
   const stops: string[] = [];
   let startPercent: number = 0;
@@ -37,10 +42,10 @@ export function getHeathBarLinearGradient(
     startPercent = endPercent;
   }
 
-  addStop(successful, HEALTH_HEX_CODES.successful);
-  addStop(partial, HEALTH_HEX_CODES.partial);
-  addStop(skipped, HEALTH_HEX_CODES.skipped);
-  addStop(failed, HEALTH_HEX_CODES.failed);
+  addStop(successful, healthHexCodes.successful);
+  addStop(partial, healthHexCodes.partial);
+  addStop(skipped, healthHexCodes.skipped);
+  addStop(failed, healthHexCodes.failed);
 
   const printedStops = stops
     .map((stop, index) => {

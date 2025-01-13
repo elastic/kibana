@@ -63,13 +63,8 @@ export abstract class ActionRunner {
 
   protected abstract processAgents(agents: Agent[]): Promise<{ actionId: string }>;
 
-  /**
-   * Common runner logic accross all agent bulk actions
-   * Starts action execution immeditalely, asynchronously
-   * On errors, starts a task with Task Manager to retry max 3 times
-   * If the last batch was stored in state, retry continues from there (searchAfter)
-   */
-  public async runActionAsyncWithRetry(): Promise<{ actionId: string }> {
+  // first attempt to run bulk action async in a task, called from API handlers
+  public async runActionAsyncTask(): Promise<{ actionId: string }> {
     appContextService
       .getLogger()
       .info(
@@ -78,6 +73,33 @@ export abstract class ActionRunner {
         }`
       );
 
+    if (!this.bulkActionsResolver) {
+      this.bulkActionsResolver = await appContextService.getBulkActionsResolver();
+    }
+
+    const taskId = this.bulkActionsResolver!.getTaskId(
+      this.actionParams.actionId!,
+      this.getTaskType()
+    );
+    await this.bulkActionsResolver!.run(
+      this.actionParams,
+      {
+        ...this.retryParams,
+        retryCount: (this.retryParams.retryCount ?? 0) + 1,
+      },
+      this.getTaskType(),
+      taskId
+    );
+    return { actionId: this.actionParams.actionId! };
+  }
+
+  /**
+   * Common runner logic accross all agent bulk actions
+   * Starts action execution immeditalely, asynchronously
+   * On errors, starts a task with Task Manager to retry max 3 times
+   * If the last batch was stored in state, retry continues from there (searchAfter)
+   */
+  public async runActionAsyncWithRetry(): Promise<{ actionId: string }> {
     if (!this.bulkActionsResolver) {
       this.bulkActionsResolver = await appContextService.getBulkActionsResolver();
     }

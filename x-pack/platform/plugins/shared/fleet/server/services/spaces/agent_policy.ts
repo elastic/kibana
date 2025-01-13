@@ -154,21 +154,6 @@ export async function updateAgentPolicySpaces({
     ignore_unavailable: true,
     refresh: true,
   });
-  await esClient.updateByQuery({
-    index: AGENTS_INDEX,
-    query: {
-      bool: {
-        must: {
-          terms: {
-            policy_id: [agentPolicyId],
-          },
-        },
-      },
-    },
-    script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
-    ignore_unavailable: true,
-    refresh: true,
-  });
 
   const agentIndexExists = await esClient.indices.exists({
     index: AGENTS_INDEX,
@@ -193,6 +178,21 @@ export async function updateAgentPolicySpaces({
         if (agents.length === 0) {
           hasMore = false;
           break;
+        }
+
+        const agentBulkRes = await esClient.bulk({
+          operations: agents.flatMap(({ id }) => [
+            { update: { _id: id, _index: AGENTS_INDEX, retry_on_conflict: 5 } },
+            { doc: { namespaces: newSpaceIds } },
+          ]),
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+        });
+
+        for (const item of agentBulkRes.items) {
+          if (item.update?.error) {
+            throw item.update?.error;
+          }
         }
 
         const lastAgent = agents[agents.length - 1];

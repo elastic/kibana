@@ -16,11 +16,14 @@ import {
   DATASET_QUALITY_TEST_PASSWORD,
   DatasetQualityUsername,
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
-import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
+import {
+  fleetPackageRegistryDockerImage,
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
+} from '@kbn/test';
 import path from 'path';
 import supertest from 'supertest';
 import { UrlObject, format } from 'url';
-import { dockerImage } from '../../fleet_api_integration/config.base';
 import { DatasetQualityFtrConfigName } from '../configs';
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
@@ -119,7 +122,7 @@ export function createTestConfig(
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,

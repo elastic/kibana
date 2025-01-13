@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-const DEFAULT_ELSER = '.elser-2-elasticsearch';
+export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 
 const mappings: MappingTypeMapping = {
   dynamic: 'strict',
@@ -46,5 +46,8 @@ export const createTargetIndex = async ({
   await client.indices.create({
     index: indexName,
     mappings,
+    settings: {
+      'index.mapping.semantic_text.use_legacy_format': false,
+    },
   });
 };

@@ -9,6 +9,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
   /**
+   * -- Deprecated --
    * Enables whether the user is able to utilize the LLM to generate the CEL input configuration.
    */
   generateCel: false,

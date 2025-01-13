@@ -106,9 +106,7 @@ describe('find', () => {
         await findSuccess(client, repository, { type });
 
         expect(client.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({ ...query }),
-          }),
+          expect.objectContaining({ ...query }),
           expect.anything()
         );
       });
@@ -138,24 +136,22 @@ describe('find', () => {
         await findSuccess(client, repository, { type, fields: ['title'] });
         expect(client.search).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              _source: [
-                `${type}.title`,
-                'namespace',
-                'namespaces',
-                'type',
-                'references',
-                'migrationVersion',
-                'coreMigrationVersion',
-                'typeMigrationVersion',
-                'managed',
-                'updated_at',
-                'updated_by',
-                'created_at',
-                'created_by',
-                'originId',
-              ],
-            }),
+            _source: [
+              `${type}.title`,
+              'namespace',
+              'namespaces',
+              'type',
+              'references',
+              'migrationVersion',
+              'coreMigrationVersion',
+              'typeMigrationVersion',
+              'managed',
+              'updated_at',
+              'updated_by',
+              'created_at',
+              'created_by',
+              'originId',
+            ],
           }),
           expect.anything()
         );

@@ -142,8 +142,16 @@ export const Comment = z.string();
 export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
+/**
+ * The host agent type (optional). Defaults to endpoint.
+ */
 export type AgentTypes = z.infer<typeof AgentTypes>;
-export const AgentTypes = z.enum(['endpoint', 'sentinel_one', 'crowdstrike']);
+export const AgentTypes = z.enum([
+  'endpoint',
+  'sentinel_one',
+  'crowdstrike',
+  'microsoft_defender_endpoint',
+]);
 export type AgentTypesEnum = typeof AgentTypes.enum;
 export const AgentTypesEnum = AgentTypes.enum;
 

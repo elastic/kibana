@@ -20,7 +20,10 @@ export interface CelInputGraphParams {
 }
 
 export interface CelInputStateDetails {
-  name: string;
+  configurable: boolean;
   default: string | number | boolean;
+  description: string;
+  name: string;
   redact: boolean;
+  type: string;
 }
