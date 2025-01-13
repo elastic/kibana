@@ -8,8 +8,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '../../dashboard_constants';
-import { panelPlacementStrings } from '../_dashboard_container_strings';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (
@@ -100,6 +100,11 @@ export const runPanelPlacementStrategy = (
         otherPanels: currentPanels,
       };
     default:
-      throw new Error(panelPlacementStrings.getUnknownStrategyError(strategy));
+      throw new Error(
+        i18n.translate('dashboard.panelPlacement.unknownStrategyError', {
+          defaultMessage: 'Unknown panel placement strategy: {strategy}',
+          values: { strategy },
+        })
+      );
   }
 };
