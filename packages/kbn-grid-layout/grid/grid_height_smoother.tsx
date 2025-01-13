@@ -74,7 +74,7 @@ export const GridHeightSmoother = ({
         overflow-anchor: none;
         transition: height 500ms linear;
 
-        &:has(.kbnGrid--hasExpandedPanel) {
+        &:has(.kbnGridPanel--expanded) {
           height: 100% !important;
           position: relative;
           transition: none;

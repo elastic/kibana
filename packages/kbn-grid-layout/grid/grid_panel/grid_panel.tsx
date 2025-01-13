@@ -156,7 +156,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
           });
 
         /**
-         * This subscription adds and/or removes the necessary attribute for expanded panel styling
+         * This subscription adds and/or removes the necessary class name for expanded panel styling
          */
         const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
           (expandedPanelId) => {
@@ -166,9 +166,9 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             if (!ref || !panel) return;
 
             if (expandedPanelId && expandedPanelId === panelId) {
-              ref.setAttribute('data-expanded-panel', '');
+              ref.classList.add('kbnGridPanel--expanded');
             } else {
-              ref.removeAttribute('data-expanded-panel');
+              ref.classList.remove('kbnGridPanel--expanded');
             }
           }
         );

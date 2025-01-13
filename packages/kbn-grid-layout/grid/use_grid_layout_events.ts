@@ -111,7 +111,7 @@ export const useGridLayoutEvents = ({
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
 
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
-      const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 3;
+      const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
 
       const previewRect = {
         left: isResize

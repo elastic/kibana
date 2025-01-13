@@ -127,13 +127,10 @@ export const GridLayout = ({
         layoutRef.current?.classList.remove('kbnGrid--mobileView');
       }
 
-      if (currentExpandedPanelId) {
-        layoutRef.current?.classList.add('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
-      } else if (currentAccessMode === 'VIEW') {
+      if (currentAccessMode === 'VIEW' || currentExpandedPanelId) {
         layoutRef.current?.classList.add('kbnGrid--static');
-        layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
       } else {
-        layoutRef.current?.classList.remove('kbnGrid--static', 'kbnGrid--hasExpandedPanel');
+        layoutRef.current?.classList.remove('kbnGrid--static');
       }
     });
 
@@ -179,7 +176,7 @@ export const GridLayout = ({
         }}
         className="kbnGrid"
         css={css`
-          &.kbnGrid--hasExpandedPanel {
+          &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}
           }
           &.kbnGrid--mobileView {
@@ -209,7 +206,7 @@ const singleColumnStyles = css`
 const expandedPanelStyles = css`
   height: 100%;
 
-  & .kbnGridRowContainer:has(.kbnGridPanel[data-expanded-panel]) {
+  & .kbnGridRowContainer:has(.kbnGridPanel--expanded) {
     // targets the grid row container that contains the expanded panel
     .kbnGridRowHeader {
       height: 0px; // used instead of 'display: none' due to a11y concerns
@@ -218,10 +215,10 @@ const expandedPanelStyles = css`
       display: block !important; // overwrite grid display
       height: 100%;
       .kbnGridPanel {
-        &[data-expanded-panel] {
+        &.kbnGridPanel--expanded {
           height: 100% !important;
         }
-        &:not([data-expanded-panel]) {
+        &:not(.kbnGridPanel--expanded) {
           // hide the non-expanded panels
           position: absolute;
           top: -9999px;
@@ -232,7 +229,7 @@ const expandedPanelStyles = css`
     }
   }
 
-  & .kbnGridRowContainer:not(:has(.kbnGridPanel[data-expanded-panel])) {
+  & .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded)) {
     // targets the grid row containers that **do not** contain the expanded panel
     position: absolute;
     top: -9999px;
