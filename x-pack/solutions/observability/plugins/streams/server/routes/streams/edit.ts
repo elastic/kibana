@@ -10,6 +10,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import {
+  getParentId,
   isRootStream,
   isWiredStream,
   isWiredStreamConfig,
@@ -19,7 +20,6 @@ import {
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import { getParentId } from '@kbn/streams-schema/src/helpers/hierarchy';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
