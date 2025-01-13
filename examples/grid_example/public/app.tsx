@@ -22,7 +22,9 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
@@ -58,6 +60,8 @@ export const GridExample = ({
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
+
+  const { euiTheme } = useEuiTheme();
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
   const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
@@ -223,25 +227,41 @@ export const GridExample = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <GridLayout
-            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
-            expandedPanelId={expandedPanelId}
-            layout={currentLayout}
-            gridSettings={{
-              gutterSize: DASHBOARD_MARGIN_SIZE,
-              rowHeight: DASHBOARD_GRID_HEIGHT,
-              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-            }}
-            renderPanelContents={renderPanelContents}
-            onLayoutChange={(newLayout) => {
-              const { panels, rows } = gridLayoutToDashboardPanelMap(
-                mockDashboardApi.panels$.getValue(),
-                newLayout
-              );
-              mockDashboardApi.panels$.next(panels);
-              mockDashboardApi.rows$.next(rows);
-            }}
-          />
+          <div
+            css={css`
+              .kbnGridLayout--targettedRow {
+                background-position: top - ${DASHBOARD_MARGIN_SIZE / 2}px left -
+                  ${DASHBOARD_MARGIN_SIZE / 2}px;
+                background-size: calc((var(--kbnGridColumnWidth) + ${DASHBOARD_MARGIN_SIZE}) * 1px)
+                  ${DASHBOARD_GRID_HEIGHT + DASHBOARD_MARGIN_SIZE}px;
+                background-image: radial-gradient(
+                  at top left,
+                  ${euiTheme.colors.accentSecondary} 2px,
+                  transparent 2px
+                );
+              }
+            `}
+          >
+            <GridLayout
+              accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+              expandedPanelId={expandedPanelId}
+              layout={currentLayout}
+              gridSettings={{
+                gutterSize: DASHBOARD_MARGIN_SIZE,
+                rowHeight: DASHBOARD_GRID_HEIGHT,
+                columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+              }}
+              renderPanelContents={renderPanelContents}
+              onLayoutChange={(newLayout) => {
+                const { panels, rows } = gridLayoutToDashboardPanelMap(
+                  mockDashboardApi.panels$.getValue(),
+                  newLayout
+                );
+                mockDashboardApi.panels$.next(panels);
+                mockDashboardApi.rows$.next(rows);
+              }}
+            />
+          </div>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </KibanaRenderContextProvider>

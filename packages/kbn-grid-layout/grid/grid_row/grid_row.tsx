@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import {
-  GridLayoutStateManager,
-  GridRowData,
-  UserInteractionEvent,
-  PanelInteractionEvent,
-} from '../types';
+import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';
-import { isTouchEvent, isMouseEvent } from '../utils/sensors';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -47,23 +41,10 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
-    const { euiTheme } = useEuiTheme();
-
-    const getRowCount = useCallback(
-      (row: GridRowData) => {
-        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-          return Math.max(acc, panel.row + panel.height);
-        }, 0);
-        return maxRow || 1;
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [rowIndex]
-    );
     const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
       const { gutterSize, columnCount, rowHeight } = runtimeSettings;
 
@@ -73,45 +54,26 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           ${columnCount},
           calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
         );
-        grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
+        grid-auto-rows: ${rowHeight}px;
       `;
-    }, [gridLayoutStateManager, getRowCount, rowIndex]);
+    }, [gridLayoutStateManager]);
 
     useEffect(
       () => {
         /** Update the styles of the grid row via a subscription to prevent re-renders */
         const interactionStyleSubscription = combineLatest([
           gridLayoutStateManager.interactionEvent$,
-          gridLayoutStateManager.gridLayout$,
-          gridLayoutStateManager.runtimeSettings$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([interactionEvent, gridLayout, runtimeSettings]) => {
+          .subscribe(([interactionEvent]) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
 
-            const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-
-            rowRef.style.gridTemplateRows = `repeat(${getRowCount(
-              gridLayout[rowIndex]
-            )}, ${rowHeight}px)`;
-
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
-              // apply "targetted row" styles
-              rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
-                gutterSize / 2
-              }px`;
-              rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
-                rowHeight + gutterSize
-              }px`;
-              rowRef.style.backgroundImage = `radial-gradient(at top left, ${euiTheme.colors.accentSecondary} 2px, transparent 2px)`;
+              rowRef.classList.add('kbnGridLayout--targettedRow');
             } else {
-              // undo any "targetted row" styles
-              rowRef.style.backgroundPosition = ``;
-              rowRef.style.backgroundSize = ``;
-              rowRef.style.backgroundImage = ``;
-              rowRef.style.backgroundColor = `transparent`;
+              rowRef.classList.remove('kbnGridLayout--targettedRow');
             }
           });
 

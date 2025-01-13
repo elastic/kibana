@@ -108,6 +108,7 @@ export const useGridLayoutState = ({
         const columnPixelWidth =
           (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
           gridSettings.columnCount;
+        document.documentElement.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
         gridLayoutStateManager.isMobileView$.next(
