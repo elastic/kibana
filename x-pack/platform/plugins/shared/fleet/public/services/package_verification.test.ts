@@ -87,9 +87,7 @@ describe('isPackageUnverified', () => {
   });
   describe('When experimental feature is enabled', () => {
     beforeEach(() => {
-      mockGet.mockReturnValue({
-        packageVerification: true,
-      } as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
+      mockGet.mockReturnValue({} as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
     });
     it('Should return false for a package with no saved object', () => {
       const noSoPkg = createPackage();

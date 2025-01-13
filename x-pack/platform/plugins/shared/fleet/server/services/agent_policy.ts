@@ -1737,10 +1737,6 @@ class AgentPolicyService {
 
     const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
 
-    const config = appContextService.getConfig();
-    const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
-    const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
-
     await scheduleDeployAgentPoliciesTask(
       appContextService.getTaskManagerStart()!,
       updatedPoliciesSuccess.map((policy) => ({

@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
@@ -853,8 +852,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAvailableVersionsHandler
     );
-
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
 
   // route used by export CSV feature on the UI to generate report
   router.versioned

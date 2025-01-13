@@ -15,15 +15,12 @@ import {
   GetUninstallTokensMetadataRequestSchema,
   GetUninstallTokensMetadataResponseSchema,
 } from '../../types/rest_spec/uninstall_token';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { genericErrorResponse } from '../schema/errors';
 
 import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
   router.versioned
     .get({
       path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
