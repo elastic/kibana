@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FindingsEvaluationsQueryResult } from './get_stats';
-import { getStatsFromFindingsEvaluationsAggs } from './get_stats';
+import { FindingsEvaluationsQueryResult, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { calculatePostureScore, roundScore } from '../../../common/utils/helpers';
 
 const standardQueryResult: FindingsEvaluationsQueryResult = {

@@ -9,12 +9,11 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { Assign } from '@kbn/utility-types';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { Assign } from '@kbn/utility-types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import type { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
-import type { AggExpressionType, AggExpressionFunctionArgs} from '..';
-import { BUCKET_TYPES } from '..';
+import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggFilterFnName = 'aggFilter';
 

@@ -10,8 +10,7 @@
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import dateMath from '@kbn/datemath';
 import { omitBy } from 'lodash';
-import type { TimeRange, RangeFilterParams } from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
+import { buildRangeFilter, TimeRange, RangeFilterParams } from '@kbn/es-query';
 import type { Moment } from 'moment';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRangeBounds } from '../..';

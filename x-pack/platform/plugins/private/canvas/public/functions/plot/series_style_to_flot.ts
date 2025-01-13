@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { SeriesStyle } from '../../../types';
+import { SeriesStyle } from '../../../types';
 
 export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
   if (!seriesStyle) {

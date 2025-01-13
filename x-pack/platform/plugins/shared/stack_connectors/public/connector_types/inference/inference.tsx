@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
+import { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import {
   INFERENCE_CONNECTOR_ID,
   INFERENCE_CONNECTOR_TITLE,
 } from '../../../common/inference/constants';
-import type { InferenceActionParams, InferenceConnector } from './types';
+import { InferenceActionParams, InferenceConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];

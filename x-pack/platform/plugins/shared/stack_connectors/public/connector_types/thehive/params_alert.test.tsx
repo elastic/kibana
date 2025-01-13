@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { SUB_ACTION } from '../../../common/thehive/constants';
-import type { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionCreateAlertParams = {

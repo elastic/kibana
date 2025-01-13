@@ -12,7 +12,8 @@ import { first, skip, toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
-import type {
+import {
+  parseExpression,
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,

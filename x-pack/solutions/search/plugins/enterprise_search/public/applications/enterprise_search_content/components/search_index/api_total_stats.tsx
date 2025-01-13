@@ -9,8 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import type { EuiStatProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiStatProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

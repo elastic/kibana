@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EventLogger } from './event_logger';
-import { Actions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Screenshot } from './types';
 

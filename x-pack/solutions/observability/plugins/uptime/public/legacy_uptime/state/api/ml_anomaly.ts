@@ -6,16 +6,16 @@
  */
 
 import moment from 'moment';
-import type {
+import {
   DataRecognizerConfigResponse,
   JobExistResult,
   MlCapabilitiesResponse,
 } from '@kbn/ml-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { apiService } from './utils';
-import type { AnomalyRecords, AnomalyRecordsParams } from '../actions';
+import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_MODULE_ID } from '../../../../common/constants';
-import type {
+import {
   CreateMLJobSuccess,
   DeleteJobResults,
   HeartbeatIndicesParam,

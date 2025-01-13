@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { State } from './bundle_cache';
-import { BundleCache } from './bundle_cache';
+import { BundleCache, State } from './bundle_cache';
 
 jest.mock('fs');
 const mockReadFileSync: jest.Mock = jest.requireMock('fs').readFileSync;

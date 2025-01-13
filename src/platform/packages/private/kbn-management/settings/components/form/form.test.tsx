@@ -10,16 +10,15 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
-import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 
-import type { FormProps } from './form';
-import { Form } from './form';
+import { Form, FormProps } from './form';
 import { wrap, createFormServicesMock, uiSettingsClientMock } from './mocks';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar/bottom_bar';
-import type { FormServices } from './types';
+import { FormServices } from './types';
 
 const settingsMock = getSettingsMock();
 const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);

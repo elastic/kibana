@@ -8,8 +8,7 @@
  */
 
 import type { Scope } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
 export function checkNodeForExistingDataTestSubjProp(
   node: TSESTree.JSXOpeningElement,

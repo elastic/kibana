@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RawAlertInstance } from '../../common';
-import type { AlertingConfig } from '../config';
+import { RawAlertInstance } from '../../common';
+import { AlertingConfig } from '../config';
 
 interface Resolvable<T> {
   resolve: (arg: T) => void;

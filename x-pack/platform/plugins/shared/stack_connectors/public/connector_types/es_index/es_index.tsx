@@ -12,7 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERT_HISTORY_PREFIX } from '@kbn/triggers-actions-ui-plugin/public';
-import type { EsIndexConfig, IndexActionParams } from '../types';
+import { EsIndexConfig, IndexActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {

@@ -8,18 +8,17 @@
  */
 
 import { isEqual, omit } from 'lodash';
-import type { IAggConfig} from '@kbn/data-plugin/common';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataViewFieldBase } from '@kbn/es-query';
-import type { SchemaConfig } from '../../types';
-import type {
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewFieldBase } from '@kbn/es-query';
+import { SchemaConfig } from '../../types';
+import {
   AggBasedColumn,
   MetricsWithoutSpecialParams,
   ParentPipelineMetric,
   SiblingPipelineMetric,
 } from './convert';
-import type { ColumnWithMeta } from '../types';
+import { ColumnWithMeta } from '../types';
 import { convertToSchemaConfig } from '../../vis_schemas';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;

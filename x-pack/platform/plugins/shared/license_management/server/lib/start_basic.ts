@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface StartBasicArg {
   acknowledge: boolean;

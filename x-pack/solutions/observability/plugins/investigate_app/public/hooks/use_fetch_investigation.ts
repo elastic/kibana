@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { GetInvestigationResponse } from '@kbn/investigation-shared';
-import type {
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
+import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
+  useQuery,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';

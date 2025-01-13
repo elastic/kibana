@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { ChildProcess } from 'child_process';
-import { spawn } from 'child_process';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
+import { ChildProcess, spawn } from 'child_process';
+import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
-import type { AgentManagerParams } from './agent';
+import { AgentManagerParams } from './agent';
 
 export class FleetManager extends Manager {
   private fleetProcess?: ChildProcess;

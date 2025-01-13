@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ApiRule} from './common_transformations';
-import { transformRule } from './common_transformations';
+import { ApiRule, transformRule } from './common_transformations';
 import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
 
 beforeEach(() => jest.resetAllMocks());

@@ -11,10 +11,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalettes } from '@kbn/palettes';
 import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
-import type { ColorMapping } from './config';
+import { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
 
 export interface ColorMappingInputCategoricalData {

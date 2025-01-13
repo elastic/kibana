@@ -12,12 +12,11 @@ import { catchError, takeUntil } from 'rxjs';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
+import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
-import type { NewsfeedApi} from './lib/api';
-import { getApi, NewsfeedApiEndpoint } from './lib/api';
+import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;

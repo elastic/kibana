@@ -8,12 +8,11 @@
  */
 
 import { times } from 'lodash';
-import type { HttpMethod} from '../apm/span';
-import { elasticsearchSpan, httpExitSpan, redisSpan, sqliteSpan } from '../apm/span';
-import type { BaseSpan } from '../apm/base_span';
-import type { Instance } from '../apm/instance';
-import type { Transaction } from '../apm/transaction';
-import type { SpanParams } from '../apm/apm_fields';
+import { elasticsearchSpan, httpExitSpan, HttpMethod, redisSpan, sqliteSpan } from '../apm/span';
+import { BaseSpan } from '../apm/base_span';
+import { Instance } from '../apm/instance';
+import { Transaction } from '../apm/transaction';
+import { SpanParams } from '../apm/apm_fields';
 
 export class DistributedTrace {
   timestamp: number;

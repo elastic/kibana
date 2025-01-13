@@ -9,12 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
+import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin} from '@kbn/core/server';
-import {
+  Plugin,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';

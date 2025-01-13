@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import type { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { MetaParameter } from '../../field_parameters';
 import { AdvancedParametersSection, EditFieldFormRow, BasicParametersSection } from '../edit_field';
 

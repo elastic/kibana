@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 
 /**
  * {@link IUiSettingsClient} wrapper to ensure uiSettings requested only once within a single KibanaRequest,

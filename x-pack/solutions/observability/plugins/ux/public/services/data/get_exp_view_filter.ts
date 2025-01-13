@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
+import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
-import type { UrlParams } from '../../context/url_params_context/types';
+import { UrlParams } from '../../context/url_params_context/types';
 import { uxLocalUIFilterNames, uxLocalUIFilters } from '../../../common/ux_ui_filter';
-import type { UxUIFilters } from '../../../typings/ui_filters';
+import { UxUIFilters } from '../../../typings/ui_filters';
 
 export function getExploratoryViewFilter(uiFilters: UxUIFilters, urlParams: UrlParams) {
   const { searchTerm } = urlParams;

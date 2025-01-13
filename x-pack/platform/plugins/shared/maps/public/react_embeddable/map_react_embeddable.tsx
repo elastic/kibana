@@ -9,9 +9,8 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import type { ReactEmbeddableFactory} from '@kbn/embeddable-plugin/public';
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   apiIsOfType,
   areTriggersDisabled,
@@ -41,8 +40,8 @@ import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
 import { extractReferences } from '../../common/migrations/references';
-import type { MapAttributes } from '../../common/content_management';
-import type { MapSettings } from '../../common/descriptor_types';
+import { MapAttributes } from '../../common/content_management';
+import { MapSettings } from '../../common/descriptor_types';
 import { isMapRendererApi } from './map_renderer/types';
 
 export function getControlledBy(id: string) {

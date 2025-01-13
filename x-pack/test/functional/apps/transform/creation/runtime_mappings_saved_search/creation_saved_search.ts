@@ -7,9 +7,14 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } from '../../helpers';
-import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import {
+  GroupByEntry,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
+} from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

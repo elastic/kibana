@@ -9,9 +9,9 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { DashboardCreationOptions } from '../..';
+import { DashboardCreationOptions } from '../..';
 import { createDashboardEditUrl } from '../../dashboard_constants';
-import type { LoadDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { screenshotModeService, spacesService } from '../../services/kibana_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
 

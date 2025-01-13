@@ -14,7 +14,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import type { Command } from './types';
+import { Command } from './types';
 
 export const snapshot: Command = {
   description: 'Downloads and run from a nightly snapshot',

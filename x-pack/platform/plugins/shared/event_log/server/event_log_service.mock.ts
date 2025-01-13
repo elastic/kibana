@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEventLogService } from './types';
+import { IEventLogService } from './types';
 import { eventLoggerMock } from './event_logger.mock';
 
 const createEventLogServiceMock = () => {

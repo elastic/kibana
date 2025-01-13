@@ -9,8 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Observable} from 'rxjs';
-import { ReplaySubject, fromEventPattern, merge, timer, BehaviorSubject } from 'rxjs';
+import { Observable, ReplaySubject, fromEventPattern, merge, timer, BehaviorSubject } from 'rxjs';
 import { map, switchMap, filter, debounce } from 'rxjs';
 import type { View, Spec } from 'vega';
 import type { Assign } from '@kbn/utility-types';

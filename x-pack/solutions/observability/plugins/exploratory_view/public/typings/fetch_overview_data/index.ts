@@ -6,7 +6,7 @@
  */
 
 import type { ApmIndicesConfig, UXMetrics } from '@kbn/observability-shared-plugin/public';
-import type { ObservabilityApp } from '@kbn/observability-shared-plugin/typings/common';
+import { ObservabilityApp } from '@kbn/observability-shared-plugin/typings/common';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';

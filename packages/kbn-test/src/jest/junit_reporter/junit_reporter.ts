@@ -14,8 +14,7 @@ import xmlBuilder from 'xmlbuilder';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Config } from '@jest/types';
-import type { AggregatedResult, Test} from '@jest/reporters';
-import { BaseReporter } from '@jest/reporters';
+import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../../mocha/xml';
 import { getUniqueJunitReportPath } from '../../report_path';

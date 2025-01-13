@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases/helpers';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const owner = SECURITY_SOLUTION_OWNER;
 

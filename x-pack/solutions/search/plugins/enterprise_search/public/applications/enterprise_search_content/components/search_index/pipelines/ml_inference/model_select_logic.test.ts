@@ -7,11 +7,13 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import type { HttpError } from '../../../../../../../common/types/api';
+import { HttpError } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
-import type { CreateModelResponse } from '../../../../api/ml_models/create_model_api_logic';
-import { CreateModelApiLogic } from '../../../../api/ml_models/create_model_api_logic';
+import {
+  CreateModelApiLogic,
+  CreateModelResponse,
+} from '../../../../api/ml_models/create_model_api_logic';
 import { StartModelApiLogic } from '../../../../api/ml_models/start_model_api_logic';
 
 import { ModelSelectLogic } from './model_select_logic';

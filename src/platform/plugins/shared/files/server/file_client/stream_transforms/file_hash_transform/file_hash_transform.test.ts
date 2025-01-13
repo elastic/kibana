@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
+import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 import { createFileHashTransform } from '../../..';
-import type { File as IFile } from '../../../../common';
+import { File as IFile } from '../../../../common';
 import { Readable } from 'stream';
 import {
   FileKindsRegistryImpl,

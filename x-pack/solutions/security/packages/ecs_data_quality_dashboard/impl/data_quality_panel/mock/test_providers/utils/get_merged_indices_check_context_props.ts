@@ -6,7 +6,7 @@
  */
 
 import { getCheckStateStub } from '../../../stub/get_check_state_stub';
-import type {
+import {
   UseIndicesCheckCheckState,
   UseIndicesCheckReturnValue,
 } from '../../../hooks/use_indices_check/types';

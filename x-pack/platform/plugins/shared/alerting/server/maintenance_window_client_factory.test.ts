@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import type {
-  MaintenanceWindowClientFactoryOpts} from './maintenance_window_client_factory';
 import {
-  MaintenanceWindowClientFactory
+  MaintenanceWindowClientFactory,
+  MaintenanceWindowClientFactoryOpts,
 } from './maintenance_window_client_factory';
 import {
   savedObjectsClientMock,
@@ -17,7 +16,7 @@ import {
   uiSettingsServiceMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 

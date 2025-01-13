@@ -10,8 +10,7 @@
 import { isUndefined, uniq, find } from 'lodash';
 import React from 'react';
 import moment from 'moment';
-import type { Unit } from '@kbn/datemath';
-import dateMath from '@kbn/datemath';
+import dateMath, { Unit } from '@kbn/datemath';
 import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {

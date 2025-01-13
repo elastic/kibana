@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { InMemoryConnector } from '../../../../..';
-import type { ActionsClientContext } from '../../../../../actions_client';
-import type { Connector } from '../../../types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import { InMemoryConnector } from '../../../../..';
+import { ActionsClientContext } from '../../../../../actions_client';
+import { Connector } from '../../../types';
 
 export interface GetAllParams {
   includeSystemActions?: boolean;

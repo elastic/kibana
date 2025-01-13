@@ -10,8 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getExceptionListItemSchemaMock } from './index.mock';
-import type { ExceptionListItemSchema } from '.';
-import { exceptionListItemSchema } from '.';
+import { ExceptionListItemSchema, exceptionListItemSchema } from '.';
 
 describe('exception_list_item_schema', () => {
   test('it should validate a typical exception list item response', () => {

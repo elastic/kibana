@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type React from 'react';
-import type {
+import React from 'react';
+import {
   UseFormReturn,
   ControllerRenderProps,
   ControllerFieldState,
@@ -14,7 +14,7 @@ import type {
   UseControllerProps,
   FieldValues,
 } from 'react-hook-form';
-import type {
+import {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
@@ -22,7 +22,7 @@ import type {
   ResponseCheckJSON,
   RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
-import type { AlertConfigKey } from './constants';
+import { AlertConfigKey } from './constants';
 
 export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
 
@@ -34,7 +34,7 @@ export interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
-export type * from '../../../../../common/types/monitor_validation';
+export * from '../../../../../common/types/monitor_validation';
 
 export interface FormLocation {
   id: string;

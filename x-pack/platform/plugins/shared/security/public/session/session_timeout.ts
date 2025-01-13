@@ -15,9 +15,9 @@ import type {
   Toast,
 } from '@kbn/core/public';
 
-import type { StartServices } from '..';
 import { createSessionExpirationToast } from './session_expiration_toast';
 import type { SessionExpired } from './session_expired';
+import type { StartServices } from '..';
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 

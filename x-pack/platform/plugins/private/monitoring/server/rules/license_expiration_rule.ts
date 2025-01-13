@@ -6,13 +6,13 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import type { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
-import type {
+import {
   AlertData,
   AlertCluster,
   AlertState,

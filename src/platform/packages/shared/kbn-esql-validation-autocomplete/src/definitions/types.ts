@@ -15,7 +15,7 @@ import type {
   ESQLFunction,
   ESQLMessage,
 } from '@kbn/esql-ast';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
+import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
  * All supported field types in ES|QL. This is all the types

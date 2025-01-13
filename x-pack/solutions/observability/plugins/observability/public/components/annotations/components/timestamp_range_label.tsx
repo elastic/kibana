@@ -7,7 +7,7 @@
 
 import { EuiIcon, formatDate } from '@elastic/eui';
 import React from 'react';
-import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function TimestampRangeLabel({
   annotation,

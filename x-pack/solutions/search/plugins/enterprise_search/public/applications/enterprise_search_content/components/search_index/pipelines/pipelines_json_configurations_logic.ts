@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
-import type { Actions } from '../../../../shared/api_logic/create_api_logic';
-import type {
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import {
   FetchCustomPipelineApiLogicArgs,
   FetchCustomPipelineApiLogicResponse,
+  FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { IndexNameLogic } from '../index_name_logic';
 
 interface IndexPipelinesConfigurationsActions {

@@ -41,8 +41,8 @@ import type {
   FieldFormatParams,
 } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
-import type {
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -62,7 +62,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import type { IndexPatternManagmentContextValue } from '../../types';
+import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';

@@ -6,7 +6,7 @@
  */
 
 import { demodata } from './demodata';
-import type { ExpressionValueFilter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 
 const nullFilter: ExpressionValueFilter = {
   type: 'filter',

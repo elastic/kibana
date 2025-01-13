@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaContext } from '@kbn/data-plugin/common';
-import type {
+import { KibanaContext } from '@kbn/data-plugin/common';
+import {
   AnyExpressionFunctionDefinition,
   Datatable,
   ExpressionValueFilter,
@@ -17,8 +17,8 @@ import type {
   Range,
 } from '@kbn/expressions-plugin/common';
 import type { Datasource, Model, Transform, View } from '../public/expression_types';
-import type { AssetType } from './assets';
-import type { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
+import { AssetType } from './assets';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',

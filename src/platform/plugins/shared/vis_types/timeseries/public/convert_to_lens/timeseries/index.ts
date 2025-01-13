@@ -8,11 +8,10 @@
  */
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type {
-  Layer} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   getIndexPatternIds,
-  isAnnotationsLayer
+  isAnnotationsLayer,
+  Layer,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,14 +23,13 @@ import {
   getConfigurationForTimeseries as getConfiguration,
   getLayers,
 } from '../lib/configurations/xy';
-import type {
-  Layer as ExtendedLayer} from '../lib/convert';
 import {
+  Layer as ExtendedLayer,
   convertToDateHistogramColumn,
   excludeMetaFromColumn,
 } from '../lib/convert';
 import { isValidMetrics } from '../lib/metrics';
-import type { ConvertTsvbToLensVisualization } from '../types';
+import { ConvertTsvbToLensVisualization } from '../types';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
   const newLayers: Record<string, Layer> = {};

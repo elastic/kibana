@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const REPO_NAME = 'test';
 const POLICY_NAME = 'ilm-a11y-test';

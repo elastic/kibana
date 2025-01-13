@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { AlertTaskInstance} from './alert_task_instance';
-import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { v4 as uuidv4 } from 'uuid';
-import type { SanitizedRule } from '../types';
+import { SanitizedRule } from '../types';
 
 const alert: SanitizedRule<{
   bar: boolean;

@@ -9,13 +9,12 @@
 
 import React from 'react';
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
-import { EuiBasicTable, EuiCode } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { filteringPolicyToText, filteringRuleToText } from '../../utils/filtering_rule_helpers';
-import type { FilteringRule, FilteringPolicy, FilteringRuleRule } from '../..';
+import { FilteringRule, FilteringPolicy, FilteringRuleRule } from '../..';
 
 interface FilteringRulesTableProps {
   filteringRules: FilteringRule[];

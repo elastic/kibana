@@ -6,7 +6,7 @@
  */
 
 import Url from 'url';
-import type { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
   const config = context.getService('config');

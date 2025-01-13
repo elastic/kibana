@@ -7,15 +7,15 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110905
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
-import type {
+import {
+  Plugin,
   ObservabilityPublicPluginsStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
-import { Plugin } from './plugin';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -58,8 +58,8 @@ export { DatePicker } from './pages/overview/components/date_picker';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
-export type * from './typings';
-import type { TopAlert } from './typings/alerts';
+export * from './typings';
+import { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
 export type { AlertDetailsAppSectionProps };

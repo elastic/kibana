@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
+import { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import type { CombinedSummarizedAlerts } from '../../../types';
-import type { RuleTypeState, RuleAlertData} from '../../../../common';
-import { parseDuration } from '../../../../common';
-import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import { CombinedSummarizedAlerts } from '../../../types';
+import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
+import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -23,7 +22,7 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import type {
+import {
   ActionSchedulerOptions,
   ActionsToSchedule,
   GetActionsToScheduleOpts,

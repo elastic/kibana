@@ -6,11 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { TEST_IDS } from '../../../../constants';
-import type { Conversation } from '../../../../../..';
+import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {

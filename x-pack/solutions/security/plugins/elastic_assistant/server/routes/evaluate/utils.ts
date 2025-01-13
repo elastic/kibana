@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Example } from 'langsmith';
-import { Client } from 'langsmith';
+import { Client, Example } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 

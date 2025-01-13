@@ -7,16 +7,16 @@
 
 import { isObject } from 'lodash';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
-import type {
+import {
   FieldBasedIndexPatternColumn,
   GenericOperationDefinition,
   GenericIndexPatternColumn,
 } from '..';
-import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { FormBasedLayer } from '../../../types';
+import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { FormBasedLayer } from '../../../types';
 import { unquotedStringRegex } from './util';
 import { isColumnOfType } from '../helpers';
-import type { StaticValueIndexPatternColumn } from '../static_value';
+import { StaticValueIndexPatternColumn } from '../static_value';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;

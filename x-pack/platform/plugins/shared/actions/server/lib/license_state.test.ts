@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ActionType } from '../types';
+import { ActionType } from '../types';
 import { Subject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { ILicenseState } from './license_state';
-import { LicenseState } from './license_state';
+import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();

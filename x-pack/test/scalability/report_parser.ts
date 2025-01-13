@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import type { ScalabilitySetup, ResponseTimeMetric } from '@kbn/journeys';
-import type { CapacityMetrics, DataPoint, ResponseMetric, RpsMetric } from './types';
+import { ScalabilitySetup, ResponseTimeMetric } from '@kbn/journeys';
+import { CapacityMetrics, DataPoint, ResponseMetric, RpsMetric } from './types';
 
 const RESPONSE_METRICS_NAMES = [
   'min',

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { ComponentType } from 'react';
-import type React from 'react';
+import React, { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';

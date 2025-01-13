@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationUsageTracker } from '@kbn/analytics';
-import type { UiCounterMetricType , Reporter} from '@kbn/analytics';
+import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type {
   PluginInitializerContext,
   Plugin,

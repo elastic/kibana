@@ -6,13 +6,15 @@
  */
 
 import { isBoolean, isString, uniq } from 'lodash';
-import type {
+import {
   BinaryFilterCondition,
   Condition,
   FilterCondition,
   UnaryFilterCondition,
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
 } from '@kbn/streams-schema';
-import { isAndCondition, isFilterCondition, isOrCondition } from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (isFilterCondition(conditionOrField)) {

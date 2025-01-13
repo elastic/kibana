@@ -9,12 +9,11 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import type { FieldInputProps } from './field_input';
-import { FieldInput } from './field_input';
-import type { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { FieldInput, FieldInputProps } from './field_input';
+import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { TEST_SUBJ_PREFIX_FIELD } from './input';
 import { wrap } from './mocks';
-import type { CodeEditorProps } from './code_editor';
+import { CodeEditorProps } from './code_editor';
 
 const name = 'test';
 

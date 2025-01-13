@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiTableFieldDataColumnType} from '@elastic/eui';
-import { EuiCallOut, EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiTableFieldDataColumnType, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { RemoveDataViewProps } from '../edit_index_pattern';
+import { RemoveDataViewProps } from '../edit_index_pattern';
 
 const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {
   defaultMessage: 'all',

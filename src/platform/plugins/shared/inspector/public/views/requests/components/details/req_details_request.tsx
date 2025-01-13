@@ -8,8 +8,8 @@
  */
 
 import React, { Component } from 'react';
-import type { Request } from '../../../../../common/adapters/request/types';
-import type { DetailViewProps } from './types';
+import { Request } from '../../../../../common/adapters/request/types';
+import { DetailViewProps } from './types';
 import { RequestDetailsRequestContent } from './req_details_request_content';
 
 export class RequestDetailsRequest extends Component<DetailViewProps> {

@@ -8,11 +8,11 @@
 import { produce } from 'immer';
 import { merge, cloneDeep } from 'lodash';
 
-import type { SerializedPolicy } from '../../../../../../common/types';
+import { SerializedPolicy } from '../../../../../../common/types';
 
 import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 
-import type { FormInternal } from '../../types';
+import { FormInternal } from '../../types';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
 

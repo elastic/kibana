@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import { BrowserFields } from '@kbn/timelines-plugin/common';
 
 export const mockBrowserFields: BrowserFields = {
   agent: {

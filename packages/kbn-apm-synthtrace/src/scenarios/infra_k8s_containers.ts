@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InfraDocument} from '@kbn/apm-synthtrace-client';
-import { infra, generateShortId } from '@kbn/apm-synthtrace-client';
+import { InfraDocument, infra, generateShortId } from '@kbn/apm-synthtrace-client';
 
-import type { Scenario } from '../cli/scenario';
+import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<InfraDocument> = async (runOptions) => {

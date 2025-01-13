@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../services';
+import { FtrProviderContext } from '../../../services';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('from the server', () => {

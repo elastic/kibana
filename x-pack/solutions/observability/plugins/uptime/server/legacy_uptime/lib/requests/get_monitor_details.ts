@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
-import type { UMElasticsearchQueryFn } from '../adapters';
-import type { MonitorDetails, Ping } from '../../../../common/runtime_types';
+import { UMElasticsearchQueryFn } from '../adapters';
+import { MonitorDetails, Ping } from '../../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
-import type { UptimeEsClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { createEsQuery } from '../../../../common/utils/es_search';
 
 export interface GetMonitorDetailsParams {

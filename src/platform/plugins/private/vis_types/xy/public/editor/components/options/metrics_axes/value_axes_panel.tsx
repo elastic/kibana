@@ -21,9 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { SeriesParam, ValueAxis } from '../../../../types';
+import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
-import type { SetParamByIndex } from '.';
+import { SetParamByIndex } from '.';
 
 export interface ValueAxesPanelProps {
   addValueAxis: () => ValueAxis;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
+import {
+  AlertsClient,
+  ConstructorOptions,
+} from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';

@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import type { Datatable } from '../../../expression_types';
-import type { MapColumnArguments } from '../map_column';
-import { mapColumn } from '../map_column';
+import { Datatable } from '../../../expression_types';
+import { mapColumn, MapColumnArguments } from '../map_column';
 import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
 
 const pricePlusTwo = jest.fn((datatable: Datatable) =>

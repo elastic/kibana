@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createConfig } from './lib/create_config';
 import { run } from './run';
-import type { PartialConfig } from './types';
+import { PartialConfig } from './types';
 
 export const generate = async ({
   client,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Command } from '@kbn/dev-cli-runner';
+import { Command } from '@kbn/dev-cli-runner';
 import { ScoutReportDataStream } from '../reporting/report';
 import { getValidatedESClient } from './common';
 

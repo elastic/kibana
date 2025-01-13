@@ -7,9 +7,8 @@
 
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import type { ClearableComponentProps } from '../types';
+import React, { FC } from 'react';
+import { ClearableComponentProps } from '../types';
 import { findPalette, prepareColorPalette } from '../utils';
 
 const strings = {

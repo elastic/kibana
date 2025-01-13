@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type {
+import {
   ChromeNavControl,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
+import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';

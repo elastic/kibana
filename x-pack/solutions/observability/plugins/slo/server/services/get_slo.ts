@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
-import { ALL_VALUE, getSLOResponseSchema } from '@kbn/slo-schema';
-import type { SloDefinitionClient } from './slo_definition_client';
-import type { SummaryClient } from './summary_client';
+import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SloDefinitionClient } from './slo_definition_client';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
   constructor(

@@ -8,14 +8,13 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
 import {
   EuiPopover,
   EuiButton,
-  EuiContextMenu
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import type { ComponentTemplateDeserialized } from '../shared_imports';
+import { ComponentTemplateDeserialized } from '../shared_imports';
 
 export interface ManageAction {
   name: string;

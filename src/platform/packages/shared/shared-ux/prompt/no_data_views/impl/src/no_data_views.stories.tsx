@@ -9,10 +9,9 @@
 
 import React from 'react';
 
-import type {
-  NoDataViewsPromptStorybookParams} from '@kbn/shared-ux-prompt-no-data-views-mocks';
 import {
-  NoDataViewsPromptStorybookMock
+  NoDataViewsPromptStorybookMock,
+  NoDataViewsPromptStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import { NoDataViewsPrompt as Component } from './no_data_views';

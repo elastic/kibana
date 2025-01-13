@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   api_polling_frequency: schema.duration({ defaultValue: '30s' }),

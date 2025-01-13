@@ -7,13 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes} from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
-import type { ConnectorCreateParams } from './types';
+import { SavedObjectAttributes, SavedObjectsUtils } from '@kbn/core/server';
+import { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult } from '../../../../types';
+import { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 
 export async function create({

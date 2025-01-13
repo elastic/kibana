@@ -10,9 +10,8 @@
 import * as t from 'io-ts';
 import { z } from '@kbn/zod';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import type { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
-import type { Observable} from 'rxjs';
-import { of } from 'rxjs';
+import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
+import { Observable, of } from 'rxjs';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 

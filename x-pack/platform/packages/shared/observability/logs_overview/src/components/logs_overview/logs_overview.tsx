@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { LogsSourceConfiguration} from '../../utils/logs_source';
-import { normalizeLogsSource } from '../../utils/logs_source';
-import type { LogCategoriesDependencies } from '../log_categories';
-import { LogCategories } from '../log_categories';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { LogsSourceConfiguration, normalizeLogsSource } from '../../utils/logs_source';
+import { LogCategories, LogCategoriesDependencies } from '../log_categories';
 import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 

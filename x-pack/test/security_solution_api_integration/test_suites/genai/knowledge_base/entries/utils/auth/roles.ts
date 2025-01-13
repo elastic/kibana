@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Role } from './types';
+import { Role } from './types';
 
 export const noKibanaPrivileges: Role = {
   name: 'no_kibana_privileges',

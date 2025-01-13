@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type {
+import {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
+  metricsSourceConfigurationResponseRT,
 } from '@kbn/infra-plugin/common/metrics_sources';
-import { metricsSourceConfigurationResponseRT } from '@kbn/infra-plugin/common/metrics_sources';
 import type { SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

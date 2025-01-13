@@ -8,9 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
-import type { WriteStream} from 'fs';
-import { createWriteStream, mkdirSync } from 'fs';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
+import { createWriteStream, WriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
 
 import { Layouts } from '../../layouts/layouts';

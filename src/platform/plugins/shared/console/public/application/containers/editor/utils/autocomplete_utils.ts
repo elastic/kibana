@@ -8,18 +8,17 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
-import type {
-  AutoCompleteContext,
-  ResultTerm} from '../../../../lib/autocomplete/types';
 import {
-  type DataAutoCompleteRulesOneOf
+  AutoCompleteContext,
+  type DataAutoCompleteRulesOneOf,
+  ResultTerm,
 } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';

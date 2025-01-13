@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StartServicesAccessor } from '@kbn/core/public';
-import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { StartServicesAccessor } from '@kbn/core/public';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEqlFn } from '../../../common/search/expressions/eql';
-import type { UiSettingsCommon } from '../../../common';
+import { UiSettingsCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

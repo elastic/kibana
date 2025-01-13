@@ -8,10 +8,10 @@
  */
 
 import React, { type FC, type PropsWithChildren } from 'react';
-import type { CoreTheme } from '@kbn/core-theme-browser/src/types';
+import { CoreTheme } from '@kbn/core-theme-browser/src/types';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 interface CoreThemeProviderProps {
   theme$: Observable<CoreTheme>;

@@ -8,12 +8,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { ActionGroup } from '@kbn/alerting-plugin/common';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ActionGroup, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleExecutionSummaryAndChart } from './rule_execution_summary_and_chart';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
-import type { RuleType } from '../../../../types';
+import { RuleType } from '../../../../types';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import { RequestHandler } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../common/types/error_codes';
 
-import type { EnterpriseSearchError } from './create_error';
-import { createError } from './create_error';
+import { createError, EnterpriseSearchError } from './create_error';
 import { isUnauthorizedException } from './identify_exceptions';
 
 export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType>(

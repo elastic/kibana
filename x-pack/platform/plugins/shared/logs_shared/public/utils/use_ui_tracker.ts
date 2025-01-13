@@ -6,9 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { LocationDescriptorObject } from 'history';
+import { LocationDescriptorObject } from 'history';
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';

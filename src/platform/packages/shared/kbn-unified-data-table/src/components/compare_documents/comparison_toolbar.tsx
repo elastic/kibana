@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiDataGridCustomToolbarProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { internalRenderCustomToolbar } from '../custom_toolbar/render_custom_toolbar';
 
 export interface ComparisonToolbarProps {

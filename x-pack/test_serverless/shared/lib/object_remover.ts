@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 
 import { getUrlPathPrefixForSpace } from './space_path_prefix';
 

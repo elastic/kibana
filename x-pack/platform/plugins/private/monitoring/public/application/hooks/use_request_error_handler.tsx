@@ -14,7 +14,7 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { formatMsg } from '../../lib/format_msg';
-import type { MonitoringStartServices } from '../../types';
+import { MonitoringStartServices } from '../../types';
 
 export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
   if (err.response?.status && err.response?.status !== -1) {

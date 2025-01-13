@@ -9,13 +9,13 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
-import type { GetElser } from '../types';
+import { GetElser } from '../types';
 
 /**
  * Creates a function that returns the ELSER model ID

@@ -9,22 +9,19 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StateFrom } from 'xstate5';
-import type { categoryDetailsService } from '../../services/category_details_service';
-import type { LogCategory } from '../../types';
-import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import type {
-  LogCategoriesFlyoutDependencies} from '../log_category_details/log_category_details_flyout';
+import { StateFrom } from 'xstate5';
+import { categoryDetailsService } from '../../services/category_details_service';
+import { LogCategory } from '../../types';
+import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import {
+  LogCategoriesFlyoutDependencies,
   LogCategoryDetailsFlyout,
 } from '../log_category_details/log_category_details_flyout';
-import type {
-  LogCategoriesControlBarDependencies} from './log_categories_control_bar';
 import {
-  LogCategoriesControlBar
+  LogCategoriesControlBar,
+  LogCategoriesControlBarDependencies,
 } from './log_categories_control_bar';
-import type { LogCategoriesGridDependencies } from './log_categories_grid';
-import { LogCategoriesGrid } from './log_categories_grid';
+import { LogCategoriesGrid, LogCategoriesGridDependencies } from './log_categories_grid';
 
 export interface LogCategoriesResultContentProps {
   dependencies: LogCategoriesResultContentDependencies;

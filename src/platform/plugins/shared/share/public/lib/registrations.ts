@@ -8,10 +8,9 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type {
-  ReactFatalError} from '@kbn/shared-ux-error-boundary';
 import {
   REACT_FATAL_ERROR_EVENT_TYPE,
+  ReactFatalError,
   reactFatalErrorSchema,
 } from '@kbn/shared-ux-error-boundary';
 

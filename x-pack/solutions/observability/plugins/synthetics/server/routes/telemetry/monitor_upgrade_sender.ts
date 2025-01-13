@@ -6,22 +6,23 @@
  */
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
-import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
-import type { TelemetryEventsSender } from '../../telemetry/sender';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
   MONITOR_ERROR_EVENTS_CHANNEL,
 } from '../../telemetry/constants';
-import type { MonitorErrorEvent } from '../../telemetry/types';
-import type {
+import { MonitorErrorEvent } from '../../telemetry/types';
+import {
   MonitorFields,
   EncryptedSyntheticsMonitorAttributes,
+  ConfigKey,
   ServiceLocationErrors,
+  SourceType,
 } from '../../../common/runtime_types';
-import { ConfigKey, SourceType } from '../../../common/runtime_types';
 import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(

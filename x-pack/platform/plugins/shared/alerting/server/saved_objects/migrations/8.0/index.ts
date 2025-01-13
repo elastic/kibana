@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { RawRule } from '../../../types';
+import { RawRule } from '../../../types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '../constants';
 import {
   createEsoMigration,

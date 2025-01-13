@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type {
+import {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import type { IIndexPatternString } from '../resource_installer_utils';
+import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import type { DataStreamAdapter } from './data_stream_adapter';
+import { DataStreamAdapter } from './data_stream_adapter';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];

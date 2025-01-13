@@ -6,10 +6,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
 import moment from 'moment';
-import type { ObservabilityAIAssistantConfig } from '../config';
+import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
+import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { EntityManagerConfig } from '../common/config';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
   core: CoreStart;

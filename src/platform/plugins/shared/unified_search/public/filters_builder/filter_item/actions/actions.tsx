@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Tooltip } from '../tooltip';
 import { strings } from './action_strings';
-import type { FilterItemActionsProps } from './types';
+import { FilterItemActionsProps } from './types';
 import { actionButtonCss } from '../filter_item.styles';
 
 export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?: boolean }> = ({

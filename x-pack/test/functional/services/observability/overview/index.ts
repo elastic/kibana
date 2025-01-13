@@ -7,7 +7,7 @@
 
 import { ObservabilityOverviewCommonProvider } from './common';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityOverviewProvider(context: FtrProviderContext) {
   const common = ObservabilityOverviewCommonProvider(context);

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DecodedStackTraceResponse,
-  StackTraceResponse} from './stack_traces';
 import {
+  DecodedStackTraceResponse,
   decodeStackTraceResponse,
-  makeFrameID
+  makeFrameID,
+  StackTraceResponse,
 } from './stack_traces';
 
 describe('Stack trace response operations', () => {

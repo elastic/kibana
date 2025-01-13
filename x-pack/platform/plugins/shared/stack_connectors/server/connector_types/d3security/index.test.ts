@@ -6,8 +6,7 @@
  */
 
 import axios from 'axios';
-import type { D3SecurityConnectorType} from '.';
-import { getConnectorType } from '.';
+import { D3SecurityConnectorType, getConnectorType } from '.';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

@@ -23,11 +23,10 @@ import {
 
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
-import type {
-  EventLoopDelaysDaily} from '../../saved_objects';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
-  serializeSavedObjectId
+  serializeSavedObjectId,
+  EventLoopDelaysDaily,
 } from '../../saved_objects';
 import { rollDailyData } from '../daily';
 

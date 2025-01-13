@@ -9,8 +9,7 @@
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { debounce } from 'lodash';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiResizableButton, useEuiTheme, keys } from '@elastic/eui';
+import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
 import { WELCOME_TOUR_DELAY } from '../../../../common/constants';
 
 const CONSOLE_MIN_HEIGHT = 200;

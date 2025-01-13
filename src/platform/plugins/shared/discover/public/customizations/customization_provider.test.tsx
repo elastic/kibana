@@ -16,12 +16,11 @@ import {
   useDiscoverCustomization$,
   useDiscoverCustomizationService,
 } from './customization_provider';
-import type {
+import {
+  createCustomizationService,
   DiscoverCustomization,
   DiscoverCustomizationId,
-  DiscoverCustomizationService} from './customization_service';
-import {
-  createCustomizationService
+  DiscoverCustomizationService,
 } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {

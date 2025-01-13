@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleSystemAction } from '../../../../../common';
+import { RuleAction, RuleSystemAction } from '../../../../../common';
 import { transformRuleToRuleResponse } from './v1';
 
 describe('transformRuleToRuleResponse', () => {

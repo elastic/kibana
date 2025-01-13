@@ -6,7 +6,7 @@
  */
 
 import { extractColorFromStyleProperty } from './extract_color_from_style_property';
-import type {
+import {
   ColorDynamicOptions,
   ColorDynamicStylePropertyDescriptor,
   ColorStaticOptions,

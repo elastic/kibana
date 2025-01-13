@@ -18,9 +18,9 @@ import { createPipelineIfNotExists } from './create_processor';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
 import { latestIndexConfigs } from './latest_indices';
-import type { IndexConfig, IndexTemplateParams } from './types';
+import { IndexConfig, IndexTemplateParams } from './types';
 
-import type { CloudSecurityPostureConfig } from '../config';
+import { CloudSecurityPostureConfig } from '../config';
 
 interface IndexTemplateSettings {
   index: {

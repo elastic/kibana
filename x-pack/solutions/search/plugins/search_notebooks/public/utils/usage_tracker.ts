@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { AppMetricsTracker } from '../types';
+import { AppMetricsTracker } from '../types';
 
 const APP_TRACKER_NAME = 'searchNotebooks';
 

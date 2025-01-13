@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { ElasticsearchLegacySource, ElasticsearchMetricbeatSource } from '../../types/es';
+import { ElasticsearchLegacySource, ElasticsearchMetricbeatSource } from '../../types/es';
 import { clusterUuidRT, ccsRT, timeRangeRT } from '../shared';
 
 export const postElasticsearchCcrRequestParamsRT = rt.type({

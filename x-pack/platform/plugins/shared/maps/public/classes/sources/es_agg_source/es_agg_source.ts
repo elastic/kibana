@@ -6,21 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GeoJsonProperties } from 'geojson';
-import type { DataView } from '@kbn/data-plugin/common';
+import { GeoJsonProperties } from 'geojson';
+import { DataView } from '@kbn/data-plugin/common';
 import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
 import { AbstractESSource } from '../es_source';
-import type { IESAggField } from '../../fields/agg';
-import { esAggFieldsFactory } from '../../fields/agg';
+import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import type {
+import {
   AbstractESAggSourceDescriptor,
   AggDescriptor,
   DataFilters,
 } from '../../../../common/descriptor_types';
-import type { IField } from '../../fields/field';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { IField } from '../../fields/field';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getAggDisplayName } from './get_agg_display_name';
 import { BUCKETS } from '../../layers/vector_layer/mask';
 

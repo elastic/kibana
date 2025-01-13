@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { TickFormatter, XYBrushEvent } from '@elastic/charts';
-import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  TickFormatter,
+  XYBrushEvent,
+} from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -25,7 +33,7 @@ import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
-import type { Series } from '../../../../../typings';
+import { Series } from '../../../../../typings';
 import { ChartContainer } from '../../chart_container/chart_container';
 import { StyledStat } from '../../styled_stat/styled_stat';
 import { onBrushEnd } from '../../../helpers/on_brush_end';

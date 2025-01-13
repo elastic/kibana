@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useState, useContext, createContext } from 'react';
+import React, { useState, useContext, createContext, FC, PropsWithChildren } from 'react';
 import { EuiSpacer, EuiText, EuiTextColor, EuiButton } from '@elastic/eui';
 
 import { TextField, NumericField } from '../../../components';
-import type { FieldHook } from '../../types';
+import { FieldHook } from '../../types';
 import { useForm } from '../../hooks';
 import { Form } from '../form';
 import { UseMultiFields } from '../use_multi_fields';

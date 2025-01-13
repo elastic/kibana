@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { isAPMDataView } from '@kbn/apm-data-view';
-import type {
+import {
   LayerDescriptor,
   SizeDynamicOptions,
   VectorStylePropertiesDescriptor,

@@ -8,8 +8,7 @@
  */
 
 import classNames from 'classnames';
-import type { FC, ReactElement} from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { Subscription } from 'rxjs';
 
@@ -19,8 +18,8 @@ import {
   type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { uiActionsService } from '../../services/kibana_services';
 import './floating_actions.scss';
 

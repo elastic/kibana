@@ -9,11 +9,10 @@ import { isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { BLANK_STR, SPACE_STR } from '../../pages/translations';
-import type { SettingsPageFieldErrors } from '../../pages/settings';
-import { isValidCertVal } from '../../pages/settings';
+import { isValidCertVal, SettingsPageFieldErrors } from '../../pages/settings';
 import { validateEmail } from './default_email';
 import { selectDynamicSettings } from '../../state/selectors';
-import type { PartialSettings } from './certificate_form';
+import { PartialSettings } from './certificate_form';
 import { connectorsSelector } from '../../state/alerts/alerts';
 
 const hasInvalidEmail = (defaultConnectors?: string[], value?: PartialSettings['defaultEmail']) => {

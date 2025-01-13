@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type {
-  LineAnnotationStyle,
-  PartialTheme} from '@elastic/charts';
 import {
   BarSeries,
   Chart,
   LineAnnotation,
+  LineAnnotationStyle,
+  PartialTheme,
   Settings,
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { RecursivePartial } from '@kbn/utility-types';
+import { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
-import type { LogCategory, LogCategoryHistogramBucket } from '../../types';
+import { LogCategory, LogCategoryHistogramBucket } from '../../types';
 
 export const logCategoriesGridHistoryColumn = {
   id: 'history' as const,

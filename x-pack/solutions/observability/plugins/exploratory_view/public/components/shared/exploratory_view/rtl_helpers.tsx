@@ -6,24 +6,20 @@
  */
 
 import { of } from 'rxjs';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import type {
-  RenderOptions,
-  MatcherFunction} from '@testing-library/react';
 import {
-  render as reactTestLibRender
+  render as reactTestLibRender,
+  RenderOptions,
+  MatcherFunction,
 } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
-import type { History } from 'history';
-import { createMemoryHistory } from 'history';
-import type { CoreStart } from '@kbn/core/public';
+import { createMemoryHistory, History } from 'history';
+import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
@@ -32,19 +28,17 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
 import { rumFieldFormats } from './configurations/rum/field_formats';
-import type { ExploratoryViewPublicPluginsStart } from '../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
-import type { DataViewContext} from './hooks/use_app_data_view';
-import { DataViewContextProvider } from './hooks/use_app_data_view';
-import type {
-  AllSeries,
-  SeriesContextValue} from './hooks/use_series_storage';
+import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {
+  AllSeries,
   reportTypeKey,
+  SeriesContextValue,
   UrlStorageContext,
 } from './hooks/use_series_storage';
 
@@ -52,7 +46,7 @@ import * as useSeriesFilterHook from './hooks/use_series_filters';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
 
-import type { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';

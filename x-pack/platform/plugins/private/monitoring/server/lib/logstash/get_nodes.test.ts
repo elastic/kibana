@@ -7,7 +7,7 @@
 
 import { getNodes } from './get_nodes';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import type { LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

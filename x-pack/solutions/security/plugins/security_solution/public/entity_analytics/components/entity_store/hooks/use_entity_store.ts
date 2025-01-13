@@ -12,8 +12,8 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type {
-  EntityType,
+import type { EntityType } from '../../../../../common/api/entity_analytics';
+import {
   type DeleteEntityEngineResponse,
   type InitEntityEngineResponse,
   type StopEntityEngineResponse,

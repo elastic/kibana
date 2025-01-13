@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 export const registerStartRoute = ({
   router,

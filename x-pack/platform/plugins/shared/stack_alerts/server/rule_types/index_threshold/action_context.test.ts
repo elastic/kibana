@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { BaseActionContext} from './action_context';
-import { addMessages } from './action_context';
+import { BaseActionContext, addMessages } from './action_context';
 import { ParamsSchema } from './rule_type_params';
 
 describe('ActionContext', () => {

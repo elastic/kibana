@@ -7,12 +7,11 @@
 
 import React from 'react';
 import moment from 'moment';
-import type { Direction } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { Direction, EuiBasicTable } from '@elastic/eui';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
-import type { Cert, CertMonitor, CertResult } from '../../../../common/runtime_types';
+import { Cert, CertMonitor, CertResult } from '../../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
 import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
 

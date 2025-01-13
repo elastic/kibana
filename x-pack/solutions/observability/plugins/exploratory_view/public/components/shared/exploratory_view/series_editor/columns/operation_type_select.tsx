@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import type { OperationType } from '@kbn/lens-plugin/public';
+import { OperationType } from '@kbn/lens-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { SeriesUrl } from '../../types';
+import { SeriesUrl } from '../../types';
 
 export function OperationTypeSelect({
   seriesId,

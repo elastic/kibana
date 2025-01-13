@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import type { SerializedDeletePhase } from '../../../../../../common/types';
+import { SerializedDeletePhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
 import type { ActionComponentProps } from './types';

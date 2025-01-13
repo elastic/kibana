@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
-import type { StepProps } from '.';
+import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 

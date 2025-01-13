@@ -6,7 +6,7 @@
  */
 
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { BrowserUrlService } from '@kbn/share-plugin/public';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';

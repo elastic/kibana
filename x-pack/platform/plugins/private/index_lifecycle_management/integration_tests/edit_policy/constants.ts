@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 
-import type { PolicyFromES } from '../../common/types';
+import { PolicyFromES } from '../../common/types';
 
 import { defaultRolloverAction } from '../../public/application/constants';
 

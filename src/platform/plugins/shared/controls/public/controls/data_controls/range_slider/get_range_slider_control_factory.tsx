@@ -11,8 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import type { Filter, RangeFilterParams} from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';

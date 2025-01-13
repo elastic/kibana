@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { createOptionsFromFields } from '../../../helpers/create_options';
-import type { CreateSLOForm } from '../../../types';
+import { CreateSLOForm } from '../../../types';
 import { OptionalText } from '../../common/optional_text';
 
 const placeholder = i18n.translate('xpack.slo.sloEdit.settings.syncField.placeholder', {

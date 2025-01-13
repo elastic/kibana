@@ -6,15 +6,15 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { compact } from 'lodash';
-import type {
+import {
   IStorageAdapter,
   StorageAdapterBulkOperation,
   StorageDocumentOf,
   StorageSettings,
 } from '.';
-import type { ObservabilityESSearchRequest } from '../client/create_observability_es_client';
+import { ObservabilityESSearchRequest } from '../client/create_observability_es_client';
 
 type StorageBulkOperation<TDocument extends { _id?: string }> =
   | {

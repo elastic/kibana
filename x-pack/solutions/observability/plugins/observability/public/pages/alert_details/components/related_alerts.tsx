@@ -25,10 +25,9 @@ import {
   ALERT_UUID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import type { BoolQuery, Filter } from '@kbn/es-query';
-import { type Query } from '@kbn/es-query';
+import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
-import type { ObservabilityFields } from '../../../../common/utils/alerting/types';
+import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -38,16 +37,18 @@ import {
   getRelatedAlertKuery,
   getSharedFields,
 } from '../../../../common/utils/alerting/get_related_alerts_query';
-import type { TopAlert } from '../../..';
-import type { AlertSearchBarContainerState } from '../../../components/alert_search_bar/containers/state_container';
-import { DEFAULT_STATE } from '../../../components/alert_search_bar/containers/state_container';
+import { TopAlert } from '../../..';
+import {
+  AlertSearchBarContainerState,
+  DEFAULT_STATE,
+} from '../../../components/alert_search_bar/containers/state_container';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from '../../../components/alerts_table/grouping/constants';
 import { ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
-import type { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
+import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
 import {
   alertSearchBarStateContainer,
   Provider,

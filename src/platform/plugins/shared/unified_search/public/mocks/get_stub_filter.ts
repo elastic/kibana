@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FilterStateStore } from '@kbn/es-query';
-import { type Filter } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 
 export function mockFilter(
   index: string,

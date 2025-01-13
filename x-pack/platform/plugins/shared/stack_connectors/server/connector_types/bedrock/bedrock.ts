@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import type { AxiosError, Method } from 'axios';
-import type { IncomingMessage } from 'http';
+import { AxiosError, Method } from 'axios';
+import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -26,7 +25,7 @@ import {
   RunApiLatestResponseSchema,
   BedrockClientSendParamsSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -46,7 +45,7 @@ import {
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_TIMEOUT_MS,
 } from '../../../common/bedrock/constants';
-import type {
+import {
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,

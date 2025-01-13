@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
-import type { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
+import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
+import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
 
 /**
  * Feature privilege definition

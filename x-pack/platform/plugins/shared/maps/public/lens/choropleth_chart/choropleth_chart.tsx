@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
@@ -20,7 +20,7 @@ import {
   VECTOR_STYLES,
 } from '../../../common';
 import { emsWorldLayerId } from '../../../common/constants';
-import type { ChoroplethChartProps } from './types';
+import { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
 

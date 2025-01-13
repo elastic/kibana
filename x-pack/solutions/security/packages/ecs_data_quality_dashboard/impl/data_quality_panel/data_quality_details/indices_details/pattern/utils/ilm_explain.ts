@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IlmExplainPhaseCounts, IlmPhase } from '../../../../types';
+import { IlmExplainPhaseCounts, IlmPhase } from '../../../../types';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined

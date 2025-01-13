@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Rule, RuleReference } from '../types';
+import { Rule, RuleReference } from '../types';
 
 export const rules: Rule[] = [
   {

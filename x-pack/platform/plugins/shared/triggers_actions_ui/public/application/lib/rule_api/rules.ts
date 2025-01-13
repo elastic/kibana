@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AsApiContract } from '@kbn/actions-plugin/common';
+import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import type { Rule } from '../../../types';
+import { Rule } from '../../../types';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import type { LoadRulesProps } from './rules_helpers';
-import { rewriteRulesResponseRes } from './rules_helpers';
+import { LoadRulesProps, rewriteRulesResponseRes } from './rules_helpers';
 
 export async function loadRules({
   http,

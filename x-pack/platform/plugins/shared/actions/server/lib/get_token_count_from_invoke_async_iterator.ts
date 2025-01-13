@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
-import type { Stream } from 'openai/streaming';
-import type { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/completions';
 
 export interface InvokeAsyncIteratorBody {
   messages: ChatCompletionMessageParam[];

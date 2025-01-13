@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type { EuiStatProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiStat,
+  EuiStatProps,
   EuiText,
 } from '@elastic/eui';
 

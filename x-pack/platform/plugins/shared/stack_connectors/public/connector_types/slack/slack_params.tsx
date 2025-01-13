@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SlackActionParams } from '../types';
+import { SlackActionParams } from '../types';
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
   actionParams,

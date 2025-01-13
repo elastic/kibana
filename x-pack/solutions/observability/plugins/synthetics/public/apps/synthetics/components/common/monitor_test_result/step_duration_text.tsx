@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CSSProperties } from 'react';
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import type { JourneyStep } from '../../../../../../common/runtime_types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';

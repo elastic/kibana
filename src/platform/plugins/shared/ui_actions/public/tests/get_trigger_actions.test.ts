@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionDefinition } from '../actions';
-import { ActionInternal } from '../actions';
+import { ActionInternal, ActionDefinition } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
 const action1: ActionDefinition = {

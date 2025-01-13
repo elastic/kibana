@@ -9,16 +9,14 @@ import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { KueryNode} from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery, nodeBuilder } from '@kbn/es-query';
-import type { IEvent, IValidatedEvent} from '../types';
-import { SAVED_OBJECT_REL_PRIMARY } from '../types';
-import type { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
-import type { ParsedIndexAlias } from './init';
-import type { EsNames } from './names';
+import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
+import { ParsedIndexAlias } from './init';
+import { EsNames } from './names';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;

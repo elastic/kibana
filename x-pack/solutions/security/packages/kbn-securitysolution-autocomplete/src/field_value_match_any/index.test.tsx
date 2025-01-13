@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormHelpText } from '@elastic/eui';
+import { ReactWrapper, mount } from 'enzyme';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
 import { act, waitFor } from '@testing-library/react';
 
 import { AutocompleteFieldMatchAnyComponent } from '.';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeString } from '../types';
-import type { ArgumentType } from './arguments';
+import { TypeString } from '../types';
+import { ArgumentType } from './arguments';
 
 export class ExpressionFunctionParameter<T = unknown> {
   name: string;

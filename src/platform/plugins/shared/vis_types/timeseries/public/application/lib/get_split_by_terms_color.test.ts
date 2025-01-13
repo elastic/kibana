@@ -8,8 +8,7 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { SplitByTermsColorProps } from './get_split_by_terms_color';
-import { getSplitByTermsColor } from './get_split_by_terms_color';
+import { getSplitByTermsColor, SplitByTermsColorProps } from './get_split_by_terms_color';
 
 const chartsRegistry = chartPluginMock.createPaletteRegistry();
 const props = {

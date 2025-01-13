@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Action, History, Location } from 'history';
+import { Action, History, Location } from 'history';
 import { Observable } from 'rxjs';
-import type { ParsedQuery } from 'query-string';
+import { ParsedQuery } from 'query-string';
 import deepEqual from 'fast-deep-equal';
 import { map } from 'rxjs';
 import { getQueryParams } from './get_query_params';

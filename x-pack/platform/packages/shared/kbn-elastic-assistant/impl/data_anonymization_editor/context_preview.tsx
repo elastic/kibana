@@ -12,9 +12,9 @@ import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anony
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import type { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import styled from '@emotion/styled';
-import type { SelectedPromptContext } from '../assistant/prompt_context/types';
+import { SelectedPromptContext } from '../assistant/prompt_context/types';
 
 const Strong = styled.strong<{ showRealValues: boolean }>`
   color: ${(props) =>

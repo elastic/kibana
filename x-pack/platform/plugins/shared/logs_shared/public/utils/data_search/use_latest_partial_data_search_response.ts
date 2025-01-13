@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs';
-import type { IKibanaSearchRequest } from '@kbn/search-types';
+import { IKibanaSearchRequest } from '@kbn/search-types';
 import { useOperator } from '../use_observable';
 import { flattenDataSearchResponseDescriptor } from './flatten_data_search_response';
-import type { ParsedDataSearchRequestDescriptor, ParsedDataSearchResponseDescriptor } from './types';
+import { ParsedDataSearchRequestDescriptor, ParsedDataSearchResponseDescriptor } from './types';
 import { useDataSearchResponseState } from './use_data_search_response_state';
 
 export const useLatestPartialDataSearchResponse = <Request extends IKibanaSearchRequest, Response>(

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactChild } from 'react';
-import React, { createContext, useContext, useReducer } from 'react';
-import type { CanvasShareableState } from '../types';
+import React, { createContext, useContext, Dispatch, useReducer, ReactChild } from 'react';
+import { CanvasShareableState } from '../types';
 import { reducer } from './reducer';
-import type { CanvasShareableAction } from './actions';
+import { CanvasShareableAction } from './actions';
 
 type StateType = [CanvasShareableState, Dispatch<CanvasShareableAction>];
 

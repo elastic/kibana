@@ -8,10 +8,10 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { AggParamsDateHistogram } from '@kbn/data-plugin/common';
+import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import { convertToDateHistogramColumn } from './date_histogram';
-import type { DateHistogramColumn } from './types';
-import type { DataType } from '../../types';
+import { DateHistogramColumn } from './types';
+import { DataType } from '../../types';
 
 describe('convertToDateHistogramColumn', () => {
   const aggId = `some-id`;

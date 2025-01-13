@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type http from 'http';
+import http from 'http';
 
-import type { ProxyArgs } from './simulator';
-import { Simulator } from './simulator';
+import { ProxyArgs, Simulator } from './simulator';
 
 export class OpenAISimulator extends Simulator {
   private readonly returnError: boolean;

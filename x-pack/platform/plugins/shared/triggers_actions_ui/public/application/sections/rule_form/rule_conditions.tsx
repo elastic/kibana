@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
-import type { ActionGroup } from '@kbn/alerting-plugin/common';
-import { getBuiltinActionGroups } from '@kbn/alerting-plugin/common';
+import { ActionGroup, getBuiltinActionGroups } from '@kbn/alerting-plugin/common';
 
 const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 

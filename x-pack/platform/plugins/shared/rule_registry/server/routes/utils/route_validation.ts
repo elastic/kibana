@@ -13,10 +13,10 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import type * as rt from 'io-ts';
+import * as rt from 'io-ts';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
-import type {
+import {
   RouteValidationError,
   RouteValidationFunction,
   RouteValidationResultFactory,

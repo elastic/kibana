@@ -12,9 +12,9 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
- SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../internals/repository_bulk_delete_internal_types';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
@@ -25,10 +25,9 @@ import {
   isFoundGetResponse,
   type GetResponseFound,
 } from '../utils';
-import type {
-  PreflightCheckForCreateObject} from '../internals/preflight_check_for_create';
 import {
-  preflightCheckForCreate
+  preflightCheckForCreate,
+  PreflightCheckForCreateObject,
 } from '../internals/preflight_check_for_create';
 
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;

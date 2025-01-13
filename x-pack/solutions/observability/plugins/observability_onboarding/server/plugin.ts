@@ -14,11 +14,10 @@ import type {
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { registerRoutes } from '@kbn/server-route-repository';
+import { DefaultRouteHandlerResources, registerRoutes } from '@kbn/server-route-repository';
 import { getObservabilityOnboardingServerRouteRepository } from './routes';
-import type { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
-import type {
+import { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
+import {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStart,
@@ -26,7 +25,7 @@ import type {
 } from './types';
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
-import type { ObservabilityOnboardingConfig } from './config';
+import { ObservabilityOnboardingConfig } from './config';
 
 export class ObservabilityOnboardingPlugin
   implements

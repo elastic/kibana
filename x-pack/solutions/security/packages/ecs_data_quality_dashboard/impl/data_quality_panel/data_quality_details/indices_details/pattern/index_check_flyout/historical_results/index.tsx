@@ -16,8 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FC } from 'react';
-import React, { useMemo, useReducer } from 'react';
+import React, { FC, useMemo, useReducer } from 'react';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
 import {
@@ -25,7 +24,7 @@ import {
   DEFAULT_HISTORICAL_RESULTS_START_DATE,
 } from '../constants';
 import { fetchHistoricalResultsQueryReducer } from './reducers/fetch_historical_results_query_reducer';
-import type { FetchHistoricalResultsQueryState } from '../types';
+import { FetchHistoricalResultsQueryState } from '../types';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import {

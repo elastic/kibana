@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ConnectorAdapterRegistry } from './connector_adapter_registry';
+import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 
 interface ValidateSchemaArgs {
   connectorAdapterRegistry: ConnectorAdapterRegistry;

@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
-import type { SecuritySolutionPluginContext } from '../types';
+import { SecuritySolutionPluginContext } from '../types';
 import { SecuritySolutionContext } from './security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
 

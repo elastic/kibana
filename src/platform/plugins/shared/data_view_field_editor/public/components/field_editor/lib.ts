@@ -8,20 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BehaviorSubject } from 'rxjs';
-import { map, bufferCount, filter } from 'rxjs';
+import { map, bufferCount, filter, BehaviorSubject } from 'rxjs';
 import { differenceWith, isEqual } from 'lodash';
 
-import type { ValidationFunc, FieldConfig } from '../../shared_imports';
+import { ValidationFunc, FieldConfig } from '../../shared_imports';
 import type { Field } from '../../types';
 import type { Context } from '../field_editor_context';
 import { schema } from './form_schema';
 import type { Props } from './field_editor';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
-import type { FieldPreview } from '../preview/types';
-import { ChangeType } from '../preview/types';
+import { ChangeType, FieldPreview } from '../preview/types';
 
-import type { RuntimePrimitiveTypes } from '../../shared_imports';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 export interface Change {
   changeType: ChangeType;

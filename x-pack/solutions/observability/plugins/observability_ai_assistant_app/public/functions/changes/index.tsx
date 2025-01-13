@@ -17,8 +17,11 @@ import type {
   LogChangeWithTimeseries,
   MetricChangeWithTimeseries,
 } from '../../../common/functions/changes';
-import type { ChangeListItem } from '../../components/changes/change_list';
-import { ChangeList, ChangeListItemImpact } from '../../components/changes/change_list';
+import {
+  ChangeList,
+  ChangeListItem,
+  ChangeListItemImpact,
+} from '../../components/changes/change_list';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 
 function sortAndGroup<T extends LogChangeWithTimeseries | MetricChangeWithTimeseries>(

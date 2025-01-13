@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as i18nModule from './i18n';
+import * as i18nModule from './i18n';
 import type { Translation, TranslationInput } from '../translation';
-import type { Formats} from './formats';
-import { defaultEnFormats } from './formats';
+import { Formats, defaultEnFormats } from './formats';
 
 const createExpectedTranslations = (
   locale: string,

@@ -10,8 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert} from '../types';
-import { FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { BytesFormat } from './bytes';
 import { NumberFormat } from './number';
 import { PercentFormat } from './percent';

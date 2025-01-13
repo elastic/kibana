@@ -12,7 +12,7 @@ import type {
   ProcessEventCloud,
 } from '../../../common';
 import { DASH } from '../../constants';
-import type {
+import {
   DetailPanelHost,
   DetailPanelContainer,
   DetailPanelOrchestrator,

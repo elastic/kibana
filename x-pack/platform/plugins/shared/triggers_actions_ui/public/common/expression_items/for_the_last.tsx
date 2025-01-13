@@ -18,10 +18,10 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
-import type { TIME_UNITS } from '../../application/constants';
+import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
-import type { IErrorObject } from '../../types';
+import { IErrorObject } from '../../types';
 
 export interface ForLastExpressionProps {
   description?: string;

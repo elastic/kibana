@@ -9,8 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
-import type { Plugin, CoreSetup, ServiceStatus} from '@kbn/core/server';
-import { ServiceStatusLevels } from '@kbn/core/server';
+import { Plugin, CoreSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 
 export class StatusPluginAPlugin implements Plugin {
   private status$ = new Subject<ServiceStatus>();

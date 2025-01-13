@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type {
-  IEvent,
-  IEventLogger} from '@kbn/event-log-plugin/server';
 import {
+  IEvent,
+  IEventLogger,
   millisToNanos,
   SAVED_OBJECT_REL_PRIMARY,
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
-import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
+import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
-import type { RuleRunMetrics } from '../rule_run_metrics_store';
+import { RuleRunMetrics } from '../rule_run_metrics_store';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;

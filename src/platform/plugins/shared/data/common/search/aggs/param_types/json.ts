@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 
-import type { IAggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 function collapseLiteralStrings(xjson: string) {

@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import type {
+import React, {
   ChangeEvent,
   MouseEvent,
   KeyboardEvent,
-  FunctionComponent} from 'react';
-import React, {
+  FunctionComponent,
   useCallback,
   useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import type {
-  EuiSelectOption,
-  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiFormRow,
   EuiRange,
   EuiSelect,
+  EuiSelectOption,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { defaultExpression } from './default_expression';
-import type { Fields } from './types';
+import { Fields } from './types';
 import { getFieldPath, getFieldValue } from './utils';
 import { ArgumentStrings } from '../../../../i18n';
 

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 
-import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
-import type {
+import {
+  AddConnectorApiLogic,
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
-import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';
 

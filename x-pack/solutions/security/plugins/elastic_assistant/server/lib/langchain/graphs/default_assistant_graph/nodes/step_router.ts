@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '../constants';
-import type { AgentState } from '../types';
+import { AgentState } from '../types';
 import { NEW_CHAT } from '../../../../../routes/helpers';
 
 /*

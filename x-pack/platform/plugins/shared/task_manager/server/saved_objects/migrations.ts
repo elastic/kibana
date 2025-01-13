@@ -6,14 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
+import {
   LogMeta,
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc} from '@kbn/core/server';
-import {
-  SavedObjectsUtils
+  SavedObjectsUtils,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import type {
   RuleTaskState,
@@ -23,8 +22,7 @@ import type {
 } from '@kbn/alerting-state-types';
 
 import { REMOVED_TYPES } from '../task_type_dictionary';
-import type { SerializedConcreteTaskInstance} from '../task';
-import { TaskStatus } from '../task';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
   migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> };

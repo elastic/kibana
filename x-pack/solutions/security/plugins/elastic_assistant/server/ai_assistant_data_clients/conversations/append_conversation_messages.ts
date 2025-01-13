@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
+import { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 
 export interface AppendConversationMessagesParams {

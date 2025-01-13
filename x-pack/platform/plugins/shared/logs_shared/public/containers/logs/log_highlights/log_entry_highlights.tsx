@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TimeKey } from '@kbn/io-ts-utils';
+import { TimeKey } from '@kbn/io-ts-utils';
 import { useEffect, useMemo, useState } from 'react';
-import type { LogViewReference } from '../../../../common';
-import type { LogEntriesHighlightsResponse } from '../../../../common/http_api';
-import type { LogEntry } from '../../../../common/log_entry';
+import { LogViewReference } from '../../../../common';
+import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';

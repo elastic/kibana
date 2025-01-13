@@ -6,10 +6,9 @@
  */
 
 import { useGeneratedHtmlId } from '@elastic/eui';
-import type { ChangeEvent, SyntheticEvent } from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, ChangeEvent, SyntheticEvent } from 'react';
 import * as i18n from '../../translations';
-import type { ListDetails } from '../../types';
+import { ListDetails } from '../../types';
 
 interface UseEditModal {
   listDetails: ListDetails;

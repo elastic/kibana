@@ -8,7 +8,7 @@
  */
 
 import { parse } from '..';
-import type { ESQLLiteral } from '../../types';
+import { ESQLLiteral } from '../../types';
 
 describe('literal expression', () => {
   it('NULL', () => {

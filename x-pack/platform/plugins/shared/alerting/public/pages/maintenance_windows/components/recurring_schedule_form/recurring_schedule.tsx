@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -34,7 +33,7 @@ import * as i18n from '../../translations';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
-import type { FormProps } from '../schema';
+import { FormProps } from '../schema';
 import { parseSchedule } from '../../helpers/parse_schedule';
 
 const UseField = getUseField({ component: Field });

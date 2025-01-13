@@ -16,12 +16,11 @@ import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
-import type {
-  Props as ComponentProps} from './saved_elements_modal.component';
 import {
-  SavedElementsModal as Component
+  SavedElementsModal as Component,
+  Props as ComponentProps,
 } from './saved_elements_modal.component';
-import type { PositionedElement, CustomElement } from '../../../types';
+import { PositionedElement, CustomElement } from '../../../types';
 import { getCustomElementService } from '../../services/canvas_custom_element_service';
 
 const customElementAdded = 'elements-custom-added';

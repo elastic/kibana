@@ -13,11 +13,10 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
-import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import type { IHttpSerializedFetchError } from '../../../state';
-import { cleanMonitorListState } from '../../../state';
+import { cleanMonitorListState, IHttpSerializedFetchError } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {

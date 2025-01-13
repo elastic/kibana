@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionTypeNode} from 'ts-morph';
-import { Node } from 'ts-morph';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { FunctionTypeNode, Node } from 'ts-morph';
+import { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';
-import type { ApiDeclaration, PluginOrPackage } from '../types';
+import { ApiDeclaration, PluginOrPackage } from '../types';
 import { buildVariableDec } from './build_variable_dec';
 import { buildTypeLiteralDec } from './build_type_literal_dec';
-import type { ApiScope } from '../types';
+import { ApiScope } from '../types';
 import { buildInterfaceDec } from './build_interface_dec';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildFunctionTypeDec } from './build_function_type_dec';
 import { buildCallSignatureDec } from './build_call_signature_dec';
-import type { BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 import { buildApiId } from './utils';
 
 export function buildApiDeclarationTopNode(

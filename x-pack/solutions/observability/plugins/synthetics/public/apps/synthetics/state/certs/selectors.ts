@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { AppState } from '..';
+import { AppState } from '..';
 
 export const selectCertsListState = (state: AppState) => state.certsList;

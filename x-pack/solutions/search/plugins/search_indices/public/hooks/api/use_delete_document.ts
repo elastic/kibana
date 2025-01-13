@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MutationKeys, QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
-import type { IndexDocuments } from './use_document_search';
-import { INDEX_SEARCH_POLLING } from './use_document_search';
+import { INDEX_SEARCH_POLLING, IndexDocuments } from './use_document_search';
 
 interface DeleteDocumentParams {
   id: string;

@@ -15,8 +15,7 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../../mock/test_providers/test_providers';
-import type { Props } from '.';
-import { LatestResults } from '.';
+import { LatestResults, Props } from '.';
 import { getCheckStateStub } from '../../../../../stub/get_check_state_stub';
 import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from '../translations';
 

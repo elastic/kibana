@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 export type OptionsListSelection = string | number;
 

@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type {
+import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   ICON_SOURCE,

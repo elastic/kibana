@@ -9,14 +9,12 @@
 
 import React, { useCallback, createContext, useContext } from 'react';
 import chroma from 'chroma-js';
-import type { LegendColorPicker} from '@elastic/charts';
-import { Position } from '@elastic/charts';
-import type { PopoverAnchorPosition} from '@elastic/eui';
-import { EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import { LegendColorPicker, Position } from '@elastic/charts';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ColorPicker } from '@kbn/charts-plugin/public';
-import type { BucketColumns } from '../../common/types';
+import { BucketColumns } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;
 

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiDataGridColumn,
-  EuiListGroupItemProps} from '@elastic/eui';
 import {
+  EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon
+  EuiIcon,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';

@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import mimeType from 'mime';
 import { createId } from '@paralleldrive/cuid2';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -28,24 +28,22 @@ import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
-import type { Counters } from '../usage';
-import { getCounters } from '../usage';
+import { getCounters, Counters } from '../usage';
 import { File as FileImpl } from '../file';
-import type { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
+import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
-import type {
-  PerfArgs} from '../performance';
 import {
+  PerfArgs,
   withReportPerformanceMetric,
   FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
 } from '../performance';
 import { createFileHashTransform } from './stream_transforms/file_hash_transform';
 import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
-import type { SupportedFileHashAlgorithm } from '../saved_objects/file';
+import { SupportedFileHashAlgorithm } from '../saved_objects/file';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 

@@ -6,8 +6,7 @@
  */
 
 import moment from 'moment';
-import type { ConcreteTaskInstance, RunContext, TaskInstance} from '../task';
-import { TaskStatus } from '../task';
+import { ConcreteTaskInstance, RunContext, TaskInstance, TaskStatus } from '../task';
 import { addMiddlewareToChain } from './middleware';
 
 interface BeforeSaveOpts {

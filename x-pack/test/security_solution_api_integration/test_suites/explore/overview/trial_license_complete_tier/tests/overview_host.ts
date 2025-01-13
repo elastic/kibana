@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import type { HostsOverviewStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
-import { HostsQueries } from '@kbn/security-solution-plugin/common/search_strategy';
-import type TestAgent from 'supertest/lib/agent';
-import type { SearchService } from '@kbn/ftr-common-functional-services';
-import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import {
+  HostsQueries,
+  HostsOverviewStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { SearchService } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');

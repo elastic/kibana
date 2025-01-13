@@ -8,12 +8,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type {
+import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
-import type { ParsedDashboardAttributesWithType } from '../../types';
+import { ParsedDashboardAttributesWithType } from '../../types';
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;

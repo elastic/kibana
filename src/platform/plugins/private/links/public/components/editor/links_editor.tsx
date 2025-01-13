@@ -10,13 +10,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import type {
-  DropResult,
-  EuiButtonGroupOptionProps} from '@elastic/eui';
 import {
+  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonGroupOptionProps,
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
@@ -32,9 +31,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type {
-  LinksLayoutType} from '../../../common/content_management';
 import {
+  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
@@ -48,7 +46,7 @@ import { LinksEditorSingleLink } from './links_editor_single_link';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './links_editor.scss';
-import type { ResolvedLink } from '../../types';
+import { ResolvedLink } from '../../types';
 import { getOrderedLinkList } from '../../lib/resolve_links';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [

@@ -8,7 +8,7 @@
  */
 
 import { expectAssignable } from 'tsd';
-import type { Writable } from '../../..';
+import { Writable } from '../../..';
 
 type WritableArray = Writable<readonly string[]>;
 expectAssignable<WritableArray>(['1']);

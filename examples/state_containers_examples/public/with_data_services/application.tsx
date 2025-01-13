@@ -9,11 +9,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { AppPluginDependencies } from './types';
+import { AppPluginDependencies } from './types';
 import { App } from './app';
-import type { ExampleLink } from '../common/example_page';
+import { ExampleLink } from '../common/example_page';
 
 export const renderApp = (
   { notifications, application }: CoreStart,

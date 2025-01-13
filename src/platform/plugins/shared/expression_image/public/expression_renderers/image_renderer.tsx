@@ -10,8 +10,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { CoreStart } from '@kbn/core/public';
-import type {
+import { CoreStart } from '@kbn/core/public';
+import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { getElasticLogo, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import type { ImageRendererConfig } from '../../common/types';
+import { ImageRendererConfig } from '../../common/types';
 
 const strings = {
   getDisplayName: () =>

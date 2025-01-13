@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RuleAggregationFormattedResult } from '../../../../../../application/rule/methods/aggregate/types';
+import { RuleAggregationFormattedResult } from '../../../../../../application/rule/methods/aggregate/types';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../../../../../../common';
-import type { DefaultRuleAggregationResult } from '../../types';
+import { DefaultRuleAggregationResult } from '../../types';
 
 export const formatDefaultAggregationResult = (
   aggregations: DefaultRuleAggregationResult

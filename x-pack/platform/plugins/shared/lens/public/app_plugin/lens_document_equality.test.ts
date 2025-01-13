@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Filter} from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
-import type { LensDocument } from '../persistence/saved_object_store';
-import type {
+import { LensDocument } from '../persistence/saved_object_store';
+import {
   AnnotationGroups,
   Datasource,
   DatasourceMap,

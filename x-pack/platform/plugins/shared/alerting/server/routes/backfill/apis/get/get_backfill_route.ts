@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core/server';
-import type {
-  GetBackfillRequestParamsV1,
-  GetBackfillResponseV1} from '../../../../../common/routes/backfill/apis/get';
+import { IRouter } from '@kbn/core/server';
 import {
-  getParamsSchemaV1
+  getParamsSchemaV1,
+  GetBackfillRequestParamsV1,
+  GetBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/get';
-import type { ILicenseState } from '../../../../lib';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformBackfillToBackfillResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

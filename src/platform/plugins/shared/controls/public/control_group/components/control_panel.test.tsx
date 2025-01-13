@@ -16,7 +16,7 @@ import { render, waitFor } from '@testing-library/react';
 
 import type { ControlLabelPosition, ControlWidth } from '../../../common';
 import { ControlPanel } from './control_panel';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 describe('render', () => {
   let mockApi = {};

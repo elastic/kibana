@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type {
+import { TypeOf } from '@kbn/config-schema';
+import {
   ConfigSchema,
   SecretsSchema,
   StreamingResponseSchema,
@@ -23,7 +23,7 @@ import type {
   DashboardActionParamsSchema,
   DashboardActionResponseSchema,
 } from './schema';
-import type { ConfigProperties } from '../dynamic_config/types';
+import { ConfigProperties } from '../dynamic_config/types';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;

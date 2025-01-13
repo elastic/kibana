@@ -9,7 +9,7 @@
 
 import React, { lazy } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
+import { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {

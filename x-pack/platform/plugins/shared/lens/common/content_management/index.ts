@@ -29,4 +29,4 @@ export type {
   LensCrudTypes,
 } from './latest';
 
-export type * as LensV1 from './v1';
+export * as LensV1 from './v1';

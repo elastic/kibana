@@ -10,8 +10,7 @@
 import simpleGit from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
-import type { CodeOwnersEntry } from '@kbn/code-owners';
-import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries, CodeOwnersEntry } from '@kbn/code-owners';
 import { asyncForEach } from '@kbn/std';
 import { inspect } from 'util';
 

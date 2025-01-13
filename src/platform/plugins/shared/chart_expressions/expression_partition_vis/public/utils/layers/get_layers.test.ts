@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ArrayEntry, ArrayNode } from '@elastic/charts';
+import { ArrayEntry, ArrayNode } from '@elastic/charts';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { BucketColumns} from '../../../common/types';
-import { ChartTypes } from '../../../common/types';
+import { BucketColumns, ChartTypes } from '../../../common/types';
 import { createMockPieParams, createMockVisData } from '../../mocks';
 import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { getLayers } from './get_layers';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ThunkAction } from 'redux-thunk';
-import type { BreadcrumbService } from '../../breadcrumbs';
+import { ThunkAction } from 'redux-thunk';
+import { BreadcrumbService } from '../../breadcrumbs';
 
 export const setBreadcrumb =
   (

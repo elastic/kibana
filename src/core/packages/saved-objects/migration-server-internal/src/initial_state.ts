@@ -11,12 +11,11 @@ import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type {
+import {
+  getLatestMappingsVirtualVersionMap,
   IndexMapping,
   IndexTypesMap,
-  SavedObjectsMigrationConfigType} from '@kbn/core-saved-objects-base-server-internal';
-import {
-  getLatestMappingsVirtualVersionMap
+  SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {

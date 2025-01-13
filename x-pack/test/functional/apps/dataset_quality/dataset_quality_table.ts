@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
-import type { DatasetQualityFtrProviderContext } from './config';
+import { DatasetQualityFtrProviderContext } from './config';
 import {
   datasetNames,
   defaultNamespace,

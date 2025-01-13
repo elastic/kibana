@@ -6,15 +6,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
-import type { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector } from '../../../hooks/use_inspector';
 import { useKibana } from '../../../hooks/use_kibana';
-import type { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../common/types/indicator';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import type { FetchParams, Pagination } from '../services/fetch_indicators';
-import { createFetchIndicators } from '../services/fetch_indicators';
+import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 
 const PAGE_SIZES = [10, 25, 50];
 

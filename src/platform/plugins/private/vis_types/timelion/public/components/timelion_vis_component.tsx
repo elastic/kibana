@@ -9,22 +9,21 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { compact, last, map } from 'lodash';
-import type {
-  LegendPositionConfig,
-  BrushEndListener} from '@elastic/charts';
 import {
   Chart,
   Settings,
   Position,
   Axis,
   TooltipType,
+  LegendPositionConfig,
   LayoutDirection,
   Placement,
   Tooltip,
-  LegendValue
+  LegendValue,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import type { RangeFilterParams } from '@kbn/es-query';
+import { RangeFilterParams } from '@kbn/es-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';

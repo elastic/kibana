@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object(
   {

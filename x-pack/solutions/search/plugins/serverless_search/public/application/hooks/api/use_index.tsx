@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { FetchIndexResult } from '../../../../common/types';
+import { FetchIndexResult } from '../../../../common/types';
 import { useKibanaServices } from '../use_kibana';
 
 export const useIndex = (id: string) => {

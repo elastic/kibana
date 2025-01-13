@@ -7,11 +7,10 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ChartType } from '@kbn/visualization-utils';
-import type { DatasourceMock} from '../mocks';
-import { createMockVisualization, createMockDatasource } from '../mocks';
-import type { DatasourceSuggestion } from '../types';
+import { createMockVisualization, DatasourceMock, createMockDatasource } from '../mocks';
+import { DatasourceSuggestion } from '../types';
 import { suggestionsApi } from '.';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
+import { TypedLensByValueInput } from '../react_embeddable/types';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

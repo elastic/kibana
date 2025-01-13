@@ -7,10 +7,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { FileLayer } from '@elastic/ems-client';
-import type { ChoroplethChartState } from './types';
+import { ChoroplethChartState } from './types';
 import { EMSFileSelect } from '../../components/ems_file_select';
 import { getEmsFileLayers } from '../../util';
 

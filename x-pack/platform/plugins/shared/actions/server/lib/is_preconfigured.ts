@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientContext } from '../actions_client';
+import { ActionsClientContext } from '../actions_client';
 
 export function isPreconfigured(context: ActionsClientContext, connectorId: string): boolean {
   return !!context.inMemoryConnectors.find(

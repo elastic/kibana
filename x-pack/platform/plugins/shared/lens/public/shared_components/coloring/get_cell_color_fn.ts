@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   ColorMappingInputData,
   PaletteOutput,
-  PaletteRegistry} from '@kbn/coloring';
-import {
+  PaletteRegistry,
   getSpecialString,
 } from '@kbn/coloring';
-import type { CustomPaletteState } from '@kbn/charts-plugin/common';
-import type { KbnPalettes } from '@kbn/palettes';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { KbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
 export type CellColorFn = (value?: number | string | null) => string | null;

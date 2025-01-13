@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OperationDocumentationType } from './types';
+import { OperationDocumentationType } from './types';
 
 export const CARDINALITY_ID = 'unique_count';
 export const CARDINALITY_NAME = i18n.translate('lensFormulaDocs.cardinality', {

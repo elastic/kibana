@@ -8,9 +8,8 @@
  */
 
 import { pick } from 'lodash';
-import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { ExpressionsService } from '../common';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 

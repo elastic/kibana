@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   addTimeZoneToDate,
   request,

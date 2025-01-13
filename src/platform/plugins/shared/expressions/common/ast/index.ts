@@ -13,4 +13,4 @@ export * from './format_expression';
 export * from './format';
 export * from './parse_expression';
 export * from './parse';
-export type * from './types';
+export * from './types';

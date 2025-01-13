@@ -15,16 +15,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { Conversation } from '../../../assistant_context/types';
-import type { ConversationTableItem} from './use_conversations_table';
-import { useConversationsTable } from './use_conversations_table';
+import { Conversation } from '../../../assistant_context/types';
+import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
-import type { AIConnector } from '../../../connectorland/connector_selector';
+import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import type {
-  FetchConversationsResponse} from '../../api';
 import {
+  FetchConversationsResponse,
   useFetchCurrentUserConversations,
   useFetchPrompts,
 } from '../../api';

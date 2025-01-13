@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Snapshot } from '../../../../common/runtime_types';
-import { SnapshotType } from '../../../../common/runtime_types';
+import { SnapshotType, Snapshot } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 

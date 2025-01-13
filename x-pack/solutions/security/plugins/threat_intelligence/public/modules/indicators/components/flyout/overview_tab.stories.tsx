@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import type { Indicator } from '../../../../../common/types/indicator';
-import { generateMockIndicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutOverview } from './overview_tab';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';

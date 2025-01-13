@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceTaskEventBase } from '../inference_task';
+import { InferenceTaskEventBase } from '../inference_task';
 
 /**
  * List possible values of {@link OutputEvent} types.

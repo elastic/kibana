@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { LogoProps } from '../types';
+import { LogoProps } from '../types';
 
 const Logo = (props: LogoProps) => (
   <svg

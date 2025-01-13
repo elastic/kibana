@@ -6,15 +6,15 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { EuiCommentProps } from '@elastic/eui';
+import { EuiCommentProps } from '@elastic/eui';
 
-import type {
+import {
   CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
-import type { ExceptionListItemIdentifiers } from '../types';
+import { ExceptionListItemIdentifiers } from '../types';
 
 interface UseExceptionItemCardProps {
   exceptionItem: ExceptionListItemSchema;

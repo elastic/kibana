@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -13,7 +13,7 @@ import type {
   PluginInitializerContext,
   IRouter,
 } from '@kbn/core/server';
-import type { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
+import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
 export class SessionViewPlugin implements Plugin {

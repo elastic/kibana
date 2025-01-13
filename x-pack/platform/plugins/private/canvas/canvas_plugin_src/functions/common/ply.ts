@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { combineLatest, defer, of } from 'rxjs';
+import { combineLatest, defer, of, Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { groupBy, flatten, pick, map as _map, uniqWith } from 'lodash';
-import type { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {

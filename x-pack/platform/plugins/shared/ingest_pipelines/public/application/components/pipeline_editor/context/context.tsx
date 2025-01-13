@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 
-import type {
-  Props as ProcessorsContextProps} from './processors_context';
 import {
-  PipelineProcessorsContextProvider
+  PipelineProcessorsContextProvider,
+  Props as ProcessorsContextProps,
 } from './processors_context';
 import { TestPipelineContextProvider } from './test_pipeline_context';
 

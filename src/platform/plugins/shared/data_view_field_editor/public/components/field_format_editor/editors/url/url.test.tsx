@@ -10,13 +10,12 @@
 import React from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { UrlFormatEditorFormatParams } from './url';
-import { UrlFormatEditor } from './url';
+import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { Serializable } from '@kbn/utility-types';
+import { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {

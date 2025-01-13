@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-import type { Index } from '../../../../..';
+import { Index } from '../../../../..';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 
 import { useLoadIndexMappings } from '../../../../services';

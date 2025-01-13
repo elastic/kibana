@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RowActionButtons } from '../row_action_buttons';

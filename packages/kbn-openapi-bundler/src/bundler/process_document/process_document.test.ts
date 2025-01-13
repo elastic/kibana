@@ -8,9 +8,9 @@
  */
 
 import { RefResolver } from '../ref_resolver';
-import type { Document } from '../document';
+import { Document } from '../document';
 import { processDocument } from './process_document';
-import type { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
+import { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
 
 jest.mock('../ref_resolver');
 

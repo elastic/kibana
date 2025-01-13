@@ -8,9 +8,8 @@
 import type { Action } from 'redux-actions';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { fetchNetworkEvents } from './api';
-import type { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
-import type { FetchNetworkEventsParams } from './actions';
-import { getNetworkEvents } from './actions';
+import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
+import { FetchNetworkEventsParams, getNetworkEvents } from './actions';
 
 export function* fetchNetworkEventsEffect() {
   yield takeLatest(

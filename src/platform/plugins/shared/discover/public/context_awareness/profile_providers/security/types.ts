@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ProfileProviderServices } from '../profile_provider_services';
+import { ProfileProviderServices } from '../profile_provider_services';
 
 export type SecurityProfileProviderFactory<T> = (services: ProfileProviderServices) => T;

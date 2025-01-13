@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefinitionType } from '../types';
+import { DefinitionType } from '../types';
 
 export class EntityDefinitionConflict extends Error {
   constructor(definitionType: DefinitionType, id: string) {

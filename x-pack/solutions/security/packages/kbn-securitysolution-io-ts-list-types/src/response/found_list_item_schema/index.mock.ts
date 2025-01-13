@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FoundListItemSchema } from '.';
+import { FoundListItemSchema } from '.';
 import { getListItemResponseMock } from '../list_item_schema/index.mock';
 
 export const getFoundListItemSchemaMock = (): FoundListItemSchema => ({

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
+import { schema, Type } from '@kbn/config-schema';
+import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
-import type { ServiceParams } from './types';
-import type { ConnectorUsageCollector } from '../usage';
+import { ServiceParams } from './types';
+import { ConnectorUsageCollector } from '../usage';
 
 export interface CaseConnectorInterface<Incident, GetIncidentResponse> {
   addComment: (

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
-import type {
+import { buildRangeFilter, Filter } from '@kbn/es-query';
+import {
   DataView,
   DataViewsContract,
   ISearchSource,
-  ISearchStartSearchSource} from '@kbn/data-plugin/common';
-import {
+  ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
 import {
@@ -22,14 +20,13 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { Logger} from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type { OnlySearchSourceRuleParams } from '../types';
+import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
 

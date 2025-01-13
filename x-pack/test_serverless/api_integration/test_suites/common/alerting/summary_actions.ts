@@ -28,8 +28,8 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { RoleCredentials } from '../../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

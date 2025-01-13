@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export class AutoDetectFlowPage {
   page: Page;

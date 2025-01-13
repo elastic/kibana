@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimeRange} from '@kbn/data-plugin/common';
-import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { LineStyle } from '@kbn/visualization-ui-components';
 import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
-import type {
+import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
-import type { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import type { EventAnnotationOutput } from '../types';
-import { annotationColumns } from '../types';
+import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
+import { annotationColumns, EventAnnotationOutput } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput

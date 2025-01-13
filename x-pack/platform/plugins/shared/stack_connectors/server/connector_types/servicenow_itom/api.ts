@@ -7,7 +7,7 @@
 
 import { convertTimestamp } from '../lib/convert_timestamp';
 import { api as commonApi } from '../lib/servicenow/api';
-import type {
+import {
   ExecutorSubActionAddEventParams,
   AddEventApiHandlerArgs,
   ExternalServiceApiITOM,

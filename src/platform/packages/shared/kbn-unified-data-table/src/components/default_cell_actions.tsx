@@ -8,15 +8,14 @@
  */
 
 import React, { useContext } from 'react';
-import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import type { ToastsStart } from '@kbn/core/public';
+import { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableContext } from '../table_context';
-import { UnifiedDataTableContext } from '../table_context';
+import { UnifiedDataTableContext, DataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import type { ValueToStringConverter } from '../types';
+import { ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,

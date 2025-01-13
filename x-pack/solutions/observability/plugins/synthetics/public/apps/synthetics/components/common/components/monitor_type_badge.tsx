@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormMonitorType, MonitorTypeEnum } from '../../../../../../common/runtime_types';

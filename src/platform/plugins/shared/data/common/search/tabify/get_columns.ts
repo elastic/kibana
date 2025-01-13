@@ -8,7 +8,7 @@
  */
 
 import { groupBy } from 'lodash';
-import type { IAggConfig } from '../aggs';
+import { IAggConfig } from '../aggs';
 import type { TabbedAggColumn } from './types';
 
 const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {

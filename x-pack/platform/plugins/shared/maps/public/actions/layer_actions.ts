@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { MapStoreState } from '../reducers/store';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
   getEditState,
@@ -44,7 +44,7 @@ import {
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import type {
+import {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
@@ -54,22 +54,21 @@ import type {
   VectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
-import type { ILayer } from '../classes/layers/layer';
+import { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import type { OnSourceChangeArgs } from '../classes/sources/source';
+import { OnSourceChangeArgs } from '../classes/sources/source';
 import { isESVectorTileSource } from '../classes/sources/es_source';
-import type {
-  LAYER_TYPE} from '../../common/constants';
 import {
   DRAW_MODE,
   LAYER_STYLE_TYPE,
+  LAYER_TYPE,
   SCALING_TYPES,
   STYLE_TYPE,
 } from '../../common/constants';
-import type { IVectorStyle } from '../classes/styles/vector/vector_style';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
-import type { IESAggField } from '../classes/fields/agg';
-import type { IField } from '../classes/fields/field';
+import { IESAggField } from '../classes/fields/agg';
+import { IField } from '../classes/fields/field';
 import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';

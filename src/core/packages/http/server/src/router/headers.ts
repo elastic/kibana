@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IncomingHttpHeaders } from 'http';
+import { IncomingHttpHeaders } from 'http';
 
 /**
  * Converts an object type to a new object type where each string

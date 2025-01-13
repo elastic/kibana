@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
   describe('Upgrade Assistant', function upgradeAssistantTestSuite() {

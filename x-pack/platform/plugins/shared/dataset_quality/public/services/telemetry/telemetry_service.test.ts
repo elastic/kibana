@@ -7,16 +7,15 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { datasetQualityEbtEvents } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
-import type {
+import {
+  NavigationTarget,
+  NavigationSource,
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsEbtProps,
   WithTrackingId,
   WithDuration,
   DatasetEbtProps,
-  DatasetNavigatedEbtProps} from './types';
-import {
-  NavigationTarget,
-  NavigationSource
+  DatasetNavigatedEbtProps,
 } from './types';
 
 // Mock uuidv4

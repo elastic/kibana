@@ -12,8 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors } from '@elastic/elasticsearch';
 
 import { updateFilteringDraft } from './update_filtering_draft';
-import type { FilteringRule, FilteringRules} from '../types/connectors';
-import { FilteringValidationState } from '../types/connectors';
+import { FilteringRule, FilteringRules, FilteringValidationState } from '../types/connectors';
 
 describe('updateFilteringDraft lib function', () => {
   const mockClient = {

@@ -12,7 +12,7 @@ import { dirname, relative, resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { Lifecycle } from './lifecycle';
+import { Lifecycle } from './lifecycle';
 
 export interface SuiteInProgress {
   startTime?: Date;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin } from '@kbn/core-plugins-server';
+import { Plugin } from '@kbn/core-plugins-server';
 
 export { config } from './config';
 

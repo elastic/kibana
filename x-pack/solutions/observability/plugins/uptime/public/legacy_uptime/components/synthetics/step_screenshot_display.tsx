@@ -17,12 +17,13 @@ import {
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import type { ScreenshotRefImageData } from '../../../../common/runtime_types';
-import { isScreenshotRef as isAScreenshotRef } from '../../../../common/runtime_types';
+import {
+  isScreenshotRef as isAScreenshotRef,
+  ScreenshotRefImageData,
+} from '../../../../common/runtime_types';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';

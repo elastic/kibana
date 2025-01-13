@@ -9,8 +9,8 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createSeries } from '../__mocks__';
-import type { Metric } from '../../../../common/types';
-import type {
+import { Metric } from '../../../../common/types';
+import {
   AvgColumn,
   CardinalityColumn,
   CountColumn,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';
 import { WatchHistoryItem } from '../models/watch_history_item';
 import { WatchStatus } from '../models/watch_status';
 
-import type { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
+import { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
 import { useRequest, sendRequest } from './use_request';
 
 import { ROUTES } from '../../../common/constants';

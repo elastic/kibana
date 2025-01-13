@@ -9,9 +9,9 @@
 
 import { BehaviorSubject, skip } from 'rxjs';
 
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 
-import type { ControlGroupChainingSystem } from '../../../common';
+import { ControlGroupChainingSystem } from '../../../common';
 import { chaining$ } from './chaining';
 
 const FILTER_ALPHA = {

@@ -8,10 +8,9 @@
  */
 
 import * as React from 'react';
-import type { EsqlQuery} from '@kbn/esql-ast';
-import { Walker } from '@kbn/esql-ast';
+import { EsqlQuery, Walker } from '@kbn/esql-ast';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import type { Annotation } from '../annotations';
+import { Annotation } from '../annotations';
 
 const palette = euiPaletteColorBlind();
 

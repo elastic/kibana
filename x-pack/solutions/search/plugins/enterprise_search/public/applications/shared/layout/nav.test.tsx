@@ -17,10 +17,10 @@ import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { renderHook } from '@testing-library/react';
 
-import type { EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType } from '@elastic/eui';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
-import type { ProductAccess } from '../../../../common/types';
+import { ProductAccess } from '../../../../common/types';
 
 import {
   useEnterpriseSearchNav,

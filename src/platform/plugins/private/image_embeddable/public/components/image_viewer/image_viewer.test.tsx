@@ -11,7 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer_context';
-import type { ImageConfig } from '../../types';
+import { ImageConfig } from '../../types';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 

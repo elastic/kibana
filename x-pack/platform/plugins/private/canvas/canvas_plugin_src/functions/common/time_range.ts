@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n/functions';
-import type { TimeRange } from '../../../types';
+import { TimeRange } from '../../../types';
 
 interface Args {
   from: string;

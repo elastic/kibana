@@ -6,16 +6,15 @@
  */
 
 import React, { type FC, useMemo, useCallback, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps} from '@elastic/eui';
 import {
   EuiComboBox,
   EuiHealth,
   EuiHighlight,
+  EuiComboBoxOptionOption,
   EuiIcon,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Tag } from '../../../common/types';

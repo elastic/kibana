@@ -9,9 +9,8 @@ import { getAppResultsMock } from './application.test.mocks';
 
 import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
-import { AppStatus } from '@kbn/core/public';
-import type {
+import { ApplicationStart, AppStatus, PublicAppInfo } from '@kbn/core/public';
+import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
 } from '@kbn/global-search-plugin/public';

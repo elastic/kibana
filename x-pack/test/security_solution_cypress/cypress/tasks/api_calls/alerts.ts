@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   RuleObjectId,
   RuleSignatureId,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';

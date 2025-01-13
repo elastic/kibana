@@ -10,8 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
-import type { TimeRangeOption } from './time_unit_selectable';
-import { TimeUnitSelectable } from './time_unit_selectable';
+import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
 
 interface Props {
   ruleParams: { [param: string]: any };

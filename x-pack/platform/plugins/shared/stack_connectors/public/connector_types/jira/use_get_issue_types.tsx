@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { IssueTypes } from './types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { IssueTypes } from './types';
 import { getIssueTypes } from './api';
 import * as i18n from './translations';
 

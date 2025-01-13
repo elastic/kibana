@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import type { FormData } from '../types';
+import { FormData } from '../types';
 import { useFormData } from '../hooks';
 
 interface Props<I> {

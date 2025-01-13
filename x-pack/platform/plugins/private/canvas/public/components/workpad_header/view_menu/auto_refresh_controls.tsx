@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,

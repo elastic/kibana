@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 
 /**

@@ -6,6 +6,6 @@
  */
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SearchHomepageServicesContext } from '../types';
+import { SearchHomepageServicesContext } from '../types';
 
 export const useKibana = () => _useKibana<SearchHomepageServicesContext>();

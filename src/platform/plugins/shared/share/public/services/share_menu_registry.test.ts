@@ -8,7 +8,7 @@
  */
 
 import { ShareMenuRegistry } from './share_menu_registry';
-import type { ShareMenuItemV2, ShareContext } from '../types';
+import { ShareMenuItemV2, ShareContext } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {

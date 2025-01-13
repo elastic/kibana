@@ -7,11 +7,10 @@
 
 import React from 'react';
 
-import type {
+import {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
-  SecretsFieldSchema} from '@kbn/triggers-actions-ui-plugin/public';
-import {
+  SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';

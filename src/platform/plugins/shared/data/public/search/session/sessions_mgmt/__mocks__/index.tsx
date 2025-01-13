@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 export function LocaleWrapper({ children }: { children?: ReactNode }) {

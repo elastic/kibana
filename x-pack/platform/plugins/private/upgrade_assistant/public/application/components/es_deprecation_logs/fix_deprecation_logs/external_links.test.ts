@@ -8,8 +8,7 @@
 import { getDeprecationDataView } from './external_links';
 
 import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
-import type { Start } from '@kbn/data-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataPluginMock, Start } from '@kbn/data-plugin/public/mocks';
 
 describe('External Links', () => {
   let dataService: Start;

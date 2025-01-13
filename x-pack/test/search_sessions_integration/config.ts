@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

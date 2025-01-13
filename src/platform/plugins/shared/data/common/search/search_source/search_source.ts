@@ -75,31 +75,28 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  Filter} from '@kbn/es-query';
 import {
   buildEsQuery,
+  Filter,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
-import type {
-  ExpressionAstExpression} from '@kbn/expressions-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
+  ExpressionAstExpression,
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
 
-import type { EsQuerySortValue } from '../..';
-import { AggConfigs } from '../..';
+import { AggConfigs, EsQuerySortValue } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -112,12 +109,11 @@ import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
-import type { AggsStart } from '../aggs';
+import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
-import type {
-  EsdslExpressionFunctionDefinition,
-  ExpressionFunctionKibanaContext} from '../expressions';
 import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
   filtersToAst,
   queryToAst,
 } from '../expressions';

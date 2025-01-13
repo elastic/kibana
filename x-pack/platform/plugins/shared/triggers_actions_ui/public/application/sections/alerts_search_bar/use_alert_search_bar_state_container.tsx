@@ -9,12 +9,11 @@ import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { type SavedQuery } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
+  IKbnUrlStateStorage,
   useContainerSelector,
   createStateContainer,
   createStateContainerReactHelpers,
@@ -22,8 +21,8 @@ import {
 
 import * as t from 'io-ts';
 import { datemathStringRt } from '@kbn/io-ts-utils';
-import type { Filter } from '@kbn/es-query';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { Filter } from '@kbn/es-query';
+import { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface AlertSearchBarContainerState {

@@ -7,12 +7,11 @@
 import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
-import type { NewPackagePolicyPostureInput } from './utils';
-import { getPosturePolicy } from './utils';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { AwsInputVarFields } from './aws_credentials_form/aws_input_var_fields';
 
 const AWSSetupInfoContent = () => (

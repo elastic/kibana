@@ -6,12 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { useEuiTheme, keys } from '@elastic/eui';
+import { useEuiTheme, EuiThemeComputed, keys } from '@elastic/eui';
 
 import { EmptyThumbnail } from './empty_thumbnail';
-import type { ScreenshotImageSize } from './screenshot_size';
-import { getConfinedScreenshotSize } from './screenshot_size';
+import { getConfinedScreenshotSize, ScreenshotImageSize } from './screenshot_size';
 
 const DEFAULT_SIZE: [number, number] = [512, 512];
 

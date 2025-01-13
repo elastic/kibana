@@ -7,8 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { MetricOptions } from '../classes';
-import { ClusterMetric, Metric } from '../classes';
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type KibanaClusterMetricOptions = Pick<

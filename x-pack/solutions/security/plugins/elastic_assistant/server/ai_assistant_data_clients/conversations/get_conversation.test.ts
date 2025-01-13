@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
-import type { estypes } from '@elastic/elasticsearch';
-import type { EsConversationSchema } from './types';
+import { estypes } from '@elastic/elasticsearch';
+import { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',

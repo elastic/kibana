@@ -9,11 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { FieldHook, FieldValidateResponse } from '../../hook_form_lib';
-import { VALIDATION_TYPES } from '../../hook_form_lib';
+import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

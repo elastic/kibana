@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocumentNodeProcessor } from './types/document_node_processor';
+import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Creates a node processor to skip nodes having provided `skipProperty` property

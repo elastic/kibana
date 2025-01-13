@@ -9,8 +9,8 @@
 
 import { get, omit, pick } from 'lodash';
 import { getConvertedValueForField } from '../filters';
-import type { Filter } from '../filters';
-import type { DataViewBase } from './types';
+import { Filter } from '../filters';
+import { DataViewBase } from './types';
 
 /** @internal */
 export interface DeprecatedMatchPhraseFilter extends Filter {

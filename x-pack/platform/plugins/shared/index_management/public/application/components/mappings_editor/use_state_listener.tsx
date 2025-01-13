@@ -7,9 +7,9 @@
 
 import { useEffect, useMemo } from 'react';
 
-import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import type {
+import {
   DocumentFieldsStatus,
   Field,
   Mappings,

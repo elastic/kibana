@@ -223,7 +223,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       ]
     );
 
-    const descriptionLists: readonly DescriptionList[][] = useMemo(
+    const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
       () => [
         firstColumn,
         [

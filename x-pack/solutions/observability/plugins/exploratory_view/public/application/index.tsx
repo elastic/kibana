@@ -9,17 +9,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { PluginContext } from '../context/plugin_context';
 import { routes } from '../routes';
-import type { ExploratoryViewPublicPluginsStart } from '../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../plugin';
 
 export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 

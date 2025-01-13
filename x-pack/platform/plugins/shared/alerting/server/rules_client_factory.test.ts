@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RulesClientFactoryOpts } from './rules_client_factory';
-import { RulesClientFactory } from './rules_client_factory';
+import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
@@ -18,15 +17,15 @@ import {
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import type { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
+import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
-import type { AlertingAuthorization } from './authorization';
-import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingAuthorization } from './authorization';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {

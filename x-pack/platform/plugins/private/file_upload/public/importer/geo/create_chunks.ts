@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature, Point } from 'geojson';
+import { Feature, Point } from 'geojson';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { ImportDoc } from '../../../common/types';
 

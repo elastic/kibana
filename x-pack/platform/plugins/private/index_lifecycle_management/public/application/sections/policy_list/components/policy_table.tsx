@@ -6,16 +6,15 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type {
-  EuiSearchBarProps,
-  EuiInMemoryTableProps} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiLink,
   EuiInMemoryTable,
   EuiToolTip,
   EuiFlexItem,
-  EuiSwitch
+  EuiSwitch,
+  EuiSearchBarProps,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -23,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
-import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { hasLinkedIndices } from '../../../lib/policies';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
-import type { PolicyFromES } from '../../../../../common/types';
+import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
 import {
   getIndicesListPath,

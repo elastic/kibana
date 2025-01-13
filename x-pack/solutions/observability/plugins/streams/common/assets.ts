@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ValuesType } from 'utility-types';
+import { ValuesType } from 'utility-types';
 
 export const ASSET_TYPES = {
   Dashboard: 'dashboard' as const,

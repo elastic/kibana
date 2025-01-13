@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiConfirmModal, EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { NormalizedFields, NormalizedField } from '../../../types';
+import { NormalizedFields, NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
 import { TYPE_DEFINITION } from '../../../constants';

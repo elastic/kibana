@@ -8,8 +8,8 @@
 import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { ActionForm } from '../application/sections';
-import type { ActionAccordionFormProps } from '../application/sections/action_connector_form/action_form';
-import type { ConnectorServices } from '../types';
+import { ActionAccordionFormProps } from '../application/sections/action_connector_form/action_form';
+import { ConnectorServices } from '../types';
 
 export const getActionFormLazy = (
   props: ActionAccordionFormProps & { connectorServices: ConnectorServices }

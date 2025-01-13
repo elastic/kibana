@@ -10,19 +10,17 @@
 import React, { useEffect, useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import type { TestBed } from '../shared_imports';
-import { registerTestBed, getRandomString } from '../shared_imports';
+import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 import { emptyField } from '../../helpers/field_validators';
 import { ComboBoxField } from '../../components';
 import { Form, UseField, UseArray } from '../components';
-import type {
+import {
   FormSubmitHandler,
   OnUpdateHandler,
   FormHook,
   FieldHook,
   ValidationFunc,
-  FieldConfig} from '..';
-import {
+  FieldConfig,
   VALIDATION_TYPES,
 } from '..';
 import { useForm } from './use_form';

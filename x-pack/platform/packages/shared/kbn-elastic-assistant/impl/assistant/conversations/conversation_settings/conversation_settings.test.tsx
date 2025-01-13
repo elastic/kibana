@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import type { ConversationSettingsProps } from './conversation_settings';
-import { ConversationSettings } from './conversation_settings';
+import { ConversationSettings, ConversationSettingsProps } from './conversation_settings';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
 import { mockConnectors } from '../../../mock/connectors';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 const mockConvos = {
   '1234': { ...welcomeConvo, id: '1234' },

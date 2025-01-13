@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
-import type { AlertStatus } from '@kbn/rule-data-utils';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type { Agent as SuperTestAgent } from 'supertest';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Agent as SuperTestAgent } from 'supertest';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {

@@ -7,7 +7,7 @@
 
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 
 export interface ILensRequestPerformance {
   requestTimeTotal: number;

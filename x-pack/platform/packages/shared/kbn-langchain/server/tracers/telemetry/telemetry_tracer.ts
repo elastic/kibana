@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
 import type { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
 export interface TelemetryParams {
   assistantStreamingEnabled: boolean;

@@ -22,8 +22,8 @@ import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import type { KbnPalettes } from '@kbn/palettes';
-import type { ColorMapping } from '../../config';
+import { KbnPalettes } from '@kbn/palettes';
+import { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
 

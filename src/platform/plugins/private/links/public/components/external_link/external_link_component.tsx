@@ -10,20 +10,18 @@
 import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type {
-  UrlDrilldownOptions} from '@kbn/ui-actions-enhanced-plugin/public';
 import {
-  DEFAULT_URL_DRILLDOWN_OPTIONS
+  DEFAULT_URL_DRILLDOWN_OPTIONS,
+  UrlDrilldownOptions,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
-import type {
-  LinksLayoutType} from '../../../common/content_management';
 import {
   EXTERNAL_LINK_TYPE,
+  LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import type { ResolvedLink } from '../../types';
+import { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,

@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import type { Capabilities } from '@kbn/core/server';
+import { Capabilities } from '@kbn/core/server';
 import {
   savedObjectsTypeRegistryMock,
   savedObjectsClientMock,

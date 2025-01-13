@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { seriesStyle } from '../../../canvas_plugin_src/functions/common/seriesStyle';
-import type { FunctionHelp } from '../function_help';
-import type { FunctionFactory } from '../../../types';
+import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
   help: i18n.translate('xpack.canvas.functions.seriesStyleHelpText', {

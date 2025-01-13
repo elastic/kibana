@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 import React from 'react';
 import { getLogCategoryTerms } from '../../utils/log_category';
-import type { LogCategory } from '../../types';
+import { LogCategory } from '../../types';
 
 interface LogCategoryPatternProps {
   logCategory: LogCategory;

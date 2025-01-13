@@ -8,8 +8,7 @@
  */
 
 import { defaultTrigger } from '@kbn/ui-actions-browser';
-import type { ActionExecutionContext} from '..';
-import { createAction } from '..';
+import { ActionExecutionContext, createAction } from '..';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({
   id: 'test',

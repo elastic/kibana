@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TotalValue } from '../common';
+import { TotalValue } from '../common';
 
 export * from './validation';
 

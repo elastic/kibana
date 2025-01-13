@@ -6,11 +6,9 @@
  */
 
 import { actionsConfigMock } from '../../../../actions_config.mock';
-import type { ActionTypeRegistryOpts } from '../../../../action_type_registry';
-import { ActionTypeRegistry } from '../../../../action_type_registry';
-import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
-import type { ILicenseState} from '../../../../lib';
-import { ActionExecutor, TaskRunnerFactory } from '../../../../lib';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../../../../action_type_registry';
+import { ActionsAuthorization } from '../../../../authorization/actions_authorization';
+import { ActionExecutor, ILicenseState, TaskRunnerFactory } from '../../../../lib';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -26,7 +24,7 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
-import type { ExecutorType } from '../../../../types';
+import { ExecutorType } from '../../../../types';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;

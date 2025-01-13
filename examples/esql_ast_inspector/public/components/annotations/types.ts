@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as React from 'react';
+import * as React from 'react';
 
 export type Annotation = [
   start: number,

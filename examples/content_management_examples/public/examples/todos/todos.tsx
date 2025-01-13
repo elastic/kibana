@@ -23,7 +23,8 @@ import {
   useUpdateContentMutation,
 } from '@kbn/content-management-plugin/public';
 
-import type {
+import {
+  TODO_CONTENT_ID,
   Todo,
   TodoCreateIn,
   TodoDeleteIn,
@@ -32,9 +33,7 @@ import type {
   TodoUpdateOut,
   TodoCreateOut,
   TodoSearchOut,
-  TodoDeleteOut} from '../../../common/examples/todos';
-import {
-  TODO_CONTENT_ID
+  TodoDeleteOut,
 } from '../../../common/examples/todos';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { UrlParams } from './types';
+import { UrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 
 const defaultUrlParams = {

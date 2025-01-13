@@ -10,14 +10,13 @@
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { GroupingProps } from './grouping';
-import { Grouping } from './grouping';
+import { Grouping, GroupingProps } from './grouping';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
-import type { SetRequired } from 'type-fest';
+import { SetRequired } from 'type-fest';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();

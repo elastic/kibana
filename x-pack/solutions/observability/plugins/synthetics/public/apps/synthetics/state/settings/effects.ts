@@ -6,10 +6,10 @@
  */
 
 import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
-import type { Action } from 'redux-actions';
+import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { updateDefaultAlertingAction } from '../alert_rules';
-import type { DynamicSettings } from '../../../../../common/runtime_types';
+import { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import {
   getConnectorsAction,

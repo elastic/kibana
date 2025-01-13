@@ -10,13 +10,11 @@
 import * as Path from 'path';
 
 import getopts from 'getopts';
-import type { CiStatsReportTestsOptions } from '@kbn/ci-stats-reporter';
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { CiStatsReporter, CiStatsReportTestsOptions } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from '@jest/types';
-import type { Test, TestResult } from '@jest/reporters';
-import { BaseReporter } from '@jest/reporters';
-import type { ConsoleBuffer } from '@jest/console';
+import { BaseReporter, Test, TestResult } from '@jest/reporters';
+import { ConsoleBuffer } from '@jest/console';
 
 type LogEntry = ConsoleBuffer[0];
 

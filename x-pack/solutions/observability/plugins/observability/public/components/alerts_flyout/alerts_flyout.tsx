@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';

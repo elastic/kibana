@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { History, LocationDescriptor, LocationDescriptorObject } from 'history';
-import { createHashHistory } from 'history';
+import { History, createHashHistory, LocationDescriptor, LocationDescriptorObject } from 'history';
 
 function preserveQueryParameters(
   history: History,

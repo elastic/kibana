@@ -14,14 +14,13 @@ import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message } from '../../../common';
-import type {
-  ChatCompletionChunkEvent,
-  MessageAddEvent} from '../../../common/conversation_complete';
 import {
+  ChatCompletionChunkEvent,
+  MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-plugin/server';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';

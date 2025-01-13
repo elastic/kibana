@@ -6,9 +6,8 @@
  */
 
 import { get, map } from 'lodash';
-import type { Style, PointSeriesColumns } from '@kbn/expressions-plugin/common';
-import type { Ticks, AxisConfig} from '../../../types';
-import { isAxisConfig } from '../../../types';
+import { Style, PointSeriesColumns } from '@kbn/expressions-plugin/common';
+import { Ticks, AxisConfig, isAxisConfig } from '../../../types';
 
 type Position = 'bottom' | 'top' | 'left' | 'right';
 interface Config {

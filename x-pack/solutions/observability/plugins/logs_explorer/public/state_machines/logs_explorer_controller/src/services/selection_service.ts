@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { InvokeCreator } from 'xstate';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { InvokeCreator } from 'xstate';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
-import type { LogsExplorerCustomizations } from '../../../../controller';
+import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
-import type {
-  UnresolvedDatasetSelection} from '../../../../../common/data_source_selection';
 import {
   DataViewSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
-  SingleDatasetSelection
+  SingleDatasetSelection,
+  UnresolvedDatasetSelection,
 } from '../../../../../common/data_source_selection';
-import type { IDatasetsClient } from '../../../../services/datasets';
-import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
+import { IDatasetsClient } from '../../../../services/datasets';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 interface LogsExplorerControllerSelectionServiceDeps {
   datasetsClient: IDatasetsClient;

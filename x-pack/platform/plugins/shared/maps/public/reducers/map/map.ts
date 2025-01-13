@@ -61,7 +61,7 @@ import {
   updateLayerSourceDescriptorProp,
 } from './layer_utils';
 import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
-import type { MapState } from './types';
+import { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
   executionContext: { name: APP_ID },

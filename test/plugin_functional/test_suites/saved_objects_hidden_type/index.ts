@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginFunctionalProviderContext } from '../../services';
+import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('Saved objects with hidden type', function () {

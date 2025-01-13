@@ -16,17 +16,15 @@ import React, {
   useRef,
   memo,
 } from 'react';
-import type {
+import {
+  EuiDataGrid,
   EuiDataGridStyle,
+  EuiSkeletonText,
   EuiDataGridRefProps,
+  EuiFlexGroup,
   EuiDataGridProps,
   RenderCellValue,
   EuiDataGridCellPopoverElementProps,
-} from '@elastic/eui';
-import {
-  EuiDataGrid,
-  EuiSkeletonText,
-  EuiFlexGroup,
   EuiCodeBlock,
   EuiText,
   EuiIcon,
@@ -49,7 +47,7 @@ import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 import './alerts_table.scss';
 import { useGetToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
-import type { SystemCellId } from './types';
+import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));

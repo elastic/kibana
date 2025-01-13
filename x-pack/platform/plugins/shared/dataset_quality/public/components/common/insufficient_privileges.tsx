@@ -9,16 +9,15 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiButtonIconProps,
-  EuiButtonIconPropsForButton} from '@elastic/eui';
 import {
   EuiLink,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiPopover,
   EuiToolTip,
   EuiIcon,
-  EuiFlexGroup
+  EuiFlexGroup,
+  EuiButtonIconPropsForButton,
 } from '@elastic/eui';
 
 const insufficientPrivilegesText = i18n.translate(

@@ -8,8 +8,7 @@
 import React from 'react';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
-import type { AppMockRenderer} from '../../../lib/test_utils';
-import { createAppMockRenderer } from '../../../lib/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { EmptyPrompt } from './empty_prompt';
 
 describe('EmptyPrompt', () => {

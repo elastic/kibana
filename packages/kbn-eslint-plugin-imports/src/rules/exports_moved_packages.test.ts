@@ -8,8 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import type { MovedExportsRule } from './exports_moved_packages';
-import { ExportsMovedPackagesRule } from './exports_moved_packages';
+import { ExportsMovedPackagesRule, MovedExportsRule } from './exports_moved_packages';
 import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';

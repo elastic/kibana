@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import type { I18nStart } from '@kbn/core/public';
+import { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
-import type { AnonymousAccessServiceContract } from '../../../common';
+import { AnonymousAccessServiceContract } from '../../../common';
 import type {
   ShareMenuItemV2,
   UrlParamExtension,

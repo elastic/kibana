@@ -13,17 +13,16 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type {
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import {
+  APP_WRAPPER_CLASS,
   App,
   AppMountParameters,
   AppUpdater,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  ScopedHistory} from '@kbn/core/public';
-import {
-  APP_WRAPPER_CLASS,
-  DEFAULT_APP_CATEGORIES,
+  ScopedHistory,
   type CoreSetup,
   type CoreStart,
 } from '@kbn/core/public';
@@ -31,7 +30,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -67,16 +66,15 @@ import {
   DashboardAppLocatorDefinition,
   type DashboardAppLocator,
 } from './dashboard_app/locator/locator';
-import type { DashboardMountContextProps } from './dashboard_app/types';
+import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import type {
-  GetPanelPlacementSettings} from './dashboard_container/panel_placement';
 import {
+  GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';

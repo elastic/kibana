@@ -8,18 +8,16 @@
  */
 
 import { upperFirst, isFunction, omit } from 'lodash';
-import type { MouseEvent } from 'react';
-import React from 'react';
-import type {
-  EuiButtonColor} from '@elastic/eui';
+import React, { MouseEvent } from 'react';
 import {
   EuiToolTip,
   EuiButton,
   EuiHeaderLink,
   EuiBetaBadge,
+  EuiButtonColor,
   EuiButtonIcon,
 } from '@elastic/eui';
-import type { TopNavMenuData } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;

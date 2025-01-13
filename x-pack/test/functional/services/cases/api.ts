@@ -6,9 +6,13 @@
  */
 
 import pMap from 'p-map';
-import type { Case, Configuration } from '@kbn/cases-plugin/common/types/domain';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  Configuration,
+} from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
@@ -22,9 +26,9 @@ import {
   loginUsers,
   suggestUserProfiles,
 } from '../../../cases_api_integration/common/lib/api/user_profiles';
-import type { User } from '../../../cases_api_integration/common/lib/authentication/types';
+import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
 type GetParams<T extends (...args: any) => any> = Omit<Parameters<T>[0], 'supertest'>;

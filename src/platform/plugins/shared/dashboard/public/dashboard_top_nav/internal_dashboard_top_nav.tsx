@@ -10,21 +10,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
-import type {
-  EuiBreadcrumb,
-  EuiToolTipProps} from '@elastic/eui';
 import {
   EuiBadge,
+  EuiBreadcrumb,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiPopover
+  EuiPopover,
+  EuiToolTipProps,
 } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
+import { MountPoint } from '@kbn/core/public';
+import { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
@@ -39,11 +38,11 @@ import {
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
-import type { DashboardEmbedSettings } from '../dashboard_app/types';
+import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
-import type { DashboardRedirect } from '../dashboard_container/types';
-import type { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { DashboardRedirect } from '../dashboard_container/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,

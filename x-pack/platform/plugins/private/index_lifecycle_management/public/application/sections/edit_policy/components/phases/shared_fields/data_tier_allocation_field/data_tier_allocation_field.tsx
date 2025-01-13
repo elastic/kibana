@@ -6,16 +6,15 @@
  */
 
 import { get } from 'lodash';
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
-import type { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
+import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
 import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../../lib';
 import { useLoadNodes } from '../../../../../../services/api';
 import { i18nTexts } from '../../../../i18n_texts';
-import type { DataTierAllocationType } from '../../../../types';
+import { DataTierAllocationType } from '../../../../types';
 
 import {
   DataTierAllocation,

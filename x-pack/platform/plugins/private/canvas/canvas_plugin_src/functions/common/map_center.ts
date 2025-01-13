@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n/functions';
-import type { MapCenter } from '../../../types';
+import { MapCenter } from '../../../types';
 
 interface Args {
   lat: number;

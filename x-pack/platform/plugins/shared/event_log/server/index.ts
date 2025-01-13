@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { IEventLogConfig } from './types';
-import { ConfigSchema } from './types';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { ConfigSchema, IEventLogConfig } from './types';
 
 export { millisToNanos, nanosToMillis } from '../common';
 

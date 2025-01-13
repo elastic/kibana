@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Appender } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
+import { LogLevel, Appender } from '@kbn/logging';
 import { LoggingConfig } from './logging_config';
 import { BaseLogger } from './logger';
 

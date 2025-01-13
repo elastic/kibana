@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import type { BatchUpdateListItem, ContextEditorRow } from '../types';
+import { BatchUpdateListItem, ContextEditorRow } from '../types';
 
 export const PRIMARY_PANEL_ID = 'primary-panel-id';
 

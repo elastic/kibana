@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
-import type {
+import {
   MicrosoftDefenderEndpointSecretsSchema,
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointActionParamsSchema,

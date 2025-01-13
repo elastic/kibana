@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   GetIn,
   CreateIn,
   SearchIn,
@@ -19,7 +19,7 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
-import type { GraphContentType } from '../types';
+import { GraphContentType } from '../types';
 
 export interface Reference {
   type: string;

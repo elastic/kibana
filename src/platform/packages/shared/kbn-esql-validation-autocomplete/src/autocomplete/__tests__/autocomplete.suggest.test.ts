@@ -8,10 +8,10 @@
  */
 
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import type { ESQLCallbacks } from '../../shared/types';
+import { ESQLCallbacks } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import { getCallbackMocks } from '../../__tests__/helpers';
-import type { EditorContext } from '../types';
+import { EditorContext } from '../types';
 
 const setup = async (caret = '?') => {
   if (caret.length !== 1) throw new Error('Caret must be a single character');

@@ -8,7 +8,7 @@
  */
 
 import { until } from './util';
-import type { EventStreamClient, EventStreamEvent } from '../types';
+import { EventStreamClient, EventStreamEvent } from '../types';
 
 export const testEventStreamClient = (clientPromise: Promise<EventStreamClient>) => {
   let now = Date.now();

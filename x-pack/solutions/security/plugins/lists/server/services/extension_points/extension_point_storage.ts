@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import type {
+import {
   ExtensionPoint,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,

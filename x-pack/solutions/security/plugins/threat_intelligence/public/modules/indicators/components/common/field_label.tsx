@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import React, { VFC } from 'react';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import {
   CONFIDENCE,

@@ -11,15 +11,15 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import dateMath from '@kbn/datemath';
-import type { TimeRange } from '@kbn/es-query';
-import type { StateComparators } from '@kbn/presentation-publishing';
+import { TimeRange } from '@kbn/es-query';
+import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import type { ControlApiRegistration } from '../types';
+import { ControlApiRegistration } from '../types';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
-import type { TimesliderControlApi, TimesliderControlState } from './types';
+import { TimesliderControlApi, TimesliderControlState } from './types';
 
 describe('TimesliderControlApi', () => {
   const uuid = 'myControl1';

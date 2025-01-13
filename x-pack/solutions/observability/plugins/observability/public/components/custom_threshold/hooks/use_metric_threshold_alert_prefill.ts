@@ -7,8 +7,10 @@
 
 import { isEqual } from 'lodash';
 import { useState } from 'react';
-import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
-import { Aggregators } from '../../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  CustomThresholdExpressionMetric,
+} from '../../../../common/custom_threshold_rule/types';
 
 export interface CustomThresholdPrefillOptions {
   groupBy?: string[];

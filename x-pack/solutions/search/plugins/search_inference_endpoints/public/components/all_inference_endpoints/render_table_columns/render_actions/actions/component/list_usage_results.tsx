@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { InferenceUsageInfo } from '../../../../types';
+import { InferenceUsageInfo } from '../../../../types';
 import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { IndexItem } from './index_item';
 import { PipelineItem } from './pipeline_item';

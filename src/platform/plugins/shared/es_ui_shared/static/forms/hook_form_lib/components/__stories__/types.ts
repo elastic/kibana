@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Props as FormProps } from '../form';
+import { Props as FormProps } from '../form';
 
 export type FormArgs = Pick<FormProps, 'children' | 'FormWrapper'>;

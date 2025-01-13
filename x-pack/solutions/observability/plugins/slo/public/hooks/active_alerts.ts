@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 type SLO = Pick<SLOWithSummaryResponse, 'id' | 'instanceId'>;
 export class ActiveAlerts {

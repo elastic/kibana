@@ -8,7 +8,7 @@
  */
 
 import { FeaturesRegistry } from '../../../common';
-import type { DiscoverFeature } from './types';
+import { DiscoverFeature } from './types';
 
 const registry = new FeaturesRegistry<DiscoverFeature>();
 

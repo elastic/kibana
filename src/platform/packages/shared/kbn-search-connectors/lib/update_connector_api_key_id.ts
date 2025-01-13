@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Result } from '@elastic/elasticsearch/lib/api/types';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
 export const updateConnectorApiKeyId = async (
   client: ElasticsearchClient,

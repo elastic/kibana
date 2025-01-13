@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { MonitoringConfig } from '../../../config';
-import type { StackProductUsage } from '../types';
+import { MonitoringConfig } from '../../../config';
+import { StackProductUsage } from '../types';
 
 interface ESResponse {
   aggregations?: {

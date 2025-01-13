@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type {
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
@@ -20,7 +19,7 @@ import {
   UIM_COMPONENT_TEMPLATE_CREATE,
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
-import type { UseRequestHook, SendRequestHook } from './request';
+import { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
   useRequest: UseRequestHook,

@@ -6,7 +6,7 @@
  */
 
 import { FieldType } from '@kbn/search-connectors/types';
-import type { InferenceProvider } from '../../types';
+import { InferenceProvider } from '../../types';
 
 export const mockProviders: InferenceProvider[] = [
   {

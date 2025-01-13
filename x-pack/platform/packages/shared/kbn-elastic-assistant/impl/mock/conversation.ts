@@ -6,7 +6,7 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import type { Conversation } from '../..';
+import { Conversation } from '../..';
 
 export const alertConvo: Conversation = {
   id: '',

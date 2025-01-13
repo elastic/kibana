@@ -10,8 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { CiStatsReporter, CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';

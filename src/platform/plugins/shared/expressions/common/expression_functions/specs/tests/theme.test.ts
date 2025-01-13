@@ -9,7 +9,7 @@
 
 import { functionWrapper } from './utils';
 import { theme } from '../theme';
-import type { ExecutionContext } from '../../../execution/types';
+import { ExecutionContext } from '../../../execution/types';
 
 describe('expression_functions', () => {
   describe('theme', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
+import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
 import type { FetchedIndexPattern } from '../../../common/types';
 

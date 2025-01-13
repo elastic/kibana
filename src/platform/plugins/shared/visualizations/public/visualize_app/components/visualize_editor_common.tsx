@@ -8,20 +8,19 @@
  */
 
 import './visualize_editor.scss';
-import type { EventEmitter } from 'events';
-import type { RefObject} from 'react';
-import React, { useCallback, useEffect } from 'react';
+import { EventEmitter } from 'events';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import type { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
 import { VizChartWarning } from './viz_chart_warning';
-import type {
+import {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeServices,

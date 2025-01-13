@@ -7,8 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import capitalize from 'lodash/capitalize';
-import type { VFC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../constants/common';
 
 export interface TLPBadgeProps {

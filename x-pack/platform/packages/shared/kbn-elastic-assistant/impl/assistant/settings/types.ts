@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ANONYMIZATION_TAB,
   CONNECTORS_TAB,
   CONVERSATIONS_TAB,

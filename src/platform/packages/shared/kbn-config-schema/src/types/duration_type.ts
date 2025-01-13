@@ -8,11 +8,10 @@
  */
 
 import typeDetect from 'type-detect';
-import type { Duration} from '../duration';
-import { ensureDuration } from '../duration';
+import { Duration, ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
-import type { Reference } from '../references';
+import { Reference } from '../references';
 import { Type } from './type';
 
 export type DurationValueType = Duration | string | number;

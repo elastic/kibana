@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
-import type { ValidationError } from 'joi';
+import { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
+import { ValidationError } from 'joi';
 import Hoek from '@hapi/hoek';
 
 /**

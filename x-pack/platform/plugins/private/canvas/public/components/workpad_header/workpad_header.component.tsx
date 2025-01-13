@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
@@ -16,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { AddFromLibraryButton, IconButtonGroup, Toolbar } from '@kbn/shared-ux-button-toolbar';
 
 import { getElementStrings } from '../../../i18n';
-import type { CommitFn, ElementSpec } from '../../../types';
+import { CommitFn, ElementSpec } from '../../../types';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local

@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
 import { useUptimeDataView } from '../../../../hooks';
-import type { ClientPluginsStart } from '../../../../../plugin';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   query: string;

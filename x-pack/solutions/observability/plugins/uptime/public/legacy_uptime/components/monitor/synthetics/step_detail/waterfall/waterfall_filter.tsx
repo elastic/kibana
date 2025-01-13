@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCheckbox,

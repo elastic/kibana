@@ -7,30 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState, BaseStateContainer} from '../../common/state_containers';
-import { createStateContainer } from '../../common/state_containers';
-import type {
-  TodoActions,
-  TodoState} from '../../demos/state_containers/todomvc';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
   defaultState,
-  pureTransitions
+  pureTransitions,
+  TodoActions,
+  TodoState,
 } from '../../demos/state_containers/todomvc';
 import { syncState, syncStates } from './state_sync';
-import type { IStateStorage } from './state_sync_state_storage/types';
-import type { Observable} from 'rxjs';
-import { Subject } from 'rxjs';
-import type {
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage} from './state_sync_state_storage';
+import { IStateStorage } from './state_sync_state_storage/types';
+import { Observable, Subject } from 'rxjs';
 import {
   createSessionStorageStateStorage,
-  createKbnUrlStateStorage
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
 } from './state_sync_state_storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import type { History } from 'history';
-import { createBrowserHistory } from 'history';
-import type { INullableBaseStateContainer } from './types';
+import { createBrowserHistory, History } from 'history';
+import { INullableBaseStateContainer } from './types';
 
 describe('state_sync', () => {
   describe('basic', () => {

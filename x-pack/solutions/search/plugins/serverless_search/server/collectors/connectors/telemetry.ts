@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { collectConnectorStats } from '@kbn/search-connectors';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { ConnectorStats } from '../../../common/types';
+import { ConnectorStats } from '../../../common/types';
 
 interface Telemetry {
   connectors: ConnectorStats[];

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { GuideState } from '@kbn/guided-onboarding';
+import { GuideState } from '@kbn/guided-onboarding';
 import { guideStateSavedObjectsType, pluginStateSavedObjectsType } from '../saved_objects';
 import { getPluginState, updatePluginStatus } from '../helpers/plugin_state_utils';
 import { API_BASE_PATH } from '../../common';

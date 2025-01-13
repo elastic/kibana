@@ -10,27 +10,26 @@ import {
   getIndexPatterns,
   getElasticsearchDataset,
 } from '../../../../../common/get_index_patterns';
-import type {
-  PostElasticsearchCcrResponsePayload,
-  CcrBucket,
-  CcrFullStats,
-  CcrShard,
-  CcrShardBucket} from '../../../../../common/http_api/elasticsearch';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
-  postElasticsearchCcrResponsePayloadRT
+  PostElasticsearchCcrResponsePayload,
+  postElasticsearchCcrResponsePayloadRT,
+  CcrBucket,
+  CcrFullStats,
+  CcrShard,
+  CcrShardBucket,
 } from '../../../../../common/http_api/elasticsearch';
-import type { TimeRange } from '../../../../../common/http_api/shared';
-import type {
+import { TimeRange } from '../../../../../common/http_api/shared';
+import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
   ElasticsearchResponse,
 } from '../../../../../common/types/es';
-import type { MonitoringConfig } from '../../../../config';
+import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors/handle_error';
-import type { MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {

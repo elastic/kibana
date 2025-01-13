@@ -10,8 +10,7 @@ import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { SyntheticsMonitorSchedule } from '../../../../../../../common/runtime_types';
-import { ScheduleUnit } from '../../../../../../../common/runtime_types';
+import { ScheduleUnit, SyntheticsMonitorSchedule } from '../../../../../../../common/runtime_types';
 
 export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
   'xpack.synthetics.management.monitorList.noItemForSelectedFiltersMessage',

@@ -7,10 +7,9 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
-import type { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
-import type { UiActionsExampleAppContextValue} from './context';
-import { context } from './context';
+import { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
+import { UiActionsExampleAppContextValue, context } from './context';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>) =>

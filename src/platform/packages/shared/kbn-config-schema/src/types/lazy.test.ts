@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type} from '../..';
-import { schema } from '../..';
+import { Type, schema } from '../..';
 
 interface RecursiveType {
   name: string;

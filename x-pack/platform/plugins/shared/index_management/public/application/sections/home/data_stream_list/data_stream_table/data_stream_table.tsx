@@ -8,10 +8,9 @@
 import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiInMemoryTable,
+  EuiBasicTableColumn,
   EuiButton,
   EuiLink,
   EuiIcon,
@@ -22,16 +21,15 @@ import {
   EuiSwitch,
   EuiIconTip,
 } from '@elastic/eui';
-import type { ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
-import type { DataStream } from '../../../../../../common/types';
+import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
-import type { UseRequestResponse} from '../../../../../shared_imports';
-import { reactRouterNavigate } from '../../../../../shared_imports';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
@@ -40,8 +38,7 @@ import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import type { Filters } from '../../components';
-import { FilterListButton } from '../../components';
+import { FilterListButton, Filters } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Reducer } from 'react';
-import { useCallback, useEffect, useRef, useReducer } from 'react';
-import type { Observable, Subscription } from 'rxjs';
+import { useCallback, useEffect, useRef, useReducer, Reducer } from 'react';
+import { Observable, Subscription } from 'rxjs';
 
 import { useIsMounted } from '../use_is_mounted';
-import type { Task } from '../types';
+import { Task } from '../types';
 
 interface State<T> {
   loading: boolean;

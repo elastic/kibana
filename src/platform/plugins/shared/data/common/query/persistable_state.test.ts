@@ -8,9 +8,9 @@
  */
 
 import { extract, inject, getAllMigrations } from './persistable_state';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { QueryState } from './query_state';
+import { QueryState } from './query_state';
 
 describe('query service persistable state tests', () => {
   const filters: Filter[] = [

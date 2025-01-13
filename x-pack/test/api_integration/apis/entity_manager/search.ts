@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import expect from 'expect';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createEntitySourceDefinition,
   createEntityTypeDefinition,

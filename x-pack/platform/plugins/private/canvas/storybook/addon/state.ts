@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, Store } from 'redux';
-import { applyMiddleware } from 'redux';
+import { applyMiddleware, Dispatch, Store } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import addons from '@storybook/addons';
 import { diff } from 'jsondiffpatch';
@@ -19,7 +18,7 @@ import { getRootReducer } from '../../public/state/reducers';
 
 // @ts-expect-error Untyped local
 import { getInitialState as getState } from '../../public/state/initial_state';
-import type { State } from '../../types';
+import { State } from '../../types';
 
 export const getInitialState: () => State = () => getState();
 export const getMiddleware = () => applyMiddleware(thunkMiddleware);

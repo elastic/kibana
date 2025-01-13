@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';

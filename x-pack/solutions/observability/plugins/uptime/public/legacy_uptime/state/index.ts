@@ -11,8 +11,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rootEffect } from './effects';
-import type { RootState } from './reducers';
-import { rootReducer } from './reducers';
+import { rootReducer, RootState } from './reducers';
 
 export type AppState = RootState;
 

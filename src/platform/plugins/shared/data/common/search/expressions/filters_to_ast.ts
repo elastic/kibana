@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter} from '@kbn/es-query';
-import { FILTERS, fromCombinedFilter } from '@kbn/es-query';
+import { Filter, FILTERS, fromCombinedFilter } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { ExpressionFunctionKibanaFilter } from './kibana_filter';
+import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
   return (Array.isArray(filters) ? filters : [filters]).map((filter) => {

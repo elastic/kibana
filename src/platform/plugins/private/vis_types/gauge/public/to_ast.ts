@@ -8,18 +8,15 @@
  */
 
 import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
-import type { SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { getVisSchemas } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import type {
+import {
   GaugeArguments,
   GaugeExpressionFunctionDefinition,
-  GaugeShape} from '@kbn/expression-gauge-plugin/common';
-import {
+  GaugeShape,
   GaugeShapes,
 } from '@kbn/expression-gauge-plugin/common';
-import type { Gauge, GaugeVisParams } from './types';
-import { GaugeType } from './types';
+import { Gauge, GaugeType, GaugeVisParams } from './types';
 
 const gaugeTypeToShape = (type: GaugeType): GaugeShape => {
   return {

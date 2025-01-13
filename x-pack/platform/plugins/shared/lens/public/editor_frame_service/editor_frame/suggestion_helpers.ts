@@ -10,7 +10,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
-import type {
+import {
   Visualization,
   Datasource,
   TableSuggestion,
@@ -23,14 +23,13 @@ import type {
   SuggestionRequest,
 } from '../../types';
 import type { LayerType } from '../../../common/types';
-import type {
+import {
   LensDispatch,
+  switchVisualization,
   DatasourceStates,
   VisualizationState,
-  DataViewsState} from '../../state_management';
-import {
-  switchVisualization,
-  applyChanges
+  applyChanges,
+  DataViewsState,
 } from '../../state_management';
 
 /**

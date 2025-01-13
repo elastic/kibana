@@ -10,8 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getListSummaryResponseMock } from './index.mock';
-import type { ExceptionListSummarySchema } from '.';
-import { exceptionListSummarySchema } from '.';
+import { ExceptionListSummarySchema, exceptionListSummarySchema } from '.';
 
 describe('list_summary_schema', () => {
   test('it should validate a typical list summary response', () => {

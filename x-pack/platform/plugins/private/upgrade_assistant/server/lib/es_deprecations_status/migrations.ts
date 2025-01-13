@@ -9,9 +9,9 @@ import type {
   MigrationDeprecationsResponse,
   MigrationDeprecationsDeprecation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import _ from 'lodash';
-import type { EnrichedDeprecationInfo } from '../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Page } from '@elastic/synthetics';
-import { journey, step, before } from '@elastic/synthetics';
+import { journey, step, before, Page } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { byTestId } from '../../../helpers/utils';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';

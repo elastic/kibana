@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   IlmExplainLifecycleLifecycleExplainManaged,
   IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';

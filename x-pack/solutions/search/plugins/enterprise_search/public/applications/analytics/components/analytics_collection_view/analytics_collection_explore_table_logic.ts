@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { DataView, TimeRange } from '@kbn/data-plugin/common';
-import { isRunningResponse } from '@kbn/data-plugin/common';
+import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import type {
+import {
+  AnalyticsCollectionDataViewLogic,
   AnalyticsCollectionDataViewLogicActions,
   AnalyticsCollectionDataViewLogicValues,
 } from './analytics_collection_data_view_logic';
-import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 
 import {
   getBaseSearchTemplate,
@@ -26,17 +24,20 @@ import {
   getPaginationRequestSizeParams,
   getTotalCountRequestParams,
 } from './analytics_collection_explore_table_formulas';
-import type {
+import {
+  ExploreTableColumns,
   ExploreTableItem,
+  ExploreTables,
   SearchTermsTable,
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
   LocationsTable,
 } from './analytics_collection_explore_table_types';
-import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
-import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
-import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import {
+  AnalyticsCollectionToolbarLogic,
+  AnalyticsCollectionToolbarLogicValues,
+} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
 const SEARCH_COOLDOWN = 200;

@@ -6,7 +6,7 @@
  */
 
 import { ENTRIES } from '../../constants/index.mock';
-import type { ImportExceptionListItemSchema, ImportExceptionListItemSchemaDecoded } from '.';
+import { ImportExceptionListItemSchema, ImportExceptionListItemSchemaDecoded } from '.';
 
 export const getImportExceptionsListItemSchemaMock = (
   itemId = 'item_id_1',

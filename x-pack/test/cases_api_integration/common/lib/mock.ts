@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   Case,
+  AttachmentType,
+  CaseStatuses,
+  CaseSeverity,
+  ExternalReferenceStorageType,
   FileAttachmentMetadata,
   AlertAttachmentPayload,
   UserCommentAttachmentPayload,
@@ -16,12 +20,6 @@ import type {
   PersistableStateAttachmentPayload,
   Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
-import {
-  AttachmentType,
-  CaseStatuses,
-  CaseSeverity,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/types/domain';
 import type {
   CasePostRequest,
   PostFileAttachmentRequest,
@@ -29,7 +27,7 @@ import type {
 import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**

@@ -13,8 +13,7 @@ import { SemVer } from 'semver';
 
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import type { BuildFlavor } from '@kbn/config';
-import { ConfigService, Env } from '@kbn/config';
+import { ConfigService, Env, BuildFlavor } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
@@ -36,11 +35,10 @@ import {
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsType} from '@kbn/core-saved-objects-server';
 import {
-  ALL_SAVED_OBJECT_INDICES
+  ALL_SAVED_OBJECT_INDICES,
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';

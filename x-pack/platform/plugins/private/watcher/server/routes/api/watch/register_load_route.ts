@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 // @ts-ignore
 import { Watch } from '../../../models/watch';
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   id: schema.string(),

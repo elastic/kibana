@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { PluginFunctionalProviderContext } from '../../services';
+import { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {

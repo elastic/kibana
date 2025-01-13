@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import { last } from 'lodash';
 
 interface Bucket {

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { RouteDependencies } from '../../../types';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { RouteDependencies } from '../../../types';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch';

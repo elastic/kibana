@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import type {
+import {
   ControlType,
   TermIntersect,
   UrlTemplate,
@@ -24,8 +24,7 @@ import { SelectedNodeEditor } from './selected_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
-import type { GraphState} from '../../state_management';
-import { liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 
 export interface TargetOptions {

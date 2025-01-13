@@ -6,8 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 
 interface ChartEmptyStateProps {
   title: string | JSX.Element;

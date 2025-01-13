@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HTMLAttributes } from 'react';
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, HTMLAttributes } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // @ts-ignore
@@ -18,8 +17,7 @@ import { getInvalidAggComponent } from './invalid_agg';
 import { seriesChangeHandler } from '../lib/series_change_handler';
 import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
 import { getFormatterType } from '../lib/get_formatter_type';
-import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { DATA_FORMATTERS } from '../../../../common/enums';
+import { DATA_FORMATTERS, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
 import type { DragHandleProps } from '../../../types';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';

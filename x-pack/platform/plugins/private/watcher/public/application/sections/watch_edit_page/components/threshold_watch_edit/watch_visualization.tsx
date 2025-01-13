@@ -6,8 +6,6 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
-import type {
-  PartialTheme} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -15,13 +13,14 @@ import {
   LegendValue,
   LineAnnotation,
   LineSeries,
+  PartialTheme,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import dateMath from '@kbn/datemath';
 import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -33,8 +32,7 @@ import { useGetWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
-import type { Error } from '../../../../components';
-import { SectionError } from '../../../../components';
+import { SectionError, Error } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
 const customTheme = (): PartialTheme => {

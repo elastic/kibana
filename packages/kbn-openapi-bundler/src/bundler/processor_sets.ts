@@ -28,7 +28,7 @@ import { createNamespaceComponentsProcessor } from './process_document/document_
  * - skips paths started with `/internal`
  * - modifies nodes having `x-modify`
  */
-export const DEFAULT_BUNDLING_PROCESSORS: readonly DocumentNodeProcessor[] = [
+export const DEFAULT_BUNDLING_PROCESSORS: Readonly<DocumentNodeProcessor[]> = [
   createSkipNodeWithInternalPropProcessor(X_INTERNAL),
   createSkipInternalPathProcessor('/internal'),
   createModifyPartialProcessor(),
@@ -44,15 +44,15 @@ export const DEFAULT_BUNDLING_PROCESSORS: readonly DocumentNodeProcessor[] = [
  * for more details
  */
 export function withIncludeLabelsProcessor(
-  processors: readonly DocumentNodeProcessor[],
+  processors: Readonly<DocumentNodeProcessor[]>,
   includeLabels: string[]
-): readonly DocumentNodeProcessor[] {
+): Readonly<DocumentNodeProcessor[]> {
   return [...processors, createIncludeLabelsProcessor(includeLabels)];
 }
 
 export function withNamespaceComponentsProcessor(
-  processors: readonly DocumentNodeProcessor[],
+  processors: Readonly<DocumentNodeProcessor[]>,
   namespacePointer: string
-): readonly DocumentNodeProcessor[] {
+): Readonly<DocumentNodeProcessor[]> {
   return [...processors, createNamespaceComponentsProcessor(namespacePointer)];
 }

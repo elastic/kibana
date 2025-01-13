@@ -8,16 +8,15 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/lib/Either';
 import _ from 'lodash';
 import {
   SavedObjectTypeRegistry,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type {
-  DocumentsTransformFailed,
-  DocumentsTransformSuccess} from './migrate_raw_docs';
 import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
   migrateRawDocs,
   migrateRawDocsSafely,
 } from './migrate_raw_docs';

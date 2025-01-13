@@ -11,11 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { parse } from 'hjson';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import type {
-  VisTypeDefinition} from '@kbn/visualizations-plugin/public';
 import {
   VIS_EVENT_TO_TRIGGER,
-  VisGroups
+  VisGroups,
+  VisTypeDefinition,
 } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';

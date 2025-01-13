@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/logging';
-import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
-import { type PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { Logger } from '@kbn/logging';
+import {
+  type PrivateLocationAttributes,
+  SyntheticsPrivateLocationsAttributes,
+} from '../../../runtime_types/private_locations';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,

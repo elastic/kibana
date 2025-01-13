@@ -9,8 +9,8 @@
 
 import moment from 'moment';
 import { Observable } from 'rxjs';
-import type { ConfigSchema } from './config';
-import type { AutocompleteSetup } from './autocomplete';
+import { ConfigSchema } from './config';
+import { AutocompleteSetup } from './autocomplete';
 
 const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getAutocompleteSettings: jest.fn(),

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type {
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   UnifiedFieldListExamplesPluginSetup,

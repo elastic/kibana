@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import type {
+import {
   GetNotesResult,
   Note,
   PersistNoteRouteRequestBody,

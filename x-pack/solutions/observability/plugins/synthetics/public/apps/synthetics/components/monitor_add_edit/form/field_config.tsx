@@ -10,8 +10,13 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import type {
+import {
+  EuiIcon,
+  EuiCode,
   EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiSelectProps,
   EuiFieldTextProps,
   EuiSwitchProps,
@@ -21,28 +26,15 @@ import type {
   EuiCheckboxProps,
   EuiTextAreaProps,
   EuiButtonGroupProps,
-} from '@elastic/eui';
-import {
-  EuiIcon,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiHighlight,
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
-import { PROFILE_OPTIONS } from '../fields/throttling/throttling_config_field';
-import type {
-  FormattedComboBoxProps,
-  JSONCodeEditorProps,
-  HeaderFieldProps,
-  RequestBodyFieldProps,
-  ResponseBodyIndexFieldProps,
-  ControlledFieldProp,
-} from './field_wrappers';
+import {
+  PROFILE_OPTIONS,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 import {
   FieldText,
   FieldNumber,
@@ -54,24 +46,22 @@ import {
   Source,
   ButtonGroup,
   FormattedComboBox,
+  FormattedComboBoxProps,
   JSONEditor,
+  JSONCodeEditorProps,
   MonitorTypeRadioGroup,
   HeaderField,
+  HeaderFieldProps,
   RequestBodyField,
+  RequestBodyFieldProps,
   ResponseBodyIndexField,
+  ResponseBodyIndexFieldProps,
+  ControlledFieldProp,
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
 } from './field_wrappers';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
-import type {
-  MonitorFields,
-  FieldMap,
-  FormLocation,
-  ResponseCheckJSON,
-  ThrottlingConfig,
-  RequestBodyCheck,
-} from '../types';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -79,9 +69,15 @@ import {
   HTTPMethod,
   ScreenshotOption,
   Mode,
+  MonitorFields,
   TLSVersion,
   VerificationMode,
+  FieldMap,
+  FormLocation,
   ResponseBodyIndexPolicy,
+  ResponseCheckJSON,
+  ThrottlingConfig,
+  RequestBodyCheck,
   SourceType,
 } from '../types';
 import {
@@ -91,7 +87,7 @@ import {
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
-import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
+import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {

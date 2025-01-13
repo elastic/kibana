@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GridAccessMode } from '../types';
+import { GridAccessMode } from '../types';
 
 const getViewportWidth = () =>
   window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;

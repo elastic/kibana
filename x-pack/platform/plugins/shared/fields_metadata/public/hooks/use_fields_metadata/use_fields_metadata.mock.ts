@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseFieldsMetadataHook } from './use_fields_metadata';
+import { UseFieldsMetadataHook } from './use_fields_metadata';
 
 export const createUseFieldsMetadataHookMock = (): jest.Mocked<UseFieldsMetadataHook> =>
   jest.fn(() => ({

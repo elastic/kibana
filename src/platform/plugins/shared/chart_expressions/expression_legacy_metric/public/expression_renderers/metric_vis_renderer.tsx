@@ -11,27 +11,24 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type {
-  ExpressionValueVisDimension} from '@kbn/visualizations-plugin/public';
 import {
+  ExpressionValueVisDimension,
   VisualizationContainer,
 } from '@kbn/visualizations-plugin/public';
-import type {
+import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type {
-  ChartSizeEvent} from '@kbn/chart-expressions-common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
+  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
-import type { ExpressionLegacyMetricPluginStart } from '../plugin';
-import type { MetricVisRenderConfig, VisParams } from '../../common';
-import { EXPRESSION_METRIC_NAME } from '../../common';
+import { ExpressionLegacyMetricPluginStart } from '../plugin';
+import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));

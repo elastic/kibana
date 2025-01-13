@@ -6,7 +6,7 @@
  */
 
 import { securityServiceMock } from '@kbn/core/server/mocks';
-import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 import { getUser } from './get_user';
 

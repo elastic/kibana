@@ -6,20 +6,18 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type {
-  BarStyleAccessor,
-  DomainRange,
-  TickFormatter,
-  CustomTooltip as CustomChartTooltip,
-} from '@elastic/charts';
 import {
   Axis,
   BarSeries,
+  BarStyleAccessor,
   Chart,
+  DomainRange,
   Position,
   ScaleType,
   Settings,
+  TickFormatter,
   TooltipContainer,
+  CustomTooltip as CustomChartTooltip,
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -27,8 +25,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
-import type { WaterfallData } from '..';
-import { useWaterfallContext } from '..';
+import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 import { WaterfallChartMarkers } from './waterfall_markers';

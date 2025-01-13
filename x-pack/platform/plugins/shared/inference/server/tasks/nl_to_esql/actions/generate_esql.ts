@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
-import { map, merge, of, switchMap } from 'rxjs';
+import { Observable, map, merge, of, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type {
+import {
   ToolCall,
   ToolOptions,
-  Message,
-  OutputCompleteEvent,
-  FunctionCallingMode} from '@kbn/inference-common';
-import {
   withoutTokenCountEvents,
   isChatCompletionMessageEvent,
+  Message,
   MessageRole,
-  OutputEventType
+  OutputCompleteEvent,
+  OutputEventType,
+  FunctionCallingMode,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
-import type { InferenceClient } from '../../..';
+import { InferenceClient } from '../../..';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
-import type { EsqlDocumentBase } from '../doc_base';
+import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
 

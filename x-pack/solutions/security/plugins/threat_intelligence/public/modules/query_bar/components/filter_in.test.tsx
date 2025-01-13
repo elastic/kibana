@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
-import type { Indicator } from '../../../../common/types/indicator';
-import { generateMockIndicator } from '../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';
 import { mockIndicatorsFiltersContext } from '../../../mocks/mock_indicators_filters_context';
 import {
   FilterInButtonEmpty,

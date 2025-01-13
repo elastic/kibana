@@ -14,9 +14,6 @@ import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitio
 import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import type {
-  PartialSuggestionWithText,
-  SuggestOptions} from './__tests__/helpers';
 import {
   policies,
   getFunctionSignaturesByReturnType,
@@ -24,9 +21,11 @@ import {
   createCustomCallbackMocks,
   createCompletionContext,
   getPolicyFields,
+  PartialSuggestionWithText,
   TIME_PICKER_SUGGESTION,
   setup,
   attachTriggerCommand,
+  SuggestOptions,
   fields,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';

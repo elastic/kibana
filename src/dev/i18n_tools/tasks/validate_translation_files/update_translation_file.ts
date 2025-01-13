@@ -9,7 +9,7 @@
 
 import { writeFile as writeFileAsync } from 'fs/promises';
 
-import type { Formats } from '@kbn/i18n';
+import { Formats } from '@kbn/i18n';
 import { serializeToJson } from '../../serializers';
 
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';

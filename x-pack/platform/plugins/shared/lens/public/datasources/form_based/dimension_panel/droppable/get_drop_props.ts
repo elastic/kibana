@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { DragContextState, DropType } from '@kbn/dom-drag-drop';
-import type {
+import { DragContextState, DropType } from '@kbn/dom-drag-drop';
+import {
+  isOperation,
   DragDropOperation,
   IndexPattern,
   IndexPatternMap,
-  IndexPatternField} from '../../../../types';
-import {
-  isOperation
+  IndexPatternField,
 } from '../../../../types';
 import {
   getCurrentFieldsForOperation,
@@ -21,10 +20,10 @@ import {
 } from '../../operations';
 import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../../utils';
 import { hasField } from '../../pure_utils';
-import type { OperationMetadata, DraggedField } from '../../../../types';
+import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
-import type { GenericIndexPatternColumn } from '../../form_based';
-import type { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { GenericIndexPatternColumn } from '../../form_based';
+import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
 
 interface GetDropPropsArgs {
   state: FormBasedPrivateState;

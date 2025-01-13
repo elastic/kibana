@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Ast, AstFunction} from '@kbn/interpreter';
-import { fromExpression, toExpression } from '@kbn/interpreter';
+import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
 import { flowRight, get, groupBy } from 'lodash';
-import type {
+import {
   Filter as FilterType,
   FilterField,
   FilterViewInstance,

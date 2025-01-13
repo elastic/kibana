@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionValueBoxed } from './types';
+import { ExpressionValueBoxed } from './types';
 
 export function unboxExpressionValue<T extends object>({
   type,

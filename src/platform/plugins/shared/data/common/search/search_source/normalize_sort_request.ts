@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EsQuerySortValue } from './types';
+import { EsQuerySortValue } from './types';
 
 type FieldSortOptions = estypes.FieldSort &
   estypes.ScoreSort &

@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { IndexPatternProvider } from '../types';
+import { IndexPatternProvider } from '../types';
 
 export function createCachedIndexPatternProvider(
   indexPatternGetter: (id: string) => Promise<DataView>

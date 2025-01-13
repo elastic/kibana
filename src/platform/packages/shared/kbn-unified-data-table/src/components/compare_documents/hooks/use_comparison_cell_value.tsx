@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridCellValueElementProps} from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import type {
-  AdditionalFieldGroups} from '@kbn/unified-field-list';
 import {
+  AdditionalFieldGroups,
   getAllFallbackFields,
   getAssociatedSmartFieldsAsString,
   SmartFieldFallbackTooltip,
@@ -27,8 +25,7 @@ import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
-import type { CalculateDiffProps} from './calculate_diff';
-import { calculateDiff, formatDiffValue } from './calculate_diff';
+import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,

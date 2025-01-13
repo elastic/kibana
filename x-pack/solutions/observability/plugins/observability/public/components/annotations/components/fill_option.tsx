@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { CreateAnnotationParams } from '../../../../common/annotations';
+import { CreateAnnotationParams } from '../../../../common/annotations';
 
 export function FillOptions() {
   const { control } = useFormContext<CreateAnnotationParams>();

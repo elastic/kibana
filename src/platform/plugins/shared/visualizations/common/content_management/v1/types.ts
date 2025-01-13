@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   GetIn,
   CreateIn,
   SearchIn,
@@ -21,7 +21,7 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
-import type { VisualizationContentType } from '../types';
+import { VisualizationContentType } from '../types';
 
 export interface Reference {
   type: string;

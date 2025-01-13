@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);

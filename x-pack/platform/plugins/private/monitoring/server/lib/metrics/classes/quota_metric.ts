@@ -6,8 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { MetricOptions } from './metric';
-import { Metric } from './metric';
+import { Metric, MetricOptions } from './metric';
 import { LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 

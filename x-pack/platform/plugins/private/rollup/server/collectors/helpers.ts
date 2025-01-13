@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 
 // elasticsearch index.max_result_window default value
@@ -110,7 +110,7 @@ export async function fetchRollupSavedSearches(
 
   while (savedSearchesList.hits.hits && savedSearchesList.hits.hits.length !== 0) {
     const savedSearches = get(savedSearchesList, 'hits.hits', []);
-    savedSearches.map((savedSearch: any) => {
+    savedSearches.map(async (savedSearch: any) => {
       const { _id: savedObjectId } = savedSearch;
       const references: Array<{ name: string; id: string; type: string }> | undefined = get(
         savedSearch,

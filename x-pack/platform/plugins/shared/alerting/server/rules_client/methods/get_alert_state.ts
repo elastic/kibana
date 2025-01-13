@@ -6,10 +6,10 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { RuleTaskState } from '../../types';
+import { RuleTaskState } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import type { RulesClientContext } from '../types';
+import { RulesClientContext } from '../types';
 import { getRule } from '../../application/rule/methods/get/get_rule';
 
 export interface GetAlertStateParams {

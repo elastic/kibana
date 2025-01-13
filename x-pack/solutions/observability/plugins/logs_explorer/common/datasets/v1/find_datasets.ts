@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { Dataset } from '../models/dataset';
+import { Dataset } from '../models/dataset';
 import { datasetRT } from '../types';
 import { sortOrderRT } from './common';
 

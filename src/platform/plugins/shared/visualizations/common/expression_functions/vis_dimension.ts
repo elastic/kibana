@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
   Datatable,

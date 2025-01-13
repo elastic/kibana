@@ -6,9 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RuleParamsV1, RuleResponseV1 } from '../../../response';
+import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
-import type {
+import {
   actionSchemaV1,
   actionFrequencySchemaV1,
   updateParamsSchemaV1,

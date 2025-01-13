@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { useState, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -18,8 +17,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import type {
-  FieldConfig} from '../../../../../../../shared_imports';
 import {
   getUseField,
   Field,
@@ -27,10 +24,11 @@ import {
   useForm,
   Form,
   TextField,
-  fieldValidators
+  fieldValidators,
+  FieldConfig,
 } from '../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../use_is_mounted';
-import type { Document } from '../../../../types';
+import { Document } from '../../../../types';
 
 const UseField = getUseField({ component: Field });
 

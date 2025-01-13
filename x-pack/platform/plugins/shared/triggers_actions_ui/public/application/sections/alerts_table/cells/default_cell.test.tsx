@@ -8,10 +8,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { DefaultCell } from './default_cell';
-import type { CellComponentProps } from '../types';
-import type { Alert } from '../../../../types';
-import type { AppMockRenderer } from '../../test_utils';
-import { createAppMockRenderer } from '../../test_utils';
+import { CellComponentProps } from '../types';
+import { Alert } from '../../../../types';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 

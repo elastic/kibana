@@ -8,12 +8,11 @@
  */
 
 import { waitUntilNextSessionCompletes$ } from './session_helpers';
-import type { ISessionService} from './session_service';
-import { SessionService } from './session_service';
+import { ISessionService, SessionService } from './session_service';
 import { BehaviorSubject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { SearchSessionState } from './search_session_state';
-import type { NowProviderInternalContract } from '../../now_provider';
+import { NowProviderInternalContract } from '../../now_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';

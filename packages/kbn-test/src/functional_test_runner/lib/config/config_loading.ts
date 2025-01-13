@@ -8,14 +8,14 @@
  */
 
 import Path from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
 import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
+import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
 import { Config } from './config';
-import type { EsVersion } from '../es_version';
+import { EsVersion } from '../es_version';
 import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 
 interface LoadSettingsOptions {

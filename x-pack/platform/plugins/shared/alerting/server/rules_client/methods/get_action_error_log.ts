@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { KueryNode } from '@kbn/es-query';
+import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SanitizedRuleWithLegacyId } from '../../types';
+import { SanitizedRuleWithLegacyId } from '../../types';
 import { convertEsSortToEventLogSort } from '../../lib';
 import {
   ReadOperations,
@@ -15,10 +15,10 @@ import {
   AlertingAuthorizationFilterType,
 } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import type { IExecutionErrorsResult } from '../../../common';
+import { IExecutionErrorsResult } from '../../../common';
 import { formatExecutionErrorsResult } from '../../lib/format_execution_log_errors';
 import { parseDate } from '../common';
-import type { RulesClientContext } from '../types';
+import { RulesClientContext } from '../types';
 import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 

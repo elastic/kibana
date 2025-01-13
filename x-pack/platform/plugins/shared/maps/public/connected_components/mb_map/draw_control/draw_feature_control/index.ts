@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { Geometry, Position } from 'geojson';
-import type {
+import { Geometry, Position } from 'geojson';
+import {
+  DrawFeatureControl,
   ReduxDispatchProps,
   ReduxStateProps,
-  OwnProps} from './draw_feature_control';
-import {
-  DrawFeatureControl
+  OwnProps,
 } from './draw_feature_control';
 import { addNewFeatureToIndex, deleteFeatureFromIndex } from '../../../../actions';
-import type { MapStoreState } from '../../../../reducers/store';
+import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
 

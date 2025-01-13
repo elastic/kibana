@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import type { RecursivePartial } from '@kbn/utility-types';
+import { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
@@ -22,7 +22,7 @@ import {
   SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
-import type { CreateSLOForm } from '../types';
+import { CreateSLOForm } from '../types';
 
 export function transformSloResponseToCreateSloForm(
   values?: GetSLOResponse

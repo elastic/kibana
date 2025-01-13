@@ -17,7 +17,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-import type { EnvironmentName } from '../../../common/labs';
+import { EnvironmentName } from '../../../common/labs';
 import { LabsStrings } from '../../i18n';
 import { getPresentationCapabilities } from '../../utils/get_presentation_capabilities';
 

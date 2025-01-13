@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 

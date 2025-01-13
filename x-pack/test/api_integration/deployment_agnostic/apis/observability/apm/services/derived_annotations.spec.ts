@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 
-import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function annotationApiTests({ getService }: DeploymentAgnosticFtrProviderContext) {

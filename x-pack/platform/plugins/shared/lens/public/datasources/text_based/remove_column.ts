@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Datasource } from '../../types';
-import type { TextBasedPrivateState } from './types';
+import { Datasource } from '../../types';
+import { TextBasedPrivateState } from './types';
 
 export const removeColumn: Datasource<TextBasedPrivateState>['removeColumn'] = ({
   prevState,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { CheckLicense } from '@kbn/licensing-plugin/server';
+import { CheckLicense } from '@kbn/licensing-plugin/server';
 
 export const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable) {

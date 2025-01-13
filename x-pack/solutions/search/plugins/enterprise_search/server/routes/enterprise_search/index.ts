@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 import { registerDocumentRoute } from './documents';
 import { registerIndexRoutes } from './indices';

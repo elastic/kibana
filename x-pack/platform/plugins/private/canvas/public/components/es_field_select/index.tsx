@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import type { ESFieldSelectProps as Props } from './es_field_select';
-import { ESFieldSelect as Component } from './es_field_select';
+import { ESFieldSelect as Component, ESFieldSelectProps as Props } from './es_field_select';
 import { getDataViewFields } from '../../lib/data_view_helpers';
 
 type ESFieldSelectProps = Omit<Props, 'fields'>;

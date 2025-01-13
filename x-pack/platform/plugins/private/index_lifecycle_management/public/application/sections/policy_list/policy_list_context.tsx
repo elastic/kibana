@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ReactChild} from 'react';
-import React, { createContext, useContext, useState } from 'react';
-import type { PolicyFromES } from '../../../../common/types';
+import React, { createContext, ReactChild, useContext, useState } from 'react';
+import { PolicyFromES } from '../../../../common/types';
 
 interface ListAction {
   actionType: 'viewIndexTemplates' | 'addIndexTemplate' | 'deletePolicy' | 'viewPolicy';

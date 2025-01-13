@@ -12,24 +12,23 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../common/types';
+import { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
-import type {
+import {
   getNewSavedSearch,
   SavedSearchUnwrapResult,
   saveSavedSearch,
-  SaveSavedSearchOptions} from './services/saved_searches';
-import {
+  SaveSavedSearchOptions,
   byValueToSavedSearch,
 } from './services/saved_searches';
 import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';

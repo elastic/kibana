@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
-import type {
+import {
   IScopedClusterClient,
   KibanaRequest,
   KibanaResponseFactory,

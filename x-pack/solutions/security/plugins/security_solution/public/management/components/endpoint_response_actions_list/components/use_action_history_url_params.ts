@@ -11,8 +11,8 @@ import {
   isActionType,
   isAgentType,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
-import type {
-  ResponseActionType,
+import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
   type ConsoleResponseActionCommands,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,

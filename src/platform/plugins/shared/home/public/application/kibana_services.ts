@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   ChromeStart,
   DocLinksStart,
   HttpStart,
@@ -19,16 +19,16 @@ import type {
   ThemeServiceStart,
   I18nStart,
 } from '@kbn/core/public';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { TutorialService } from '../services/tutorials';
-import type { AddDataService } from '../services/add_data';
-import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
-import type { EnvironmentService } from '../services/environment';
+import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { TutorialService } from '../services/tutorials';
+import { AddDataService } from '../services/add_data';
+import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import { EnvironmentService } from '../services/environment';
 import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
 

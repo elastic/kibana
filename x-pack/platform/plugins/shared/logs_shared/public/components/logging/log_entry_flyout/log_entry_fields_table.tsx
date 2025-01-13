@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
-import type { EuiBasicTableColumn} from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import React, { useMemo } from 'react';
-import type { TimeKey } from '@kbn/io-ts-utils';
-import type { LogEntryField } from '../../../../common/log_entry';
-import type { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
-import type { JsonScalar} from '../../../../common/typed_json';
-import { jsonScalarRT } from '../../../../common/typed_json';
+import { TimeKey } from '@kbn/io-ts-utils';
+import { LogEntryField } from '../../../../common/log_entry';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
+import { JsonScalar, jsonScalarRT } from '../../../../common/typed_json';
 import { FieldValue } from '../log_text_stream/field_value';
 
 export const LogEntryFieldsTable: React.FC<{

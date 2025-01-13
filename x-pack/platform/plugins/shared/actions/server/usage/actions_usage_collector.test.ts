@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { registerActionsUsageCollector } from './actions_usage_collector';
-import type { ActionsConfig } from '../config';
-import { configSchema } from '../config';
+import { configSchema, ActionsConfig } from '../config';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 

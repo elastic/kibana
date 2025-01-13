@@ -10,7 +10,7 @@ import { omitBy, isNil } from 'lodash';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
 
-import type { ExpressionRenderer } from '@kbn/expressions-plugin/common';
+import { ExpressionRenderer } from '@kbn/expressions-plugin/common';
 import { getType } from '@kbn/interpreter';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
@@ -18,8 +18,8 @@ import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
-import type { RendererHandlers } from '../../../types';
-import type { Renderable } from '../../../canvas_plugin_src/functions/common/render';
+import { RendererHandlers } from '../../../types';
+import { Renderable } from '../../../canvas_plugin_src/functions/common/render';
 
 export interface Props {
   renderable: Renderable | null;

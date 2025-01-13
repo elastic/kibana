@@ -7,9 +7,9 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
-import type { D3SecurityActionParams, D3SecurityConnector } from './types';
+import { D3SecurityActionParams, D3SecurityConnector } from './types';
 import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
 interface ValidationErrors {
   subAction: string[];

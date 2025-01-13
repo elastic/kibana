@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BrushEndListener, XYChartElementEvent, ElementClickListener } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -14,6 +13,9 @@ import {
   Settings,
   Position,
   timeFormatter,
+  BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -21,11 +23,11 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HistogramPoint } from '../../../../../common/runtime_types';
+import { HistogramPoint } from '../../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
 import { getDateRangeFromChartElement } from './utils';
-import type { ClientPluginsStart } from '../../../../plugin';
+import { ClientPluginsStart } from '../../../../plugin';
 
 export interface MonitorBarSeriesProps {
   /**

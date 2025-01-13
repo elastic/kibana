@@ -7,7 +7,7 @@
 
 import { FILTER, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import type { FindExceptionListSchema, FindExceptionListSchemaDecoded } from '.';
+import { FindExceptionListSchema, FindExceptionListSchemaDecoded } from '.';
 
 export const getFindExceptionListSchemaMock = (): FindExceptionListSchema => ({
   filter: FILTER,

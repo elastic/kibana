@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {

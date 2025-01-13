@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 

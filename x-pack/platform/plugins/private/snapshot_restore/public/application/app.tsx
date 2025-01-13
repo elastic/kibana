@@ -20,8 +20,7 @@ import {
   NotAuthorizedSection,
 } from '../shared_imports';
 import { PageLoading } from './components';
-import type { Section } from './constants';
-import { DEFAULT_SECTION } from './constants';
+import { DEFAULT_SECTION, Section } from './constants';
 import {
   RepositoryAdd,
   RepositoryEdit,

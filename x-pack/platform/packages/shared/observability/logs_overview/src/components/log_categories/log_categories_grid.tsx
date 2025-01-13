@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type {
-  EuiDataGridColumnSortingConfig,
-  EuiDataGridPaginationProps} from '@elastic/eui';
 import {
-  EuiDataGrid
+  EuiDataGrid,
+  EuiDataGridColumnSortingConfig,
+  EuiDataGridPaginationProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createConsoleInspector } from '@kbn/xstate-utils';
@@ -17,11 +16,10 @@ import { useMachine } from '@xstate5/react';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { assign, setup } from 'xstate5';
-import type { LogCategory } from '../../types';
-import type {
-  LogCategoriesGridCellDependencies,
-  LogCategoriesGridColumnId} from './log_categories_grid_cell';
+import { LogCategory } from '../../types';
 import {
+  LogCategoriesGridCellDependencies,
+  LogCategoriesGridColumnId,
   createCellContext,
   logCategoriesGridColumnIds,
   logCategoriesGridColumns,

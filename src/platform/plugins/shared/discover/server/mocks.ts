@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverServerPluginStart } from '.';
+import { DiscoverServerPluginStart } from '.';
 import { createLocatorServiceMock } from './locator/mocks';
 
 export const discoverPluginMock = {

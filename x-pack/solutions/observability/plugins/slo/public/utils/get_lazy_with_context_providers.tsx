@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { EuiLoadingSpinnerProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingSpinnerProps } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense } from 'react';
-import type { ExperimentalFeatures } from '../../common/config';
+import { ExperimentalFeatures } from '../../common/config';
 import { PluginContext } from '../context/plugin_context';
-import type { SLOPublicPluginsStart, SLORepositoryClient } from '../types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from '../types';
 
 interface Props {
   core: CoreStart;

@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
-import type { CasesWebhookActionConnector } from './types';
+import { CasesWebhookActionConnector } from './types';
 
 const actionParams = {
   subAction: 'pushToService',

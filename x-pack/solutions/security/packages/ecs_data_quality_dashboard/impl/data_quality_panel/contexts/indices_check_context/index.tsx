@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 
-import type { UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
+import { UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
 
 export const IndicesCheckContext = createContext<UseIndicesCheckReturnValue | null>(null);
 

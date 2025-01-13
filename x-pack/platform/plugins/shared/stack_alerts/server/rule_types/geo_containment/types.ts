@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/common/query';
-import type {
+import { Query } from '@kbn/data-plugin/common/query';
+import {
   RuleType,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import type { ActionGroupId, RecoveryActionGroupId } from './constants';
+import { ActionGroupId, RecoveryActionGroupId } from './constants';
 
 export interface BoundariesRequestMeta {
   geoField: string;

@@ -8,7 +8,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { AppDependencies } from '../../types';
+import { AppDependencies } from '../../types';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 

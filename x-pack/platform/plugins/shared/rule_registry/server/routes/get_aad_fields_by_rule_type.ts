@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
-import type { RacRequestHandlerContext } from '../types';
+import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 

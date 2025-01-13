@@ -10,8 +10,7 @@ import { sortBy } from 'lodash/fp';
 import { formatIndexFields, createFieldItem, requestIndexFieldSearchHandler } from '.';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields.json';
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {

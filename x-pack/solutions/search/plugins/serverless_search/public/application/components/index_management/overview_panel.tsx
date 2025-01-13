@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
 export interface IndexOverviewPanelProps {

@@ -9,7 +9,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 
-import type { NotebookListValue, AppMetricsTracker } from '../types';
+import { NotebookListValue, AppMetricsTracker } from '../types';
 
 export interface SearchNotebooksContext {
   console: ConsolePluginStart;

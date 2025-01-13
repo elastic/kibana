@@ -12,9 +12,6 @@ import mockFs from 'mock-fs';
 import Fsp from 'fs/promises';
 import { basename } from 'path';
 
-import type {
-  ServerlessOptions,
-  ServerlessProjectType} from './docker';
 import {
   DOCKER_IMG,
   detectRunningNodes,
@@ -33,7 +30,9 @@ import {
   stopServerlessCluster,
   teardownServerlessClusterSync,
   verifyDockerInstalled,
-  getESp12Volume
+  getESp12Volume,
+  ServerlessOptions,
+  ServerlessProjectType,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';

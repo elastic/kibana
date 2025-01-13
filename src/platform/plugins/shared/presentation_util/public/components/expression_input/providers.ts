@@ -8,10 +8,9 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
-import type {
-  AutocompleteSuggestion} from './autocomplete';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
+  AutocompleteSuggestion,
   getAutocompleteSuggestions,
   getFnArgDefAtPosition,
 } from './autocomplete';

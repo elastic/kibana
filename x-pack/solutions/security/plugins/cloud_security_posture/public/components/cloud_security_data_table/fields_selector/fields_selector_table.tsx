@@ -6,8 +6,9 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiContextMenuItem,
@@ -17,9 +18,10 @@ import {
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiPopover,
+  EuiSearchBarProps,
   EuiText,
 } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';

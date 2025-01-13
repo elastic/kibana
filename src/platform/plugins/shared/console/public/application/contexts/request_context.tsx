@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dispatch } from 'react';
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useReducer, Dispatch } from 'react';
 import { createUseContext } from './create_use_context';
 import * as store from '../stores/request';
 

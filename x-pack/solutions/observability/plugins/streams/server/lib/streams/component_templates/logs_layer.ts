@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   IndicesIndexSettings,
   IndicesDataStreamLifecycle,
 } from '@elastic/elasticsearch/lib/api/types';

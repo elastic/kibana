@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
-import React, { useEffect } from 'react';
-import type { Meta } from '@storybook/react';
+import React, { ComponentProps, useEffect } from 'react';
+import { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import type { RulesListProps } from './rules_list';
-import { RulesList } from './rules_list';
+import { RulesList, RulesListProps } from './rules_list';
 
 type Args = ComponentProps<typeof RulesList>;
 

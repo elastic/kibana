@@ -5,20 +5,18 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import type {
-  Criteria,
-  EuiTableFieldDataColumnType,
-  EuiBasicTableProps,
-  EuiTableSortingType,
-} from '@elastic/eui';
 import {
+  Criteria,
   EuiButtonEmpty,
+  EuiTableFieldDataColumnType,
   EuiBasicTable,
+  EuiBasicTableProps,
   useEuiTheme,
   EuiSwitch,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';

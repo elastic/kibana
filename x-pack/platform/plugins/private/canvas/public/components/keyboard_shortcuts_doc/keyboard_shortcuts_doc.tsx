@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlyout,
@@ -21,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { keymap } from '../../lib/keymap';
-import type { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
+import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';

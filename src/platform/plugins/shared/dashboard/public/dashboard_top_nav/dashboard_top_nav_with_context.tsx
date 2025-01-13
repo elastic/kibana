@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import type {
-  InternalDashboardTopNavProps} from './internal_dashboard_top_nav';
 import {
-  InternalDashboardTopNav
+  InternalDashboardTopNav,
+  InternalDashboardTopNavProps,
 } from './internal_dashboard_top_nav';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import type { DashboardApi } from '../dashboard_api/types';
+import { DashboardApi } from '../dashboard_api/types';
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardApi: DashboardApi;
 }

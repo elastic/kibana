@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiAccordionProps,
-  EuiSwitchEvent,
-  EuiSwitchProps} from '@elastic/eui';
 import {
   EuiSpacer,
   EuiSwitch,
   EuiPanel,
   EuiAccordion,
-  useGeneratedHtmlId
+  EuiAccordionProps,
+  useGeneratedHtmlId,
+  EuiSwitchEvent,
+  EuiSwitchProps,
 } from '@elastic/eui';
 import { useFormContext, useFormData } from '../../../shared_imports';
 

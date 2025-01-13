@@ -8,12 +8,11 @@
  */
 
 import { get } from 'lodash';
-import type {
-  UIRestrictions,
-  TimeseriesUIRestrictions} from './ui_restrictions';
 import {
   RESTRICTIONS_KEYS,
-  DEFAULT_UI_RESTRICTION
+  DEFAULT_UI_RESTRICTION,
+  UIRestrictions,
+  TimeseriesUIRestrictions,
 } from './ui_restrictions';
 
 /**

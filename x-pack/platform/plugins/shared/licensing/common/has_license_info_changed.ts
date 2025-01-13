@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from './types';
+import { ILicense } from './types';
 
 /**
  * Check if 2 potential license instances have changes between them

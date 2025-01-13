@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
-import type {
+import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   RouteHandlerGlobalSearchContext,

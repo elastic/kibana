@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import type { StartServices } from '..';
 import type { SessionState } from './session_timeout';
+import type { StartServices } from '..';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 
 export interface SessionExpirationToastProps {

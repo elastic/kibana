@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpHandler } from '@kbn/core/public';
+import { HttpHandler } from '@kbn/core/public';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 interface Params {

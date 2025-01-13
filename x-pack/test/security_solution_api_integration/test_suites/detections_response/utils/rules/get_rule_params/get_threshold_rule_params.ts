@@ -6,7 +6,7 @@
  */
 
 import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { CreateRulePropsRewrites } from './types';
+import { CreateRulePropsRewrites } from './types';
 
 export function getThresholdRuleParams(
   rewrites?: CreateRulePropsRewrites<ThresholdRuleCreateProps>

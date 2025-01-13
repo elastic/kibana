@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story, type Meta } from '@storybook/react';
+import { Story, type Meta } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';

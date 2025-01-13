@@ -15,8 +15,8 @@ import type {
 import { type UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
 import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
-import type { LinksContentType } from '../../types';
-import type {
+import { LinksContentType } from '../../types';
+import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,

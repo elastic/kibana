@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { GetAllInvestigationTagsResponse } from '@kbn/investigation-shared';
-import { getAllInvestigationTagsResponseSchema } from '@kbn/investigation-shared';
-import type { InvestigationRepository } from './investigation_repository';
+import {
+  GetAllInvestigationTagsResponse,
+  getAllInvestigationTagsResponseSchema,
+} from '@kbn/investigation-shared';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function getAllInvestigationTags(
   repository: InvestigationRepository

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 // @ts-expect-error module is not typed
 import Stats from 'webpack/lib/Stats';
 

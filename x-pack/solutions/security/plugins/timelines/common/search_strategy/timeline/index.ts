@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   TimelineEventsAllStrategyResponse,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
 } from './events';
-import type { SortField } from '../common';
-import type {
+import { SortField } from '../common';
+import {
   TimelineEventsAllOptionsInput,
   TimelineEventsDetailsRequestOptionsInput,
   TimelineEventsLastEventTimeRequestOptionsInput,

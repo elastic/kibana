@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
-import type { InheritedFtrProviderContext } from './ftr_provider_context';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
+import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(
   context: InheritedFtrProviderContext,

@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Serializable } from '@kbn/utility-types';
-import type { Filter, FILTERS } from './types';
+import { Serializable } from '@kbn/utility-types';
+import { Filter, FILTERS } from './types';
 
-import type { PhraseFilterValue } from './phrase_filter';
-import { buildPhraseFilter } from './phrase_filter';
+import { buildPhraseFilter, PhraseFilterValue } from './phrase_filter';
 import { buildPhrasesFilter } from './phrases_filter';
-import type { RangeFilterParams } from './range_filter';
-import { buildRangeFilter } from './range_filter';
+import { buildRangeFilter, RangeFilterParams } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
 import type { DataViewFieldBase, DataViewBase, DataViewBaseNoFields } from '../../es_query';
-import type { FilterStateStore } from './types';
+import { FilterStateStore } from './types';
 
 /**
  *

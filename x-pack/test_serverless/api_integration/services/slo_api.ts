@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type {
+import {
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
 } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import * as t from 'io-ts';
 import type { RoleCredentials } from '../../shared/services';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 

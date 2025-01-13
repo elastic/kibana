@@ -19,6 +19,8 @@ import type {
   PatchTimelineRequestBody,
   CreateTimelinesRequestBody,
   GetTimelineRequestQuery,
+} from '../../../../common/api/timeline';
+import {
   type TimelineType,
   TimelineTypeEnum,
   TimelineStatusEnum,

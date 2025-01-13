@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React, { useEffect, useRef } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { FieldHook } from '../../../../../../../shared_imports';
-import { ComboBoxField } from '../../../../../../../shared_imports';
+import { ComboBoxField, FieldHook } from '../../../../../../../shared_imports';
 import { useGlobalFields } from '../../../../form';
 
 interface PropsRepositoryCombobox {

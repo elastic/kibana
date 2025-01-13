@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
-import type { History } from 'history';
+import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -20,8 +20,7 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -30,30 +29,28 @@ import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { App } from './app';
-import type { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
+import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import type { LensPluginStartDependencies } from '../plugin';
+import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import type { LensAttributesService } from '../lens_attribute_service';
-import type { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import type {
-  LensRootStore} from '../state_management';
+import { LensAttributesService } from '../lens_attribute_service';
+import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
   makeConfigureStore,
   navigateAway,
+  LensRootStore,
   loadInitial,
   setState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
-import type {
-  LensAppLocator,
-  MainHistoryLocationState} from '../../common/locator/locator';
 import {
-  LENS_SHARE_STATE_ACTION
+  LensAppLocator,
+  LENS_SHARE_STATE_ACTION,
+  MainHistoryLocationState,
 } from '../../common/locator/locator';
 import { SavedObjectIndexStore } from '../persistence';
-import type { LensSerializedState } from '../react_embeddable/types';
+import { LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as

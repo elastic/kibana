@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import type { ProcessorInternal } from '../../types';
+import { ProcessorInternal } from '../../types';
 
 import './pipeline_processors_editor_item_toolip.scss';
 import { ProcessorInformation } from './processor_information';

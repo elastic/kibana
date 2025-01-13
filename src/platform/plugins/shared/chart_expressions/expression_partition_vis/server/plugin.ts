@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import {
   partitionLabelsFunction,
   pieVisFunction,
@@ -15,7 +15,7 @@ import {
   mosaicVisFunction,
   waffleVisFunction,
 } from '../common';
-import type {
+import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
   SetupDeps,

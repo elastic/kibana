@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { RuleSnoozeModal } from '../application/sections';
-import type { RuleSnoozeModalProps } from '../application/sections/rules_list/components/rule_snooze_modal';
+import { RuleSnoozeModalProps } from '../application/sections/rules_list/components/rule_snooze_modal';
 
 export const getRuleSnoozeModalLazy = (props: RuleSnoozeModalProps) => {
   return <RuleSnoozeModal {...props} />;

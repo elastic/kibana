@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 
 export type EntitiesInventoryLocator = LocatorPublic<SerializableRecord>;
 

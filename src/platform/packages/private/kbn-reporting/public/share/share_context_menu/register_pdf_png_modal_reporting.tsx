@@ -10,11 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ShareContext, ShareMenuItemV2, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItemV2, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import type { ScreenshotExportOpts } from '@kbn/share-plugin/public/types';
-import type { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ScreenshotExportOpts } from '@kbn/share-plugin/public/types';
+import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
 
 const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {

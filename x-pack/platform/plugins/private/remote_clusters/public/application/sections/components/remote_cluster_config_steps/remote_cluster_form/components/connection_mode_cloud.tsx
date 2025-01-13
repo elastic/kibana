@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -24,8 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { proxySettingsUrl } from '../../../../../services/documentation';
 
-import type { ClusterErrors } from '../validators';
-import type { FormFields } from '../remote_cluster_form';
+import { ClusterErrors } from '../validators';
+import { FormFields } from '../remote_cluster_form';
 
 export interface Props {
   fields: FormFields;

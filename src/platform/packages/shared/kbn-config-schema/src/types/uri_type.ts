@@ -9,8 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
-import { Type } from './type';
+import { Type, TypeOptions } from './type';
 
 export type URIOptions = TypeOptions<string> & {
   scheme?: string | string[];

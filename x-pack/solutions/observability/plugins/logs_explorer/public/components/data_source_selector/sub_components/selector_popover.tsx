@@ -6,21 +6,19 @@
  */
 
 import React from 'react';
-import type {
-  EuiPopoverProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiPopoverProps,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import type {
+import {
   DatasetSelection,
   DataSourceSelection,
-  DataViewSelection} from '../../../../common/data_source_selection';
-import {
+  DataViewSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
 import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';

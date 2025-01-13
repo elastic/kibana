@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   CustomItemAction,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
@@ -25,7 +25,7 @@ import {
   getSummaryTableSizeInBytesColumn,
 } from './columns';
 import { VIEW_HISTORY } from '../translations';
-import type { IndexSummaryTableItem } from '../../../../../types';
+import { IndexSummaryTableItem } from '../../../../../types';
 import { CHECK_NOW } from '../../translations';
 
 const defaultBytesFormat = '0,0.[0]b';

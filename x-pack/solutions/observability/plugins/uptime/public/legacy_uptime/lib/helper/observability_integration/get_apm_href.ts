@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from './add_base_path';
-import type { MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 export const getLegacyApmHref = (
   summary: MonitorSummary,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { MapsUsage } from '../maps_telemetry';
-import { getMapsTelemetry } from '../maps_telemetry';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 
 export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetup): void {
   if (!usageCollection) {

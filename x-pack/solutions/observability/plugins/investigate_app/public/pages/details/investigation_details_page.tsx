@@ -14,7 +14,7 @@ import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationDetails } from './components/investigation_details/investigation_details';
 import { InvestigationProvider } from './contexts/investigation_context';
-import type { InvestigationDetailsPathParams } from './types';
+import { InvestigationDetailsPathParams } from './types';
 
 export function InvestigationDetailsPage() {
   const {

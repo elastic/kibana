@@ -9,9 +9,8 @@
 
 import Path from 'path';
 
-import type { ThemeTags} from '@kbn/core-ui-settings-common';
-import { parseThemeTags } from '@kbn/core-ui-settings-common';
-import type { UnknownVals } from './ts_helpers';
+import { ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
+import { UnknownVals } from './ts_helpers';
 
 export interface WorkerConfig {
   readonly repoRoot: string;

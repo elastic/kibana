@@ -9,11 +9,11 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import type {
+import {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

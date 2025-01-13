@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable, Range } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition, Datatable, Range } from '@kbn/expressions-plugin/common';
 
 interface Arguments {
   from: number;

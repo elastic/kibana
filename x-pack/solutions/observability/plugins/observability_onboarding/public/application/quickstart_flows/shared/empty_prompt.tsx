@@ -10,9 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
-import { OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
-import type { ObservabilityOnboardingAppServices } from '../../..';
+import {
+  OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
+  OnboardingFlowEventContext,
+} from '../../../../common/telemetry_events';
+import { ObservabilityOnboardingAppServices } from '../../..';
 
 interface EmptyPromptProps {
   onboardingFlowType: string;

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import * as i18n from '../translations';
-import type {
-  MaintenanceWindowFrequency} from '../constants';
 import {
+  MaintenanceWindowFrequency,
   ISO_WEEKDAYS_TO_RRULE,
   RRULE_WEEKDAYS_TO_ISO_WEEKDAYS,
 } from '../constants';
 import { monthDayDate } from './month_day_date';
 import { getNthByWeekday } from './get_nth_by_weekday';
-import type { RecurringScheduleFormProps } from '../components/schema';
+import { RecurringScheduleFormProps } from '../components/schema';
 
 export const recurringSummary = (
   startDate: Moment,

@@ -6,10 +6,9 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isRunningResponse } from '@kbn/data-plugin/public';
-import type { IKibanaSearchRequest } from '@kbn/search-types';
-import type {
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import { IKibanaSearchRequest } from '@kbn/search-types';
+import {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { _IGNORED } from '../../../common/es_fields';
-import type { DataStreamType } from '../../../common/types';
+import { DataStreamType } from '../../../common/types';
 import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import { createDatasetQualityESClient } from '../../utils';
 import { rangeQuery } from '../../utils/queries';

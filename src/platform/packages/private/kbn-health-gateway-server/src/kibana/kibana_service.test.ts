@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IConfigServiceMock } from '@kbn/config-mocks';
-import { configServiceMock } from '@kbn/config-mocks';
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { ServerStart } from '../server';
 import { serverMock } from '../server/server.mock';
 import { mockReadFileSync } from './kibana_service.test.mocks';

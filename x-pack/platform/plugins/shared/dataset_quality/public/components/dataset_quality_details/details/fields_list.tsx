@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
-import React, { Fragment } from 'react';
+import React, { ReactNode, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiPanel,

@@ -12,8 +12,7 @@ import './collapse_button.scss';
 import React from 'react';
 import classNames from 'classnames';
 
-import type { EuiButtonIconPropsForButton } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export type SolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {

@@ -9,7 +9,7 @@
 
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { Duration } from 'moment-timezone';
-import type { LayoutConfigType } from '../layout';
+import { LayoutConfigType } from '../layout';
 
 /**
  * Configuration of a rolling-file appender

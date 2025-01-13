@@ -7,7 +7,7 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { UnstructuredLogState } from '../../types';
 import { GROK_MAIN_PROMPT } from './prompts';
-import type { GrokResult, HandleUnstructuredNodeParams } from './types';
+import { GrokResult, HandleUnstructuredNodeParams } from './types';
 import { GROK_EXAMPLE_ANSWER } from './constants';
 
 export async function handleUnstructured({

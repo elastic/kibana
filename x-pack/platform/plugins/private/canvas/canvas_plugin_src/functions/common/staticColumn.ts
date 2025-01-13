@@ -6,7 +6,7 @@
  */
 
 import { getType } from '@kbn/interpreter';
-import type {
+import {
   ExpressionFunctionDefinition,
   Datatable,
   DatatableColumnType,

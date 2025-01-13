@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren} from 'react';
-import React, { useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
-import type {
-  SampleDataCardServices,
-  SampleDataCardKibanaDependencies} from '@kbn/home-sample-data-card';
 import {
+  SampleDataCardServices,
+  SampleDataCardKibanaDependencies,
   SampleDataCardProvider,
   SampleDataCardKibanaProvider,
 } from '@kbn/home-sample-data-card';

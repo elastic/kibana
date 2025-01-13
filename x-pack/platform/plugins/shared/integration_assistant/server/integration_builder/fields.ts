@@ -7,7 +7,7 @@
 
 import nunjucks from 'nunjucks';
 import { load } from 'js-yaml';
-import type { Field } from '../util/samples';
+import { Field } from '../util/samples';
 import { createSync, generateFields, mergeSamples } from '../util';
 
 export function createFieldMapping(

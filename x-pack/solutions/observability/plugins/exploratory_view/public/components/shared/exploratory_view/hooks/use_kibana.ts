@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
 
 export type StartServices<AdditionalServices extends object = {}> = CoreStart &
   ExploratoryViewPublicPluginsStart &

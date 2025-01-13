@@ -11,7 +11,7 @@ import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
+import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
   alertFlyoutVisible: boolean;

@@ -7,8 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { MappingsEditorTestBed, DomFields } from './helpers';
-import { componentHelpers } from './helpers';
+import { componentHelpers, MappingsEditorTestBed, DomFields } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();

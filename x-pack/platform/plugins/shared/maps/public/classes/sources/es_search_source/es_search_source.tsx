@@ -6,28 +6,26 @@
  */
 
 import _ from 'lodash';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
-import type { DataViewField, DataView , SortDirectionNumeric } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection } from '@kbn/data-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
 import { getCore, getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
-import type {
-  TotalHits} from '../../../../common/elasticsearch_util';
 import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
-  isTotalHitsGreaterThan
+  isTotalHitsGreaterThan,
+  TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -45,7 +43,7 @@ import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-import type {
+import {
   AbstractESSourceDescriptor,
   DataRequestMeta,
   ESSearchSourceDescriptor,
@@ -53,22 +51,20 @@ import type {
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import type { IField } from '../../fields/field';
-import type {
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { IField } from '../../fields/field';
+import {
+  getLayerFeaturesRequestName,
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
   IMvtVectorSource,
-  SourceStatus} from '../vector_source';
-import {
-  getLayerFeaturesRequestName
+  SourceStatus,
 } from '../vector_source';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import type { DataRequest } from '../../util/data_request';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import type { ScriptField } from './util/get_docvalue_source_fields';
-import { getDocValueAndSourceFields } from './util/get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import {
   addFeatureToIndex,
   deleteFeatureFromIndex,

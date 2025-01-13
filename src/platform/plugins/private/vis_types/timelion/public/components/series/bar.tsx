@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { BarSeriesStyle } from '@elastic/charts';
-import { BarSeries, ScaleType } from '@elastic/charts';
+import { BarSeries, ScaleType, BarSeriesStyle } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface BarSeriesComponentProps {

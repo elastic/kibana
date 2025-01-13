@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Context} from 'react';
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
-import type { AppDataType } from '../types';
-import type { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
+import { AppDataType } from '../types';
+import { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
 import {
   getDataTypeIndices,
   ObservabilityDataViews,

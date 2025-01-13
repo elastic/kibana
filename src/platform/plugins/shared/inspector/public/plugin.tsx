@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
-import type { InspectorOptions, InspectorSession } from './types';
+import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
-import type { Adapters } from '../common';
+import { Adapters } from '../common';
 
 import { getRequestsViewDescription } from './views';
 

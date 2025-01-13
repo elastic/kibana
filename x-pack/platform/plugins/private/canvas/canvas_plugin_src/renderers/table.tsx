@@ -7,12 +7,12 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { StartInitializer } from '../plugin';
+import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
-import type { RendererFactory, Style, Datatable } from '../../types';
+import { RendererFactory, Style, Datatable } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
 export interface TableArguments {

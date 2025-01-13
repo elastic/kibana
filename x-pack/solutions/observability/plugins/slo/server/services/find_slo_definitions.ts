@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
+  findSloDefinitionsResponseSchema,
   Pagination,
 } from '@kbn/slo-schema';
-import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../errors';
-import type { SLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;

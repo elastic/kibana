@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
-import type { ListSnapshotReposResponse } from '../../../../common/types';
+import { ListSnapshotReposResponse } from '../../../../common/types';
 
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 import { handleEsError } from '../../../shared_imports';
 

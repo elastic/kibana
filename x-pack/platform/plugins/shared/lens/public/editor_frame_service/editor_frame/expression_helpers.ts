@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ast} from '@kbn/interpreter';
-import { fromExpression } from '@kbn/interpreter';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import type { DateRange } from '../../../common/types';
-import type { DatasourceStates } from '../../state_management';
+import { DatasourceStates } from '../../state_management';
 import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(

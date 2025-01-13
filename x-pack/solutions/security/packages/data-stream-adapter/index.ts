@@ -16,4 +16,4 @@ export type {
   EcsFieldMap,
 } from '@kbn/index-adapter';
 
-export type * from '@kbn/index-adapter/src/field_maps/types';
+export * from '@kbn/index-adapter/src/field_maps/types';

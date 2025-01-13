@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Connector } from './connectors';
+import { Connector } from './connectors';
 
 export enum IngestionStatus {
   CONFIGURED,

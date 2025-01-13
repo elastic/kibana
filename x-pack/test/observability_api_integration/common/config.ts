@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { Config, FtrConfigProviderContext } from '@kbn/test';
-import { kbnTestConfig } from '@kbn/test';
-import type { UrlObject } from 'url';
-import { format } from 'url';
+import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import { format, UrlObject } from 'url';
 import { LogsSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import supertest from 'supertest';
 import { bootstrapApmSynthtraceEsClient, getSynthtraceKibanaClient } from './bootstrap_synthtrace';
-import type { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 import { createObsApiClient } from './obs_api_supertest';
 
 interface Settings {

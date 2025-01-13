@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   GetIn,
   CreateIn,
   SearchIn,
@@ -23,7 +23,7 @@ import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import type { EventAnnotationGroupContentType } from '../types';
+import { EventAnnotationGroupContentType } from '../types';
 
 export interface Reference {
   type: string;

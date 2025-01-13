@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 
 export const styles = {
   badgesGroup: ({ euiTheme }: { euiTheme: UseEuiTheme['euiTheme'] }) => css`

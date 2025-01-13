@@ -7,15 +7,14 @@
 
 import { cloneDeep } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import type { LensDocShape } from './saved_object_migrations';
-import { getAllMigrations } from './saved_object_migrations';
-import type {
+import { getAllMigrations, LensDocShape } from './saved_object_migrations';
+import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type {
+import {
   LensDocShape715,
   LensDocShape810,
   VisState716,
@@ -29,9 +28,9 @@ import type {
   VisState850,
 } from './types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import type { LegacyMetricState } from '../../common/types';
-import type { Filter } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LegacyMetricState } from '../../common/types';
+import { Filter } from '@kbn/es-query';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {}, {});

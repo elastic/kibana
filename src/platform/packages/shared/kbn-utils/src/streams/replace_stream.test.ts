@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Writable, Readable } from 'stream';
+import { Writable, Readable } from 'stream';
 
 import {
   createReplaceStream,

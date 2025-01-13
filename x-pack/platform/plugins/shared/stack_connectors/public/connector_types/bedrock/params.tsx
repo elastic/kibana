@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
 import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
-import type { BedrockActionParams } from './types';
+import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
   actionParams,

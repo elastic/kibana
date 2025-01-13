@@ -23,16 +23,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { LazyPackagePolicyInputVarField, type NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { GcpCredentialsType } from '../../../../common/types_old';
+import { GcpCredentialsType } from '../../../../common/types_old';
 import { CLOUDBEAT_GCP } from '../../../../common/constants';
-import type { CspRadioOption } from '../csp_boxed_radio_group';
-import { RadioGroup } from '../csp_boxed_radio_group';
-import type { NewPackagePolicyPostureInput } from '../utils';
-import { findVariableDef, getCspmCloudShellDefaultValue, getPosturePolicy } from '../utils';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import {
+  findVariableDef,
+  getCspmCloudShellDefaultValue,
+  getPosturePolicy,
+  NewPackagePolicyPostureInput,
+} from '../utils';
 import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';

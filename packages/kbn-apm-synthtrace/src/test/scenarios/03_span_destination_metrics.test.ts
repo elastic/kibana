@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
 import { sortBy } from 'lodash';
 import { Readable } from 'stream';
 import { createSpanMetricsAggregator } from '../../lib/apm/aggregators/create_span_metrics_aggregator';

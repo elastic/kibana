@@ -9,12 +9,11 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type {
-  EuiDataGridControlColumn,
-  EuiThemeComputed,
-  EuiDataGridCellValueElementProps} from '@elastic/eui';
 import {
-  useEuiTheme
+  EuiDataGridControlColumn,
+  useEuiTheme,
+  EuiThemeComputed,
+  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';

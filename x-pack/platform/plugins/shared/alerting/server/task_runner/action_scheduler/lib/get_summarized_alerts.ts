@@ -7,8 +7,8 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type { GetSummarizedAlertsParams, IAlertsClient } from '../../../alerts_client/types';
-import type {
+import { GetSummarizedAlertsParams, IAlertsClient } from '../../../alerts_client/types';
+import {
   AlertInstanceContext,
   AlertInstanceState,
   CombinedSummarizedAlerts,

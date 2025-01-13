@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract} from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 

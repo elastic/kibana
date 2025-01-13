@@ -7,8 +7,14 @@
 
 import React, { useEffect } from 'react';
 
-import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiAccordion, EuiSpacer, EuiText, EuiLink, EuiCode } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiCode,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,7 +22,7 @@ import { CodeBox } from '@kbn/search-api-panels';
 
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 
-import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import {
   getConnectorTemplate,
   getRunFromDockerSnippet,

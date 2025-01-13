@@ -6,15 +6,15 @@
  */
 
 import { FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import type {
+import {
   Category,
   DynamicStylePropertyOptions,
   RangeFieldMeta,
   StyleMetaDescriptor,
   TileMetaFeature,
 } from '../../../../../common/descriptor_types';
-import type { PropertiesMap } from '../../../../../common/elasticsearch_util';
-import type { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 
 export async function pluckStyleMeta(
   metaFeatures: TileMetaFeature[],

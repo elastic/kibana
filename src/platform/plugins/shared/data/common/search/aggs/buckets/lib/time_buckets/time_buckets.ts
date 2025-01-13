@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Assign } from 'utility-types';
+import { Assign } from 'utility-types';
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
-import type { Unit } from '@kbn/datemath';
+import { Unit } from '@kbn/datemath';
 import { parseInterval, splitStringInterval } from '../../../utils';
-import type { TimeRangeBounds } from '../../../../../query';
+import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
-import type {
-  EsInterval} from './calc_es_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
+  EsInterval,
   getPreciseDurationDescription,
 } from './calc_es_interval';
 import { autoInterval } from '../../_interval_options';

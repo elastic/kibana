@@ -10,22 +10,19 @@
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
 
-import type {
+import {
+  FieldFormat,
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
-  SerializedFieldFormat} from '@kbn/field-formats-plugin/common';
-import {
-  FieldFormat
+  SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { DateRange } from '../../expressions';
+import { SerializableRecord } from '@kbn/utility-types';
+import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
-import type { IpPrefixKey } from '../buckets/lib/ip_prefix';
-import { convertIPPrefixToString } from '../buckets/lib/ip_prefix';
-import type { IpRangeKey } from '../buckets/lib/ip_range';
-import { convertIPRangeToString } from '../buckets/lib/ip_range';
-import type { MultiFieldKey } from '../buckets/multi_field_key';
+import { convertIPPrefixToString, IpPrefixKey } from '../buckets/lib/ip_prefix';
+import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
+import { MultiFieldKey } from '../buckets/multi_field_key';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 

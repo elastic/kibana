@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import type { IconType } from '@elastic/eui';
 import {
   EuiButton,
   EuiCard,
@@ -16,6 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
+  IconType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

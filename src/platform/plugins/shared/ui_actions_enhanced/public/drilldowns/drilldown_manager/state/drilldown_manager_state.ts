@@ -8,17 +8,16 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { useMemo } from 'react';
-import type {
+import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
   DrilldownTemplate,
 } from '../types';
-import type {
+import {
   ActionFactory,
   BaseActionFactoryContext,
   SerializedAction,
@@ -35,7 +34,7 @@ import {
   toastDrilldownsDeleted,
   toastDrilldownEdited,
 } from './i18n';
-import type { DrilldownTableItem } from '../components/drilldown_table';
+import { DrilldownTableItem } from '../components/drilldown_table';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 

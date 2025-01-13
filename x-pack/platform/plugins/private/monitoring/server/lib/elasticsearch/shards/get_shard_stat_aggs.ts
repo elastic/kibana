@@ -10,7 +10,7 @@
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
  */
 
-import type { MonitoringConfig } from '../../../config';
+import { MonitoringConfig } from '../../../config';
 
 export function getShardAggs(
   config: MonitoringConfig,

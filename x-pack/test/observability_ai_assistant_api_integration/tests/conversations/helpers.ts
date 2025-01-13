@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
-import type {
+import { Readable } from 'stream';
+import {
   ConversationCreateEvent,
   ConversationUpdateEvent,
   StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 
 export function decodeEvents(body: Readable | string) {
   return String(body)

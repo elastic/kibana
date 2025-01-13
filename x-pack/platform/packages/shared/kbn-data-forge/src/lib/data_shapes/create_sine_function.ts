@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
-import type { Point } from '../../types';
+import { Moment } from 'moment';
+import { Point } from '../../types';
 
 function caluclateOffset(amplitude: number, y1: number) {
   const offset = y1 - amplitude;

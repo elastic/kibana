@@ -11,12 +11,12 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import type { Column } from '../reorderable_table/types';
+import { Column } from '../reorderable_table/types';
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';
 import { getUpdatedColumns } from './get_updated_columns';
-import type { InlineEditableTableColumn } from './types';
+import { InlineEditableTableColumn } from './types';
 
 interface Foo {
   id: number;

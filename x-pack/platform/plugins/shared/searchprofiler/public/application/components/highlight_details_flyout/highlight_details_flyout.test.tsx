@@ -6,8 +6,7 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import type { Props } from '.';
-import { HighlightDetailsFlyout } from '.';
+import { HighlightDetailsFlyout, Props } from '.';
 
 describe('Highlight Details Flyout', () => {
   it('renders', async () => {

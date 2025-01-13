@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { RuleAction } from '../../../types';
+import { RuleAction } from '../../../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,

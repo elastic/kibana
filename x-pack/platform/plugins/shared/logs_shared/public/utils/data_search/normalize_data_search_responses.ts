@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import type { SearchStrategyError } from '../../../common/search_strategies/common/errors';
-import type { ParsedKibanaSearchResponse } from './types';
+import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
+import { ParsedKibanaSearchResponse } from './types';
 
 export type RawResponseParser<RawResponse, Response> = (rawResponse: RawResponse) => {
   data: Response;

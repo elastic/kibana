@@ -11,9 +11,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ComparisonControlsProps } from './comparison_controls';
-import { ComparisonControls } from './comparison_controls';
-import type { DocumentDiffMode } from './types';
+import { ComparisonControls, ComparisonControlsProps } from './comparison_controls';
+import { DocumentDiffMode } from './types';
 
 const renderComparisonControls = ({
   isPlainRecord = false,

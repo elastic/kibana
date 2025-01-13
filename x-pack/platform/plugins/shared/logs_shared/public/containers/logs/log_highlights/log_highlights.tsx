@@ -8,8 +8,8 @@
 import createContainer from 'constate';
 import { useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import type { TimeKey } from '@kbn/io-ts-utils';
-import type { LogViewReference } from '../../../../common';
+import { TimeKey } from '@kbn/io-ts-utils';
+import { LogViewReference } from '../../../../common';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';

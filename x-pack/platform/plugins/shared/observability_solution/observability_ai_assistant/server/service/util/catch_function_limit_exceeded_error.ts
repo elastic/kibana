@@ -6,16 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OperatorFunction} from 'rxjs';
-import { catchError, filter, of, shareReplay, throwError } from 'rxjs';
-import type {
-  ChatCompletionChunkEvent} from '../../../common';
+import { catchError, filter, of, OperatorFunction, shareReplay, throwError } from 'rxjs';
 import {
+  ChatCompletionChunkEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../common';
-import type { MessageOrChatEvent } from '../../../common/conversation_complete';
-import { isFunctionNotFoundError } from '../../../common/conversation_complete';
+import { isFunctionNotFoundError, MessageOrChatEvent } from '../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 
 export function catchFunctionLimitExceededError(): OperatorFunction<

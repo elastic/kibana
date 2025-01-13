@@ -8,9 +8,9 @@
 import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
-import type { PeerCertificate } from 'tls';
+import { PeerCertificate } from 'tls';
 
-import type { ConfigType } from '..';
+import { ConfigType } from '..';
 
 export type HttpAgent = http.Agent | https.Agent;
 interface AgentOptions {

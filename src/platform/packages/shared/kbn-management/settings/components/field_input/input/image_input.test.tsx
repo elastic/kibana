@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { ImageInputProps } from './image_input';
-import { ImageInput } from './image_input';
+import { ImageInput, ImageInputProps } from './image_input';
 import { wrap } from '../mocks';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import userEvent from '@testing-library/user-event';

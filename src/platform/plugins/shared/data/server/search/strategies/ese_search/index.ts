@@ -8,4 +8,4 @@
  */
 
 export { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
-export type * from './types';
+export * from './types';

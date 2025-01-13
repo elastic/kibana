@@ -8,13 +8,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiText,
 } from '@elastic/eui';
 import {

@@ -10,9 +10,9 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationTooltip } from './annotation_tooltip';
-import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewRectAnnotation({
   slo,

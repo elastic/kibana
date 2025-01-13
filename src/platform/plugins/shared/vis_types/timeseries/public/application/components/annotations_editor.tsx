@@ -14,8 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { AnnotationRow } from './annotation_row';
-import type { CollectionActionsProps } from './lib/collection_actions';
-import { collectionActions } from './lib/collection_actions';
+import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';

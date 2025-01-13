@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectIndexStore } from '..';
+import { SavedObjectIndexStore } from '..';
 
 /** Returns an object matching a given title */
 export async function findObjectByTitle(

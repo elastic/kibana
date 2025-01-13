@@ -6,15 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { RulesClientContext } from '../../../../rules_client';
+import { RulesClientContext } from '../../../../rules_client';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   AdHocRunAuditAction,
   adHocRunAuditEvent,
 } from '../../../../rules_client/common/audit_events';
-import type { Backfill } from '../../result/types';
+import { Backfill } from '../../result/types';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
 
 export async function getBackfill(context: RulesClientContext, id: string): Promise<Backfill> {

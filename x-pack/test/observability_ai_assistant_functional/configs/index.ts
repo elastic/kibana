@@ -6,10 +6,11 @@
  */
 
 import { mapValues } from 'lodash';
-import type { ObservabilityAIAssistantFtrConfigName } from '../../observability_ai_assistant_api_integration/configs';
-import { observabilityAIAssistantFtrConfigs } from '../../observability_ai_assistant_api_integration/configs';
-import type { CreateTestConfig } from '../common/config';
-import { createTestConfig } from '../common/config';
+import {
+  ObservabilityAIAssistantFtrConfigName,
+  observabilityAIAssistantFtrConfigs,
+} from '../../observability_ai_assistant_api_integration/configs';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 export const configs: Record<ObservabilityAIAssistantFtrConfigName, CreateTestConfig> = mapValues(
   observabilityAIAssistantFtrConfigs,

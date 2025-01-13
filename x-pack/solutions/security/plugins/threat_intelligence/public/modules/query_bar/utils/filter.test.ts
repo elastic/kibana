@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter, PhraseFilter } from '@kbn/es-query';
+import { Filter, PhraseFilter } from '@kbn/es-query';
 import { FilterIn, FilterOut, updateFiltersArray } from './filter';
 
 describe('updateFiltersArray', () => {

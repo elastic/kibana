@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { ProvidedType } from '@kbn/test';
+import { ProvidedType } from '@kbn/test';
 
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;
 export interface ExpectedSectionTable {

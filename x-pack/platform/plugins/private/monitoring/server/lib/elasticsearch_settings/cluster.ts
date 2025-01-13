@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash';
-import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { findReason } from './find_reason';
-import type { ClusterSettingsReasonResponse, LegacyRequest } from '../../types';
+import { ClusterSettingsReasonResponse, LegacyRequest } from '../../types';
 
 export function handleResponse(
   response: ClusterGetSettingsResponse,

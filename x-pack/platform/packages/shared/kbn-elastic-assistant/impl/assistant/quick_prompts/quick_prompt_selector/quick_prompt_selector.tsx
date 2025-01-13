@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,11 +13,12 @@ import {
   EuiToolTip,
   EuiHealth,
   EuiHighlight,
-  EuiComboBox
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {

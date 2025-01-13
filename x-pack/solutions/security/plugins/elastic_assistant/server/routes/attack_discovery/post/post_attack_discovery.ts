@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, Logger, type IKibanaResponse } from '@kbn/core/server';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -20,7 +20,7 @@ import { ATTACK_DISCOVERY } from '../../../../common/constants';
 import { handleGraphError } from './helpers/handle_graph_error';
 import { updateAttackDiscoveries, updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
+import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { invokeAttackDiscoveryGraph } from './helpers/invoke_attack_discovery_graph';
 import { requestIsValid } from './helpers/request_is_valid';
 

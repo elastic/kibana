@@ -24,11 +24,10 @@ import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
 
-import type {
-  InstanceInfo} from './plugin_context';
 import {
   createPluginInitializerContext,
-  createPluginSetupContext
+  createPluginSetupContext,
+  InstanceInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

@@ -8,7 +8,7 @@
  */
 
 import { getAllMigrations } from './visualization_saved_object_migrations';
-import type {
+import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,

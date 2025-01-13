@@ -9,8 +9,7 @@
 
 import React, { useState, createContext, useContext, useCallback } from 'react';
 
-import type { HookProps } from '../multi_content';
-import { WithMultiContent, useMultiContentContext } from '../multi_content';
+import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
-import type { ConfigSchema } from './config';
-import { configSchema } from './config';
+import { configSchema, ConfigSchema } from './config';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { GraphPlugin } = await import('./plugin');

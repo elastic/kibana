@@ -6,11 +6,10 @@
  */
 
 import { isEmpty, isString } from 'lodash';
-import type { JsonValue } from '@kbn/utility-types';
-import type { Logger } from '@kbn/core/server';
-import type { RawMonitoringStats } from '../monitoring';
-import { HealthStatus } from '../monitoring';
-import type { TaskManagerConfig } from '../config';
+import { JsonValue } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
+import { HealthStatus, RawMonitoringStats } from '../monitoring';
+import { TaskManagerConfig } from '../config';
 
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,

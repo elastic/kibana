@@ -7,8 +7,7 @@
 
 import { createServer } from '@mswjs/http-middleware';
 
-import type { StrictResponse } from 'msw';
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse, StrictResponse } from 'msw';
 
 export const setupMockServer = () => {
   const server = createServer(deploymentHandler);

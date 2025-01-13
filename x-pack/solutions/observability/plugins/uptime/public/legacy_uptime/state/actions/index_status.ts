@@ -6,6 +6,6 @@
  */
 
 import { createAsyncAction } from './utils';
-import type { StatesIndexStatus } from '../../../../common/runtime_types';
+import { StatesIndexStatus } from '../../../../common/runtime_types';
 
 export const indexStatusAction = createAsyncAction<any, StatesIndexStatus>('GET INDEX STATUS');

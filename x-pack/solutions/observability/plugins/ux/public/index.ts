@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import type { UxPluginSetup, UxPluginStart } from './plugin';
-import { UxPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { UxPlugin, UxPluginSetup, UxPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = (
   initializerContext: PluginInitializerContext

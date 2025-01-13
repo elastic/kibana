@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../../common/lib';
 import { EmailDomainsAllowed } from '../../config';
 

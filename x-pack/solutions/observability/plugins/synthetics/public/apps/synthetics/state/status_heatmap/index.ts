@@ -7,9 +7,9 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import type { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
 
-import type { IHttpSerializedFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   clearMonitorStatusHeatmapAction,

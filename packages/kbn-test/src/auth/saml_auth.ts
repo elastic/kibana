@@ -8,16 +8,14 @@
  */
 
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
+import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosResponse } from 'axios';
 import util from 'util';
 import * as cheerio from 'cheerio';
-import type { Cookie} from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { isValidHostname, isValidUrl } from './helper';
-import type {
+import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,

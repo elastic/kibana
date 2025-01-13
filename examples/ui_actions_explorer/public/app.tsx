@@ -18,9 +18,9 @@ import {
   EuiSpacer,
   EuiPageHeader,
 } from '@elastic/eui';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { TriggerContextExample } from './trigger_context_example';
 import { ContextMenuExamples } from './context_menu_examples';
 import { Overview } from './overview';

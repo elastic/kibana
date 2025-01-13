@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { IndexNameFormProps } from '..';
+import { IndexNameFormProps } from '..';
 
 interface State {
   IndexNameForm: React.ComponentType<IndexNameFormProps> | null;

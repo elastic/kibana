@@ -10,10 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
-import type { OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { JsonEditor } from '../../shared_imports';
-import type { MappingsValidationError } from '../../lib';
-import { validateMappings } from '../../lib';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
+import { validateMappings, MappingsValidationError } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 

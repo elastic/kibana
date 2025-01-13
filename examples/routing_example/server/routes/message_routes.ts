@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { POST_MESSAGE_ROUTE_PATH, INTERNAL_GET_MESSAGE_BY_ID_ROUTE } from '../../common';
 
 /**

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   CrawlerCustomScheduleMappingClient,
   CrawlerCustomSchedulesServer,
   CrawlerCustomScheduleClient,
   CrawlerCustomScheduleConfigOverridesClient,
 } from '../../../../../common/types/crawler';
 
-import type {
+import {
   CrawlerDomain,
   CrawlerDomainFromServer,
   CrawlerData,

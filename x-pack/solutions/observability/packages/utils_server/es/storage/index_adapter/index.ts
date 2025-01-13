@@ -13,11 +13,11 @@ import type {
   MappingProperty,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { InferSearchResponseOf } from '@kbn/es-types';
+import { InferSearchResponseOf } from '@kbn/es-types';
 import { last, mapValues, padStart } from 'lodash';
-import type {
+import {
   IStorageAdapter,
   IndexStorageSettings,
   StorageAdapterBulkRequest,
@@ -31,7 +31,7 @@ import type {
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageClient } from '../storage_client';
-import type { StorageMappingProperty } from '../types';
+import { StorageMappingProperty } from '../types';
 
 function getAliasName(name: string) {
   return name;

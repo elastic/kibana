@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
-import React, { createContext, useState, useContext } from 'react';
-import type { HttpSetup, ChromeStart } from '@kbn/core/public';
+import React, { createContext, ReactNode, useState, useContext } from 'react';
+import { HttpSetup, ChromeStart } from '@kbn/core/public';
 
-import type { Links } from '../../links';
-import type { Store, Payload, Validation } from '../types';
+import { Links } from '../../links';
+import { Store, Payload, Validation } from '../types';
 import { initialPayload } from './initial_payload';
 
 interface AppContextProviderArgs {

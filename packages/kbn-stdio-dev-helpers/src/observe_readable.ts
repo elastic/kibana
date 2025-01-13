@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 
 import * as Rx from 'rxjs';
 

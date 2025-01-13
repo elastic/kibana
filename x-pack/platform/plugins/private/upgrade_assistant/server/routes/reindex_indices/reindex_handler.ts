@@ -6,22 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
 
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import type { ReindexOperation} from '../../../common/types';
-import { ReindexStatus } from '../../../common/types';
+import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../../lib/reindexing';
-import type { CredentialStore } from '../../lib/reindexing/credential_store';
+import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { error } from '../../lib/reindexing/error';
 
 interface ReindexHandlerArgs {

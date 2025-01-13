@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { generateLinkedRulesMenuItems } from '../generate_linked_rules_menu_item';
 import { rules } from './rule_references.mock';
 export const securityLinkAnchorComponentMock = ({

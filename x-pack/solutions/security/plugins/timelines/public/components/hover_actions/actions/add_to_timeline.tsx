@@ -6,22 +6,21 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import type { DraggableId } from '@hello-pangea/dnd';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { TimelinesStartServices } from '../../..';
+import { TimelinesStartServices } from '../../..';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import type { DataProvider } from '../../../../common/types';
+import { DataProvider } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-import type { HoverActionComponentProps } from './types';
+import { HoverActionComponentProps } from './types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 

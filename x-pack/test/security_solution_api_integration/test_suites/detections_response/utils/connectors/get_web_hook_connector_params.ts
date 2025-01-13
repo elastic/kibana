@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateConnectorBody } from './create_connector';
+import { CreateConnectorBody } from './create_connector';
 
 export function getWebHookConnectorParams(): CreateConnectorBody {
   return {

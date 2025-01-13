@@ -15,8 +15,7 @@ import { createReadStream } from 'fs';
 import { PassThrough } from 'stream';
 import { createGunzip, createGzip } from 'zlib';
 
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 import { getResponsePayloadBytes } from './get_payload_size';
 

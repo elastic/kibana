@@ -7,25 +7,24 @@
 
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
-import type {
+import {
+  CustomizablePalette,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams} from '@kbn/coloring';
-import {
-  CustomizablePalette
+  CustomPaletteParams,
 } from '@kbn/coloring';
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
-import type { DatasourcePublicAPI } from '../..';
+import { DatasourcePublicAPI } from '../..';
 
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
   return expect.objectContaining({

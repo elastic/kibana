@@ -13,10 +13,9 @@ import { combineLatest, skip } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { GridLayoutStateManager, UserInteractionEvent, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager, UserInteractionEvent, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
-import type { DragHandleApi } from './drag_handle';
-import { DragHandle } from './drag_handle';
+import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
 export interface GridPanelProps {

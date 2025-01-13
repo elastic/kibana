@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Ensure, SerializableRecord } from '@kbn/utility-types';
+import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import type { MessagePort} from 'worker_threads';
-import { isMainThread, workerData } from 'worker_threads';
+import { isMainThread, MessagePort, workerData } from 'worker_threads';
 import path from 'path';
 
 import { getTemplate } from './get_template';

@@ -8,14 +8,14 @@
 import React, { useEffect } from 'react';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
-import type { AlertSummaryWidgetProps } from '.';
+import { AlertSummaryWidgetProps } from '.';
 import {
   AlertSummaryWidgetError,
   AlertSummaryWidgetCompact,
   AlertSummaryWidgetFullSize,
   AlertSummaryWidgetLoader,
 } from './components';
-import type { AlertSummaryWidgetDependencies, DependencyProps } from './types';
+import { AlertSummaryWidgetDependencies, DependencyProps } from './types';
 
 export const AlertSummaryWidget = ({
   chartProps,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Column } from '../convert';
+import { Column } from '../convert';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

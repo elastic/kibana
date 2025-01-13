@@ -11,8 +11,7 @@ jest.mock('fs');
 
 import { Bundle } from '../common';
 
-import type { Assignments } from './assign_bundles_to_workers';
-import { assignBundlesToWorkers } from './assign_bundles_to_workers';
+import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
 
 const hasWorkUnits = (b: Bundle) => b.cache.getWorkUnits() !== undefined;
 const noWorkUnits = (b: Bundle) => b.cache.getWorkUnits() === undefined;

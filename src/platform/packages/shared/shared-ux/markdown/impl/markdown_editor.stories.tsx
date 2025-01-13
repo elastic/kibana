@@ -9,8 +9,7 @@
 
 import React from 'react';
 
-import type { MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
-import { MarkdownStorybookMock } from '@kbn/shared-ux-markdown-mocks';
+import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
 
 import { EuiFlexItem } from '@elastic/eui';
 import mdx from './README.mdx';

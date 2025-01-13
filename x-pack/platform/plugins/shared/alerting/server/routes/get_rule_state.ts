@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { ILicenseState } from '../lib';
-import type { RewriteResponseCase} from './lib';
-import { verifyAccessAndContext } from './lib';
-import type {
-  AlertingRequestHandlerContext,
-  RuleTaskState} from '../types';
+import { ILicenseState } from '../lib';
+import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
-  INTERNAL_BASE_ALERTING_API_PATH
+  AlertingRequestHandlerContext,
+  INTERNAL_BASE_ALERTING_API_PATH,
+  RuleTaskState,
 } from '../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 

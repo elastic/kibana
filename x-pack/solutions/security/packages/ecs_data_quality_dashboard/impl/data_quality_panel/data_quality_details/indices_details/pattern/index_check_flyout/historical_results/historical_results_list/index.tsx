@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, memo, useState } from 'react';
+import React, { FC, Fragment, memo, useState } from 'react';
 import {
   EuiAccordion,
   EuiEmptyPrompt,

@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
-import type { Page } from '../../../../../common/types/pagination';
-import type {
+import { Page } from '../../../../../common/types/pagination';
+import {
   EnterpriseSearchApplication,
   EnterpriseSearchApplicationDetails,
   EnterpriseSearchApplicationsResponse,
 } from '../../../../../common/types/search_applications';
 
-import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import type { DeleteSearchApplicationApiLogicActions } from '../../api/search_applications/delete_search_application_api_logic';
-import { DeleteSearchApplicationAPILogic } from '../../api/search_applications/delete_search_application_api_logic';
+import {
+  DeleteSearchApplicationAPILogic,
+  DeleteSearchApplicationApiLogicActions,
+} from '../../api/search_applications/delete_search_application_api_logic';
 
-import type { SearchApplicationsListAPIArguments } from '../../api/search_applications/fetch_search_applications_api_logic';
-import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
+import {
+  SearchApplicationsListAPIArguments,
+  FetchSearchApplicationsAPILogic,
+} from '../../api/search_applications/fetch_search_applications_api_logic';
 
 import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';
 

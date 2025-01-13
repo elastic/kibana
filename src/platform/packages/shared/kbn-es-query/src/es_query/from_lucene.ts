@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { Query } from '../..';
+import { SerializableRecord } from '@kbn/utility-types';
+import { Query } from '../..';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
-import type { BoolQuery } from './types';
+import { BoolQuery } from './types';
 
 /** @internal */
 export function buildQueryFromLucene(

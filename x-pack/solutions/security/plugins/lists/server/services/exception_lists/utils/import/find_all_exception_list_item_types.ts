@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type {
+import {
   ExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
-import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
+import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 import { getExceptionListsItemFilter } from '../get_exception_lists_item_filter';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 import { transformSavedObjectsToFoundExceptionListItem } from '..';

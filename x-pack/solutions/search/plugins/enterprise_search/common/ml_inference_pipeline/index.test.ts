@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type {
-  MlTrainedModelConfig,
-  MlTrainedModelStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
-import type { MlModel } from '../types/ml';
-import { MlModelDeploymentState } from '../types/ml';
-import type { MlInferencePipeline } from '../types/pipelines';
-import { TrainedModelState } from '../types/pipelines';
+import { MlModel, MlModelDeploymentState } from '../types/ml';
+import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
   generateMlInferencePipelineBody,

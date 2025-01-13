@@ -6,10 +6,7 @@
  */
 
 import moment from 'moment';
-import type {
-  EncryptedSyntheticsMonitorAttributes,
-  OverviewPing,
-} from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes, OverviewPing } from '../../../common/runtime_types';
 
 export const getMonitorToPing = (
   monitor: EncryptedSyntheticsMonitorAttributes,

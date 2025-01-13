@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import type { CSSObject } from '@emotion/react';
+import { UseEuiTheme } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 
 export const patternAccordionCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
   '.euiAccordion__triggerWrapper': {

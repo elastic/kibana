@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogRecord } from '@kbn/logging';
+import { LogRecord } from '@kbn/logging';
 
 /**
  * Rewrites a {@link LogRecord} based on the policy's configuration.

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
-import type { SystemLogActionParams } from '../types';
+import { SystemLogActionParams } from '../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<
   ActionParamsProps<SystemLogActionParams>

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import type { MockedLogger } from '@kbn/logging-mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SloDefinitionClient } from './slo_definition_client';
-import type { SLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 describe('SLODefinitionClient', () => {

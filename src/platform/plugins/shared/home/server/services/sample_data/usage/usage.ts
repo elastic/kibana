@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, SavedObjectsServiceStart } from '@kbn/core/server';
+import { Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 

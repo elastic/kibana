@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Message} from '../../../common';
-import { MessageRole } from '../../../common';
+import { Message, MessageRole } from '../../../common';
 
 export function replaceSystemMessage(systemMessage: string, messages: Message[]): Message[] {
   return [

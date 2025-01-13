@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect } from '@elastic/synthetics';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { loginPageProvider } from '../../page_objects/login';
 

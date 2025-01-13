@@ -10,8 +10,8 @@ import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type {
-  ResponseActionAgentType,
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
   type ResponseActionStatus,

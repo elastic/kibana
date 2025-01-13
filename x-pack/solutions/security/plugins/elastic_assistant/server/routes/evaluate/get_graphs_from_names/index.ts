@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
+import {
+  ASSISTANT_GRAPH_MAP,
   AssistantGraphMetadata,
   AttackDiscoveryGraphMetadata,
 } from '../../../lib/langchain/graphs';
-import { ASSISTANT_GRAPH_MAP } from '../../../lib/langchain/graphs';
 
 export interface GetGraphsFromNamesResults {
   attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[];

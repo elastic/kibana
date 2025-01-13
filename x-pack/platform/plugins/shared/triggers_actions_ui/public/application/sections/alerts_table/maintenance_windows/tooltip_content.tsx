@@ -9,8 +9,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, formatDate, EuiHorizontalRule } from '@elastic/eui';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
-import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindow, MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/alerting-plugin/common';
 import { css } from '@emotion/react';
 
 const START_TIME = i18n.translate(

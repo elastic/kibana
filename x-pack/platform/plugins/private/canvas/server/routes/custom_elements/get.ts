@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteInitializerDeps } from '..';
+import { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
-import type { CustomElementAttributes } from './custom_element_attributes';
+import { CustomElementAttributes } from './custom_element_attributes';
 import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeGetCustomElementRoute(deps: RouteInitializerDeps) {

@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
-import type { SelfChangingVisParams } from '../self_changing_vis_fn';
+import { SelfChangingVisParams } from '../self_changing_vis_fn';
 
 interface SelfChangingComponentProps {
   renderComplete(): void;

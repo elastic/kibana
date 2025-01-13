@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { MachineImplementationsFrom} from 'xstate5';
-import { assign, setup } from 'xstate5';
-import type { LogCategory } from '../../types';
+import { MachineImplementationsFrom, assign, setup } from 'xstate5';
+import { LogCategory } from '../../types';
 import { getPlaceholderFor } from '../../utils/xstate5_utils';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
-import type { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
+import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
 
 export const categorizeLogsService = setup({
   types: {

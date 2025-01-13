@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   IndicesGetMappingIndexMappingRecord,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 
 import { EMPTY_METADATA, EcsFlatTyped } from '../constants';
-import type {
+import {
   CustomFieldMetadata,
   EcsCompliantFieldMetadata,
   EnrichedFieldMetadata,

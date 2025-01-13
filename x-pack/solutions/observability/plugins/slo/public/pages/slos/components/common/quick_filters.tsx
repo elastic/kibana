@@ -6,15 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { skip } from 'rxjs';
-import type { SearchState } from '../../hooks/use_url_search_state';
+import { SearchState } from '../../hooks/use_url_search_state';
 
 interface Props {
   initialState: SearchState;

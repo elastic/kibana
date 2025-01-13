@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type {
+import {
   AggFunctionsMapping,
   ExpressionFunctionKql,
   ExpressionFunctionLucene,
 } from '@kbn/data-plugin/public';
-import type {
+import {
   AnyExpressionFunctionDefinition,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/common';
-import type { Primitive } from 'utility-types';
+import { Primitive } from 'utility-types';
 
 export function groupByKey<T>(
   items: T[],

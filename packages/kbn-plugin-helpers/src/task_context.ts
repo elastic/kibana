@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import type { Plugin } from './load_kibana_platform_plugin';
-import type { Config } from './config';
+import { Plugin } from './load_kibana_platform_plugin';
+import { Config } from './config';
 
 export interface TaskContext {
   log: ToolingLog;

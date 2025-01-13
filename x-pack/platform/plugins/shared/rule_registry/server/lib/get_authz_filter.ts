@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
+import { PublicMethodsOf } from '@kbn/utility-types';
+import {
   ReadOperations,
   WriteOperations,
-  AlertingAuthorization} from '@kbn/alerting-plugin/server';
-import {
+  AlertingAuthorization,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
 } from '@kbn/alerting-plugin/server';

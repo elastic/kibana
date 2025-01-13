@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResolveIndexResponseFromES } from './types';
+import { ResolveIndexResponseFromES } from './types';
 
 /**
  * Throws if the index name is not found in the resolved indices response

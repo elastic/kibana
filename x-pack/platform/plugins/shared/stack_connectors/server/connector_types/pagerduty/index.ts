@@ -7,8 +7,7 @@
 
 import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 import type {
   ActionType as ConnectorType,

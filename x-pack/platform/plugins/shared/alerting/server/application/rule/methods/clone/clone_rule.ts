@@ -8,10 +8,9 @@
 import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObject} from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import type { SanitizedRule, RawRule } from '../../../../types';
+import { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration } from '../../../../../common/parse_duration';
@@ -19,10 +18,10 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
 import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_client/lib';
-import type { RulesClientContext } from '../../../../rules_client/types';
+import { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { CloneRuleParams } from './types';
-import type { RuleDomain, RuleParams } from '../../types';
+import { CloneRuleParams } from './types';
+import { RuleDomain, RuleParams } from '../../types';
 import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';

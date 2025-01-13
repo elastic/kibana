@@ -6,4 +6,4 @@
  */
 
 // Latest version is 1
-export type * from './v1';
+export * from './v1';

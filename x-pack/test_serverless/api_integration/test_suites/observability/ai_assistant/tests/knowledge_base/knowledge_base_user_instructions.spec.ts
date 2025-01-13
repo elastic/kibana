@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
-import type { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   clearConversations,
   clearKnowledgeBase,
@@ -20,10 +19,12 @@ import {
   TINY_ELSER,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
-import type { LlmProxy } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
+import {
+  LlmProxy,
+  createLlmProxy,
+} from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

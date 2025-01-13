@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf} from '@kbn/config-schema';
-import { schema, offeringBasedSchema } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import type { ConfigDeprecationProvider } from '@kbn/config';
+import { ConfigDeprecationProvider } from '@kbn/config';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
   unused('enabled', { level: 'warning' }),

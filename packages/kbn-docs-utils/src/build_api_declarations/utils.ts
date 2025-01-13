@@ -9,9 +9,8 @@
 
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ParameterDeclaration, ClassMemberTypes} from 'ts-morph';
-import { Node } from 'ts-morph';
-import type { BuildApiDecOpts } from './types';
+import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
+import { BuildApiDecOpts } from './types';
 import { isNamedNode } from '../tsmorph_utils';
 
 // Collect any paths encountered that are not in the correct scope folder.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createQuery } from './create_query';
@@ -16,17 +16,16 @@ import {
   INDEX_PATTERN_LOGSTASH_METRICS_PLUGINS,
   INDEX_PATTERN_LOGSTASH_METRICS_NODE,
 } from '../../common/constants';
-import type {
+import {
+  HITS_SIZE,
+  LOGSTASH_PLUGIN_TYPES,
+  getLogstashBaseStats,
   Counter,
   LogstashMonitoring,
   LogstashProcessOptions,
   LogstashState,
   LogstashStats,
-  LogstashStatsByClusterUuid} from './logstash_monitoring';
-import {
-  HITS_SIZE,
-  LOGSTASH_PLUGIN_TYPES,
-  getLogstashBaseStats
+  LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
 
 export class LogstashAgentMonitoring implements LogstashMonitoring {

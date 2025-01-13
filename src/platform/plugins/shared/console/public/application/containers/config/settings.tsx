@@ -9,11 +9,10 @@
 
 import React from 'react';
 
-import type { AutocompleteOptions} from '../../components/settings';
-import { SettingsEditor } from '../../components/settings';
+import { AutocompleteOptions, SettingsEditor } from '../../components/settings';
 
 import { useServicesContext, useEditorActionContext } from '../../contexts';
-import type { DevToolsSettings, Settings as SettingsService } from '../../../services';
+import { DevToolsSettings, Settings as SettingsService } from '../../../services';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,

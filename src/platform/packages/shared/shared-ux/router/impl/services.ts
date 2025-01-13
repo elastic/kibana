@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { createContext, useContext } from 'react';
-import type { SharedUXExecutionContext } from './types';
+import { SharedUXExecutionContext } from './types';
 
 /**
  * @public Execution context start and setup types are the same

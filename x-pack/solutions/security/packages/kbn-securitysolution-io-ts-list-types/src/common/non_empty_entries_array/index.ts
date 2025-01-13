@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
-import type { EntriesArray } from '../entries';
-import { entriesArray } from '../entries';
+import { Either } from 'fp-ts/lib/Either';
+import { entriesArray, EntriesArray } from '../entries';
 import { entriesList } from '../entries_list';
 
 /**

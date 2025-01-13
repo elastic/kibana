@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
@@ -18,8 +18,7 @@ import type {
 } from '@kbn/core-security-server-internal';
 import { apiKeysMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
-import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {

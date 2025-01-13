@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
-import { TOCEntry } from './toc_entry';
-import type { MapStoreState } from '../../../../../reducers/store';
+import { TOCEntry, OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
+import { MapStoreState } from '../../../../../reducers/store';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
 import {
   getMapZoom,

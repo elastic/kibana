@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawConnectorTokenSchemaV1 } from '../schemas/raw_connector_token';
 
 export const connectorTokenModelVersions: SavedObjectsModelVersionMap = {

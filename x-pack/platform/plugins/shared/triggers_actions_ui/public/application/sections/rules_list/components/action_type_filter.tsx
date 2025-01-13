@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, useEuiTheme } from '@elastic/eui';
-import type { ActionType } from '../../../../types';
+import { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {
   actionTypes: ActionType[];

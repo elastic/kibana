@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { Connector, ConnectorDefinition } from '@kbn/search-connectors';
+import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
-import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
-import type {
+import {
+  AddConnectorApiLogic,
   AddConnectorApiLogicActions,
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
-import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
-import type { GenerateConfigApiActions } from '../../../api/connector/generate_connector_config_api_logic';
-import { GenerateConfigApiLogic } from '../../../api/connector/generate_connector_config_api_logic';
-import type {
+import {
+  GenerateConfigApiActions,
+  GenerateConfigApiLogic,
+} from '../../../api/connector/generate_connector_config_api_logic';
+import {
+  GenerateConnectorNamesApiLogic,
   GenerateConnectorNamesApiLogicActions,
   GenerateConnectorNamesApiResponse,
 } from '../../../api/connector/generate_connector_names_api_logic';
-import { GenerateConnectorNamesApiLogic } from '../../../api/connector/generate_connector_names_api_logic';
-import type { APIKeyResponse } from '../../../api/generate_api_key/generate_api_key_logic';
+import { APIKeyResponse } from '../../../api/generate_api_key/generate_api_key_logic';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
-import type { ConnectorViewActions } from '../../connector_detail/connector_view_logic';
-import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
-import type { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
+import {
+  ConnectorViewActions,
+  ConnectorViewLogic,
+} from '../../connector_detail/connector_view_logic';
+import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
 import { SearchIndexTabId } from '../../search_index/search_index';
 
 export interface NewConnectorValues {

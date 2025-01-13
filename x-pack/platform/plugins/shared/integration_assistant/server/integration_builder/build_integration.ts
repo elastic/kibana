@@ -18,8 +18,7 @@ import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 import { createReadme } from './readme_files';
-import type { Field} from '../util/samples';
-import { flattenObjectsList } from '../util/samples';
+import { Field, flattenObjectsList } from '../util/samples';
 
 const initialVersion = '1.0.0';
 

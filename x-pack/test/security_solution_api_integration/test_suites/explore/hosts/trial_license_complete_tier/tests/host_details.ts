@@ -6,11 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { HostDetailsStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
-import { HostsQueries } from '@kbn/security-solution-plugin/common/search_strategy';
-import type TestAgent from 'supertest/lib/agent';
-import type { SearchService } from '@kbn/ftr-common-functional-services';
-import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import {
+  HostDetailsStrategyResponse,
+  HostsQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { SearchService } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { hostDetailsFilebeatExpectedResult } from '../mocks/host_details';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {

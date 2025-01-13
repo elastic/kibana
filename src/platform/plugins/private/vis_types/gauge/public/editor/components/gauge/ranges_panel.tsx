@@ -11,18 +11,16 @@ import React, { useCallback } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  SetColorRangeValue} from '@kbn/vis-default-editor-plugin/public';
 import {
   ColorRanges,
+  SetColorRangeValue,
   SwitchOption,
   ColorSchemaOptions,
   PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import type { ColorSchemaParams} from '@kbn/charts-plugin/public';
-import { ColorSchemas, colorSchemas } from '@kbn/charts-plugin/public';
-import type { GaugeOptionsInternalProps } from '.';
-import type { Gauge } from '../../../types';
+import { ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/charts-plugin/public';
+import { GaugeOptionsInternalProps } from '.';
+import { Gauge } from '../../../types';
 
 function RangesPanel({
   showElasticChartsOptions,

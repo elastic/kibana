@@ -8,14 +8,13 @@
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type {
-  MigrateFunction,
-  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import {
-  mergeMigrationFunctionMaps
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import type {
+import {
   LensDocShapePre712,
   OperationTypePre712,
   LensDocShapePost712,
@@ -40,7 +39,7 @@ import type {
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
 import { RowHeightMode, type LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
-import type { LensDocShape } from './saved_object_migrations';
+import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712

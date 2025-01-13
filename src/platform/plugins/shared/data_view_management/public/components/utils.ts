@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   DataViewsContract,
   DataView,
   DataViewField,
-  DataViewListItem} from '@kbn/data-views-plugin/public';
-import {
+  DataViewListItem,
   DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';

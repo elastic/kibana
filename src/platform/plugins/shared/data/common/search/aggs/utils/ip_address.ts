@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IPv4, IPv6 } from 'ipaddr.js';
-import ipaddr from 'ipaddr.js';
+import ipaddr, { IPv4, IPv6 } from 'ipaddr.js';
 
 function isIPv6(value: IPv4 | IPv6): value is IPv6 {
   return value.kind() === 'ipv6';

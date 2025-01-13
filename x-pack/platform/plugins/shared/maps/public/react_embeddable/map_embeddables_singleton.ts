@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { MapCenterAndZoom } from '../../common/descriptor_types';
+import { MapCenterAndZoom } from '../../common/descriptor_types';
 
 interface MapPanel {
   getTitle(): string;

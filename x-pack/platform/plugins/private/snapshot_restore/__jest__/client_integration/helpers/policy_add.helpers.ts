@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import type { HttpSetup } from '@kbn/core/public';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 import { PolicyAdd } from '../../../public/application/sections/policy_add';
-import type { PolicyFormTestSubjects } from './policy_form.helpers';
-import { formSetup } from './policy_form.helpers';
+import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {

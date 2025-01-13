@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UiCounterMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 /* @internal */
 export enum CountMetric {

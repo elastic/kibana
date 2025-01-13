@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import type {
+import {
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceSettings,
 } from '../../../../common/descriptor_types';

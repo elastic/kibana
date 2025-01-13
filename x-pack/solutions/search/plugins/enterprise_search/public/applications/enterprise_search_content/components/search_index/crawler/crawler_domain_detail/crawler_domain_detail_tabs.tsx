@@ -7,11 +7,10 @@
 
 import React, { useState } from 'react';
 
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { CrawlerDomain } from '../../../../api/crawler/types';
+import { CrawlerDomain } from '../../../../api/crawler/types';
 
 import { AuthenticationPanel } from './authentication_panel/authentication_panel';
 import { CrawlRulesTable } from './crawl_rules_table';

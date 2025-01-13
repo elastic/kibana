@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useState } from 'react';
+import React, { useState, FC, PropsWithChildren } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -16,8 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { SchedulingConfiguraton } from '@kbn/search-connectors';
-import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, SchedulingConfiguraton } from '@kbn/search-connectors';
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 
 import { Status } from '../../../../../../common/types/api';

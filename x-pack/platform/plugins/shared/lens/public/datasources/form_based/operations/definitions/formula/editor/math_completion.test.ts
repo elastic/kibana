@@ -11,9 +11,9 @@ import { monaco } from '@kbn/monaco';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { createMockedIndexPattern } from '../../../../mocks';
-import type { GenericOperationDefinition } from '../..';
+import { GenericOperationDefinition } from '../..';
 import type { OperationMetadata, IndexPatternField } from '../../../../../../types';
 import {
   getSignatureHelp,

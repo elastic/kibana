@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiCodeBlock,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';

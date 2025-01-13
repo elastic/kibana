@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
+import {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -14,13 +14,12 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { SLACK_URL } from '../../common/slack_api/constants';
-import type { ValidChannelResponse } from '../../common/slack_api/types';
+import { ValidChannelResponse } from '../../common/slack_api/types';
 
 const bodySchema = schema.object({
   authToken: schema.string(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   APM_DISPLAY_NAME,
@@ -19,7 +19,7 @@ import {
   STACK_MONITORING_DISPLAY_NAME,
   UPTIME_DISPLAY_NAME,
 } from '../translations';
-import type { AlertsTableSupportedConsumers } from './types';
+import { AlertsTableSupportedConsumers } from './types';
 
 interface AlertProducerData {
   displayName: string;

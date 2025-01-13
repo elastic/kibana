@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
 
 export type { Index } from '@kbn/index-management-shared-types';
 

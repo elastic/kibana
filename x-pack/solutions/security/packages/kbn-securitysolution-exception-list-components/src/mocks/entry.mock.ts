@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Entry } from '../exception_item_card/conditions/types';
+import { Entry } from '../exception_item_card/conditions/types';
 
 export const includedListTypeEntry: Entry = {
   field: '',

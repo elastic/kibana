@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { CertSort } from './certificates_list';
-import { CertificateList } from './certificates_list';
+import { CertificateList, CertSort } from './certificates_list';
 import { render } from '../../utils/testing';
 
 describe('CertificateList', () => {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ColorMapping} from '@kbn/coloring';
-import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
+import { ColorMapping, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { isEqual } from 'lodash';
 import { KbnPalette } from '@kbn/palettes';
 import { nonNullable } from '../utils';

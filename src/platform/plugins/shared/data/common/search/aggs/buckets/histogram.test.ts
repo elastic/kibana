@@ -9,12 +9,11 @@
 
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
-import type { AggTypesDependencies } from '../agg_types';
+import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IBucketHistogramAggConfig, AutoBounds } from './histogram';
-import { getHistogramBucketAgg } from './histogram';
-import type { BucketAggType } from './bucket_agg_type';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
+import { BucketAggType } from './bucket_agg_type';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;

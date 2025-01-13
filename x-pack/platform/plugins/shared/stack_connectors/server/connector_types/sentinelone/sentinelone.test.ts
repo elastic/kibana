@@ -6,7 +6,7 @@
  */
 
 import { sentinelOneConnectorMocks } from './mocks';
-import type {
+import {
   SentinelOneDownloadAgentFileParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneGetActivitiesParams,

@@ -10,7 +10,7 @@
 import Path from 'path';
 import { inspect } from 'util';
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 import {
   isExternalModule,
   isNormalModule,
@@ -20,14 +20,13 @@ import {
   getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
-import type {
+import {
   Bundle,
   WorkerConfig,
-  ParsedDllManifest} from '../common';
-import {
   ascending,
   parseFilePath,
-  Hashes
+  Hashes,
+  ParsedDllManifest,
 } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
 

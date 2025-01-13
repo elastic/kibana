@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import moment from 'moment';
-import type { TimeRange } from './use_lens_definition';
+import { TimeRange } from './use_lens_definition';
 
 // For a timeslice SLO
 // When the date range is lower than 24 hours, we force the interval to be the timeslice window

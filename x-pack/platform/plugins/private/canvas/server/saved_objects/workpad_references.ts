@@ -6,10 +6,10 @@
  */
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
-import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import type { SavedObjectReference } from '@kbn/core/server';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectReference } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
+import { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 
 export const extractReferences = (
   workpad: WorkpadAttributes,

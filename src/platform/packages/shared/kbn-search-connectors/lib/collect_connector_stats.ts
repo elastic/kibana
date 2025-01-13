@@ -9,21 +9,20 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
-import type {
+import {
   Connector,
   ConnectorConfigProperties,
   ConnectorStats,
   ConnectorSyncJob,
+  CRAWLER_SERVICE_TYPE,
   DataSourceSpecificStats,
   DocumentsStats,
+  fetchConnectors,
+  fetchSyncJobs,
   SyncJobStats,
   SyncJobStatsByState,
   SyncJobStatsByType,
-  SyncJobStatsDetails} from '..';
-import {
-  CRAWLER_SERVICE_TYPE,
-  fetchConnectors,
-  fetchSyncJobs,
+  SyncJobStatsDetails,
   SyncJobType,
   SyncStatus,
   TriggerMethod,

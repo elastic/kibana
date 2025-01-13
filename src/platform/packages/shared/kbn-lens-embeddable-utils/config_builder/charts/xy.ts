@@ -26,7 +26,7 @@ import {
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
-import type {
+import {
   BuildDependencies,
   LensAnnotationLayer,
   LensAttributes,

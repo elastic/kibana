@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { SERVERLESS_NODES } from '@kbn/es';
 import { startOsqueryCypress } from './runner';

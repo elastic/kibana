@@ -9,9 +9,8 @@
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment-timezone';
-import type { IAggConfig} from '../aggs';
-import { parseInterval } from '../aggs';
-import type { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
+import { IAggConfig, parseInterval } from '../aggs';
+import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;

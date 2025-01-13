@@ -13,10 +13,10 @@ import * as React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { OptInMessage } from './opt_in_message';
-import type { TelemetryService } from '../services';
-import type { TelemetryConstants } from '..';
+import { TelemetryService } from '../services';
+import { TelemetryConstants } from '..';
 
 interface Props {
   http: HttpSetup;

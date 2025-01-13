@@ -6,7 +6,7 @@
  */
 
 import type { MapAttributes } from '../../../common/content_management';
-import type {
+import {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,
   LAYER_KEYS,
@@ -16,7 +16,7 @@ import type {
 import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
 import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 
-import type { ClusterCountStats, MapStats } from './types';
+import { ClusterCountStats, MapStats } from './types';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.

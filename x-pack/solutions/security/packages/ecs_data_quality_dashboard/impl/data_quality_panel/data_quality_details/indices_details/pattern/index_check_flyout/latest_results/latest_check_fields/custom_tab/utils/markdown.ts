@@ -7,7 +7,7 @@
 
 import { EcsVersion } from '@elastic/ecs';
 
-import type { CustomFieldMetadata, IlmPhase } from '../../../../../../../../types';
+import { CustomFieldMetadata, IlmPhase } from '../../../../../../../../types';
 import { FIELD } from '../../../../../../../../translations';
 import {
   escapeNewlines,

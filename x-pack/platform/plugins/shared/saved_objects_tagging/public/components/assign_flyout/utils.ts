@@ -6,9 +6,8 @@
  */
 
 import { sortBy } from 'lodash';
-import type { AssignableObject} from '../../../common/assignments';
-import { getKey } from '../../../common/assignments';
-import type {
+import { AssignableObject, getKey } from '../../../common/assignments';
+import {
   AssignmentOverride,
   AssignmentStatus,
   AssignmentAction,

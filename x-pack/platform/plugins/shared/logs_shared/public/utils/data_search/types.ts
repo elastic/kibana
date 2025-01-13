@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
   ISearchOptions,
 } from '@kbn/search-types';
-import type { SearchStrategyError } from '../../../common/search_strategies/common/errors';
+import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 
 export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
   request: Request;

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { Headers, Logger } from '@kbn/core/server';
-import type {
-  ScreenshotModePluginSetup} from '@kbn/screenshot-mode-plugin/server';
+import { Headers, Logger } from '@kbn/core/server';
 import {
-  KBN_SCREENSHOT_MODE_HEADER
+  KBN_SCREENSHOT_MODE_HEADER,
+  ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
-import type { ConfigType } from '@kbn/screenshotting-server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
-import type { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
+import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
-import type { Layout } from '../../layouts';
+import { Layout } from '../../layouts';
 import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';

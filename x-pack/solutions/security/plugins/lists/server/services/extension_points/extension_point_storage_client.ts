@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import type {
   ExtensionPoint,

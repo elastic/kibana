@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
+import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 
 import { notebooksConsoleView } from './console_view';
-import type {
+import {
   SearchNotebooksPluginSetup,
   SearchNotebooksPluginStart,
   SearchNotebooksPluginStartDependencies,

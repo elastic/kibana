@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren} from 'react';
-import React, { createContext, useContext } from 'react';
-import type { CustomIntegrationsFindService } from './find';
-import type { CustomIntegrationsPlatformService } from './platform';
+import React, { createContext, FC, PropsWithChildren, useContext } from 'react';
+import { CustomIntegrationsFindService } from './find';
+import { CustomIntegrationsPlatformService } from './platform';
 
 /**
  * Services used by the custom_integrations plugin.

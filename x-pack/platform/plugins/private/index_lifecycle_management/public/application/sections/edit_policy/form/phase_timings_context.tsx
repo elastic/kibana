@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, FunctionComponent, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
-import type { FormInternal } from '../types';
+import { FormInternal } from '../types';
 import { useGlobalFields } from '.';
 
 export interface PhaseTimingConfiguration {

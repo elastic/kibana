@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

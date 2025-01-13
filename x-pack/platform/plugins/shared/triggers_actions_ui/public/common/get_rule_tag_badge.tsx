@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type {
+import {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
 } from '../application/sections/rules_list/components/rule_tag_badge';

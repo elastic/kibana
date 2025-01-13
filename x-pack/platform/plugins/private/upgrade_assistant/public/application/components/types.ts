@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResponseError } from '../../../common/types';
+import { ResponseError } from '../../../common/types';
 
 export enum LoadingState {
   Loading,

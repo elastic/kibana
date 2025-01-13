@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
-import type { TimeRange } from '../../query';
+import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import { TimeRange } from '../../query';
 
 export type KibanaTimerangeOutput = ExpressionValueBoxed<'timerange', TimeRange>;
 

@@ -15,17 +15,16 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import type {
-  TimeRange} from '../../../common';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   calculateBounds,
   AggsCommonService,
-  aggsRequiredUiSettings
+  aggsRequiredUiSettings,
+  TimeRange,
 } from '../../../common';
-import type { AggsSetup, AggsStart } from './types';
+import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
 export interface AggsSetupDependencies {

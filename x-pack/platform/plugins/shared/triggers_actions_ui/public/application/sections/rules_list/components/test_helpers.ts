@@ -10,7 +10,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
-import type { ValidationResult } from '../../../../types';
+import { ValidationResult } from '../../../../types';
 
 export const mockedRulesData = [
   {

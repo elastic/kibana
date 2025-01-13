@@ -6,6 +6,6 @@
  */
 
 // export * from './state_machine';
-export type * from './types';
+export * from './types';
 export * from './defaults';
 export * from './state_machine';

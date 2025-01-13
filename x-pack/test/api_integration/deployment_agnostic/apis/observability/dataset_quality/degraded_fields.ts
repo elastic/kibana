@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import type { DegradedField } from '@kbn/dataset-quality-plugin/common/api_types';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type { SupertestWithRoleScopeType } from '../../../services';
+import { DegradedField } from '@kbn/dataset-quality-plugin/common/api_types';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { rolloverDataStream, createBackingIndexNameWithoutVersion } from './utils';
 
 const MORE_THAN_1024_CHARS =

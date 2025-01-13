@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import type { EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
 
-import type { SameFamilyFieldMetadata } from '../../../../../../types';
+import { SameFamilyFieldMetadata } from '../../../../../../types';
 import {
   ECS_MAPPING_TYPE_EXPECTED,
   FIELD,

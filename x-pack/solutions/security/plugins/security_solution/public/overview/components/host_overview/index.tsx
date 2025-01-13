@@ -242,7 +242,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       ]
     );
 
-    const descriptionLists: readonly DescriptionList[][] = useMemo(
+    const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
       () => [
         firstColumn,
         [

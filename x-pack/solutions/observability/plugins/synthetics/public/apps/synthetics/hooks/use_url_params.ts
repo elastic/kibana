@@ -8,8 +8,7 @@
 import { useCallback } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import type { SyntheticsUrlParams } from '../utils/url_params';
-import { getSupportedUrlParams } from '../utils/url_params';
+import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
 
 function getParsedParams(search: string) {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};

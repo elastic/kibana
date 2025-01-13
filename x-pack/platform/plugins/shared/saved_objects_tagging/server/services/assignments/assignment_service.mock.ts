@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IAssignmentService } from './assignment_service';
+import { IAssignmentService } from './assignment_service';
 
 const getAssigmentServiceMock = () => {
   const mock: jest.Mocked<IAssignmentService> = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicLastRunSetters } from '../types';
+import { PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
   errors: LastRunError[];

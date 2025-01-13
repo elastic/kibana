@@ -13,10 +13,9 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { extractErrors } from './extract_errors';
-import type {
-  LegacyUrlAlias} from '@kbn/core-saved-objects-base-server-internal';
 import {
-  LEGACY_URL_ALIAS_TYPE
+  LEGACY_URL_ALIAS_TYPE,
+  LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('extractErrors()', () => {

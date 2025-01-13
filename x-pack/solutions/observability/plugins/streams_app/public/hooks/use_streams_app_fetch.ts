@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UseAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import {
+  UseAbortableAsync,
+  useAbortableAsync,
+} from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { omit } from 'lodash';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useKibana } from './use_kibana';

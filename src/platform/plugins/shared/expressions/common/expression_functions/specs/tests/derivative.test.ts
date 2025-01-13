@@ -8,10 +8,9 @@
  */
 
 import { functionWrapper } from './utils';
-import type { DerivativeArgs } from '../derivative';
-import { derivative } from '../derivative';
-import type { ExecutionContext } from '../../../execution/types';
-import type { Datatable } from '../../../expression_types/specs/datatable';
+import { derivative, DerivativeArgs } from '../derivative';
+import { ExecutionContext } from '../../../execution/types';
+import { Datatable } from '../../../expression_types/specs/datatable';
 
 describe('interpreter/functions#derivative', () => {
   const fn = functionWrapper(derivative);

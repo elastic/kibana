@@ -8,28 +8,25 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
-import type { Result } from '../lib/result_type';
-import { asOk, asErr } from '../lib/result_type';
-import type { ConcreteTaskInstance } from '../task';
-import type { TaskClaim } from '../task_events';
+import { asOk, asErr, Result } from '../lib/result_type';
+import { ConcreteTaskInstance } from '../task';
+import { TaskClaim } from '../task_events';
 
-import type { TaskTypeDictionary } from '../task_type_dictionary';
-import type { TaskStore, UpdateByQueryResult } from '../task_store';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskStore, UpdateByQueryResult } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
-import type {
+import {
   TaskClaimerOpts,
   TaskClaimerFn,
-  ClaimOwnershipResult} from '../task_claimers';
-import {
+  ClaimOwnershipResult,
   getTaskClaimer,
 } from '../task_claimers';
-import type { TaskPartitioner } from '../lib/task_partitioner';
+import { TaskPartitioner } from '../lib/task_partitioner';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 export type { ClaimOwnershipResult } from '../task_claimers';

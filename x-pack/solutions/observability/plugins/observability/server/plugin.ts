@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type {
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import type { ObservabilityConfig } from '.';
+import { ObservabilityConfig } from '.';
 import { observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
 } from '../common/guided_onboarding/kubernetes_guide_config';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
-import type {
+import {
   AnnotationsAPI,
+  bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
 } from './lib/annotations/bootstrap_annotations';
-import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';

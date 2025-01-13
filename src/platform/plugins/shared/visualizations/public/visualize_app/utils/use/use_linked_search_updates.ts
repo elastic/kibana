@@ -9,10 +9,10 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
-import type { Filter, Query } from '@kbn/es-query';
-import type {
+import { Filter, Query } from '@kbn/es-query';
+import {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,

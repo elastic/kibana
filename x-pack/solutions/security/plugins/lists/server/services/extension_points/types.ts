@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { UnionToIntersection } from '@kbn/utility-types';
-import type { KibanaRequest } from '@kbn/core/server';
+import { UnionToIntersection } from '@kbn/utility-types';
+import { KibanaRequest } from '@kbn/core/server';
 
-import type {
+import {
   CreateExceptionListItemOptions,
   DeleteExceptionListItemOptions,
   ExportExceptionListAndItemsOptions,
@@ -18,7 +18,7 @@ import type {
   GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
-import type { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
+import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
 import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 /**

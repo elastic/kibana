@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectionOptions as TlsConnectionOptions } from 'tls';
+import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
-import type { Duration } from 'moment';
+import { Duration } from 'moment';
 import type { ClientOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import type { AgentOptions } from 'https';
+import { AgentOptions } from 'https';
 import { getDefaultHeaders } from './headers';
 
 export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: AgentOptions };

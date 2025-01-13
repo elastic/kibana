@@ -20,9 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
-import { KbnPalette } from '@kbn/palettes';
-import type { ColorMapping } from '../../config';
+import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
+import { ColorMapping } from '../../config';
 import { isSameColor } from '../../color/color_math';
 
 export function PaletteColors({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core/server';
 
 /**
  * @internal

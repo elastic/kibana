@@ -7,14 +7,13 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiSpacer,
   EuiPanel,
   EuiCodeBlock,
   EuiText,
-  EuiSwitch
+  EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 const bulkRequestExample = `PUT books/_bulk?pipeline=my-pipeline

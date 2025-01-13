@@ -8,7 +8,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -17,8 +17,7 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-import type { IBody, IQuery} from './fields_for';
-import { parseFields, querySchema, validate } from './fields_for';
+import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiCard, EuiScreenReaderOnly, EuiTextColor, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
+import { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 
 import { NoDataCardStyles } from './no_data_card.styles';
 import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';

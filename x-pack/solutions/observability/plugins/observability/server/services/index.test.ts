@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
+import {
   AlertDetailsContextualInsightsHandlerQuery,
   AlertDetailsContextualInsightsRequestContext,
+  AlertDetailsContextualInsightsService,
 } from '.';
-import { AlertDetailsContextualInsightsService } from '.';
 
 describe('AlertDetailsContextualInsightsService', () => {
   it('concatenates context from registered handlers', async () => {

@@ -16,7 +16,7 @@ import { KpiBaseComponent } from '../../../../components/kpi';
 
 export const ID = 'networkKpiNetworkEventsQuery';
 
-const useGetNetworkEventsStatsItems: () => readonly StatItems[] = () => {
+const useGetNetworkEventsStatsItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () => [

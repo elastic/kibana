@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
-import type { Observable} from 'rxjs';
-import { BehaviorSubject, map, distinctUntilChanged } from 'rxjs';
+import { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import { BehaviorSubject, Observable, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { FilterChecked } from '@elastic/eui';
+import { FilterChecked } from '@elastic/eui';
 
-import type {
+import {
   SavedObjectsManagementPluginStart,
   SavedObjectManagementTypeInfo,
   SavedObjectRelation,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import type {
+import {
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,

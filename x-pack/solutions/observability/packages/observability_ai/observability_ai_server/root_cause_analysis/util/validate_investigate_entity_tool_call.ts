@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { ToolCallsOf } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, ToolCallsOf } from '@kbn/inference-common';
 import { entityQuery } from '@kbn/observability-utils-common/es/queries/entity_query';
 import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
 import { isEqual } from 'lodash';
 import { getEntitiesByFuzzySearch } from '@kbn/observability-utils-server/entities/get_entities_by_fuzzy_search';
-import type { RCA_TOOLS } from '../tools';
-import type {
+import { RCA_TOOLS } from '../tools';
+import {
   InvestigateEntityToolMessage,
   RootCauseAnalysisContext,
   RootCauseAnalysisToolRequest,

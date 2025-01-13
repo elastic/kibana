@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { History } from 'history';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, History } from 'history';
 import type { IBasePath } from '@kbn/core-http-browser';
 
 import { BasePath } from '@kbn/core-http-browser-internal';

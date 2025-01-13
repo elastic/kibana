@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import type { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
-import type { RendererSpec } from '../../types';
+import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
+import { RendererSpec } from '../../types';
 import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
 import { Canvas } from './canvas';
 import { renderFunctions } from '../supported_renderers';

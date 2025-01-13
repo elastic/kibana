@@ -16,12 +16,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  ActionParamsProps,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { PagerDutyActionParams } from '../types';
+import { PagerDutyActionParams } from '../types';
 import { OPTIONAL_LABEL } from './translations';
 
 type LinksListProps = Pick<

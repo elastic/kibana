@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,7 +21,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
-import type { ListDetails } from '../../types';
+import { ListDetails } from '../../types';
 import { useEditModal } from './use_edit_modal';
 
 interface EditModalProps {

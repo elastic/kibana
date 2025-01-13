@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import type { DatasourceMock } from '../../mocks';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { DatatableVisualizationState} from './visualization';
-import { getDatatableVisualization } from './visualization';
-import type {
+import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
+import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
+import {
   Operation,
   DataType,
   FramePublicAPI,
@@ -23,9 +21,8 @@ import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
-import type {
+import { ColorMapping, CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import {
   ColumnState,
   DatatableColumnFn,
   DatatableExpressionFunction,

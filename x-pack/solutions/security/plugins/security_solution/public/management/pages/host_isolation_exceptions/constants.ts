@@ -12,7 +12,7 @@ import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
 
-export const SEARCHABLE_FIELDS: readonly string[] = [
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `item_id`,
   `name`,
   `description`,

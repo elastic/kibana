@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { State } from '../../../types';
+import { State } from '../../../types';
 
 export const getKeyboardShortcutsDocVisibility = (state: State): boolean => {
   return state.transient.flyouts.keyboardShortcutsDoc.isVisible;

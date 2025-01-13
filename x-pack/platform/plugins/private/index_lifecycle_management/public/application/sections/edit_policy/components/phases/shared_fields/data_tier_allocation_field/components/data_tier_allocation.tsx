@@ -6,21 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
 import { SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
-import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
+import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
-import type { DataTierAllocationType } from '../../../../../types';
+import { DataTierAllocationType } from '../../../../../types';
 
 import { UseField } from '../../../../../form';
 
 import { NodeAllocation } from './node_allocation';
-import type { SharedProps } from './types';
+import { SharedProps } from './types';
 
 import './data_tier_allocation.scss';
 

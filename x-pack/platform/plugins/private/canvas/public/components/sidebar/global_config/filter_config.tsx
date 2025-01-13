@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { WorkpadFilters } from '../../workpad_filters';
 
 export const FilterConfig: FC = () => {

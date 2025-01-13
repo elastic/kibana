@@ -8,16 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   ConnectorConfigProperties,
   ConnectorConfiguration,
-  Dependency} from '..';
-import {
+  Dependency,
   FieldType,
   isConfigEntry,
 } from '..';
 
-import type { ConfigEntryView, ConfigView } from '../components/configuration/connector_configuration';
+import { ConfigEntryView, ConfigView } from '../components/configuration/connector_configuration';
 
 import { isCategoryEntry } from './is_category_entry';
 

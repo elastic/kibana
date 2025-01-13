@@ -8,8 +8,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ObjectStorage, IdObject } from '../../../common/types';
-import type { Storage } from '../../services';
+import { ObjectStorage, IdObject } from '../../../common/types';
+import { Storage } from '../../services';
 
 export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> {
   private readonly prefix: string;

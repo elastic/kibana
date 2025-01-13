@@ -10,9 +10,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiCallOut } from '@elastic/eui';
 
-import type { SolutionName, ProjectID, Project } from '../../../common';
-import type { Props as ProjectListItemProps } from './project_list_item';
-import { ProjectListItem } from './project_list_item';
+import { SolutionName, ProjectID, Project } from '../../../common';
+import { ProjectListItem, Props as ProjectListItemProps } from './project_list_item';
 
 import { LabsStrings } from '../../i18n';
 

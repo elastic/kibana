@@ -6,12 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { PackageClient } from '@kbn/fleet-plugin/server';
-import type { Logger } from '@kbn/logging';
+import { PackageClient } from '@kbn/fleet-plugin/server';
+import { Logger } from '@kbn/logging';
 import { validateCustomComponentTemplate } from './validate_custom_component_template';
 import { getIntegration, getIntegrations } from '../../integrations/get_integrations';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../common/utils/component_template_name';
-import type { CheckAndLoadIntegrationResponse } from '../../../../common/api_types';
+import { CheckAndLoadIntegrationResponse } from '../../../../common/api_types';
 import { dataStreamService } from '../../../services';
 
 // The function works on 2 conditions:

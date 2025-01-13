@@ -6,8 +6,7 @@
  */
 
 import { getSavedObjectClient } from '../kibana_server_services';
-import type { MapStats} from './map_stats';
-import { MapStatsCollector } from './map_stats';
+import { MapStats, MapStatsCollector } from './map_stats';
 import { findMaps } from './find_maps';
 
 export type MapsUsage = MapStats;

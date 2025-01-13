@@ -7,8 +7,7 @@
 
 jest.mock('fs');
 
-import type { ReadStream } from 'fs';
-import { createReadStream } from 'fs';
+import { createReadStream, ReadStream } from 'fs';
 import { Readable } from 'stream';
 import { sha256 } from './checksum';
 

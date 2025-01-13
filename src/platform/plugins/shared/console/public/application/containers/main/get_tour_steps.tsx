@@ -10,9 +10,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiStatelessTourSteps} from '@elastic/eui';
-import { EuiLink, EuiText } from '@elastic/eui';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { EuiStatelessTourSteps, EuiLink, EuiText } from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 const commonProps = {
   stepsTotal: 5,

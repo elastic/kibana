@@ -7,11 +7,11 @@
 
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
-import type React from 'react';
+import React from 'react';
 import { Observable } from 'rxjs';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import type { ExploratoryViewPublicPluginsStart } from '../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../plugin';
 import { renderApp } from '.';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 

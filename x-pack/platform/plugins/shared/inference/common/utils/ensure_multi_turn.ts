@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Message} from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
+import { Message, MessageRole } from '@kbn/inference-common';
 
 function isUserMessage(message: Message): boolean {
   return message.role !== MessageRole.Assistant;

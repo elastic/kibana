@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldHook } from './types';
+import { FieldHook } from './types';
 
 export const getFieldValidityAndErrorMessage = (field: {
   isChangingValue: FieldHook['isChangingValue'];

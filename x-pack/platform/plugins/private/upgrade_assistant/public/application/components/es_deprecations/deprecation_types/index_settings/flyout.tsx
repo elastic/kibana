@@ -24,7 +24,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import type {
+import {
   EnrichedDeprecationInfo,
   IndexSettingAction,
   ResponseError,

@@ -9,22 +9,21 @@
 
 import { inspect } from 'util';
 
-import type { Page } from 'playwright';
+import { Page } from 'playwright';
 import callsites from 'callsites';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { FtrConfigProvider } from '@kbn/test';
-import type { FtrProviderContext } from '../services/ftr_context_provider';
-import type { Es, KibanaServer, Retry, Auth } from '../services';
+import { ToolingLog } from '@kbn/tooling-log';
+import { FtrConfigProvider } from '@kbn/test';
+import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, Retry, Auth } from '../services';
 
-import type { InputDelays } from '../services/input_delays';
-import type { KibanaUrl } from '../services/kibana_url';
+import { InputDelays } from '../services/input_delays';
+import { KibanaUrl } from '../services/kibana_url';
 
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
-import type { JourneyConfigOptions } from './journey_config';
-import { JourneyConfig } from './journey_config';
-import type { KibanaPage } from '../services/page/kibana_page';
-import type { ProjectPage } from '../services/page/project_page';
+import { JourneyConfig, JourneyConfigOptions } from './journey_config';
+import { KibanaPage } from '../services/page/kibana_page';
+import { ProjectPage } from '../services/page/project_page';
 
 export interface BaseStepCtx {
   kibanaPage: KibanaPage | ProjectPage;

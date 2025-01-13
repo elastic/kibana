@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EnterpriseSearchMetricFields } from '../metrics';
-import { EnterpriseSearchMetric } from '../metrics';
+import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { getEntsearchDataset } from '../../../common/get_index_patterns';

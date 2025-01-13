@@ -7,7 +7,7 @@
 
 import { ID, LIST_ID, VALUE } from '../../constants/index.mock';
 
-import type { DeleteListItemSchema } from '.';
+import { DeleteListItemSchema } from '.';
 
 export const getDeleteListItemSchemaMock = (): DeleteListItemSchema => ({
   id: ID,

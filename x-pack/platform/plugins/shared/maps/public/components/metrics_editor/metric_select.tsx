@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { AGG_TYPE } from '../../../common/constants';
 import { getAggDisplayName } from '../../classes/sources/es_agg_source';
 

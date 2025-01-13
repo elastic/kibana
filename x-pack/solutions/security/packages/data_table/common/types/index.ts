@@ -6,8 +6,8 @@
  */
 
 export * from './data_table';
-export type * from './header_actions';
-export type * from './session_view';
+export * from './header_actions';
+export * from './session_view';
 
 export const FILTER_OPEN = 'open' as const;
 export const FILTER_CLOSED = 'closed' as const;

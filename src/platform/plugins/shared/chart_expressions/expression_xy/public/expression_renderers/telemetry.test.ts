@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommonXYLayerConfig} from '../../common';
-import { LayerTypes } from '../../common';
-import type { AnnotationLayerConfig, DataLayerConfig, XYProps } from '../../common/types';
+import { CommonXYLayerConfig, LayerTypes } from '../../common';
+import { AnnotationLayerConfig, DataLayerConfig, XYProps } from '../../common/types';
 import {
   createArgsWithLayers,
   sampleAnnotationLayer,

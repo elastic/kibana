@@ -17,8 +17,6 @@ import type { OpenAPIV3 } from 'openapi-types';
 import { extractAuthzDescription } from './extract_authz_description';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
-import type {
-  GetOpId} from './util';
 import {
   prepareRoutes,
   getPathParameters,
@@ -29,7 +27,8 @@ import {
   extractTags,
   mergeResponseContent,
   getXsrfHeaderForMethod,
-  setXState
+  setXState,
+  GetOpId,
 } from './util';
 import { isReferenceObject } from './oas_converter/common';
 

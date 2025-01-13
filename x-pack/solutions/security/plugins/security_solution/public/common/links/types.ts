@@ -165,7 +165,7 @@ export interface LinkItem {
   uiSettingRequired?: string | { key: string; value: unknown };
 }
 
-export type AppLinkItems = readonly LinkItem[];
+export type AppLinkItems = Readonly<LinkItem[]>;
 
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };

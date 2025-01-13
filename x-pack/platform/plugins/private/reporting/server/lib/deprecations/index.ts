@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
+import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
 
 function deprecationError(
   title: string,

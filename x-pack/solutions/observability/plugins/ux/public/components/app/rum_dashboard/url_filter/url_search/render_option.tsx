@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiHighlight } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
 import styled from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 

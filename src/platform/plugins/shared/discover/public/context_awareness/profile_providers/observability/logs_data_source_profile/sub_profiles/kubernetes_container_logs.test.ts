@@ -9,12 +9,11 @@
 
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
-import type { RootContext} from '../../../../profiles';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createKubernetesContainerLogsDataSourceProfileProvider } from './kubernetes_container_logs';
-import type { ContextWithProfileId } from '../../../../profile_service';
+import { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {

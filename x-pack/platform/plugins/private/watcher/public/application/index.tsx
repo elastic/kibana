@@ -10,8 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaRenderContextProvider } from './shared_imports';
-import type { AppDeps } from './app';
-import { App } from './app';
+import { App, AppDeps } from './app';
 import { setHttpClient } from './lib/api';
 
 interface BootDeps extends AppDeps {

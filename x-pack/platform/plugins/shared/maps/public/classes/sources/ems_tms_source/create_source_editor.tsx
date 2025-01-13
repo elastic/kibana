@@ -7,8 +7,7 @@
 
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import type { EmsTmsSourceConfig} from './tile_service_select';
-import { TileServiceSelect } from './tile_service_select';
+import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
 
 interface Props {
   onTileSelect: (sourceConfig: EmsTmsSourceConfig) => void;

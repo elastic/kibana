@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactWrapper} from 'enzyme';
-import { mount } from 'enzyme';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import { ComponentType, ReactWrapper, mount } from 'enzyme';
+import React, { PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,7 +20,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { TableListView } from '@kbn/content-management-table-list-view';
 
 import { DashboardListing } from './dashboard_listing';
-import type { DashboardListingProps } from './types';
+import { DashboardListingProps } from './types';
 import { coreServices } from '../services/kibana_services';
 
 jest.mock('@kbn/content-management-table-list-view-table', () => {

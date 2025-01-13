@@ -10,9 +10,8 @@
 
 const MAX_INDICES = 20;
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type {
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -20,7 +19,7 @@ import type {
   KibanaResponseFactory,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),

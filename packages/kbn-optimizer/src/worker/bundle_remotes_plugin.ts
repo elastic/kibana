@@ -8,11 +8,11 @@
  * Author Tobias Koppers @sokra
  */
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 
 import { parseKbnImportReq } from '@kbn/repo-packages';
 
-import type { Bundle, BundleRemotes } from '../common';
+import { Bundle, BundleRemotes } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
 
 interface RequestData {

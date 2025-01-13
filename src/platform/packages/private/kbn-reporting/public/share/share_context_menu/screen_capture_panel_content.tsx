@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { ReportingPanelProps } from './reporting_panel_content';
-import { ReportingPanelContent } from './reporting_panel_content';
+import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
 export interface Props extends ReportingPanelProps {
   layoutOption?: 'canvas' | 'print';

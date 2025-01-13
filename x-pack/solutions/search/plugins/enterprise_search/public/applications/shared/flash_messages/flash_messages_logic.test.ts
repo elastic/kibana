@@ -15,7 +15,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 const { history } = mockKibanaValues;
 
 import { FlashMessagesLogic } from './flash_messages_logic';
-import type { IFlashMessage } from './types';
+import { IFlashMessage } from './types';
 
 describe('FlashMessagesLogic', () => {
   const { mount: mountFlashMessagesLogic, unmount: unmountFlashMessagesLogic } = new LogicMounter(

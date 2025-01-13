@@ -6,26 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup} from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { STACK_ALERTS_AAD_CONFIG } from '..';
-import type { RuleType } from '../../types';
-import type { ActionContext } from './action_context';
-import type {
+import { RuleType } from '../../types';
+import { ActionContext } from './action_context';
+import {
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
-  EsQueryRuleState} from './rule_type_params';
-import {
   EsQueryRuleParamsSchema,
+  EsQueryRuleState,
   validateServerless,
 } from './rule_type_params';
-import type { ExecutorOptions } from './types';
+import { ExecutorOptions } from './types';
 import { ActionGroupId } from './constants';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
-import type { StackAlertType } from '../types';
+import { StackAlertType } from '../types';
 
 export function getRuleType(
   core: CoreSetup,

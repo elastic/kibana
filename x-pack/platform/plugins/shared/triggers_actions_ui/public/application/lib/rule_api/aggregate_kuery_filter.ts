@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import type { AggregateRulesResponse, LoadRuleAggregationsProps } from './aggregate_helpers';
-import { rewriteBodyRes } from './aggregate_helpers';
+import {
+  AggregateRulesResponse,
+  LoadRuleAggregationsProps,
+  rewriteBodyRes,
+} from './aggregate_helpers';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
 export async function loadRuleAggregationsWithKueryFilter({

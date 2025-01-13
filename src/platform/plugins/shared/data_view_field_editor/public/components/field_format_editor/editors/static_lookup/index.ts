@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatEditorFactory } from '../types';
+import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import type { StaticLookupFormatEditorFormatParams } from './static_lookup';
+import { StaticLookupFormatEditorFormatParams } from './static_lookup';
 
 export type { StaticLookupFormatEditor } from './static_lookup';
 export const staticLookupFormatEditorFactory: FieldFormatEditorFactory<

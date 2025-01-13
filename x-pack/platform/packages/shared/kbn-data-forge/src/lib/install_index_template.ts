@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import { isArray } from 'lodash';
 import { indexTemplates } from '../data_sources';
-import type { Config } from '../types';
+import { Config } from '../types';
 
 export async function installIndexTemplate(
   config: Config,

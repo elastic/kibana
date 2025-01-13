@@ -8,7 +8,7 @@
 import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
+import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
 
 export interface ActionStatusModelEs {
   id: string;

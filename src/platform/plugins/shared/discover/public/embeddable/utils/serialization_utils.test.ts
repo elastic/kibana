@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import type { SearchEmbeddableSerializedState } from '../types';
+import { SearchEmbeddableSerializedState } from '../types';
 import { deserializeState, serializeState } from './serialization_utils';
 
 describe('Serialization utils', () => {

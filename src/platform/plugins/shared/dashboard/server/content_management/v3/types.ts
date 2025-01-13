@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type {
+import { TypeOf } from '@kbn/config-schema';
+import {
   CreateIn,
   GetIn,
   SearchIn,
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { WithRequiredProperty } from '@kbn/utility-types';
-import type {
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { WithRequiredProperty } from '@kbn/utility-types';
+import {
   dashboardItemSchema,
   controlGroupInputSchema,
   gridDataSchema,
@@ -31,8 +31,8 @@ import type {
   dashboardUpdateOptionsSchema,
   optionsSchema,
 } from './cm_services';
-import type { CONTENT_ID } from '../../../common/content_management';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { CONTENT_ID } from '../../../common/content_management';
+import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 

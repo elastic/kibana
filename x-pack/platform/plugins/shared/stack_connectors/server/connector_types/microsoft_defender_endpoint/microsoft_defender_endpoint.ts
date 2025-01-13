@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -20,7 +19,7 @@ import {
   GetActionsParamsSchema,
   AgentDetailsParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
-import type {
+import {
   MicrosoftDefenderEndpointAgentDetailsParams,
   MicrosoftDefenderEndpointIsolateHostParams,
   MicrosoftDefenderEndpointBaseApiResponse,

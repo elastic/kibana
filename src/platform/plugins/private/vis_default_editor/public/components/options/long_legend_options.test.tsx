@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { LongLegendOptionsProps } from './long_legend_options';
-import { LongLegendOptions } from './long_legend_options';
+import { LongLegendOptions, LongLegendOptionsProps } from './long_legend_options';
 import { EuiFieldNumber } from '@elastic/eui';
 
 describe('LongLegendOptions', () => {

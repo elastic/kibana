@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type {
+import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
+  useQuery,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
-import type { WindowSchema } from '../typings';
+import { WindowSchema } from '../typings';
 
 export interface SloRule extends Record<string, unknown> {
   windows: WindowSchema[];

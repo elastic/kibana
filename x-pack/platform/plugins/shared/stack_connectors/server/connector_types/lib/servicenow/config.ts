@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SNProductsConfig } from './types';
+import { SNProductsConfig } from './types';
 
 export const serviceNowITSMTable = 'incident';
 export const serviceNowSIRTable = 'sn_si_incident';

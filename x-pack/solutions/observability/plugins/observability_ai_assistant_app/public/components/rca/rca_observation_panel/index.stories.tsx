@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { RootCauseAnalysisObservationPanel } from '.';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConfigProps, SeriesConfig } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   LABEL_FIELDS_FILTER,

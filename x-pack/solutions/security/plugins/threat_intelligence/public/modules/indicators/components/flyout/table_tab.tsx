@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
-import type { Indicator } from '../../../../../common/types/indicator';
+import React, { VFC } from 'react';
+import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { IndicatorFieldsTable } from './fields_table';
 import { FLYOUT_TABLE_TEST_ID } from './test_ids';

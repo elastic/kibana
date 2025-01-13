@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { isWiredReadStream } from '@kbn/streams-schema';
 import {
@@ -25,7 +25,7 @@ import {
 } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
-import type { AssetClient } from '../../lib/streams/assets/asset_client';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
 
 export const deleteStreamRoute = createServerRoute({
   endpoint: 'DELETE /api/streams/{id}',

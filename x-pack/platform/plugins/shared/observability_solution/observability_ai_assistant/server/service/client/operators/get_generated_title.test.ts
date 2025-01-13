@@ -5,15 +5,14 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError, toArray } from 'rxjs';
-import type {
-  ChatCompletionChunkEvent,
-  Message} from '../../../../common';
 import {
+  ChatCompletionChunkEvent,
+  Message,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
-import type { ChatEvent } from '../../../../common/conversation_complete';
-import type { LangTracer } from '../instrumentation/lang_tracer';
+import { ChatEvent } from '../../../../common/conversation_complete';
+import { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
 describe('getGeneratedTitle', () => {

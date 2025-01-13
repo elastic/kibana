@@ -5,16 +5,17 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import type {
+import {
   BrowserFields,
+  ConfigKey,
   MonitorFields,
+  ScheduleUnit,
   SyntheticsMonitorWithSecretsAttributes,
   ThrottlingConfig,
 } from '../../../../common/runtime_types';
-import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   CUSTOM_LABEL,

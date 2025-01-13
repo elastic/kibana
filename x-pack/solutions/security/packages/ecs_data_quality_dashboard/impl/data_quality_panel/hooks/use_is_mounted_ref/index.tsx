@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
-import { useEffect, useRef } from 'react';
+import { MutableRefObject, useEffect, useRef } from 'react';
 
 /**
  * Hook that returns a ref that is true when mounted and false when unmounted.

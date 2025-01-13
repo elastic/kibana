@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
 import { takeMountedSnapshot } from '../../../test';

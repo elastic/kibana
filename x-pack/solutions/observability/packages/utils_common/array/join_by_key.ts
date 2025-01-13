@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UnionToIntersection, ValuesType } from 'utility-types';
+import { UnionToIntersection, ValuesType } from 'utility-types';
 import { merge, castArray } from 'lodash';
 import stableStringify from 'json-stable-stringify';
 

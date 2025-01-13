@@ -12,11 +12,11 @@ import {
   unstructuredLogState,
   unstructuredLogResponse,
 } from '../../../__jest__/fixtures/unstructured';
-import type {
+import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
   response: JSON.stringify(unstructuredLogResponse, null, 2),

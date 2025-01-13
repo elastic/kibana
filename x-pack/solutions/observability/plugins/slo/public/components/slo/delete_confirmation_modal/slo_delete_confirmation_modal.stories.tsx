@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
-import type { Props } from './slo_delete_confirmation_modal';
-import { SloDeleteModal as Component } from './slo_delete_confirmation_modal';
+import { Props, SloDeleteModal as Component } from './slo_delete_confirmation_modal';
 
 export default {
   component: Component,

@@ -10,12 +10,12 @@
 import type { KbnClient, SamlSessionManager } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import type { LoadActionPerfOptions } from '@kbn/es-archiver';
-import type { IndexStats } from '@kbn/es-archiver/src/lib/stats';
+import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
 import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 
-import type { ScoutTestConfig } from '../../../types';
-import type { KibanaUrl } from '../../../common/services/kibana_url';
+import { ScoutTestConfig } from '../../../types';
+import { KibanaUrl } from '../../../common/services/kibana_url';
 
 export interface EsArchiverFixture {
   /**

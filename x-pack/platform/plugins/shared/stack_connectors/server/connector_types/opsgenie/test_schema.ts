@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloseAlertParams, CreateAlertParams } from './types';
+import { CloseAlertParams, CreateAlertParams } from './types';
 
 export const ValidCreateAlertSchema: CreateAlertParams = {
   message: 'a message',

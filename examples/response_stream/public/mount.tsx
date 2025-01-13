@@ -9,11 +9,11 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { PLUGIN_NAME } from '../common/constants';
-import type { ResponseStreamStartPlugins } from './plugin';
+import { ResponseStreamStartPlugins } from './plugin';
 import { App } from './containers/app';
 
 export interface ResponseStreamDeps {

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { ExtendedColumnConverterArgs, FormulaColumn } from '../convert';
-import { createFormulaColumn } from '../convert';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { createFormulaColumn, ExtendedColumnConverterArgs, FormulaColumn } from '../convert';
 import { getFormulaForAgg } from './formula';
 
 export const getPercentageColumnFormulaColumn = ({

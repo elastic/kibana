@@ -6,7 +6,7 @@
  */
 
 import { compileFnName } from '@kbn/handlebars';
-import type {
+import {
   Datatable,
   Render,
   Style,

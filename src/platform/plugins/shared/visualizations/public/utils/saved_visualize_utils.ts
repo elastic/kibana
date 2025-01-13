@@ -10,18 +10,17 @@
 import _ from 'lodash';
 import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import type {
-  DataPublicPluginStart} from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  parseSearchSourceJSON
+  parseSearchSourceJSON,
+  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { VisualizationSavedObject, Reference } from '../../common/content_management';
+import { VisualizationSavedObject, Reference } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
-import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
+import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
   SerializedVis,
@@ -36,7 +35,7 @@ import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 import { visualizationsClient } from '../content_management';
-import type { VisualizationSavedObjectAttributes } from '../../common';
+import { VisualizationSavedObjectAttributes } from '../../common';
 
 export const SAVED_VIS_TYPE = 'visualization';
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiText } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 
 export interface Props {
   /**

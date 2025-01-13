@@ -8,13 +8,12 @@
  */
 
 import React, { useCallback } from 'react';
-import type { EuiRangeProps} from '@elastic/eui';
-import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiRange, EuiRangeProps, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMount from 'react-use/lib/useMount';
 
-import type { AggControlProps } from './agg_control_props';
+import { AggControlProps } from './agg_control_props';
 
 const DEFAULT_VALUE = 50;
 const PARAM_NAME = 'radiusRatio';

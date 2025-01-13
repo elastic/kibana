@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ReactChild} from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, ReactChild, useContext } from 'react';
 
-import type { PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 export interface EditPolicyContextValue {
   isNewPolicy: boolean;

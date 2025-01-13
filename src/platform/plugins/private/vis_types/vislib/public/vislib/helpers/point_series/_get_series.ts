@@ -9,10 +9,9 @@
 
 import { partial } from 'lodash';
 import { getPoint } from './_get_point';
-import type { Serie } from './_add_to_siri';
-import { addToSiri } from './_add_to_siri';
-import type { Chart } from './point_series';
-import type { Table } from '../../types';
+import { addToSiri, Serie } from './_add_to_siri';
+import { Chart } from './point_series';
+import { Table } from '../../types';
 
 export function getSeries(table: Table, chart: Chart) {
   const aspects = chart.aspects;

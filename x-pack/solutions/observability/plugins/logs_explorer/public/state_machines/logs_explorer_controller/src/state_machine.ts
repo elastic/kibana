@@ -6,11 +6,10 @@
  */
 
 import { type Subject } from 'rxjs';
-import type { IToasts, IUiSettingsClient } from '@kbn/core/public';
-import type { QueryStart } from '@kbn/data-plugin/public';
-import type { InterpreterFrom} from 'xstate';
-import { actions, createMachine, interpret, raise } from 'xstate';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { IToasts, IUiSettingsClient } from '@kbn/core/public';
+import { QueryStart } from '@kbn/data-plugin/public';
+import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
@@ -18,7 +17,7 @@ import {
   isDataSourceSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
-import type { IDatasetsClient } from '../../../services/datasets';
+import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   createCreateDataViewFailedNotifier,
@@ -44,7 +43,7 @@ import {
   updateContextFromTimefilter,
   updateTimefilterFromContext,
 } from './services/timefilter_service';
-import type {
+import {
   LogsExplorerControllerContext,
   LogsExplorerControllerEvent,
   LogsExplorerControllerTypeState,

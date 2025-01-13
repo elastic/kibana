@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React, { createContext } from 'react';
+import React, { createContext, FC } from 'react';
 import { TrackApplicationViewComponent } from './track_application_view_component';
-import type { IApplicationUsageTracker } from '../../plugin';
-import type { TrackApplicationViewProps } from './types';
+import { IApplicationUsageTracker } from '../../plugin';
+import { TrackApplicationViewProps } from './types';
 
 export const ApplicationUsageContext = createContext<IApplicationUsageTracker | undefined>(
   undefined

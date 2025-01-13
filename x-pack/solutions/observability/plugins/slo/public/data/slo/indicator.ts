@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KQLCustomIndicator, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { KQLCustomIndicator, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export const buildApmAvailabilityIndicator = (
   params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}

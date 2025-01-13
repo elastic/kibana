@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Meta } from '../../../../../common/types/pagination';
+import { Meta } from '../../../../../common/types/pagination';
 
-import type { Actions } from '../../../shared/api_logic/create_api_logic';
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { HttpLogic } from '../../../shared/http';
 

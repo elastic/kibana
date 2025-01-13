@@ -9,8 +9,7 @@ import React from 'react';
 import { useSelector } from '@xstate/react';
 import { useCustomIntegrations } from '../hooks/use_custom_integrations';
 import { createIsInitializedSelector } from '../state_machines/custom_integrations/selectors';
-import type { CreateTestSubjects } from './create/form';
-import { ConnectedCreateCustomIntegrationForm } from './create/form';
+import { ConnectedCreateCustomIntegrationForm, CreateTestSubjects } from './create/form';
 
 interface Props {
   testSubjects?: {

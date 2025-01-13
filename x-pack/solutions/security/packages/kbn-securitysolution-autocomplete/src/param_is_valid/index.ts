@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { checkEmptyValue } from '../check_empty_value';
 
 import * as i18n from '../translations';

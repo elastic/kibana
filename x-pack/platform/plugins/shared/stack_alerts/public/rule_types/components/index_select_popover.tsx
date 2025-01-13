@@ -9,11 +9,10 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString, debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,15 +21,14 @@ import {
   EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  IErrorObject} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   firstFieldOption,
   getFields,
   getIndexOptions,
-  getTimeFieldOptions
+  getTimeFieldOptions,
+  IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface KibanaDeps {

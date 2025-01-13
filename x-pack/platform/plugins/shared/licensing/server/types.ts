@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { IClusterClient, IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
-import type { ILicense } from '../common/types';
-import type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
+import { ILicense } from '../common/types';
+import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export interface ElasticsearchError extends Error {
   status?: number;

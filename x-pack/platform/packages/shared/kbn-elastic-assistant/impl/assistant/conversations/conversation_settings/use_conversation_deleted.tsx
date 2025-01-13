@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { Conversation, ConversationsBulkActions } from '../../../..';
+import { Conversation, ConversationsBulkActions } from '../../../..';
 
 interface Props {
   conversationSettings: Record<string, Conversation>;

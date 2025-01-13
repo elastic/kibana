@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StaticHeader } from '../../../shared_components';
-import type {
+import {
   DatasourceMap,
   FramePublicAPI,
   VisualizationLayerWidgetProps,

@@ -8,12 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FetchContext} from '@kbn/presentation-publishing';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';

@@ -10,8 +10,7 @@ import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { FormSchema } from '../../../shared_imports';
-import { FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, fieldFormatters, FormSchema } from '../../../shared_imports';
 
 const { emptyField, containsCharsField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;

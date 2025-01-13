@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import type { ReactElement} from 'react';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 

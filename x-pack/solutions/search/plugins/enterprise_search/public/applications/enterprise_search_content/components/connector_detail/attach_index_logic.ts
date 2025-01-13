@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { Connector } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 
-import type { HttpError } from '../../../../../common/types/api';
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
-import type { AttachIndexApiLogicActions } from '../../api/connector/attach_index_api_logic';
-import { AttachIndexApiLogic } from '../../api/connector/attach_index_api_logic';
-import type { CreateApiIndexApiLogicActions } from '../../api/index/create_api_index_api_logic';
-import { CreateApiIndexApiLogic } from '../../api/index/create_api_index_api_logic';
-import type { IndexExistsApiLogicActions } from '../../api/index/index_exists_api_logic';
-import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
+import {
+  AttachIndexApiLogic,
+  AttachIndexApiLogicActions,
+} from '../../api/connector/attach_index_api_logic';
+import {
+  CreateApiIndexApiLogic,
+  CreateApiIndexApiLogicActions,
+} from '../../api/index/create_api_index_api_logic';
+import {
+  IndexExistsApiLogic,
+  IndexExistsApiLogicActions,
+} from '../../api/index/index_exists_api_logic';
 
-import type { ConnectorViewActions } from './connector_view_logic';
-import { ConnectorViewLogic } from './connector_view_logic';
+import { ConnectorViewActions, ConnectorViewLogic } from './connector_view_logic';
 
 export interface AttachIndexActions {
   attachIndex: AttachIndexApiLogicActions['makeRequest'];

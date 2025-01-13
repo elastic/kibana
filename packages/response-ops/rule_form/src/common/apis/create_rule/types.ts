@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule, RuleTypeParams } from '../../types';
+import { Rule, RuleTypeParams } from '../../types';
 
 export interface CreateRuleBody<Params extends RuleTypeParams = RuleTypeParams> {
   name: Rule<Params>['name'];

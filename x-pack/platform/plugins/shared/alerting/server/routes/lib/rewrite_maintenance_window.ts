@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RewriteResponseCase } from '.';
-import type { MaintenanceWindow } from '../../../common';
+import { RewriteResponseCase } from '.';
+import { MaintenanceWindow } from '../../../common';
 
 export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow> = ({
   expirationDate,

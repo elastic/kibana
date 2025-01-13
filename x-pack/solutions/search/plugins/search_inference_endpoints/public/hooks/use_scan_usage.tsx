@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
-import type { InferenceUsageResponse } from '../types';
+import { InferenceUsageResponse } from '../types';
 
 interface ScanUsageProps {
   type: string;

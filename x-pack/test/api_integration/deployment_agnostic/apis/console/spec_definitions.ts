@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { SupertestWithRoleScopeType } from '../../services';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { Connector } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
-import type { Actions } from '../../../shared/api_logic/create_api_logic';
-import type {
+import { Actions } from '../../../shared/api_logic/create_api_logic';
+import {
+  ConnectorNameAndDescriptionApiLogic,
   PutConnectorNameAndDescriptionArgs,
   PutConnectorNameAndDescriptionResponse,
 } from '../../api/connector/update_connector_name_and_description_api_logic';
-import { ConnectorNameAndDescriptionApiLogic } from '../../api/connector/update_connector_name_and_description_api_logic';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 

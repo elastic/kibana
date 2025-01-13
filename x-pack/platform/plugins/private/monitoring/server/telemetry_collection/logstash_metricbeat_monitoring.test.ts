@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashMetricbeatMonitoring } from './logstash_metricbeat_monitoring';
 import {
   INDEX_PATTERN_LOGSTASH_MONITORING,

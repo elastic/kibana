@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import type { CertResult, GetCertsParams } from '../../../common/runtime_types';
+import { CertResult, GetCertsParams } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 

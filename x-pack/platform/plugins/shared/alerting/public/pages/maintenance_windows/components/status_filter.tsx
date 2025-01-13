@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
 import { STATUS_OPTIONS } from '../constants';
 import * as i18n from '../translations';
-import type { MaintenanceWindowStatus } from '../../../../common';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 export interface RuleStatusFilterProps {
   selectedStatus: MaintenanceWindowStatus[];

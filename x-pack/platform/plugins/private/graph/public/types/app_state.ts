@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from '@kbn/core/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GenericIcon } from '../helpers/style_choices';
-import type { OutlinkEncoder } from '../helpers/outlink_encoders';
+import { OutlinkEncoder } from '../helpers/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;

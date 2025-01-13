@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { CanvasAsset } from '../../../types';
+import { CanvasAsset } from '../../../types';
 
 const strings = {
   getAssetAltText: () =>

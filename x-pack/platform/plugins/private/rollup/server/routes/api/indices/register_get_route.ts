@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from '../../../services';
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 /**
  * Returns a list of all rollup index names

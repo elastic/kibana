@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { DataViewsContract } from '../data_views';
-import type { DataViewSpec } from '..';
+import { DataViewsContract } from '../data_views';
+import { DataViewSpec } from '..';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';

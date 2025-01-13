@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ResponseError } from '../../../common/types';
+import { ResponseError } from '../../../common/types';
 
 const i18nTexts = {
   permissionsError: i18n.translate(

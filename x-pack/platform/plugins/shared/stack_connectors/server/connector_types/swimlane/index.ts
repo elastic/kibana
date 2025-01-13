@@ -16,7 +16,7 @@ import {
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
-import type {
+import {
   SwimlaneExecutorResultData,
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,

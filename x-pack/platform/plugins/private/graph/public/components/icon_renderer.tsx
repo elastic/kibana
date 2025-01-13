@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EuiIconProps } from '@elastic/eui';
-import { isColorDark, EuiIcon } from '@elastic/eui';
+import { isColorDark, EuiIcon, EuiIconProps } from '@elastic/eui';
 import chroma from 'chroma-js';
 import React from 'react';
 import type { GenericIcon } from '../helpers/style_choices';

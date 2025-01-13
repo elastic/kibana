@@ -18,8 +18,8 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
-import type { VisGroups } from './vis_groups_enum';
-import type { NavigateToLensContext } from '../../common';
+import { VisGroups } from './vis_groups_enum';
+import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;

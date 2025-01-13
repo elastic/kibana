@@ -9,8 +9,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { DimensionButtonProps } from './dimension_button';
-import { DimensionButton } from './dimension_button';
+import { DimensionButton, DimensionButtonProps } from './dimension_button';
 
 describe('DimensionButton', () => {
   function getDefaultProps(): Omit<DimensionButtonProps, 'label' | 'children'> {

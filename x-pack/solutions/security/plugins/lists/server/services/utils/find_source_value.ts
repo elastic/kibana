@@ -6,10 +6,9 @@
  */
 
 import Mustache from 'mustache';
-import type { DeserializerOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
-import { type } from '@kbn/securitysolution-io-ts-list-types';
+import { DeserializerOrUndefined, type } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { esDataTypeGeoPointRange, esDataTypeRange } from '../../schemas/common/schemas';
 
 export const DEFAULT_GEO_POINT = '{{{lat}}},{{{lon}}}';

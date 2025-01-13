@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import type { StatusWithoutMessage } from './status_badge';
-import { StatusBadge } from './status_badge';
+import { StatusBadge, StatusWithoutMessage } from './status_badge';
 
 const getStatus = (parts: Partial<StatusWithoutMessage> = {}): StatusWithoutMessage => ({
   id: 'available',

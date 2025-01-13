@@ -18,11 +18,11 @@ import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 import { ReorderableTable } from '../reorderable_table';
 
-import type { ItemWithAnID } from '../types';
+import { ItemWithAnID } from '../types';
 
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import type { FormErrors, InlineEditableTableColumn } from './types';
+import { FormErrors, InlineEditableTableColumn } from './types';
 
 import './inline_editable_tables.scss';
 

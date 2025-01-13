@@ -7,33 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   EventAnnotationConfig,
+  FillTypes,
   XYAnnotationsLayerConfig,
   XYLayerConfig,
-  YAxisMode} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
-  FillTypes
+  YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
 import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
-import type {
-  Column,
-  Layer,
-  AnyColumnWithReferences} from '../../convert';
 import {
   isPercentileRanksColumnWithMeta,
-  isPercentileColumnWithMeta
+  isPercentileColumnWithMeta,
+  Column,
+  Layer,
+  AnyColumnWithReferences,
 } from '../../convert';
 import { getChartType } from './chart_type';
 import { extractOrGenerateDatasourceInfo } from '../../datasource';

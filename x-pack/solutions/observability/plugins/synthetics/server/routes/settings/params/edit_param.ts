@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { SavedObject } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { validateRouteSpaceName } from '../../common';
-import type { SyntheticsRestApiRouteFactory } from '../../types';
-import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 

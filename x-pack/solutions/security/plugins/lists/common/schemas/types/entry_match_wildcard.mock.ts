@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntryMatchWildcard } from '@kbn/securitysolution-io-ts-list-types';
+import { EntryMatchWildcard } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../constants.mock';
 

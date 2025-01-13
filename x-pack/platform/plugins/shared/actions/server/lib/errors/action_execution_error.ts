@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionTypeExecutorResult } from '../../types';
+import { ActionTypeExecutorResult } from '../../types';
 
 export enum ActionExecutionErrorReason {
   Validation = 'validation',

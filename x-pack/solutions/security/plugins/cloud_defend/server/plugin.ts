@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import type {
+import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,

@@ -6,7 +6,7 @@
  */
 
 import { getPieVisualization } from './visualization';
-import type { PieVisualizationState } from '../../../common/types';
+import { PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -16,13 +16,13 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
+import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import type { CollapseFunction } from '../../../common/expressions';
-import type { PaletteOutput } from '@kbn/coloring';
-import type { PersistedPieVisualizationState } from './persistence';
+import { CollapseFunction } from '../../../common/expressions';
+import { PaletteOutput } from '@kbn/coloring';
+import { PersistedPieVisualizationState } from './persistence';
 import { LegendValue } from '@elastic/charts';
 
 jest.mock('../../id_generator');

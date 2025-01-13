@@ -7,22 +7,19 @@
 
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useCallback, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
-import type { QuerySchema } from '@kbn/slo-schema';
-import { kqlQuerySchema } from '@kbn/slo-schema';
+import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
 import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
-import { buildFilter, FILTERS } from '@kbn/es-query';
-import type { FieldPath } from 'react-hook-form';
-import { useFormContext } from 'react-hook-form';
-import type { Serializable } from '@kbn/utility-types';
+import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
+import { FieldPath, useFormContext } from 'react-hook-form';
+import { Serializable } from '@kbn/utility-types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { CreateSLOForm } from '../../types';
+import { CreateSLOForm } from '../../types';
 import { QuerySearchBar } from './query_search_bar';
-import type { SearchBarProps } from './query_builder';
+import { SearchBarProps } from './query_builder';
 import { useTableDocs } from './use_table_docs';
 import { useFieldSidebar } from './use_field_sidebar';
 

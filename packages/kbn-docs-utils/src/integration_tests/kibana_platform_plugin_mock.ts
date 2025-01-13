@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { PluginOrPackage } from '../types';
+import { PluginOrPackage } from '../types';
 
 export function getKibanaPlatformPlugin(id: string, dir?: string): PluginOrPackage {
   const directory = dir ?? Path.resolve(__dirname, '__fixtures__/src/plugin_a');

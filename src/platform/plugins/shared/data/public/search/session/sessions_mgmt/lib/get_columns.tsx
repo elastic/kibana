@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBadge,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,19 +19,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SearchSessionStatus } from '../../../../../common';
-import type { OnActionComplete} from '../components';
-import { PopoverActionsMenu, TableText } from '../components';
+import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
 import { dateString } from './date_string';
-import type { SearchSessionsMgmtAPI } from './api';
+import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
-import type { UISession } from '../types';
-import type { SearchUsageCollector } from '../../../collectors';
+import { UISession } from '../types';
+import { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 // Helper function: translate an app string to EuiIcon-friendly string

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 export async function getIndexNotFoundError(es: Client) {
   try {

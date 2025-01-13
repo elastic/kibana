@@ -9,14 +9,13 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import type {
-  AggregateValueProp,
-  TopAggregateParamEditorProps} from './top_aggregate';
 import {
-  TopAggregateParamEditor
+  AggregateValueProp,
+  TopAggregateParamEditor,
+  TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import type { IAggConfig } from '@kbn/data-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;

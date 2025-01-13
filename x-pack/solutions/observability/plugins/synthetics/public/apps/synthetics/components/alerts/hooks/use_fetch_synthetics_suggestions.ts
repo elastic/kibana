@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import type { ClientPluginsStart } from '../../../../../plugin';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export interface Suggestion {
   label: string;

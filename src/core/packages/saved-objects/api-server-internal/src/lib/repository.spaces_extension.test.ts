@@ -18,22 +18,21 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type {
+import {
   SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import type {
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
-  SavedObject} from '@kbn/core-saved-objects-server';
-import {
+  SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';

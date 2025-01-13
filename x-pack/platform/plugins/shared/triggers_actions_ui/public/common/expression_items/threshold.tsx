@@ -18,9 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
-import type { Comparator } from '@kbn/alerting-comparators';
+import { Comparator } from '@kbn/alerting-comparators';
 import { builtInComparators } from '../constants';
-import type { IErrorObject } from '../../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 export interface ThresholdExpressionProps {

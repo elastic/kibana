@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type { FormattedValue } from './common';
+import { FormattedValue } from './common';
 import {
   formatMonitorConfigFields,
   formatHeartbeatRequest,
@@ -13,16 +13,14 @@ import {
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  CodeEditorMode,
-  MonitorFields,
-  ResponseBodyIndexPolicy,
-  SyntheticsMonitor,
-} from '../../../../common/runtime_types';
 import {
   ConfigKey,
   MonitorTypeEnum,
+  CodeEditorMode,
+  MonitorFields,
+  ResponseBodyIndexPolicy,
   ScheduleUnit,
+  SyntheticsMonitor,
   VerificationMode,
 } from '../../../../common/runtime_types';
 

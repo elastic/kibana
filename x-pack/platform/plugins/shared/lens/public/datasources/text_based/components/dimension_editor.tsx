@@ -14,16 +14,15 @@ import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
-import type {
-  FormatSelectorProps} from '../../form_based/dimension_panel/format_selector';
 import {
-  FormatSelector
+  FormatSelector,
+  FormatSelectorProps,
 } from '../../form_based/dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import type { TextBasedLayer } from '../types';
+import { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {

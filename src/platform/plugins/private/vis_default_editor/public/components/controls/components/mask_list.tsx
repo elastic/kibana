@@ -12,8 +12,7 @@ import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { search } from '@kbn/data-plugin/public';
-import type { InputListConfig, InputObject, InputModel, InputItem } from './input_list';
-import { InputList } from './input_list';
+import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
 

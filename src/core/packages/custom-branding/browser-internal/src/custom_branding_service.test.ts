@@ -8,7 +8,7 @@
  */
 
 import { take } from 'rxjs';
-import type { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
+import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
 import { CustomBrandingService } from './custom_branding_service';
 
 describe('custom branding service', () => {

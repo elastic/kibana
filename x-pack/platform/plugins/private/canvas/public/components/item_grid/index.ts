@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { memo } from 'react';
-import type { Props as ComponentProps } from './item_grid';
-import { ItemGrid as Component } from './item_grid';
+import { ItemGrid as Component, Props as ComponentProps } from './item_grid';
 
 export const ItemGrid = memo<ComponentProps<any>>(Component);

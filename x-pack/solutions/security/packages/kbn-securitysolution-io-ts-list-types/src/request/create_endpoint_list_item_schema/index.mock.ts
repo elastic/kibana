@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateEndpointListItemSchema } from '.';
+import { CreateEndpointListItemSchema } from '.';
 import {
   COMMENTS,
   DESCRIPTION,

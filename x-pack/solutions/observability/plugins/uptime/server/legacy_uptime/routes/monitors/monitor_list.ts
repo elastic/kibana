@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { UMRestApiRouteFactory } from '../types';
+import { UMRestApiRouteFactory } from '../types';
 import { API_URLS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 
 export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({

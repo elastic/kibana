@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { MetricRaw } from '../raw/metric_raw';
+import { MetricRaw } from '../raw/metric_raw';
 
 export type Metric = MetricRaw;

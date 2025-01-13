@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import { NewChat } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';

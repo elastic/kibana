@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type React from 'react';
+import React from 'react';
 
-import type { Column } from '../reorderable_table/types';
-import type { ItemWithAnID } from '../types';
+import { Column } from '../reorderable_table/types';
+import { ItemWithAnID } from '../types';
 
 export interface FormErrors {
   [key: string]: string | undefined;

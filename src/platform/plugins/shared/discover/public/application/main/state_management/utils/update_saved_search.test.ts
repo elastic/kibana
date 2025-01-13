@@ -9,10 +9,9 @@
 
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import type { Filter, Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('updateSavedSearch', () => {
   const query: Query = {

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type {
+import {
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
+  SECURITY_EXTENSION_ID,
   SecurityServiceStart,
-  UiSettingsServiceStart} from '@kbn/core/server';
-import {
-  SECURITY_EXTENSION_ID
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';

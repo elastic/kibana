@@ -4,18 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSuperDatePicker,
+  EuiTitle,
+  OnRefreshProps,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useMemo, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { TimeBounds } from '../../types';
+import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
-import type { SloTabId } from '../slo_details';
+import { SloTabId } from '../slo_details';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

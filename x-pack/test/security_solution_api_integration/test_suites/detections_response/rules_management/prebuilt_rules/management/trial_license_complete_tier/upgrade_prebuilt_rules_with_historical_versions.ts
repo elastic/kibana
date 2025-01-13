@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,

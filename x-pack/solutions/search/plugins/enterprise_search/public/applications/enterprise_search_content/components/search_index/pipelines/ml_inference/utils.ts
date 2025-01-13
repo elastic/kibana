@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
+import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
 
-import type { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
+import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 const NORMALIZABLE_PIPELINE_CHARS_REGEX = /[^\w\-]/g;

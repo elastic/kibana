@@ -8,18 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import type {
-  EmbeddableApiContext,
-  PublishesPanelTitle,
-  HasParentApi} from '@kbn/presentation-publishing';
 import {
-  getPanelTitle
+  EmbeddableApiContext,
+  getPanelTitle,
+  PublishesPanelTitle,
+  HasParentApi,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';

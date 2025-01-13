@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { ItemWithAnID } from '../types';
+import { ItemWithAnID } from '../types';
 
-import type { FormErrors, InlineEditableTableColumn } from './types';
+import { FormErrors, InlineEditableTableColumn } from './types';
 
 interface InlineEditableTableActions<Item extends ItemWithAnID> {
   deleteItem(item: Item): { item: Item };

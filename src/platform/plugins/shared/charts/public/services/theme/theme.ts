@@ -8,12 +8,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { Observable} from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
-import type { CoreSetup, CoreTheme } from '@kbn/core/public';
-import type { PartialTheme, Theme } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
+import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 export class ThemeService {

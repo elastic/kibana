@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { Rule } from '@kbn/alerting-plugin/common';
-import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
@@ -28,7 +28,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

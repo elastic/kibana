@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo } from 'react';
+import React, { FC, useMemo, PropsWithChildren } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
-import type { IndicatorsFiltersContextValue } from '../hooks/use_filters_context';
-import { IndicatorsFiltersContext } from '../hooks/use_filters_context';
+import {
+  IndicatorsFiltersContext,
+  IndicatorsFiltersContextValue,
+} from '../hooks/use_filters_context';
 
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.

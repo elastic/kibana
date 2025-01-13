@@ -7,20 +7,19 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
-import type { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
+import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
+import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
-import type {
-  CloudSetup,
-  ILicense} from '../shared_imports';
 import {
+  CloudSetup,
+  ILicense,
   KibanaContextProvider,
   APP_WRAPPER_CLASS,
   KibanaRenderContextProvider,
   RedirectAppLinks,
 } from '../shared_imports';
 import { App } from './app';
-import type { BreadcrumbService } from './services/breadcrumbs';
+import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
   startServices: CoreStart,

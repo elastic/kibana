@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Dataset, PartialConfig } from '@kbn/data-forge';
-import { cleanup, generate } from '@kbn/data-forge';
-import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

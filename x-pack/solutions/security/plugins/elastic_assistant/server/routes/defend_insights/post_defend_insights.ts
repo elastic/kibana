@@ -7,20 +7,21 @@
 
 import moment from 'moment/moment';
 
-import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 
 import { buildResponse } from '../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import {
   getAssistantTool,

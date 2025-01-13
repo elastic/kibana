@@ -7,7 +7,7 @@
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
-import type { AppServices } from './application';
+import { AppServices } from './application';
 
 export { CodeEditor };
 

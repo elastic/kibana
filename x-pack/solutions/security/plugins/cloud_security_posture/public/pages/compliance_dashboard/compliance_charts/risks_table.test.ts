@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RisksTableProps } from './risks_table';
-import { getTopRisks } from './risks_table';
+import { getTopRisks, RisksTableProps } from './risks_table';
 
 const podsAgg = {
   name: 'pods',

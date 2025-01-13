@@ -8,11 +8,10 @@
  */
 
 import { castArray } from 'lodash';
-import type { unitOfTime } from 'moment';
-import moment from 'moment';
-import type { SynthtraceGenerator } from '../types';
-import type { Fields } from './entity';
-import type { Serializable } from './serializable';
+import moment, { unitOfTime } from 'moment';
+import { SynthtraceGenerator } from '../types';
+import { Fields } from './entity';
+import { Serializable } from './serializable';
 
 export function parseInterval(interval: string): {
   intervalAmount: number;

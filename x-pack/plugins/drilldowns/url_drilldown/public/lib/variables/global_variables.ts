@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { UrlDrilldownGlobalScope } from '@kbn/ui-actions-enhanced-plugin/public';
+import { UrlDrilldownGlobalScope } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
 

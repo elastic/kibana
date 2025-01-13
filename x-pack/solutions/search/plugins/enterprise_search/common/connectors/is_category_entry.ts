@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ConnectorConfigProperties,
   ConnectorConfigCategoryProperties,
 } from '@kbn/search-connectors';

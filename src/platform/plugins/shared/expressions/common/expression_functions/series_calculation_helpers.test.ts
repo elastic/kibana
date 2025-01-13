@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Datatable } from '..';
-import { buildResultColumns } from '..';
+import { buildResultColumns, Datatable } from '..';
 
 describe('buildResultColumns', () => {
   function getDatatable(columns: Datatable['columns']): Datatable {

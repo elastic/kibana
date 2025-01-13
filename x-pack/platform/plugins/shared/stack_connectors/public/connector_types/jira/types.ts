@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ExecutorSubActionPushParams } from '../../../server/connector_types/jira/types';
 
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;

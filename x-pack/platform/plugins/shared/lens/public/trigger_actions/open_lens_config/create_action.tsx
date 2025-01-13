@@ -6,9 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import type { Action} from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TagBulkAction } from '../types';
+import { TagBulkAction } from '../types';
 
 interface GetClearSelectionActionOptions {
   clearSelection: () => void;

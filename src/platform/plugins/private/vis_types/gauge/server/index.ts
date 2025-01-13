@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { GaugeConfig } from './config';
-import { configSchema } from './config';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, GaugeConfig } from './config';
 
 export const config: PluginConfigDescriptor<GaugeConfig> = {
   exposeToBrowser: {

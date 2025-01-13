@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Datatable} from '@kbn/expressions-plugin/common';
-import { PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
-import type {
+import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
+import {
   WithLayerId,
   ExtendedDataLayerConfig,
   XYExtendedLayerConfigResult,

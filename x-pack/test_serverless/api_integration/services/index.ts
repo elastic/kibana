@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrProviderContext } from '@kbn/test';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 

@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiThemeComputed } from '@elastic/eui';
 
 export const partitionVisWrapperStyle = css({
   display: 'flex',

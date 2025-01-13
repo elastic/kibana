@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
-import type {
+import React, { VFC } from 'react';
+import {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';

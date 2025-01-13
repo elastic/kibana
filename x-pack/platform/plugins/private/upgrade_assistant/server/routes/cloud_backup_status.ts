@@ -7,7 +7,7 @@
 
 import { API_BASE_PATH, CLOUD_SNAPSHOT_REPOSITORY } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import type { RouteDependencies } from '../types';
+import { RouteDependencies } from '../types';
 
 export function registerCloudBackupStatusRoutes({
   router,

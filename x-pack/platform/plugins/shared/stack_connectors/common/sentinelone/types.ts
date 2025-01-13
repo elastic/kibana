@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Mutable } from 'utility-types';
-import type {
+import { TypeOf } from '@kbn/config-schema';
+import { Mutable } from 'utility-types';
+import {
   SentinelOneBaseApiResponseSchema,
   SentinelOneConfigSchema,
   SentinelOneExecuteScriptParamsSchema,

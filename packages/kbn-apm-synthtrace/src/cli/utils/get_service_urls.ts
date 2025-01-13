@@ -8,10 +8,9 @@
  */
 
 import fetch from 'node-fetch';
-import type { Url } from 'url';
-import { format, parse } from 'url';
-import type { Logger } from '../../lib/utils/create_logger';
-import type { RunOptions } from './parse_run_cli_flags';
+import { format, parse, Url } from 'url';
+import { Logger } from '../../lib/utils/create_logger';
+import { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
 
 async function discoverAuth(parsedTarget: Url) {

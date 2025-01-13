@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { SettingsApplication } from './application';
-import type {
-  SettingsApplicationKibanaDependencies} from './services';
 import {
+  SettingsApplicationKibanaDependencies,
   SettingsApplicationKibanaProvider,
 } from './services';
 

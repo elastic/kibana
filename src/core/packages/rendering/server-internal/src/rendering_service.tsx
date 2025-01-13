@@ -27,7 +27,7 @@ import {
   type UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import type {
+import {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,

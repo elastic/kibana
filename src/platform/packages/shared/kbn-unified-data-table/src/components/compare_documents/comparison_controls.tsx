@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuItemProps,
-  EuiSwitchProps,
-  EuiTitleSize} from '@elastic/eui';
 import {
   EuiContextMenuItem,
+  EuiContextMenuItemProps,
   EuiContextMenuPanel,
   EuiDataGridToolbarControl,
   EuiFlexGroup,
@@ -21,13 +18,14 @@ import {
   EuiIconTip,
   EuiPopover,
   EuiSwitch,
+  EuiSwitchProps,
   EuiText,
   EuiTitle,
+  EuiTitleSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC, PropsWithChildren, ReactNode} from 'react';
-import React, { useState } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
 

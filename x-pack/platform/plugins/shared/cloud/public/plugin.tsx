@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
@@ -19,7 +18,7 @@ import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { getSupportUrl } from './utils';
-import type { ElasticsearchConfigType } from '../common/types';
+import { ElasticsearchConfigType } from '../common/types';
 
 export interface CloudConfigType {
   id?: string;

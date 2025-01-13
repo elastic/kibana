@@ -8,17 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Ast } from '@kbn/interpreter';
-import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type {
+import { Ast } from '@kbn/interpreter';
+import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
+import {
   PaletteRegistry,
   CustomPaletteParams,
-  PaletteOutput} from '@kbn/coloring';
-import {
   CUSTOM_PALETTE,
   applyPaletteParams,
-  getOverridePaletteStops
+  getOverridePaletteStops,
+  PaletteOutput,
 } from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
@@ -43,8 +41,7 @@ import type {
   Visualization,
 } from '../../types';
 import { getSuggestions } from './suggestions';
-import type { GaugeVisualizationState } from './constants';
-import { GROUP_ID, LENS_GAUGE_ID } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';

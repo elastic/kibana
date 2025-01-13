@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Role } from './types';
+import { Role } from './types';
 
 const defaultElasticsearchPrivileges = {
   elasticsearch: {

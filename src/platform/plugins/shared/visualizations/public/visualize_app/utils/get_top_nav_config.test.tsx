@@ -8,9 +8,8 @@
  */
 
 import { Observable } from 'rxjs';
-import type { Capabilities } from '@kbn/core/public';
-import type { TopNavConfigParams } from './get_top_nav_config';
-import { showPublicUrlSwitch, getTopNavConfig } from './get_top_nav_config';
+import { Capabilities } from '@kbn/core/public';
+import { showPublicUrlSwitch, getTopNavConfig, TopNavConfigParams } from './get_top_nav_config';
 import type {
   VisualizeEditorVisInstance,
   VisualizeAppStateContainer,

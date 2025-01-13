@@ -6,7 +6,7 @@
  */
 
 import stats from 'stats-lite';
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import { isUndefined, countBy, mapValues } from 'lodash';
 
 export interface AveragedStat extends JsonObject {

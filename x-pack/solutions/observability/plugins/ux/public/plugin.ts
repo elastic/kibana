@@ -8,44 +8,44 @@
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import type {
+import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type {
+import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
-import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type {
+import { MapsStartApi } from '@kbn/maps-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type {
+import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;

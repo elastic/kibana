@@ -40,7 +40,7 @@ import type { ProductType, Credentials, ProjectHandler } from './project_handler
 import { CloudHandler } from './project_handler/cloud_project_handler';
 import { ProxyHandler } from './project_handler/proxy_project_handler';
 
-const DEFAULT_CONFIGURATION: readonly ProductType[] = [
+const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'security', product_tier: 'complete' },
   { product_line: 'cloud', product_tier: 'complete' },
   { product_line: 'endpoint', product_tier: 'complete' },

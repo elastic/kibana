@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants';
-import type { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import type { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
+import { Dependencies, LicenseStatus, RouteDependencies } from './types';
+import { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
 import {
   registerGetRoute,
   registerAddRoute,

@@ -7,24 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiPopoverProps,
-  EuiButtonGroupOptionProps} from '@elastic/eui';
 import {
   EuiPopover,
   keys,
   EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiButtonGroup
+  EuiPopoverProps,
+  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
 import { ColorPicker } from '@kbn/charts-plugin/public';
-import type { LegendItem } from './models';
+import { LegendItem } from './models';
 
 interface Props {
   item: LegendItem;

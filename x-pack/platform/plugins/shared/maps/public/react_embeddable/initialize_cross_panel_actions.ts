@@ -8,12 +8,11 @@
 import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { StateComparators } from '@kbn/presentation-publishing';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
-import type { SavedMap } from '../routes/map_page';
+import { SavedMap } from '../routes/map_page';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
 import {
   getGeoFieldNames,
@@ -25,10 +24,10 @@ import {
   getMapZoom,
 } from '../selectors/map_selectors';
 import { setGotoWithCenter, setMapSettings } from '../actions';
-import type { MapExtent } from '../../common/descriptor_types';
+import { MapExtent } from '../../common/descriptor_types';
 import { getUiActions } from '../kibana_services';
 import { getGeoFieldsLabel } from './get_geo_fields_label';
-import type { MapApi, MapSerializedState } from './types';
+import { MapApi, MapSerializedState } from './types';
 import { setOnMapMove } from '../reducers/non_serializable_instances';
 
 export function initializeCrossPanelActions({

@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import type { UseEuiTheme} from '@elastic/eui';
-import { EuiIcon, euiFontSize } from '@elastic/eui';
+import { EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 
-import type { QuerySuggestion} from '@kbn/unified-search-plugin/public';
-import { QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 
 interface Props {
   isSelected?: boolean;

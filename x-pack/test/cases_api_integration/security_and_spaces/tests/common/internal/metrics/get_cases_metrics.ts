@@ -18,7 +18,7 @@ import {
   obsSecRead,
   obsSec,
 } from '../../../../../common/lib/authentication/users';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   deleteAllCaseItems,

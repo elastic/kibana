@@ -13,14 +13,13 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  SetColorRangeValue,
-  SetColorSchemaOptionsValue} from '@kbn/vis-default-editor-plugin/public';
 import {
   BasicOptions,
   SelectOption,
   SwitchOption,
   ColorRanges,
+  SetColorRangeValue,
+  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   NumberInputOption,
   PercentageModeOption,
@@ -28,9 +27,8 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
-import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
 

@@ -6,7 +6,7 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamDefinition } from '@kbn/streams-schema';
+import { StreamDefinition } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { AddDashboardFlyout } from './add_dashboard_flyout';

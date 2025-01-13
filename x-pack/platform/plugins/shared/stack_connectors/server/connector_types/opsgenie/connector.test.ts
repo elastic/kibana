@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { MockedLogger } from '@kbn/logging-mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';

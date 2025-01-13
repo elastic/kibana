@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LanguageDefinition, LanguageDefinitionSnippetArguments } from './types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './types';
 import { consoleDefinition } from './languages/console';
 
 export const getLanguageDefinitionCodeSnippet = (

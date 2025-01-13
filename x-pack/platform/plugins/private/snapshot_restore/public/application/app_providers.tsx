@@ -11,8 +11,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { API_BASE_PATH } from '../../common';
 import { AuthorizationProvider } from '../shared_imports';
-import type { AppDependencies } from './app_context';
-import { AppContextProvider } from './app_context';
+import { AppContextProvider, AppDependencies } from './app_context';
 
 interface Props {
   appDependencies: AppDependencies;

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { AssistantMessage} from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
-import type { RootCauseAnalysisEvent } from './types';
+import { AssistantMessage, MessageRole } from '@kbn/inference-common';
+import { RootCauseAnalysisEvent } from './types';
 
 export const EMPTY_ASSISTANT_MESSAGE: Extract<RootCauseAnalysisEvent, AssistantMessage> = {
   content: '',

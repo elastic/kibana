@@ -8,15 +8,14 @@
  */
 
 import { ProfilingESField } from './elasticsearch';
-import type {
+import {
   Executable,
   FileID,
+  isErrorFrame,
   StackFrame,
   StackFrameID,
   StackTrace,
-  StackTraceID} from './profiling';
-import {
-  isErrorFrame
+  StackTraceID,
 } from './profiling';
 import { convertTonsToKgs } from './utils';
 

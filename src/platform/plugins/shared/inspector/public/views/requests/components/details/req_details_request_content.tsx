@@ -9,8 +9,7 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import type { ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, ReactNode } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';

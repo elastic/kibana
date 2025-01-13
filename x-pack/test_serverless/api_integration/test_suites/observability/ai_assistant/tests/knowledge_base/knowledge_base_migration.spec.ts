@@ -14,10 +14,10 @@ import {
   clearKnowledgeBase,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { orderBy } from 'lodash';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');

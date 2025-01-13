@@ -11,8 +11,7 @@ import type { DomainDeprecationDetails } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
-import type { OverviewTestBed} from '../overview.helpers';
-import { setupOverviewPage } from '../overview.helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {

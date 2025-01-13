@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   useUpdateUserProfile,
   type DarkModeValue as ColorMode,

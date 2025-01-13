@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import type {
+import {
   ContentManagementPublicStart,
   ContentManagementPublicSetup,
   SetupDependencies,

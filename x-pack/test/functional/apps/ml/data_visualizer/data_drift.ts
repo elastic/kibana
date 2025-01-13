@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const farequoteKQLFiltersSearchTestData = {
   suiteTitle: 'KQL saved search and filters',

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { WORKPAD_CANVAS_BUFFER, DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
-import type { CommitFn, CanvasPage } from '../../../types';
+import { CommitFn, CanvasPage } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
 
 export interface Props {

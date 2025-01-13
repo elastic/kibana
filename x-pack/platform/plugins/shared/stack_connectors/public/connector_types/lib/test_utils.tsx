@@ -8,17 +8,15 @@
 import React, { useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import type { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 
-import type { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
 import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
 import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 

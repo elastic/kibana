@@ -8,7 +8,7 @@
  */
 
 import { overviewPageActions } from './overview_page_actions';
-import type { ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

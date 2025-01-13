@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import type {
+import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';

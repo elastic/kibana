@@ -7,12 +7,12 @@
 
 import { expect } from 'expect';
 
-import type { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { Anomaly } from '@kbn/security-solution-plugin/server/lib/machine_learning';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   dataGeneratorFactory,
   executeSetupModuleRequest,

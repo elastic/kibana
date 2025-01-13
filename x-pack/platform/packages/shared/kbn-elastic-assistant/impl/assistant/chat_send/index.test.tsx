@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import type { Props } from '.';
-import { ChatSend } from '.';
+import { ChatSend, Props } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('./use_chat_send');

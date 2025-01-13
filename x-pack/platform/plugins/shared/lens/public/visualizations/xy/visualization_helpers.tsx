@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import type {
+import {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   UserMessage,
   VisualizationType,
 } from '../../types';
-import type {
+import {
   State,
   XYState,
   XYAnnotationLayerConfig,
@@ -25,8 +25,7 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig} from './types';
-import {
+  XYByValueAnnotationLayerConfig,
   visualizationTypes,
   visualizationSubtypes,
 } from './types';

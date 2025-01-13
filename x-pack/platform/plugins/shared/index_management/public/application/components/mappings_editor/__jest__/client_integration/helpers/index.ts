@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type {
-  MappingsEditorTestBed,
-  DomFields} from './mappings_editor.helpers';
 import {
   setup as mappingsEditorSetup,
+  MappingsEditorTestBed,
+  DomFields,
   getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 

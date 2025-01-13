@@ -18,12 +18,11 @@ import {
   EuiPageSection,
 } from '@elastic/eui';
 import React from 'react';
-import type { Observable, Subscription} from 'rxjs';
-import { merge, tap, fromEvent } from 'rxjs';
+import { Observable, Subscription, merge, tap, fromEvent } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
 
 interface Props {
   kibanaVersion: string;

@@ -6,19 +6,17 @@
  */
 
 import { Service } from '@kbn/inference_integration_flyout/types';
-import type { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type {
-  ElserVersion} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   LATEST_ELSER_VERSION,
   LATEST_ELSER_MODEL_ID,
-  LATEST_E5_MODEL_ID
+  LATEST_E5_MODEL_ID,
+  ElserVersion,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useCallback } from 'react';
-import type { AppDependencies} from '../application/app_context';
-import { useAppContext } from '../application/app_context';
-import type { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
+import { AppDependencies, useAppContext } from '../application/app_context';
+import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
 import { isLocalModel } from '../application/components/mappings_editor/lib/utils';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
 import { DefaultInferenceModels } from '../application/components/mappings_editor/types';

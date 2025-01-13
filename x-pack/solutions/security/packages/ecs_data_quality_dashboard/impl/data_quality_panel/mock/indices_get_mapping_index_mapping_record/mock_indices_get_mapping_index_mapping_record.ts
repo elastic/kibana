@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 export const mockIndicesGetMappingIndexMappingRecords: Record<
   string,

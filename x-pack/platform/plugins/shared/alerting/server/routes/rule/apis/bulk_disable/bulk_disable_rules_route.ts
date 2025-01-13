@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type { ILicenseState} from '../../../../lib';
-import { RuleTypeDisabledError } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
-import type {
-  BulkDisableRulesRequestBodyV1,
-  BulkDisableRulesResponseV1} from '../../../../../common/routes/rule/apis/bulk_disable';
 import {
-  bulkDisableRulesRequestBodySchemaV1
+  bulkDisableRulesRequestBodySchemaV1,
+  BulkDisableRulesRequestBodyV1,
+  BulkDisableRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_disable';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import type { Rule } from '../../../../application/rule/types';
+import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

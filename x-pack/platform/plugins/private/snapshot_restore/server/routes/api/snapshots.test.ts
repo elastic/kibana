@@ -7,8 +7,7 @@
 
 import { addBasePath } from '../helpers';
 import { registerSnapshotsRoutes } from './snapshots';
-import type { RequestMock } from '../../test/helpers';
-import { RouterMock, routeDependencies } from '../../test/helpers';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 const defaultSnapshot = {
   repository: undefined,

@@ -6,9 +6,9 @@
  */
 
 import sinon from 'sinon';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   executionContextServiceMock,
@@ -20,43 +20,40 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
-import type { TaskRunnerContext } from './types';
+import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import type {
-  ContextOpts} from '../lib/alerting_event_logger/alerting_event_logger';
 import {
   AlertingEventLogger,
-  executionType
+  executionType,
+  ContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import type { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { adHocRunStatus } from '../../common/constants';
 import { DATE_1970, ruleType } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { alertsMock } from '../mocks';
-import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsService } from '../alerts_service';
 import { of, ReplaySubject } from 'rxjs';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import type {
+import {
   AlertInstanceContext,
   AlertInstanceState,
+  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleExecutorOptions,
   RuleTypeParams,
-  RuleTypeState} from '../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS
+  RuleTypeState,
 } from '../types';
 import {
   TIMESTAMP,

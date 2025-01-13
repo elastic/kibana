@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Comparator } from '@kbn/alerting-comparators';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Comparator, COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 
 export { VIEW_LICENSE_OPTIONS_LINK } from '@kbn/alerts-ui-shared/src/common/constants';

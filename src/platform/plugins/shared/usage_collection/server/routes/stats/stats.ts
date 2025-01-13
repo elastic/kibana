@@ -9,19 +9,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
-import type {
+import {
   ElasticsearchClient,
   IRouter,
-  ServiceStatus} from '@kbn/core/server';
-import {
   type MetricsServiceSetup,
+  ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import type { ICollectorSet } from '../../collector';
-import type { Stats } from '../../../common/types';
+import { ICollectorSet } from '../../collector';
+import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 export function registerStatsRoute({

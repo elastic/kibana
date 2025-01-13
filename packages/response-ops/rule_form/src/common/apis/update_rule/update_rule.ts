@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
-import type { AsApiContract } from '@kbn/actions-types';
-import type { UpdateRuleBody } from './types';
+import { AsApiContract } from '@kbn/actions-types';
+import { UpdateRuleBody } from './types';
 import { BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformUpdateRuleBody } from './transform_update_rule_body';
 import { transformRule } from '../../transformations';
-import type { Rule } from '../../types';
+import { Rule } from '../../types';
 
 export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'name',

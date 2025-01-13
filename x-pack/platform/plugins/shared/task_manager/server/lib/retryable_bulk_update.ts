@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { ConcreteTaskInstance } from '../task';
-import type { TaskStore, BulkUpdateResult, BulkGetResult } from '../task_store';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { ConcreteTaskInstance } from '../task';
+import { TaskStore, BulkUpdateResult, BulkGetResult } from '../task_store';
 import { isErr, isOk, asErr } from './result_type';
-import type { BulkUpdateTaskResult } from '../task_scheduling';
+import { BulkUpdateTaskResult } from '../task_scheduling';
 
 export const MAX_RETRIES = 2;
 

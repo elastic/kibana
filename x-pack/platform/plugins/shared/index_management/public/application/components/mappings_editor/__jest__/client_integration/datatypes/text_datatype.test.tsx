@@ -7,8 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { MappingsEditorTestBed} from '../helpers';
-import { componentHelpers, kibanaVersion } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed, kibanaVersion } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;

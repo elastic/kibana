@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface DefaultDeprecationFlyoutProps {

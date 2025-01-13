@@ -6,12 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
+import {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type {
+import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
@@ -22,12 +22,13 @@ import type {
   FoundExceptionListSchema,
   UpdateCommentsArrayOrUndefined,
   UpdateExceptionListItemSchema,
+  exceptionListItemType,
+  exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exceptionListItemType, exceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
-import type { ExceptionListSoSchema } from '../../../schemas/saved_objects';
-import type {
+import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
+import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_list_client_types';

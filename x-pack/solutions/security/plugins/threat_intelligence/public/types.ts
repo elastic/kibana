@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
+import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
   DataViewField,
+  type DataViewSpec,
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
-import { type DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { BrowserField } from '@kbn/rule-registry-plugin/common';
-import type { Store } from 'redux';
-import type { DataProvider } from '@kbn/timelines-plugin/common';
-import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { Policy } from './modules/block_list/hooks/use_policies';
+import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { Store } from 'redux';
+import { DataProvider } from '@kbn/timelines-plugin/common';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Policy } from './modules/block_list/hooks/use_policies';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;

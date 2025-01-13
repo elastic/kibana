@@ -9,8 +9,14 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import type { EuiStatProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiSpacer } from '@elastic/eui';
+import {
+  EuiStatProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiStat,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from './crawler/crawler_logic';

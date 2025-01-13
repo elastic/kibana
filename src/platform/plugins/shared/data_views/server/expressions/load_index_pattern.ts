@@ -8,15 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 
-import type {
-  IndexPatternLoadExpressionFunctionDefinition,
-  IndexPatternLoadStartDependencies} from '../../common/expressions';
 import {
-  getIndexPatternLoadMeta
+  getIndexPatternLoadMeta,
+  IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
-import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
+import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

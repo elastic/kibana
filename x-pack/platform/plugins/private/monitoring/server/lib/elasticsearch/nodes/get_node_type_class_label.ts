@@ -6,7 +6,7 @@
  */
 
 import { nodeTypeLabel, nodeTypeClass } from './lookups';
-import type {
+import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatNode,
 } from '../../../../common/types/es';

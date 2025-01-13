@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type {
+import { Observable } from 'rxjs';
+import {
   ScopedHistory,
   Capabilities,
   ThemeServiceStart,
@@ -19,7 +19,7 @@ import type {
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import type { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {

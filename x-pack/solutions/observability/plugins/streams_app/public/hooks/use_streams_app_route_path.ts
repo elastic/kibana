@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PathsOf } from '@kbn/typed-react-router-config';
-import { useRoutePath } from '@kbn/typed-react-router-config';
+import { PathsOf, useRoutePath } from '@kbn/typed-react-router-config';
 import type { StreamsAppRoutes } from '../routes/config';
 
 export function useStreamsAppRoutePath() {

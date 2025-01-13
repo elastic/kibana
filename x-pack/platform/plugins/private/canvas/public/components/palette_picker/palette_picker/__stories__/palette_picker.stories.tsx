@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { PalettePicker } from '..';
 
-import type { ColorPalette } from '../../../../../common/lib/palettes';
-import { paulTor14 } from '../../../../../common/lib/palettes';
-import type { CustomColorPalette } from '../../types';
+import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
+import { CustomColorPalette } from '../../types';
 
 const Interactive: FC = () => {
   const [palette, setPalette] = useState<ColorPalette | CustomColorPalette | null>(paulTor14);

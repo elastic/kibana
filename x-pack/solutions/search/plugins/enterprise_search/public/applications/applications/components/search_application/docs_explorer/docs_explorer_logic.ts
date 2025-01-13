@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { FieldConfiguration } from '@elastic/search-ui';
+import { FieldConfiguration } from '@elastic/search-ui';
 
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 import { SearchApplicationNameLogic } from '../search_application_name_logic';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ESQLColumn } from '@kbn/es-types';
+import { ESQLColumn } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { EsqlColumnMeta } from '../services/esql';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { EsqlColumnMeta } from '../services/esql';
 
 export function getKibanaColumns(columns: ESQLColumn[]): EsqlColumnMeta[] {
   return (

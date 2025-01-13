@@ -8,11 +8,10 @@
  */
 
 import moment from 'moment';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionSavedObjectAttributes} from '../../../common';
-import { SearchSessionStatus } from '../../../common';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
-import type { SearchSessionsConfigSchema } from '../../config';
+import { SearchSessionsConfigSchema } from '../../config';
 import { getSearchStatus } from './get_search_status';
 
 export async function getSessionStatus(

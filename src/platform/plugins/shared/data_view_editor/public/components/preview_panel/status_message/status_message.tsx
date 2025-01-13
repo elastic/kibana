@@ -10,10 +10,10 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MatchedIndicesSet } from '../../../types';
+import { MatchedIndicesSet } from '../../../types';
 
 interface StatusMessageProps {
   matchedIndices: MatchedIndicesSet;

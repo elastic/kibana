@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/server';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export const getTagFindReferences = ({
   selectedTags,

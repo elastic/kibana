@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntriesArray } from '.';
+import { EntriesArray } from '.';
 import { getEntryExistsMock } from '../entries_exist/index.mock';
 import { getEntryListMock } from '../entries_list/index.mock';
 import { getEntryMatchMock } from '../entry_match/index.mock';

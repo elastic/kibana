@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 
 export const getCanvas = (wrapper: ReactWrapper) => wrapper.find('Canvas > CanvasComponent');
 

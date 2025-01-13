@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, Action } from 'redux';
+import { Dispatch, Action } from 'redux';
 // @ts-expect-error untyped dependency
 import { createThunk as createThunkFn } from 'redux-thunks/cjs';
-import type { State } from '../../types';
+import { State } from '../../types';
 
 type CreateThunk = <Arguments extends any[]>(
   type: string,

@@ -11,7 +11,7 @@ import styled, { css } from 'styled-components';
 
 import { RoundedBadge } from './rounded_badge';
 
-import type { AndOr } from '.';
+import { AndOr } from '.';
 
 const antennaStyles = css`
   background: ${({ theme }): string => theme.eui.euiColorLightShade};

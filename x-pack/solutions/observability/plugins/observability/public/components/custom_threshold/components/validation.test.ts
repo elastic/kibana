@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type {
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';

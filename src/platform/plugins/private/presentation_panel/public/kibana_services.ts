@@ -9,8 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { CoreStart } from '@kbn/core/public';
-import type { PresentationPanelStartDependencies } from './plugin';
+import { CoreStart } from '@kbn/core/public';
+import { PresentationPanelStartDependencies } from './plugin';
 
 export let core: CoreStart;
 export let uiActions: PresentationPanelStartDependencies['uiActions'];

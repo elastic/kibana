@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
-import React from 'react';
+import React, { FC, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import tinycolor from 'tinycolor2';
 

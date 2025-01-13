@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Page } from '@elastic/synthetics';
-import { expect } from '@elastic/synthetics';
+import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   let retries = 50;

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-import type { FeatureUsageTestPluginSetup, FeatureUsageTestPluginStart } from './plugin';
-import { FeatureUsageTestPlugin } from './plugin';
+import { PluginInitializer } from '@kbn/core/server';
+import {
+  FeatureUsageTestPlugin,
+  FeatureUsageTestPluginSetup,
+  FeatureUsageTestPluginStart,
+} from './plugin';
 
 export const plugin: PluginInitializer<
   FeatureUsageTestPluginSetup,

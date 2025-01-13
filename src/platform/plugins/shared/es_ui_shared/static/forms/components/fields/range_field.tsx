@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEvent} from 'react';
-import React, { useCallback } from 'react';
-import type { EuiRangeProps } from '@elastic/eui';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import React, { ChangeEvent, useCallback } from 'react';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 
-import type { FieldHook} from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

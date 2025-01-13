@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Fields } from './entity';
-import { Entity } from './entity';
+import { Entity, Fields } from './entity';
 
 export class Serializable<TFields extends Fields> extends Entity<TFields> {
   constructor(fields: TFields) {

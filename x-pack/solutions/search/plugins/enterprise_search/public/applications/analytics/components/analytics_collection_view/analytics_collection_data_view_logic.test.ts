@@ -7,9 +7,9 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 
-import type { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { findOrCreateDataView } from '../../utils/find_or_create_data_view';
 

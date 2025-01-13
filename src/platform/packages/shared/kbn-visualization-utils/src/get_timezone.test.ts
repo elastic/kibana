@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { getTimeZone } from './get_timezone';
 
 describe('getTimeZone', () => {

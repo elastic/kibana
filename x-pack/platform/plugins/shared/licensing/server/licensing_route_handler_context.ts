@@ -6,8 +6,7 @@
  */
 
 import type { IContextProvider, StartServicesAccessor } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import type { ILicense } from '../common/types';
 import type { LicensingPluginStart, LicensingRequestHandlerContext } from './types';

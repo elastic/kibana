@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import path from 'path';
-import type {
+import {
   ContentText,
   DynamicContent,
   StyleDictionary,
@@ -16,7 +16,7 @@ import type {
 } from 'pdfmake/interfaces';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import type { TemplateLayout } from './types';
+import { TemplateLayout } from './types';
 import {
   headingFontSize,
   headingMarginBottom,

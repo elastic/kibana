@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ValidationError } from 'io-ts';
+import { ValidationError } from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
-import type { Reporter } from 'io-ts/lib/Reporter';
+import { Reporter } from 'io-ts/lib/Reporter';
 
 export type ReporterResult = Array<{ path: string[]; message: string }>;
 

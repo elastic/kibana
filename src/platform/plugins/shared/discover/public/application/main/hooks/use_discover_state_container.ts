@@ -8,11 +8,10 @@
  */
 
 import { useState } from 'react';
-import type {
-  DiscoverStateContainer,
-  DiscoverStateContainerParams} from '../state_management/discover_state';
 import {
-  getDiscoverStateContainer
+  DiscoverStateContainer,
+  getDiscoverStateContainer,
+  DiscoverStateContainerParams,
 } from '../state_management/discover_state';
 
 /**

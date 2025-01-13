@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import React, { VFC } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
 import { COPY_TITLE } from './translations';
 

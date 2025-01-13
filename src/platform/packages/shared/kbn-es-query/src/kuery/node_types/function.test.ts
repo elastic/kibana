@@ -15,12 +15,11 @@ import {
   toElasticsearchQuery,
   toKqlExpression,
 } from './function';
-import type {
-  KqlIsFunctionNode} from '../functions/is';
 import {
+  KqlIsFunctionNode,
   toElasticsearchQuery as isFunctionToElasticsearchQuery,
 } from '../functions/is';
-import type { DataViewBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
 
 describe('kuery node types', () => {

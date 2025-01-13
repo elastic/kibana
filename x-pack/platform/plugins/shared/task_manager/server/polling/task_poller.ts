@@ -9,15 +9,12 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import type { Observable} from 'rxjs';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
-import type { Option} from 'fp-ts/lib/Option';
-import { none } from 'fp-ts/lib/Option';
-import type { Logger } from '@kbn/core/server';
+import { Option, none } from 'fp-ts/lib/Option';
+import { Logger } from '@kbn/core/server';
 import { TaskErrorSource } from '../task_running';
-import type { Result} from '../lib/result_type';
-import { asOk, asErr } from '../lib/result_type';
+import { Result, asOk, asErr } from '../lib/result_type';
 
 type WorkFn<H> = () => Promise<H>;
 

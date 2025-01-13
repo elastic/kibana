@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { indexPatterns } from '@kbn/data-plugin/public';

@@ -10,8 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type {
-  EuiContextMenuPanelProps} from '@elastic/eui';
 import {
   EuiPopover,
   EuiHorizontalRule,
@@ -22,6 +20,7 @@ import {
   useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
+  EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,

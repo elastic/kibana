@@ -10,11 +10,11 @@ import React, { useCallback, useState } from 'react';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
-import type { AvailableLanguages } from '../../code_examples';
+import { AvailableLanguages } from '../../code_examples';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import type { CreateIndexFormState } from '../../types';
+import { CreateIndexFormState } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 

@@ -9,28 +9,27 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 
-import type {
-  MountStoreProps} from '../../../mocks';
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
   mockDatasourceMap,
-  mockStoreDeps
+  mockStoreDeps,
+  MountStoreProps,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Visualization } from '../../../types';
+import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
-import type { LayerType } from '@kbn/visualizations-plugin/common';
+import { LayerType } from '@kbn/visualizations-plugin/common';
 
 jest.mock('../../../id_generator');
 

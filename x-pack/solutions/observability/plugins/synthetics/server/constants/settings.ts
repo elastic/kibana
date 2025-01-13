@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DynamicSettingsAttributes } from '../runtime_types/settings';
+import { DynamicSettingsAttributes } from '../runtime_types/settings';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
   certAgeThreshold: 730,

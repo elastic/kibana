@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedEvent } from './types';
+import { SerializedEvent } from './types';
 
 /**
  * This interface represents the state of @type {DynamicActionManager} at every

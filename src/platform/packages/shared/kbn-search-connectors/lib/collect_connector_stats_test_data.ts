@@ -8,12 +8,11 @@
  */
 
 // @ts-nocheck
-import type {
+import {
   Connector,
   ConnectorStats,
-  ConnectorSyncJob} from '..';
-import {
   ConnectorStatus,
+  ConnectorSyncJob,
   SyncJobType,
   SyncStatus,
   TriggerMethod,

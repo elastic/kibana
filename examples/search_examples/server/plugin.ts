@@ -17,7 +17,7 @@ import type {
 
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-import type {
+import {
   SearchExamplesPluginSetup,
   SearchExamplesPluginStart,
   SearchExamplesPluginSetupDeps,

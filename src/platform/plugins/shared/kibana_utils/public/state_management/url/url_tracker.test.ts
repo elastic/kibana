@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUrlTracker } from './url_tracker';
-import { createUrlTracker } from './url_tracker';
+import { createUrlTracker, IUrlTracker } from './url_tracker';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import type { History } from 'history';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, History } from 'history';
 
 describe('urlTracker', () => {
   let storage: StubBrowserStorage;

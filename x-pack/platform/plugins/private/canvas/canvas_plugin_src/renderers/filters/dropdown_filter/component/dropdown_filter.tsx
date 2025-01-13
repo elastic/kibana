@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ChangeEvent, FocusEvent, FunctionComponent} from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import type { EuiSelectOption } from '@elastic/eui';
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const strings = {

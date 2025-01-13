@@ -8,7 +8,7 @@
  */
 
 import { parse } from '..';
-import type { ESQLFunction, ESQLInlineCast, ESQLSingleAstItem } from '../../types';
+import { ESQLFunction, ESQLInlineCast, ESQLSingleAstItem } from '../../types';
 
 describe('Inline cast (::)', () => {
   describe('correctly formatted', () => {

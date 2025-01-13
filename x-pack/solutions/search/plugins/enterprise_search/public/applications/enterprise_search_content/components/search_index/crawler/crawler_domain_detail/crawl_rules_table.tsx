@@ -28,10 +28,9 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { clearFlashMessages, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import type { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
-import type { ItemWithAnID } from '../../../../../shared/tables/types';
-import type { CrawlRule } from '../../../../api/crawler/types';
-import { CrawlerPolicies, CrawlerRules } from '../../../../api/crawler/types';
+import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
+import { CrawlerPolicies, CrawlRule, CrawlerRules } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 

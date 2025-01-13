@@ -9,9 +9,9 @@
 
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
-import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 import moment from 'moment';
-import type { SearchSessionSavedObjectAttributes } from '../../../common';
+import { SearchSessionSavedObjectAttributes } from '../../../common';
 
 /**
  * Generate the hash for this request so that, in the future, this hash can be used to look up

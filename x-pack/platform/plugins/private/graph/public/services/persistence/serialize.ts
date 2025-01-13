@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   WorkspaceNode,
   WorkspaceEdge,
   SerializedEdge,
@@ -19,7 +19,7 @@ import type {
   SerializedNode,
   BlockListedNode,
 } from '../../types';
-import type { IndexpatternDatasource } from '../../state_management';
+import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: BlockListedNode,

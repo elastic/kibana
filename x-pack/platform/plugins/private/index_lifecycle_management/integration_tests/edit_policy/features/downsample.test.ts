@@ -7,8 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { DownsampleTestBed} from './downsample.helpers';
-import { setupDownsampleTestBed } from './downsample.helpers';
+import { DownsampleTestBed, setupDownsampleTestBed } from './downsample.helpers';
 
 describe('<EditPolicy /> downsample', () => {
   let testBed: DownsampleTestBed;

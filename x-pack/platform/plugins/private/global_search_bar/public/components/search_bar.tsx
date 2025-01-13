@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type {
-  EuiSelectableTemplateSitewideOption} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,30 +15,29 @@ import {
   EuiText,
   EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
+  EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import type { FC} from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { blurEvent, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
-import type { SearchSuggestion } from '../suggestions';
-import { getSuggestions } from '../suggestions';
+import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
-import type { SearchBarProps } from './types';
+import { SearchBarProps } from './types';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (

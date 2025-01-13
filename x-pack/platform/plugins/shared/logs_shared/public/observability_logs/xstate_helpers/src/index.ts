@@ -6,4 +6,4 @@
  */
 
 export * from './notification_channel';
-export type * from './types';
+export * from './types';

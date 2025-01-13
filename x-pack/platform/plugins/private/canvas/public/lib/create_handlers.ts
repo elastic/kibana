@@ -6,12 +6,12 @@
  */
 
 import { isEqual } from 'lodash';
-import type {
+import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
-import type { RendererHandlers, CanvasElement } from '../../types';
+import { RendererHandlers, CanvasElement } from '../../types';
 import { getCanvasFiltersService } from '../services/canvas_filters_service';
 import { clearValue } from '../state/actions/resolved_args';
 // @ts-expect-error unconverted file

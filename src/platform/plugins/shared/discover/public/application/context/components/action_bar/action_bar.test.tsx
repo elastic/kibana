@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ActionBarProps } from './action_bar';
-import { ActionBar } from './action_bar';
+import { ActionBar, ActionBarProps } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 import { SurrDocType } from '../../services/context';

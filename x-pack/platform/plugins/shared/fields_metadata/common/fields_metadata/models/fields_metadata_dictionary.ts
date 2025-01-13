@@ -6,8 +6,8 @@
  */
 
 import mapValues from 'lodash/mapValues';
-import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
-import type { FieldMetadata } from './field_metadata';
+import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
+import { FieldMetadata } from './field_metadata';
 
 export type FieldsMetadataMap = Record<string, FieldMetadata>;
 

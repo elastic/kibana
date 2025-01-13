@@ -6,18 +6,18 @@
  */
 
 import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
-import type {
+import {
   ConfigurationPatchRequest,
   ConfigurationRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import type {
+import {
   CaseConnector,
   Configuration,
   Configurations,
+  ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
-import type { User } from '../authentication/types';
+import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';

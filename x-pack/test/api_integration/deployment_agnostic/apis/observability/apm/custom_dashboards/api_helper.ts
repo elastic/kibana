@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApmApiProvider } from '../../../../services/apm_api';
+import { ApmApiProvider } from '../../../../services/apm_api';
 
 export type ApmApiClient = ReturnType<typeof ApmApiProvider>;
 

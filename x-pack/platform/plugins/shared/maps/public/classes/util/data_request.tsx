@@ -7,8 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { renderSearchError } from '@kbn/search-errors';
 import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 

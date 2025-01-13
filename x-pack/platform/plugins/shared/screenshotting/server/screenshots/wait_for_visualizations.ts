@@ -6,10 +6,9 @@
  */
 
 import type { HeadlessChromiumDriver } from '../browsers';
-import type { Layout } from '../layouts';
+import { Layout } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
-import type { EventLogger } from './event_logger';
-import { Actions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 interface CompletedItemsCountParameters {
   context: string;

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type {
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import {
   NavigateToLensContext,
   GaugeVisConfiguration,
   MetricVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import type { Vis } from '@kbn/visualizations-plugin/public';
-import type { GaugeVisParams } from '../types';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { GaugeVisParams } from '../types';
 
 export type ConvertGaugeVisToLensVisualization = (
   vis: Vis<GaugeVisParams>,

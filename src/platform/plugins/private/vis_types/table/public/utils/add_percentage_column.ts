@@ -9,9 +9,9 @@
 
 import { findIndex } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import type { FormattedColumns, TableContext } from '../types';
+import { FormattedColumns, TableContext } from '../types';
 
 function insertColumn(arr: DatatableColumn[], index: number, col: DatatableColumn) {
   const newArray = [...arr];

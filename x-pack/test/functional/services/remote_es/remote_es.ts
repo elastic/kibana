@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 import { systemIndicesSuperuser, createRemoteEsClientForFtrConfig } from '@kbn/test';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
  * Kibana-specific @elastic/elasticsearch client instance.

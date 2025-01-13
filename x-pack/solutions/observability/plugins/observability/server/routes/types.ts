@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
-import type {
+import {
   ObservabilityServerRouteRepository,
   APIEndpoint,
 } from './get_global_observability_server_route_repository';
-import type { ObservabilityRequestHandlerContext } from '../types';
-import type { RegisterRoutesDependencies } from './register_routes';
+import { ObservabilityRequestHandlerContext } from '../types';
+import { RegisterRoutesDependencies } from './register_routes';
 
 export type { ObservabilityServerRouteRepository, APIEndpoint };
 

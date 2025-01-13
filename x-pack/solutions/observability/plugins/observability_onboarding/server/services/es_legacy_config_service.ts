@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Observable, Subscription } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
-import type { ElasticsearchConfig } from '@kbn/core/server';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { ElasticsearchConfig } from '@kbn/core/server';
 
 export class EsLegacyConfigService {
   /**

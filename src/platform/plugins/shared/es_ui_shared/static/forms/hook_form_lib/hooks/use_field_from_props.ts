@@ -8,11 +8,10 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import type { UseFieldProps } from '../components';
-import type { FieldHook, FieldConfig, FieldValidationData } from '../types';
+import { UseFieldProps } from '../components';
+import { FieldHook, FieldConfig, FieldValidationData } from '../types';
 import { useFormContext } from '../form_context';
-import type { InternalFieldConfig } from './use_field';
-import { useField } from './use_field';
+import { useField, InternalFieldConfig } from './use_field';
 
 /**
  * Hook to initialize a FieldHook based on Props passed to <UseField /> or <UseMultiFields />

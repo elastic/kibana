@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import execa from 'execa';
-import type { RuleType } from '@kbn/alerting-plugin/server';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import {
   alertFieldMap,
   ecsFieldMap,
@@ -15,7 +15,7 @@ import {
   createSchemaFromFieldMap,
 } from '@kbn/alerts-as-data-utils';
 import { contextToSchemaName } from '@kbn/alerting-plugin/common';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function checkAlertSchemasTest({ getService }: FtrProviderContext) {

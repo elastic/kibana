@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HistoricalResult } from '../../../../../../types';
-import type { FetchHistoricalResultsReducerState } from '../types';
+import { HistoricalResult } from '../../../../../../types';
+import { FetchHistoricalResultsReducerState } from '../types';
 
 type Action =
   | { type: 'FETCH_SUCCESS'; payload: { results: HistoricalResult[]; total: number } }

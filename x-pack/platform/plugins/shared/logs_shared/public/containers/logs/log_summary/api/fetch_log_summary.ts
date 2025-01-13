@@ -8,10 +8,9 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-import type {
-  LogEntriesSummaryRequest} from '../../../../../common/http_api';
 import {
   LOG_ENTRIES_SUMMARY_PATH,
+  LogEntriesSummaryRequest,
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
 } from '../../../../../common/http_api';

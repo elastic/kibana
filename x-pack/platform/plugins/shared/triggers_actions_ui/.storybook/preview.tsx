@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { DecoratorFn } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
+import { addDecorator, DecoratorFn } from '@storybook/react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
 import { StorybookContextDecorator } from './decorator';
 

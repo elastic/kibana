@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export function registerPreviewScriptedFieldRoute(router: IRouter): void {
   router.post(

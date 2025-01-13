@@ -7,7 +7,7 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 /**
  * Returns supertest.SuperTest<supertest.Test> instance that will not persist cookie between API requests.
  */

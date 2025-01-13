@@ -6,7 +6,7 @@
  */
 
 import { flatten, zip } from 'lodash';
-import type { useOnboardingFlow } from './use_onboarding_flow';
+import { useOnboardingFlow } from './use_onboarding_flow';
 
 export function getAutoDetectCommand(
   options: NonNullable<ReturnType<typeof useOnboardingFlow>['data']>

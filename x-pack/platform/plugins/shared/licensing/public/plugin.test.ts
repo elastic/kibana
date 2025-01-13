@@ -9,13 +9,13 @@ import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
-import type { LicenseType } from '../common/types';
+import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { HttpInterceptor } from '@kbn/core/public';
+import { HttpInterceptor } from '@kbn/core/public';
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {

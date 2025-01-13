@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
 } from '../datasources/form_based/mocks';
-import type { DataViewsState } from '../state_management';
-import type { IndexPattern } from '../types';
+import { DataViewsState } from '../state_management';
+import { IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';
 
 /**

@@ -10,8 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import type { EsVersion, Config} from '../../functional_test_runner';
-import { FunctionalTestRunner } from '../../functional_test_runner';
+import { EsVersion, Config, FunctionalTestRunner } from '../../functional_test_runner';
 
 export async function runFtr(options: {
   log: ToolingLog;

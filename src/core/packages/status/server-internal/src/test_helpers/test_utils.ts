@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceStatusLevel } from '@kbn/core-status-common';
-import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
 
 export const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),

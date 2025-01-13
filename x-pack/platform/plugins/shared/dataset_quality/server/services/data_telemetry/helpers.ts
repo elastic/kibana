@@ -6,17 +6,16 @@
  */
 
 import { intersection } from 'lodash';
-import type { Observable} from 'rxjs';
-import { from, of, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
-import type {
+import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
+import {
   MappingPropertyBase,
   IndicesGetMappingResponse,
   IndicesStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
+import { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
 
-import type {
+import {
   IndexBasicInfo,
   DataStreamStatsPerNamespace,
   DataStreamStats,

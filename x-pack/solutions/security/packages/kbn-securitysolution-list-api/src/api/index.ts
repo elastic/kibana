@@ -8,12 +8,17 @@
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
-import type {
+import {
   CreateEndpointListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
+  createEndpointListSchema,
+  exceptionListItemSchema,
+  exceptionListSchema,
+  foundExceptionListItemSchema,
+  foundExceptionListSchema,
   AddEndpointExceptionListProps,
   AddExceptionListItemProps,
   AddExceptionListProps,
@@ -27,13 +32,6 @@ import type {
   GetExceptionFilterFromExceptionsProps,
   ExceptionFilterResponse,
   DuplicateExceptionListProps,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  createEndpointListSchema,
-  exceptionListItemSchema,
-  exceptionListSchema,
-  foundExceptionListItemSchema,
-  foundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {

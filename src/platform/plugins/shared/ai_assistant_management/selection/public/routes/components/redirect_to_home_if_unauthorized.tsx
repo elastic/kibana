@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 export function RedirectToHomeIfUnauthorized({
   coreStart,

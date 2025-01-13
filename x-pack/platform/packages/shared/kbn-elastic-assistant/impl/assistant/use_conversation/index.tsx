@@ -6,9 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import type { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import type { Conversation, ClientMessage } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {

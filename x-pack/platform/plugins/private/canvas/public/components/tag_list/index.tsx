@@ -7,9 +7,8 @@
 
 import { compose, withProps } from 'react-recompose';
 import { tagsRegistry } from '../../lib/tags_registry';
-import type { Props as ComponentProps } from './tag_list';
-import { TagList as Component } from './tag_list';
-import type { TagSpec } from '../../lib/tag';
+import { TagList as Component, Props as ComponentProps } from './tag_list';
+import { TagSpec } from '../../lib/tag';
 
 interface Props {
   /**

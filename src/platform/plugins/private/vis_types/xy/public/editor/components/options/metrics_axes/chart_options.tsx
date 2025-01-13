@@ -14,10 +14,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption } from '@kbn/vis-default-editor-plugin/public';
 
-import type { SeriesParam, ValueAxis } from '../../../../types';
+import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
-import type { SetParamByIndex, ChangeValueAxis } from '.';
+import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
 import { getConfigCollections } from '../../../collections';
 

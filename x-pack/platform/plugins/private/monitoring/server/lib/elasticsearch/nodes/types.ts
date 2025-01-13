@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchLegacySource } from '../../../../common/types/es';
+import { ElasticsearchLegacySource } from '../../../../common/types/es';
 
 export type Node = ElasticsearchLegacySource['source_node'] & {
   attributes?: Record<string, any>;

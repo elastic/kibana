@@ -10,11 +10,10 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  LoadingStatusEntry} from '../../services/context_query_state';
 import {
   FailureReason,
-  LoadingStatus
+  LoadingStatus,
+  LoadingStatusEntry,
 } from '../../services/context_query_state';
 
 export interface ContextErrorMessageProps {

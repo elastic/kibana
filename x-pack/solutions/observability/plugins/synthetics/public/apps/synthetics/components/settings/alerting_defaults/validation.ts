@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmail as DefaultEmailType } from '../../../../../../common/runtime_types';
+import { DefaultEmail as DefaultEmailType } from '../../../../../../common/runtime_types';
 
 export const validateEmail = (email: string) => {
   return email

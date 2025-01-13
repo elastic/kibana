@@ -13,8 +13,8 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 import { useCreateRule } from './use_create_rule';
-import type { CreateRuleBody } from '../apis/create_rule';
-import type { RuleTypeParams } from '../types';
+import { CreateRuleBody } from '../apis/create_rule';
+import { RuleTypeParams } from '../types';
 
 const ruleToCreate: CreateRuleBody<RuleTypeParams> = {
   params: {

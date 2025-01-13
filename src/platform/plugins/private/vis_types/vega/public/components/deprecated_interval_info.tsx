@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiCallOut, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import type { VegaSpec } from '../data_model/types';
+import { VegaSpec } from '../data_model/types';
 import { getDocLinks } from '../services';
 
 export const DeprecatedHistogramIntervalInfo = () => (

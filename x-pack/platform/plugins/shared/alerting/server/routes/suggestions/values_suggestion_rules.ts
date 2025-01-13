@@ -6,24 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { IRouter } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { verifyAccessAndContext } from '../lib';
-import type { ILicenseState } from '../../lib';
-import type { AlertingRequestHandlerContext } from '../../types';
-import type {
-  AlertingAuthorizationFilterOpts} from '../../authorization';
+import { ILicenseState } from '../../lib';
+import { AlertingRequestHandlerContext } from '../../types';
 import {
   AlertingAuthorizationEntity,
+  AlertingAuthorizationFilterOpts,
   AlertingAuthorizationFilterType,
 } from '../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';

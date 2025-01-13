@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FilesRouter } from './types';
+import { FilesRouter } from './types';
 
 import * as find from './find';
 import * as metrics from './metrics';

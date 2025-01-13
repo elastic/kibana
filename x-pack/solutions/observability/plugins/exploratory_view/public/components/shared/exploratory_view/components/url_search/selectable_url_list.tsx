@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type {
+import React, {
   SetStateAction,
+  useRef,
+  useState,
   KeyboardEvent,
   ReactNode,
-  FormEventHandler} from 'react';
-import React, {
-  useRef,
-  useState
+  FormEventHandler,
 } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,7 +23,8 @@ import {
   EuiSelectableMessage,
   EuiPopoverFooter,
   EuiButton,
-  EuiButtonIcon
+  EuiButtonIcon,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useEvent from 'react-use/lib/useEvent';

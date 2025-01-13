@@ -6,10 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import type { AppState } from '../../../../../state';
+import { AppState } from '../../../../../state';
 import { isIntegrationsPopupOpen } from '../../../../../state/selectors';
-import type { PopoverState } from '../../../../../state/actions';
-import { toggleIntegrationsPopover } from '../../../../../state/actions';
+import { PopoverState, toggleIntegrationsPopover } from '../../../../../state/actions';
 import { ActionsPopoverComponent } from '..';
 
 const mapStateToProps = (state: AppState) => ({

@@ -9,14 +9,13 @@ import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { act } from 'react-dom/test-utils';
 
 import { EuiContextMenuItem, EuiSuperDatePicker } from '@elastic/eui';
 
-import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar';
 

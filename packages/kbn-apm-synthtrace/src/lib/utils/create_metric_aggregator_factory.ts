@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Fields} from '@kbn/apm-synthtrace-client';
-import { appendHash, parseInterval } from '@kbn/apm-synthtrace-client';
+import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import type { Duplex} from 'stream';
-import { PassThrough } from 'stream';
+import { Duplex, PassThrough } from 'stream';
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
   return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>(

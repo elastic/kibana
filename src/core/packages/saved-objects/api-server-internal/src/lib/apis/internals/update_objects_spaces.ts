@@ -8,7 +8,7 @@
  */
 
 import pMap from 'p-map';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
 import type { Logger } from '@kbn/logging';

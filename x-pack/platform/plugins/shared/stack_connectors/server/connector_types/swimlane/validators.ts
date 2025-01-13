@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import type {
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import {
   ExternalServiceValidation,
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,

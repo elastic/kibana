@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ComponentType } from 'react';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import {
   createStorybookChatService,
   createStorybookService,
@@ -14,7 +13,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { AIAssistantAppService } from '../service/create_app_service';
+import { AIAssistantAppService } from '../service/create_app_service';
 
 const mockService: AIAssistantAppService = {
   ...createStorybookService(),

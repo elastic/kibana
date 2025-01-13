@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type {
+import {
   ExpandWildcard,
   IndicesGetResponse,
   IndicesIndexState,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import type { AlwaysShowPattern } from '../../../../common/types/indices';
+import { AlwaysShowPattern } from '../../../../common/types/indices';
 
-import type { TotalIndexData } from '../fetch_indices';
+import { TotalIndexData } from '../fetch_indices';
 
 import { mapIndexStats } from './map_index_stats';
 

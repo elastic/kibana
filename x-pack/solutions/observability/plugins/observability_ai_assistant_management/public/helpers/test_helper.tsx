@@ -15,12 +15,11 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
-import type { DeepPartial } from 'utility-types';
-import type { AppContextValue } from '../context/app_context';
-import { AppContextProvider } from '../context/app_context';
+import { DeepPartial } from 'utility-types';
+import { AppContextProvider, AppContextValue } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
-import type { CoreStartWithStartDeps } from '../hooks/use_kibana';
+import { CoreStartWithStartDeps } from '../hooks/use_kibana';
 
 export const coreStartMock = coreMock.createStart();
 

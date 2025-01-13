@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionRegistrationParameters } from '..';
+import { FunctionRegistrationParameters } from '..';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
 

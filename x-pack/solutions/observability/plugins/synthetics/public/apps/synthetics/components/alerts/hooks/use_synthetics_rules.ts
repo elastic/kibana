@@ -26,7 +26,7 @@ import {
   selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
-import type { ClientPluginsStart } from '../../../../../plugin';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export const useSyntheticsRules = (isOpen: boolean) => {
   const dispatch = useDispatch();

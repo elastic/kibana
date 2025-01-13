@@ -8,7 +8,7 @@
  */
 
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
-import type { DocumentNodeProcessor } from './types/document_node_processor';
+import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Creates a node processor to remove specified by `propNames` properties.

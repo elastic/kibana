@@ -7,13 +7,12 @@
 
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import type {
-  EuiSuperSelectOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiSuperSelect
+  EuiSuperSelect,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import * as i18n from './translations';
 

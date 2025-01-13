@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeseriesVisParams } from '../../types';
+import { TimeseriesVisParams } from '../../types';
 
 interface YesNoProps {
   name: string;

@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
 

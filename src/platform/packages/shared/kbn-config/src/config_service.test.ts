@@ -19,12 +19,10 @@ import {
 import { createRawConfigServiceMock } from './internal_mocks';
 
 import { schema } from '@kbn/config-schema';
-import type { MockedLogger} from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
-import type { RawPackageInfo } from '..';
-import { ConfigService, Env } from '..';
+import { ConfigService, Env, RawPackageInfo } from '..';
 
 import { getEnvOptions } from './internal_mocks';
 

@@ -10,18 +10,16 @@
 import { get, has } from 'lodash';
 import React, { useEffect, useCallback, useState } from 'react';
 
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IAggType } from '@kbn/data-plugin/public';
+import { IAggType } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import type { DocLinksStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ComboBoxGroupedOptions } from '../utils';
-import type { AggTypeAction } from './agg_params_state';
-import { AGG_TYPE_ACTION_KEYS } from './agg_params_state';
+import { ComboBoxGroupedOptions } from '../utils';
+import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;

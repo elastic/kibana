@@ -9,7 +9,7 @@
 
 import { reduce } from 'lodash';
 import { difference, flattenKeys, pickDeep } from './utils';
-import type { ParsedUsageCollection } from './ts_parser';
+import { ParsedUsageCollection } from './ts_parser';
 import { generateMapping, compatibleSchemaTypes } from './manage_schema';
 import { kindToDescriptorName } from './serializer';
 

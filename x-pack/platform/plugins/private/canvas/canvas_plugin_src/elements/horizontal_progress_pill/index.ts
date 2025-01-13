@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import type { ElementFactory } from '../../../types';
+import { ElementFactory } from '../../../types';
 
 export const horizontalProgressPill: ElementFactory = () => ({
   name: 'horizontalProgressPill',

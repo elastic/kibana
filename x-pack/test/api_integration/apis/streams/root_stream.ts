@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { cleanUpRootStream } from './helpers/cleanup';
 import { enableStreams, putStream } from './helpers/requests';
 

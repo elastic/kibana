@@ -13,7 +13,7 @@ import {
   buildPainlessStartRule,
   painlessLanguageAttributes,
 } from './nested_painless';
-import type { monaco } from '../../..';
+import { monaco } from '../../..';
 import { globals } from '../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 

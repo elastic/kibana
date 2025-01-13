@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -26,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { VarConfig } from '../var_config';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
-import type { CanvasVariable } from '../../../types';
+import { CanvasVariable } from '../../../types';
 
 const strings = {
   getApplyStylesheetButtonLabel: () =>

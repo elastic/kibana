@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subject } from 'rxjs';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 

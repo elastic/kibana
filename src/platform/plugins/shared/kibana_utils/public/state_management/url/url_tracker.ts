@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { History, Location } from 'history';
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, History, Location } from 'history';
 import { getRelativeToHistoryPath } from './kbn_url_storage';
 
 export interface IUrlTracker {

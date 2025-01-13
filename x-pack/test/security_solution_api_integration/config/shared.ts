@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 
 interface PreconfiguredConnector extends Pick<Connector, 'name' | 'actionTypeId' | 'config'> {
   secrets: {

@@ -11,25 +11,24 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import type { GenericOperationDefinition } from '../operations';
-import type {
-  FieldBasedIndexPatternColumn,
-  FieldInputProps} from '../operations/definitions';
+import { GenericOperationDefinition } from '../operations';
 import {
   averageOperation,
   countOperation,
   derivativeOperation,
+  FieldBasedIndexPatternColumn,
   termsOperation,
   staticValueOperation,
-  minOperation
+  minOperation,
+  FieldInputProps,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
-import type { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
-import type { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
+import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
 import { FieldSelect } from './field_select';
-import type { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
+import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
 function getStringBasedOperationColumn(field = 'source') {
   return {

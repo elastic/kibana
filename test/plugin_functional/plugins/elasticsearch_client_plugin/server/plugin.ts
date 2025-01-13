@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from '@kbn/core/server';
 
 export class ElasticsearchClientPlugin implements Plugin {
   private client?: ICustomClusterClient;

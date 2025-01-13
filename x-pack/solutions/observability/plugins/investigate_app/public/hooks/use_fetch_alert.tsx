@@ -6,8 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { type GetInvestigationResponse, alertOriginSchema } from '@kbn/investigation-shared';
 import { useKibana } from './use_kibana';
 

@@ -9,8 +9,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getCommentsArrayMock, getCommentsMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
-import type { ImportCommentsArray, ImportCommentsArrayOrUndefined } from '.';
-import { importComment, importCommentsArray, importCommentsArrayOrUndefined } from '.';
+import {
+  importComment,
+  ImportCommentsArray,
+  importCommentsArray,
+  ImportCommentsArrayOrUndefined,
+  importCommentsArrayOrUndefined,
+} from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('ImportComment', () => {

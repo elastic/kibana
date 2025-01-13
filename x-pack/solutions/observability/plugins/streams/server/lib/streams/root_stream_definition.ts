@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamDefinition } from '@kbn/streams-schema';
 
 export const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',

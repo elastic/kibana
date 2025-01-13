@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type {
+import React, {
   Dispatch,
   FunctionComponent,
-  SetStateAction} from 'react';
-import React, {
+  SetStateAction,
   useEffect,
   useMemo,
   useRef,
 } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
-import type { Conversation } from '../../..';
+import { Conversation } from '../../..';
 import { UpgradeLicenseCallToAction } from '../upgrade_license_cta';
 import * as i18n from '../translations';
 interface Props {

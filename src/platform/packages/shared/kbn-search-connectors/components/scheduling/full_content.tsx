@@ -9,9 +9,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSwitchProps} from '@elastic/eui';
 import {
+  EuiSwitchProps,
   EuiSwitch,
   EuiAccordion,
   EuiButtonIcon,
@@ -22,8 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { Connector, SchedulingConfiguraton} from '../../types/connectors';
-import { SyncJobType } from '../../types/connectors';
+import { Connector, SchedulingConfiguraton, SyncJobType } from '../../types/connectors';
 import { PlatinumLicensePopover } from '../configuration/platinum_license_popover';
 import { ConnectorCronEditor } from './connector_cron_editor';
 export interface ConnectorContentSchedulingProps {

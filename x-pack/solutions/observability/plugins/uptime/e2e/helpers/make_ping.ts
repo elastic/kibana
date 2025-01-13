@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { TlsProps } from './make_tls';
-import { makeTls } from './make_tls';
+import { makeTls, TlsProps } from './make_tls';
 
 const DEFAULT_INDEX_NAME = 'heartbeat-8-full-test';
 const DATA_STREAM_INDEX_NAME = 'synthetics-http-default';

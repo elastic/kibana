@@ -6,19 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import type {
-  StreamDefinition,
-  WiredStreamConfigDefinition,
-  WiredStreamDefinition,
-} from '@kbn/streams-schema';
 import {
   isRootStream,
   isWiredStream,
   isWiredStreamConfig,
   streamConfigDefinitionSchema,
+  StreamDefinition,
+  WiredStreamConfigDefinition,
+  WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import {
@@ -39,7 +37,7 @@ import {
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
-import type { AssetClient } from '../../lib/streams/assets/asset_client';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const editStreamRoute = createServerRoute({

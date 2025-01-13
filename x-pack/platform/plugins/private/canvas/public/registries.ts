@@ -21,7 +21,7 @@ import {
   transformRegistry,
   viewRegistry,
 } from './expression_types';
-import type { SetupRegistries } from './plugin_api';
+import { SetupRegistries } from './plugin_api';
 
 export let registries = {};
 

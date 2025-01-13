@@ -9,8 +9,7 @@
 
 import moment from 'moment';
 
-import type { TimeBucketsConfig } from './time_buckets';
-import { TimeBuckets } from './time_buckets';
+import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 import { autoInterval } from '../../_interval_options';
 import { InvalidEsCalendarIntervalError } from '../../../utils';
 

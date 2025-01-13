@@ -27,7 +27,7 @@ import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
 import { handleUpdateStableSamples } from './stable';
 import { testPipeline, combineProcessors } from '../../util';
-import type {
+import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

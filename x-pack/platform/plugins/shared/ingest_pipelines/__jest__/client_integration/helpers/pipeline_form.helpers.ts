@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 export const getFormActions = (testBed: TestBed) => {
   const { find, form, component } = testBed;

@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { ColorPickerProps } from './color_picker';
-import { ColorPicker } from './color_picker';
+import { ColorPicker, ColorPickerProps } from './color_picker';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('ColorPicker', () => {

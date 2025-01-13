@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { HeadlessChromiumDriver } from '../browsers';
-import type { Layout } from '../layouts';
-import type { EventLogger } from './event_logger';
-import { Actions } from './event_logger';
+import { Logger } from '@kbn/logging';
+import { HeadlessChromiumDriver } from '../browsers';
+import { Layout } from '../layouts';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import type { Screenshot } from './types';
 

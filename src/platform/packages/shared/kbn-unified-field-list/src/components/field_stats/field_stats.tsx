@@ -28,8 +28,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  PartialTheme} from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -39,12 +37,12 @@ import {
   ScaleType,
   Settings,
   TooltipType,
-  Tooltip
+  Tooltip,
+  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,

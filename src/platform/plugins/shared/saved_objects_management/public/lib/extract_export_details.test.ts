@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsExportResultDetails } from './extract_export_details';
-import { extractExportDetails } from './extract_export_details';
+import { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
 
 describe('extractExportDetails', () => {
   const objLine = (id: string, type: string) => {

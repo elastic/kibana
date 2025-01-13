@@ -6,36 +6,33 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import { subtractMillisecondsFromDate } from '../../../../common/utils';
-import type {
+import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
 } from '../../../../common/http_api';
-import type { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import type {
-  LogViewColumnConfiguration,
-  LogViewReference,
-  ResolvedLogView} from '../../../../common/log_views';
+import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import {
-  logViewFieldColumnConfigurationRT
+  LogViewColumnConfiguration,
+  logViewFieldColumnConfigurationRT,
+  LogViewReference,
+  ResolvedLogView,
 } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
-import type {
-  CompiledLogMessageFormattingRule,
-  Fields,
-  Highlights} from '../../../services/log_entries/message/message';
 import {
-  compileFormattingRules
+  CompiledLogMessageFormattingRule,
+  compileFormattingRules,
+  Fields,
+  Highlights,
 } from '../../../services/log_entries/message/message';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
-import type { LogsSharedBackendLibs } from '../../logs_shared_types';
-import type {
-  CompositeDatasetKey,
-  LogEntryDatasetBucket} from './queries/log_entry_datasets';
+import { LogsSharedBackendLibs } from '../../logs_shared_types';
 import {
+  CompositeDatasetKey,
   createLogEntryDatasetsQuery,
+  LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_datasets';
 

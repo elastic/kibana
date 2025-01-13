@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ProjectAPIKeyResponse } from '../../../../../server/routes/monitor_cruds/get_api_key';
 import { apiService } from '../../../../utils/api_service';
-import type {
+import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitor,
   ServiceLocationErrorsResponse,

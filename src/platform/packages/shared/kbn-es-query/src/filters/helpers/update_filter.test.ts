@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter} from '../build_filters';
-import { buildQueryFilter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter, Filter, FilterStateStore } from '../build_filters';
 import { updateFilter } from './update_filter';
 
 describe('updateFilter', () => {

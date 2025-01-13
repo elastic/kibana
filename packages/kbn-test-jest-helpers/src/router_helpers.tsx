@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType } from 'react';
-import React, { Component } from 'react';
+import React, { Component, ComponentType } from 'react';
 import { MemoryRouter, withRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import type { History, LocationDescriptor } from 'history';
+import { History, LocationDescriptor } from 'history';
 
 const stringifyPath = (path: LocationDescriptor): string => {
   if (typeof path === 'string') {

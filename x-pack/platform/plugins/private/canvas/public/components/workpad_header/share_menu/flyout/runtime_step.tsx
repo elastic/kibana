@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CANVAS } from '../../../../../i18n/constants';
 
-import type { OnDownloadFn } from './flyout';
+import { OnDownloadFn } from './flyout';
 
 const strings = {
   getDownloadLabel: () =>

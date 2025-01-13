@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Router } from '@kbn/shared-ux-router';
-import type { ServerlessSearchContext } from './hooks/use_kibana';
+import { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(
   element: HTMLElement,

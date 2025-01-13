@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useContext } from 'react';
+import React, { FC, useContext } from 'react';
 import { Fullscreen as Component } from './fullscreen';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';

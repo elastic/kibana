@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { MlSecurityCommon } from './security_common';
-import { USER } from './security_common';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlSecurityCommon, USER } from './security_common';
 
 export function MachineLearningSecurityUIProvider(
   { getPageObjects }: FtrProviderContext,

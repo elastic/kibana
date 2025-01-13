@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { TimefilterSetup } from '../timefilter';
-import type { FilterManager } from '../filter_manager';
-import type { QueryState } from '../query_state';
-import { getQueryState } from '../query_state';
-import type { QueryStateChange } from './types';
+import { FilterManager } from '../filter_manager';
+import { getQueryState, QueryState } from '../query_state';
+import { QueryStateChange } from './types';
 import type { QueryStringContract } from '../query_string';
 
 export type QueryState$ = Observable<{ changes: QueryStateChange; state: QueryState }>;

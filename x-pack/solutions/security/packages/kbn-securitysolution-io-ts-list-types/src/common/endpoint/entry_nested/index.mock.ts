@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EndpointEntryNested } from '.';
+import { EndpointEntryNested } from '.';
 import { FIELD, NESTED } from '../../../constants/index.mock';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';

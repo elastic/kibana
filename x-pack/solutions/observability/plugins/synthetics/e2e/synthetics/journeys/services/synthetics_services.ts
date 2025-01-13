@@ -7,10 +7,10 @@
 
 import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
-import type { KbnClient } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import type {
+import {
   SyntheticsMonitor,
   SyntheticsPrivateLocations,
 } from '@kbn/synthetics-plugin/common/runtime_types';

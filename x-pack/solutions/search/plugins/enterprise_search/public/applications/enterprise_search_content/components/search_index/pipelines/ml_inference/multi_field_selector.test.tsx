@@ -11,8 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiButton, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiComboBox,
+  EuiFieldText,
+} from '@elastic/eui';
 
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 

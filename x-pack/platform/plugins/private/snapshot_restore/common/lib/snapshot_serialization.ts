@@ -8,7 +8,7 @@
 import { sortBy } from 'lodash';
 import { flow, map, flatten, uniq } from 'lodash/fp';
 
-import type {
+import {
   SnapshotDetails,
   SnapshotDetailsEs,
   SnapshotConfig,

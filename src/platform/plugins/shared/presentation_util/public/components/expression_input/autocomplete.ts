@@ -11,10 +11,9 @@ import { uniq } from 'lodash';
 import type { AstWithMeta, AstArgumentWithMeta } from '@kbn/interpreter';
 import { isAstWithMeta } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
-import type {
-  ExpressionFunction,
-  ExpressionFunctionParameter} from '@kbn/expressions-plugin/common';
 import {
+  ExpressionFunction,
+  ExpressionFunctionParameter,
   getByAlias,
 } from '@kbn/expressions-plugin/common';
 

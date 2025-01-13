@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeResolveWorkpadRoute } from './resolve';
-import type { RequestHandler} from '@kbn/core/server';
-import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
-import type { CanvasWorkpad } from '../../../types';
+import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
-import type { MockWorkpadRouteContext } from '../../mocks';
-import { workpadRouteContextMock } from '../../mocks';
+import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
 const mockRouteContext = {
   canvas: workpadRouteContextMock.create(),

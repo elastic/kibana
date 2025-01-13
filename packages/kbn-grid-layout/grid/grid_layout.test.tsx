@@ -10,8 +10,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
-import type { GridLayoutProps } from './grid_layout';
-import { GridLayout } from './grid_layout';
+import { GridLayout, GridLayoutProps } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
 

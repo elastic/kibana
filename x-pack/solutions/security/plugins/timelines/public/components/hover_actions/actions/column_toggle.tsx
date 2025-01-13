@@ -6,17 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../../common/constants';
-import type { ColumnHeaderOptions } from '../../../../common/types';
-import { defaultColumnHeaderType } from '../../../../common/types';
+import { ColumnHeaderOptions, defaultColumnHeaderType } from '../../../../common/types';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import type { HoverActionComponentProps } from './types';
+import { HoverActionComponentProps } from './types';
 
 export const COLUMN_TOGGLE = (field: string) =>
   i18n.translate('xpack.timelines.hoverActions.columnToggleLabel', {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
 
 /**

@@ -6,18 +6,19 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type {
+import {
   App,
   AppMountParameters,
+  AppStatus,
   AppUpdater,
   CoreSetup,
+  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 
-import type {
+import {
   EntityManagerAppPluginClass,
   EntityManagerPluginStart,
   EntityManagerPluginSetup,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SubActionConnectorType} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
+  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
@@ -19,7 +18,7 @@ import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from '../../../common
 import { renderParameterTemplates } from './render';
 import { D3SecurityConnector } from './d3security';
 import { D3_SECURITY_CONNECTOR_ID, D3_SECURITY_TITLE } from '../../../common/d3security/constants';
-import type { D3SecurityConfig, D3SecuritySecrets } from '../../../common/d3security/types';
+import { D3SecurityConfig, D3SecuritySecrets } from '../../../common/d3security/types';
 export type D3SecurityConnectorType = SubActionConnectorType<D3SecurityConfig, D3SecuritySecrets>;
 
 export function getConnectorType(): D3SecurityConnectorType {

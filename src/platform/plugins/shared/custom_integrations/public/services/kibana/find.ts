@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CustomIntegration} from '../../../common';
 import {
+  CustomIntegration,
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../../../common';
-import type { KibanaPluginServiceFactory } from '../types';
+import { KibanaPluginServiceFactory } from '../types';
 
-import type { CustomIntegrationsStartDependencies } from '../../types';
-import type { CustomIntegrationsFindService} from '../find';
-import { filterCustomIntegrations } from '../find';
+import { CustomIntegrationsStartDependencies } from '../../types';
+import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsFindService` for use in Kibana.

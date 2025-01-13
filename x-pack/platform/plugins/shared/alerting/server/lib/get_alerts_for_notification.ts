@@ -6,9 +6,9 @@
  */
 
 import { keys } from 'lodash';
-import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
-import type { AlertInstanceState, AlertInstanceContext } from '../types';
+import { AlertInstanceState, AlertInstanceContext } from '../types';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,

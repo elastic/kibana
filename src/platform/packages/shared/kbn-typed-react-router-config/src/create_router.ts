@@ -9,17 +9,16 @@
 
 import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
 import { isLeft } from 'fp-ts/lib/Either';
-import type { Location } from 'history';
+import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { compact, findLastIndex, mapValues, merge, orderBy } from 'lodash';
 import qs from 'query-string';
-import type {
-  MatchedRoute,
-  RouteConfig as ReactRouterConfig} from 'react-router-config';
 import {
-  matchRoutes as matchRoutesConfig
+  MatchedRoute,
+  matchRoutes as matchRoutesConfig,
+  RouteConfig as ReactRouterConfig,
 } from 'react-router-config';
-import type { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
+import { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');

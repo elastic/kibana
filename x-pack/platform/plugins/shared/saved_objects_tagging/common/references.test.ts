@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { tagIdToReference, replaceTagReferences, updateTagReferences } from './references';
 
 const ref = (type: string, id: string): SavedObjectReference => ({

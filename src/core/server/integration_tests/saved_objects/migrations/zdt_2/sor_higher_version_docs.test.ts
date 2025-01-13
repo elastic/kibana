@@ -10,9 +10,9 @@
 import { pick, range } from 'lodash';
 import Path from 'path';
 import '../jest_matchers';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createType } from '../test_utils';
-import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { createModelVersionTestBed } from '@kbn/core-test-helpers-model-versions';
 
 export const logFilePath = Path.join(__dirname, 'sor_higher.test.log');

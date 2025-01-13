@@ -10,8 +10,7 @@ import {
   CLOUD_SNAPSHOT_REPOSITORY,
 } from '../../../../common/constants';
 import { setupEnvironment, advanceTime } from '../../helpers';
-import type { OverviewTestBed} from '../overview.helpers';
-import { setupOverviewPage } from '../overview.helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
   let testBed: OverviewTestBed;

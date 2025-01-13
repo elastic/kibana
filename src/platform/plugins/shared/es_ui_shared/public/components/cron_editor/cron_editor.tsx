@@ -10,10 +10,9 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { EuiSelectOption } from '@elastic/eui';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiSelectOption } from '@elastic/eui';
 
-import type { Frequency, Field, FieldToValueMap } from './types';
+import { Frequency, Field, FieldToValueMap } from './types';
 
 import {
   MINUTE_OPTIONS,

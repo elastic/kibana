@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
-import type { CustomIcon, StyleDescriptor } from '../../../common/descriptor_types';
+import { ReactElement } from 'react';
+import { CustomIcon, StyleDescriptor } from '../../../common/descriptor_types';
 
 export interface IStyle {
   getType(): string;

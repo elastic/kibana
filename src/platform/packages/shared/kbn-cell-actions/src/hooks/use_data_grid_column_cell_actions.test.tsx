@@ -9,12 +9,8 @@
 
 import type { JSXElementConstructor, MutableRefObject } from 'react';
 import React from 'react';
-import type {
-  EuiDataGridColumnCellActionProps,
-  EuiDataGridRefProps,
-  EuiButtonEmpty,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
 import { render, waitFor, renderHook } from '@testing-library/react';
 import { makeAction } from '../mocks/helpers';
 import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';

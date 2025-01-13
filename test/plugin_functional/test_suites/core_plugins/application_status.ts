@@ -9,9 +9,8 @@
 
 import Url from 'url';
 import expect from '@kbn/expect';
-import type { AppUpdatableFields } from '@kbn/core-application-browser';
-import { AppStatus } from '@kbn/core-application-browser';
-import type { PluginFunctionalProviderContext } from '../../services';
+import { AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
+import { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>

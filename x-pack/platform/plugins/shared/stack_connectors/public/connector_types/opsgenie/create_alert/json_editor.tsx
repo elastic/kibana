@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
-import type { CreateAlertProps } from '.';
+import { CreateAlertProps } from '.';
 import { decodeCreateAlert } from './schema';
 import { isDecodeError } from '../schema_utils';
 

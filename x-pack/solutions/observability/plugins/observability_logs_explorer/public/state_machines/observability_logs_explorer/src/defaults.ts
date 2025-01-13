@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_ALL_SELECTION } from '@kbn/logs-explorer-plugin/public';
-import type { CommonObservabilityLogsExplorerContext } from './types';
+import { CommonObservabilityLogsExplorerContext } from './types';
 
 export const DEFAULT_CONTEXT: CommonObservabilityLogsExplorerContext = {
   initialLogsExplorerState: {},

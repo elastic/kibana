@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpecDefinitionsService } from '../../../services';
+import { SpecDefinitionsService } from '../../../services';
 
 export const document = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('update', {

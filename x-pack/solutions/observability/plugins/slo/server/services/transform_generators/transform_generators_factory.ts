@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewsService } from '@kbn/data-views-plugin/server';
-import type { TransformGenerator } from '.';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -15,8 +14,9 @@ import {
   MetricCustomTransformGenerator,
   SyntheticsAvailabilityTransformGenerator,
   TimesliceMetricTransformGenerator,
+  TransformGenerator,
 } from '.';
-import type { IndicatorTypes } from '../../domain/models';
+import { IndicatorTypes } from '../../domain/models';
 
 export function createTransformGenerators(
   spaceId: string,

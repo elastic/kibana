@@ -13,13 +13,12 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import type { ReactNode} from 'react';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
-import type { BehaviorSubject } from 'rxjs';
-import type { SidebarToggleState } from '../../../types';
+import { BehaviorSubject } from 'rxjs';
+import { SidebarToggleState } from '../../../types';
 
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 

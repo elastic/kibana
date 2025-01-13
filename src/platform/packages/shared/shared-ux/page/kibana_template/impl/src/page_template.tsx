@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import {
   NoDataConfigPage,
   NoDataConfigPageWithSolutionNavBar,
 } from '@kbn/shared-ux-page-no-data-config';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 

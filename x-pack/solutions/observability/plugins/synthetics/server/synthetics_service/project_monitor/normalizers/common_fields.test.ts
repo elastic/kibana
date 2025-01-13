@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { NormalizedProjectProps } from './common_fields';
 import {
   flattenAndFormatObject,
   getNormalizeCommonFields,
   getUrlsField,
   isValidURL,
+  NormalizedProjectProps,
 } from './common_fields';
 
 describe('isValidUrl', () => {

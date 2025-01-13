@@ -9,11 +9,11 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { IndexEntryEditor } from './index_entry_editor';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { IndexEntry } from '@kbn/elastic-assistant-common';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
-import { SyntheticsNetworkEventsApiResponseType } from '../../../../../common/runtime_types';
+import {
+  SyntheticsNetworkEventsApiResponse,
+  SyntheticsNetworkEventsApiResponseType,
+} from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
-import type { FetchNetworkEventsParams } from './actions';
+import { FetchNetworkEventsParams } from './actions';
 
 export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams

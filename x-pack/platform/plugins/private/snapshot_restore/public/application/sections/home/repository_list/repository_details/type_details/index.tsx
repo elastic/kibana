@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { REPOSITORY_TYPES } from '../../../../../../../common/constants';
-import type {
+import {
   AzureRepository,
   FSRepository,
   GCSRepository,

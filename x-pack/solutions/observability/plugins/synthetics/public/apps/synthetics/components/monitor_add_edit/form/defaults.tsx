@@ -7,8 +7,15 @@
 import { formatKibanaNamespace } from '../../../../../../common/formatters';
 import { DEFAULT_FIELDS } from '../constants';
 
-import type { SyntheticsMonitor, BrowserFields, HTTPFields, ScheduleUnit } from '../types';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  FormMonitorType,
+  SyntheticsMonitor,
+  BrowserFields,
+  HTTPFields,
+  ScheduleUnit,
+} from '../types';
 
 export const getDefaultFormFields = (
   spaceId: string = 'default'

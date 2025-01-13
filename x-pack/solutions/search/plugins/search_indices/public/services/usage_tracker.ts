@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { AppUsageTracker } from '../types';
+import { AppUsageTracker } from '../types';
 
 const APP_TRACKER_NAME = 'searchIndices';
 

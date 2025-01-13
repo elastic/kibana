@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { InvokeCreator } from 'xstate';
-import type { ObservabilityLogsExplorerHistory } from '../../../types';
-import type { OriginInterpreterContext, OriginInterpreterEvent } from './types';
+import { InvokeCreator } from 'xstate';
+import { ObservabilityLogsExplorerHistory } from '../../../types';
+import { OriginInterpreterContext, OriginInterpreterEvent } from './types';
 
 export const initializeFromLocationState =
   ({

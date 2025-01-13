@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { Dispatch } from '@reduxjs/toolkit';
+import { Dispatch } from '@reduxjs/toolkit';
 import { partition } from 'lodash';
-import type {
-  DatasourceState} from '../state_management';
 import {
   updateDatasourceState,
   type DataViewsState,
-  type VisualizationState
+  type VisualizationState,
+  DatasourceState,
 } from '../state_management';
 import type {
   AddUserMessages,

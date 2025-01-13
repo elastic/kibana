@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type {
-  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
 import {
-  mergeMigrationFunctionMaps
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -37,7 +36,7 @@ import {
   commonMigrateIndexPatternDatasource,
   commonMigrateMetricFormatter,
 } from '../migrations/common_migrations';
-import type {
+import {
   CustomVisualizationMigrations,
   LensDocShape713,
   LensDocShape715,

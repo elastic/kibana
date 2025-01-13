@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type {
+import {
   ChatCompleteAPI,
   ChatCompleteCompositeResponse,
   ChatCompleteOptions,

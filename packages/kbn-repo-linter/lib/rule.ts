@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { RepoPath } from '@kbn/repo-path';
+import { SomeDevLog } from '@kbn/some-dev-log';
+import { RepoPath } from '@kbn/repo-path';
 
-import type { LintTarget, PackageLintTarget, TsProjectLintTarget } from './lint_target';
+import { LintTarget, PackageLintTarget, TsProjectLintTarget } from './lint_target';
 import { RuleContext } from './rule_context';
 
 export interface NamedViolation extends Violation {

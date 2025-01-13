@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { useAppContext } from '../../../../../app_context';
-import type { Index } from '../../../../../../../common';
+import { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 
 export const StorageDetails: FunctionComponent<{

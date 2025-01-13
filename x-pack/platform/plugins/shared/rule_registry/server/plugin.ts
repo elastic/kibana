@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
-import { type Subject, ReplaySubject, map, distinctUntilChanged } from 'rxjs';
-import type {
+import { type Subject, ReplaySubject, Observable, map, distinctUntilChanged } from 'rxjs';
+import {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -15,8 +14,7 @@ import type {
   KibanaRequest,
   CoreStart,
   IContextProvider,
-  CoreStatus} from '@kbn/core/server';
-import {
+  CoreStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
 

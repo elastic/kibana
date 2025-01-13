@@ -9,17 +9,16 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiBasicTableColumn,
-  CustomItemAction} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
+  CustomItemAction,
   EuiCopy,
   EuiToolTip,
   euiScrollBarStyles,
@@ -31,8 +30,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
-import type { Interpolation, Theme } from '@emotion/react';
-import { css } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
@@ -42,8 +40,7 @@ import {
 } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
-import type { StarredQueryItem } from './esql_starred_queries_service';
-import { EsqlStarredQueriesService } from './esql_starred_queries_service';
+import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
 
 export function QueryHistoryAction({

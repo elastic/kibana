@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Annotation } from '../../../common/annotations';
+import { Annotation } from '../../../common/annotations';
 
 export const formatAnnotation = (annotation: Annotation) => {
   // copy message to title if title is not set

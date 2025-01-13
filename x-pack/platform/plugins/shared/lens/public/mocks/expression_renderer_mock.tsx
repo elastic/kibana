@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,

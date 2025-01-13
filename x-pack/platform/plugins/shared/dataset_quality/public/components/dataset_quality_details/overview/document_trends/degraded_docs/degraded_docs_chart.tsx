@@ -7,15 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { flyoutDegradedDocsTrendText } from '../../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../../utils';
-import type { TimeRangeConfig } from '../../../../../../common/types';
-import type { useDegradedDocsChart } from '../../../../../hooks';
+import { TimeRangeConfig } from '../../../../../../common/types';
+import { useDegradedDocsChart } from '../../../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [

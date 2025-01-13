@@ -6,10 +6,9 @@
  */
 
 import { parse, stringify } from 'query-string';
-import type { Location } from 'history';
+import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { RisonValue } from '@kbn/rison';
-import { decode, encode } from '@kbn/rison';
+import { decode, encode, RisonValue } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
 import { url } from '@kbn/kibana-utils-plugin/common';
 

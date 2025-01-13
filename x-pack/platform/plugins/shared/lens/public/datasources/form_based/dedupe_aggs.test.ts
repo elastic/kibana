@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type {
-  ExpressionAstExpressionBuilder} from '@kbn/expressions-plugin/common';
 import {
   buildExpression,
+  ExpressionAstExpressionBuilder,
   parseExpression,
 } from '@kbn/expressions-plugin/common';
 import { dedupeAggs } from './dedupe_aggs';
 import { operationDefinitionMap } from './operations';
-import type { OriginalColumn } from './to_expression';
+import { OriginalColumn } from './to_expression';
 
 describe('dedupeAggs', () => {
   const buildMapsFromAggBuilders = (aggs: ExpressionAstExpressionBuilder[]) => {

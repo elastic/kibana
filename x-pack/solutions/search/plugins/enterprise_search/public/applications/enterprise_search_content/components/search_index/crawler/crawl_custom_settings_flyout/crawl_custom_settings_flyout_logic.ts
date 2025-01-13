@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { DomainConfig } from '../../../../api/crawler/types';
-import { CustomCrawlType } from '../../../../api/crawler/types';
+import { CustomCrawlType, DomainConfig } from '../../../../api/crawler/types';
 
-import type { CrawlerActions, CrawlRequestOverrides } from '../crawler_logic';
-import { CrawlerLogic } from '../crawler_logic';
+import { CrawlerActions, CrawlerLogic, CrawlRequestOverrides } from '../crawler_logic';
 import { extractDomainAndEntryPointFromUrl } from '../domain_management/add_domain/utils';
 
 import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';

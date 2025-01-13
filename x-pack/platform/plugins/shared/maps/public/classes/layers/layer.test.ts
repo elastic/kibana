@@ -7,7 +7,7 @@
 
 import { SOURCE_DATA_REQUEST_ID, SOURCE_META_DATA_REQUEST_ID } from '../../../common/constants';
 import { AbstractLayer } from './layer';
-import type { ISource } from '../sources/source';
+import { ISource } from '../sources/source';
 
 describe('isFittable', () => {
   [

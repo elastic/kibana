@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SameFamilyFieldMetadata, IncompatibleFieldMetadata } from '../../../types';
+import { SameFamilyFieldMetadata, IncompatibleFieldMetadata } from '../../../types';
 import {
   escapeNewlines,
   getIncompatibleMappings,

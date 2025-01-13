@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../configs/ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

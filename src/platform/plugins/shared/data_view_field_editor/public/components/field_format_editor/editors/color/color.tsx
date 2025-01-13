@@ -25,7 +25,7 @@ import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
-import type { FormatEditorProps } from '../types';
+import { FormatEditorProps } from '../types';
 
 interface Color {
   range?: string;

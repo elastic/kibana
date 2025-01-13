@@ -7,13 +7,13 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
-import type { SyntheticsMonitorFilterItem } from '../../../../utils/filters/filter_fields';
 import {
   getSyntheticsFilterDisplayValues,
+  SyntheticsMonitorFilterItem,
   valueToLabelWithEmptyCount,
 } from '../../../../utils/filters/filter_fields';
 import { useGetUrlParams } from '../../../../hooks';
-import type { useMonitorFiltersState } from './use_filters';
+import { useMonitorFiltersState } from './use_filters';
 
 export const FilterButton = ({
   filter,

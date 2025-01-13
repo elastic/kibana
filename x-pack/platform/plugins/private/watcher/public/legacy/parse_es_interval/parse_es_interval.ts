@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Unit } from '@kbn/datemath';
-import dateMath from '@kbn/datemath';
+import dateMath, { Unit } from '@kbn/datemath';
 
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';

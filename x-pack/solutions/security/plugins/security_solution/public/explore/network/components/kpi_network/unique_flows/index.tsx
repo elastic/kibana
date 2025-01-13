@@ -15,7 +15,7 @@ import * as i18n from './translations';
 
 export const ID = 'networkKpiUniqueFlowsQuery';
 
-export const uniqueFlowsStatItems: readonly StatItems[] = [
+export const uniqueFlowsStatItems: Readonly<StatItems[]> = [
   {
     key: 'uniqueFlowId',
     fields: [

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,
@@ -30,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
-import type { AssetType } from '../../../types';
+import { AssetType } from '../../../types';
 
 const strings = {
   getDescription: () =>

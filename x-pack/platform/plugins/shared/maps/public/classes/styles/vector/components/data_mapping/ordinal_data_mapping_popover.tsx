@@ -7,8 +7,6 @@
 
 import _ from 'lodash';
 import React, { Fragment } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
 import {
   EuiFormRow,
   EuiHorizontalRule,
@@ -16,6 +14,7 @@ import {
   EuiRange,
   EuiSuperSelect,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -24,12 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { DataMappingPopover } from './data_mapping_popover';
-import type { FieldMetaOptions } from '../../../../../../common/descriptor_types';
-import type {
-  VECTOR_STYLES} from '../../../../../../common/constants';
+import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import {
   DEFAULT_PERCENTILES,
-  DATA_MAPPING_FUNCTION
+  DATA_MAPPING_FUNCTION,
+  VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import { PercentilesForm } from './percentiles_form';
 

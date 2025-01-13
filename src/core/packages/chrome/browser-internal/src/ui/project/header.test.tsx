@@ -13,8 +13,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
-import type { Props as ProjectHeaderProps } from './header';
-import { ProjectHeader } from './header';
+import { ProjectHeader, Props as ProjectHeaderProps } from './header';
 
 const mockApplication = applicationServiceMock.createInternalStartContract();
 

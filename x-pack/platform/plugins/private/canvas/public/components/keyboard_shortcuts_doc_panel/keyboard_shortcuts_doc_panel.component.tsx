@@ -6,8 +6,7 @@
  */
 
 import { EuiPortal } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
+import React, { FC } from 'react';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
 interface Props {

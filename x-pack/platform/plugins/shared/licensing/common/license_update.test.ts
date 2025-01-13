@@ -8,7 +8,7 @@
 import { firstValueFrom, Subject } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
-import type { ILicense } from './types';
+import { ILicense } from './types';
 import { createLicenseUpdate } from './license_update';
 import { licenseMock } from './licensing.mock';
 

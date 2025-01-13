@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, PhrasesFilter} from '@kbn/es-query';
-import { isPhrasesFilter } from '@kbn/es-query';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { Filter, PhrasesFilter, isPhrasesFilter } from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export function getPhrasesDisplayValue(filter: PhrasesFilter, formatter?: FieldFormat) {
   return filter.meta.params

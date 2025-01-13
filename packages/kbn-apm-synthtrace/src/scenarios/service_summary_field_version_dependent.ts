@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmFields} from '@kbn/apm-synthtrace-client';
-import { apm } from '@kbn/apm-synthtrace-client';
+import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import semver from 'semver';
-import type { Scenario } from '../cli/scenario';
+import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
-import type { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import type { Logger } from '../lib/utils/create_logger';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { Logger } from '../lib/utils/create_logger';
 
 const scenario: Scenario<ApmFields> = async ({
   logger,

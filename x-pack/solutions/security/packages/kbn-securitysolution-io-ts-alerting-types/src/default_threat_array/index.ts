@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
-import type { Threats } from '../threat';
-import { threats } from '../threat';
+import { Either } from 'fp-ts/lib/Either';
+import { threats, Threats } from '../threat';
 
 /**
  * Types the DefaultThreatArray as:

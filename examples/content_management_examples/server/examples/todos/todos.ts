@@ -8,14 +8,15 @@
  */
 
 import type { BulkGetResult } from '@kbn/content-management-plugin/common';
-import type {
+import {
   ContentStorage,
   StorageContext,
   ContentManagementServerSetup,
 } from '@kbn/content-management-plugin/server';
 import { v4 } from 'uuid';
-import type {
+import {
   Todo,
+  TODO_CONTENT_ID,
   TodoSearchOut,
   TodoCreateOut,
   TodoUpdateOut,
@@ -23,9 +24,7 @@ import type {
   TodoGetOut,
   TodoUpdateIn,
   TodoSearchIn,
-  TodoCreateIn} from '../../../common/examples/todos';
-import {
-  TODO_CONTENT_ID
+  TodoCreateIn,
 } from '../../../common/examples/todos';
 
 export const registerTodoContentType = ({

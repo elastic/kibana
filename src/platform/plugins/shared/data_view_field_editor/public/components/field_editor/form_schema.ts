@@ -8,10 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '@kbn/data-views-plugin/common';
-import type { FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
-import { fieldValidators } from '../../shared_imports';
+import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import type { PreviewState } from '../preview/types';
 

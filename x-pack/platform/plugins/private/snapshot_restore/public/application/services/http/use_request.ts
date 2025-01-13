@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   SendRequestConfig,
   UseRequestConfig,
-  Error as CustomError} from '../../../shared_imports';
-import {
   sendRequest as _sendRequest,
-  useRequest as _useRequest
+  useRequest as _useRequest,
+  Error as CustomError,
 } from '../../../shared_imports';
 
 import { httpService } from '.';

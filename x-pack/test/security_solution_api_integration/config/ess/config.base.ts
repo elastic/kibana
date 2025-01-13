@@ -8,8 +8,7 @@
 import path from 'path';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { kbnTestConfig, kibanaTestUser } from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 

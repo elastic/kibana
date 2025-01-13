@@ -6,12 +6,11 @@
  */
 
 import apm from 'elastic-apm-node';
-import type {
-  OperatorFunction} from 'rxjs';
 import {
   catchError,
   ignoreElements,
   merge,
+  OperatorFunction,
   shareReplay,
   tap,
   last,

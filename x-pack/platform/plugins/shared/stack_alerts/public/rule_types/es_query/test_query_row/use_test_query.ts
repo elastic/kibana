@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
-import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn } from '@elastic/eui';
 
 interface TestQueryResponse {
   result: string | null;

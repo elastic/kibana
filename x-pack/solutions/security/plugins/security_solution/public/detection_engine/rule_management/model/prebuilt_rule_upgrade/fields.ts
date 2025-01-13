@@ -70,5 +70,5 @@ export function isCommonFieldName(fieldName: string): fieldName is keyof Diffabl
 export function isNonUpgradeableFieldName(
   fieldName: string
 ): fieldName is NonUpgradeableDiffableFields {
-  return (NON_UPGRADEABLE_DIFFABLE_FIELDS as readonly string[]).includes(fieldName);
+  return (NON_UPGRADEABLE_DIFFABLE_FIELDS as Readonly<string[]>).includes(fieldName);
 }

@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  UserCommentAttachmentAttributes,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {

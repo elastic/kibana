@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  Filter,
-  Query,
-  TimeRange} from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
   compareFilters,
   isFilterPinned,
 } from '@kbn/es-query';
-import type {
-  Observable} from 'rxjs';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
   Subscription,
   combineLatest,
@@ -32,23 +30,21 @@ import {
   tap,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type {
-  GlobalQueryStateFromUrl,
-  RefreshInterval} from '@kbn/data-plugin/public';
 import {
+  GlobalQueryStateFromUrl,
+  RefreshInterval,
   connectToQueryState,
   extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { dataService } from '../services/kibana_services';
-import type { DashboardCreationOptions, DashboardState } from './types';
+import { DashboardCreationOptions, DashboardState } from './types';
 import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_constants';
 
 export function initializeUnifiedSearchManager(

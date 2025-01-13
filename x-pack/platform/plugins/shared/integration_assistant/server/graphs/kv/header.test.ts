@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
@@ -13,7 +13,7 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { kvState } from '../../../__jest__/fixtures/kv';
 import type { KVState } from '../../types';
 import { handleHeader } from './header';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const exampleAnswer = {
   rfc: 'RFC2454',

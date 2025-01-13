@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { ErrorResponse } from './helpers';
+import { ErrorResponse } from './helpers';
 
 export const getValidEqlResponse = (): TransportResult['body'] => ({
   is_partial: false,

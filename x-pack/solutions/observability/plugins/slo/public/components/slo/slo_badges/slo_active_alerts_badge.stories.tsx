@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import type { Props } from './slo_active_alerts_badge';
-import { SloActiveAlertsBadge as Component } from './slo_active_alerts_badge';
+import { SloActiveAlertsBadge as Component, Props } from './slo_active_alerts_badge';
 
 export default {
   component: Component,

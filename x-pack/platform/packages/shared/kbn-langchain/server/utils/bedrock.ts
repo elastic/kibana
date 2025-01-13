@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import type { Message } from '@aws-sdk/client-bedrock-runtime';
-import type { StreamParser } from './types';
+import { Message } from '@aws-sdk/client-bedrock-runtime';
+import { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (
   responseStream: Readable,

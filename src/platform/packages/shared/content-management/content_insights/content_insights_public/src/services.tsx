@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren} from 'react';
-import { useContext } from 'react';
+import { FC, PropsWithChildren, useContext } from 'react';
 import React from 'react';
 
-import type { ContentInsightsClientPublic } from './client';
+import { ContentInsightsClientPublic } from './client';
 
 /**
  * Abstract external services for this component.

@@ -12,7 +12,7 @@ import log from './generated/elasticsearch/composable/component/log.json';
 import event from './generated/elasticsearch/composable/component/event.json';
 
 import template from './generated/elasticsearch/composable/template.json';
-import type { IndexTemplateDef } from '../../../../types';
+import { IndexTemplateDef } from '../../../../types';
 
 const ECS_VERSION = template._meta.ecs_version;
 

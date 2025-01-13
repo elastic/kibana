@@ -5,7 +5,7 @@
  * 2.0.
  */
 import sinon from 'sinon';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';

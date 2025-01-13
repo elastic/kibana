@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import type {
+import {
   EntryExists,
   EntryList,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
+import {
+  ALL_OPERATORS,
   BuilderEntry,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
-} from '@kbn/securitysolution-list-utils';
-import {
-  ALL_OPERATORS,
-  DETECTION_ENGINE_EXCEPTION_OPERATORS,
-  EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   doesNotMatchOperator,
   existsOperator,
@@ -57,7 +53,7 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 

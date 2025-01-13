@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import type { rRuleRequestSchema } from '../../../r_rule';
+import { rRuleRequestSchema } from '../../../r_rule';
 
 export const validateSnoozeSchedule = (schedule: {
   rRule: TypeOf<typeof rRuleRequestSchema>;

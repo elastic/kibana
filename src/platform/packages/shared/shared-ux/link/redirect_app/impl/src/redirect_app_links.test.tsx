@@ -8,10 +8,8 @@
  */
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import type { MouseEvent } from 'react';
-import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount as enzymeMount } from 'enzyme';
+import React, { MouseEvent } from 'react';
+import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
 import {
   getRedirectAppLinksKibanaDependenciesMock,

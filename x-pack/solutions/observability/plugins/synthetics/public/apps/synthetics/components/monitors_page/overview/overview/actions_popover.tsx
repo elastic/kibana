@@ -6,7 +6,6 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -14,6 +13,7 @@ import {
   useEuiShadow,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
   EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -29,8 +29,7 @@ import {
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { ConfigKey, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';

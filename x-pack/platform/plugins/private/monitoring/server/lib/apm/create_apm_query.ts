@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ApmMetricFields } from '../metrics';
-import { ApmMetric } from '../metrics';
+import { ApmMetric, ApmMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 import { getBeatDataset } from '../../../common/get_index_patterns';
 

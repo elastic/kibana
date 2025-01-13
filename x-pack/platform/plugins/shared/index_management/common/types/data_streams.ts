@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ByteSize,
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,

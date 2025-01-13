@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
-import type {
+import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
   PromptCreateProps,

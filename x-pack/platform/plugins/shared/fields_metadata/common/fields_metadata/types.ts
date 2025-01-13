@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EcsFlat } from '@elastic/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
-import type { MetadataFields } from '../metadata_fields';
+import { MetadataFields } from '../metadata_fields';
 
 export const fieldSourceRT = rt.keyof({
   ecs: null,

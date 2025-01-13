@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type { Response as SupertestResponse } from 'supertest';
+import { Response as SupertestResponse } from 'supertest';
 import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
@@ -21,7 +21,7 @@ import {
   ensureDatetimeIsWithinRange,
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

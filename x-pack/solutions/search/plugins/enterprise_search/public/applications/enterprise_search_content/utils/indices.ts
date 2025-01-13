@@ -9,25 +9,20 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ConnectorViewIndex,
-  ConnectorIndex,
-  ElasticsearchIndex,
-} from '@kbn/search-connectors';
 import {
   SyncStatus,
   ConnectorStatus,
+  ConnectorViewIndex,
+  ConnectorIndex,
+  ElasticsearchIndex,
   IngestionStatus,
   IngestionMethod,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-import type {
-  CrawlerIndex,
-  ElasticsearchIndexWithIngestion,
-} from '../../../../common/types/indices';
+import { CrawlerIndex, ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
-import type { ApiViewIndex, CrawlerViewIndex, ElasticsearchViewIndex } from '../types';
+import { ApiViewIndex, CrawlerViewIndex, ElasticsearchViewIndex } from '../types';
 
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | null | undefined

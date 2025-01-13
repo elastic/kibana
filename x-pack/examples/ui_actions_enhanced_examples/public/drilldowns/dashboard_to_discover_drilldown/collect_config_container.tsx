@@ -7,10 +7,9 @@
 
 import React, { useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { CollectConfigProps } from './types';
-import type { IndexPatternItem } from './components/discover_drilldown_config';
-import { DiscoverDrilldownConfig } from './components/discover_drilldown_config';
-import type { Params } from './drilldown';
+import { CollectConfigProps } from './types';
+import { DiscoverDrilldownConfig, IndexPatternItem } from './components/discover_drilldown_config';
+import { Params } from './drilldown';
 
 export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;

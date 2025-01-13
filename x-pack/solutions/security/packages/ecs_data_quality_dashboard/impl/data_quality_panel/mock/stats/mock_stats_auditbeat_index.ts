@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MeteringStatsIndex } from '../../types';
+import { MeteringStatsIndex } from '../../types';
 
 export const mockStatsAuditbeatIndex: Record<string, MeteringStatsIndex> = {
   'auditbeat-custom-index-1': {

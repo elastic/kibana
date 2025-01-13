@@ -9,7 +9,7 @@
 
 import { Observable } from 'rxjs';
 
-import type {
+import {
   RedirectAppLinksServices,
   RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';

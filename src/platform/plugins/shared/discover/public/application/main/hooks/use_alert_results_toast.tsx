@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from 'react';
-import type { ToastsStart } from '@kbn/core/public';
+import { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {

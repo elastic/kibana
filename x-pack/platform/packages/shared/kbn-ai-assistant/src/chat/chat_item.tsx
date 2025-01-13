@@ -14,20 +14,19 @@ import {
   EuiPanel,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import type {
-  ChatActionClickHandler,
-  Feedback,
-  TelemetryEventTypeWithPayload} from '@kbn/observability-ai-assistant-plugin/public';
+import { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
+  ChatActionClickHandler,
   ChatItemControls,
-  FailedToLoadResponse
+  FailedToLoadResponse,
+  Feedback,
+  TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { getRoleTranslation } from '../utils/get_role_translation';
 import { ChatItemActions } from './chat_item_actions';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_prompt_editor';
-import type { ChatTimelineItem } from './chat_timeline';
+import { ChatTimelineItem } from './chat_timeline';
 
 export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;

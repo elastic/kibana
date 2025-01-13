@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
+import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { onActiveDataChange, updateDatasourceState, setExecutionContext } from '.';
-import type { SetExecutionContextPayload } from './lens_slice';
+import { SetExecutionContextPayload } from './lens_slice';
 
 /** cancels updates to the store that don't change the state */
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {

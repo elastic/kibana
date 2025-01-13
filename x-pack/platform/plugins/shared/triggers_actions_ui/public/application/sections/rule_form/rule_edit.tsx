@@ -30,11 +30,12 @@ import { fetchUiConfig as triggersActionsUiConfig, updateRule } from '@kbn/respo
 import { cloneDeep, omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import type {
+import {
   IErrorObject,
   Rule,
   RuleAction,
   RuleEditProps,
+  RuleFlyoutCloseReason,
   RuleNotifyWhenType,
   RuleType,
   RuleTypeMetaData,
@@ -42,7 +43,6 @@ import type {
   RuleUiAction,
   TriggersActionsUiConfig,
 } from '../../../types';
-import { RuleFlyoutCloseReason } from '../../../types';
 import { HealthCheck } from '../../components/health_check';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
 import { HealthContextProvider } from '../../context/health_context';

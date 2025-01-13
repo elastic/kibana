@@ -8,16 +8,16 @@
 import axios from 'axios';
 import { isEmpty } from 'lodash';
 
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   request,
   getErrorMessage,
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import type {
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {
   CreateCommentParams,
   CreateIncidentParams,
   ExternalService,

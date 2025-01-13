@@ -6,14 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { RouteComponentProps, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
 import { parse } from 'query-string';
-import type { ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
-import type { TemplateDeserialized } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { saveTemplate } from '../../services/api';

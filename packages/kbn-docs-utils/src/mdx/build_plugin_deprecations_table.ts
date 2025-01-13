@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import Path from 'path';
-import type { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
+import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
 import { getPluginApiDocId } from '../utils';
 
 export function buildPluginDeprecationsTable(

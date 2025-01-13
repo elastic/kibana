@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { Fragment } from 'react';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
+import React, { Fragment, ReactElement } from 'react';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;

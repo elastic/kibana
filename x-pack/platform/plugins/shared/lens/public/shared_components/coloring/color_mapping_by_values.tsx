@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
-import React from 'react';
+import React, { MutableRefObject } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
-import type {
+import {
   PaletteOutput,
   PaletteRegistry,
+  CustomizablePalette,
   DataBounds,
-  CustomPaletteParams} from '@kbn/coloring';
-import {
-  CustomizablePalette
+  CustomPaletteParams,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { PalettePanelContainer } from './palette_panel_container';

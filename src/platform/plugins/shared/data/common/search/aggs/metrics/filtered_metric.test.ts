@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IAggConfigs } from '../agg_configs';
-import { AggConfigs } from '../agg_configs';
-import type { AggTypesDependencies } from '../agg_types';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { AggTypesDependencies } from '../agg_types';
 import { mockAggTypesDependencies, mockAggTypesRegistry } from '../test_helpers';
 import { getFilteredMetricAgg } from './filtered_metric';
-import type { IMetricAggConfig } from './metric_agg_type';
+import { IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 
 describe('filtered metric agg type', () => {

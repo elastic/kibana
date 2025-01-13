@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { TypeOf, Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf, Type } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import type { FieldCopyAction } from '../../../common/types';
+import { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
-import type { RouteDependencies } from '../../types';
+import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
   file: schema.string(),

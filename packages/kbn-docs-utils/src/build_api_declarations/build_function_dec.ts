@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   FunctionDeclaration,
   MethodDeclaration,
   ConstructorDeclaration,
@@ -16,11 +16,10 @@ import type {
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
-import type { ApiDeclaration} from '../types';
-import { TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import type { BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 
 /**
  * Takes the various function-like node declaration types and converts them into an ApiDeclaration.

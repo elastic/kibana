@@ -6,7 +6,7 @@
  */
 
 import { summarizeCustomElements } from './custom_element_collector';
-import type { TelemetryCustomElementDocument } from '../../types';
+import { TelemetryCustomElementDocument } from '../../types';
 
 function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {

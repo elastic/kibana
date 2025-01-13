@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexThresholdRuleParams } from './types';
+import { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
 
 describe('expression params validation', () => {

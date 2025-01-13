@@ -9,17 +9,15 @@
 
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { FC } from 'react';
-import React from 'react';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type {
-  AxesMap,
-  AxisConfiguration} from '../../helpers';
+import React, { FC } from 'react';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import {
+  AxesMap,
+  AxisConfiguration,
   getOriginalAxisPosition,
   LINES_MARKER_SIZE,
 } from '../../helpers';
-import type {
+import {
   AvailableReferenceLineIcon,
   FillStyle,
   IconPosition,

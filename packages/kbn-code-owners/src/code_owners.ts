@@ -11,11 +11,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import type { Ignore } from 'ignore';
-import ignore from 'ignore';
+import ignore, { Ignore } from 'ignore';
 import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
-import type { CodeOwnerArea} from './code_owner_areas';
-import { findAreaForCodeOwner } from './code_owner_areas';
+import { CodeOwnerArea, findAreaForCodeOwner } from './code_owner_areas';
 
 export interface CodeOwnersEntry {
   pattern: string;

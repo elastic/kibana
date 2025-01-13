@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, ChangeEvent } from 'react';
-import React from 'react';
+import React, { FunctionComponent, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';

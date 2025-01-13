@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  ISearchStartSearchSource} from '@kbn/data-plugin/common';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   injectReferences,
+  ISearchStartSearchSource,
   parseSearchSourceJSON,
 } from '@kbn/data-plugin/common';
-import type { SavedSearchAttributes } from '../../../common';
-import { fromSavedSearchAttributes } from '../../../common';
+import { fromSavedSearchAttributes, SavedSearchAttributes } from '../../../common';
 
 interface GetSavedSearchDependencies {
   savedObjects: SavedObjectsClientContract;

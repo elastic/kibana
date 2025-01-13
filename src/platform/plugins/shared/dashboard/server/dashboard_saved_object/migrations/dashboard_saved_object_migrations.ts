@@ -9,13 +9,12 @@
 
 import { flow, mapValues } from 'lodash';
 
-import type {
-  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
 import {
-  mergeMigrationFunctionMaps
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 
 import { migrations730, migrations700 } from './migrate_to_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';

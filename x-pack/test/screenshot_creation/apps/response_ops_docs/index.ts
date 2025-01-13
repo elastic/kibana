@@ -6,7 +6,7 @@
  */
 
 import { esTestConfig } from '@kbn/test';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const ECOMMERCE_INDEX_PATTERN = 'kibana_sample_data_ecommerce';
 export const FLIGHTS_INDEX_PATTERN = 'kibana_sample_data_flights';

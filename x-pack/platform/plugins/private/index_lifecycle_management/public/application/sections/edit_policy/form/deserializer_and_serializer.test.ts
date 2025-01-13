@@ -7,11 +7,11 @@
 
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
-import type { SerializedPolicy } from '../../../../../common/types';
+import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
 import { createDeserializer } from './deserializer';
 import { createSerializer } from './serializer';
-import type { FormInternal } from '../types';
+import { FormInternal } from '../types';
 
 const isObject = (v: unknown): v is { [key: string]: any } =>
   Object.prototype.toString.call(v) === '[object Object]';

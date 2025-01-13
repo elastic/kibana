@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 
 export const parseFilterQuery = (
   filterQuery: string | null | undefined

@@ -20,17 +20,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
+import {
   ReindexWarning,
   ReindexWarningTypes,
   ReindexStatusResponse,
 } from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
-import type {
-  WarningCheckboxProps} from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
-  ReplaceIndexWithAliasWarningCheckbox
+  ReplaceIndexWithAliasWarningCheckbox,
+  WarningCheckboxProps,
 } from './warning_step_checkbox';
 
 interface CheckedIds {

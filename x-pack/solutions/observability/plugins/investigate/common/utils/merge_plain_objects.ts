@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { RequiredKeys } from 'utility-types';
-import type { MergeWithCustomizer } from 'lodash';
-import { isPlainObject, mergeWith } from 'lodash';
+import { isPlainObject, mergeWith, MergeWithCustomizer } from 'lodash';
 
 type DeepOverwrite<T, U> = U extends Record<string, any>
   ? Omit<T, RequiredKeys<U>> & {

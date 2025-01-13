@@ -25,8 +25,8 @@ import {
 
 import * as i18n from '../lib/servicenow/translations';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
-import type { ServiceNowSIRActionParams } from './types';
-import type { Fields, Choice } from '../lib/servicenow/types';
+import { ServiceNowSIRActionParams } from './types';
+import { Fields, Choice } from '../lib/servicenow/types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
 import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
 import { AdditionalFields } from '../lib/servicenow/additional_fields';

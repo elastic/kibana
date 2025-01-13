@@ -8,18 +8,17 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import type { Observable} from 'rxjs';
-import { Subject, concat, defer, of } from 'rxjs';
+import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 
-import type { UserProvidedValues } from '@kbn/core-ui-settings-common';
-import type {
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import {
   IUiSettingsClient,
   UiSettingsState,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 
-import type { UiSettingsApi } from './ui_settings_api';
+import { UiSettingsApi } from './ui_settings_api';
 
 export interface UiSettingsClientParams {
   api: UiSettingsApi;

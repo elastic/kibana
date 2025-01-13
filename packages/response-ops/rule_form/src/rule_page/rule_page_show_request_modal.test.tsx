@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
-import type { RuleFormData } from '../types';
+import { RuleFormData } from '../types';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),

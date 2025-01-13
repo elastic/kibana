@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionAstExpression } from './types';
+import { ExpressionAstExpression } from './types';
 import { buildExpression, isExpressionAstBuilder, isExpressionAst } from './build_expression';
-import type { ExpressionAstFunctionBuilder } from './build_function';
-import { buildExpressionFunction } from './build_function';
+import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_function';
 import { format } from './format';
 
 describe('isExpressionAst()', () => {

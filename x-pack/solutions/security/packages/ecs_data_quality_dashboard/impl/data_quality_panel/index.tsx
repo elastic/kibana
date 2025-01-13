@@ -11,10 +11,9 @@ import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DataQualityProvider } from './data_quality_context';
-import type { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
+import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 import { ResultsRollupContext } from './contexts/results_rollup_context';
 import { IndicesCheckContext } from './contexts/indices_check_context';
 import { useIndicesCheck } from './hooks/use_indices_check';

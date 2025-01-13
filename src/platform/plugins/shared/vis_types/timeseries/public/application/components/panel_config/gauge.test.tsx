@@ -15,7 +15,7 @@ jest.mock('../lib/get_default_query_language', () => ({
 }));
 
 import { GaugePanelConfig } from './gauge';
-import type { PanelConfigProps } from './types';
+import { PanelConfigProps } from './types';
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {

@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
-import type { SkipBottomButtonProps } from './skip_bottom_button';
-import { SkipBottomButton } from './skip_bottom_button';
+import { ReactWrapper } from 'enzyme';
+import { SkipBottomButton, SkipBottomButtonProps } from './skip_bottom_button';
 
 describe('Skip to Bottom Button', function () {
   let props: SkipBottomButtonProps;

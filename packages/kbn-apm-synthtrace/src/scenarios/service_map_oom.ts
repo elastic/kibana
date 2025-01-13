@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmFields} from '@kbn/apm-synthtrace-client';
-import { httpExitSpan } from '@kbn/apm-synthtrace-client';
+import { ApmFields, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
-import type { Transaction } from '@kbn/apm-synthtrace-client/src/lib/apm/transaction';
-import type { Scenario } from '../cli/scenario';
+import { Transaction } from '@kbn/apm-synthtrace-client/src/lib/apm/transaction';
+import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

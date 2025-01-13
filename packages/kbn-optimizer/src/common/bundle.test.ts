@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BundleSpec} from './bundle';
-import { Bundle, parseBundles } from './bundle';
+import { Bundle, BundleSpec, parseBundles } from './bundle';
 import { Hashes } from './hashes';
 import { parseDllManifest } from './dll_manifest';
 

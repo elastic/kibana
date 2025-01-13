@@ -10,13 +10,12 @@
 import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
-import type {
+import {
   BuildDependencies,
+  DEFAULT_LAYER_ID,
   LensAttributes,
   LensRegionMapConfig,
-  LensTagCloudConfig} from '../types';
-import {
-  DEFAULT_LAYER_ID
+  LensTagCloudConfig,
 } from '../types';
 import {
   addLayerColumn,

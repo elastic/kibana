@@ -9,7 +9,7 @@
 
 import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { FormulaValueConfig } from '../types';
+import { FormulaValueConfig } from '../types';
 
 export function getFormulaColumn(
   id: string,

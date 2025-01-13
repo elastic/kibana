@@ -6,9 +6,9 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
+import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 
-import type { JobSummary, JobSummarySet } from '../types';
+import { JobSummary, JobSummarySet } from '../types';
 import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchResponseHit } from '../../../common/types/es';
+import { ElasticsearchResponseHit } from '../../../common/types/es';
 
 export interface KibanaInfo {
   transport_address?: string;

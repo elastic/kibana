@@ -6,21 +6,19 @@
  */
 
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import type { RuleTaskStateAndMetrics } from '../task_runner/types';
+import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import type { RuleLastRunOutcomes } from '../../common';
-import { RuleLastRunOutcomeOrderMap } from '../../common';
-import type {
-  RawRuleLastRun,
-  RuleLastRun} from '../types';
+import { RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
-  RuleExecutionStatusWarningReasons
+  RuleExecutionStatusWarningReasons,
+  RawRuleLastRun,
+  RuleLastRun,
 } from '../types';
 import { translations } from '../constants/translations';
-import type { RuleRunMetrics } from './rule_run_metrics_store';
-import type { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 export interface ILastRun {
   lastRun: RuleLastRun;

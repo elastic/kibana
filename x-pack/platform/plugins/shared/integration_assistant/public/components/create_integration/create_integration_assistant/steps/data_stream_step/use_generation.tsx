@@ -9,11 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type {
-  Docs,
-  ESProcessorItem,
-  Pipeline,
-  SamplesFormat,
+import type { Docs, ESProcessorItem, Pipeline, SamplesFormat } from '../../../../../../common';
+import {
   type AnalyzeLogsRequestBody,
   type CategorizationRequestBody,
   type EcsMappingRequestBody,

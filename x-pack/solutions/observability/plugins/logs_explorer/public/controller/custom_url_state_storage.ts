@@ -7,7 +7,7 @@
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
-import type { LogsExplorerDiscoverServices } from './types';
+import { LogsExplorerDiscoverServices } from './types';
 
 type DiscoverHistory = LogsExplorerDiscoverServices['history'];
 

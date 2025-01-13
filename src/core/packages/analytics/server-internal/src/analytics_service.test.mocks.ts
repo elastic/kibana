@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsClient } from '@elastic/ebt/client';
+import { AnalyticsClient } from '@elastic/ebt/client';
 import { Subject } from 'rxjs';
 
 export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {

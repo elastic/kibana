@@ -8,15 +8,14 @@
 import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import type {
-  Pagination,
-  EuiTableSortingType} from '@elastic/eui';
 import {
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer
+  EuiSpacer,
+  Pagination,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

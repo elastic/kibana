@@ -6,16 +6,15 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import type { EnrichedDeprecationInfo } from '../../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';

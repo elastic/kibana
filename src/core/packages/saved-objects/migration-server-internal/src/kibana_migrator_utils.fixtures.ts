@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMap } from './core';
+import { IndexMap } from './core';
 
 export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
   '.kibana': {

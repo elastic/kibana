@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { VECTOR_STYLES } from '../../../../../../common/constants';
-import type { ColorStaticOptions } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { ColorStaticOptions } from '../../../../../../common/descriptor_types';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
-import type { StaticColorProperty } from '../../properties/static_color_property';
+import { StaticColorProperty } from '../../properties/static_color_property';
 
 interface Props {
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: ColorStaticOptions) => void;

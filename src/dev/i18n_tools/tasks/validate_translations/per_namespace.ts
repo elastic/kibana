@@ -9,14 +9,13 @@
 
 import { readFile as readFileAsync } from 'fs/promises';
 import { diffStrings } from '@kbn/dev-utils';
-import type { MessageDescriptor } from '../../extractors/call_expt';
+import { MessageDescriptor } from '../../extractors/call_expt';
 import {
   extractI18nMessageDescriptors,
   verifyMessageDescriptor,
   verifyMessageIdStartsWithNamespace,
 } from '../../extractors/formatjs';
-import type { ErrorReporter } from '../../utils';
-import { globNamespacePaths, descriptorDetailsStack } from '../../utils';
+import { globNamespacePaths, descriptorDetailsStack, ErrorReporter } from '../../utils';
 
 export const validateMessages = ({
   extractedMessages,

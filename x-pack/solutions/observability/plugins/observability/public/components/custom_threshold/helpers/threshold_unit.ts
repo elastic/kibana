@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { decimalToPct, pctToDecimal } from './corrected_percent_convert';
 
 export const convertToApiThreshold = (

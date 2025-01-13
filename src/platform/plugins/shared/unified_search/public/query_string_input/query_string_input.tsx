@@ -11,31 +11,29 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import type {
-  EuiIconProps,
-  PopoverAnchorPosition} from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutIcons,
+  EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
   EuiPortal,
   EuiTextArea,
   htmlIdGenerator,
+  PopoverAnchorPosition,
   toSentenceCase,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
-import type { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
-import type { Query , Filter } from '@kbn/es-query';
+import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getQueryLog } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog , DataPublicPluginStart} from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
+import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -44,7 +42,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { buildQueryFromFilters } from '@kbn/es-query';
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -57,8 +55,7 @@ import type {
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import type { AutocompleteService, QuerySuggestion} from '../autocomplete';
-import { QuerySuggestionTypes } from '../autocomplete';
+import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getCoreStart } from '../services';
 import './query_string_input.scss';
 

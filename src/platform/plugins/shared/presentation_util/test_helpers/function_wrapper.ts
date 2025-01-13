@@ -8,7 +8,7 @@
  */
 
 import { mapValues } from 'lodash';
-import type {
+import {
   ExpressionValueBoxed,
   typeSpecs,
   ExpressionFunctionDefinition,

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -14,6 +13,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
+  IconType,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

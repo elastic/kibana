@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties } from 'react';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { CoreStart } from '@kbn/core/public';
-import type {
+import { CoreStart } from '@kbn/core/public';
+import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import type { MetricRendererConfig } from '../../common/types';
+import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
   getDisplayName: () =>

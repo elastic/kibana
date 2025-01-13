@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import type { CliSupportedServerModes } from '../../types';
+import { CliSupportedServerModes } from '../../types';
 
 export const getConfigFilePath = (config: CliSupportedServerModes): string => {
   const baseDir = path.join(__dirname, '..'); // config base directory

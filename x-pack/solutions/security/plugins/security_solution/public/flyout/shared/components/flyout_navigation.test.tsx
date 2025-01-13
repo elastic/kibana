@@ -16,15 +16,14 @@ import {
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type {
-  ExpandableFlyoutState,
-  FlyoutPanelProps,
+import type { ExpandableFlyoutState, FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import {
   useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
   useExpandableFlyoutState,
   useExpandableFlyoutHistory,
 } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const expandDetails = jest.fn();
 

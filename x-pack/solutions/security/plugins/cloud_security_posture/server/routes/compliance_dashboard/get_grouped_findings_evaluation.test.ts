@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PostureStatsBucket } from './get_grouped_findings_evaluation';
-import { getPostureStatsFromAggs } from './get_grouped_findings_evaluation';
+import { getPostureStatsFromAggs, PostureStatsBucket } from './get_grouped_findings_evaluation';
 
 const resourceTypeBuckets: PostureStatsBucket[] = [
   {

@@ -7,7 +7,7 @@
 
 import { discardPreviousRefinements } from '.';
 import { mockAttackDiscoveries } from '../../../../../../evaluation/__mocks__/mock_attack_discoveries';
-import type { GraphState } from '../../../../types';
+import { GraphState } from '../../../../types';
 
 const initialState: GraphState = {
   anonymizedAlerts: [],

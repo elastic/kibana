@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
-import type { EsNames} from './names';
-import { getEsNames } from './names';
+import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
-import type { IClusterClientAdapter } from './cluster_client_adapter';
-import { ClusterClientAdapter } from './cluster_client_adapter';
-import type { ReadySignal } from '../lib/ready_signal';
-import { createReadySignal } from '../lib/ready_signal';
+import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
+import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
 export const RETRY_DELAY = 2000;
 

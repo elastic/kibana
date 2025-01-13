@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import type {
+import {
   GetPingHistogramParams,
   HistogramResult,
   PingsResponse,

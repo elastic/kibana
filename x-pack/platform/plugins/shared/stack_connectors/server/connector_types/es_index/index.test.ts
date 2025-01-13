@@ -9,18 +9,17 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type {
+import {
   ActionParamsType,
   ConnectorTypeConfigType,
   ESIndexConnectorType,
-  ESIndexConnectorTypeExecutorOptions} from '.';
-import {
+  ESIndexConnectorTypeExecutorOptions,
   getConnectorType,
 } from '.';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
 

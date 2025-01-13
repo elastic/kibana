@@ -12,11 +12,10 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
-import type { Lifecycle } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { Lifecycle } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-import type { WebDriver } from 'selenium-webdriver';
-import { Builder, logging } from 'selenium-webdriver';
+import { Builder, logging, WebDriver } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -32,8 +31,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import type { NetworkProfile} from './network_profiles';
-import { NETWORK_PROFILES } from './network_profiles';
+import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
 interface Configuration {
   throttleOption: string;

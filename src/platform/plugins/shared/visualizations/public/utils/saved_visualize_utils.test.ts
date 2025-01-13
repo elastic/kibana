@@ -18,7 +18,7 @@ import {
   saveVisualization,
   SAVED_VIS_TYPE,
 } from './saved_visualize_utils';
-import type { VisTypeAlias, TypesStart } from '../vis_types';
+import { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
 
 let visTypes = [] as VisTypeAlias[];

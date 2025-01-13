@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { CoreSetup } from '@kbn/core/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
-import type { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
+import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { getAllowedTypes } from '../lib';
-import type {
+import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';

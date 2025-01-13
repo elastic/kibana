@@ -12,7 +12,7 @@ import { LandingLinksIcons } from './landing_links_icons';
 import { LinkCategoryType } from '../constants';
 
 export interface LandingLinksIconsCategoriesProps {
-  links: readonly NavigationLink[];
+  links: Readonly<NavigationLink[]>;
   /** Only `title` and `separator` category types supported */
   categories: Readonly<LinkCategories>;
   urlState?: string;

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { IRouter } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { healthFrameworkResponseSchemaV1 } from '../../../../../common/routes/framework/apis/health';
-import type { ILicenseState } from '../../../../lib';
+import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  AlertingRequestHandlerContext,
-  AlertingFrameworkHealth} from '../../../../types';
 import {
-  BASE_ALERTING_API_PATH
+  AlertingRequestHandlerContext,
+  BASE_ALERTING_API_PATH,
+  AlertingFrameworkHealth,
 } from '../../../../types';
 import { getSecurityHealth } from '../../../../lib/get_security_health';
 import { transformHealthBodyResponse } from './transforms/transform_health_response/v1';

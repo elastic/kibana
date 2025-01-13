@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared_imports';
@@ -14,8 +13,7 @@ import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import type { FieldsConfig} from './shared';
-import { to, EDITOR_PX_HEIGHT, from, isXJsonField } from './shared';
+import { FieldsConfig, to, EDITOR_PX_HEIGHT, from, isXJsonField } from './shared';
 
 const { emptyField } = fieldValidators;
 

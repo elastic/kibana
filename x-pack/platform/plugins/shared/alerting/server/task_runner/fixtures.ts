@@ -6,23 +6,22 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type {
+import {
   Rule,
   RuleTypeParams,
+  RecoveredActionGroup,
   RuleMonitoring,
+  RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
-  SanitizedRuleAction} from '../../common';
-import {
-  RecoveredActionGroup,
-  RuleLastRunOutcomeOrderMap
+  SanitizedRuleAction,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
-import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import type { AlertHit, RawRule } from '../types';
+import { AlertHit, RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {

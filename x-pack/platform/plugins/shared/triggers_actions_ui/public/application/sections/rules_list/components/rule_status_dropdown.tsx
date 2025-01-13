@@ -25,7 +25,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { SnoozePanel } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
-import type { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
+import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 

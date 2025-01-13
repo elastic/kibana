@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { initSelectionsManager } from './selections_manager';
-import type { ControlGroupApi } from './types';
+import { ControlGroupApi } from './types';
 
 describe('selections manager', () => {
   const control1Api = {

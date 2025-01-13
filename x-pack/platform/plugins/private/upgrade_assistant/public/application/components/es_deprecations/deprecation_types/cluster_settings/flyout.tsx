@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import type {
+import {
   EnrichedDeprecationInfo,
   ClusterSettingAction,
   ResponseError,

@@ -7,8 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { get } from 'lodash';
-import type { ValidationError } from '../../../../../../shared_imports';
-import { useFormData, useFormContext } from '../../../../../../shared_imports';
+import { useFormData, useFormContext, ValidationError } from '../../../../../../shared_imports';
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 import { ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE } from '../../../form';
 

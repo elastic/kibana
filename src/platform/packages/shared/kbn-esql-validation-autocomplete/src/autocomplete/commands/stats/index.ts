@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
-import type { SupportedDataType } from '../../../definitions/types';
+import { SupportedDataType } from '../../../definitions/types';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,

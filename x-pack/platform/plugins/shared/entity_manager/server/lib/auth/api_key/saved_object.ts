@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDiscoveryApiKeyType } from '../../../saved_objects';
-import type { EntityManagerServerSetup } from '../../../types';
-import type { EntityDiscoveryAPIKey } from './api_key';
+import { EntityManagerServerSetup } from '../../../types';
+import { EntityDiscoveryAPIKey } from './api_key';
 
 const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
 

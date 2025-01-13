@@ -10,8 +10,7 @@
 import Path from 'path';
 import Url from 'url';
 
-import type { Flags } from '@kbn/dev-cli-runner';
-import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { RunWithCommands, Flags } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KbnClient } from './kbn_client';
 

@@ -8,11 +8,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import type { DeprecationTableColumns } from '../../../types';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import type { HealthIndicatorFlyoutProps } from './flyout';
-import { HealthIndicatorFlyout } from './flyout';
+import { HealthIndicatorFlyout, HealthIndicatorFlyoutProps } from './flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
 

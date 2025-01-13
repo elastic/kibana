@@ -9,30 +9,27 @@
 
 import React, { useState } from 'react';
 
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  Pagination} from '@elastic/eui';
 import {
+  CriteriaWithPagination,
   EuiBadge,
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiCode,
   EuiIcon,
-  EuiToolTip
+  EuiToolTip,
+  Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
-import { isSyncCancellable } from '../..';
+import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
-import type { CancelSyncModalProps } from './sync_job_cancel_modal';
-import { CancelSyncJobModal } from './sync_job_cancel_modal';
+import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;

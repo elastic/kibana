@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { NumberFormatEditor } from './number';
 

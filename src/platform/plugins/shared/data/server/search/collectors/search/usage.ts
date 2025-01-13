@@ -9,9 +9,9 @@
 
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '../../../../common';
-import type { CollectedUsage } from './register';
+import { CollectedUsage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 

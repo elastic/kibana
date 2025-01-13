@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { AxisExtentConfig, AxisExtentConfigResult } from '../types';
+import { AxisExtentConfig, AxisExtentConfigResult } from '../types';
 import { AxisExtentModes, AXIS_EXTENT_CONFIG } from '../constants';
 
 const errors = {

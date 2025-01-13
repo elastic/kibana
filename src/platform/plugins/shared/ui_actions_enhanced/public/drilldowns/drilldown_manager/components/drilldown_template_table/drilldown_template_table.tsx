@@ -8,15 +8,14 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiBasicTableColumn,
-  EuiSearchBarProps} from '@elastic/eui';
 import {
   EuiInMemoryTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiSpacer,
   EuiButton,
-  EuiText
+  EuiText,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import {
   txtNameColumnTitle,

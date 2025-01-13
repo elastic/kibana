@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ISearchStart } from '@kbn/data-plugin/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { FactoryQueryType } from '../../../../common/constants';
-import type { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../common/types/indicator';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 import { search } from '../../../utils/search';
 

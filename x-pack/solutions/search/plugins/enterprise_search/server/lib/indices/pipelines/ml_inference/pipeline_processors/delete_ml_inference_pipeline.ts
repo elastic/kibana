@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorCode } from '../../../../../../common/types/error_codes';
-import type { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
+import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 

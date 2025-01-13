@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { HasApiKeysResponse} from './get_has_api_keys';
-import { getHasApiKeys$ } from './get_has_api_keys';
+import { HasApiKeysResponse, getHasApiKeys$ } from './get_has_api_keys';
 
 describe('getHasApiKeys$', () => {
   let mockHttp: HttpSetup;

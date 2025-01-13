@@ -117,7 +117,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
         ]
       : column;
 
-    const descriptionLists: readonly DescriptionList[][] = [
+    const descriptionLists: Readonly<DescriptionList[][]> = [
       firstColumn,
       [
         {

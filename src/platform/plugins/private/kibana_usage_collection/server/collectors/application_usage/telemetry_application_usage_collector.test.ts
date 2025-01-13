@@ -19,7 +19,7 @@ import {
   registerApplicationUsageCollector,
   transformByApplicationViews,
 } from './telemetry_application_usage_collector';
-import type { ApplicationUsageViews } from './types';
+import { ApplicationUsageViews } from './types';
 
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from './saved_objects_types';
 

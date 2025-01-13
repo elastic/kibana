@@ -21,7 +21,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import type { ActionConnector, ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import type { RuleActionsItemProps } from './rule_actions_item';
+import { RuleActionsItemProps } from './rule_actions_item';
 
 const http = httpServiceMock.createStartContract();
 

@@ -9,7 +9,7 @@
 
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart } from '@kbn/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 
 export const restoreUrlErrorTitle = i18n.translate(
   'kibana_utils.stateManagement.url.restoreUrlErrorTitle',

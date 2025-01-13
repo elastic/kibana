@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
+import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -16,14 +16,13 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
-import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
-import type { ActionsConfig } from './config';
-import type {
+import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
+import { ActionsConfig } from './config';
+import {
+  ActionsPlugin,
   ActionsPluginsSetup,
   ActionsPluginsStart,
-  PluginSetupContract} from './plugin';
-import {
-  ActionsPlugin
+  PluginSetupContract,
 } from './plugin';
 import {
   AlertHistoryEsIndexConnectorId,

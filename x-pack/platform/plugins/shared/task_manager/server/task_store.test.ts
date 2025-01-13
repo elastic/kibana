@@ -6,34 +6,30 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
-import type {
+import {
   TaskInstance,
-  SerializedConcreteTaskInstance} from './task';
-import {
   TaskStatus,
-  TaskLifecycleResult
+  TaskLifecycleResult,
+  SerializedConcreteTaskInstance,
 } from './task';
-import type {
-  ElasticsearchClientMock} from '@kbn/core/server/mocks';
 import {
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { SearchOpts, AggregationOpts} from './task_store';
-import { TaskStore, taskInstanceToAttributes } from './task_store';
+import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes} from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();

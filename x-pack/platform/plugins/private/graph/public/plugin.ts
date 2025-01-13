@@ -7,31 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type {
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import {
+  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
   AppMountParameters,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  AppStatus,
+  PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 
-import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
 import type { ConfigSchema } from '../server/config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';

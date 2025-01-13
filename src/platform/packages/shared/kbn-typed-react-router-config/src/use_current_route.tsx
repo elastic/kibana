@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { OutletContextProvider } from './outlet';
-import type { RouteMatch } from './types';
+import { RouteMatch } from './types';
 
 const CurrentRouteContext = createContext<
   { match: RouteMatch; element: React.ReactElement } | undefined

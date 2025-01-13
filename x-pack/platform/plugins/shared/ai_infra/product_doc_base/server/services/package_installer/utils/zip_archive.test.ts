@@ -6,8 +6,7 @@
  */
 
 import Path from 'path';
-import type { ZipArchive } from './zip_archive';
-import { openZipArchive } from './zip_archive';
+import { openZipArchive, ZipArchive } from './zip_archive';
 
 const ZIP_PATH = Path.resolve(__dirname, './test_data/test_archive_1.zip');
 

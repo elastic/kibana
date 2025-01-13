@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type {
-  FunctionComponent} from 'react';
 import React, {
   createContext,
+  FunctionComponent,
   useCallback,
   useContext,
   useEffect,
@@ -17,9 +16,9 @@ import React, {
   useRef,
 } from 'react';
 
-import type { Processor } from '../../../../../common/types';
+import { Processor } from '../../../../../common/types';
 
-import type {
+import {
   EditorMode,
   FormValidityState,
   OnFormUpdateArg,
@@ -35,14 +34,13 @@ import { deserialize } from '../deserialize';
 
 import { serialize } from '../serialize';
 
-import type { OnActionHandler } from '../components/processors_tree';
+import { OnActionHandler } from '../components/processors_tree';
 
-import type {
-  OnSubmitHandler} from '../components';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ProcessorForm
+  ProcessorForm,
+  OnSubmitHandler,
 } from '../components';
 
 import { getValue } from '../utils';

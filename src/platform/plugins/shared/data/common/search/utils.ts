@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { AggTypesDependencies } from '..';
+import { AggTypesDependencies } from '..';
 
 // TODO - investigate if this check is still needed
 // There are no documented work flows where response or rawResponse is not returned

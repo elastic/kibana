@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EBTHelpersContract } from '../common/types';
+import { EBTHelpersContract } from '../common/types';
 
 declare global {
   interface Window {

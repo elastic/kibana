@@ -25,7 +25,7 @@ import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { UseField } from '../../shared_imports';
 
-import type { IndexPatternConfig } from '../../types';
+import { IndexPatternConfig } from '../../types';
 
 interface TypeFieldProps {
   onChange: (type: INDEX_PATTERN_TYPE) => void;

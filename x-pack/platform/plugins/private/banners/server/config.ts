@@ -6,9 +6,8 @@
  */
 
 // import { get } from 'lodash';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({

@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { EuiIconProps} from '@elastic/eui';
-import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -18,8 +17,7 @@ import type {
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
-import type { AxesMap} from './axes_configuration';
-import { getOriginalAxisPosition } from './axes_configuration';
+import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 

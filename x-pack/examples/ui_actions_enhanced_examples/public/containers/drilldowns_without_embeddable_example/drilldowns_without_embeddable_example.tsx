@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -16,11 +14,11 @@ import {
   EuiSpacer,
   EuiFlyout,
   EuiPopover,
-  EuiContextMenu
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import type { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
-import { SAMPLE_APP1_CLICK_TRIGGER } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER, SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 
 export const job: SampleMlJob = {
   job_id: '123',

@@ -7,12 +7,11 @@
 
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
-import type { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
 
 export function isMetricValid(aggDescriptor: AggDescriptor) {

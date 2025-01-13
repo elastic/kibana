@@ -35,8 +35,7 @@ import {
 } from '../../../../../shared_imports';
 
 import { documentationService } from '../../../../services/documentation';
-import type { DataStream } from '../../../../../../common';
-import { splitSizeAndUnits } from '../../../../../../common';
+import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { timeUnits } from '../../../../constants/time_units';
 import { deserializeGlobalMaxRetention, isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';

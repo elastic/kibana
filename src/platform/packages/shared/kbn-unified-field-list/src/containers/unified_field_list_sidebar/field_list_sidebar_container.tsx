@@ -38,8 +38,7 @@ import {
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
-import type { SidebarVisibility } from './get_sidebar_visibility';
-import { getSidebarVisibility } from './get_sidebar_visibility';
+import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,

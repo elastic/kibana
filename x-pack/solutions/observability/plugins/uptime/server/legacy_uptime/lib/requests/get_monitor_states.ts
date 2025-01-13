@@ -6,8 +6,8 @@
  */
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../../common/constants';
-import type { UMElasticsearchQueryFn } from '../adapters';
-import type {
+import { UMElasticsearchQueryFn } from '../adapters';
+import {
   SortOrder,
   CursorDirection,
   MonitorSummariesResult,

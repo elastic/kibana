@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { ruleParamsSchema } from '@kbn/response-ops-rule-params';
-import type {
+import { TypeOf } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
-import type {
+import {
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,

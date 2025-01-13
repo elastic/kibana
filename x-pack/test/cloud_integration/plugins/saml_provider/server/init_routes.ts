@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { getSAMLResponse, getSAMLRequestId } from './saml_tools';
 
 export function initRoutes(core: CoreSetup) {

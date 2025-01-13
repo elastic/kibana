@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
@@ -13,10 +13,10 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
 } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ActionTaskParams, InMemoryConnector } from '../types';
-import type { RelatedSavedObjects } from '../lib/related_saved_objects';
+import { ActionTaskParams, InMemoryConnector } from '../types';
+import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionTaskParamsLogMeta extends LogMeta {
   migrations: { actionTaskParamDocument: SavedObjectUnsanitizedDoc<ActionTaskParams> };

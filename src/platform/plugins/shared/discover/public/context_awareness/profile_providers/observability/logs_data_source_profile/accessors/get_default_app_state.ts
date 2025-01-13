@@ -9,7 +9,7 @@
 
 import { LOG_LEVEL_FIELD } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import type { DefaultAppStateColumn } from '../../../../types';
+import { DefaultAppStateColumn } from '../../../../types';
 
 export const createGetDefaultAppState = ({
   defaultColumns,

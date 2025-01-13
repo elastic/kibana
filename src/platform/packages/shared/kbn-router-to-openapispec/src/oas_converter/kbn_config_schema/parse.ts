@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type Joi from 'joi';
+import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
 import { omit } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';

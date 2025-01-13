@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { LineSeries, CurveType, Fit, ScaleType } from '@elastic/charts';
-import type { LocationDurationLine } from '../../../../../common/types';
+import { LocationDurationLine } from '../../../../../common/types';
 import { microToMilli, microToSec } from '../../../lib/formatting';
 import { MS_LABEL, SEC_LABEL } from '../../../../../common/translations/translations';
 

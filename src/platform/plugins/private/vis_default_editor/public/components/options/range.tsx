@@ -8,8 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiRangeProps } from '@elastic/eui';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface RangeOptionProps<ParamName extends string> {

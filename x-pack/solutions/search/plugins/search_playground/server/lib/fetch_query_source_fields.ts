@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   SearchResponse,
   FieldCapsResponse,
   IndicesGetMappingResponse,
@@ -13,8 +13,8 @@ import type {
   MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { IndicesQuerySourceFields } from '../types';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IndicesQuerySourceFields } from '../types';
 
 interface FieldModelId {
   field: string;

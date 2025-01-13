@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
-import type { SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { DefaultDataControlState } from '../../common';
+import { DefaultDataControlState } from '../../common';
 
 const dataViewReferenceName = 'rangeSliderDataView';
 

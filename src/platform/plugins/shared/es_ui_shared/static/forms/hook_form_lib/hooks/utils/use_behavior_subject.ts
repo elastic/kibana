@@ -8,8 +8,7 @@
  */
 
 import { useCallback, useRef, useMemo } from 'react';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
  * Utility to create an observable with a handler to update its value.

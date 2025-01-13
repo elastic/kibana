@@ -9,14 +9,13 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type {
-  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';

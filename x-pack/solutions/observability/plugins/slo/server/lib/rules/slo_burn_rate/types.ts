@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RuleTypeState } from '@kbn/alerting-plugin/server';
-import type {
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import type {
+import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,

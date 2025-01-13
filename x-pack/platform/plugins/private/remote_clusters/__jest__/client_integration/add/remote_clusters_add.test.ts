@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import type { RemoteClustersActions } from '../helpers';
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 import { MAX_NODE_CONNECTIONS } from '../../../common/constants';

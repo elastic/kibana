@@ -13,7 +13,7 @@ import {
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { handleError } from '../../../../lib/errors';
-import type { MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 
 export function clusterRoute(server: MonitoringCore) {
   /*

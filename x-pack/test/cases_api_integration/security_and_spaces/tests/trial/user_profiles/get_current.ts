@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { CreateCaseUserAction, User } from '@kbn/cases-plugin/common/types/domain';
-import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { CreateCaseUserAction, User, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setupSuperUserProfile } from '../../../../common/lib/api/user_profiles';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
 import {
   createCase,

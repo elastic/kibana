@@ -6,11 +6,10 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { Props } from '.';
-import { useCurrentConversation } from '.';
+import { useCurrentConversation, Props } from '.';
 import { useConversation } from '../use_conversation';
 import deepEqual from 'fast-deep-equal';
-import type { Conversation } from '../../..';
+import { Conversation } from '../../..';
 import { find } from 'lodash';
 
 // Mock dependencies

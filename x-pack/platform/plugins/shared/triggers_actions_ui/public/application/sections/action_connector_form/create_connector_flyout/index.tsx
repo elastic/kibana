@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -21,7 +20,7 @@ import {
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   ActionConnector,
   ActionType,
   ActionTypeModel,
@@ -32,9 +31,8 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import type { ConnectorFormState, ResetForm } from '../connector_form';
-import { ConnectorForm } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
+import { ConnectorForm, ConnectorFormState, ResetForm } from '../connector_form';
+import { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';

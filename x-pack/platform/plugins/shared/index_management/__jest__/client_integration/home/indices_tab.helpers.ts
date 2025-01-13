@@ -6,20 +6,18 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
 import {
   registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import type { TestSubjects } from '../helpers';
-import { WithAppDependencies, services } from '../helpers';
+import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),

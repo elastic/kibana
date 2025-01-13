@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WebDriver } from 'selenium-webdriver';
+import { WebDriver } from 'selenium-webdriver';
 
 interface ResponseFactory {
   fail: (reason?: string) => ['Fetch.failRequest', { requestId: string }];

@@ -15,7 +15,7 @@ import {
 } from '../../lib/fleet_util';
 import { defineGetPoliciesRoute } from './policies';
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,

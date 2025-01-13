@@ -6,7 +6,7 @@
  */
 
 import { orderBy } from 'lodash';
-import type { Pipeline, PipelineMetricKey } from '../../types';
+import { Pipeline, PipelineMetricKey } from '../../types';
 
 export function sortPipelines(
   pipelines: Pipeline[],

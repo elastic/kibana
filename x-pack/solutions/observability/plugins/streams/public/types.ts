@@ -6,7 +6,7 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { StreamsRepositoryClient } from './api';
 
 export interface StreamsPluginSetup {

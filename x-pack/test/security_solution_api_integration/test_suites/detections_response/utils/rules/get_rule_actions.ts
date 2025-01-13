@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 
-import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getSlackAction } from '..';
 import { getWebHookAction } from '..';
 

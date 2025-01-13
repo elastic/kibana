@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SystemIndicesMigrationStatus } from '../../../../common/types';
+import { SystemIndicesMigrationStatus } from '../../../../common/types';
 
 export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
   migration_status: 'MIGRATION_NEEDED',

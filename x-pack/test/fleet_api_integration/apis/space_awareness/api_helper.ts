@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { Agent } from 'supertest';
-import type {
+import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyResponse,
@@ -18,7 +18,7 @@ import type {
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import type {
+import {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
@@ -40,11 +40,11 @@ import type {
   PostOutputRequest,
   GetOneOutputResponse,
 } from '@kbn/fleet-plugin/common/types';
-import type {
+import {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import type { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
 import { testUsers } from '../test_users';
 
 export class SpaceTestApiClient {

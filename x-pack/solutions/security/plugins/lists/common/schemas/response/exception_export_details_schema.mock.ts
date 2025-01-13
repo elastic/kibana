@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
+import { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface ExportExceptionDetailsMock {
   listCount?: number;

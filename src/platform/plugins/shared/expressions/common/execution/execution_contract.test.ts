@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscriber } from 'rxjs';
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 import { first } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExecutionContract } from './execution_contract';
-import type { ExpressionFunctionDefinition } from '../expression_functions';
+import { ExpressionFunctionDefinition } from '../expression_functions';
 
 const createExecution = (
   expression: string = 'foo bar=123',

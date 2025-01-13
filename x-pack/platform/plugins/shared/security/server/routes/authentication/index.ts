@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
 import { defineSAMLRoutes } from './saml';
+import type { RouteDefinitionParams } from '..';
 
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineCommonRoutes(params);

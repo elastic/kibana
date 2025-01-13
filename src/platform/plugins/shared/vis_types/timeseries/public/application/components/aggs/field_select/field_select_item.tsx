@@ -9,11 +9,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps} from '@elastic/eui';
 import {
   EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';

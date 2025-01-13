@@ -6,9 +6,9 @@
  */
 
 import { DefaultAlertService } from './default_alert_service';
-import type { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

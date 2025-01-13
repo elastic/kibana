@@ -6,8 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { KeyedMutator } from 'swr';
-import useSWR from 'swr';
+import useSWR, { KeyedMutator } from 'swr';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchApi } from '../utils/api';
 

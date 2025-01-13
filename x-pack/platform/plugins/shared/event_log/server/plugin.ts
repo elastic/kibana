@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   CoreSetup,
   CoreStart,
   Logger,
@@ -13,8 +13,8 @@ import type {
   PluginInitializerContext,
   IClusterClient,
 } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 import type {
   IEventLogConfig,
@@ -23,8 +23,7 @@ import type {
   IEventLogClientService,
 } from './types';
 import { EventLogService } from './event_log_service';
-import type { EsContext } from './es';
-import { createEsContext } from './es';
+import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 

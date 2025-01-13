@@ -11,8 +11,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act, screen } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
-import type { AppMockRenderer } from '../../test_utils';
-import { createAppMockRenderer } from '../../test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
 jest.mock('../../../lib/action_connector_api', () => ({

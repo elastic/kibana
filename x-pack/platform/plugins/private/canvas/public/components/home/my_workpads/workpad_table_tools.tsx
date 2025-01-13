@@ -13,10 +13,9 @@ import type { State } from '../../../../types';
 import { useDeleteWorkpads } from '../hooks';
 import { useDownloadWorkpad } from '../../hooks';
 
-import type {
-  Props as ComponentProps} from './workpad_table_tools.component';
 import {
-  WorkpadTableTools as Component
+  WorkpadTableTools as Component,
+  Props as ComponentProps,
 } from './workpad_table_tools.component';
 import { WorkpadsContext } from './my_workpads';
 

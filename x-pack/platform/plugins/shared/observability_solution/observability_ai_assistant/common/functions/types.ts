@@ -6,7 +6,7 @@
  */
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
-import type { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
+import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
 export { FunctionVisibility };
 

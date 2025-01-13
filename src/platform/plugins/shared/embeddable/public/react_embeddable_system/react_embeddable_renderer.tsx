@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  HasSerializedChildState,
-  HasSnapshottableState,
-  SerializedPanelState} from '@kbn/presentation-containers';
 import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
-  initializeUnsavedChanges
+  HasSerializedChildState,
+  HasSnapshottableState,
+  initializeUnsavedChanges,
+  SerializedPanelState,
 } from '@kbn/presentation-containers';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-import type { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
+import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import type {
+import {
   BuildReactEmbeddableApiRegistration,
   DefaultEmbeddableApi,
   SetReactEmbeddableApiRegistration,

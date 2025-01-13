@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {

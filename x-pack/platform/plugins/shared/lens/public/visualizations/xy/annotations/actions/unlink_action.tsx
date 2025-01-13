@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { LayerAction, StateSetter } from '../../../../types';
-import type {
+import {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYState,

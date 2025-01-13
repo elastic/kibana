@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { CSSProperties, ReactElement } from 'react';
-import React from 'react';
-import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import type { FeatureCollection } from 'geojson';
-import type { StyleProperties} from './components/vector_style_editor';
-import { VectorStyleEditor } from './components/vector_style_editor';
+import React, { CSSProperties, ReactElement } from 'react';
+import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { FeatureCollection } from 'geojson';
+import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import {
   getDefaultStaticProperties,
   LABEL_STYLES,
@@ -32,8 +30,7 @@ import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { getHasLabel } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
-import type { IDynamicStyleProperty } from './properties/dynamic_style_property';
-import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
 import { StaticColorProperty } from './properties/static_color_property';
@@ -49,7 +46,7 @@ import { extractColorFromStyleProperty } from './components/legend/extract_color
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
 import { StaticIconProperty } from './properties/static_icon_property';
 import { DynamicIconProperty } from './properties/dynamic_icon_property';
-import type {
+import {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
@@ -74,14 +71,13 @@ import type {
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
-import type { IStyle } from '../style';
-import type { IStyleProperty } from './properties/style_property';
-import type { IField } from '../../fields/field';
-import type { IVectorLayer } from '../../layers/vector_layer';
-import type { IVectorSource } from '../../sources/vector_source';
-import type { StyleFieldsHelper } from './style_fields_helper';
-import { createStyleFieldsHelper } from './style_fields_helper';
-import type { IESAggField } from '../../fields/agg';
+import { IStyle } from '../style';
+import { IStyleProperty } from './properties/style_property';
+import { IField } from '../../fields/field';
+import { IVectorLayer } from '../../layers/vector_layer';
+import { IVectorSource } from '../../sources/vector_source';
+import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
+import { IESAggField } from '../../fields/agg';
 
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;

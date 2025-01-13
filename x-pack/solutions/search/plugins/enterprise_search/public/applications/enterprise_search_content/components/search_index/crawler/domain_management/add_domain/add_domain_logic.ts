@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,8 +15,8 @@ import { flashSuccessToast } from '../../../../../../shared/flash_messages';
 import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../../shared/http';
 import { KibanaLogic } from '../../../../../../shared/kibana';
-import type { CrawlerDomain, CrawlerDomainFromServer } from '../../../../../api/crawler/types';
-import type {
+import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../../api/crawler/types';
+import {
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
   CrawlerDomainValidationResultFromServer,

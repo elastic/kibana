@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 

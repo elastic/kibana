@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ActionConnectorFieldsProps } from '../../../types';
+import { ActionConnectorFieldsProps } from '../../../types';
 
 const TestConnectorError: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,

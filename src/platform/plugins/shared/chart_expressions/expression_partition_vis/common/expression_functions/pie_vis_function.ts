@@ -16,8 +16,7 @@ import {
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import type { PieVisExpressionFunctionDefinition } from '../types';
-import { ChartTypes } from '../types';
+import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,

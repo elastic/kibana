@@ -36,7 +36,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data, scopeId })
     ),
     [contextID, scopeId]
   );
-  const descriptionLists: readonly DescriptionList[][] = useMemo(() => {
+  const descriptionLists: Readonly<DescriptionList[][]> = useMemo(() => {
     const appliedPolicy = data?.hostInfo?.metadata.Endpoint.policy.applied;
 
     return [

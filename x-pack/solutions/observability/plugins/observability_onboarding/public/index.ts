@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
@@ -13,12 +13,12 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type {
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
 } from './plugin';
-import { ObservabilityOnboardingPlugin } from './plugin';
 
 export interface ConfigSchema {
   ui: {

@@ -8,7 +8,7 @@
  */
 
 import { SourceFormat } from './source';
-import type { HtmlContextTypeConvert } from '../types';
+import { HtmlContextTypeConvert } from '../types';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Source Format', () => {

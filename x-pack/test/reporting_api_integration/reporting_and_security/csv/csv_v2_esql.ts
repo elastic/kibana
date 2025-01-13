@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type request from 'supertest';
+import request from 'supertest';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

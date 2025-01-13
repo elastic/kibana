@@ -7,10 +7,9 @@
 
 import React from 'react';
 
-import type { CoreStart } from '@kbn/core/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { AggregateQuery} from '@kbn/es-query';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { CoreStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -21,7 +20,7 @@ import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
-import type {
+import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,

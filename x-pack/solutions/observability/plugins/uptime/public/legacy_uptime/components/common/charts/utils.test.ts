@@ -6,7 +6,7 @@
  */
 
 import { getDateRangeFromChartElement } from './utils';
-import type { XYChartElementEvent } from '@elastic/charts';
+import { XYChartElementEvent } from '@elastic/charts';
 
 describe('Chart utils', () => {
   it('get date range from chart element should add 100 miliseconds', () => {

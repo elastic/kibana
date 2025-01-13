@@ -9,7 +9,7 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
-import type { LegacyRequest, Bucket } from '../../../../types';
+import { LegacyRequest, Bucket } from '../../../../types';
 import {
   getIndexPatterns,
   getElasticsearchDataset,

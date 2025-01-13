@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import type { Arguments, MarkdownVisParams } from './types';
+import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { Arguments, MarkdownVisParams } from './types';
 
 export interface MarkdownVisRenderValue {
   visType: 'markdown';

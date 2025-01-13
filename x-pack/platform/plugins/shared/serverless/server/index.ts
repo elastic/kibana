@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {

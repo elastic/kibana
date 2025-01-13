@@ -7,17 +7,15 @@
 
 import { first, take, bufferCount } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type {
+import {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
-  ScheduleDensityHistogram} from './workload_statistics';
-import {
+  ScheduleDensityHistogram,
   createWorkloadAggregator,
   padBuckets,
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
-import type { ConcreteTaskInstance} from '../task';
-import { TaskCost } from '../task';
+import { ConcreteTaskInstance, TaskCost } from '../task';
 
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';

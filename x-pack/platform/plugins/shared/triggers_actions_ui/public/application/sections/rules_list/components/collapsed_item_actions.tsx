@@ -21,9 +21,11 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import type { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
-import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import { RuleTableItem, SnoozeSchedule } from '../../../../types';
+import {
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkRuleOperations,
+} from '../../common/components/with_bulk_rule_api_operations';
 import { isRuleSnoozed } from '../../../lib';
 import './collapsed_item_actions.scss';
 import { futureTimeToInterval, SnoozePanel } from './rule_snooze';

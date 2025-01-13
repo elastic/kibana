@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   AggregationsBuckets,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

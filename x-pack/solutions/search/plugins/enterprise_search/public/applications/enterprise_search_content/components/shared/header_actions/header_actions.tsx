@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import type { Connector } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 
-import type { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../utils/indices';
 
 import { SearchPlaygroundPopover } from '../../search_index/components/header_actions/search_playground_popover';

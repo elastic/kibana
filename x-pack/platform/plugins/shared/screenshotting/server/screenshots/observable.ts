@@ -6,31 +6,27 @@
  */
 
 import type { Headers } from '@kbn/core/server';
-import type { ConfigType} from '@kbn/screenshotting-server';
-import { durationToNumber as toNumber } from '@kbn/screenshotting-server';
-import type {
-  Observable} from 'rxjs';
+import { ConfigType, durationToNumber as toNumber } from '@kbn/screenshotting-server';
 import {
   catchError,
   defer,
   forkJoin,
   mergeMap,
+  Observable,
   switchMapTo,
   throwError,
   timeoutWith,
 } from 'rxjs';
 import { errors } from '../../common';
-import type {
-  Context,
-  HeadlessChromiumDriver} from '../browsers';
 import {
+  Context,
   DEFAULT_VIEWPORT,
-  getChromiumDisconnectedError
+  getChromiumDisconnectedError,
+  HeadlessChromiumDriver,
 } from '../browsers';
 import type { PdfScreenshotOptions } from '../formats';
-import type { Layout } from '../layouts';
-import type { EventLogger } from './event_logger';
-import { Actions } from './event_logger';
+import { Layout } from '../layouts';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';

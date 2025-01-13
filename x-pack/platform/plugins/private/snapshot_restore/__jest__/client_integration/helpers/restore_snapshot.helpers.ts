@@ -6,9 +6,8 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import type { HttpSetup } from '@kbn/core/public';
-import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './constant';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinks } from '@kbn/doc-links';
+import { DocLinks } from '@kbn/doc-links';
 
 class PlaygroundDocLinks {
   public chatPlayground: string = '';

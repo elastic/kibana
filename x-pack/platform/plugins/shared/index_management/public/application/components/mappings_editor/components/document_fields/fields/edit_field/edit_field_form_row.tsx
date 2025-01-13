@@ -25,7 +25,7 @@ import {
   useFormContext,
 } from '../../../../shared_imports';
 
-import type { ParameterName } from '../../../../types';
+import { ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;

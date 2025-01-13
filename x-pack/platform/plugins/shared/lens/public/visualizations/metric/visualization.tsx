@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry} from '@kbn/coloring';
-import { getOverridePaletteStops } from '@kbn/coloring';
-import type { ThemeServiceStart } from '@kbn/core/public';
+import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
-import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
-import type {
+import {
   Visualization,
   OperationMetadata,
   VisualizationConfigProps,
@@ -33,7 +32,7 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import type { MetricVisualizationState } from './types';
+import { MetricVisualizationState } from './types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 

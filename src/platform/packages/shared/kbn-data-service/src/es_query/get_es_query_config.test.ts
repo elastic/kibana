@@ -9,7 +9,7 @@
 
 import { get } from 'lodash';
 import { getEsQueryConfig } from './get_es_query_config';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '../constants';
 
 const config = {

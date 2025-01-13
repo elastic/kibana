@@ -13,7 +13,7 @@ import {
   validateSecrets,
   validateConnector,
 } from './validate_with_schema';
-import type {
+import {
   ActionType,
   ActionTypeConfig,
   ActionTypeParams,

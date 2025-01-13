@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
+import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 import { toBoolean } from '../../../utils/to_boolean';
 
 export interface DataStreamSettingResponse {

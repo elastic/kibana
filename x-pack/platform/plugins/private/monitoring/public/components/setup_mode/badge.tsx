@@ -6,8 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import type { EuiBadgeProps } from '@elastic/eui';
-import { EuiTextColor, EuiIcon, EuiBadge } from '@elastic/eui';
+import { EuiTextColor, EuiIcon, EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 import type { Instance, SetupMode } from './types';

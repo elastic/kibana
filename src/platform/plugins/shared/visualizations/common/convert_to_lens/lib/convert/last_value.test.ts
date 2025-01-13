@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggParamsTopHit} from '@kbn/data-plugin/common';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTopHit, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { SchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import { convertToLastValueColumn } from './last_value';
-import type { FiltersColumn } from './types';
+import { FiltersColumn } from './types';
 
 const mockGetFieldNameFromField = jest.fn();
 const mockGetFieldByName = jest.fn();

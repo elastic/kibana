@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { TCPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
 import { objectToJsonFormatter } from './formatting_utils';
 import { tlsFormatters } from './tls_formatters';
 import { stringToJsonFormatter } from './formatting_utils';
-import type { Formatter } from './common_formatters';
-import { commonFormatters } from './common_formatters';
+import { commonFormatters, Formatter } from './common_formatters';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 

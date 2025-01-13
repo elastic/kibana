@@ -7,7 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 
-import type { GenericObject } from '../types';
+import { GenericObject } from '../types';
 import {
   validateMappingsConfiguration,
   mappingsConfigurationSchemaKeys,

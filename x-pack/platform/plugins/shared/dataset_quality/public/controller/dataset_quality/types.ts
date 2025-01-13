@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import type {
+import { Observable } from 'rxjs';
+import {
   DatasetQualityControllerStateService,
   WithFilters,
   WithTableOptions,

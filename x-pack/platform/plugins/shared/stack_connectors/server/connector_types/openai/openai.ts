@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import type { IncomingMessage } from 'http';
-import type {
+import { IncomingMessage } from 'http';
+import {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
-import type { Stream } from 'openai/streaming';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { Stream } from 'openai/streaming';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -40,7 +39,7 @@ import {
   OpenAiProviderType,
   SUB_ACTION,
 } from '../../../common/openai/constants';
-import type {
+import {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,

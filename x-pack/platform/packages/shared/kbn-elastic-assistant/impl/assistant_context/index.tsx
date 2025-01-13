@@ -9,13 +9,12 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { AssistantFeatures} from '@kbn/elastic-assistant-common';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import type { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -23,16 +22,16 @@ import type {
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
-import type {
+import {
   AssistantAvailability,
   AssistantTelemetry,
   Conversation,
   GetAssistantMessages,
 } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
-import type { CodeBlockDetails } from '../assistant/use_conversation/helpers';
-import type { PromptContextTemplate } from '../assistant/prompt_context/types';
-import type { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
+import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
+import { PromptContextTemplate } from '../assistant/prompt_context/types';
+import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
@@ -43,7 +42,7 @@ import {
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
-import type { SettingsTabs } from '../assistant/settings/types';
+import { SettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
 export interface ShowAssistantOverlayProps {

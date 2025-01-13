@@ -8,11 +8,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
+import {
   StaticValueParams,
   StaticValueColumn as BaseStaticValueColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
+import { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';

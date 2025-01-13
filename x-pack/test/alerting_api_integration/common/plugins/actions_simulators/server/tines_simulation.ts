@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type http from 'http';
-import type {
+import http from 'http';
+import {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import type { ProxyArgs } from './simulator';
-import { Simulator } from './simulator';
+import { ProxyArgs, Simulator } from './simulator';
 
 export const tinesStory1 = { name: 'story 1', id: 1, team: 'team', published: true };
 export const tinesStory2 = { name: 'story 2', id: 2, team: 'team', published: true };

@@ -6,7 +6,7 @@
  */
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import type { RuleExecutorOptions } from '../../types';
+import { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
   executeEsQuery,
@@ -22,8 +22,7 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import type { ActionGroupId} from './constants';
-import { GEO_CONTAINMENT_ID } from './constants';
+import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
   previousStartedAt,

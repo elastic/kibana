@@ -8,14 +8,14 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
 
-import type { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
+import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
-import type {
+import {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { getRandomEuiColor } from './helpers';
-import type { PromptContextTemplate } from '../../../..';
+import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';

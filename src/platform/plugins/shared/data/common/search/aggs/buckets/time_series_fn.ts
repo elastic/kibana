@@ -8,9 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { AggExpressionType, AggExpressionFunctionArgs} from '..';
-import { BUCKET_TYPES } from '..';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggTimeSeriesFnName = 'aggTimeSeries';
 

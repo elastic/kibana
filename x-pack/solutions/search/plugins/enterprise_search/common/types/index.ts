@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
+import {
   Account as AppSearchAccount,
   ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
-import type {
+import {
   WorkplaceSearchInitialData,
   ConfiguredLimits as WorkplaceSearchConfiguredLimits,
 } from './workplace_search';

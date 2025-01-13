@@ -8,8 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette } from '@kbn/coloring';
+import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePanelContainer } from '../../shared_components';
 import './dimension_editor.scss';

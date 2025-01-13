@@ -7,12 +7,11 @@
 
 import { InferenceTaskError, type UnvalidatedToolCall } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
+  ChatCompletionErrorCode,
   ChatCompletionTokenLimitReachedError,
   ChatCompletionToolNotFoundError,
-  ChatCompletionToolValidationError} from '@kbn/inference-common/src/chat_complete/errors';
-import {
-  ChatCompletionErrorCode
+  ChatCompletionToolValidationError,
 } from '@kbn/inference-common/src/chat_complete/errors';
 
 export function createTokenLimitReachedError(

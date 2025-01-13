@@ -30,7 +30,7 @@ interface StartServices {
   userProfile: UserProfileService;
 }
 
-import type { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 
 const App = ({ appName }: { appName: string }) => (
   <EuiPage>

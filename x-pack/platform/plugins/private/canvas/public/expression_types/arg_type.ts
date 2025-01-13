@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { templateFromReactComponent } from '../lib/template_from_react_component';
-import type { BaseFormProps } from './base_form';
-import { BaseForm } from './base_form';
+import { templateFromReactComponent } from '../lib/template_from_react_component';
+import { BaseForm, BaseFormProps } from './base_form';
 
 interface ArgTypeOwnProps {
   simpleTemplate: ReturnType<typeof templateFromReactComponent>;

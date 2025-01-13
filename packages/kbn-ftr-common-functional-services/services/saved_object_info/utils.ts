@@ -9,7 +9,7 @@
 
 import { inspect } from 'util';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 interface ResolvedPayload {
   xs: any;

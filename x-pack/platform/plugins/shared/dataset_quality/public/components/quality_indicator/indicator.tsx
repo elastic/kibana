@@ -6,8 +6,7 @@
  */
 
 import { EuiHealth, EuiText } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
 export function QualityIndicator({

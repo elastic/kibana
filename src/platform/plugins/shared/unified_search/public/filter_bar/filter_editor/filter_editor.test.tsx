@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import type { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';

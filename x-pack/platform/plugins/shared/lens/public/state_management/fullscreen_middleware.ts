@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
-import type { LensGetState, LensStoreDeps } from '.';
+import { LensGetState, LensStoreDeps } from '.';
 import { setToggleFullscreen } from './lens_slice';
 
 export const fullscreenMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {

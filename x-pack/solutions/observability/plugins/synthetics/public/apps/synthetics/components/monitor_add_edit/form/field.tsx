@@ -6,13 +6,12 @@
  */
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
-import type { FieldError } from 'react-hook-form';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
 import { useKibanaSpace, useIsEditFlow, useValidateField } from '../hooks';
 import { ControlledField } from './controlled_field';
-import type { FormConfig, FieldMeta } from '../types';
+import { FormConfig, FieldMeta } from '../types';
 
 type Props = FieldMeta<any> & { fieldError?: FieldError };
 

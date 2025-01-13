@@ -22,24 +22,20 @@ import {
   Tooltip,
 } from '@elastic/charts';
 
-import type { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
+import { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
 import { niceTimeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 
 import DateMath from '@kbn/datemath';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  DateHistogramIndexPatternColumn,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+import { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import type { WithLensDataInputProps } from '../../../hoc/with_lens_data';
-import { withLensData } from '../../../hoc/with_lens_data';
+import { withLensData, WithLensDataInputProps } from '../../../hoc/with_lens_data';
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 const DEFAULT_STROKE_WIDTH = 1;

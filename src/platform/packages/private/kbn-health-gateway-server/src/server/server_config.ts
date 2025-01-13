@@ -8,9 +8,8 @@
  */
 
 import type { Duration } from 'moment';
-import type { TypeOf, ByteSizeValue } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { schema, TypeOf, ByteSizeValue } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ISslConfig, ICorsConfig, IHttpConfig } from '@kbn/server-http-tools';
 import { sslSchema, SslConfig } from '@kbn/server-http-tools';
 

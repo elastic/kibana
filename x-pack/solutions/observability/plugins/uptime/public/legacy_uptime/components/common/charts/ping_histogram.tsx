@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BrushEndListener, XYChartElementEvent, ElementClickListener } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -13,6 +12,9 @@ import {
   Position,
   Settings,
   timeFormatter,
+  BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
   ScaleType,
 } from '@elastic/charts';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
@@ -24,7 +26,7 @@ import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
-import type { HistogramResult } from '../../../../../common/runtime_types';
+import { HistogramResult } from '../../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
@@ -32,7 +34,7 @@ import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
 } from '../../../../../common/translations/translations';
-import type { ClientPluginsStart } from '../../../../plugin';
+import { ClientPluginsStart } from '../../../../plugin';
 
 export interface PingHistogramComponentProps {
   /**

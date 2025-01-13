@@ -8,8 +8,8 @@
  */
 
 import { formatId } from './constants';
-import type { FieldFormatEditorFactory } from '../types';
-import type { UrlFormatEditorFormatParams } from './url';
+import { FieldFormatEditorFactory } from '../types';
+import { UrlFormatEditorFormatParams } from './url';
 
 export type { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 

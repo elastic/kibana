@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { FindAssignableObjectResponse } from '../../../common/http_api_types';
+import { FindAssignableObjectResponse } from '../../../common/http_api_types';
 import type { TagsPluginRouter } from '../../types';
 
 export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => {

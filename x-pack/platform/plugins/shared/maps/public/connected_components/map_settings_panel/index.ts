@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
+import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { ThunkDispatch } from 'redux-thunk';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import type { MapStoreState } from '../../reducers/store';
+import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
-import type { CustomIcon } from '../../../common/descriptor_types';
+import { CustomIcon } from '../../../common/descriptor_types';
 import {
   deleteCustomIcon,
   rollbackMapSettings,

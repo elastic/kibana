@@ -8,8 +8,8 @@
  */
 
 import util from 'util';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
 
 export class RoleMappings {
   constructor(private log: ToolingLog, private kbnClient: KbnClient) {}

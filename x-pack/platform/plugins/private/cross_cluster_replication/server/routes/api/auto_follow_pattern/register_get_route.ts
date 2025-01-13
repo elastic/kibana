@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { deserializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
 import { addBasePath } from '../../../services';
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 /**
  * Get a single auto-follow pattern

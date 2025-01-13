@@ -7,11 +7,10 @@
 
 import Path from 'path';
 import Fs from 'fs/promises';
-import type { SimpleGitProgressEvent } from 'simple-git';
-import git from 'simple-git';
+import git, { SimpleGitProgressEvent } from 'simple-git';
 import { SingleBar } from 'cli-progress';
 import { once } from 'lodash';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export const syncBuiltDocs = async ({
   builtDocsDir,

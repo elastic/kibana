@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useConversationDeleted } from './use_conversation_deleted';
 import { customConvo, alertConvo, welcomeConvo } from '../../../mock/conversation';
-import type { Conversation, ConversationsBulkActions } from '../../../..';
+import { Conversation, ConversationsBulkActions } from '../../../..';
 
 const customConveId = '1';
 const alertConvoId = '2';

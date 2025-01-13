@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type { MaintenanceWindowAttributes } from '../types';
+import { MaintenanceWindowAttributes } from '../types';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 
 export interface FindMaintenanceWindowSoParams {

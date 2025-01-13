@@ -10,42 +10,40 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  MetricSpec,
-  MetricWProgress,
-  RenderChangeListener,
-  MetricWTrend,
-  MetricWNumber,
-  SettingsProps,
-  MetricWText} from '@elastic/charts';
 import {
   Chart,
   Metric,
+  MetricSpec,
+  MetricWProgress,
   isMetricElementEvent,
-  Settings
+  RenderChangeListener,
+  Settings,
+  MetricWTrend,
+  MetricWNumber,
+  SettingsProps,
+  MetricWText,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import type { CustomPaletteState } from '@kbn/charts-plugin/public';
-import type {
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import {
   FieldFormatConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type { PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { CUSTOM_PALETTE, PaletteOutput } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import type { VisParams } from '../../common';
+import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 

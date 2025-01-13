@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
 import { USERS, ROLES } from './authentication';
-import type { User, Role } from './types';
+import { User, Role } from './types';
 
 export const createUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
   const security = getService('security');

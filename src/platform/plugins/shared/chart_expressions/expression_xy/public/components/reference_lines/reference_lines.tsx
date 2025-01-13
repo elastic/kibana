@@ -10,20 +10,18 @@
 import './reference_lines.scss';
 
 import React from 'react';
-import type { Position } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CommonXYReferenceLineLayerConfig, ReferenceLineConfig } from '../../../common/types';
-import type {
+import {
   AxesMap,
   GroupsConfiguration,
-  LayersAccessorsTitles} from '../../helpers';
-import {
-  isReferenceLine
+  isReferenceLine,
+  LayersAccessorsTitles,
 } from '../../helpers';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
-import type { FormattersMap} from './utils';
-import { getNextValuesForReferenceLines } from './utils';
+import { FormattersMap, getNextValuesForReferenceLines } from './utils';
 
 export interface ReferenceLinesProps {
   layers: CommonXYReferenceLineLayerConfig[];

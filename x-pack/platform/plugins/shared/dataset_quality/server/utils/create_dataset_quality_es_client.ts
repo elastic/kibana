@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
+import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import {
   ClusterPutComponentTemplateRequest,
   ClusterPutComponentTemplateResponse,
   FieldCapsRequest,

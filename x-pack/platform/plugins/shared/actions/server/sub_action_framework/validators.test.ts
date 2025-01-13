@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
-import type {
-  TestConfig,
-  TestSecrets} from './mocks';
 import {
   TestSecretsSchema,
   TestConfigSchema,
+  TestConfig,
+  TestSecrets,
   TestSubActionConnector,
 } from './mocks';
-import type { IService, ServiceParams, SubActionConnectorType} from './types';
-import { ValidatorType } from './types';
+import { IService, ServiceParams, SubActionConnectorType, ValidatorType } from './types';
 import { buildValidators } from './validators';
 
 describe('Validators', () => {

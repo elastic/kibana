@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Context, FC, PropsWithChildren } from 'react';
-import React, { createContext, useContext } from 'react';
-import type { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
-import type { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
-import type { SidebarItems } from '../../step_detail/waterfall/types';
-import type { JourneyStep } from '../../../../../../../common/runtime_types';
+import React, { createContext, useContext, Context, FC, PropsWithChildren } from 'react';
+import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
+import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
+import { SidebarItems } from '../../step_detail/waterfall/types';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export type MarkerItems = Array<{
   id:

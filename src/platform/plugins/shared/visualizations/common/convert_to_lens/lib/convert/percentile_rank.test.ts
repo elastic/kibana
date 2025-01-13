@@ -9,9 +9,9 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { SchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import { convertToPercentileRankColumn } from './percentile_rank';
-import type { PercentileRanksColumn } from './types';
+import { PercentileRanksColumn } from './types';
 
 const mockGetFieldNameFromField = jest.fn();
 const mockGetFieldByName = jest.fn();

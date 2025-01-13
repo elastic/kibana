@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -16,7 +15,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { ActionSelect } from '../action_select';
 

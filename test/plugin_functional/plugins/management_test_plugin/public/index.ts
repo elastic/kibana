@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  ManagementTestPluginSetup,
-  ManagementTestPluginStart} from './plugin';
+import { PluginInitializer } from '@kbn/core/public';
 import {
-  ManagementTestPlugin
+  ManagementTestPlugin,
+  ManagementTestPluginSetup,
+  ManagementTestPluginStart,
 } from './plugin';
 
 export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>

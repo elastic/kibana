@@ -8,8 +8,7 @@
  */
 
 import type { Profile } from '../types';
-import type { AsyncProfileProvider} from '../profile_service';
-import { AsyncProfileService } from '../profile_service';
+import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
 
 /**
  * Indicates the current solution type (i.e. Observability, Security, Search)

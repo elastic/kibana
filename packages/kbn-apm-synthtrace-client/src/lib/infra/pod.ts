@@ -8,8 +8,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { Fields } from '../entity';
-import { Entity } from '../entity';
+import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 import { k8sContainer } from './k8s_container';
 

@@ -10,12 +10,11 @@ import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
-import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { isPlainObject } from 'lodash';
-import type {
-  FieldConfig,
-  ValidationFunc} from '../../../../../../shared_imports';
 import {
+  FieldConfig,
+  ValidationFunc,
   fieldValidators,
   isJSON,
 } from '../../../../../../shared_imports';

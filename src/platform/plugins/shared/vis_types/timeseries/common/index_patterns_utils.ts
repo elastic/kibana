@@ -8,7 +8,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { DataViewNotFoundError } from './errors';
 import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 

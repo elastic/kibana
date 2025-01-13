@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { RouteValidationError } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';

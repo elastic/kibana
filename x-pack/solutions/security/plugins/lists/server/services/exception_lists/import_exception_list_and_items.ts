@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 
-import type {
+import {
   BulkErrorSchema,
   ImportExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
@@ -16,7 +16,7 @@ import type {
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 

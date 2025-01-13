@@ -7,7 +7,7 @@
 import { render as reactRender, type RenderResult } from '@testing-library/react';
 import MicrosoftDefenderEndpointParamsFields from './microsoft_defender_endpoint_params';
 import type { ActionParamsProps } from '@kbn/alerts-ui-shared';
-import type { MicrosoftDefenderEndpointActionParams } from '../../../common/microsoft_defender_endpoint/types';
+import { MicrosoftDefenderEndpointActionParams } from '../../../common/microsoft_defender_endpoint/types';
 import React from 'react';
 import { RUN_CONNECTOR_TEST_MESSAGE } from './translations';
 

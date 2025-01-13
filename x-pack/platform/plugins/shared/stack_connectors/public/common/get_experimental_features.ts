@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ExperimentalFeatures} from '../../common/experimental_features';
 import {
+  ExperimentalFeatures,
   isValidExperimentalValue,
   getExperimentalAllowedValues,
 } from '../../common/experimental_features';

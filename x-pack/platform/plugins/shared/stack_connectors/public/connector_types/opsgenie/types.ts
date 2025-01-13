@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RecursivePartial } from '@elastic/eui';
-import type {
+import { RecursivePartial } from '@elastic/eui';
+import {
   ActionParamsProps,
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';

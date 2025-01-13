@@ -12,8 +12,8 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import { UserProfileAPIClient } from '..';
 import { UserProfile, useUserProfileForm } from './user_profile';
+import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../../management';

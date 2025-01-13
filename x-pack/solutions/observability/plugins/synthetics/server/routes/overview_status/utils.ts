@@ -11,8 +11,7 @@
  * @param schedule a number/unit pair that represents how often a configured monitor runs
  * @returns schedule interval in ms
  */
-import type { Unit } from '@kbn/datemath';
-import datemath from '@kbn/datemath';
+import datemath, { Unit } from '@kbn/datemath';
 
 export function periodToMs(schedule: { number: string; unit: Unit }) {
   if (Object.keys(datemath.unitsMap).indexOf(schedule.unit) === -1) return 0;

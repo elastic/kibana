@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
-import type {
+import {
   ItemDefinition,
   ItemDefinitionData,
   ItemDefinitionParams,

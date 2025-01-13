@@ -19,8 +19,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
 import * as ExistenceApi from './use_existing_fields';
 import { type ExistingFieldsReader } from './use_existing_fields';
-import type { FieldListGroups} from '../types';
-import { ExistenceFetchStatus, FieldsGroupNames } from '../types';
+import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
 
 describe('UnifiedFieldList useGroupedFields()', () => {
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];

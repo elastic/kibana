@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { NormalizedFields, NormalizedField, SearchResult, SearchMetadata } from '../types';
+import { NormalizedFields, NormalizedField, SearchResult, SearchMetadata } from '../types';
 import { ALL_DATA_TYPES } from '../constants';
 
 interface FieldWithMeta {

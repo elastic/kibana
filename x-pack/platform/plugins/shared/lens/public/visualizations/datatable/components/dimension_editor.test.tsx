@@ -12,15 +12,14 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import type { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor } from '../../../types';
+import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import type { TableDimensionEditorProps } from './dimension_editor';
-import { TableDimensionEditor } from './dimension_editor';
-import type { ColumnState } from '../../../../common/expressions';
+import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
+import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { getKbnPalettes } from '@kbn/palettes';
 
 describe('data table dimension editor', () => {

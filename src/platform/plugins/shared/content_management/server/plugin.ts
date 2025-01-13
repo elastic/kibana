@@ -18,13 +18,13 @@ import { registerFavorites } from '@kbn/content-management-favorites-server';
 import { Core } from './core';
 import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
 import type { Context as RpcContext } from './rpc';
-import type {
+import {
   ContentManagementServerSetup,
   ContentManagementServerStart,
   ContentManagementServerSetupDependencies,
   ContentManagementServerStartDependencies,
 } from './types';
-import type { EventStreamService } from './event_stream';
+import { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
 
 export class ContentManagementPlugin

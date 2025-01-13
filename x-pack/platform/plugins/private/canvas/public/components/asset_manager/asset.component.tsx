@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import { useNotifyService } from '../../services';
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
-import type { AssetType } from '../../../types';
+import { AssetType } from '../../../types';
 
 const strings = {
   getCopyAssetTooltip: () =>

@@ -8,12 +8,12 @@
 import { lastValueFrom } from 'rxjs';
 import { first } from 'rxjs';
 import { Query } from '@elastic/eui';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import type {
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import {
   ParseSearchQueryOptions,
   SavedObjectsTaggingApiUi,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ITagsCache } from '../services';
+import { ITagsCache } from '../services';
 
 export interface BuildParseSearchQueryOptions {
   cache: ITagsCache;

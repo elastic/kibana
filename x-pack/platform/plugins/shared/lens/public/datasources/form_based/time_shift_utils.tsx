@@ -9,12 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import type {
-  DatatableUtilitiesService} from '@kbn/data-plugin/common';
 import {
   calcAutoIntervalNear,
+  DatatableUtilitiesService,
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,

@@ -8,16 +8,15 @@
 import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
-import type { Repository, EmptyRepository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { SectionError } from '../../../shared_imports';
 
 import { RepositoryForm } from '../../components';
-import type { Section } from '../../constants';
-import { BASE_PATH } from '../../constants';
+import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 

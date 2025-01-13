@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SavedObjectsClientContract, IScopedClusterClient, IBasePath } from '@kbn/core/server';
-import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import type {
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type {
+import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import type { UptimeEsClient } from '../../lib';
-import type { UptimeConfig } from '../../../../../common/config';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { UptimeEsClient } from '../../lib';
+import { UptimeConfig } from '../../../../../common/config';
 
 export type UMElasticsearchQueryFnParams<P> = {
   uptimeEsClient: UptimeEsClient;

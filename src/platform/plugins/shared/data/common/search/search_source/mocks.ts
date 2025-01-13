@@ -10,11 +10,10 @@
 import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import type { SearchSourceDependencies } from './search_source';
-import { SearchSource } from './search_source';
-import type { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
+import { SearchSource, SearchSourceDependencies } from './search_source';
+import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setOverwriteDataViewType: jest.fn(),

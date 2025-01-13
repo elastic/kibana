@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardStart} from '@kbn/dashboard-plugin/public';
-import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
-import type { FieldListSerializedStateState } from './types';
+import { FieldListSerializedStateState } from './types';
 
 const getPanelPlacementSetting = (serializedState?: FieldListSerializedStateState) => {
   // Consider using the serialized state to determine the width, height, and strategy

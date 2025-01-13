@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MonitorFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import type { ConnectorConfiguration } from '@kbn/search-connectors';
 import {
+  ConnectorConfiguration,
   SyncJobType,
   CONNECTORS_INDEX,
   startConnectorSync,

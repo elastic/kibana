@@ -8,10 +8,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 
 import { BehaviorSubject } from 'rxjs';
-import type {
+import {
   DataView,
   DataViewField,
   DataViewLazy,
@@ -21,12 +21,10 @@ import type {
   FieldFormatsStart,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
-import type { ApiService } from '../lib';
-import { getLinks } from '../lib';
-import type {
-  Props as FieldEditorFlyoutContentProps} from './field_editor_flyout_content';
+import { getLinks, ApiService } from '../lib';
 import {
-  FieldEditorFlyoutContent
+  FieldEditorFlyoutContent,
+  Props as FieldEditorFlyoutContentProps,
 } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';

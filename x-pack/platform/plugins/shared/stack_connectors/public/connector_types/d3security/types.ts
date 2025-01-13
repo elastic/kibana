@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SUB_ACTION } from '../../../common/d3security/constants';
-import type {
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { SUB_ACTION } from '../../../common/d3security/constants';
+import {
   D3SecurityConfig,
   D3SecuritySecrets,
   D3SecurityRunActionParams,

@@ -7,14 +7,18 @@
 
 import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect, memo } from 'react';
 import { isEmpty } from 'lodash';
-import type {
+import {
   EuiDataGridColumn,
+  EuiProgress,
   EuiDataGridSorting,
+  EuiEmptyPrompt,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
+  EuiButton,
+  EuiCode,
+  EuiCopy,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { EuiProgress, EuiEmptyPrompt, EuiButton, EuiCode, EuiCopy } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -33,7 +37,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
-import type {
+import {
   Alert,
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -55,10 +59,9 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
-import type { CasesService } from './types';
+import { CasesService } from './types';
 import { AlertsTableContext } from './contexts/alerts_table_context';
-import type { FallbackComponent } from '../common/components/error_boundary';
-import { ErrorBoundary } from '../common/components/error_boundary';
+import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
-import type { UrlObject } from 'url';
+import { UrlObject } from 'url';
 import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
@@ -17,10 +17,12 @@ import {
   editor,
   viewer,
 } from '../../observability_ai_assistant_api_integration/common/users/users';
-import type { ObservabilityAIAssistantFtrConfig } from '../../observability_ai_assistant_api_integration/common/config';
-import { createObservabilityAIAssistantAPIConfig } from '../../observability_ai_assistant_api_integration/common/config';
+import {
+  ObservabilityAIAssistantFtrConfig,
+  createObservabilityAIAssistantAPIConfig,
+} from '../../observability_ai_assistant_api_integration/common/config';
 import { getScopedApiClient } from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
-import type { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
+import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;

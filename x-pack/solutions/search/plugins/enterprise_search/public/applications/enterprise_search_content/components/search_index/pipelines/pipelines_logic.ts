@@ -5,69 +5,72 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { i18n } from '@kbn/i18n';
 
-import type { IngestPipelineParams } from '@kbn/search-connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
-import type { HttpError } from '../../../../../../common/types/api';
-import type { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
-import type { InferencePipeline } from '../../../../../../common/types/pipelines';
-import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { HttpError } from '../../../../../../common/types/api';
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../../shared/flash_messages';
 
-import type { FetchDefaultPipelineResponse } from '../../../api/connector/get_default_pipeline_api_logic';
-import { FetchDefaultPipelineApiLogic } from '../../../api/connector/get_default_pipeline_api_logic';
-import type {
+import {
+  FetchDefaultPipelineApiLogic,
+  FetchDefaultPipelineResponse,
+} from '../../../api/connector/get_default_pipeline_api_logic';
+import {
   PostPipelineArgs,
   PostPipelineResponse,
+  UpdatePipelineApiLogic,
 } from '../../../api/connector/update_pipeline_api_logic';
-import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
-import type {
+import {
+  CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicValues,
   CachedFetchIndexApiLogicActions,
 } from '../../../api/index/cached_fetch_index_api_logic';
-import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
-import type {
+import {
+  CreateCustomPipelineApiLogic,
   CreateCustomPipelineApiLogicArgs,
   CreateCustomPipelineApiLogicResponse,
 } from '../../../api/index/create_custom_pipeline_api_logic';
-import { CreateCustomPipelineApiLogic } from '../../../api/index/create_custom_pipeline_api_logic';
-import type {
+import {
   FetchCustomPipelineApiLogicArgs,
   FetchCustomPipelineApiLogicResponse,
+  FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import type {
+import {
+  AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
 } from '../../../api/pipelines/attach_ml_inference_pipeline';
-import { AttachMlInferencePipelineApiLogic } from '../../../api/pipelines/attach_ml_inference_pipeline';
-import type {
+import {
+  CreateMlInferencePipelineApiLogic,
   CreateMlInferencePipelineApiLogicArgs,
   CreateMlInferencePipelineResponse,
 } from '../../../api/pipelines/create_ml_inference_pipeline';
-import { CreateMlInferencePipelineApiLogic } from '../../../api/pipelines/create_ml_inference_pipeline';
-import type {
+import {
+  DeleteMlInferencePipelineApiLogic,
   DeleteMlInferencePipelineApiLogicArgs,
   DeleteMlInferencePipelineResponse,
 } from '../../../api/pipelines/delete_ml_inference_pipeline';
-import { DeleteMlInferencePipelineApiLogic } from '../../../api/pipelines/delete_ml_inference_pipeline';
-import type {
+import {
+  DetachMlInferencePipelineApiLogic,
   DetachMlInferencePipelineApiLogicArgs,
   DetachMlInferencePipelineResponse,
 } from '../../../api/pipelines/detach_ml_inference_pipeline';
-import { DetachMlInferencePipelineApiLogic } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
-import type { RevertConnectorPipelineActions } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
+import {
+  RevertConnectorPipelineActions,
+  RevertConnectorPipelineApilogic,
+} from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 type PipelinesActions = Pick<

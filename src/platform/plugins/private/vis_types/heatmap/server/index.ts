@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { HeatmapConfig } from './config';
-import { configSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, HeatmapConfig } from './config';
 
 export const config: PluginConfigDescriptor<HeatmapConfig> = {
   exposeToBrowser: {

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

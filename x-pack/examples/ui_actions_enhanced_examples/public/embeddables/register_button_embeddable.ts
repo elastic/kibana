@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import type { StartDependencies } from '../plugin';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { StartDependencies } from '../plugin';
 
 export const BUTTON_EMBEDDABLE = 'BUTTON_EMBEDDABLE';
 

@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  UiActionsServiceEnhancementsParams} from './ui_actions_service_enhancements';
 import {
-  UiActionsServiceEnhancements
+  UiActionsServiceEnhancements,
+  UiActionsServiceEnhancementsParams,
 } from './ui_actions_service_enhancements';
-import type { ActionFactoryDefinition} from '../dynamic_actions';
-import { ActionFactory } from '../dynamic_actions';
+import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const deps: UiActionsServiceEnhancementsParams = {

@@ -10,7 +10,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { resolveRule } from '../apis/resolve_rule';
-import type { RuleFormData } from '../../types';
+import { RuleFormData } from '../../types';
 
 export interface UseResolveProps {
   http: HttpStart;

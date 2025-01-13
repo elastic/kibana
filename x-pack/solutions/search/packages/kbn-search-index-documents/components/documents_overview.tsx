@@ -7,8 +7,7 @@
 
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ChangeEvent } from 'react';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { css } from '@emotion/react';
 
 interface DocumentsProps {

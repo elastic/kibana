@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorThatHandlesItsOwnResponse, ElasticsearchError } from './types';
+import { ErrorThatHandlesItsOwnResponse, ElasticsearchError } from './types';
 import { getEsErrorMessage } from './es_error_parser';
 
 export function isErrorThatHandlesItsOwnResponse(

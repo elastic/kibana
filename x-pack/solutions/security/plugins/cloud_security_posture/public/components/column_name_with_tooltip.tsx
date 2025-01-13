@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EuiToolTipProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 
 export const ColumnNameWithTooltip = ({
   tooltipContent,

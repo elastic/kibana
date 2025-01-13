@@ -9,7 +9,7 @@ import type {
   PluginInitializerContext,
   PluginConfigDescriptor,
 } from '@kbn/core/server';
-import type { DataUsageConfigType } from './config';
+import { DataUsageConfigType } from './config';
 
 import { DataUsagePlugin } from './plugin';
 import type {

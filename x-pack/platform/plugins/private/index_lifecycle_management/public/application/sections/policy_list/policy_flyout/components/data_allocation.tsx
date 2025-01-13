@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
+import {
   AllocateAction,
   PhaseWithAllocation,
   SerializedColdPhase,

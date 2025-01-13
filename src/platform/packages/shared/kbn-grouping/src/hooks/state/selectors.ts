@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GroupsById, GroupState } from '../types';
+import { GroupsById, GroupState } from '../types';
 
 const selectGroupById = (state: GroupState): GroupsById => state.groups.groupById;
 

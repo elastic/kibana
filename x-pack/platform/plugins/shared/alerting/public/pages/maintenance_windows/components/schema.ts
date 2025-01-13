@@ -10,9 +10,8 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Frequency } from '@kbn/rrule';
 import * as i18n from '../translations';
-import type { MaintenanceWindowFrequency } from '../constants';
-import { EndsOptions } from '../constants';
-import type { ScopedQueryAttributes } from '../../../../common';
+import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
+import { ScopedQueryAttributes } from '../../../../common';
 
 const { emptyField } = fieldValidators;
 

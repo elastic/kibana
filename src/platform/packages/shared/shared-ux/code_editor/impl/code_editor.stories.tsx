@@ -12,8 +12,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { monaco as monacoEditor } from '@kbn/monaco';
 
-import type { CodeEditorStorybookParams } from './mocks/storybook';
-import { CodeEditorStorybookMock } from './mocks/storybook';
+import { CodeEditorStorybookMock, CodeEditorStorybookParams } from './mocks/storybook';
 
 import mdx from './README.mdx';
 

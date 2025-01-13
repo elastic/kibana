@@ -8,17 +8,16 @@ import type { HttpFetchOptions } from '@kbn/core/public';
 import { BehaviorSubject, filter, lastValueFrom, Observable } from 'rxjs';
 import { ReadableStream } from 'stream/web';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type {
-  ChatCompletionChunkEvent,
-  StreamingChatResponseEventWithoutError} from '../../common/conversation_complete';
 import {
+  ChatCompletionChunkEvent,
   ChatCompletionError,
-  StreamingChatResponseEventType
+  StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 
 async function getConcatenatedMessage(
   response$: Observable<StreamingChatResponseEventWithoutError>

@@ -10,7 +10,7 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
-import type { Fields, NormalizedFields, State } from '../types';
+import { Fields, NormalizedFields, State } from '../types';
 import {
   stripUndefinedValues,
   getTypeLabelFromField,

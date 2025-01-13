@@ -7,14 +7,13 @@
 
 import { memoize } from 'lodash';
 import type { IndexPattern, IndexPatternField, OperationMetadata } from '../../../types';
-import type {
-  GenericOperationDefinition,
-  OperationType,
-  BaseIndexPatternColumn} from './definitions';
 import {
   operationDefinitionMap,
   operationDefinitions,
-  renameOperationsMapping
+  GenericOperationDefinition,
+  OperationType,
+  renameOperationsMapping,
+  BaseIndexPatternColumn,
 } from './definitions';
 import { documentField } from '../document_field';
 import { hasField } from '../pure_utils';

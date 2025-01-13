@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { IToasts } from '@kbn/core/public';
+import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
-import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { assign, createMachine } from 'xstate';
-import type {
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import {
   DataStreamDocsStat,
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import { KNOWN_TYPES } from '../../../../common/constants';
-import type { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
-import type { Integration } from '../../../../common/data_streams_stats/integration';
-import type { DataStreamType } from '../../../../common/types';
-import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
+import { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
+import { Integration } from '../../../../common/data_streams_stats/integration';
+import { DataStreamType } from '../../../../common/types';
+import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../../common/notifications';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -28,7 +27,7 @@ import {
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
 } from './notifications';
-import type {
+import {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
   DatasetQualityControllerTypeState,

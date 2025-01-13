@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
-import type { ListArray } from '../lists';
-import { list } from '../lists';
+import { Either } from 'fp-ts/lib/Either';
+import { list, ListArray } from '../lists';
 
 /**
  * Types the DefaultListArray as:

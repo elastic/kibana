@@ -7,11 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
-import type { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
-import type { DataRequest } from '../../../util/data_request';
-import type { DataRequestContext } from '../../../../actions';
+import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
+import { DataRequest } from '../../../util/data_request';
+import { DataRequestContext } from '../../../../actions';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import type { IMvtVectorSource } from '../../../sources/vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 import { isESVectorTileSource } from '../../../sources/es_source';
 
 // shape of sourceDataRequest.getData()

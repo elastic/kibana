@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import { SavedObjectReference } from '@kbn/core/public';
 
 export function tagListToReferenceList(tags: string[]): SavedObjectReference[] {
   return tags.map((tag) => ({

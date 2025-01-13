@@ -10,19 +10,18 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import type { Observable, Subscription } from 'rxjs';
-import type { Config } from '@kbn/config';
+import { Observable, Subscription } from 'rxjs';
+import { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import type {
-  SecurityServiceConfigType,
-  PKCS12ConfigType} from './utils';
 import {
   getDefaultSecurityImplementation,
-  convertSecurityApi
+  convertSecurityApi,
+  SecurityServiceConfigType,
+  PKCS12ConfigType,
 } from './utils';
 
 export class SecurityService

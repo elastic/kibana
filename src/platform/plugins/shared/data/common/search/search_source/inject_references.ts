@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { SerializedSearchSourceFields } from './types';
+import { SerializedSearchSourceFields } from './types';
 
 export const injectReferences = (
   searchSourceFields: SerializedSearchSourceFields & { indexRefName: string },

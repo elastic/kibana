@@ -6,8 +6,8 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { UpdateInvestigationItemParams } from '@kbn/investigation-shared';
-import type { InvestigationRepository } from './investigation_repository';
+import { UpdateInvestigationItemParams } from '@kbn/investigation-shared';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function updateInvestigationItem(
   investigationId: string,

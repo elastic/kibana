@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { StaticValueColumn } from '../../types';
+import { StaticValueColumn } from '../../types';
 
 export const createStaticValueColumn = (value: number): StaticValueColumn => ({
   operationType: 'static_value',

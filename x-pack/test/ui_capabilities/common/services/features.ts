@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { FtrProviderContext } from '../ftr_provider_context';
-import type { Features } from '../features';
+import { ToolingLog } from '@kbn/tooling-log';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { Features } from '../features';
 
 export class FeaturesService {
   private readonly axios: AxiosInstance;

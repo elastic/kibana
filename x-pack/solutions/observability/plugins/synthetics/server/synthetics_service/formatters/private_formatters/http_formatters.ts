@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { HTTPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, HTTPFields } from '../../../../common/runtime_types';
 import { tlsFormatters } from './tls_formatters';
 
-import type { Formatter } from './common_formatters';
-import { commonFormatters } from './common_formatters';
+import { Formatter, commonFormatters } from './common_formatters';
 import {
   stringToJsonFormatter,
   arrayToJsonFormatter,

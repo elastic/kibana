@@ -11,15 +11,14 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';
-import type { TimeRange } from '@kbn/es-query';
-import type { AutoRefreshDoneFn} from './timefilter';
-import { Timefilter } from './timefilter';
-import type { Subscription } from 'rxjs';
-import type { RefreshInterval } from '../../../common';
+import { TimeRange } from '@kbn/es-query';
+import { AutoRefreshDoneFn, Timefilter } from './timefilter';
+import { Subscription } from 'rxjs';
+import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
-import type { TimefilterConfig } from './types';
+import { TimefilterConfig } from './types';
 
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 const minRefreshIntervalDefault = 1000;

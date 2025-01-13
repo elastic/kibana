@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import * as i18n from '../translations';
 
 /**

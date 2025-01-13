@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type {
+import {
   Datatable,
   DatatableColumnType,
-  ExpressionFunctionDefinition} from '../../../types';
-import {
+  ExpressionFunctionDefinition,
   getType,
 } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';

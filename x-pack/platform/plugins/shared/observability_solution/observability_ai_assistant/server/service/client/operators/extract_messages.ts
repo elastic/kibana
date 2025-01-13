@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
-import { filter, last, map, toArray } from 'rxjs';
-import type { Message, MessageAddEvent} from '../../../../common';
-import { StreamingChatResponseEventType } from '../../../../common';
+import { filter, last, map, OperatorFunction, toArray } from 'rxjs';
+import { Message, MessageAddEvent, StreamingChatResponseEventType } from '../../../../common';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
 
 export function extractMessages(): OperatorFunction<MessageOrChatEvent, Message[]> {

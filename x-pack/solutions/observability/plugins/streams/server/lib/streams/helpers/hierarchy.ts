@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamDefinition } from '@kbn/streams-schema';
+import { StreamDefinition } from '@kbn/streams-schema';
 
 export function isDescendandOf(parent: StreamDefinition, child: StreamDefinition) {
   return child.name.startsWith(parent.name);

@@ -14,7 +14,7 @@ import type {
 import { getErrorsForDateReference } from './utils';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
-import type { FormBasedLayer } from '../../../types';
+import { FormBasedLayer } from '../../../types';
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {

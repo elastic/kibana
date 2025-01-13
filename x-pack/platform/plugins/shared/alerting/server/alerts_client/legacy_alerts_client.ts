@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
-import type {
-  AlertFactory} from '../alert/create_alert_factory';
 import {
+  AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
 } from '../alert/create_alert_factory';
@@ -21,13 +20,12 @@ import {
 } from '../lib';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
-import type { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
-import type {
-  RulesSettingsFlappingProperties} from '../../common/rules_settings';
+import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import {
-  DEFAULT_FLAPPING_SETTINGS
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
 } from '../../common/rules_settings';
-import type {
+import {
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAlertsOpts,
@@ -35,9 +33,9 @@ import type {
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
-import type { UntypedNormalizedRuleType } from '../rule_type_registry';
-import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
-import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;

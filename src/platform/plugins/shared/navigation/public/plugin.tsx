@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import type { Observable} from 'rxjs';
-import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
-import type {
+import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
+import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -20,7 +19,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
-import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import type {
   NavigationPublicSetup,
@@ -30,7 +29,7 @@ import type {
   AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
-import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
 import { registerNavigationEventTypes } from './analytics';
 

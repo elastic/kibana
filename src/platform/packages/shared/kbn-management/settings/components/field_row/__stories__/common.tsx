@@ -11,17 +11,16 @@ import React, { useState } from 'react';
 import type { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
-import type { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
-import type {
+import {
   KnownTypeToMetadata,
   UiSettingMetadata,
   OnFieldChangeFn,
 } from '@kbn/management-settings-types';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import type { FieldRow as Component} from '../field_row';
-import { FieldRow } from '../field_row';
+import { FieldRow as Component, FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
 
 /**

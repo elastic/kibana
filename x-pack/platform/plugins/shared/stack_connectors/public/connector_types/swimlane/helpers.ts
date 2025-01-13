@@ -6,8 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { SwimlaneMappingConfig, MappingConfigurationKeys } from './types';
-import { SwimlaneConnectorType } from './types';
+import { SwimlaneConnectorType, SwimlaneMappingConfig, MappingConfigurationKeys } from './types';
 import * as i18n from './translations';
 
 const casesRequiredFields: MappingConfigurationKeys[] = [

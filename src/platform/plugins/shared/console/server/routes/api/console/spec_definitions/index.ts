@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandler } from '@kbn/core/server';
-import type { RouteDependencies } from '../../..';
+import { RequestHandler } from '@kbn/core/server';
+import { RouteDependencies } from '../../..';
 
 interface SpecDefinitionsRouteResponse {
   es: {

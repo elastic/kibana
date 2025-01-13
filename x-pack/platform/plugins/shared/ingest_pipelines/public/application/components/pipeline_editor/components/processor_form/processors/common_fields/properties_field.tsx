@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
-import type { EuiComboBoxProps } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ComboBoxField, FIELD_TYPES, UseField } from '../../../../../../../shared_imports';
 
-import type { FieldsConfig} from '../shared';
-import { to } from '../shared';
+import { FieldsConfig, to } from '../shared';
 
 const fieldsConfig: FieldsConfig = {
   properties: {

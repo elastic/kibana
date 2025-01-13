@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
+import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (

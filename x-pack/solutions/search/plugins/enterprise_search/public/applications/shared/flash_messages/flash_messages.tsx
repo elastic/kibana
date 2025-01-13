@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { Fragment } from 'react';
+import React, { Fragment, FC, PropsWithChildren } from 'react';
 
 import { useValues } from 'kea';
 

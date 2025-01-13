@@ -11,9 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import type {
-  EuiSelectOption} from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFieldText,
@@ -27,6 +25,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSelectOption,
   EuiFlexGrid,
 } from '@elastic/eui';
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';

@@ -8,21 +8,20 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { number } from 'io-ts';
-import type {
+import {
   SearchRequest,
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   MAX_FINDINGS_TO_LOAD,
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
-import { showErrorToast } from '@kbn/cloud-security-posture';
+import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import {

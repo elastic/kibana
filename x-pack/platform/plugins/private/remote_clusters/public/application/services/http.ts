@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { HttpSetup, HttpResponse } from '@kbn/core/public';
+import { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
-import type { Cluster } from '../../../common/lib';
+import { Cluster } from '../../../common/lib';
 
 let _httpClient: HttpSetup;
 

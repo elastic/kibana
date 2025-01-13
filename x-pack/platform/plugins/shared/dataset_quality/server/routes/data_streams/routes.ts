@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import type {
+import {
   DataStreamDetails,
   DataStreamSettings,
   DataStreamStat,

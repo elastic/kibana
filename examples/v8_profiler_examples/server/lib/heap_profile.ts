@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Session } from './session';
+import { Session } from './session';
 
 interface StartProfilingArgs {
   samplingInterval: number;

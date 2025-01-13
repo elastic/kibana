@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryObserverOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, QueryObserverOptions } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
 import type { GetIn, SearchIn } from '../../common';
 

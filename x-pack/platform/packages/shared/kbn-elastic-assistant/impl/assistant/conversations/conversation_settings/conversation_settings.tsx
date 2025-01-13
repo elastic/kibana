@@ -15,17 +15,17 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
-import type { Conversation } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
-import type { AIConnector } from '../../../connectorland/connector_selector';
+import { AIConnector } from '../../../connectorland/connector_selector';
 
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
 
-import type { ConversationsBulkActions } from '../../api';
+import { ConversationsBulkActions } from '../../api';
 import { useConversationDeleted } from './use_conversation_deleted';
 import { ConversationSettingsEditor } from './conversation_settings_editor';
 import { useConversationChanged } from './use_conversation_changed';

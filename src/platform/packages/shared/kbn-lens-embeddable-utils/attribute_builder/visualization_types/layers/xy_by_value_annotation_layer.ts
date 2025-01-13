@@ -9,12 +9,12 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { FormBasedPersistedState, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { ChartLayer } from '../../types';
 import { getDefaultReferences } from '../../utils';
-import type { XY_ANNOTATIONS_ID } from '../constants';
+import { XY_ANNOTATIONS_ID } from '../constants';
 
 export interface XYByValueAnnotationsLayerConfig {
   annotations: EventAnnotationConfig[];

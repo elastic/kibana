@@ -21,7 +21,7 @@ import {
   VIEW_INDEX_METADATA,
   WARM,
 } from '../../../translations';
-import type { ErrorSummary, IlmExplainPhaseCounts, PatternRollup } from '../../../types';
+import { ErrorSummary, IlmExplainPhaseCounts, PatternRollup } from '../../../types';
 import {
   escapeNewlines,
   getCodeFormattedValue,

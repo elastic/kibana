@@ -11,9 +11,9 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 import type { TaskRunMetrics } from '@kbn/reporting-common/types';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 import { ActionType } from '.';
-import type { IReport } from '../store';
+import { IReport } from '../store';
 import { EcsLogAdapter } from './adapter';
-import type {
+import {
   ClaimedTask,
   CompletedExecution,
   ErrorAction,

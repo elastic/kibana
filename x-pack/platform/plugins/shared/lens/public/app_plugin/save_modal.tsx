@@ -9,15 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
-import type {
-  OriginSaveProps} from './tags_saved_object_save_modal_origin_wrapper';
 import {
-  TagEnhancedSavedObjectSaveModalOrigin
+  TagEnhancedSavedObjectSaveModalOrigin,
+  OriginSaveProps,
 } from './tags_saved_object_save_modal_origin_wrapper';
-import type {
-  DashboardSaveProps} from './tags_saved_object_save_modal_dashboard_wrapper';
 import {
-  TagEnhancedSavedObjectSaveModalDashboard
+  TagEnhancedSavedObjectSaveModalDashboard,
+  DashboardSaveProps,
 } from './tags_saved_object_save_modal_dashboard_wrapper';
 
 export type SaveProps = OriginSaveProps | DashboardSaveProps;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
-import type {
+import {
   UserMessagesGetter,
   UserMessage,
   FramePublicAPI,
@@ -25,7 +25,7 @@ import {
   getActiveVisualizationIdFromDoc,
   getInitialDataViewsObject,
 } from '../../utils';
-import type {
+import {
   LensPublicCallbacks,
   LensEmbeddableStartServices,
   VisualizationContextHelper,

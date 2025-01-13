@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsQuerySortValue, SearchRequest} from '../..';
-import { queryToFields, SortDirection } from '../..';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import { EsQuerySortValue, queryToFields, SearchRequest, SortDirection } from '../..';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 
 describe('SearchSource#queryToFields', () => {
   it('should include time field', async () => {

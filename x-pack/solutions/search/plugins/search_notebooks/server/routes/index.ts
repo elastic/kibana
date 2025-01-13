@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { NotebookDefinition } from '@kbn/ipynb';
+import { NotebookDefinition } from '@kbn/ipynb';
 
 import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
 import { getNotebookCatalog, getNotebook, getNotebookMetadata } from '../lib/notebook_catalog';

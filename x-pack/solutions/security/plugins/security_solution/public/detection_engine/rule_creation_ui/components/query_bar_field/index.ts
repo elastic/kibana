@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type * from './types';
+export * from './types';
 export * from './default_queries';
 export * from './query_field';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,7 +26,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useAbortControllerRef } from '../../../../hooks/use_abort_controller_ref';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
-import type { MeteringStatsIndex, PatternRollup } from '../../../../types';
+import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
@@ -41,7 +41,7 @@ import {
   HISTORY_TAB_ID,
   LATEST_CHECK_TAB_ID,
 } from '../constants';
-import type { IndexCheckFlyoutTabId } from './types';
+import { IndexCheckFlyoutTabId } from './types';
 import { HistoricalResultsTour } from '../historical_results_tour';
 
 export interface Props {

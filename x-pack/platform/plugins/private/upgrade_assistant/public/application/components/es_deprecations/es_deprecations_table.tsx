@@ -8,8 +8,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
-import type {
-  Query} from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,9 +22,10 @@ import {
   EuiTablePagination,
   EuiCallOut,
   EuiTableRowCell,
-  Pager
+  Pager,
+  Query,
 } from '@elastic/eui';
-import type { EnrichedDeprecationInfo } from '../../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
 import {
   MlSnapshotsTableRow,
@@ -36,7 +35,7 @@ import {
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
 } from './deprecation_types';
-import type { DeprecationTableColumns } from '../types';
+import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {

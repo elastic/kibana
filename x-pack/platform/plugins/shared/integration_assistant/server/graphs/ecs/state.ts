@@ -6,7 +6,7 @@
  */
 
 import type { StateGraphArgs } from '@langchain/langgraph';
-import type { ESProcessorItem, SamplesFormat } from '../../../common';
+import { ESProcessorItem, SamplesFormat } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { merge } from '../../util/samples';
 

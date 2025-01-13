@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
+import { LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
 import { infraSourceConfigurationSavedObjectName } from '@kbn/infra-plugin/server/lib/sources';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { defaultLogViewId } from '@kbn/logs-shared-plugin/common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '@kbn/logs-shared-plugin/common/http_api/deprecations';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

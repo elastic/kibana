@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Elasticsearch, Kibana } from '..';
-import type { DatasetQualityCustomRolename } from '../authentication';
-import { customRoles } from '../authentication';
+import { Elasticsearch, Kibana } from '..';
+import { customRoles, DatasetQualityCustomRolename } from '../authentication';
 import { callKibana } from './call_kibana';
 
 export async function createCustomRole({

@@ -15,10 +15,9 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
-import type {
-  LazyExpressionProps} from '../components/param_details_form/lazy_expression';
 import {
-  LazyExpression
+  LazyExpression,
+  LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
 interface ValidateOptions extends RuleTypeParams {

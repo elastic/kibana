@@ -8,8 +8,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -22,7 +20,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverFooter,
-  EuiToolTip
+  EuiToolTip,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
 import './add_message_variables.scss';

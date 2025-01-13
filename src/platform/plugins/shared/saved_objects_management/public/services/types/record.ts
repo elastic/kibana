@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference, SavedObjectsNamespaceType } from '@kbn/core/public';
+import { SavedObjectReference, SavedObjectsNamespaceType } from '@kbn/core/public';
 
 export interface SavedObjectsManagementRecord {
   type: string;

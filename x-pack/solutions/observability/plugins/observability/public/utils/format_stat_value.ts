@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import type { Stat } from '../typings';
+import { Stat } from '../typings';
 
 export function formatStatValue(stat: Stat) {
   const { value, type } = stat;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type {
+import {
   Message,
   MessageAddEvent,
+  MessageRole,
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { CreateTest } from '../../../common/config';
+import { CreateTest } from '../../../common/config';
 
 function decodeEvents(body: Readable | string) {
   return String(body)

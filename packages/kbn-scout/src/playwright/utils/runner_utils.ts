@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import type { Config } from '../../config';
+import { Config } from '../../config';
 import { tagsByMode } from '../tags';
 
 export const serviceLoadedMsg = (name: string) => `scout service loaded: ${name}`;

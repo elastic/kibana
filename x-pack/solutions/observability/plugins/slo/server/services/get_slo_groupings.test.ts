@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { SLORepository } from '.';
-import { GetSLOGroupings } from '.';
+import { GetSLOGroupings, SLORepository } from '.';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SloDefinitionClient } from './slo_definition_client';

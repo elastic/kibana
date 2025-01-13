@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { transformRequestParamsToApplicationV1 } from './transforms';
-import type { ILicenseState} from '../../../../lib';
-import { RuleTypeDisabledError } from '../../../../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
-import type {
-  MuteAlertRequestParamsV1} from '../../../../../common/routes/rule/apis/mute_alert';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  muteAlertParamsSchemaV1
+  muteAlertParamsSchemaV1,
+  MuteAlertRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

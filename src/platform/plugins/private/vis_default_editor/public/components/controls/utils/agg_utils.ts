@@ -10,7 +10,7 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { IAggConfig } from '@kbn/data-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 type AggFilter = string[];
 

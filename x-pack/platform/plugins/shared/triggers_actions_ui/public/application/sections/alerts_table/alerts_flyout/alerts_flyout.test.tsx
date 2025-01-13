@@ -8,8 +8,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
-import type { Alert } from '../../../../types';
-import { AlertsField } from '../../../../types';
+import { Alert, AlertsField } from '../../../../types';
 
 const onClose = jest.fn();
 const onPaginate = jest.fn();

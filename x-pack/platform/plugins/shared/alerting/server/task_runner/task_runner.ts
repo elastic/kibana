@@ -7,12 +7,11 @@
 
 import apm from 'elastic-apm-node';
 import { omit } from 'lodash';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import type {
-  ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
+  ConcreteTaskInstance,
   createTaskRunError,
   TaskErrorSource,
   throwUnrecoverableError,
@@ -20,7 +19,7 @@ import {
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionScheduler, type RunResult } from './action_scheduler';
-import type {
+import {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
   RuleTaskRunResult,
@@ -29,39 +28,34 @@ import type {
   TaskRunnerContext,
 } from './types';
 import { getExecutorServices } from './get_executor_services';
-import type { ElasticsearchError} from '../lib';
-import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
-import type {
+import { ElasticsearchError, getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import {
   IntervalSchedule,
   RawRuleExecutionStatus,
   RawRuleLastRun,
   RawRuleMonitoring,
   RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   RuleTaskState,
-  RuleTypeRegistry} from '../types';
-import {
-  RuleExecutionStatusErrorReasons
+  RuleTypeRegistry,
 } from '../types';
-import type { Result } from '../lib/result_type';
-import { asErr, asOk, isErr, isOk, map, resolveErr } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type {
+import {
   AlertInstanceContext,
   AlertInstanceState,
+  parseDuration,
   RawAlertInstance,
   RuleAlertData,
+  RuleLastRunOutcomeOrderMap,
   RuleTypeParams,
-  RuleTypeState} from '../../common';
-import {
-  parseDuration,
-  RuleLastRunOutcomeOrderMap
+  RuleTypeState,
 } from '../../common';
-import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import type { InMemoryMetrics } from '../monitoring';
-import { IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';

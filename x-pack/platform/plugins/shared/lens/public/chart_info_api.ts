@@ -10,7 +10,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getActiveDatasourceIdFromDoc } from './utils';
 import type { DatasourceMap, OperationDescriptor, VisualizationMap } from './types';
-import type { LensDocument } from './persistence';
+import { LensDocument } from './persistence';
 
 export type ChartInfoApi = Promise<{
   getChartInfo: (vis: LensDocument) => Promise<ChartInfo | undefined>;

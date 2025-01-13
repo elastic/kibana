@@ -6,8 +6,7 @@
  */
 
 import { compose, withState } from 'react-recompose';
-import type { Props as ComponentProps } from './advanced_filter';
-import { AdvancedFilter as Component } from './advanced_filter';
+import { AdvancedFilter as Component, Props as ComponentProps } from './advanced_filter';
 
 export interface Props {
   /** Optional value for the component */

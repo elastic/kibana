@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type {
-  BulkUntrackByQueryRequestBodyV1} from '../../../../../common/routes/rule/apis/bulk_untrack_by_query';
+import { IRouter } from '@kbn/core/server';
 import {
+  BulkUntrackByQueryRequestBodyV1,
   bulkUntrackByQueryBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_untrack_by_query';
-import type { ILicenseState} from '../../../../lib';
-import { RuleTypeDisabledError } from '../../../../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformBulkUntrackAlertsByQueryBodyV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

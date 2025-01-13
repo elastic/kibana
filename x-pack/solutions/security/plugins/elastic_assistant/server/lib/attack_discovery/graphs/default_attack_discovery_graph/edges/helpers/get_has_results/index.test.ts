@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
 import { getHasResults } from '.';
 

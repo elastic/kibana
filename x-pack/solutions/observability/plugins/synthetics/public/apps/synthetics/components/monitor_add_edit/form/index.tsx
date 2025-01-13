@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
-import type { SyntheticsMonitor } from '../types';
-import { FormMonitorType } from '../types';
+import { FormMonitorType, SyntheticsMonitor } from '../types';
 import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';

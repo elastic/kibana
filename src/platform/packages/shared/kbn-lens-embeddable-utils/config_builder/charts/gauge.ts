@@ -13,8 +13,7 @@ import type {
   GaugeVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { BuildDependencies, LensAttributes, LensGaugeConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } from '../types';
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,

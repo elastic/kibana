@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PhrasesFilter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore, PhrasesFilter } from '@kbn/es-query';
 
 export const phrasesFilter: PhrasesFilter = {
   meta: {

@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
-import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <

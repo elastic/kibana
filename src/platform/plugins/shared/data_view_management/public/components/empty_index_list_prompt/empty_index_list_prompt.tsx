@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiFlexGroup,
 } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,

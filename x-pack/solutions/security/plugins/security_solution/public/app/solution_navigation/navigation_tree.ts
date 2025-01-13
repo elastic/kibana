@@ -23,8 +23,8 @@ import { SOLUTION_NAME } from '../../common/translations';
 
 export const formatNavigationTree = (
   solutionNavLinks: SolutionNavLink[],
-  bodyCategories: readonly SolutionLinkCategory[],
-  footerCategories: readonly SolutionLinkCategory[]
+  bodyCategories: Readonly<SolutionLinkCategory[]>,
+  footerCategories: Readonly<SolutionLinkCategory[]>
 ): NavigationTreeDefinition => {
   const [footerNavItems, bodyNavItems] = partition('isFooterLink', solutionNavLinks);
   const bodyChildren = addMainLinksPanelOpenerProp(

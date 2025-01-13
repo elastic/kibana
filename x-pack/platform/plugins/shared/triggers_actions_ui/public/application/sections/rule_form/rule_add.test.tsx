@@ -6,8 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
 
@@ -19,16 +18,16 @@ import { createRule } from '@kbn/response-ops-rule-form/src/common/apis/create_r
 import { fetchAlertingFrameworkHealth as fetchAlertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import type {
+import {
   Rule,
   RuleAddProps,
+  RuleFlyoutCloseReason,
   GenericValidationResult,
   ValidationResult,
   RuleCreationValidConsumer,
   RuleType,
   RuleTypeModel,
 } from '../../../types';
-import { RuleFlyoutCloseReason } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';

@@ -10,8 +10,6 @@
 import React, { useMemo, useState } from 'react';
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type {
-  OnTimeChangeProps} from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,10 +17,11 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSwitch,
-  EuiText
+  EuiText,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';

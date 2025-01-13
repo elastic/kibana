@@ -34,8 +34,7 @@ import {
 } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import type { NewLocation } from '../settings/private_locations/add_location_flyout';
-import { AddLocationFlyout } from '../settings/private_locations/add_location_flyout';
+import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 
 export const GettingStartedPage = () => {

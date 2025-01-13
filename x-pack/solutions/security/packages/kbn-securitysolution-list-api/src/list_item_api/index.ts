@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import type {
+import {
   FindListItemSchema,
   ListItemSchema,
-  FoundListItemSchema,
-  DeleteListItemSchema,
-  PatchListItemSchema,
-  CreateListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
   deleteListItemSchema,
   patchListItemSchema,
   createListItemSchema,
   findListItemSchema,
   foundListItemSchema,
   listItemSchema,
+  FoundListItemSchema,
+  DeleteListItemSchema,
+  PatchListItemSchema,
+  CreateListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
@@ -27,7 +25,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import type {
+import {
   ApiParams,
   FindListItemsParams,
   DeleteListItemParams,

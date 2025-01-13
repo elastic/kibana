@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
-import type { Point } from '../../types';
+import { Moment } from 'moment';
+import { Point } from '../../types';
 
 export function createExponentialFunction(start: Point, end: Point) {
   const totalPoints = end.x - start.x;

@@ -11,8 +11,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
-import type { Props as ComponentProps } from './sample_data_card.component';
-import { SampleDataCard as Component } from './sample_data_card.component';
+import { SampleDataCard as Component, Props as ComponentProps } from './sample_data_card.component';
 
 /**
  * Props for the `SampleDataCard` component.

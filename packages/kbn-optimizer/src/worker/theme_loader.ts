@@ -8,7 +8,7 @@
  */
 
 import { stringifyRequest, getOptions } from 'loader-utils';
-import type webpack from 'webpack';
+import webpack from 'webpack';
 import {
   FALLBACK_THEME_TAG,
   parseThemeTags,

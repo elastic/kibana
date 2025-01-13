@@ -9,20 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  HasEditCapabilities,
-  EmbeddableApiContext,
-  CanAccessViewMode} from '@kbn/presentation-publishing';
 import {
   hasEditCapabilities,
+  HasEditCapabilities,
+  EmbeddableApiContext,
+  CanAccessViewMode,
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import type {
-  Action,
-  FrequentCompatibilityChangeAction} from '@kbn/ui-actions-plugin/public';
 import {
+  Action,
+  FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 

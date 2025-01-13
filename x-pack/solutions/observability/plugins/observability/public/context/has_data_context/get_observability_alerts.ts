@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { Rule } from '@kbn/alerting-plugin/common';
+import { Rule } from '@kbn/alerting-plugin/common';
 
 const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
 

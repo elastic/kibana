@@ -18,7 +18,7 @@ import { isEqual as mockIsEqual } from 'lodash';
 import React from 'react';
 import { DiscoverResizableLayout, SIDEBAR_WIDTH_KEY } from './discover_resizable_layout';
 import { BehaviorSubject } from 'rxjs';
-import type { SidebarToggleState } from '../../../types';
+import { SidebarToggleState } from '../../../types';
 
 const mockSidebarKey = SIDEBAR_WIDTH_KEY;
 let mockSidebarWidth: number | undefined;

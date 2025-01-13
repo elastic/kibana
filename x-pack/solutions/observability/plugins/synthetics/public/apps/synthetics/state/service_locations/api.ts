@@ -6,12 +6,12 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import type {
+import {
   ServiceLocations,
   ServiceLocationsApiResponse,
+  ServiceLocationsApiResponseCodec,
   ThrottlingOptions,
 } from '../../../../../common/runtime_types';
-import { ServiceLocationsApiResponseCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export const fetchServiceLocations = async (): Promise<{

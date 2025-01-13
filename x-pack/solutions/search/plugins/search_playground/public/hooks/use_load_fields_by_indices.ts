@@ -6,13 +6,16 @@
  */
 
 import { useEffect } from 'react';
-import type { UseFormReturn } from 'react-hook-form/dist/types';
+import { UseFormReturn } from 'react-hook-form/dist/types';
 import { useUsageTracker } from './use_usage_tracker';
-import type { ChatForm } from '../types';
-import { ChatFormFields } from '../types';
+import { ChatForm, ChatFormFields } from '../types';
 import { useIndicesFields } from './use_indices_fields';
-import type { IndexFields } from '../utils/create_query';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+  IndexFields,
+} from '../utils/create_query';
 import { AnalyticsEvents } from '../analytics/constants';
 
 const mergeDefaultAndCurrentValues = (

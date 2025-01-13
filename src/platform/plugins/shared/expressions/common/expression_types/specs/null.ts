@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionTypeDefinition } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 
 const name = 'null';
 

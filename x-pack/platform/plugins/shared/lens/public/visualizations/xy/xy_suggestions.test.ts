@@ -7,13 +7,12 @@
 
 import { getSuggestions } from './xy_suggestions';
 import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
-import type {
+import {
   State,
   XYState,
+  visualizationSubtypes,
   XYAnnotationLayerConfig,
-  XYDataLayerConfig} from './types';
-import {
-  visualizationSubtypes
+  XYDataLayerConfig,
 } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';

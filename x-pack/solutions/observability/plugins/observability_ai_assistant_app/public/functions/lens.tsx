@@ -11,13 +11,13 @@ import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddabl
 import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import type { Assign } from 'utility-types';
-import type {
+import { Assign } from 'utility-types';
+import {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public/types';
 import type { LensFunctionArguments } from '../../common/functions/lens';
-import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export enum SeriesType {
   Bar = 'bar',

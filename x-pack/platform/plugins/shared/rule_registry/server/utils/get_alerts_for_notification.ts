@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_END,
   ALERT_STATUS,

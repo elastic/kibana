@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FC, PropsWithChildren } from 'react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, FC, PropsWithChildren } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 const seeFullErrorMessage = i18n.translate(

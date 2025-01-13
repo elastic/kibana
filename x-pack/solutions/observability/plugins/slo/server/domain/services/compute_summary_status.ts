@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorBudget, Objective, Status } from '../models';
+import { ErrorBudget, Objective, Status } from '../models';
 
 export function computeSummaryStatus(
   objective: Objective,

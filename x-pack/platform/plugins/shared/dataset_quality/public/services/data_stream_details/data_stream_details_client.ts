@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import type {
-  CheckAndLoadIntegrationResponse,
-  DataStreamRolloverResponse,
-  DegradedFieldAnalysis,
-  DegradedFieldValues,
-  IntegrationDashboardsResponse,
-  UpdateFieldLimitResponse} from '../../../common/api_types';
 import {
+  CheckAndLoadIntegrationResponse,
   checkAndLoadIntegrationResponseRt,
+  DataStreamRolloverResponse,
   dataStreamRolloverResponseRt,
+  DegradedFieldAnalysis,
   degradedFieldAnalysisRt,
+  DegradedFieldValues,
   degradedFieldValuesRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
+  IntegrationDashboardsResponse,
   integrationDashboardsRT,
+  UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
 } from '../../../common/api_types';
-import type {
+import {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
@@ -37,9 +36,9 @@ import type {
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
 } from '../../../common/data_streams_stats';
-import type { IDataStreamDetailsClient } from './types';
+import { IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import type {
+import {
   AnalyzeDegradedFieldsParams,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,

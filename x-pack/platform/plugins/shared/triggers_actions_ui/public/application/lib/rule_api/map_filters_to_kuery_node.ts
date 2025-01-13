@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import type { RuleStatus } from '../../../types';
+import { RuleStatus } from '../../../types';
 
 export const mapFiltersToKueryNode = ({
   typesFilter,

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SomeDevLog } from '@kbn/some-dev-log';
+import { SomeDevLog } from '@kbn/some-dev-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import type { YarnLock } from './yarn_lock';
+import { YarnLock } from './yarn_lock';
 
 /**
  * Get a list of the all production dependencies for Kibana by starting with the

@@ -8,8 +8,7 @@
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { memo } from 'react';
-import type { EuiButtonEmptyProps } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 
 const EuiButtonEmptyCss = css`
   border-top: ${euiThemeVars.euiBorderThin};

@@ -8,28 +8,26 @@
  */
 
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
-import type {
+import {
+  SeriesTypes,
   Column,
   XYConfiguration,
   XYDataLayerConfig,
-  XYReferenceLineLayerConfig} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
-  SeriesTypes
+  XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { Vis } from '@kbn/visualizations-plugin/public';
-import type { Layer } from '..';
-import type { ChartType } from '../../../common';
-import type {
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { Layer } from '..';
+import { ChartType } from '../../../common';
+import {
   CategoryAxis,
   ChartMode,
-  Scale,
-  SeriesParam,
-  ValueAxis,
-  VisParams} from '../../types';
-import {
   InterpolationMode,
+  Scale,
   ScaleType,
-  ThresholdLineStyle
+  SeriesParam,
+  ThresholdLineStyle,
+  ValueAxis,
+  VisParams,
 } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 

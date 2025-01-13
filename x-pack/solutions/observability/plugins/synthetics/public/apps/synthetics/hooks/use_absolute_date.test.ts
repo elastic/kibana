@@ -7,8 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { renderHook } from '@testing-library/react';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { useAbsoluteDate } from './use_absolute_date';
 
 describe('useAbsoluteDate', () => {

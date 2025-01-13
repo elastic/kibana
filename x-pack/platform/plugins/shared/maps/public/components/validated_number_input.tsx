@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ChangeEvent, ReactNode } from 'react';
-import React, { Component } from 'react';
+import React, { Component, ChangeEvent, ReactNode } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import type { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
+import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 

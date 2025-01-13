@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { PureComponent } from 'react';
+import React, { FC, PureComponent } from 'react';
 import { css as emotionCss } from '@emotion/css';
-import type { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Positionable } from '../../public/components/positionable/positionable';
 import { elementToShape } from '../../public/components/workpad_page/positioning_utils';
-import type { CanvasRenderedElement } from '../types';
+import { CanvasRenderedElement } from '../types';
 import { CanvasShareableContext, useCanvasShareableState } from '../context';
-import type { AnyRendererSpec } from '../../types';
+import { AnyRendererSpec } from '../../types';
 import { createHandlers } from '../../public/lib/create_handlers';
 
 import css from './rendered_element.module.scss';

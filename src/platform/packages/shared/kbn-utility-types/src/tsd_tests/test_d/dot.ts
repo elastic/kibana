@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DedotObject, DotObject } from '../../dot';
+import { DedotObject, DotObject } from '../../dot';
 
 function isAssignable<T>(t: T) {}
 

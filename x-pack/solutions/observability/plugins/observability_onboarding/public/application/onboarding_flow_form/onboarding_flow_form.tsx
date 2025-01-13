@@ -27,12 +27,11 @@ import { css } from '@emotion/react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnboardingFlowPackageList } from '../packages_list';
-import type { Category } from './types';
+import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
-import type { SupportedLogo } from '../shared/logo_icon';
-import { LogoIcon } from '../shared/logo_icon';
-import type { ObservabilityOnboardingAppServices } from '../..';
+import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 interface UseCaseOption {
   id: Category;

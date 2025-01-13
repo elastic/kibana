@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   CoreSetup,
   Plugin,
   CoreStart,
@@ -17,7 +17,7 @@ import { PLUGIN_ID } from '../common';
 
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
-import type {
+import {
   SearchHomepageConfigType,
   SearchHomepagePluginSetup,
   SearchHomepagePluginStart,

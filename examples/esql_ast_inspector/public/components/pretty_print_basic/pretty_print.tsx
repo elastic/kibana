@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BasicPrettyPrinterOptions } from '@kbn/esql-ast';
-import { parse, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { parse, BasicPrettyPrinter, BasicPrettyPrinterOptions } from '@kbn/esql-ast';
 import * as React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 

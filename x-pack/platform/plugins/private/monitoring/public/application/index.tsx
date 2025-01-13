@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
+import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
   CODE_PATH_BEATS,
@@ -21,9 +21,8 @@ import {
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
-import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
-import type { ExternalConfig} from './contexts/external_config_context';
-import { ExternalConfigContext } from './contexts/external_config_context';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
+import { ExternalConfig, ExternalConfigContext } from './contexts/external_config_context';
 import { GlobalStateProvider } from './contexts/global_state_context';
 import { HeaderActionMenuContext } from './contexts/header_action_menu_context';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';

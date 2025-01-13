@@ -8,7 +8,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type {
+import {
   BaseColumn,
   Operation,
   DataType,
@@ -25,7 +25,7 @@ import {
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';
-import type { ColumnWithMeta, Meta, Column } from './types';
+import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;

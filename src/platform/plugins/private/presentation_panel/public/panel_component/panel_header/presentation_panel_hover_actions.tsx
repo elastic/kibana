@@ -9,10 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import type {
-  MouseEventHandler,
-  ReactElement} from 'react';
 import React, {
+  MouseEventHandler,
+  ReactElement,
   useCallback,
   useEffect,
   useMemo,
@@ -20,33 +19,30 @@ import React, {
   useState,
 } from 'react';
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  IconType} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
+  IconType,
   useEuiTheme,
 } from '@elastic/eui';
-import type { ActionExecutionContext} from '@kbn/ui-actions-plugin/public';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import type {
-  EmbeddableApiContext,
-  ViewMode} from '@kbn/presentation-publishing';
 import {
   apiCanLockHoverActions,
+  EmbeddableApiContext,
   getViewModeSubject,
-  useBatchedOptionalPublishingSubjects
+  useBatchedOptionalPublishingSubjects,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { css } from '@emotion/react';
-import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { uiActions } from '../../kibana_services';
 import {
   contextMenuTrigger,
@@ -55,8 +51,8 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
-import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import type { AnyApiAction } from '../../panel_actions/types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import { AnyApiAction } from '../../panel_actions/types';
 
 const QUICK_ACTION_IDS = {
   edit: [

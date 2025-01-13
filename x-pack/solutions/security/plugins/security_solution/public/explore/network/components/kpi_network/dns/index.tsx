@@ -16,7 +16,7 @@ import * as i18n from './translations';
 
 export const ID = 'networkKpiDnsQuery';
 
-export const dnsStatItems: readonly StatItems[] = [
+export const dnsStatItems: Readonly<StatItems[]> = [
   {
     key: 'dnsQueries',
     fields: [

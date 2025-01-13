@@ -8,8 +8,7 @@
  */
 
 import { rangeControlFactory } from './range_control_factory';
-import type { ControlParams} from '../editor_utils';
-import { CONTROL_TYPES } from '../editor_utils';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 import { getDepsMock, getSearchSourceMock } from '../test_utils';
 
 describe('rangeControlFactory', () => {

@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { ResilientSimulator } from '@kbn/actions-simulators-plugin/server/resilient_simulation';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

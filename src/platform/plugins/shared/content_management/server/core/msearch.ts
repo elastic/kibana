@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
 } from '@kbn/core-saved-objects-api-server';
 import type { MSearchResult, SearchQuery } from '../../common';
-import type { ContentRegistry } from './registry';
-import type { StorageContext } from './types';
+import { ContentRegistry } from './registry';
+import { StorageContext } from './types';
 
 export class MSearchService {
   constructor(

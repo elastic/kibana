@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PartialTheme } from '@elastic/charts';
-import type {
-  PartitionVisParams,
-  PieContainerDimensions} from '../../common/types';
+import { PartialTheme } from '@elastic/charts';
 import {
   ChartTypes,
-  LabelPositions
+  LabelPositions,
+  PartitionVisParams,
+  PieContainerDimensions,
 } from '../../common/types';
 
 const MAX_SIZE = 1000;

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { HasType} from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { HasType, apiIsOfType } from '@kbn/presentation-publishing';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 
 export const MAP_RENDERER_TYPE = 'mapRenderer';
 

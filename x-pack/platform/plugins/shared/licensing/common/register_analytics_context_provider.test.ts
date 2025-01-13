@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Subject } from 'rxjs';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
 import type { ILicense } from './types';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 

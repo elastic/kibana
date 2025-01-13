@@ -7,9 +7,9 @@
 
 import { getQueryStringFilter } from './search/get_query_string_filter';
 import { getFilterClause } from '../helper';
-import type { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
+import { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
 import { QUERY } from '../../../../common/constants';
-import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { createEsQuery } from '../../../../common/utils/es_search';
 import { getHistogramInterval } from '../../../../common/lib/get_histogram_interval';
 import {

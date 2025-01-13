@@ -6,10 +6,10 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-server';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import moment from 'moment';
-import type { AlertsLocatorParams } from '../..';
+import { AlertsLocatorParams } from '../..';
 
 export const getAlertUrl = async (
   alertUuid: string | null,

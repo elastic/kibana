@@ -9,8 +9,7 @@
 
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import type { ConfirmHandler } from './navigation_confirm';
-import { getUserConfirmationHandler } from './navigation_confirm';
+import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
 

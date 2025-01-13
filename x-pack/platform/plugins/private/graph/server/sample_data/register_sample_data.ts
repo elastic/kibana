@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
+import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { registerLogsSampleData, registerLogsSampleDataLink } from './logs';
 import { registerEcommerceSampleData, registerEcommerceSampleDataLink } from './ecommerce';
 import { registerFlightsSampleData, registerFlightsSampleDataLink } from './flights';
-import type { LicenseState } from '../lib/license_state';
+import { LicenseState } from '../lib/license_state';
 
 export function registerSampleData(
   sampleDataRegistry: SampleDataRegistrySetup,

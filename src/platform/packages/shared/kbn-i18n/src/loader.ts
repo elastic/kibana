@@ -9,7 +9,7 @@
 
 import { readFile } from 'fs/promises';
 import * as path from 'path';
-import type { TranslationInput } from './translation';
+import { TranslationInput } from './translation';
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 

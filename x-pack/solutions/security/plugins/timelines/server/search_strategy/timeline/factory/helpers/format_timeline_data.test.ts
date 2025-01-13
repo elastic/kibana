@@ -6,7 +6,7 @@
  */
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
-import type { EventHit } from '../../../../../common/search_strategy';
+import { EventHit } from '../../../../../common/search_strategy';
 import { formatTimelineData } from './format_timeline_data';
 
 describe('formatTimelineData', () => {

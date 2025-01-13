@@ -10,7 +10,7 @@
 import { buildQueryFromLucene } from './from_lucene';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
-import type { Query } from '../..';
+import { Query } from '../..';
 
 describe('build query', () => {
   describe('buildQueryFromLucene', () => {

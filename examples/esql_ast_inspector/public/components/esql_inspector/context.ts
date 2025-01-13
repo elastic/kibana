@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import type { EsqlInspectorState } from './esql_inspector_state';
+import { EsqlInspectorState } from './esql_inspector_state';
 
 export const context = React.createContext<EsqlInspectorState | null>(null);
 

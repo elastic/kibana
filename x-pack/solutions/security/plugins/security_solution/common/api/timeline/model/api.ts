@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type {
-  DataProviderType,
+import type { DataProviderType } from './components.gen';
+import {
   BareNote,
   BarePinnedEvent,
   ColumnHeaderResult,

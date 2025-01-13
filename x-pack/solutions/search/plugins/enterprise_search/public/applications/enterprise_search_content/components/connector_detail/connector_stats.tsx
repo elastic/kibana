@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { useValues } from 'kea';
 
@@ -27,8 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Connector, ElasticsearchIndex } from '@kbn/search-connectors';
-import { ConnectorStatus } from '@kbn/search-connectors';
+import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';

@@ -6,10 +6,10 @@
  */
 
 import { has } from 'lodash/fp';
-import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
-import type { ImportResponse } from '../../import_exception_list_and_items';
+import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
+import { ImportResponse } from '../../import_exception_list_and_items';
 
 export const bulkUpdateImportedItems = async ({
   itemsToUpdate,

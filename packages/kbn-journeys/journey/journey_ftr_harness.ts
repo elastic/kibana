@@ -12,18 +12,17 @@ import { inspect, format } from 'util';
 import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
-import type { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
-import playwright from 'playwright';
+import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { asyncMap, asyncForEach } from '@kbn/std';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { Config } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { Config } from '@kbn/test';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import type { AxiosError } from 'axios';
-import type { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
+import { AxiosError } from 'axios';
+import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 

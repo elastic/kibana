@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { FieldConfig } from '../../../../../../../shared_imports';
-import { Field, FIELD_TYPES, UseField } from '../../../../../../../shared_imports';
+import { Field, FIELD_TYPES, UseField, FieldConfig } from '../../../../../../../shared_imports';
 
-import type { FieldsConfig} from '../shared';
-import { from } from '../shared';
+import { FieldsConfig, from } from '../shared';
 
 const fieldsConfig: FieldsConfig = {
   target_field: {

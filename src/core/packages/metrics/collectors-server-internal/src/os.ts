@@ -8,8 +8,7 @@
  */
 
 import os from 'os';
-import type { LinuxOs } from 'getos';
-import getosAsync from 'getos';
+import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
 import type { Logger } from '@kbn/logging';
 import type { OpsOsMetrics, MetricsCollector } from '@kbn/core-metrics-server';

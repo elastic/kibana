@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type {
-  Dispatch,
-  SetStateAction} from 'react';
 import React, {
+  Dispatch,
+  SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -43,7 +42,7 @@ import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import type { CodeBlockDetails } from './use_conversation/helpers';
+import { CodeBlockDetails } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';

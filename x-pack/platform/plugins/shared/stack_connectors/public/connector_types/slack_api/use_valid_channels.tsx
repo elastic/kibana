@@ -15,8 +15,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
-import type { ValidChannelRouteResponse } from '../../../common/slack_api/types';
+import { HttpSetup } from '@kbn/core/public';
+import { ValidChannelRouteResponse } from '../../../common/slack_api/types';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
 import * as i18n from './translations';
 

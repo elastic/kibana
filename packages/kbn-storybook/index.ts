@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  StorybookConfig} from './src/lib/default_config';
 import {
   defaultConfig,
   defaultConfigWebFinal,
-  mergeWebpackFinal
+  mergeWebpackFinal,
+  StorybookConfig,
 } from './src/lib/default_config';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };

@@ -8,22 +8,19 @@
  */
 
 import { exporters } from '@kbn/data-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import type { Action} from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import type {
-  HasInspectorAdapters} from '@kbn/inspector-plugin/public';
 import {
+  HasInspectorAdapters,
   apiHasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
-import type {
-  EmbeddableApiContext,
-  PublishesPanelTitle} from '@kbn/presentation-publishing';
 import {
+  EmbeddableApiContext,
+  PublishesPanelTitle,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
 import { coreServices, fieldFormatService } from '../services/kibana_services';

@@ -8,8 +8,8 @@
  */
 
 import * as React from 'react';
-import type { KibanaServices } from '../context/types';
-import type { KibanaReactNotifications } from './types';
+import { KibanaServices } from '../context/types';
+import { KibanaReactNotifications } from './types';
 import { toMountPoint } from '../util';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {

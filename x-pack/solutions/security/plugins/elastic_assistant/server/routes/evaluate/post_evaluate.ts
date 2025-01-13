@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest, type IKibanaResponse } from '@kbn/core/server';
+import { IRouter, KibanaRequest, type IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { asyncForEach } from '@kbn/std';
 import { Client } from 'langsmith';
@@ -13,17 +13,17 @@ import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
-import type { StructuredTool } from '@langchain/core/tools';
+import { StructuredTool } from '@langchain/core/tools';
 import {
   createOpenAIFunctionsAgent,
   createStructuredChatAgent,
@@ -31,19 +31,17 @@ import {
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { buildResponse } from '../../lib/build_response';
-import type { AssistantDataClients } from '../../lib/langchain/executors/types';
-import type {
-  AssistantToolParams,
-  ElasticAssistantRequestHandlerContext,
-  GetElser,
-} from '../../types';
+import { AssistantDataClients } from '../../lib/langchain/executors/types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
-import type { DefaultAssistantGraph } from '../../lib/langchain/graphs/default_assistant_graph/graph';
-import { getDefaultAssistantGraph } from '../../lib/langchain/graphs/default_assistant_graph/graph';
+import {
+  DefaultAssistantGraph,
+  getDefaultAssistantGraph,
+} from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import {
   bedrockToolCallingAgentPrompt,
   geminiToolCallingAgentPrompt,

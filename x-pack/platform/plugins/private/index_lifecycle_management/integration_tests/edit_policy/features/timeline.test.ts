@@ -7,8 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { TimelineTestBed } from './timeline.helpers';
-import { setupTimelineTestBed } from './timeline.helpers';
+import { setupTimelineTestBed, TimelineTestBed } from './timeline.helpers';
 
 describe('<EditPolicy /> timeline', () => {
   let testBed: TimelineTestBed;

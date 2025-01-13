@@ -9,7 +9,7 @@
 
 import { Transform } from 'stream';
 
-import type File from 'vinyl';
+import File from 'vinyl';
 
 interface BufferedFile extends File {
   contents: Buffer;

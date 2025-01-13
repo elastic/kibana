@@ -20,7 +20,7 @@ import React, { useCallback } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
-import type { InferenceUsageInfo } from '../../../../types';
+import { InferenceUsageInfo } from '../../../../types';
 import { PIPELINE_URL } from '../../../../constants';
 
 interface UsageProps {

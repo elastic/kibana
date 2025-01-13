@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { createAction, handleActions } from 'redux-actions';
-import type { AppState } from '..';
+import { Action, createAction, handleActions } from 'redux-actions';
+import { AppState } from '..';
 
 export const setCertificatesTotalAction = createAction<CertificatesState>('SET_CERTIFICATES_TOTAL');
 

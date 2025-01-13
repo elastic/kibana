@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+import {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -12,14 +12,14 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import * as t from 'io-ts';
-import type { ObservabilityOnboardingServerRouteRepository } from '.';
-import type { EsLegacyConfigService } from '../services/es_legacy_config_service';
-import type {
+import { ObservabilityOnboardingServerRouteRepository } from '.';
+import { EsLegacyConfigService } from '../services/es_legacy_config_service';
+import {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
   ObservabilityOnboardingRequestHandlerContext,
 } from '../types';
-import type { ObservabilityOnboardingConfig } from '../config';
+import { ObservabilityOnboardingConfig } from '../config';
 
 export type { ObservabilityOnboardingServerRouteRepository };
 

@@ -10,10 +10,10 @@ import { useEffect, useCallback, useReducer } from 'react';
 import { useIsMountedRef } from '../../../../../../../hooks/use_is_mounted_ref';
 import { useAbortControllerRef } from '../../../../../../../hooks/use_abort_controller_ref';
 import { DEFAULT_HISTORICAL_RESULTS_PAGE_SIZE } from '../../constants';
-import type { FetchHistoricalResultsQueryAction, PaginationReducerState } from '../../types';
+import { FetchHistoricalResultsQueryAction, PaginationReducerState } from '../../types';
 import { useHistoricalResultsContext } from '../../../../contexts/historical_results_context';
 import { historicalResultsPaginationReducer } from './reducers/historical_results_pagination_reducer';
-import type { FetchHistoricalResultsQueryState } from '../../../types';
+import { FetchHistoricalResultsQueryState } from '../../../types';
 
 export const initialPaginationState: PaginationReducerState = {
   activePage: 0,

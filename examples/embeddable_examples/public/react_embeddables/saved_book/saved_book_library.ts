@@ -9,7 +9,7 @@
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { v4 } from 'uuid';
-import type { BookAttributes } from './types';
+import { BookAttributes } from './types';
 
 const storage = new Storage(localStorage);
 

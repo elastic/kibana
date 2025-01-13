@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  SubActionConnectorType} from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
+  SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
@@ -16,12 +15,12 @@ import {
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/gemini/schema';
-import type { Config, Secrets } from '../../../common/gemini/types';
+import { Config, Secrets } from '../../../common/gemini/types';
 import { GeminiConnector } from './gemini';
 import { renderParameterTemplates } from './render';
 

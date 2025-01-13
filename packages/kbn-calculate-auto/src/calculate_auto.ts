@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Duration } from 'moment';
-import moment, { isDuration } from 'moment';
+import moment, { isDuration, Duration } from 'moment';
 const d = moment.duration;
 
 const roundingRules = [

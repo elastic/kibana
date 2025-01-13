@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertingPublicPlugin } from './plugin';
+import { AlertingPublicPlugin } from './plugin';
 
 export type Setup = jest.Mocked<ReturnType<AlertingPublicPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<AlertingPublicPlugin['start']>>;

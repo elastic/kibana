@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { SeriesIdentifier, TooltipAction } from '@elastic/charts';
-import { Settings, TooltipType, Tooltip } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier, Tooltip, TooltipAction } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -18,8 +17,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
-import type { PartitionVisComponentProps } from './partition_vis_component';
-import PartitionVisComponent from './partition_vis_component';
+import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
 import {
   createMockDonutParams,
   createMockPieParams,

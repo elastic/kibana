@@ -11,9 +11,8 @@ import * as hooks from '../../public/application/lib/use_is_read_only';
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { setupEnvironment } from '../helpers';
 
-import type {
-  AppTestBed} from './app.helpers';
 import {
+  AppTestBed,
   getDoubleEncodedPolicyEditPath,
   getEncodedPolicyEditPath,
   setup,

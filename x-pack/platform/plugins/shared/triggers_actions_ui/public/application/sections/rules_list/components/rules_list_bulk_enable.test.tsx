@@ -13,7 +13,7 @@ import {
   waitForElementToBeRemoved,
   fireEvent,
 } from '@testing-library/react';
-import type { IToasts } from '@kbn/core/public';
+import { IToasts } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';

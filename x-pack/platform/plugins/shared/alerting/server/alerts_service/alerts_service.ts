@@ -6,9 +6,8 @@
  */
 
 import { isEmpty, isEqual, omit } from 'lodash';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { filter, firstValueFrom } from 'rxjs';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { filter, firstValueFrom, Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -20,19 +19,18 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import type {
+import {
   AlertInstanceContext,
   AlertInstanceState,
   IRuleTypeAlerts,
   RuleAlertData,
   DataStreamAdapter,
 } from '../types';
-import type {
-  InitializationPromise,
-  ResourceInstallationHelper} from './create_resource_installation_helper';
 import {
   createResourceInstallationHelper,
   errorResult,
+  InitializationPromise,
+  ResourceInstallationHelper,
   successResult,
 } from './create_resource_installation_helper';
 import {
@@ -46,9 +44,8 @@ import {
 } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
-import type { IAlertsClient } from '../alerts_client/types';
-import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
-import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
+import { IAlertsClient } from '../alerts_client/types';
+import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';

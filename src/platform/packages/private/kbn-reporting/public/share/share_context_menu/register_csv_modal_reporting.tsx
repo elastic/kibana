@@ -15,9 +15,8 @@ import { firstValueFrom } from 'rxjs';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import type { InjectedIntl } from '@kbn/i18n-react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 

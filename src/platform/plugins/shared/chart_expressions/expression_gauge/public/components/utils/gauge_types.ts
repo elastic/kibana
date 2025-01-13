@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulletProps} from '@elastic/charts';
-import { BulletSubtype } from '@elastic/charts';
-import type { GaugeShape} from '../../../common';
-import { GaugeShapes } from '../../../common';
+import { BulletProps, BulletSubtype } from '@elastic/charts';
+import { GaugeShape, GaugeShapes } from '../../../common';
 
 export const getSubtypeByGaugeType = (type: GaugeShape): BulletProps['subtype'] =>
   ((

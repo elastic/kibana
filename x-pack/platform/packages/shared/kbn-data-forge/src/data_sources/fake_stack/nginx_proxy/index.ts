@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GeneratorFunction, Doc } from '../../../types';
+import { GeneratorFunction, Doc } from '../../../types';
 import { createStartupEvents } from './lib/events/startup';
 
 let firstRun = true;

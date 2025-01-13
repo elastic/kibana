@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { DefinedUseQueryResult } from '@tanstack/react-query';
+import { DefinedUseQueryResult } from '@tanstack/react-query';
 
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useFetchCurrentUserConversations } from '../api';
-import type { Conversation } from '../../assistant_context/types';
+import { Conversation } from '../../assistant_context/types';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {

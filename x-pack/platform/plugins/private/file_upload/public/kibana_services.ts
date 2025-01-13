@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { FileUploadStartDependencies } from './plugin';
+import { CoreStart } from '@kbn/core/public';
+import { FileUploadStartDependencies } from './plugin';
 
 let coreStart: CoreStart;
 let pluginsStart: FileUploadStartDependencies;

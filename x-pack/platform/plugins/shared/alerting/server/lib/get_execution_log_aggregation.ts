@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KueryNode } from '@kbn/es-query';
+import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
-import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
-import type { IExecutionLog, IExecutionLogResult} from '../../common';
-import { EMPTY_EXECUTION_KPI_RESULT } from '../../common';
+import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;

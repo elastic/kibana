@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { PluginConfigDescriptor } from '@kbn/core/server';
-import type { MapsXPackConfig } from './config';
-import { configSchema } from './config';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, MapsXPackConfig } from './config';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser

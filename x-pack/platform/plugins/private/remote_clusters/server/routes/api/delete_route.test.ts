@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -16,7 +15,7 @@ import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mock
 
 import { handleEsError } from '../../shared_imports';
 
-import type { ScopedClusterClientMock } from './types';
+import { ScopedClusterClientMock } from './types';
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {

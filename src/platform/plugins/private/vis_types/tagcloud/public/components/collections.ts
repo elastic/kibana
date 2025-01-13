@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TagCloudVisParams } from '../types';
+import { TagCloudVisParams } from '../types';
 
 interface Scales {
   text: string;

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
-import { catchError, filter, of, share, throwError } from 'rxjs';
+import { catchError, filter, of, OperatorFunction, share, throwError } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { MessageRole } from '../../../../common';
-import type {
-  ChatCompletionChunkEvent,
-  MessageOrChatEvent} from '../../../../common/conversation_complete';
 import {
+  ChatCompletionChunkEvent,
   isFunctionNotFoundError,
+  MessageOrChatEvent,
   StreamingChatResponseEventType,
 } from '../../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';

@@ -10,16 +10,15 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   AlertsFilter,
   AlertsFilterTimeframe,
-  RuleActionFrequency} from '@kbn/alerting-types';
-import {
-  RecoveredActionGroup
+  RecoveredActionGroup,
+  RuleActionFrequency,
 } from '@kbn/alerting-types';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
-import type { RuleAction, RuleTypeWithDescription } from '../common';
+import { RuleAction, RuleTypeWithDescription } from '../common';
 import {
   getActionGroups,
   getDurationNumberInItsUnit,

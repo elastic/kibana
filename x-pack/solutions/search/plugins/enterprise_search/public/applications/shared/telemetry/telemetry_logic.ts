@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { JSON_HEADER as headers } from '../../../../common/constants';
 import { HttpLogic } from '../http';

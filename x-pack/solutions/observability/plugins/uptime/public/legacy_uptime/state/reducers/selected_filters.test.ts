@@ -6,8 +6,11 @@
  */
 
 import { selectedFiltersReducer } from './selected_filters';
-import type { SelectedFilters } from '../actions/selected_filters';
-import { getSelectedFilters, setSelectedFilters } from '../actions/selected_filters';
+import {
+  getSelectedFilters,
+  setSelectedFilters,
+  SelectedFilters,
+} from '../actions/selected_filters';
 import { createAction } from 'redux-actions';
 
 describe('selectedFiltersReducer', () => {

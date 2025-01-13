@@ -11,8 +11,7 @@ import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { waitFor } from '@testing-library/react';
-import type { AppMockRenderer } from '../test_utils';
-import { createAppMockRenderer } from '../test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorFormFields', () => {
   let appMockRenderer: AppMockRenderer;

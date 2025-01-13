@@ -11,12 +11,12 @@ import { ElasticsearchMetric } from '../../metrics';
 import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
-import type {
+import {
   ElasticsearchSource,
   ElasticsearchResponse,
   ElasticsearchLegacySource,
 } from '../../../../common/types/es';
-import type { LegacyRequest } from '../../../types';
+import { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 

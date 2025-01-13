@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ChromeHelpMenuActions } from '@kbn/core/public';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
 
 const strings = {
   getKeyboardShortcutsLinkLabel: () =>

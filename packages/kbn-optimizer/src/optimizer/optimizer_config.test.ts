@@ -28,8 +28,7 @@ jest.mock('os', () => {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
-import type { ParsedOptions } from './optimizer_config';
-import { OptimizerConfig } from './optimizer_config';
+import { OptimizerConfig, ParsedOptions } from './optimizer_config';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());

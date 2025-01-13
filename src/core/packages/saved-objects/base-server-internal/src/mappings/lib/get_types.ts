@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMapping } from '../types';
+import { IndexMapping } from '../types';
 
 /**
  *  Get the names of the types defined in the EsMappingsDsl

@@ -8,7 +8,7 @@
  */
 
 import { expectAssignable } from 'tsd';
-import type { ZodEsque } from './types';
+import { ZodEsque } from './types';
 import { z } from '.';
 
 describe('ZodEsque', () => {

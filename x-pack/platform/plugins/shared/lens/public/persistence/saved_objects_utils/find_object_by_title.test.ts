@@ -6,9 +6,9 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
-import type { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
 import { simpleSavedObjectMock } from '@kbn/core/public/mocks';
-import type { SavedObjectIndexStore } from '..';
+import { SavedObjectIndexStore } from '..';
 
 describe('findObjectByTitle', () => {
   const indexStore: SavedObjectIndexStore = {} as SavedObjectIndexStore;

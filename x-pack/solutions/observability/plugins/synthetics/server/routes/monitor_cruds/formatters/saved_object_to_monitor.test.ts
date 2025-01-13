@@ -6,7 +6,7 @@
  */
 
 import { mapSavedObjectToMonitor, mergeSourceMonitor } from './saved_object_to_monitor';
-import type { EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
+import { EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
 
 describe('mergeSourceMonitor', () => {
   it('should merge keys', function () {

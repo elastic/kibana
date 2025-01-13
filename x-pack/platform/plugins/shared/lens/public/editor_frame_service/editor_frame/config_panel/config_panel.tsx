@@ -7,23 +7,23 @@
 
 import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm } from '@elastic/eui';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 
-import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
   changeIndexPattern,
   onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
-import type { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
+import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
-import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
+import { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
   setLayerDefaultDimension,

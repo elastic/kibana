@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { TagsCapabilities } from '../../common';
-import type { ITagInternalClient, ITagsCache } from '../services';
+import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { TagsCapabilities } from '../../common';
+import { ITagInternalClient, ITagsCache } from '../services';
 import {
   getConnectedTagListComponent,
   getConnectedTagSelectorComponent,
   getConnectedSavedObjectModalTagSelectorComponent,
 } from '../components/connected';
 import { getCreateModalOpener } from '../components/edition_modal';
-import type { StartServices } from '../types';
+import { StartServices } from '../types';
 
 export interface GetComponentsOptions extends StartServices {
   capabilities: TagsCapabilities;

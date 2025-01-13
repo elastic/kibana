@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, SavedObject } from '@kbn/core/server';
+import { CoreSetup, SavedObject } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}

@@ -6,12 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import type { OnTimeChangeProps } from '@elastic/eui';
+import { OnTimeChangeProps } from '@elastic/eui';
 
 import { useAbortControllerRef } from '../../../../../../../hooks/use_abort_controller_ref';
 import { useIsMountedRef } from '../../../../../../../hooks/use_is_mounted_ref';
-import type { FetchHistoricalResultsQueryState } from '../../../types';
-import type { FetchHistoricalResultsQueryAction } from '../../types';
+import { FetchHistoricalResultsQueryState } from '../../../types';
+import { FetchHistoricalResultsQueryAction } from '../../types';
 import { useHistoricalResultsContext } from '../../../../contexts/historical_results_context';
 
 export interface UseHistoricalResultsDatePickerOpts {

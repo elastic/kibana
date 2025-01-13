@@ -8,10 +8,10 @@
  */
 
 import { useRefetch } from './use_refetch';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderHook } from '@testing-library/react';
-import type {
+import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,

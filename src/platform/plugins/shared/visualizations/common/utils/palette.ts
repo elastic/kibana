@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ColorSchemas} from '@kbn/charts-plugin/common';
-import { getHeatmapColors } from '@kbn/charts-plugin/common';
-import type { Range } from '@kbn/expressions-plugin/common';
+import { ColorSchemas, getHeatmapColors } from '@kbn/charts-plugin/common';
+import { Range } from '@kbn/expressions-plugin/common';
 
 export interface PaletteConfig {
   color: Array<string | undefined>;

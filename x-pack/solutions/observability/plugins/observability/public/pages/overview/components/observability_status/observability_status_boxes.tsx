@@ -8,8 +8,11 @@
 import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ObservabilityStatusBoxProps } from './observability_status_box';
-import { CompletedStatusBox, EmptyStatusBox } from './observability_status_box';
+import {
+  CompletedStatusBox,
+  EmptyStatusBox,
+  ObservabilityStatusBoxProps,
+} from './observability_status_box';
 export interface ObservabilityStatusProps {
   boxes: ObservabilityStatusBoxProps[];
 }

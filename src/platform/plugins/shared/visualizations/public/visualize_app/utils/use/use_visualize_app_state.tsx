@@ -10,7 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs';
-import type { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
@@ -18,7 +18,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import type {
+import {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,

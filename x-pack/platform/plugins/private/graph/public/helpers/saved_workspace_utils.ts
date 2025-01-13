@@ -7,13 +7,12 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
+import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
 
-import type { SavedObjectSaveOpts} from '@kbn/saved-objects-plugin/public';
-import { isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type {
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import {
   GraphGetIn,
   GraphGetOut,
   GraphSearchIn,
@@ -24,15 +23,14 @@ import type {
   GraphCreateOut,
   GraphSavedObjectAttributes,
   GraphUpdateOut,
-  GraphUpdateIn} from '../../common/content_management';
-import {
+  GraphUpdateIn,
   CONTENT_ID,
 } from '../../common/content_management';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import type { GraphWorkspaceSavedObject } from '../types';
+import { GraphWorkspaceSavedObject } from '../types';
 import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
 const savedWorkspaceType = 'graph-workspace';
 const mapping: Record<string, string> = {

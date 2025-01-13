@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reducer} from 'react';
-import React, { useReducer } from 'react';
+import React, { Reducer, useReducer } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   DropIdentifier,
   DragDropIdentifier,
   RegisteredDropTargets,

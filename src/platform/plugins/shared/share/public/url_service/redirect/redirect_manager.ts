@@ -13,13 +13,11 @@ import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { Location } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
-import type {
-  LegacyShortUrlLocatorParams} from '../../../common/url_service/locators/legacy_short_url_locator';
 import {
-  LEGACY_SHORT_URL_LOCATOR_ID
+  LEGACY_SHORT_URL_LOCATOR_ID,
+  LegacyShortUrlLocatorParams,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
-import type { RedirectOptions } from '../../../common/url_service/locators/redirect';
-import { parseSearchParams } from '../../../common/url_service/locators/redirect';
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {

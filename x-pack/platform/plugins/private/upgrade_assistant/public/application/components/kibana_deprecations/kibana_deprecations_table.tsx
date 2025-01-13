@@ -6,8 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, Search } from '@elastic/eui';
-import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';

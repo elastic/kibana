@@ -7,16 +7,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SearchApiKeyProvider } from '@kbn/search-api-keys-components';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
-import type { SearchIndicesServicesContextDeps } from './types';
+import { SearchIndicesServicesContextDeps } from './types';
 
 export const renderApp = async (
   App: React.FC<{}>,

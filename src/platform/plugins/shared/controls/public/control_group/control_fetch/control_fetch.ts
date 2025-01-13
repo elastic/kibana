@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { Observable } from 'rxjs';
-import { combineLatest, debounceTime, map } from 'rxjs';
-import type { ChainingContext } from './chaining';
-import type { ControlGroupFetchContext } from './control_group_fetch';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { combineLatest, debounceTime, map, Observable } from 'rxjs';
+import { ChainingContext } from './chaining';
+import { ControlGroupFetchContext } from './control_group_fetch';
 
 export interface ControlFetchContext {
   filters?: Filter[] | undefined;

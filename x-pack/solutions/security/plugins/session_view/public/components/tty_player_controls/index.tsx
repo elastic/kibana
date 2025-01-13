@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type { EuiButtonIconProps, EuiRangeProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiPanel,
@@ -13,6 +12,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
+  EuiButtonIconProps,
+  EuiRangeProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
 import type { ProcessStartMarker, ProcessEvent } from '../../../common';

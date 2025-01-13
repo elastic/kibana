@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import type { FieldMap } from '@kbn/data-stream-adapter';
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { Subject } from 'rxjs';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { Subject } from 'rxjs';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
-import type { AssistantResourceNames, GetElser } from '../types';
+import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import type {
+import {
   InitializationPromise,
   ResourceInstallationHelper,
-} from './create_resource_installation_helper';
-import {
   createResourceInstallationHelper,
   errorResult,
   successResult,
@@ -33,8 +30,10 @@ import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/f
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import type { GetAIAssistantKnowledgeBaseDataClientParams } from '../ai_assistant_data_clients/knowledge_base';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import {
+  AIAssistantKnowledgeBaseDataClient,
+  GetAIAssistantKnowledgeBaseDataClientParams,
+} from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import {

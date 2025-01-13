@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ColorMapping } from '../config';
+import { ColorMapping } from '../config';
 
 export function ruleMatch(
   rule: ColorMapping.Config['assignments'][number]['rule'],

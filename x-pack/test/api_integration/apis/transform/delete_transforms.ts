@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import type { DeleteTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/delete_transforms';
+import { DeleteTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/delete_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { asyncForEach, generateDestIndex, generateTransformConfig } from './common';
 

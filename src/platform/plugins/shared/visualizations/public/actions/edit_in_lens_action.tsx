@@ -9,32 +9,30 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasUniqueId,
-  PublishesUnifiedSearch,
-  PublishesPanelDescription,
-  PublishesPanelTitle} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  getInheritedViewMode
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasUniqueId,
+  PublishesUnifiedSearch,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
 import {
   apiHasVisualizeConfig,
   type HasVisualizeConfig,
 } from '../embeddable/interfaces/has_visualize_config';
-import type {
-  HasExpressionVariables} from '../embeddable/interfaces/has_expression_variables';
 import {
-  apiHasExpressionVariables
+  apiHasExpressionVariables,
+  HasExpressionVariables,
 } from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,

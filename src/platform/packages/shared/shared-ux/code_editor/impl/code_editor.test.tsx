@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { monaco } from '@kbn/monaco';
 

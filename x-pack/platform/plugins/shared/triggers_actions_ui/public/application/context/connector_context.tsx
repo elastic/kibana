@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import type { ConnectorServices } from '../../types';
+import React, { FC, PropsWithChildren } from 'react';
+import { ConnectorServices } from '../../types';
 
 export interface ConnectorContextValue {
   services: ConnectorServices;

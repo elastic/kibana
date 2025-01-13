@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import type { HasSerializableState } from '@kbn/presentation-containers';
-import type { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import type {
+import { HasSerializableState } from '@kbn/presentation-containers';
+import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import {
   HasParentApi,
   HasType,
   HasUniqueId,
@@ -24,9 +24,9 @@ import type {
   StateComparators,
 } from '@kbn/presentation-publishing';
 
-import type { ControlWidth, DefaultControlState } from '../../common/types';
-import type { ControlGroupApi } from '../control_group/types';
-import type { CanClearSelections } from '../types';
+import { ControlWidth, DefaultControlState } from '../../common/types';
+import { ControlGroupApi } from '../control_group/types';
+import { CanClearSelections } from '../types';
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;

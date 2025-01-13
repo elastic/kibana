@@ -8,4 +8,4 @@
 export * from './src/common';
 export * from './src/request';
 export * from './src/response';
-export type * from './src/typescript_types';
+export * from './src/typescript_types';

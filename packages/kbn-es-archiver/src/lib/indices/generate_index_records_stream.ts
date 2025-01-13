@@ -9,9 +9,9 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { Stats } from '../stats';
+import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 import { getIndexTemplate } from '..';
 

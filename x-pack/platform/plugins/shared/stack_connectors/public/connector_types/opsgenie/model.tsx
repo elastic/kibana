@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -15,7 +15,7 @@ import { isEmpty } from 'lodash';
 import { OpsgenieSubActions } from '../../../common';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
 import type { OpsgenieActionConfig, OpsgenieActionSecrets } from '../../../server/connector_types';
-import type { OpsgenieConnectorTypeParams, ValidationParams } from './types';
+import { OpsgenieConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
 
 const SELECT_MESSAGE = i18n.translate(

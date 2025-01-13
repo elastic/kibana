@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { ShardSerialized } from '../types';
+import { ShardSerialized } from '../types';
 
 export function hasSearch(profileResponse: ShardSerialized[]) {
   const aggs = get(profileResponse, '[0].searches', []);

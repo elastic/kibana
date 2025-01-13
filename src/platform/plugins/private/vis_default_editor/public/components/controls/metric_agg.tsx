@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEventHandler } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, ChangeEventHandler } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
-import type { AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const aggFilter = [
   '!top_hits',

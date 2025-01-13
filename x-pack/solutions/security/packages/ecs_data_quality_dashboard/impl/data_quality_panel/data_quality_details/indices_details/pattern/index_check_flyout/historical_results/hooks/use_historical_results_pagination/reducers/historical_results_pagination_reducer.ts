@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PaginationReducerAction, PaginationReducerState } from '../../../types';
+import { PaginationReducerAction, PaginationReducerState } from '../../../types';
 
 export const historicalResultsPaginationReducer = (
   state: PaginationReducerState,

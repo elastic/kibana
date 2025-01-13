@@ -8,9 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { UrlServiceError } from '../../error';
-import type { ServerUrlService } from '../../types';
+import { ServerUrlService } from '../../types';
 
 export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
   router.post(

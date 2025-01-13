@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
-import type { LlmProxy } from '../../../common/create_llm_proxy';
-import { createLlmProxy } from '../../../common/create_llm_proxy';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { LlmProxy, createLlmProxy } from '../../../common/create_llm_proxy';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getMessageAddedEvents, invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
   createProxyActionConnector,

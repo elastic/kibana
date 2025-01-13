@@ -8,8 +8,7 @@
  */
 
 import path from 'path';
-import type { FtrConfigProviderContext} from '@kbn/test';
-import { findTestPluginPaths } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 /*
  * These tests exist in a separate configuration because:

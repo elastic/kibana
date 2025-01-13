@@ -8,7 +8,7 @@
  */
 
 import { getJsSource } from '@kbn/peggy';
-import type webpack from 'webpack';
+import webpack from 'webpack';
 
 // eslint-disable-next-line import/no-default-export
 export default function (this: webpack.loader.LoaderContext) {

@@ -13,7 +13,7 @@ import {
   relatedMockProcessors,
   relatedExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/related';
-import type {
+import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

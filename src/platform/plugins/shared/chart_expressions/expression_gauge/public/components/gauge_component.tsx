@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC} from 'react';
-import React, { useCallback } from 'react';
-import type { BulletProps} from '@elastic/charts';
-import { Chart, Bullet, Settings } from '@elastic/charts';
+import React, { FC, useCallback } from 'react';
+import { Chart, Bullet, BulletProps, Settings } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
@@ -24,10 +22,9 @@ import {
   isVisDimension,
 } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
-import type {
-  GaugeRenderProps,
-  GaugeLabelMajorMode} from '../../common';
 import {
+  GaugeRenderProps,
+  GaugeLabelMajorMode,
   GaugeLabelMajorModes,
   GaugeColorModes,
   GaugeTicksPositions,
@@ -42,7 +39,7 @@ import {
 } from './utils';
 import { getGaugeIconByType } from './utils/icons';
 import './index.scss';
-import type { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
+import { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
 
 import './gauge.scss';
 import { useGaugeSizeByType } from './utils/use_gauge_size_by_type';

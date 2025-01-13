@@ -11,16 +11,15 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 
 import { EuiLink, EuiCode } from '@elastic/eui';
-import type {
-  ValidationFunc,
-  ValidationFuncArg,
-  FieldConfig} from '../shared_imports';
 import {
   FIELD_TYPES,
   fieldValidators,
-  fieldFormatters
+  ValidationFunc,
+  ValidationFuncArg,
+  fieldFormatters,
+  FieldConfig,
 } from '../shared_imports';
-import type {
+import {
   AliasOption,
   DataType,
   ComboBoxOption,

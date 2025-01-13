@@ -7,7 +7,7 @@
 
 import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import type { InvokeCreator } from 'xstate';
+import { InvokeCreator } from 'xstate';
 import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 
 export const initializeAllSelection =

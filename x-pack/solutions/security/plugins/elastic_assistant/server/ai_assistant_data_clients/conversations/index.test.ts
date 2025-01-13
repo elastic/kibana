@@ -9,7 +9,7 @@ import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types'
 import { AIAssistantConversationsDataClient } from '.';
 import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
-import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClientParams } from '..';
 
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;

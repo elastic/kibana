@@ -8,14 +8,13 @@
 import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { ScopedHistory } from '@kbn/core/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { MapAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import type { MapStore, MapStoreState } from '../../../reducers/store';
-import { createMapStore } from '../../../reducers/store';
-import type { MapSettings } from '../../../../common/descriptor_types';
+import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
+import { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
   getMapZoom,
@@ -36,10 +35,9 @@ import {
   setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import type { SharingSavedObjectProps } from './load_from_library';
-import { loadFromLibrary } from './load_from_library';
+import { loadFromLibrary, SharingSavedObjectProps } from './load_from_library';
 import { saveToLibrary } from './save_to_library';
-import type { MapSerializedState } from '../../../react_embeddable/types';
+import { MapSerializedState } from '../../../react_embeddable/types';
 import {
   getCoreChrome,
   getIndexPatternService,
@@ -49,13 +47,13 @@ import {
   getUsageCollection,
   getServerless,
 } from '../../../kibana_services';
-import type { LayerDescriptor } from '../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import type { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
+import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';

@@ -12,11 +12,10 @@ import type {
   FieldFormatEditor as InnerFieldFormatEditor,
   FieldFormatEditorFactory,
 } from '@kbn/data-view-field-editor-plugin/public';
-import type { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
+import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
-import type { LazyExoticComponent} from 'react';
-import React, { PureComponent } from 'react';
+import React, { LazyExoticComponent, PureComponent } from 'react';
 
 export interface FieldFormatEditorProps {
   fieldType: string;

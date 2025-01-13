@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { DataStreamDocsStat } from '../api_types';
+import { DataStreamDocsStat } from '../api_types';
 import { DEFAULT_DATASET_QUALITY, DEFAULT_DEGRADED_DOCS } from '../constants';
-import type { DataStreamType, QualityIndicators } from '../types';
+import { DataStreamType, QualityIndicators } from '../types';
 import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
-import type { Integration } from './integration';
-import type { DataStreamStatType } from './types';
+import { Integration } from './integration';
+import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
   rawName: string;

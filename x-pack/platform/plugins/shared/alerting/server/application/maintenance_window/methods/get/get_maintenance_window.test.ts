@@ -11,10 +11,9 @@ import {
   loggingSystemMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { SavedObject } from '@kbn/core/server';
-import type {
-  MaintenanceWindowClientContext} from '../../../../../common';
+import { SavedObject } from '@kbn/core/server';
 import {
+  MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand } from '../../../types';
+import { ESQLAstQueryExpression, ESQLCommand } from '../../../types';
 import { Visitor } from '../../../visitor';
-import type { Predicate } from '../../types';
+import { Predicate } from '../../types';
 
 export * as args from './args';
 export * as options from './options';

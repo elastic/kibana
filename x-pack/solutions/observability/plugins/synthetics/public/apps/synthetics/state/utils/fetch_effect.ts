@@ -6,13 +6,12 @@
  */
 
 import { call, put } from 'redux-saga/effects';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction } from '@reduxjs/toolkit';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
+import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { toastTitle } from '../monitor_list/toast_title';
 import { kibanaService } from '../../../../utils/kibana_service';
-import type { IHttpSerializedFetchError } from './http_error';
-import { serializeHttpFetchError } from './http_error';
+import { IHttpSerializedFetchError, serializeHttpFetchError } from './http_error';
 
 interface ToastParams<MessageType> {
   message: MessageType;

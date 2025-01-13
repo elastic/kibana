@@ -61,7 +61,7 @@
  */
 
 import { pull, sortBy } from 'lodash';
-import type { IStorage } from '../types';
+import { IStorage } from '../types';
 
 interface IndexedItem {
   hash: string;

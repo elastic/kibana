@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggsCommonSetup } from '../../../common';
+import { AggsCommonSetup } from '../../../common';
 
 export type AggsSetup = AggsCommonSetup;
 export type { AggsStart } from '../../../common';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import type { ActionConnectorProps } from '../../types';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import { ActionConnectorProps } from '../../types';
 
 export const transformConnectorResponse = (
   results: Array<

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { Plugin } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { Plugin } from '@kbn/core/public';
 import { registerServices } from './services/register_services';
-import type { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
+import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
 

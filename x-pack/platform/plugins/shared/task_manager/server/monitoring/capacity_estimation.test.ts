@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { CapacityEstimationParams} from './capacity_estimation';
-import { estimateCapacity } from './capacity_estimation';
-import type { RawMonitoringStats } from './monitoring_stats_stream';
-import { HealthStatus } from './monitoring_stats_stream';
+import { CapacityEstimationParams, estimateCapacity } from './capacity_estimation';
+import { HealthStatus, RawMonitoringStats } from './monitoring_stats_stream';
 import { mockLogger } from '../test_utils';
 
 describe('estimateCapacity', () => {

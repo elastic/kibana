@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type {
+import {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';

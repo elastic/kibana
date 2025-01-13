@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import type {
-  EuiButtonSize,
-  EuiButtonEmptySizes} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonSize,
+  EuiButtonEmptySizes,
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';

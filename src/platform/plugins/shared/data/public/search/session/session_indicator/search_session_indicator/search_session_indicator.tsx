@@ -8,12 +8,11 @@
  */
 
 import React, { useCallback, useImperativeHandle } from 'react';
-import type {
-  EuiButtonEmptyProps,
-  EuiButtonIconProps} from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,

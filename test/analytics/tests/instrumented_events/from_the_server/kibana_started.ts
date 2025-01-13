@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../services';
+import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');

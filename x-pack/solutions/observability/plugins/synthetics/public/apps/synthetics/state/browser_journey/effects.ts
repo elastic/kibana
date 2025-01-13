@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
+import { Action } from 'redux-actions';
 import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
 import { serializeHttpFetchError } from '../utils/http_error';
-import type { FetchNetworkEventsParams } from '../network_events/actions';
-import type {
+import { FetchNetworkEventsParams } from '../network_events/actions';
+import {
   ScreenshotBlockDoc,
   ScreenshotBlockCache,
   SyntheticsJourneyApiResponse,

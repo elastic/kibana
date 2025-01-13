@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
+import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 
 /**
  * Generate a DataProvider object to use when adding/investigating to/in a timeline.

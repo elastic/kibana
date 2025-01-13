@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type {
+import {
   AggParamsMapping,
   AggConfigSerialized,
   SerializedSearchSourceFields,
@@ -16,7 +16,7 @@ import type {
   BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { Reference } from './content_management';
+import { Reference } from './content_management';
 
 export interface VisParams {
   [key: string]: any;

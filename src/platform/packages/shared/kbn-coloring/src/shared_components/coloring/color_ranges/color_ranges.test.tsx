@@ -10,9 +10,8 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import type { ColorRangesProps } from './color_ranges';
-import { ColorRanges } from './color_ranges';
-import type { ReactWrapper } from 'enzyme';
+import { ColorRanges, ColorRangesProps } from './color_ranges';
+import { ReactWrapper } from 'enzyme';
 import { ColorRangesContext } from './color_ranges_context';
 import type { PaletteRegistry } from '../../../palettes';
 

@@ -7,36 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   AreaSeriesProps,
   AreaSeriesStyle,
   BarSeriesProps,
+  ColorVariant,
   LineSeriesProps,
+  ScaleType,
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
-  SeriesColorAccessorFn} from '@elastic/charts';
-import {
-  ColorVariant,
-  ScaleType
+  SeriesColorAccessorFn,
 } from '@elastic/charts';
-import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { SPECIAL_TOKENS_STRING_CONVERSION } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalettes } from '@kbn/palettes';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
-import type { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
-import type { FormatFactory } from '../types';
+import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
-import type { ColorAssignments } from './color_assignment';
-import type { GroupsConfiguration } from './axes_configuration';
-import type { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import { ColorAssignments } from './color_assignment';
+import { GroupsConfiguration } from './axes_configuration';
+import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 

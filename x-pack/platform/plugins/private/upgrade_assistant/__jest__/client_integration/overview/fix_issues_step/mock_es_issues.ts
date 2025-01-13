@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESUpgradeStatus } from '../../../../common/types';
+import { ESUpgradeStatus } from '../../../../common/types';
 
 export const esCriticalAndWarningDeprecations: ESUpgradeStatus = {
   totalCriticalDeprecations: 1,

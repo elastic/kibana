@@ -6,9 +6,9 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ConfigType } from '@kbn/screenshotting-server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import { createMockBrowserDriver } from '../browsers/mock';
-import type { Layout } from '../layouts';
+import { Layout } from '../layouts';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import { getScreenshots } from './get_screenshots';

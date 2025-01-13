@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { hasMaxLengthString } from '../../../validators/string';
 import { hasMaxLengthArray } from '../../../validators/array';
-import type { ERROR_CODE } from './types';
+import { ERROR_CODE } from './types';
 
 export const maxLengthField =
   ({

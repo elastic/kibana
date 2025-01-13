@@ -10,8 +10,7 @@
 import Url from 'url';
 import { format } from 'util';
 
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { FtrService } from './ftr_context_provider';
 
 export interface Credentials {

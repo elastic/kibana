@@ -22,10 +22,10 @@
 
 import moment from 'moment';
 
-import type { Phase, PhaseWithTiming } from '../../../../../common/types';
+import { Phase, PhaseWithTiming } from '../../../../../common/types';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
-import type { FormInternal } from '../types';
+import { FormInternal } from '../types';
 
 /* -===- Private functions and types -===- */
 

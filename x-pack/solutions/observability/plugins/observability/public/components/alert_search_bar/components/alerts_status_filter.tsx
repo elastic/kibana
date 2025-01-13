@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from '../constants';
-import type { AlertStatusFilterProps } from '../types';
-import type { AlertStatus } from '../../../../common/typings';
+import { AlertStatusFilterProps } from '../types';
+import { AlertStatus } from '../../../../common/typings';
 
 const options: EuiButtonGroupOptionProps[] = [
   {

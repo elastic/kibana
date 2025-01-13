@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '../../..';
+import { monaco } from '../../..';
 
 const getOpeningLineRegex = (openingMarker: string) => {
   // Opening parentheses can only be preceded by a colon or nothing

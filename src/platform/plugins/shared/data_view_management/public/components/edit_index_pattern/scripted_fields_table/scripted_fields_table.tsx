@@ -9,14 +9,14 @@
 
 import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
 } from '../../../scripting_languages';
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
-import type { ScriptedFieldItem } from './types';
+import { ScriptedFieldItem } from './types';
 
 interface ScriptedFieldsTableProps {
   indexPattern: DataView;

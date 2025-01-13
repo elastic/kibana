@@ -8,11 +8,10 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { AggParamsTerms, IAggConfig} from '@kbn/data-plugin/common';
-import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTerms, IAggConfig, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { convertToTermsColumn } from './terms';
-import type { AggBasedColumn, TermsColumn } from './types';
-import type { SchemaConfig } from '../../..';
+import { AggBasedColumn, TermsColumn } from './types';
+import { SchemaConfig } from '../../..';
 
 const mockConvertMetricToColumns = jest.fn();
 

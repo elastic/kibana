@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CSSProperties } from 'react';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';

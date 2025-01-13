@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MuteAlertParams } from '../../../../../../application/rule/methods/mute_alert/types';
-import type { RewriteRequestCase } from '../../../../../lib';
+import { MuteAlertParams } from '../../../../../../application/rule/methods/mute_alert/types';
+import { RewriteRequestCase } from '../../../../../lib';
 
 export const transformRequestParamsToApplication: RewriteRequestCase<MuteAlertParams> = ({
   rule_id: alertId,

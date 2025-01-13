@@ -8,10 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { LogRecord } from '@kbn/logging';
+import { LogRecord } from '@kbn/logging';
 import type { SizeLimitTriggeringPolicyConfig } from '@kbn/core-logging-server';
-import type { RollingFileContext } from '../../rolling_file_context';
-import type { TriggeringPolicy } from '../policy';
+import { RollingFileContext } from '../../rolling_file_context';
+import { TriggeringPolicy } from '../policy';
 
 export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
   type: schema.literal('size-limit'),

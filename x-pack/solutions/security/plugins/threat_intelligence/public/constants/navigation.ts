@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TIPage, TIPageProperties } from '../types';
+import { TIPage, TIPageProperties } from '../types';
 import { DESCRIPTION, INDICATORS, INTELLIGENCE } from './translations';
 
 /**

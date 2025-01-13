@@ -26,8 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import type { Error } from '../../../../../shared_imports';
-import { SectionError } from '../../../../../shared_imports';
+import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
 import {
@@ -40,7 +39,7 @@ import { linkToSnapshots, linkToEditRepository } from '../../../../services/navi
 
 import { REPOSITORY_TYPES } from '../../../../../../common';
 
-import type {
+import {
   Repository,
   RepositoryVerification,
   RepositoryCleanup,

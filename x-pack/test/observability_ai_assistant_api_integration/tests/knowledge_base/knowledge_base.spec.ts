@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   TINY_ELSER,
   clearKnowledgeBase,

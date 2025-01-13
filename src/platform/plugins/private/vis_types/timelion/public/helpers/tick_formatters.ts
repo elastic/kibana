@@ -9,7 +9,7 @@
 
 import { get } from 'lodash';
 
-import type { IAxis } from './panel_utils';
+import { IAxis } from './panel_utils';
 
 function baseTickFormatter(value: number, axis: IAxis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;

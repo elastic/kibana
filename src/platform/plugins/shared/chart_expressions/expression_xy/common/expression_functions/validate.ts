@@ -9,9 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { isValidInterval } from '@kbn/data-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { AxisExtentModes, ValueLabelModes, SeriesTypes } from '../constants';
-import type {
+import {
   SeriesType,
   AxisExtentConfigResult,
   DataLayerConfigResult,

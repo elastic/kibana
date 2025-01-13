@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
-import type { Providers, ProviderFn} from './read_provider_spec';
-import { isProviderConstructor } from './read_provider_spec';
+import { Providers, ProviderFn, isProviderConstructor } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
 
 export class ProviderCollection {

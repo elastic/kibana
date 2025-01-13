@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ESProcessorItem } from '../../common';
+import { ESProcessorItem } from '../../common';
 import { createPassthroughFailureProcessor, createRemoveProcessor } from './processors';
 
 interface DocTemplate {

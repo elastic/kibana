@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import type {
+import {
   EnterpriseSearchApplication,
   SchemaField,
 } from '../../../common/types/search_applications';

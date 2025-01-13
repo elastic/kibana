@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
-import type { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { FormBasedLayer } from '../../../types';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   getErrorsForDateReference,
@@ -18,7 +18,7 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
-import type { OperationDefinition } from '..';
+import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {

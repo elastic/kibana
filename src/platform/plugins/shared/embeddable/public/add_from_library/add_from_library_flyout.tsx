@@ -11,17 +11,16 @@ import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type {
-  SavedObjectFinderProps} from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   SavedObjectFinder,
+  SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
   core,
   savedObjectsTaggingOss,

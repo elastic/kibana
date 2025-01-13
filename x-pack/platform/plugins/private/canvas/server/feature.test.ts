@@ -7,7 +7,7 @@
 
 import { getCanvasFeature } from './feature';
 import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
-import type { ReportingStart } from '@kbn/reporting-plugin/server/types';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 
 let mockReportingPlugin: ReportingStart;
 beforeEach(() => {

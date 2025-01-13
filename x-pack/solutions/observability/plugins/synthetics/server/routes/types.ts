@@ -6,8 +6,8 @@
  */
 
 import type { Subject } from 'rxjs';
-import type { ObjectType } from '@kbn/config-schema';
-import type {
+import { ObjectType } from '@kbn/config-schema';
+import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
@@ -16,14 +16,14 @@ import type {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
-import type {
+import {
   VersionedRouteValidation,
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core-http-server';
-import type { SyntheticsEsClient } from '../lib';
-import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
-import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsEsClient } from '../lib';
+import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
+import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
   Record<string, any>,

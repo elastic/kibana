@@ -13,15 +13,14 @@ import type {
   PieVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
+import {
   BuildDependencies,
+  DEFAULT_LAYER_ID,
   LensAttributes,
   LensPieConfig,
   LensTreeMapConfig,
   LensMosaicConfig,
-  LensLegendConfig} from '../types';
-import {
-  DEFAULT_LAYER_ID
+  LensLegendConfig,
 } from '../types';
 import {
   addLayerColumn,

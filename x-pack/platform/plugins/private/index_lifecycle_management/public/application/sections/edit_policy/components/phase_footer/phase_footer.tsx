@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { PhaseExceptDelete } from '../../../../../../common/types';
+import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import { usePhaseTimings } from '../../form';
 

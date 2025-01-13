@@ -6,10 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormSchema} from '../../shared_imports';
-import { fieldValidators } from '../../shared_imports';
+import { FormSchema, fieldValidators } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
-import type { RuntimeField, RuntimeType, ComboBoxOption } from '../../types';
+import { RuntimeField, RuntimeType, ComboBoxOption } from '../../types';
 
 const { emptyField } = fieldValidators;
 

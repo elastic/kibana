@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
@@ -21,8 +20,7 @@ import {
 
 import { TargetField } from './common_fields/target_field';
 
-import type { FieldsConfig} from './shared';
-import { to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
 import { XJsonEditor } from '../field_components';
 
 const { emptyField } = fieldValidators;

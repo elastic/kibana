@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type {
-  CreateInvestigationParams,
-  CreateInvestigationResponse,
-} from '@kbn/investigation-shared';
+import { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { InvestigationRepository } from './investigation_repository';
-import type { Investigation } from '../models/investigation';
+import { InvestigationRepository } from './investigation_repository';
+import { Investigation } from '../models/investigation';
 
 export async function createInvestigation(
   params: CreateInvestigationParams,

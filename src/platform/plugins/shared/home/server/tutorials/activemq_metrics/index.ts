@@ -13,11 +13,10 @@ import {
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
-import type {
-  TutorialContext,
-  TutorialSchema} from '../../services/tutorials/lib/tutorials_registry_types';
 import {
-  TutorialsCategory
+  TutorialContext,
+  TutorialsCategory,
+  TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function activemqMetricsSpecProvider(context: TutorialContext): TutorialSchema {

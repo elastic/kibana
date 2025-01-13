@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { act } from 'react-dom/test-utils';
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
 import {
   registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

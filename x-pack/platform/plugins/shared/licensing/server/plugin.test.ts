@@ -8,23 +8,21 @@
 import moment from 'moment';
 import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  ClusterClientMock} from '@kbn/core/server/mocks';
 import {
+  ClusterClientMock,
   coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
-import type {
+import {
   CoreStatus,
   IClusterClient,
-  ServiceStatusLevel} from '@kbn/core/server';
-import {
+  ServiceStatusLevel,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import type { LicenseType } from '../common/types';
-import type { ElasticsearchError } from './types';
+import { LicenseType } from '../common/types';
+import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
 
 function buildRawLicense(

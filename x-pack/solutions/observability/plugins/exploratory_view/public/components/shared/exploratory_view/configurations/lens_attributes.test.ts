@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { LayerConfig} from './lens_attributes';
-import { LensAttributes } from './lens_attributes';
+import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
@@ -22,8 +21,8 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import type { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
-import type { Query } from '@kbn/es-query';
+import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
+import { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
   mockAppDataView();

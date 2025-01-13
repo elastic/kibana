@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { startTransforms } from './start_transforms';
-import type { EntityManagerServerSetup } from '../../types';
+import { EntityManagerServerSetup } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
 import { ERROR_API_KEY_NOT_FOUND } from '../../../common/errors';

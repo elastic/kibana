@@ -8,14 +8,13 @@
  */
 
 import React from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import { ComponentMeta } from '@storybook/react';
 
 import { SampleDataTab } from './sample_data_tab';
 
 import mdx from '../README.mdx';
 import { SampleDataTabProvider } from './services';
-import type { Params } from './mocks';
-import { getStoryServices, getStoryArgTypes } from './mocks';
+import { getStoryServices, getStoryArgTypes, Params } from './mocks';
 
 export default {
   title: 'Sample Data/Tab Content',

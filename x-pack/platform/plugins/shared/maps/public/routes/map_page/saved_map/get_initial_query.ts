@@ -6,8 +6,8 @@
  */
 
 import { getData } from '../../../kibana_services';
-import type { MapsAppState } from '../url_state';
-import type { ParsedMapStateJSON } from './types';
+import { MapsAppState } from '../url_state';
+import { ParsedMapStateJSON } from './types';
 
 export function getInitialQuery({
   mapState,

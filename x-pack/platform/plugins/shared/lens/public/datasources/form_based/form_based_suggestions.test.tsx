@@ -12,22 +12,21 @@ import type {
   StaticValueColumn,
   CountColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { DatasourceSuggestion } from '../../types';
+import { DatasourceSuggestion } from '../../types';
 import { generateId } from '../../id_generator';
 import type { FormBasedPrivateState } from './types';
-import type {
-  IndexPatternSuggestion} from './form_based_suggestions';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
-  getDatasourceSuggestionsForVisualizeCharts
+  getDatasourceSuggestionsForVisualizeCharts,
+  IndexPatternSuggestion,
 } from './form_based_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import type { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import type {
+import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import {
   MathIndexPatternColumn,
   RangeIndexPatternColumn,
   StaticValueIndexPatternColumn,

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
+import { Observable } from 'rxjs';
+import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import type { ITagsClient, Tag, TagWithOptionalId } from '../common';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
  * @public

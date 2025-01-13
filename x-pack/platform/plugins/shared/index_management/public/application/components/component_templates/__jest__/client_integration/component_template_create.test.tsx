@@ -11,8 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
-import type { ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
-import { setup } from './helpers/component_template_create.helpers';
+import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 import { serializeAsESLifecycle } from '../../../../../../common/lib';
 
 jest.mock('@kbn/code-editor', () => {

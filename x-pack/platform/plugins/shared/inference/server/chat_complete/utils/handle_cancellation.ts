@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { OperatorFunction, Observable, Subject, takeUntil } from 'rxjs';
 import { createInferenceRequestAbortedError } from '@kbn/inference-common';
 
 export function handleCancellation<T>(abortSignal: AbortSignal): OperatorFunction<T, T> {

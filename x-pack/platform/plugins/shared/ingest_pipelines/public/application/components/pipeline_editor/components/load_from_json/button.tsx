@@ -6,12 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import type { OnDoneLoadJsonHandler } from './modal_provider';
-import { ModalProvider } from './modal_provider';
+import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
 interface Props {
   onDone: OnDoneLoadJsonHandler;

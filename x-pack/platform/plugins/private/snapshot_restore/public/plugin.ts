@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { PLUGIN } from '../common/constants';
 
-import type { ClientConfigType } from './types';
+import { ClientConfigType } from './types';
 
 import { httpService, setUiMetricService } from './application/services/http';
 import { textService } from './application/services/text';

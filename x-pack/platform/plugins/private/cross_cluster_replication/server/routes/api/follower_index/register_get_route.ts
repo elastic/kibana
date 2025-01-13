@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { deserializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
 import { addBasePath } from '../../../services';
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 /**
  * Returns a single follower index pattern

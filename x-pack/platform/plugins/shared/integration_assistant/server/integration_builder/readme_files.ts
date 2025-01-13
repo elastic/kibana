@@ -8,7 +8,7 @@
 import { Environment, FileSystemLoader } from 'nunjucks';
 
 import { join as joinPath } from 'path';
-import type { DataStream } from '../../common';
+import { DataStream } from '../../common';
 import { createSync, ensureDirSync } from '../util';
 
 export function createReadme(

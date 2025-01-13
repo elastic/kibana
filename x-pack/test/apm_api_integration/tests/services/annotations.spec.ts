@@ -9,16 +9,16 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '@kbn/apm-plugin/common/environment_filter_values';
-import type {
+import {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import { cloneDeep, isPlainObject, merge } from 'lodash';
-import type { ApmApiError } from '../../common/apm_api_supertest';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmApiError } from '../../common/apm_api_supertest';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { expectToReject } from '../../common/utils/expect_to_reject';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';

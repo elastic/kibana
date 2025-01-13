@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 
 import { BulkActionsHeader, BulkActionsRowCell } from './components';
 

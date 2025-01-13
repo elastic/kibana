@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
 import { select, takeLatest, takeEvery } from 'redux-saga/effects';
-import type { WorkspaceField } from '../types';
-import type { GraphState, GraphStoreDependencies } from './store';
+import { WorkspaceField } from '../types';
+import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
-import type { InferActionType } from './helpers';
-import { matchesOne } from './helpers';
+import { matchesOne, InferActionType } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 

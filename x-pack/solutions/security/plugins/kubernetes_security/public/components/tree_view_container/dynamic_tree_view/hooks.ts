@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { QueryDslQueryContainerBool } from '../../../types';
+import { QueryDslQueryContainerBool } from '../../../types';
 import {
   QUERY_KEY_PROCESS_EVENTS,
   AGGREGATE_ROUTE,
@@ -15,7 +15,7 @@ import {
   ORCHESTRATOR_CLUSTER_NAME,
   CURRENT_API_VERSION,
 } from '../../../../common/constants';
-import type { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
+import { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
 import { KUBERNETES_COLLECTION_FIELDS } from '../helpers';
 
 export const useFetchDynamicTreeView = (

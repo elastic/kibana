@@ -8,8 +8,7 @@
  */
 
 import { compact, flattenDeep, isString } from 'lodash';
-import type { Observable} from 'rxjs';
-import { ReplaySubject, distinctUntilChanged } from 'rxjs';
+import { Observable, ReplaySubject, distinctUntilChanged } from 'rxjs';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 
 export interface InternalChromeDocTitleSetup {

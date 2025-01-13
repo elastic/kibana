@@ -13,8 +13,7 @@ import type {
   TagcloudState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { BuildDependencies, LensAttributes, LensTagCloudConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  InvokeAsyncIteratorBody} from './get_token_count_from_invoke_async_iterator';
 import {
-  getTokenCountFromInvokeAsyncIterator
+  getTokenCountFromInvokeAsyncIterator,
+  InvokeAsyncIteratorBody,
 } from './get_token_count_from_invoke_async_iterator';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Stream } from 'openai/streaming';
-import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import { ChatCompletionChunk } from 'openai/resources/chat/completions';
 
 const body: InvokeAsyncIteratorBody = {
   messages: [

@@ -8,7 +8,7 @@
  */
 
 import { findPlugins } from '@kbn/docs-utils';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Utility method for finding and logging information about all plugins.

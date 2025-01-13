@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
-import type {
+import { estypes } from '@elastic/elasticsearch';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import {
   PerformPromptsBulkActionRequestBody,
   PromptCreateProps,
   PromptResponse,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { EuiPanel, EuiStat, useEuiTheme, EuiIcon } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 import { css } from '@emotion/react';

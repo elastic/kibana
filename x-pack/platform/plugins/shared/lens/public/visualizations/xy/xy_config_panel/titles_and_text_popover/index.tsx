@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
-import type { XYState } from '../../types';
+import { XYState } from '../../types';
 import type { FramePublicAPI } from '../../../../types';
 
 export interface TextPopoverProps {

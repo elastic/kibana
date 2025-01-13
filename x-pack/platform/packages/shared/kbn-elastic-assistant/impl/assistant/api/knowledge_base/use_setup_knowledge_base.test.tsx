@@ -6,8 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import type { UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
-import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
 

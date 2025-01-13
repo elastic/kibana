@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { TestData } from './types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { TestData } from './types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import { farequoteDataViewTestData } from './index_test_data';

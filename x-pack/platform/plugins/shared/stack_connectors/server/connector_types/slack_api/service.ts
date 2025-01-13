@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import type { Logger } from '@kbn/core/server';
+import axios, { AxiosResponse } from 'axios';
+import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
   PostMessageSubActionParams,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
 export const mockIndexPattern: DataViewBase = {
   fields: [

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+import {
   AppMountParameters,
+  AppStatus,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { INVESTIGATE_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
@@ -26,8 +27,7 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
-import type { InvestigateAppRepositoryClient } from './api';
-import { createInvestigateAppRepositoryClient } from './api';
+import { createInvestigateAppRepositoryClient, InvestigateAppRepositoryClient } from './api';
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 

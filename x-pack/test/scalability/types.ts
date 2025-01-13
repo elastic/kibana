@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScalabilitySetup } from '@kbn/journeys';
+import { ScalabilitySetup } from '@kbn/journeys';
 
 export interface ScalabilityJourney {
   journeyName: string;

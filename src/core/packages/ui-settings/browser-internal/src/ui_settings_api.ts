@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
-import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;

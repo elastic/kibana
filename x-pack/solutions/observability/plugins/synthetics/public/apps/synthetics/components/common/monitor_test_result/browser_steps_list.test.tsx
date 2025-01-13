@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Matcher, SelectorMatcherOptions } from '@testing-library/react';
-import { within } from '@testing-library/react';
+import { Matcher, SelectorMatcherOptions, within } from '@testing-library/react';
 import React from 'react';
 import { render, WrappedHelper } from '../../../utils/testing';
-import type { JourneyStep } from '../../../../../../common/runtime_types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { BrowserStepsList } from './browser_steps_list';
 
 describe('<BrowserStepsList />', () => {

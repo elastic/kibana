@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Readable, Writable} from 'stream';
-import Stream, { PassThrough, Transform } from 'stream';
+import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';

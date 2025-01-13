@@ -10,8 +10,7 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiIconTip } from '@elastic/eui';
-import type { SizeParamEditorProps } from './size';
-import { SizeParamEditor } from './size';
+import { SizeParamEditor, SizeParamEditorProps } from './size';
 import { aggParamCommonPropsMock } from './test_utils';
 
 describe('SizeParamEditor', () => {

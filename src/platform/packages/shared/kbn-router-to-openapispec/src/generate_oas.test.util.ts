@@ -8,8 +8,7 @@
  */
 
 import type { ZodType } from '@kbn/zod';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { RouterRoute, VersionedRouterRoute } from '@kbn/core-http-server';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';

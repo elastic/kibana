@@ -12,10 +12,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiButtonGroup, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { KbnPalettes } from '@kbn/palettes';
-import type { RootState} from '../../state/color_mapping';
-import { updatePalette } from '../../state/color_mapping';
-import type { ColorMapping } from '../../config';
+import { KbnPalettes } from '@kbn/palettes';
+import { RootState, updatePalette } from '../../state/color_mapping';
+import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette } from '../../config/assignments';
 
 export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {

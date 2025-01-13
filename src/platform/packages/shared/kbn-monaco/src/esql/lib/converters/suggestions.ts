@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '../../../monaco_imports';
-import type {
+import {
   MonacoAutocompleteCommandDefinition,
   SuggestionRawDefinitionWithMonacoRange,
 } from '../types';

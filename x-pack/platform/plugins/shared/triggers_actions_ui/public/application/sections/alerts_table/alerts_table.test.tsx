@@ -16,9 +16,10 @@ import {
   ALERT_STATUS,
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { AlertsTable } from './alerts_table';
-import type {
+import {
+  AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
   BulkActionsState,
@@ -27,11 +28,9 @@ import type {
   UseCellActions,
   Alerts,
 } from '../../../types';
-import { AlertsField } from '../../../types';
-import type { EuiDataGridColumnCellAction } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import type { BrowserFields } from '@kbn/alerting-types';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';

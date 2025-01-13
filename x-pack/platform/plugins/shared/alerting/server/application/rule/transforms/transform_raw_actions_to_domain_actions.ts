@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash';
-import type { SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { injectReferencesIntoActions } from '../../../rules_client/common';
-import type { RawRule } from '../../../types';
-import type { RuleDomain } from '../types';
+import { RawRule } from '../../../types';
+import { RuleDomain } from '../types';
 
 interface Args {
   ruleId: string;

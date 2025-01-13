@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import {
@@ -20,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { parseTimestamp } from '../parse_timestamp';
-import type { Ping, PingError } from '../../../../../../common/runtime_types';
+import { Ping, PingError } from '../../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,

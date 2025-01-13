@@ -9,13 +9,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { SearchSessionStatus } from '../../../../../common';
 import { dateString } from '../lib/date_string';
-import type { UISession } from '../types';
-import type { StatusDef as StatusAttributes} from '.';
-import { TableText } from '.';
+import { UISession } from '../types';
+import { StatusDef as StatusAttributes, TableText } from '.';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {

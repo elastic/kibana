@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -19,8 +18,7 @@ import {
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
-import { from, to, isEmptyString } from './shared';
+import { FieldsConfig, from, to, isEmptyString } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Pipeline, Processor } from '../types';
+import { Pipeline, Processor } from '../types';
 
 export function deserializePipelines(pipelinesByName: {
   [key: string]: estypes.IngestPipeline;

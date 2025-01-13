@@ -6,14 +6,13 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import type {
-  TrainedModelsDeploymentModalProps} from '../../../public/application/sections/home/index_list/details_page/trained_models_deployment_modal';
 import {
-  TrainedModelsDeploymentModal
+  TrainedModelsDeploymentModal,
+  TrainedModelsDeploymentModalProps,
 } from '../../../public/application/sections/home/index_list/details_page/trained_models_deployment_modal';
 import { act } from 'react-dom/test-utils';
 import * as mappingsContext from '../../../public/application/components/mappings_editor/mappings_state_context';
-import type { NormalizedField } from '../../../public/application/components/mappings_editor/types';
+import { NormalizedField } from '../../../public/application/components/mappings_editor/types';
 
 jest.mock('../../../public/hooks/use_ml_model_status_toasts', () => ({
   useMLModelNotificationToasts: jest.fn().mockReturnValue({

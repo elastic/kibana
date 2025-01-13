@@ -9,7 +9,7 @@ import { sample, random } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { ADMIN_CONSOLE, DOMAINS } from '../../../common/constants';
 import { createEvent } from './create_base_event';
-import type { EventFunction } from '../../../../../types';
+import { EventFunction } from '../../../../../types';
 
 export const internalError: EventFunction = (_schedule, timestamp) => {
   const user = {

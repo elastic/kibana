@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';

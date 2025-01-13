@@ -10,9 +10,9 @@ import {
   mockMultiIndexResponse,
 } from '../../../__mocks__/fetch_indices.mock';
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import type { TotalIndexData } from '../fetch_indices';
+import { TotalIndexData } from '../fetch_indices';
 
 import { getIndexDataMapper, getSearchIndexData } from './get_index_data';
 

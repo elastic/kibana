@@ -7,12 +7,10 @@
 
 import { isEmpty } from 'lodash';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import type {
+import {
   DeleteParamsResponse,
   SyntheticsParamRequest,
   SyntheticsParams,
-} from '../../../../../common/runtime_types';
-import {
   SyntheticsParamsCodec,
   SyntheticsParamsReadonlyCodec,
   SyntheticsParamsReadonlyCodecList,

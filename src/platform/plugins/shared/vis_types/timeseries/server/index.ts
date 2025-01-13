@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { VisTypeTimeseriesConfig} from './config';
-import { config as configSchema } from './config';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 
 export type { VisTypeTimeseriesSetup } from './plugin';
 

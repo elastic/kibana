@@ -12,15 +12,14 @@ import { BehaviorSubject } from 'rxjs';
 
 import { render } from '@testing-library/react';
 
-import type { ControlGroupApi } from '../..';
-import type {
+import { ControlGroupApi } from '../..';
+import {
   ControlGroupChainingSystem,
   ControlLabelPosition,
-  ParentIgnoreSettings} from '../../../common';
-import {
-  DEFAULT_CONTROL_LABEL_POSITION
+  DEFAULT_CONTROL_LABEL_POSITION,
+  ParentIgnoreSettings,
 } from '../../../common';
-import type { DefaultControlApi } from '../../controls/types';
+import { DefaultControlApi } from '../../controls/types';
 import { ControlGroupEditor } from './control_group_editor';
 
 describe('render', () => {

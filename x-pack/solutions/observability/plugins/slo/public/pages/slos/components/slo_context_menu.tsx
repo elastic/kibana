@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -13,11 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSelectableOption,
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
 
-import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 
 export interface Option {
   label: string;

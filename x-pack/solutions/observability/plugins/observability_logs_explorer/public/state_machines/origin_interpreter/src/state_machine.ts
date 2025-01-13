@@ -6,8 +6,7 @@
  */
 
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { InterpreterFrom } from 'xstate';
-import { createMachine } from 'xstate';
+import { createMachine, InterpreterFrom } from 'xstate';
 import type {
   ObservabilityLogsExplorerHistory,
   ObservabilityLogsExplorerStartServices,

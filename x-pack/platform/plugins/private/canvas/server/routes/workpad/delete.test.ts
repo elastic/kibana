@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
-import type {
-  RequestHandlerContext,
-  RequestHandler} from '@kbn/core/server';
 import {
   kibanaResponseFactory,
+  RequestHandlerContext,
+  RequestHandler,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';

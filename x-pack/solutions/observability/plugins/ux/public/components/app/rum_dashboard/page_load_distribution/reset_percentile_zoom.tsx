@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiHideFor, EuiShowFor, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { I18LABELS } from '../translations';
-import type { PercentileRange } from './types';
+import { PercentileRange } from './types';
 
 interface Props {
   percentileRange: PercentileRange;

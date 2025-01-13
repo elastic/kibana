@@ -7,7 +7,7 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 
 jest.mock('../../lib/fetch_mapping', () => ({
   fetchMapping: jest.fn(),

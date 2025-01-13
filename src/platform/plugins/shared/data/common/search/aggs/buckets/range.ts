@@ -9,11 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { NumericalRange} from '../../expressions';
-import { numericalRangeToAst } from '../../expressions';
+import { NumericalRange, numericalRangeToAst } from '../../expressions';
 import { KBN_FIELD_TYPES } from '../../..';
-import type { AggTypesDependencies } from '../agg_types';
-import type { BaseAggParams } from '../types';
+import { AggTypesDependencies } from '../agg_types';
+import { BaseAggParams } from '../types';
 
 import { BucketAggType } from './bucket_agg_type';
 import { aggRangeFnName } from './range_fn';

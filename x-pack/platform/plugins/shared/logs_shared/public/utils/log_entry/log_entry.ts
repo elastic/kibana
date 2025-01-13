@@ -8,7 +8,7 @@
 import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
 import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
-import type {
+import {
   LogEntry,
   LogColumn,
   LogTimestampColumn,

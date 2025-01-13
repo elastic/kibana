@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { EuiToolTipProps } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
 
 type TooltipWrapperProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   tooltipContent: string;

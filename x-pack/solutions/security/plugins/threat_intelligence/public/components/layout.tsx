@@ -6,8 +6,7 @@
  */
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren, ReactNode } from 'react';
 import { SecuritySolutionPageWrapper } from '../containers/security_solution_page_wrapper';
 import { TITLE_TEST_ID } from './test_ids';
 

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
-import type {
-  ExecutionUuidAggResult} from './get_execution_log_aggregation';
 import {
   getNumExecutions,
   getExecutionLogAggregation,
   formatExecutionLogResult,
   formatSortForBucketSort,
   formatSortForTermSort,
+  ExecutionUuidAggResult,
   getExecutionKPIAggregation,
   formatExecutionKPIResult,
 } from './get_execution_log_aggregation';

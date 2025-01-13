@@ -9,14 +9,14 @@
 
 import type { Observable } from 'rxjs';
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type {
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { Filter } from '@kbn/es-query';
+import {
   HasSaveNotification,
   HasSerializedChildState,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import type {
+import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDisabledActionIds,
@@ -26,10 +26,10 @@ import type {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import type {
+import {
   ControlGroupChainingSystem,
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
@@ -39,7 +39,7 @@ import type {
   DefaultControlState,
   ParentIgnoreSettings,
 } from '../../common';
-import type { ControlFetchContext } from './control_fetch/control_fetch';
+import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /**
  * ----------------------------------------------------------------

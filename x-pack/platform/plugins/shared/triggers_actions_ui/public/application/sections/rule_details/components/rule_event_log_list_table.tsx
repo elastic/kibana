@@ -8,18 +8,20 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiDataGridSorting, OnTimeChangeProps, EuiDataGridColumn } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
+  EuiDataGridSorting,
   EuiSuperDatePicker,
+  OnTimeChangeProps,
   EuiSwitch,
+  EuiDataGridColumn,
   EuiCallOut,
 } from '@elastic/eui';
-import type { IExecutionLog } from '@kbn/alerting-plugin/common';
+import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -41,13 +43,15 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
-import type { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
+import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
-import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_event_logs';
-import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
+import {
+  useLoadRuleEventLogs,
+  UseLoadRuleEventLogsProps,
+} from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-import type { RefreshToken } from './types';
+import { RefreshToken } from './types';
 
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',

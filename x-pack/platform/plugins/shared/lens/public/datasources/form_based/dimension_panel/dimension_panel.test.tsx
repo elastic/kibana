@@ -5,48 +5,43 @@
  * 2.0.
  */
 
-import type { ShallowWrapper, ComponentType } from 'enzyme';
-import { ReactWrapper } from 'enzyme';
-import type { ChangeEvent } from 'react';
-import React from 'react';
+import { ReactWrapper, ShallowWrapper, ComponentType } from 'enzyme';
+import React, { ChangeEvent } from 'react';
 import { screen, act, render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import type {
-  EuiListGroupItemProps,
-  EuiComboBoxProps} from '@elastic/eui';
 import {
   EuiComboBox,
+  EuiListGroupItemProps,
   EuiListGroup,
   EuiRange,
-  EuiSelect
+  EuiSelect,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type {
-  FormBasedDimensionEditorProps} from './dimension_panel';
 import {
-  FormBasedDimensionEditorComponent
+  FormBasedDimensionEditorComponent,
+  FormBasedDimensionEditorProps,
 } from './dimension_panel';
 import { mount } from 'enzyme';
-import type { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
-import type { FormBasedPrivateState } from '../types';
+import { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type {
+import {
   FiltersIndexPatternColumn,
   GenericIndexPatternColumn,
-  TermsIndexPatternColumn} from '../operations';
-import {
-  replaceColumn
+  replaceColumn,
+  TermsIndexPatternColumn,
 } from '../operations';
 import { documentField } from '../document_field';
-import type { OperationMetadata } from '../../../types';
-import type { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
+import { OperationMetadata } from '../../../types';
+import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
@@ -55,7 +50,7 @@ import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { LensAppServices } from '../../../app_plugin/types';
+import { LensAppServices } from '../../../app_plugin/types';
 
 jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,

@@ -7,10 +7,10 @@
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
-import type { SyntheticsRestApiRouteFactory } from '../../types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import type { SyntheticsServerSetup } from '../../../types';
+import { SyntheticsServerSetup } from '../../../types';
 
 type Payload = Array<{
   id: string;

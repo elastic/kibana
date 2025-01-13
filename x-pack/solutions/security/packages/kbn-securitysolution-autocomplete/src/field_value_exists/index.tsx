@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 const NO_OPTIONS_FOR_EXIST: EuiComboBoxOptionOption[] = [];
 

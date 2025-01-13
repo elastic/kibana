@@ -10,10 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { FieldFormat, FIELD_FORMAT_IDS } from '..';
-import type { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert } from '../types';
 
 interface FractPatternObject {
   length: number;

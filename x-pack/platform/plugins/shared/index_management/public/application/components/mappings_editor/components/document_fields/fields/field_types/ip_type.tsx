@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type SemVer from 'semver/classes/semver';
+import SemVer from 'semver/classes/semver';
 
-import type { NormalizedField, Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 
 import {

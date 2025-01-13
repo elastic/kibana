@@ -10,7 +10,7 @@
  * 2.0.
  */
 
-import type { SchedulingConfiguraton } from '@kbn/search-connectors';
+import { SchedulingConfiguraton } from '@kbn/search-connectors';
 import { useMutation } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 

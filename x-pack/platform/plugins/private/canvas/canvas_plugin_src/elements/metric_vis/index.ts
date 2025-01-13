@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElementFactory } from '../../../types';
+import { ElementFactory } from '../../../types';
 
 export const metricVis: ElementFactory = () => ({
   name: 'metricVis',

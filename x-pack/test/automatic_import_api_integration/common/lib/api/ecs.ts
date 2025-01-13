@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type SuperTest from 'supertest';
-import type {
+import {
   EcsMappingRequestBody,
+  ECS_GRAPH_PATH,
   EcsMappingResponse,
 } from '@kbn/integration-assistant-plugin/common';
-import { ECS_GRAPH_PATH } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
-import type { User } from '../authentication/types';
+import { User } from '../authentication/types';
 import { BadRequestError } from '../error/error';
 
 export const postEcsMapping = async ({

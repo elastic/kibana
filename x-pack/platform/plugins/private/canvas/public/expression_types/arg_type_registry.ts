@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { Registry } from '@kbn/interpreter';
-import type { ArgTypeProps } from './arg_type';
-import { ArgType } from './arg_type';
+import { ArgType, ArgTypeProps } from './arg_type';
 
 class ArgTypeRegistry extends Registry<ArgTypeProps, ArgType> {
   wrapper(obj: ArgTypeProps) {

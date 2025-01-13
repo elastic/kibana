@@ -34,7 +34,7 @@ import {
   SAME_FAMILY,
   SIZE,
 } from '../translations';
-import type {
+import {
   AllowedValue,
   EnrichedFieldMetadata,
   IlmPhase,

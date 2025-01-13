@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Response, ExecutionError, Payload } from '../types';
-import { PayloadFormat } from '../types';
+import { Response, ExecutionError, PayloadFormat, Payload } from '../types';
 
 function prettifyPayload(payload = '', indentationLevel = 0) {
   const indentation = new Array(indentationLevel + 1).join(' ');

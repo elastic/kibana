@@ -9,7 +9,7 @@
 
 import { difference, union } from 'lodash';
 import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
-import type { Elasticsearch, Kibana } from '..';
+import { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
 
 interface User {

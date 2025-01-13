@@ -11,8 +11,7 @@ import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import type { RelationshipsProps } from './relationships';
-import { RelationshipsClass as Relationships } from './relationships';
+import { RelationshipsClass as Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: jest.fn(),

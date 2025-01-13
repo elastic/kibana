@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type http from 'http';
+import http from 'http';
 
 export const getDataFromRequest = async (request: http.IncomingMessage) => {
   if (request.method !== 'POST' && request.method !== 'PATCH') {

@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type {
+import {
   ExternalReferenceAttachmentAttributes,
   ExternalReferenceSOAttachmentAttributes,
   Case,
   PersistableStateAttachment,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,

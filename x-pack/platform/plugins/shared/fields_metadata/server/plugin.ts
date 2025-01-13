@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import type {
+import {
   FieldsMetadataPluginCoreSetup,
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -16,7 +16,7 @@ import type {
 } from './types';
 import { initFieldsMetadataServer } from './fields_metadata_server';
 import { FieldsMetadataService } from './services/fields_metadata';
-import type { FieldsMetadataBackendLibs } from './lib/shared_types';
+import { FieldsMetadataBackendLibs } from './lib/shared_types';
 
 export class FieldsMetadataPlugin
   implements

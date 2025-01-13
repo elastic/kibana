@@ -9,8 +9,7 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import type { SourcePickerProps } from './source_picker';
-import { SourcePicker } from './source_picker';
+import { SourcePicker, SourcePickerProps } from './source_picker';
 
 export function SourceModal(props: SourcePickerProps) {
   return (

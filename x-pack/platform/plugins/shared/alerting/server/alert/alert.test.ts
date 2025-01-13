@@ -7,9 +7,9 @@
 
 import sinon from 'sinon';
 import { Alert } from './alert';
-import type { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
-import type { CombinedSummarizedAlerts } from '../types';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 

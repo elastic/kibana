@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type {
+import {
   FeatureUsageService,
   FeatureUsageServiceSetup,
   FeatureUsageServiceStart,

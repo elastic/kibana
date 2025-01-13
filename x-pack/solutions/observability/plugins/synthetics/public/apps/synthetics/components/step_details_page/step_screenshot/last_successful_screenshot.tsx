@@ -11,9 +11,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchLastSuccessfulCheck } from '../../../state';
-import type { JourneyStep } from '../../../../../../common/runtime_types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
-import type { ScreenshotImageSize } from '../../common/screenshot/screenshot_size';
+import { ScreenshotImageSize } from '../../common/screenshot/screenshot_size';
 
 export const LastSuccessfulScreenshot = ({
   step,

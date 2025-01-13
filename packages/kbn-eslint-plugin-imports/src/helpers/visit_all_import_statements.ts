@@ -8,10 +8,9 @@
  */
 
 import type { Rule } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import * as T from '@babel/types';
-import type { ImportType } from '@kbn/import-resolver';
+import { ImportType } from '@kbn/import-resolver';
 
 const JEST_MODULE_METHODS = [
   'jest.createMockFromModule',

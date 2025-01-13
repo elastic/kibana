@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Metric, MetricType } from '../../../../common/types';
-import type { PANEL_TYPES } from '../../../../common/enums';
+import { Metric, MetricType } from '../../../../common/types';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { SUPPORTED_METRICS } from '.';
 
 const isMetricValid = (

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDependencies } from '../../../types';
+import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
 const bodySchema = schema.object({

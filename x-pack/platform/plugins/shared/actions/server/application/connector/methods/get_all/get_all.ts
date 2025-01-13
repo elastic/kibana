@@ -8,19 +8,19 @@
 /**
  * Get all actions with in-memory connectors
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AuditLogger } from '@kbn/security-plugin-types-server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
-import type { InMemoryConnector } from '../../../..';
-import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
+import { InMemoryConnector } from '../../../..';
+import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
-import type { GetAllParams, InjectExtraFindDataParams } from './types';
+import { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import type { ConnectorWithExtraFindData } from '../../types';
-import type { GetAllUnsecuredParams } from './types/params';
+import { ConnectorWithExtraFindData } from '../../types';
+import { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;

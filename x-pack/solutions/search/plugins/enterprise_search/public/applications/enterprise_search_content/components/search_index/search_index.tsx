@@ -11,18 +11,17 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { ClientConfigType } from '../../../../../common/types';
+import { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
-import type { ElasticsearchViewIndex } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';

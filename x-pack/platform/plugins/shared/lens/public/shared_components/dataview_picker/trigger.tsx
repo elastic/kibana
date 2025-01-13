@@ -8,8 +8,7 @@
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { ToolbarButtonProps } from './toolbar_button';
-import { ToolbarButton } from './toolbar_button';
+import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
 
 interface TriggerLabelProps {
   label: string;

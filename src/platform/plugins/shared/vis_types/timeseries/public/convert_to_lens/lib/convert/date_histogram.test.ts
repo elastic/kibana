@@ -8,7 +8,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type {
+import {
   DateHistogramColumn,
   DateHistogramParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';

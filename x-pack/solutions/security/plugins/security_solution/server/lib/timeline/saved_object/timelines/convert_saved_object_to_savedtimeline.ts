@@ -16,8 +16,8 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type {
-  TimelineResponse,
+import type { TimelineResponse } from '../../../../../common/api/timeline';
+import {
   type TimelineType,
   TimelineTypeEnum,
   type TimelineStatus,

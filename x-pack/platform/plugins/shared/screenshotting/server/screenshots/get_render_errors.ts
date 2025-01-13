@@ -8,8 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Layout } from '../layouts';
 import { CONTEXT_GETRENDERERRORS } from './constants';
-import type { EventLogger } from './event_logger';
-import { Actions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,

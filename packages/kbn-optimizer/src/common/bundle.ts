@@ -12,12 +12,11 @@ import Fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
 import { BundleCache } from './bundle_cache';
-import type { UnknownVals} from './ts_helpers';
-import { isObj } from './ts_helpers';
+import { UnknownVals, isObj } from './ts_helpers';
 import { omit } from './obj_helpers';
 import { includes } from './array_helpers';
 import type { Hashes } from './hashes';
-import type { ParsedDllManifest } from './dll_manifest';
+import { ParsedDllManifest } from './dll_manifest';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 

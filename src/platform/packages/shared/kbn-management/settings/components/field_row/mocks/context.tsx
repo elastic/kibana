@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactChild } from 'react';
-import React from 'react';
+import React, { ReactChild } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFieldInputServicesMock } from '@kbn/management-settings-components-field-input/mocks';
-import type { FieldInputServices } from '@kbn/management-settings-components-field-input/mocks';
+import { FieldInputServices } from '@kbn/management-settings-components-field-input/mocks';
 import { FieldRowProvider } from '../services';
-import type { FieldRowServices } from '../types';
+import { FieldRowServices } from '../types';
 
 const createRootMock = () => {
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();

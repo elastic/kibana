@@ -11,21 +11,20 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
-import type {
-  ConnectorsByConsumersBucket} from './group_connectors_by_consumers';
 import {
+  ConnectorsByConsumersBucket,
   groupConnectorsByConsumers,
 } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
-import type { AlertingUsage } from '../types';
+import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
-import type { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
 
 interface Opts {
   esClient: ElasticsearchClient;

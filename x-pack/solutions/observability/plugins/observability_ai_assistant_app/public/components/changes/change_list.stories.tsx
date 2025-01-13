@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 
-import type { ChangeListProps } from './change_list';
-import { ChangeList as Component, ChangeListItemImpact } from './change_list';
+import { ChangeListProps, ChangeList as Component, ChangeListItemImpact } from './change_list';
 
 export default {
   component: Component,

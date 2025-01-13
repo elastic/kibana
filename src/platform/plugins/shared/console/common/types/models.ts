@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TextObject } from '../text_object';
+import { TextObject } from '../text_object';
 
 export interface IdObject {
   id: string;

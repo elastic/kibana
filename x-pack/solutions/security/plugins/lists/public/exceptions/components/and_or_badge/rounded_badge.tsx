@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-import type { AndOr } from '.';
+import { AndOr } from '.';
 
 const RoundBadge = styled(EuiBadge)`
   align-items: center;

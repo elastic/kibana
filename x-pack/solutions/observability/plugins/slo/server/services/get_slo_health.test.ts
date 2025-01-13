@@ -5,9 +5,8 @@
  * 2.0.
  */
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
@@ -18,7 +17,7 @@ import {
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;

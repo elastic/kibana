@@ -17,24 +17,23 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  SerializedTitles} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   initializeTitles,
+  SerializedTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
 import { SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
 import { loadBookAttributes, saveBookAttributes } from './saved_book_library';
-import type {
+import {
   BookApi,
   BookAttributes,
   BookByReferenceSerializedState,

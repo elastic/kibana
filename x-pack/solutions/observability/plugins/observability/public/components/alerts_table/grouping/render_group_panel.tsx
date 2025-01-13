@@ -8,10 +8,9 @@
 import React from 'react';
 import { isArray } from 'lodash/fp';
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { GroupPanelRenderer } from '@kbn/grouping/src';
-import { firstNonNullValue } from '@kbn/grouping/src';
+import { firstNonNullValue, GroupPanelRenderer } from '@kbn/grouping/src';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AlertsByGroupingAgg } from '../types';
+import { AlertsByGroupingAgg } from '../types';
 import { Tags } from '../../tags';
 import { ungrouped } from './constants';
 

@@ -9,7 +9,7 @@
  * Copyright (c) 2017 The xterm.js authors. All rights reserved.
  * @license MIT
  */
-import type { Terminal, IDisposable, ITerminalAddon, IBufferRange } from 'xterm';
+import { Terminal, IDisposable, ITerminalAddon, IBufferRange } from 'xterm';
 
 export interface ISearchOptions {
   regex?: boolean;

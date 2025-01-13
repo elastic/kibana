@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IndicesGetMappingResponse,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export const SPARSE_SEMANTIC_FIELD_FIELD_CAPS = {
   indices: ['test-index2'],

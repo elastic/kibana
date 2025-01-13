@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
+import {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';

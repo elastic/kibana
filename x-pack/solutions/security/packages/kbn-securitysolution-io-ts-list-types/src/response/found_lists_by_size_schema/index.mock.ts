@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FoundListsBySizeSchema } from '.';
+import { FoundListsBySizeSchema } from '.';
 import { getListResponseMock } from '../list_schema/index.mock';
 
 export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({

@@ -8,17 +8,16 @@
  */
 
 import $ from 'jquery';
-import type { RefObject } from 'react';
-import React from 'react';
+import React, { RefObject } from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { VisTypeVislibCoreSetup } from './plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import type { BasicVislibParams } from './types';
+import { BasicVislibParams } from './types';
 
 const legendClassName = {
   top: 'vislib--legend-top',

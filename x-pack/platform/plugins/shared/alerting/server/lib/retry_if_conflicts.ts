@@ -11,8 +11,7 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import type { Logger} from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 

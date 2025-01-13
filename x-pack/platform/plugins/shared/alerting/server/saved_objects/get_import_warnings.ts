@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
+import { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
 
 export function getImportWarnings(
   rulesSavedObjects: Array<SavedObject<unknown>>

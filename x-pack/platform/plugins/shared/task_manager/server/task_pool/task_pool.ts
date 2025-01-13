@@ -9,20 +9,18 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import type { Observable} from 'rxjs';
-import { Subject } from 'rxjs';
-import type { Duration } from 'moment';
-import moment from 'moment';
+import { Observable, Subject } from 'rxjs';
+import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
-import type { Logger } from '@kbn/core/server';
-import type { TaskRunner } from '../task_running';
+import { Logger } from '@kbn/core/server';
+import { TaskRunner } from '../task_running';
 import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
-import type { TaskManagerStat } from '../task_events';
-import type { ICapacity } from './types';
+import { TaskManagerStat } from '../task_events';
+import { ICapacity } from './types';
 import { CLAIM_STRATEGY_MGET } from '../config';
 import { WorkerCapacity } from './worker_capacity';
 import { CostCapacity } from './cost_capacity';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 
 interface TaskPoolOpts {
   capacity$: Observable<number>;

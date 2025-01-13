@@ -6,4 +6,4 @@
  */
 
 export * from './data_source_selector';
-export type * from './types';
+export * from './types';

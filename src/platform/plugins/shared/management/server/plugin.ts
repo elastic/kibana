@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import type { ManagementAppLocatorParams } from '../common/locator';
-import { ManagementAppLocatorDefinition } from '../common/locator';
+import { ManagementAppLocatorDefinition, ManagementAppLocatorParams } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 
 interface ManagementSetupDependencies {

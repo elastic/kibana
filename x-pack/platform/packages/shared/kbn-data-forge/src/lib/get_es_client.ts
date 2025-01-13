@@ -8,7 +8,7 @@
 import * as Fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { Config } from '../types';
+import { Config } from '../types';
 
 let esClient: Client;
 

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 
-import type { FormHook } from '../../../../../shared_imports';
-import { Form as LibForm } from '../../../../../shared_imports';
+import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
 import { ConfigurationProvider } from '../configuration_context';
 import { FormErrorsProvider } from '../form_errors_context';

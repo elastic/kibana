@@ -8,7 +8,7 @@
 import * as tinymath from '@kbn/tinymath';
 import { parse as hjsonParse } from 'hjson';
 import moment from 'moment-timezone';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { formatNumber } from './number_formatter';
 

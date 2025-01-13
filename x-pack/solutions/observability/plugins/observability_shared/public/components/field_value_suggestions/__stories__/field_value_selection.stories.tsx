@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { text } from '@storybook/addon-knobs';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { FieldValueSelectionProps } from '../types';
+import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
 
 const values = [

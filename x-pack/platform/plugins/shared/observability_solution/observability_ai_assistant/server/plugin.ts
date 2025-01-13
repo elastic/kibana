@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   CoreSetup,
+  DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -19,9 +18,9 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import type { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
-import type {
+import {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantPluginSetupDependencies,

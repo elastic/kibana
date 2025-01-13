@@ -8,8 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiIcon,
   EuiLink,
@@ -17,9 +15,10 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiText
+  EuiText,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
   txtAddVariableButtonTitle,
   txtUrlTemplateVariablesHelpLinkText,

@@ -8,14 +8,12 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { PresentationContainer} from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type {
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import {
   HasParentApi,
   HasType,
   HasUniqueId,
-  PublishesViewMode} from '@kbn/presentation-publishing';
-import {
+  PublishesViewMode,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,

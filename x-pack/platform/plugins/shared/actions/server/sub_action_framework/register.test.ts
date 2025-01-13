@@ -8,16 +8,15 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type {
-  TestConfig,
-  TestSecrets} from './mocks';
 import {
   TestSecretsSchema,
   TestConfigSchema,
+  TestConfig,
+  TestSecrets,
   TestSubActionConnector,
 } from './mocks';
 import { register } from './register';
-import type { ServiceParams } from './types';
+import { ServiceParams } from './types';
 
 describe('Registration', () => {
   const renderedVariables = { body: '' };

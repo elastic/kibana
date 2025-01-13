@@ -9,9 +9,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import type { ErrorRendererConfig } from '../../common/types';
+import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorComponent } from '.';
 
 const Error = withSuspense(LazyErrorComponent);

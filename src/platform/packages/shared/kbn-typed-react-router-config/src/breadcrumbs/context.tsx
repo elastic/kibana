@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import type {
+import {
   PathsOf,
   Route,
   RouteMap,
   RouteMatch,
   TypeAsArgs,
   TypeAsParams,
-  TypeOf} from '../..';
-import {
+  TypeOf,
   useMatchRoutes,
   useRouter,
 } from '../..';

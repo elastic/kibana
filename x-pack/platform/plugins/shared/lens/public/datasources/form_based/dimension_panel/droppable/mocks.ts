@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FormBasedLayer } from '../../types';
+import { FormBasedLayer } from '../../types';
 import { documentField } from '../../document_field';
-import type { IndexPatternMap, OperationMetadata } from '../../../../types';
-import type {
+import { IndexPatternMap, OperationMetadata } from '../../../../types';
+import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,

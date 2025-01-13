@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { GetInfraMetricsRequestBodyPayloadClient } from '@kbn/infra-plugin/common/http_api/infra';
+import { GetInfraMetricsRequestBodyPayloadClient } from '@kbn/infra-plugin/common/http_api/infra';
 import { DATES } from './utils/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

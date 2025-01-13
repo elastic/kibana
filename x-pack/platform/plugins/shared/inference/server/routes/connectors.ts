@@ -6,10 +6,9 @@
  */
 
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import type {
-  InferenceConnector,
-  InferenceConnectorType} from '@kbn/inference-common';
 import {
+  InferenceConnector,
+  InferenceConnectorType,
   isSupportedConnectorType,
 } from '@kbn/inference-common';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';

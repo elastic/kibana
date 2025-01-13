@@ -10,11 +10,11 @@
 import type { Dispatch } from 'react';
 import { debounce } from 'lodash';
 
-import type {
+import {
   EmbeddedConsoleAction as EmbeddableConsoleAction,
   EmbeddedConsoleView,
 } from '../types/embeddable_console';
-import type { Storage } from '.';
+import { Storage } from '.';
 
 const CONSOLE_HEIGHT_KEY = 'embeddedConsoleHeight';
 const CONSOLE_HEIGHT_LOCAL_STORAGE_DEBOUNCE_WAIT_TIME = 500;

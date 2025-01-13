@@ -17,8 +17,7 @@ import { EuiPanel } from '@elastic/eui';
 
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
-import type { ProductCardProps } from './product_card';
-import { ProductCard } from './product_card';
+import { ProductCard, ProductCardProps } from './product_card';
 
 const MOCK_VALUES: ProductCardProps = {
   cta: 'Click me',

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Response } from 'superagent';
+import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import type {
+import {
   GetDraftTimelinesResponse,
   PatchTimelineResponse,
   SavedTimeline,

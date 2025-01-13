@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
-import { RulesClient } from '../../../../rules_client/rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,12 +18,12 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
-import type { RegistryRuleType } from '../../../../rule_type_registry';
+import { RegistryRuleType } from '../../../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
 import {
   enabledRule1,

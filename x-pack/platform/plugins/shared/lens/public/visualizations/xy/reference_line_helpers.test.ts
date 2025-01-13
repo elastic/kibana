@@ -6,7 +6,7 @@
  */
 
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
-import type { XYDataLayerConfig } from './types';
+import { XYDataLayerConfig } from './types';
 import { generateActiveData } from '../../mocks';
 
 describe('reference_line helpers', () => {

@@ -6,12 +6,12 @@
  */
 
 import { DEFAULT_DEGRADED_DOCS } from '../../common/constants';
-import type { DataStreamDocsStat } from '../../common/api_types';
-import type { DataStreamStatType } from '../../common/data_streams_stats/types';
+import { DataStreamDocsStat } from '../../common/api_types';
+import { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { mapPercentageToQuality } from '../../common/utils';
-import type { Integration } from '../../common/data_streams_stats/integration';
+import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import type { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
+import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],

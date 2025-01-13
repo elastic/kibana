@@ -8,13 +8,11 @@
  */
 
 import { compact } from 'lodash';
-import type { InjectedIntl} from '@kbn/i18n-react';
-import { injectI18n } from '@kbn/i18n-react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
-import type { EuiIconProps, WithEuiThemeProps } from '@elastic/eui';
-import { withEuiTheme } from '@elastic/eui';
-import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
@@ -27,27 +25,23 @@ import {
   isOfQueryType,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type {
   TimeHistoryContract,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
+import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { SavedQueryMeta} from '../saved_query_form';
-import { SaveQueryForm } from '../saved_query_form';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
-import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
-import { QueryBarMenu } from '../query_string_input/query_bar_menu';
+import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type {
   SuggestionsAbstraction,

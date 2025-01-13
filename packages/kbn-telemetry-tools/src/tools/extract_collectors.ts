@@ -10,7 +10,7 @@
 import globby from 'globby';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
-import type { TelemetryRC } from './config';
+import { TelemetryRC } from './config';
 import { createKibanaProgram, getAllSourceFiles } from './ts_program';
 
 export async function getProgramPaths({

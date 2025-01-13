@@ -8,7 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type { FieldHook } from '../types';
+import { FieldHook } from '../types';
 
 interface GenericObject {
   [key: string]: any;

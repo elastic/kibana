@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent} from 'react';
-import React, { useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { EuiButtonEmpty, EuiFilterGroup, EuiFilterButton, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserProfilesPopover } from '@kbn/user-profile-components';
+import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const PopoverDemo: FunctionComponent = () => {

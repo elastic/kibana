@@ -12,7 +12,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
-import type { JiraConfig, JiraSecrets, JiraActionParams } from './types';
+import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import { validateJSON } from '../lib/validate_json';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {

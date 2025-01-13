@@ -7,9 +7,8 @@
 
 import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
-import type { IntegrationFieldName } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
-import type {
+import { FieldMetadata, IntegrationFieldName } from '../../../../common';
+import {
   ExtractedIntegration,
   ExtractedIntegrationFields,
   IntegrationFieldsExtractor,

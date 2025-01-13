@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   DataBounds,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams} from '../../palettes';
-import {
   checkIsMinContinuity,
   reversePalette,
   checkIsMaxContinuity,
@@ -20,6 +18,7 @@ import {
   roundValue,
   getPaletteStops,
   getDataMinMax,
+  CustomPaletteParams,
   CUSTOM_PALETTE,
   DEFAULT_RANGE_TYPE,
   DEFAULT_COLOR_STEPS,

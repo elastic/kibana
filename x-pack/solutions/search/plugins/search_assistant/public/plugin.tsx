@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { type CoreSetup, type Plugin } from '@kbn/core/public';
+import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { createAppService } from '@kbn/ai-assistant';
 import ReactDOM from 'react-dom';
 import React from 'react';

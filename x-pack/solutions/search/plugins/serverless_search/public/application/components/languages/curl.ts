@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { LanguageDefinition } from '@kbn/search-api-panels';
-import { Languages } from '@kbn/search-api-panels';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
 

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { proxySettingsUrl } from '../../../../../services/documentation';
-import type { Props } from './connection_mode';
+import { Props } from './connection_mode';
 
 export const ProxyConnection: FunctionComponent<Props> = (props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;

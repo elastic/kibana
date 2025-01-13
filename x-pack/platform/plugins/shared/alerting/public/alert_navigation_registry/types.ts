@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SanitizedRule } from '../../common';
+import { SanitizedRule } from '../../common';
 
 /**
  * Returns information that can be used to navigate to a specific page to view the given rule.

@@ -7,7 +7,7 @@
 
 import { NEVER, lastValueFrom } from 'rxjs';
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 

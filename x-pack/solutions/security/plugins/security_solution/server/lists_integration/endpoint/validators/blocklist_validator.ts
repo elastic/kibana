@@ -20,8 +20,8 @@ import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-const allowedHashes: readonly string[] = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
-const allowedFilePaths: readonly string[] = ['file.path', 'file.path.caseless'];
+const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
+const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
 
 const FileHashField = schema.oneOf(
   allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]

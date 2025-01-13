@@ -6,17 +6,15 @@
  */
 
 import { get } from 'lodash';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { RequestHandler } from '@kbn/core/server';
+import { RequestHandler } from '@kbn/core/server';
 
-import type { Cluster } from '../../../common/lib';
-import { serializeCluster } from '../../../common/lib';
+import { serializeCluster, Cluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import type { RouteDependencies } from '../../types';
+import { RouteDependencies } from '../../types';
 
 const bodyValidation = schema.object({
   name: schema.string({ maxLength: 1000 }),

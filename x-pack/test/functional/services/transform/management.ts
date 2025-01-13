@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import type { ProvidedType } from '@kbn/test';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { ProvidedType } from '@kbn/test';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type TransformManagement = ProvidedType<typeof TransformManagementProvider>;
 

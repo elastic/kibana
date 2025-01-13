@@ -8,17 +8,16 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { PercentileRanksParams } from '@kbn/visualizations-plugin/common';
-import { Operations } from '@kbn/visualizations-plugin/common';
+import { Operations, PercentileRanksParams } from '@kbn/visualizations-plugin/common';
 import { createSeries } from '../__mocks__';
-import type { Metric } from '../../../../common/types';
+import { Metric } from '../../../../common/types';
 import {
   convertToPercentileRankColumn,
   convertToPercentileRankColumns,
   convertToPercentileRankParams,
   isPercentileRanksColumnWithMeta,
 } from './percentile_rank';
-import type {
+import {
   PercentileRanksColumn,
   PercentileRanksColumnWithCommonMeta,
   PercentileRanksColumnWithExtendedMeta,

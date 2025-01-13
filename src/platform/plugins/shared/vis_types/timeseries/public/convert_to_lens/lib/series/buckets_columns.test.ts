@@ -8,9 +8,8 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { TermsParams } from '@kbn/visualizations-plugin/common';
-import { Operations } from '@kbn/visualizations-plugin/common';
-import type { Column } from '../convert';
+import { Operations, TermsParams } from '@kbn/visualizations-plugin/common';
+import { Column } from '../convert';
 import { createPanel, createSeries } from '../__mocks__';
 import { getBucketsColumns, isSplitWithDateHistogram } from './buckets_columns';
 

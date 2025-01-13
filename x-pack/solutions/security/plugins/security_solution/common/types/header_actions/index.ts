@@ -95,7 +95,7 @@ export interface ActionProps {
   index: number;
   isEventPinned?: boolean;
   isEventViewer?: boolean;
-  loadingEventIds: readonly string[];
+  loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
@@ -124,7 +124,7 @@ interface AdditionalControlColumnProps {
   onRowSelected: OnRowSelected;
   eventId: string;
   columnId: string;
-  loadingEventIds: readonly string[];
+  loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   showCheckboxes: boolean;
   // Override these type definitions to support either a generic custom component or the one used in security_solution today.

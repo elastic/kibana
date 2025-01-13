@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
-import type { KibanaFeatureConfig} from '.';
-import { KibanaFeature } from '.';
+import { HttpSetup } from '@kbn/core/public';
+import { KibanaFeatureConfig, KibanaFeature } from '.';
 
 export class FeaturesAPIClient {
   constructor(private readonly http: HttpSetup) {}

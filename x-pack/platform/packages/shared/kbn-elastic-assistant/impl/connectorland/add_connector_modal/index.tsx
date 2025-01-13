@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { ActionType } from '@kbn/actions-plugin/common';
+import { ActionType } from '@kbn/actions-plugin/common';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type {
+import {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';

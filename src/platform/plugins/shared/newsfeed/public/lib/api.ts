@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
-import { combineLatest, timer, of } from 'rxjs';
+import { combineLatest, Observable, timer, of } from 'rxjs';
 import { map, catchError, filter, mergeMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
+import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver } from './driver';
 import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';
 import { NewsfeedStorage } from './storage';

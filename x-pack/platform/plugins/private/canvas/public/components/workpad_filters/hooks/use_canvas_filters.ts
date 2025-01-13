@@ -6,11 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import type { AstFunction} from '@kbn/interpreter';
-import { fromExpression } from '@kbn/interpreter';
+import { AstFunction, fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
 
-import type { State } from '../../../../types';
+import { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
 import { getCanvasFiltersService } from '../../../services/canvas_filters_service';

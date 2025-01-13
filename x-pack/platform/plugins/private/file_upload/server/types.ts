@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;

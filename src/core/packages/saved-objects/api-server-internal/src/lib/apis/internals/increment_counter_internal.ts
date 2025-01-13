@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SavedObjectsRawDocSource} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  type SavedObjectSanitizedDoc
+  type SavedObjectSanitizedDoc,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
-import type {
+import {
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import { getCurrentTime, normalizeNamespace } from '../utils';
-import type { ApiExecutionContext } from '../types';
+import { ApiExecutionContext } from '../types';
 
 export interface PerformIncrementCounterInternalParams<T = unknown> {
   type: string;

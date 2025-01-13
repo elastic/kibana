@@ -6,26 +6,26 @@
  */
 
 import React from 'react';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type {
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataViewsContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type {
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { LensDocument } from '../persistence/saved_object_store';
-import type {
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { LensDocument } from '../persistence/saved_object_store';
+import {
   Datasource,
   Visualization,
   EditorFrameSetup,

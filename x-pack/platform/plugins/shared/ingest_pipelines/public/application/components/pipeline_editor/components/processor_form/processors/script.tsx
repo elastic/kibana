@@ -21,12 +21,11 @@ import {
 
 import { XJsonEditor, TextEditor } from '../field_components';
 
-import type {
-  FieldsConfig,
-  FormFieldsComponent} from './shared';
 import {
+  FieldsConfig,
   to,
   from,
+  FormFieldsComponent,
   EDITOR_PX_HEIGHT,
   isXJsonField,
 } from './shared';

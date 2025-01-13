@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import React, { VFC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
-import type { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../common/types/indicator';
 import { FILTER_IN_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';

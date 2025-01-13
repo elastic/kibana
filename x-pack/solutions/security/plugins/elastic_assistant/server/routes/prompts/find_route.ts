@@ -9,12 +9,14 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
-import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
-import { FindPromptsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import {
+  FindPromptsRequestQuery,
+  FindPromptsResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type { ElasticAssistantPluginRouter } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import type { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
 import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
 import { performChecks } from '../helpers';
 

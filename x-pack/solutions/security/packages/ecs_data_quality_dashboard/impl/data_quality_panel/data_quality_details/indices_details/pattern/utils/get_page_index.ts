@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexSummaryTableItem } from '../../../../types';
+import { IndexSummaryTableItem } from '../../../../types';
 
 export const getPageIndex = ({
   indexName,

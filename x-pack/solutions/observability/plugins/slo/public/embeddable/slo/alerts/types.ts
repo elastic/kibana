@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
-import { type CoreStart } from '@kbn/core/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import {
+  type CoreStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type {
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import {
   SerializedTitles,
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 
 export interface SloItem {
   id: string;

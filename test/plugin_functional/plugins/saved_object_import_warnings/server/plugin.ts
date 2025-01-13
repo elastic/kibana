@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class SavedObjectImportWarningsPlugin implements Plugin {
   public setup({ savedObjects }: CoreSetup, deps: {}) {

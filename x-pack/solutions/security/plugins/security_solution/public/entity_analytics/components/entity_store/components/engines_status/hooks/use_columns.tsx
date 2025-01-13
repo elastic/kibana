@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type {
-  IconColor,
+import type { IconColor } from '@elastic/eui';
+import {
   EuiLink,
   type EuiBasicTableColumn,
   EuiHealth,
@@ -16,11 +16,11 @@ import type {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EngineComponentStatus,
+import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
 } from '../../../../../../../common/api/entity_analytics';
+import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;

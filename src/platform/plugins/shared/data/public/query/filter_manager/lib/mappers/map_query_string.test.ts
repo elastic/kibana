@@ -8,8 +8,7 @@
  */
 
 import { mapQueryString } from './map_query_string';
-import type { Filter } from '@kbn/es-query';
-import { buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
+import { buildQueryFilter, buildEmptyFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapQueryString()', () => {

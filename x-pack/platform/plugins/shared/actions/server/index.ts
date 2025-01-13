@@ -5,11 +5,10 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { ActionsConfig } from './config';
-import { configSchema } from './config';
-import type { ActionsClient as ActionsClientClass } from './actions_client';
-import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, ActionsConfig } from './config';
+import { ActionsClient as ActionsClientClass } from './actions_client';
+import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';

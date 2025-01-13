@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from 'ts-morph';
-import { Node } from 'ts-morph';
+import { Type, Node } from 'ts-morph';
 import { TypeKind } from '../types';
 
 export function getTypeKind(node: Node): TypeKind {

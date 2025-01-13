@@ -6,33 +6,28 @@
  */
 
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import type {
+import {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
+  ChatCompletionErrorCode,
   ChatCompletionErrorEvent,
+  concatenateChatCompletionChunks,
   ConversationCreateEvent,
   FunctionDefinition,
+  isChatCompletionError,
   MessageAddEvent,
   StreamingChatResponseEvent,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  ChatCompletionErrorCode,
-  concatenateChatCompletionChunks,
-  isChatCompletionError,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios, { isAxiosError } from 'axios';
+import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
-import type { OperatorFunction, Observable } from 'rxjs';
 import {
   concatMap,
   defer,
@@ -40,18 +35,19 @@ import {
   from,
   lastValueFrom,
   of,
+  OperatorFunction,
   retry,
   switchMap,
   timer,
   toArray,
   catchError,
+  Observable,
   throwError,
 } from 'rxjs';
-import type { UrlObject } from 'url';
-import { format, parse } from 'url';
+import { format, parse, UrlObject } from 'url';
 import { inspect } from 'util';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
-import type { EvaluationResult } from './types';
+import { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>

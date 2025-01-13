@@ -7,7 +7,7 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import type { ChatForm } from '../../../types';
+import { ChatForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { getESQuery } from './utils';
 

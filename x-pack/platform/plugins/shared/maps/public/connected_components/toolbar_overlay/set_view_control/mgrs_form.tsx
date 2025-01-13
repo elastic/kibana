@@ -6,8 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { ChangeEvent} from 'react';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -19,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { ddToMGRS, mgrsToDD, withinRange } from './utils';
 
 interface Props {

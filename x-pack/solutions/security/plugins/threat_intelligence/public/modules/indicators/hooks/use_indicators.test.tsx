@@ -6,8 +6,7 @@
  */
 
 import { act, waitFor, renderHook } from '@testing-library/react';
-import type { UseIndicatorsParams } from './use_indicators';
-import { useIndicators } from './use_indicators';
+import { useIndicators, UseIndicatorsParams } from './use_indicators';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';

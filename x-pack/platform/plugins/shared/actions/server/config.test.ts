@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ActionsConfig} from './config';
-import { configSchema, getValidatedConfig } from './config';
-import type { Logger } from '@kbn/core/server';
+import { configSchema, ActionsConfig, getValidatedConfig } from './config';
+import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

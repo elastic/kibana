@@ -10,7 +10,7 @@
 import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RuleActionsMessage } from './rule_actions_message';
-import type { RuleType } from '@kbn/alerting-types';
+import { RuleType } from '@kbn/alerting-types';
 import type { ActionParamsProps, ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {

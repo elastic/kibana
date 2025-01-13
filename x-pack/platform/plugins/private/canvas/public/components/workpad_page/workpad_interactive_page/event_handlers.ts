@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommitFn } from '../../../lib/aeroelastic';
+import { CommitFn } from '../../../lib/aeroelastic';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app/workpad_app.component';
 
 type CanvasOriginFn = () => { left: number; top: number };

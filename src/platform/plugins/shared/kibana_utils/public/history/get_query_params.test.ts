@@ -8,7 +8,7 @@
  */
 
 import { getQueryParams } from './get_query_params';
-import type { Location } from 'history';
+import { Location } from 'history';
 
 describe('getQueryParams', () => {
   it('should getQueryParams', () => {

@@ -12,7 +12,7 @@ import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
 import { getLogstashDataset } from '../../../common/get_index_patterns';
-import type {
+import {
   LegacyRequest,
   Pipeline,
   PipelineMetricKey,

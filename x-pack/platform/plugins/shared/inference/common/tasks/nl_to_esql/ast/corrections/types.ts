@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLSingleAstItem } from '@kbn/esql-ast';
+import { ESQLSingleAstItem } from '@kbn/esql-ast';
 
 /**
  * Represents a correction that was applied to the query

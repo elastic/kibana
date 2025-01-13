@@ -8,7 +8,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/logging';
-import type { MigrationLog } from '../../types';
+import { MigrationLog } from '../../types';
 
 export interface LogAwareState {
   controlState: string;

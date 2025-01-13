@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
+import {
+  isScreenshotBlockDoc,
   ScreenshotRefImageData,
   ScreenshotBlockCache,
 } from '../../../../../common/runtime_types';
-import { isScreenshotBlockDoc } from '../../../../../common/runtime_types';
 
 /**
  * Draws image fragments on a canvas.

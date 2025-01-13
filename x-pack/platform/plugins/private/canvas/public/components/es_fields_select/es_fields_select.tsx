@@ -8,10 +8,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-import type {
-  ESFieldsSelectProps as Props} from './es_fields_select.component';
 import {
-  ESFieldsSelect as Component
+  ESFieldsSelect as Component,
+  ESFieldsSelectProps as Props,
 } from './es_fields_select.component';
 import { getDataViewFields } from '../../lib/data_view_helpers';
 

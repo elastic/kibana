@@ -11,7 +11,7 @@ import { BasicPrettyPrinter } from '../../../pretty_print';
 import * as mutate from '../..';
 import { EsqlQuery } from '../../../query';
 import { Builder } from '../../../builder';
-import type { ESQLFunction } from '../../../types';
+import { ESQLFunction } from '../../../types';
 
 describe('scenarios', () => {
   it('can remove the found WHERE command', () => {

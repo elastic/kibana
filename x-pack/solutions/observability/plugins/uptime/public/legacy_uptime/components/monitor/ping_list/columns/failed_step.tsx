@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { FailedStepsApiResponse } from '../../../../../../common/runtime_types/ping/synthetics';
+import { FailedStepsApiResponse } from '../../../../../../common/runtime_types/ping/synthetics';
 
 interface Props {
   checkGroup?: string;

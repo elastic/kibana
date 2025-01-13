@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 export function registerGatedFormRoute({
   router,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntryExists } from '.';
+import { EntryExists } from '.';
 import { EXISTS, FIELD, OPERATOR } from '../../constants/index.mock';
 
 export const getEntryExistsMock = (): EntryExists => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataUsageContext, DataUsageRouter } from '../types';
+import { DataUsageContext, DataUsageRouter } from '../types';
 import { registerDataStreamsRoute, registerUsageMetricsRoute } from './internal';
 
 export const registerDataUsageRoutes = (

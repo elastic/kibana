@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
-import type { AxiosError, Method } from 'axios';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { AxiosError, Method } from 'axios';
 import { PassThrough } from 'stream';
-import type { IncomingMessage } from 'http';
-import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { IncomingMessage } from 'http';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
-import type {
+import {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
@@ -27,7 +26,7 @@ import {
   StreamingResponseSchema,
 } from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,

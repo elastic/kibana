@@ -14,8 +14,7 @@ import {
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
 } from '../constants';
-import type { DeleteTestBed} from './delete_phase.helpers';
-import { setupDeleteTestBed } from './delete_phase.helpers';
+import { DeleteTestBed, setupDeleteTestBed } from './delete_phase.helpers';
 
 describe('<EditPolicy /> delete phase', () => {
   let testBed: DeleteTestBed;

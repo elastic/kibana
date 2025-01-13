@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import type { Phase } from '../../../common/types';
+import { Phase } from '../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 
 export const createShrinkActions = (testBed: TestBed, phase: Phase) => {

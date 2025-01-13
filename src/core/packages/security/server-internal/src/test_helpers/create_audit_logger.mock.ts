@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuditLogger } from '@kbn/core-security-server';
+import { AuditLogger } from '@kbn/core-security-server';
 
 export type MockedAuditLogger = jest.Mocked<AuditLogger>;
 

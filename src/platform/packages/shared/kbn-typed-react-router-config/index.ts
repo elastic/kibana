@@ -8,7 +8,7 @@
  */
 
 export * from './src/create_router';
-export type * from './src/types';
+export * from './src/types';
 export * from './src/outlet';
 export * from './src/route_renderer';
 export * from './src/router_provider';

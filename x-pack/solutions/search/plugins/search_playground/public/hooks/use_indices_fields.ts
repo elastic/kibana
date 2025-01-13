@@ -7,8 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
-import type { IndicesQuerySourceFields } from '../types';
-import { APIRoutes } from '../types';
+import { APIRoutes, IndicesQuerySourceFields } from '../types';
 
 const initialData = {};
 

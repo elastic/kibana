@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField, DataViewLazy } from '../../../../common';
-import type { SERVICE_KEY_TYPE} from '../../../constants';
-import { SERVICE_KEY_LEGACY, SERVICE_KEY } from '../../../constants';
+import { DataViewField, DataViewLazy } from '../../../../common';
+import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../../constants';
 
 interface ResponseFormatterArgs {
   serviceKey: SERVICE_KEY_TYPE;

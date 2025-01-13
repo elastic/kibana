@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   AppMenuActionPrimary,
   AppMenuActionSecondary,
-  AppMenuActionSubmenuCustom} from '@kbn/discover-utils';
-import {
+  AppMenuActionSubmenuCustom,
   AppMenuActionType,
 } from '@kbn/discover-utils';
 import { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';

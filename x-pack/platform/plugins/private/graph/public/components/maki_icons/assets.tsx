@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SVGProps } from 'react';
-import React from 'react';
+import React, { SVGProps } from 'react';
 
 const Airport = (props: SVGProps<SVGSVGElement>) => {
   return (

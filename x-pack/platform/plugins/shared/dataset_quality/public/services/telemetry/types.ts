@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type { QualityIndicators } from '../../../common/types';
+import { QualityIndicators } from '../../../common/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;

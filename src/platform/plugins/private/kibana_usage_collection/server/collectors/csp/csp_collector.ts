@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UsageCollectionSetup, UsageCollectorOptions } from '@kbn/usage-collection-plugin/server';
-import type { HttpServiceSetup} from '@kbn/core/server';
-import { CspConfig } from '@kbn/core/server';
+import { UsageCollectionSetup, UsageCollectorOptions } from '@kbn/usage-collection-plugin/server';
+import { HttpServiceSetup, CspConfig } from '@kbn/core/server';
 
 interface Usage {
   strict: boolean;

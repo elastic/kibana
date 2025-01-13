@@ -11,7 +11,7 @@ import {
   createDiscoverFeaturesServiceSetupMock,
   createDiscoverFeaturesServiceStartMock,
 } from './services/discover_features/discover_features_service.mock';
-import type { DiscoverSharedPublicSetup, DiscoverSharedPublicStart } from './types';
+import { DiscoverSharedPublicSetup, DiscoverSharedPublicStart } from './types';
 
 export type Setup = jest.Mocked<DiscoverSharedPublicSetup>;
 export type Start = jest.Mocked<DiscoverSharedPublicStart>;

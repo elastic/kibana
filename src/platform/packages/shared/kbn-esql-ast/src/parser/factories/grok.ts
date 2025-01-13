@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GrokCommandContext } from '../../antlr/esql_parser';
 // eslint-disable-next-line @typescript-eslint/naming-convention
-import esql_parser from '../../antlr/esql_parser';
-import type { ESQLCommand } from '../../types';
+import esql_parser, { GrokCommandContext } from '../../antlr/esql_parser';
+import { ESQLCommand } from '../../types';
 import { createCommand, createLiteralString, textExistsAndIsValid } from '../factories';
 import { visitPrimaryExpression } from '../walkers';
 

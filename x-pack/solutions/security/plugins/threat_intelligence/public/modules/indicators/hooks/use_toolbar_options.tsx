@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiText } from '@elastic/eui';
-import type { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';
 import { IndicatorsFieldBrowser } from '../components/table/field_browser';
 import { INSPECT_BUTTON_TEST_ID } from './test_ids';

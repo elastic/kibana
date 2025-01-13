@@ -11,14 +11,13 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
-import type { VisTypeVislibCoreSetup } from './plugin';
-import type { VislibRenderValue} from './vis_type_vislib_vis_fn';
-import { vislibVisName } from './vis_type_vislib_vis_fn';
-import type { VislibChartType } from './types';
+import { VisTypeVislibCoreSetup } from './plugin';
+import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
+import { VislibChartType } from './types';
 
 const VislibWrapper = lazy(() => import('./vis_wrapper'));
 

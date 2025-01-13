@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { Observable} from 'rxjs';
-import { BehaviorSubject, debounceTime, map, merge, switchMap } from 'rxjs';
-import type { ParentIgnoreSettings } from '../../../common';
+import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap } from 'rxjs';
+import { ParentIgnoreSettings } from '../../../common';
 
 export interface ControlGroupFetchContext {
   unifiedSearchFilters?: Filter[] | undefined;

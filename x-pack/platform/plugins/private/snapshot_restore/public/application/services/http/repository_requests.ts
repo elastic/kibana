@@ -6,7 +6,7 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import type { Repository, EmptyRepository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 import {
   UIM_REPOSITORY_CREATE,
   UIM_REPOSITORY_UPDATE,
@@ -15,7 +15,7 @@ import {
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
   UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
 } from '../../constants';
-import type { UiMetricService } from '../ui_metric';
+import { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.

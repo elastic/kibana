@@ -8,8 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
-import { withRouter, useLocation } from 'react-router-dom';
+import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,18 +22,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuntimeField, DataView } from '@kbn/data-views-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, RuntimeField, DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
 import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
-import type { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import type { RemoveDataViewProps } from './remove_data_view';
-import { removeDataView } from './remove_data_view';
+import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
 import { useStateSelector } from '../../management_app/state_utils';
 

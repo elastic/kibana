@@ -24,7 +24,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 export const DashboardListing = ({
   children,

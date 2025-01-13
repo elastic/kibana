@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
-import type {
+import { HttpStart } from '@kbn/core/public';
+import {
   FindDatasetsRequestQuery,
   FindDatasetValue,
   FindIntegrationsRequestQuery,

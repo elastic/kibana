@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { STREAMS_INDEX } from '../../../common/constants';
 
 export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {

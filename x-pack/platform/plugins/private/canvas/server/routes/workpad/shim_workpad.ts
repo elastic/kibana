@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
-import type { WorkpadAttributes } from './workpad_attributes';
+import { SavedObject } from '@kbn/core/server';
+import { WorkpadAttributes } from './workpad_attributes';
 
 export function shimWorkpad(workpad: SavedObject<WorkpadAttributes>) {
   if (

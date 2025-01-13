@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   PerformRuleInstallationResponseBody,
   RelatedIntegration,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -18,10 +18,10 @@ import {
   INTEGRATIONS_POPOVER_TITLE,
   RULE_NAME,
 } from '../../../../screens/alerts_detection_rules';
-import type { SAMPLE_PREBUILT_RULE } from '../../../../tasks/api_calls/prebuilt_rules';
 import {
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
+  SAMPLE_PREBUILT_RULE,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanFleet } from '../../../../tasks/api_calls/fleet';
 import {
@@ -32,8 +32,10 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import type { PackagePolicyWithoutAgentPolicyId } from '../../../../tasks/api_calls/integrations';
-import { installIntegrations } from '../../../../tasks/api_calls/integrations';
+import {
+  installIntegrations,
+  PackagePolicyWithoutAgentPolicyId,
+} from '../../../../tasks/api_calls/integrations';
 import {
   disableAutoRefresh,
   openIntegrationsPopover,

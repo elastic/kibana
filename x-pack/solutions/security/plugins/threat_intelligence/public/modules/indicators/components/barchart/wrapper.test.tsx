@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { TimeRange } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { TimeRange } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChartWrapper } from './wrapper';
 import {

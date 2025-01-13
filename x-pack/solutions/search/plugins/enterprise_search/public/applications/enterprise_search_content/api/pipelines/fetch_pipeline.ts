@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { MlInferencePipeline } from '../../../../../common/types/pipelines';
-import type { Actions } from '../../../shared/api_logic/create_api_logic';
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { MlInferencePipeline } from '../../../../../common/types/pipelines';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchPipelineArgs {

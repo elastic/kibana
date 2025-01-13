@@ -12,10 +12,9 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { css } from '@emotion/react';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type { GuideFilterValuesClassic } from '../../../../classic';
-import type { GuideCardSolutions } from './guide_cards';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { GuideFilterValuesClassic } from '../../../../classic';
+import { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
   border-radius: 20px !important;

@@ -8,15 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiFieldNumberProps} from '@elastic/eui';
 import {
   EuiFormControlLayoutDelimited,
   EuiFieldNumber,
+  EuiFieldNumberProps,
   EuiFormRow,
 } from '@elastic/eui';
 
-import type { FieldHook } from '../../../shared_imports';
+import { FieldHook } from '../../../shared_imports';
 
 interface Props {
   min: FieldHook<number>;

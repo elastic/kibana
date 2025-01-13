@@ -11,8 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiLink } from '@elastic/eui';
 
-import type { LicenseBadgeProps } from './license_badge';
-import { LicenseBadge } from './license_badge';
+import { LicenseBadge, LicenseBadgeProps } from './license_badge';
 
 const DEFAULT_PROPS: LicenseBadgeProps = {
   licenseType: 'mit',

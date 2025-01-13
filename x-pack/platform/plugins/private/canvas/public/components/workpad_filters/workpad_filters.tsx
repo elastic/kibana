@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { State, FilterField, PositionedElement } from '../../../types';
+import { State, FilterField, PositionedElement } from '../../../types';
 import { groupFiltersBy, getFiltersExprsFromExpression } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';

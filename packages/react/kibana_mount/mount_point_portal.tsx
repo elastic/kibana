@@ -8,8 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FC, PropsWithChildren } from 'react';
-import React, { useRef, useEffect, useState, Component } from 'react';
+import React, { useRef, useEffect, useState, Component, FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { useIfMounted } from './utils';

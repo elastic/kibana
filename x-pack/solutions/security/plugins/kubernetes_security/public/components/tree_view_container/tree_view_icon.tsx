@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
-import type { TreeViewIconProps } from '../../types';
+import { TreeViewIconProps } from '../../types';
 
 export const TreeViewIcon = ({ euiVarColor, ...props }: TreeViewIconProps) => {
   const { euiVars } = useEuiTheme();

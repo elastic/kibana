@@ -6,15 +6,19 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiIcon, EuiSpacer, EuiToolTip, useEuiPaddingSize } from '@elastic/eui';
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import {
+  EuiComboBoxOptionOption,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+  useEuiPaddingSize,
+} from '@elastic/eui';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
-import type { FieldConflictsInfo } from '@kbn/securitysolution-list-utils';
-import { getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
+import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import * as i18n from '../translations';
-import type {
+import {
   ComboBoxFields,
   DataViewField,
   FieldBaseProps,

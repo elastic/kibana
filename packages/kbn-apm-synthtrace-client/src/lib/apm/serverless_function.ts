@@ -8,7 +8,7 @@
  */
 
 import { Entity } from '../entity';
-import type { ApmFields } from './apm_fields';
+import { ApmFields } from './apm_fields';
 import { ServerlessInstance } from './serverless_instance';
 
 export class ServerlessFunction extends Entity<ApmFields> {

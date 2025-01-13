@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -19,10 +19,10 @@ import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { PluginContext } from '../../../context/plugin_context';
-import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ERROR_BUDGET_ID } from './constants';
 import { SloErrorBudget } from './error_budget_burn_down';
-import type { ErrorBudgetApi, SloErrorBudgetEmbeddableState } from './types';
+import { ErrorBudgetApi, SloErrorBudgetEmbeddableState } from './types';
 
 const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {

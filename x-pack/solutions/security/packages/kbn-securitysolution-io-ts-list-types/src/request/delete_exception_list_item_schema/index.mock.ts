@@ -7,7 +7,7 @@
 
 import { ID, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import type { DeleteExceptionListItemSchema } from '.';
+import { DeleteExceptionListItemSchema } from '.';
 
 export const getDeleteExceptionListItemSchemaMock = (): DeleteExceptionListItemSchema => ({
   id: ID,

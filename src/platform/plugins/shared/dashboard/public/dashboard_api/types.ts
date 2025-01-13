@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   CanExpandPanels,
   HasRuntimeChildState,
   HasSaveNotification,
@@ -18,7 +18,7 @@ import type {
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
-import type {
+import {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -35,27 +35,27 @@ import type {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import type {
+import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Observable, Subject } from 'rxjs';
-import type { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { Observable, Subject } from 'rxjs';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { DashboardPanelMap, DashboardPanelState } from '../../common';
+import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import type {
+import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import type { DashboardLocatorParams } from '../dashboard_container/types';
+import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 

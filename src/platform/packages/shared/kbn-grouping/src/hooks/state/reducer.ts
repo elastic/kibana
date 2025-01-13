@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  Action,
-  GroupMap,
-  GroupsById,
-  Storage} from '../types';
 import {
+  Action,
   ActionType,
   defaultGroup,
-  EMPTY_GROUP_BY_ID
+  EMPTY_GROUP_BY_ID,
+  GroupMap,
+  GroupsById,
+  Storage,
 } from '../types';
 import { addGroupsToStorage, getAllGroupsInStorage } from '../..';
 

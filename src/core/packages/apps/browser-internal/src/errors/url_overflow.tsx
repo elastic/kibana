@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { History, Location } from 'history';
+import { History, Location } from 'history';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

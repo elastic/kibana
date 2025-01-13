@@ -6,11 +6,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import type { LicenseState} from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_state';
+import { LicenseState, verifyApiAccess } from '../lib/license_state';
 
 interface ErrorResponse {
   error?: {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   DocumentEntryCreateFields,
+  DocumentEntryType,
   IndexEntryCreateFields,
+  IndexEntryType,
 } from '@kbn/elastic-assistant-common';
-import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 
 export const documentEntry: DocumentEntryCreateFields = {
   name: 'Sample Document Entry',

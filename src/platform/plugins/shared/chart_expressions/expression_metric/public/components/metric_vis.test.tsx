@@ -9,27 +9,25 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { MetricVisComponentProps } from './metric_vis';
-import { MetricVis } from './metric_vis';
-import type {
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
+import {
   LayoutDirection,
+  Metric,
   MetricElementEvent,
   MetricWNumber,
   MetricWProgress,
-  MetricWTrend} from '@elastic/charts';
-import {
-  Metric,
+  MetricWTrend,
   Settings,
 } from '@elastic/charts';
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import type { DimensionsVisParam, MetricVisParam } from '../../common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import type { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {

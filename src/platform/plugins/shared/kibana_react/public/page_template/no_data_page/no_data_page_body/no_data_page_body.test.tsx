@@ -8,8 +8,7 @@
  */
 
 import { NoDataPageBody } from './no_data_page_body';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '../no_data_card';
 

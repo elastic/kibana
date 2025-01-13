@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const StaticHeader = ({

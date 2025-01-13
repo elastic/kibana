@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormatFactory } from '../types';
+import { FormatFactory } from '../types';
 import { getSuffixFormatter } from '.';
 
 describe('suffix formatter', () => {

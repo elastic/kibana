@@ -13,7 +13,7 @@ import {
   mockAnonymizedAlerts,
   mockAnonymizedAlertsReplacements,
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
-import type { GraphState } from '../../types';
+import { GraphState } from '../../types';
 
 const logger = loggerMock.create();
 

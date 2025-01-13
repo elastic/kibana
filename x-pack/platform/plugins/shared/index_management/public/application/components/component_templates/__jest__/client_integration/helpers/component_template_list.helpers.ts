@@ -6,13 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
 import {
   registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
   nextTick,
 } from '@kbn/test-jest-helpers';

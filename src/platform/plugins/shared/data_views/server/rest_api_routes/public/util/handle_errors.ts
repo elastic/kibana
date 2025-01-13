@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type Boom from '@hapi/boom';
+import Boom from '@hapi/boom';
 import type { RequestHandler, RouteMethod, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ErrorIndexPatternNotFound } from '../../../error';
+import { ErrorIndexPatternNotFound } from '../../../error';
 
 interface ErrorResponseBody {
   message: string;

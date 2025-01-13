@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpecificationTypes } from '../types';
+import { SpecificationTypes } from '../types';
 
 export const mockRequestType: SpecificationTypes.Request = {
   body: { kind: 'no_body' },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
 const createSavedObjectProviderRegistryMock = () => {
   return {

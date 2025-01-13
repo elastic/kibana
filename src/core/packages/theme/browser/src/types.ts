@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 /**
  * Contains all the required information to apply Kibana's theme at the various levels it can be used.

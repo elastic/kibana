@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { migrateDataPersistedState } from './migrate_data_persisted_state';
 
 const attributes = {

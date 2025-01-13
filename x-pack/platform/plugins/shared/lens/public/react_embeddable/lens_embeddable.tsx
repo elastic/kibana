@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
-import type {
+import {
   LensApi,
   LensEmbeddableStartServices,
   LensRuntimeState,

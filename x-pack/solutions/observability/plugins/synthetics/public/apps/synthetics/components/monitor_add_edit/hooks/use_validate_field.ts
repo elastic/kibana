@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
-import { useEffect, useState } from 'react';
-import type { Controller, ControllerFieldState } from 'react-hook-form';
-import { useFormContext } from 'react-hook-form';
-import type { FieldMeta, FormConfig } from '../types';
+import { useEffect, useState, ComponentProps } from 'react';
+import { Controller, ControllerFieldState, useFormContext } from 'react-hook-form';
+import { FieldMeta, FormConfig } from '../types';
 
 export function useValidateField<TFieldKey extends keyof FormConfig>({
   fieldKey,

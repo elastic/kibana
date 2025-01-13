@@ -8,10 +8,9 @@
  */
 
 import { css } from '@emotion/react';
-import type { PropsWithChildren} from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
-import type { GridLayoutStateManager } from './types';
+import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
   children,

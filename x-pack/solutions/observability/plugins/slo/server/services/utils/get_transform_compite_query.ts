@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   AggregationsCompositeAggregationSource,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

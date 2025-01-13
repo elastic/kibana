@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ToolDefinition } from '@kbn/inference-common';
-import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   FunctionVisibility,
+  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
@@ -19,7 +18,7 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
-import type { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
+import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 

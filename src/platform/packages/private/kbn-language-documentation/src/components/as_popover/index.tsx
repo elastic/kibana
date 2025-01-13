@@ -9,12 +9,11 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiButtonIconProps} from '@elastic/eui';
 import {
   EuiPopover,
   EuiToolTip,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { LanguageDocumentationPopoverContent } from './popover_content';

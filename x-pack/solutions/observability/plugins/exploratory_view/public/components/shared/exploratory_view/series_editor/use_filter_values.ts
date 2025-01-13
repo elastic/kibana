@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExistsFilter} from '@kbn/es-query';
-import { isExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESFilter } from '@kbn/es-types';
-import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { useValuesList } from '@kbn/observability-shared-plugin/public';
-import type { FilterProps } from './columns/filter_expanded';
+import { FilterProps } from './columns/filter_expanded';
 import { useAppDataViewContext } from '../hooks/use_app_data_view';
 
 export function useFilterValues(

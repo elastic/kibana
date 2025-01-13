@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PhrasesFilter } from './phrases_filter';
-import { isPhrasesFilter } from './phrases_filter';
+import { isPhrasesFilter, PhrasesFilter } from './phrases_filter';
 import { isPhraseFilter } from './phrase_filter';
 import { isRangeFilter } from './range_filter';
-import type { Filter } from './types';
+import { Filter } from './types';
 
 /**
  * @internal used only by the filter bar to create filter pills.

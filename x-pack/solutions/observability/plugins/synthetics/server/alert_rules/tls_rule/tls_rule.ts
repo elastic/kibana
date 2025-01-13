@@ -6,13 +6,13 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import type {
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import {
@@ -20,16 +20,16 @@ import {
   type TLSRuleParams,
 } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
-import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
-import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
+import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
-import type { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
+import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import { TLS_CERTIFICATE } from '../../../common/constants/synthetics_alerts';
 import { SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
-import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
 type TLSActionGroups = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 type TLSRuleTypeState = SyntheticsCommonState;

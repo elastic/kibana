@@ -8,10 +8,10 @@
  */
 
 import { Position } from '@elastic/charts';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '../../common/constants';
-import type { DataLayerConfig, XYProps } from '../../common/types';
+import { DataLayerConfig, XYProps } from '../../common/types';
 import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';
 
 const chartSetupContract = chartPluginMock.createSetupContract();

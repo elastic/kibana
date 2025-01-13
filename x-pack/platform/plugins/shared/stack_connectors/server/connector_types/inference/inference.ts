@@ -6,21 +6,19 @@
  */
 
 import { text as streamToString } from 'node:stream/consumers';
-import type { ServiceParams} from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 
-import type { AxiosError } from 'axios';
-import type {
+import { AxiosError } from 'axios';
+import {
   InferenceInferenceRequest,
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import type { Observable} from 'rxjs';
-import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
-import type OpenAI from 'openai';
-import type { ChatCompletionChunk } from 'openai/resources';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { filter, from, identity, map, mergeMap, Observable, tap } from 'rxjs';
+import OpenAI from 'openai';
+import { ChatCompletionChunk } from 'openai/resources';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -28,7 +26,7 @@ import {
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
-import type {
+import {
   Config,
   Secrets,
   RerankParams,

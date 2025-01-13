@@ -11,11 +11,13 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
-import { ConversationUpdateProps } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import {
+  ConversationResponse,
+  ConversationUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type { ElasticAssistantPluginRouter } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
 

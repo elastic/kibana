@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type {
-  EmbeddableApiContext,
-  StateComparators} from '@kbn/presentation-publishing';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
-  apiHasUniqueId
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  StateComparators,
 } from '@kbn/presentation-publishing';
-import type {
+import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-  DynamicActionsState} from '@kbn/ui-actions-enhanced-plugin/public';
-import {
+  DynamicActionsState,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
@@ -26,7 +24,7 @@ import {
   DynamicActionStorage,
   type DynamicActionStorageApi,
 } from './embeddables/dynamic_action_storage';
-import type { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
+import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 
 export interface SetupDependencies {

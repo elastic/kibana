@@ -8,9 +8,8 @@
  */
 
 import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
-import type { FtrProviderContext } from '../ftr_provider_context';
-import type { BrowserConfig } from './webdriver';
-import { initWebDriver } from './webdriver';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {

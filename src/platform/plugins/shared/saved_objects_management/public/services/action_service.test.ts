@@ -12,10 +12,9 @@ import {
   CopyToSpaceSavedObjectsManagementAction,
   ShareToSpaceSavedObjectsManagementAction,
 } from './actions';
-import type {
-  SavedObjectsManagementActionServiceSetup} from './action_service';
 import {
-  SavedObjectsManagementActionService
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceSetup,
 } from './action_service';
 import { SavedObjectsManagementAction } from './types';
 

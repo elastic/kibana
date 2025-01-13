@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import type {
+import {
   SerializedColdPhase,
   SerializedFrozenPhase,
   SerializedHotPhase,

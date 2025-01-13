@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { LOG_ENTRY_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entry';
 import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
 import { logEntriesSearchStrategyProvider } from './log_entries_search_strategy';
 import { logEntrySearchStrategyProvider } from './log_entry_search_strategy';
-import type {
+import {
   LogEntriesServiceSetupDeps,
   LogEntriesServicePluginsStartDeps,
   LogEntriesServicePluginSelfDeps,

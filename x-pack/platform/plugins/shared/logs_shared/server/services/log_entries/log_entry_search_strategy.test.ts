@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
-import type { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors, TransportResult } from '@elastic/elasticsearch';
+import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -15,7 +14,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { getMockSearchConfig } from '@kbn/data-plugin/config.mock';
-import type { ISearchStrategy } from '@kbn/data-plugin/server';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
 import { enhancedEsSearchStrategyProvider } from '@kbn/data-plugin/server/search';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';

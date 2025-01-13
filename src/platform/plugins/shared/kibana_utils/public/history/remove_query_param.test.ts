@@ -8,8 +8,7 @@
  */
 
 import { removeQueryParam } from './remove_query_param';
-import type { Location } from 'history';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, Location } from 'history';
 
 describe('removeQueryParam', () => {
   it('should remove query param from url', () => {

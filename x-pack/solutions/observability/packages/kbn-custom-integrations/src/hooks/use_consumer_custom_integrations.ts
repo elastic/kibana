@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type {
-  CreateDispatchableEvents} from './create/use_create_dispatchable_events';
 import {
+  CreateDispatchableEvents,
   useCreateDispatchableEvents,
 } from './create/use_create_dispatchable_events';
 import { useCustomIntegrations } from './use_custom_integrations';

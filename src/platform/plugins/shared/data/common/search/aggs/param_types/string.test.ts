@@ -9,7 +9,7 @@
 
 import { BaseParamType } from './base';
 import { StringParamType } from './string';
-import type { IAggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 
 describe('String', function () {
   let paramName = 'json_test';

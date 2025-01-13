@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { CacheBounds } from './types';
+import { CacheBounds } from './types';
 
 /**
  * Optimization caching - always return the same value if queried within this time

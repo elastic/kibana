@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RuleLastRunOutcomes, RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
-import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import {
+  RuleLastRunOutcomes,
+  RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+} from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
-import type { Rule } from '../../types';
+import { Rule } from '../../types';
 
 export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
   switch (status) {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { QueryState } from '@kbn/data-plugin/common';
-import type { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
-import type {
+import { QueryState } from '@kbn/data-plugin/common';
+import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
+import {
   LogsExplorerController,
   LogsExplorerPublicState,
   LogsExplorerPublicStateUpdate,
 } from '@kbn/logs-explorer-plugin/public';
-import type { DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent } from 'xstate';
 
 export type ObservabilityLogsExplorerContext = ObservabilityLogsExplorerTypeState['context'];
 

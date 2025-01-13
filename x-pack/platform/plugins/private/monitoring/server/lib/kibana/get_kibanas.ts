@@ -6,14 +6,13 @@
  */
 
 import moment from 'moment';
-import type { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import type { LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaMetric } from '../metrics';
-import type { KibanaInfo } from './build_kibana_info';
-import { buildKibanaInfo } from './build_kibana_info';
+import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 interface Kibana {

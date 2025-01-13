@@ -7,7 +7,7 @@
 
 import { mockLogger } from '../../__mocks__';
 
-import type { MlTrainedModels } from '@kbn/ml-plugin/server';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   E5_LINUX_OPTIMIZED_MODEL_ID,

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reducer, Dispatch } from 'react';
-import React, { useReducer } from 'react';
+import React, { useReducer, Reducer, Dispatch } from 'react';
 import classNames from 'classnames';
 import { DEFAULT_DATA_TEST_SUBJ, REORDER_ITEM_HEIGHT } from '../constants';
 

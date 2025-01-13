@@ -8,8 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed} from './es_deprecations.helpers';
-import { setupElasticsearchPage } from './es_deprecations.helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse } from './mocked_responses';
 import { MOCK_REINDEX_DEPRECATION } from './mocked_responses';
 

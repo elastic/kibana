@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  StateContainer} from '@kbn/kibana-utils-plugin/common/state_containers';
 import {
+  StateContainer,
   createStateContainer,
 } from '@kbn/kibana-utils-plugin/common/state_containers';
-import type { ExpressionFunction } from '../expression_functions';
-import type { ExpressionType } from '../expression_types';
+import { ExpressionFunction } from '../expression_functions';
+import { ExpressionType } from '../expression_types';
 
 export interface ExecutorState<Context extends Record<string, unknown> = Record<string, unknown>> {
   functions: Record<string, ExpressionFunction>;

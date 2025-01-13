@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';

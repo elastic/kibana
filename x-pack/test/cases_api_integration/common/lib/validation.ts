@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { AttachmentTotals, Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentTotals, Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import { xorWith, isEqual } from 'lodash';
-import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common/types/api';
+import { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common/types/api';
 
 type AttachmentTotalsKeys = keyof AttachmentTotals;
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, CoreSetup } from '@kbn/core/server';
-import type {
+import { Logger, CoreSetup } from '@kbn/core/server';
+import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import type { InMemoryConnector } from '../types';
+import { InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 

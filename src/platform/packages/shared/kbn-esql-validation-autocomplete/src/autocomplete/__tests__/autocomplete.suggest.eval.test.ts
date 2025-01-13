@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PartialSuggestionWithText} from './helpers';
 import {
   setup,
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
   createCustomCallbackMocks,
   getLiteralsByType,
+  PartialSuggestionWithText,
   getDateLiteralsByFieldType,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
@@ -26,17 +25,16 @@ import {
   strictlyGetParamAtPosition,
 } from '../helper';
 import { uniq } from 'lodash';
-import type {
+import {
   FunctionParameter,
   FunctionReturnType,
-  SupportedDataType} from '../../definitions/types';
-import {
+  SupportedDataType,
   isFieldType,
   isReturnType,
   isSupportedDataType,
 } from '../../definitions/types';
 import { fieldNameFromType } from '../../validation/validation.test';
-import type { ESQLAstItem } from '@kbn/esql-ast';
+import { ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
 
 const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>

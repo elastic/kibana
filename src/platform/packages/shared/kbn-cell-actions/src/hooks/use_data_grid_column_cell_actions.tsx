@@ -9,7 +9,8 @@
 
 import type { MutableRefObject } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import type { EuiDataGridRefProps, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import { type EuiDataGridColumnCellAction } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,

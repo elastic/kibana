@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import {
   getObjectTags,
   convertTagNameToId,

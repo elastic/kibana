@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import type { InspectorViewDescription } from '../types';
+import { InspectorViewDescription } from '../types';
 
 interface Props {
   views: InspectorViewDescription[];

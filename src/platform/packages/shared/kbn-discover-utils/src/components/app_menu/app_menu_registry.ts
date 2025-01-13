@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   AppMenuActionBase,
   AppMenuActionSubmenuBase,
   AppMenuActionSubmenuCustom,
   AppMenuSubmenuHorizontalRule,
   AppMenuActionSubmenuSecondary,
+  AppMenuActionType,
   AppMenuItem,
   AppMenuItemCustom,
   AppMenuItemPrimary,
   AppMenuItemSecondary,
-  AppMenuSubmenuActionCustom} from './types';
-import {
-  AppMenuActionType
+  AppMenuSubmenuActionCustom,
 } from './types';
 
 export class AppMenuRegistry {

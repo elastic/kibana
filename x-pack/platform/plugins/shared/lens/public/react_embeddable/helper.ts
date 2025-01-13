@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ViewMode} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
+  ViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
@@ -18,9 +17,9 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
-import type { SavedObjectReference } from '@kbn/core/types';
-import type { LensRuntimeState, LensSerializedState } from './types';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
+import { LensRuntimeState, LensSerializedState } from './types';
 import type { LensAttributesService } from '../lens_attribute_service';
 
 export function createEmptyLensState(

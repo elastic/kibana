@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListIdentifiers,
-  NamespaceType,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListIdentifiers, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getIdsAndNamespaces = ({
   lists,

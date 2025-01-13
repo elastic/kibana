@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 export const plugin = async (ctx: PluginInitializerContext) => {

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import type { FetchConnectorExecuteResponse } from '../api';
-import { fetchConnectorExecuteAction } from '../api';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 import * as i18n from './translations';
 
 /**

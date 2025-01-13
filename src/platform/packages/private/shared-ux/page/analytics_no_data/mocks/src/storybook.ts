@@ -9,8 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 
-import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type {

@@ -12,11 +12,10 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import type {
+import {
   FieldType,
   FunctionDefinition,
-  SupportedDataType} from '../definitions/types';
-import {
+  SupportedDataType,
   dataTypes,
   fieldTypes as _fieldTypes,
 } from '../definitions/types';
@@ -35,8 +34,7 @@ import {
   unsupported_field,
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
-import type { Setup} from './__tests__/helpers';
-import { setup } from './__tests__/helpers';
+import { Setup, setup } from './__tests__/helpers';
 
 const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 

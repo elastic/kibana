@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import type {
+import {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';

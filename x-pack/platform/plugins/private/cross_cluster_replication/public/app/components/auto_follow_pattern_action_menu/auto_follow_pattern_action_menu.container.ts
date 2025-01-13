@@ -6,10 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import type {
-  Props} from './auto_follow_pattern_action_menu';
 import {
-  AutoFollowPatternActionMenu as AutoFollowPatternActionMenuView
+  AutoFollowPatternActionMenu as AutoFollowPatternActionMenuView,
+  Props,
 } from './auto_follow_pattern_action_menu';
 
 // @ts-ignore

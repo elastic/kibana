@@ -9,9 +9,9 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
-import type {
+import {
   AnnotationLayerConfig,
   CommonXYLayerConfig,
   DataLayerConfig,

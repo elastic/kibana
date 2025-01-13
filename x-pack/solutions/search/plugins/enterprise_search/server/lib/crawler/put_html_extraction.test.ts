@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import type { Connector } from '@kbn/search-connectors';
-import { CONNECTORS_INDEX } from '@kbn/search-connectors';
+import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { updateHtmlExtraction } from './put_html_extraction';
 

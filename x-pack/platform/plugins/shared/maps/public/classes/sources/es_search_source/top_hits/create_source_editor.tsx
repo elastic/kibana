@@ -19,9 +19,9 @@ import {
   getSortFields,
   getIsTimeseries,
 } from '../../../../index_pattern_util';
-import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { TopHitsForm } from './top_hits_form';
-import type { OnSourceChangeArgs } from '../../source';
+import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
   onSourceConfigChange: (

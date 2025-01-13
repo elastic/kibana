@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ElementType, ReactElement } from 'react';
-import React from 'react';
-import type { IconType } from '@elastic/eui';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { Rule } from '../types';
+import React, { ElementType, ReactElement } from 'react';
+import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
+import { Rule } from '../types';
 import { itemContentCss, containerCss } from './menu_link.styles';
 
 interface MenuItemLinkedRulesProps {

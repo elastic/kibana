@@ -8,7 +8,7 @@
  */
 
 import { debounceTime, first, skipUntil } from 'rxjs';
-import type { ISessionService } from './session_service';
+import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 
 /**

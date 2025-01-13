@@ -9,10 +9,9 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { TaskDefinition } from '../task';
-import { TaskCost } from '../task';
+import { TaskCost, TaskDefinition } from '../task';
 import { setupTestServers } from './lib';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 import { sortBy } from 'lodash';
 
 jest.mock('../task_type_dictionary', () => {

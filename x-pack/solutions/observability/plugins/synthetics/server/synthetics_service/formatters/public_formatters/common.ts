@@ -7,8 +7,12 @@
 
 import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
-import type { CommonFields, MonitorFields } from '../../../../common/runtime_types';
-import { ConfigKey, SourceType } from '../../../../common/runtime_types';
+import {
+  CommonFields,
+  ConfigKey,
+  MonitorFields,
+  SourceType,
+} from '../../../../common/runtime_types';
 
 export type FormattedValue =
   | boolean

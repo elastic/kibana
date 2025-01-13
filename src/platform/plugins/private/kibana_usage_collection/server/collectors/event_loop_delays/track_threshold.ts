@@ -8,8 +8,7 @@
  */
 
 import { takeUntil, finalize } from 'rxjs';
-import type { Observable} from 'rxjs';
-import { timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';

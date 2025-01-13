@@ -6,7 +6,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import type {
+import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';

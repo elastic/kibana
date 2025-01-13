@@ -8,9 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiListGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { Ping } from '../../../../../../../common/runtime_types';
+import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { Ping } from '../../../../../../../common/runtime_types';
 
 const ListGroup = styled(EuiListGroup)`
   &&& {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './unmute_all_rule_types';
+export * from './unmute_all_rule_types';

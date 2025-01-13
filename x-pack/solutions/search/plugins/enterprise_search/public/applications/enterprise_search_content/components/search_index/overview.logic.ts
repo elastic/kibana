@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import type { MakeLogicType } from 'kea';
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import type { IngestPipelineParams } from '@kbn/search-connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
-import type { CachedFetchIndexApiLogicActions } from '../../api/index/cached_fetch_index_api_logic';
-import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
-import type { FetchIndexPipelineParametersApiLogicActions } from '../../api/pipelines/fetch_index_pipeline_parameters';
-import { FetchIndexPipelineParametersApiLogic } from '../../api/pipelines/fetch_index_pipeline_parameters';
+import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '../../api/index/cached_fetch_index_api_logic';
+import {
+  FetchIndexPipelineParametersApiLogic,
+  FetchIndexPipelineParametersApiLogicActions,
+} from '../../api/pipelines/fetch_index_pipeline_parameters';
 
 import { SEARCH_INDICES_PATH } from '../../routes';
 

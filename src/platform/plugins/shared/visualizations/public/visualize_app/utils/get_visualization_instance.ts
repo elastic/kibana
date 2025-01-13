@@ -11,10 +11,10 @@ import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import type { SerializedVis, Vis, VisSavedObject, VisualizeEmbeddableContract } from '../..';
+import { SerializedVis, Vis, VisSavedObject, VisualizeEmbeddableContract } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
 import type { VisualizeInput } from '../../legacy/embeddable';
 

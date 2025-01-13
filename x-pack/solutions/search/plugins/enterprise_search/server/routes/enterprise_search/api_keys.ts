@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { createApiKey } from '../../lib/indices/create_api_key';
-import type { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerApiKeysRoutes({ log, router }: RouteDependencies) {

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import type {
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import {
   FramePublicAPI,
+  isOperation,
   Visualization,
   DragDropOperation,
-  VisualizationDimensionGroupConfig} from '../../../../types';
-import {
-  isOperation
+  VisualizationDimensionGroupConfig,
 } from '../../../../types';
 
 export interface OnVisDropProps<T> {

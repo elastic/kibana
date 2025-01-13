@@ -33,6 +33,6 @@ export const FILE_STORAGE_INTEGRATION_INDEX_NAMES: Readonly<
   elastic_agent: { name: 'agent', fromHost: true, toHost: false },
   endpoint: { name: 'endpoint', fromHost: true, toHost: true },
 };
-export const FILE_STORAGE_INTEGRATION_NAMES: readonly string[] = Object.keys(
+export const FILE_STORAGE_INTEGRATION_NAMES: Readonly<string[]> = Object.keys(
   FILE_STORAGE_INTEGRATION_INDEX_NAMES
 );

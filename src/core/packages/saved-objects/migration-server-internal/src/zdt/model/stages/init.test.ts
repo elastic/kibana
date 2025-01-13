@@ -18,9 +18,8 @@ import {
   getCreationAliasesMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
-import type { FetchIndexResponse } from '../../../actions';
-import type { MockedMigratorContext } from '../../test_helpers';
-import { createContextMock } from '../../test_helpers';
+import { FetchIndexResponse } from '../../../actions';
+import { createContextMock, MockedMigratorContext } from '../../test_helpers';
 import type { InitState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { init } from './init';

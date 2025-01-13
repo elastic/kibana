@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
-import type { PluginKibanaContextValue } from '../utils/use_kibana';
+import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
+import { PluginKibanaContextValue } from '../utils/use_kibana';
 import { createOnUknownDataViewSelectionHandler } from './discover_navigation_handler';
 
 export const createLogsExplorerControllerWithCustomizations =

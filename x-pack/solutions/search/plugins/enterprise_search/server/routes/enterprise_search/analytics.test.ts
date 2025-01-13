@@ -7,15 +7,15 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({
   fetchAnalyticsCollections: jest.fn(),
 }));
 
-import type { AnalyticsCollection } from '../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 

@@ -9,7 +9,7 @@
 
 import React, { useContext } from 'react';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 
 import type {
   OptionsListDisplaySettings,

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
-import type { AlertsHealth} from '@kbn/alerting-types';
-import { HealthStatus } from '@kbn/alerting-types';
+import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
+import { AlertsHealth, HealthStatus } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { RawRule} from '../types';
-import { RuleExecutionStatusErrorReasons } from '../types';
+import { RawRule, RuleExecutionStatusErrorReasons } from '../types';
 import type { LatestTaskStateSchema } from './task_state';
 
 export const getHealth = async (

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type {
+import { estypes } from '@elastic/elasticsearch';
+import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import type {
+import {
   EsKnowledgeBaseEntrySchema,
   EsDocumentEntry,
 } from '../ai_assistant_data_clients/knowledge_base/types';

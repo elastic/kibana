@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enableUiSettingsValidations: schema.boolean({ defaultValue: false }),

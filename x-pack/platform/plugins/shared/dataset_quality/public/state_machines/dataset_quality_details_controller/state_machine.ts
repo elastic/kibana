@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { DoneInvokeEvent, InterpreterFrom} from 'xstate';
-import { assign, createMachine, raise } from 'xstate';
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type {
+import {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
 } from './types';
-import type { DatasetQualityStartDeps } from '../../types';
-import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import { DatasetQualityStartDeps } from '../../types';
+import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import { IDataStreamDetailsClient } from '../../services/data_stream_details';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import type {
+import {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
@@ -30,7 +29,7 @@ import type {
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 
-import type { IntegrationType } from '../../../common/data_stream_details';
+import { IntegrationType } from '../../../common/data_stream_details';
 import {
   fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,

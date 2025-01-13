@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { ILicenseState } from '../lib';
-import type { RewriteResponseCase, RewriteRequestCase } from './lib';
-import { verifyAccessAndContext } from './lib';
-import type { AlertingRequestHandlerContext} from '../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import type {
-  RulesSettingsFlapping,
-  RulesSettingsFlappingProperties} from '../../common';
+import { ILicenseState } from '../lib';
+import { verifyAccessAndContext, RewriteResponseCase, RewriteRequestCase } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import {
-  API_PRIVILEGES
+  API_PRIVILEGES,
+  RulesSettingsFlapping,
+  RulesSettingsFlappingProperties,
 } from '../../common';
 
 const bodySchema = schema.object({

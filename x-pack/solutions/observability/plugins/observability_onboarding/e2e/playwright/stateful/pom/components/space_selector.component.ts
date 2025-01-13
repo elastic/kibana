@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Page } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export class SpaceSelector {
   page: Page;

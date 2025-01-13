@@ -6,9 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { IRouter } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -18,15 +17,14 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-da
 
 import { verifyAccessAndContext } from '../lib';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
-import type {
-  AlertingAuthorizationFilterOpts,
-  AuthorizedRuleTypes} from '../../authorization';
 import {
   AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType
+  AlertingAuthorizationFilterOpts,
+  AlertingAuthorizationFilterType,
+  AuthorizedRuleTypes,
 } from '../../authorization';
-import type { AlertingRequestHandlerContext } from '../../types';
-import type { GetAlertIndicesAlias, ILicenseState } from '../../lib';
+import { AlertingRequestHandlerContext } from '../../types';
+import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {

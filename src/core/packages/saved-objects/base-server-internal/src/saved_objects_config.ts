@@ -8,8 +8,7 @@
  */
 
 import { valid } from 'semver';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import buffer from 'buffer';
 

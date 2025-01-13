@@ -7,9 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
-import type { ServiceLocations } from '../../../../../common/runtime_types';
-import { MonitorTypeEnum } from '../../../../../common/runtime_types';
-import type { MonitorFilterState } from '../../state';
+import { MonitorTypeEnum, ServiceLocations } from '../../../../../common/runtime_types';
+import { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<
   MonitorFilterState,

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Appender, LogMeta, LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
+import { Appender, LogLevel, LogMeta, LogRecord } from '@kbn/logging';
 import { getLoggerContext } from '..';
-import type { CreateLogRecordFn } from './logger';
-import { AbstractLogger } from './logger';
+import { AbstractLogger, CreateLogRecordFn } from './logger';
 
 describe('AbstractLogger', () => {
   const context = getLoggerContext(['context', 'parent', 'child']);

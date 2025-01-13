@@ -10,7 +10,7 @@ import type { ActionParamsProps } from '@kbn/alerts-ui-shared';
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import { RUN_CONNECTOR_TEST_MESSAGE } from './translations';
-import type { MicrosoftDefenderEndpointActionParams } from '../../../common/microsoft_defender_endpoint/types';
+import { MicrosoftDefenderEndpointActionParams } from '../../../common/microsoft_defender_endpoint/types';
 
 const MicrosoftDefenderEndpointParamsFields = memo<
   ActionParamsProps<MicrosoftDefenderEndpointActionParams>

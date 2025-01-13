@@ -10,13 +10,13 @@ import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
-import type { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import type { IBasePath, Logger } from '@kbn/core/server';
+import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import type { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
+import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
@@ -37,11 +37,13 @@ import {
   viewInAppUrlActionVariableDescription,
 } from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
-import type { CustomThresholdLocators } from './custom_threshold_executor';
-import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import {
+  createCustomThresholdExecutor,
+  CustomThresholdLocators,
+} from './custom_threshold_executor';
 import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import type { ObservabilityConfig } from '../../..';
-import type { CustomThresholdAlert } from './types';
+import { ObservabilityConfig } from '../../..';
+import { CustomThresholdAlert } from './types';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,

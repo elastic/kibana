@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 export const authenticatedUser = {
   username: 'my_username',

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
+  actions,
   ActorRef,
   AnyEventObject,
   EventObject,
   Expr,
   PureAction,
-  SendActionOptions} from 'xstate';
-import {
-  actions
+  SendActionOptions,
 } from 'xstate';
 
 export const sendIfDefined =

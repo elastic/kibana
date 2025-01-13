@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
 describe('mapFiltersToKueryNode', () => {

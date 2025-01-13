@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { ApiExecutionContext } from './types';
+import { ApiExecutionContext } from './types';
 import { collectMultiNamespaceReferences } from './internals/collect_multi_namespace_references';
 
 export interface PerformCreateParams<T = unknown> {

@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import type webpack from 'webpack';
+import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 
 export interface State {

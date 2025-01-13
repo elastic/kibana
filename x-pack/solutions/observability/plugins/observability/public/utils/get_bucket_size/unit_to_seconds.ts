@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { unitOfTime as UnitOfTIme } from 'moment';
-import moment from 'moment';
+import moment, { unitOfTime as UnitOfTIme } from 'moment';
 
 function getDurationAsSeconds(value: number, unitOfTime: UnitOfTIme.Base) {
   return moment.duration(value, unitOfTime).asSeconds();

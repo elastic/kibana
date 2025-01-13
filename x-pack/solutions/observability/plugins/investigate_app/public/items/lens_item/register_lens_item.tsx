@@ -11,16 +11,18 @@ import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import type {
+import {
   LensAttributes,
   XYLayerOptions,
+  XYDataLayer,
   XYReferenceLinesLayer,
   XYByValueAnnotationsLayer,
+  LensAttributesBuilder,
+  XYChart,
 } from '@kbn/lens-embeddable-utils';
-import { XYDataLayer, LensAttributesBuilder, XYChart } from '@kbn/lens-embeddable-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import type { Query, Filter } from '@kbn/es-query';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Query, Filter } from '@kbn/es-query';
 import type { Options } from '../register_items';
 import { useKibana } from '../../hooks/use_kibana';
 

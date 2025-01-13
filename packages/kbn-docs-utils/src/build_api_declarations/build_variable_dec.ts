@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   VariableDeclaration,
+  Node,
   PropertyAssignment,
   PropertyDeclaration,
   PropertySignature,
-  ShorthandPropertyAssignment} from 'ts-morph';
-import {
-  Node
+  ShorthandPropertyAssignment,
 } from 'ts-morph';
 import { isInternal } from '../utils';
-import type { ApiDeclaration} from '../types';
-import { TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildCallSignatureDec } from './build_call_signature_dec';
-import type { BuildApiDecOpts } from './types';
+import { BuildApiDecOpts } from './types';
 import { getOptsForChild } from './utils';
 
 /**

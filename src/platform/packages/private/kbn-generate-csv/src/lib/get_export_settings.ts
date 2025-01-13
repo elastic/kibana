@@ -19,7 +19,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../constants';
-import type { CsvPagingStrategy } from '../../types';
+import { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;

@@ -6,12 +6,11 @@
  */
 
 import React, { Fragment } from 'react';
-import type {
-  UseEuiTheme} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiStat,
+  UseEuiTheme,
   euiTextTruncate,
   logicalCSS,
 } from '@elastic/eui';
@@ -21,8 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { StatusIconProps } from '../status_icon';
-import { StatusIcon } from '../status_icon';
+import { StatusIcon, StatusIconProps } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import type { AlertsByName } from '../../alerts/types';
 

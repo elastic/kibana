@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-import { GenericFtrService } from '@kbn/test';
-import type { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
-import type { DatasetQualityServices } from './config';
+import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
+import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { DatasetQualityServices } from './config';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
   infer TServices,

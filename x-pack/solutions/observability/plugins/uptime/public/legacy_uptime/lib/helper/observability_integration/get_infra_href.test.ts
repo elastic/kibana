@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   AssetDetailsLocator,
   AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from './get_infra_href';
-import type { MonitorSummary, Ping } from '../../../../../common/runtime_types';
-import { makePing } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing, Ping } from '../../../../../common/runtime_types';
 
 const mockAssetDetailsLocator = {
   getRedirectUrl: jest

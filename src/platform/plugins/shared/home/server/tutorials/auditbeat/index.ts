@@ -14,7 +14,7 @@ import {
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/auditbeat_instructions';
-import type {
+import {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';

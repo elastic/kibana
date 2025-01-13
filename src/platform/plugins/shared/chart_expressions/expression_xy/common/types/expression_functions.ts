@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { type AxisProps } from '@elastic/charts';
+import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
@@ -18,16 +17,16 @@ import type {
   ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import type {
+import {
   LegendSize,
   XYLegendValue,
   LegendLayout,
   ExpressionValueVisDimension,
 } from '@kbn/visualizations-plugin/common';
-import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
-import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
-import type {
+import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import {
   AxisExtentModes,
   FillStyles,
   FittingFunctions,
@@ -58,7 +57,7 @@ import type {
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
-import type { XYRender } from './expression_renderers';
+import { XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;

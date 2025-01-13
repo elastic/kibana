@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import type { v1 } from '../../common';
 
 export const registerBulkDeleteRoute = (router: IRouter) => {

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import React, { ChangeEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -19,14 +16,14 @@ import {
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Value } from '@kbn/kibana-react-plugin/public';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import type { MapCenter, MapSettings } from '../../../common/descriptor_types';
+import { MapCenter, MapSettings } from '../../../common/descriptor_types';
 // @ts-ignore
 import { ValidatedRange } from '../../components/validated_range';
 

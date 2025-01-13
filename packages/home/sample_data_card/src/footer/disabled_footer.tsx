@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import { SampleDataSet } from '@kbn/home-sample-data-types';
 
 /**
  * Props for the `DisabledFooter` component.

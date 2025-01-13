@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type {
+import {
   ExternalService,
   ExecutorSubActionPushParams,
   PushToServiceApiParamsSIR,
   ExternalServiceSIR,
   Observable,
+  ObservableTypes,
   ExternalServiceITOM,
-  ExecutorSubActionAddEventParams} from './types';
-import {
-  ObservableTypes
+  ExecutorSubActionAddEventParams,
 } from './types';
 
 export const serviceNowCommonFields = [

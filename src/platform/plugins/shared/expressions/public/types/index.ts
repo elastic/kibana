@@ -8,16 +8,16 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Adapters } from '@kbn/inspector-plugin/public';
-import type { ExecutionContextSearch } from '@kbn/es-query';
-import type {
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { ExecutionContextSearch } from '@kbn/es-query';
+import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
   RenderMode,
   IInterpreterRenderEvent,
 } from '../../common';
-import type { ExpressionRenderHandlerParams } from '../render';
+import { ExpressionRenderHandlerParams } from '../render';
 
 /**
  * @deprecated

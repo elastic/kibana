@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type {
+import { TypeOf } from '@kbn/config-schema';
+import {
   TheHiveConfigSchema,
   TheHiveSecretsSchema,
   ExecutorParamsSchema,

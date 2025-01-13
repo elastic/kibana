@@ -7,9 +7,6 @@
 
 import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSwitchEvent,
-  EuiComboBoxOptionOption} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -22,22 +19,24 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTitle,
   EuiCallOut,
-  EuiComboBox
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
-import type { RestoreSettings } from '../../../../../../common/types';
+import { RestoreSettings } from '../../../../../../common/types';
 
 import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
 
-import type { StepProps } from '..';
+import { StepProps } from '..';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
 

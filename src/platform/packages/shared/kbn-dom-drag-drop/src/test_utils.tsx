@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { faker } from '@faker-js/faker';
-import type { RenderOptions} from '@testing-library/react';
-import { render } from '@testing-library/react';
-import type { DragContextState} from './providers';
-import { RootDragDropProvider } from './providers';
+import { RenderOptions, render } from '@testing-library/react';
+import { DragContextState, RootDragDropProvider } from './providers';
 
 export const EXACT = {
   exact: true,

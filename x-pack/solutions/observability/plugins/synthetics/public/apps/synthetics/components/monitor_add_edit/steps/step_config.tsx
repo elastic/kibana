@@ -9,8 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import type { Step, StepMap } from '../types';
-import { FormMonitorType } from '../types';
+import { FormMonitorType, Step, StepMap } from '../types';
 import { StepFields } from './step_fields';
 
 const MONITOR_TYPE_STEP: Step = {

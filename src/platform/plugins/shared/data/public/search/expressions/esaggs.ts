@@ -10,14 +10,13 @@
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
-import type { StartServicesAccessor } from '@kbn/core/public';
-import type {
-  EsaggsExpressionFunctionDefinition,
-  EsaggsStartDependencies} from '../../../common/search/expressions';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
+  EsaggsExpressionFunctionDefinition,
+  EsaggsStartDependencies,
   getEsaggsMeta,
 } from '../../../common/search/expressions';
-import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

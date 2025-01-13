@@ -24,7 +24,7 @@ import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
 import { useNavigation } from '../navigation';
-import type { EventTracker } from '../../analytics';
+import { EventTracker } from '../../analytics';
 import { useAccordionState } from '../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
@@ -32,8 +32,7 @@ import {
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
 } from '../constants';
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../types';
-import type { PanelContext} from './panel';
-import { usePanel } from './panel';
+import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>

@@ -15,7 +15,7 @@ import {
   VERSION,
 } from '../../constants/index.mock';
 
-import type { CreateExceptionListSchema } from '.';
+import { CreateExceptionListSchema } from '.';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
   description: DESCRIPTION,

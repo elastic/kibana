@@ -11,15 +11,13 @@ import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
 import { ShareMenuProvider } from './context';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { KibanaLocation, LocatorGetUrlParams} from '../../common/url_service';
-import { UrlService } from '../../common/url_service';
-import type {
+import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
+import {
   BrowserShortUrlClient,
   BrowserShortUrlClientHttp,
 } from '../url_service/short_urls/short_url_client';
-import type {
-  BrowserShortUrlClientFactoryCreateParams} from '../url_service/short_urls/short_url_client_factory';
 import {
+  BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClientFactory,
 } from '../url_service/short_urls/short_url_client_factory';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';

@@ -6,7 +6,7 @@
  */
 
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
-import type { MonitorListPageState } from './models';
+import { MonitorListPageState } from './models';
 
 const DEFAULT_PAGE_STATE: MonitorListPageState = {
   pageIndex: 0,

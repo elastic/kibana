@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
+import React from 'react';
 
 export interface ExpandableFlyoutApi {
   /**

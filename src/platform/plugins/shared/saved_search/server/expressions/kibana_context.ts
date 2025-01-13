@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { getKibanaContextFn } from '../../common';
-import type { SavedSearchServerStartDeps } from '../plugin';
+import { SavedSearchServerStartDeps } from '../plugin';
 import { getSavedSearch } from '../../common/service/get_saved_searches';
-import type { SavedSearchAttributes } from '../../common/types';
+import { SavedSearchAttributes } from '../../common/types';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

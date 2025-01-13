@@ -8,8 +8,7 @@
  */
 
 import React, { useContext } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';

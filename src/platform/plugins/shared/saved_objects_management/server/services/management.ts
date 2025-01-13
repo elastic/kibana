@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core/server';
+import { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core/server';
 
 export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
 

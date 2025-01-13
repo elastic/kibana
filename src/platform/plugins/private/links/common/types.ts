@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import type { CONTENT_ID } from './constants';
+import { CONTENT_ID } from './constants';
 
 export type LinksContentType = typeof CONTENT_ID;
 

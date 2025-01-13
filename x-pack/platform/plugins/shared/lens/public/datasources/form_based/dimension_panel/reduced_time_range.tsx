@@ -11,11 +11,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { Duration } from 'moment';
-import type {
-  GenericIndexPatternColumn} from '../operations';
+import { Duration } from 'moment';
 import {
   adjustTimeScaleLabelSuffix,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import type { FormBasedLayer } from '../types';

@@ -9,8 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import type { ImportListItemQuerySchema } from '.';
-import { importListItemQuerySchema } from '.';
+import { ImportListItemQuerySchema, importListItemQuerySchema } from '.';
 import { getImportListItemQuerySchemaMock } from './index.mock';
 
 describe('import_list_item_schema', () => {

@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type {
+import {
   Plugin,
   CoreSetup,
   AppUpdater,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
+import { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
 
 export type { SerializedAction, SerializedEvent, BaseActionConfig };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 import { entSearchOverviewRoute } from './overview';
 
 export function registerV1EnterpriseSearchRoutes(server: MonitoringCore) {

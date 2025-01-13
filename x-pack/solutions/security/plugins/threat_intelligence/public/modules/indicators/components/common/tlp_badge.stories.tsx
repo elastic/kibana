@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ComponentStory } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import type { TLPBadgeProps } from './tlp_badge';
-import { TLPBadge } from './tlp_badge';
+import { TLPBadge, TLPBadgeProps } from './tlp_badge';
 
 export default {
   component: TLPBadge,

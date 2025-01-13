@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldPath } from './fields';
+import { FieldPath } from './fields';
 
 /**
  * Branded type respresenting a string that is a safe Painless expression.

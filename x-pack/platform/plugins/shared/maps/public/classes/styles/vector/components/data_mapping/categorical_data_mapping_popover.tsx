@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import type { EuiSwitchEvent} from '@elastic/eui';
-import { EuiFormRow, EuiIcon, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiSwitch, EuiSwitchEvent, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataMappingPopover } from './data_mapping_popover';
-import type { FieldMetaOptions } from '../../../../../../common/descriptor_types';
+import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
 interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;

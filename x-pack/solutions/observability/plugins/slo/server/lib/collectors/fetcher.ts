@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import type { StoredSLODefinition } from '../../domain/models';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import type { Usage } from './type';
+import { Usage } from './type';
 
 export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({

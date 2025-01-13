@@ -9,8 +9,7 @@ import React from 'react';
 
 import { EuiCommentList } from '@elastic/eui';
 
-import type { AIMessage, Message } from '../../types';
-import { MessageRole } from '../../types';
+import { AIMessage, Message, MessageRole } from '../../types';
 
 import { AssistantMessage } from './assistant_message';
 import { SystemMessage } from './system_message';

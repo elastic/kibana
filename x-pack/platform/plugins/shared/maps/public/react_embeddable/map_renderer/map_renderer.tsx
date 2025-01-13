@@ -15,9 +15,9 @@ import type {
   MapSettings,
 } from '../../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
-import type { MapApi, MapRuntimeState, MapSerializedState } from '../types';
+import { MapApi, MapRuntimeState, MapSerializedState } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MAP_RENDERER_TYPE } from './types';
 
 function getLayers(layerList: LayerDescriptor[]) {

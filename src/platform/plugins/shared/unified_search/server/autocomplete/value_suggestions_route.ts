@@ -8,9 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { IRouter } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ConfigSchema } from '../config';

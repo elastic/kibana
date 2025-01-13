@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerParams } from '@kbn/data-plugin/common';
-import { handleEsaggsRequest } from '@kbn/data-plugin/common';
+import { handleEsaggsRequest, RequestHandlerParams } from '@kbn/data-plugin/common';
 
 // in a separate file to solve a mocking problem for tests
 export const handleRequest = (args: RequestHandlerParams) => handleEsaggsRequest(args);

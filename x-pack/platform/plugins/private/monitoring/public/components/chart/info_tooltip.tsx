@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize } from '@elastic/eui';
+import { euiFontSize, UseEuiTheme } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Series } from './types';
+import { Series } from './types';
 
 const tooltipLabelStyle = (theme: UseEuiTheme) => css`
   text-align: left;

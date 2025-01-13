@@ -8,7 +8,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type { ExpressionAstNode } from '..';
+import { ExpressionAstNode } from '..';
 
 export class ExpressionsInspectorAdapter extends EventEmitter {
   private _ast = {} as ExpressionAstNode;

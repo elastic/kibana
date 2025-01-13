@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
-import type {
-  ApiConfig} from '@kbn/elastic-assistant-common';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+  ApiConfig,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import type { Conversation, ClientMessage } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface BulkActionSummary {
   failed: number;

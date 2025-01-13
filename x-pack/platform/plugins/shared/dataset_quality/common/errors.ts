@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiErrorResponse } from './fetch_options';
+import { ApiErrorResponse } from './fetch_options';
 
 export class DatasetQualityError extends Error {
   readonly statusCode?: number;

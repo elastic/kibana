@@ -9,8 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChatForm } from '../../types';
-import { ChatFormFields, PlaygroundPageMode } from '../../types';
+import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TLSFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, TLSFields } from '../../../../common/runtime_types';
 import {
   tlsArrayToYamlFormatter,
   tlsValueToStringFormatter,
   tlsValueToYamlFormatter,
 } from './formatting_utils';
-import type { Formatter } from './common_formatters';
+import { Formatter } from './common_formatters';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 

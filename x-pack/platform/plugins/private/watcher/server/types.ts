@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SemVer } from 'semver';
+import { SemVer } from 'semver';
 import type { IRouter } from '@kbn/core/server';
 
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { License, handleEsError } from './shared_imports';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { License, handleEsError } from './shared_imports';
 
 export interface SetupDependencies {
   licensing: LicensingPluginSetup;

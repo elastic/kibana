@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, OptionHTMLAttributes } from 'react';
-import React from 'react';
+import React, { ReactNode, OptionHTMLAttributes } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { FieldHook} from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 export interface Props {
   field: FieldHook;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CustomIntegrationOptions, IntegrationError } from '../../types';
-import type {
+import { CustomIntegrationOptions, IntegrationError } from '../../types';
+import {
   CreateCustomIntegrationValue,
   DeleteCustomIntegrationResponse,
 } from '../services/integrations_client';
-import type { IndexedValidationErrors, ValidationErrors } from '../services/validation';
+import { IndexedValidationErrors, ValidationErrors } from '../services/validation';
 
 export type CreateCustomIntegrationOptions = CustomIntegrationOptions;
 

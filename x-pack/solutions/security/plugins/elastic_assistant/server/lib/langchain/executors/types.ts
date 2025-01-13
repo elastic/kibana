@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { BaseMessage } from '@langchain/core/messages';
-import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { BaseMessage } from '@langchain/core/messages';
+import { Logger } from '@kbn/logging';
+import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import type {
-  ExecuteConnectorRequestBody,
-  Message,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
-import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { ResponseBody } from '../types';
+import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
-import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
-import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
-import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
 export type OnLlmResponse = (
   content: string,

@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-import type { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import type { Conversation } from '../../..';
+import { Conversation } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useConversation } from '../../assistant/use_conversation';
 import { useAssistantContext } from '../../assistant_context';

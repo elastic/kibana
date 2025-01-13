@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Column } from './columns';
-import type { Configuration } from './configurations';
+import { Column } from './columns';
+import { Configuration } from './configurations';
 
 export interface Layer {
   indexPatternId: string;

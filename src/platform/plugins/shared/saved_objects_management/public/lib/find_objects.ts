@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import type { v1 } from '../../common';
 
 export async function findObjects(

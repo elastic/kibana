@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
-import type { IndexContent } from '@kbn/index-management-shared-types';
+import { CoreStart } from '@kbn/core/public';
+import { IndexContent } from '@kbn/index-management-shared-types';
 
 const IndexMappingsDocsLink: FunctionComponent<{ docLinks: CoreStart['docLinks'] }> = ({
   docLinks,

@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent} from 'react';
-import React, { useMemo } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
+import React, { FunctionComponent, useMemo } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import type { History } from 'history';
-import type { Observable } from 'rxjs';
-import { EMPTY } from 'rxjs';
+import { History } from 'history';
+import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';

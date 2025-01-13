@@ -6,9 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import { CoreSetup } from '@kbn/core-lifecycle-server';
 import { firstValueFrom } from 'rxjs';
-import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 export async function getElserModelId({
   core,

@@ -8,11 +8,11 @@
  */
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
 import { getSplitDimensionAccessor } from './get_split_dimension_accessor';
-import type { BucketColumns } from '../../common/types';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { BucketColumns } from '../../common/types';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 describe('getSplitDimensionAccessor', () => {
   const visData = createMockVisData();

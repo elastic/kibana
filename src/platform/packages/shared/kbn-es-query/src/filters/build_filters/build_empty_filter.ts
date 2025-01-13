@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, FilterMeta} from './types';
-import { FilterStateStore } from './types';
+import { Filter, FilterMeta, FilterStateStore } from './types';
 
 export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
   const meta: FilterMeta = {

@@ -19,7 +19,7 @@ import {
   VALUE_2,
 } from '../../../common/constants.mock';
 
-import type { CreateListItemsBulkOptions } from '.';
+import { CreateListItemsBulkOptions } from '.';
 
 export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions => ({
   dateNow: DATE_NOW,

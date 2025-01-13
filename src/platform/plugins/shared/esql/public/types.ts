@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLEditorProps } from '@kbn/esql-editor';
+import { ESQLEditorProps } from '@kbn/esql-editor';
 
 export interface EsqlPluginStart {
   Editor: React.ComponentType<ESQLEditorProps>;

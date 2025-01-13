@@ -6,8 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiFlexItemProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexItemProps,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
@@ -15,8 +20,7 @@ import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_util
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
-import type { CspCounterCardProps } from '../../../components/csp_counter_card';
-import { CspCounterCard } from '../../../components/csp_counter_card';
+import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
 import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';

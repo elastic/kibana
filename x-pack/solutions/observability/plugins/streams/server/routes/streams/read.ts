@@ -7,12 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import type {
+import {
   FieldDefinitionConfig,
+  isWiredReadStream,
   ReadStreamDefinition,
   WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
-import { isWiredReadStream } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readAncestors, readStream } from '../../lib/streams/stream_crud';

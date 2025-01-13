@@ -7,23 +7,22 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import type { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
 import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { kbnTestConfig } from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
-import type { UrlObject } from 'url';
-import { format } from 'url';
+import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
-import type { APMFtrConfigName } from '../configs';
+import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
-import type {
+import {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,

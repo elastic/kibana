@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OtelDocument } from '.';
+import { OtelDocument } from '.';
 import { Serializable } from '../serializable';
 
 export interface OtelMetricDocument extends OtelDocument {

@@ -10,10 +10,9 @@
 import { take } from 'rxjs';
 import { Subject, of } from 'rxjs';
 
-import type { ServiceStatusLevel, ServiceStatus } from '@kbn/core-status-common';
-import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { ServiceStatusLevels, ServiceStatusLevel, ServiceStatus } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),

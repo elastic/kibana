@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RuleTypeModel, RuleTypeParams, RuleTypeWithDescription } from '../common';
+import { RuleTypeModel, RuleTypeParams, RuleTypeWithDescription } from '../common';
 
 const recoveredActionGroupMessage = i18n.translate(
   'responseOpsRuleForm.actionForm.actionGroupRecoveredMessage',

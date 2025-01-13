@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
-import type { Rule, RuleTableItem } from '../../../../types';
+import { Rule, RuleTableItem } from '../../../../types';
 
 export interface ComponentOpts {
   item: RuleTableItem;

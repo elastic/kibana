@@ -9,11 +9,11 @@
 
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
-import type { TableVisConfig } from './types';
+import { TableVisConfig } from './types';
 
-import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({

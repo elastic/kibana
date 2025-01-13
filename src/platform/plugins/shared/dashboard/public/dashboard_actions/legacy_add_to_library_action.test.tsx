@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  LegacyAddPanelToLibraryActionApi} from './legacy_add_to_library_action';
 import {
-  LegacyAddToLibraryAction
+  LegacyAddToLibraryAction,
+  LegacyAddPanelToLibraryActionApi,
 } from './legacy_add_to_library_action';
 import { coreServices } from '../services/kibana_services';
 

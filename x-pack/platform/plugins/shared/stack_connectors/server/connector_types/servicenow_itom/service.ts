@@ -6,7 +6,7 @@
  */
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type {
+import {
   ServiceFactory,
   ExternalServiceITOM,
   ExecutorSubActionAddEventParams,

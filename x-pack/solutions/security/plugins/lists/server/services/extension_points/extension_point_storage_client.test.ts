@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
-import type { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
+import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
 import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
 import { DataValidationError } from '../exception_lists/utils/errors';
 
 import { ExtensionPointError } from './errors';
-import type {
+import {
   ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
   ExtensionPoint,

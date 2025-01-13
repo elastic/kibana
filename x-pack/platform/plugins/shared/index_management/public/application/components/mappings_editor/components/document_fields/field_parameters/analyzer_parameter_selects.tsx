@@ -8,19 +8,18 @@
 import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type {
-  FieldConfig,
-  FieldHook} from '../../../shared_imports';
 import {
   useForm,
   Form,
   UseField,
   SelectField,
   SuperSelectField,
+  FieldConfig,
+  FieldHook,
   FormDataProvider,
 } from '../../../shared_imports';
-import type { SelectOption, SuperSelectOption } from '../../../types';
-import type { MapOptionsToSubOptions } from './analyzer_parameter';
+import { SelectOption, SuperSelectOption } from '../../../types';
+import { MapOptionsToSubOptions } from './analyzer_parameter';
 
 type Options = SuperSelectOption[] | SelectOption[];
 

@@ -13,12 +13,11 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { Panel } from '../../../../common/types';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
-import type {
-  FieldsFetcherServices} from '../../search_strategies/lib/fields_fetcher';
 import {
-  createFieldsFetcher
+  createFieldsFetcher,
+  FieldsFetcherServices,
 } from '../../search_strategies/lib/fields_fetcher';
-import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(
   panel: Panel,

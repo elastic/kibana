@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  FunctionComponent,
-  MouseEventHandler} from 'react';
 import React, {
+  FunctionComponent,
   useCallback,
   useEffect,
   useState,
-  useMemo
+  useMemo,
+  MouseEventHandler,
 } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { EDITOR_PX_HEIGHT, isXJsonValue } from '../processors/shared';
-import type { FieldHook } from '../../../../../../shared_imports';
-import { ComboBoxField, Field } from '../../../../../../shared_imports';
+import { ComboBoxField, Field, FieldHook } from '../../../../../../shared_imports';
 
 import { XJsonEditor } from '.';
 

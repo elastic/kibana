@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { Feature, FeatureCollection } from 'geojson';
-import type { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
-import { AbstractVectorSource } from '../vector_source';
+import { Feature, FeatureCollection } from 'geojson';
+import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
-import type {
+import {
   InlineFieldDescriptor,
   GeojsonFileSourceDescriptor,
   MapExtent,
 } from '../../../../common/descriptor_types';
-import type { IField } from '../../fields/field';
+import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import { InlineField } from '../../fields/inline_field';
 

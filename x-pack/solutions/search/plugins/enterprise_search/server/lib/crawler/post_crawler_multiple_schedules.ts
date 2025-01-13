@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
-import type {
+import {
   CrawlerCustomScheduleMappingServer,
   CrawlerCustomScheduleMappingClient,
   CrawlerCustomScheduleServer,

@@ -13,11 +13,10 @@ import {
   mockStoreDeps,
   exactMatchDoc,
 } from '../mocks';
-import type { Location, History } from 'history';
+import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
-import type { InitialAppState} from './lens_slice';
-import { loadInitial } from './lens_slice';
-import type { Filter } from '@kbn/es-query';
+import { InitialAppState, loadInitial } from './lens_slice';
+import { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 

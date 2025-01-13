@@ -12,11 +12,10 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { EuiLink } from '@elastic/eui';
 import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type {
-  FieldBadgeWithActionsProps,
-  FieldBadgeWithActionsPropsAndDependencies} from './cell_actions_popover';
 import {
-  FieldBadgeWithActions
+  FieldBadgeWithActions,
+  FieldBadgeWithActionsProps,
+  FieldBadgeWithActionsPropsAndDependencies,
 } from './cell_actions_popover';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';

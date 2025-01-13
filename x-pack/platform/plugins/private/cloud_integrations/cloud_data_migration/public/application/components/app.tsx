@@ -23,10 +23,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 import { getAppStyles } from '../../app.styles';
-import type { BreadcrumbService } from '../services/breadcrumbs';
+import { BreadcrumbService } from '../services/breadcrumbs';
 
 interface CloudDataMigrationAppDeps {
   http: CoreStart['http'];

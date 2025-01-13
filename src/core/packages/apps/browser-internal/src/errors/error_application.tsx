@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactChild} from 'react';
-import React, { useState, useLayoutEffect } from 'react';
+import React, { ReactChild, useState, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import type { History } from 'history';
 import { i18n } from '@kbn/i18n';

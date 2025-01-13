@@ -8,7 +8,7 @@
  */
 
 import { isOptionNode } from '../../../../ast/util';
-import type {
+import {
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLProperNode,

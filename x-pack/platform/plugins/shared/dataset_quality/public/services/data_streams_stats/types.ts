@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
-import type {
+import { HttpStart } from '@kbn/core/public';
+import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsTotalDocsQuery,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
-import type { Integration } from '../../../common/data_streams_stats/integration';
-import type { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
 
 export type DataStreamsStatsServiceSetup = void;
 

@@ -8,16 +8,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiHealth } from '@elastic/eui';
-import type { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
+import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
-import type { WaterfallNetworkItem, LegendItem } from '../../common/network_data/types';
-import type { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
+import { WaterfallNetworkItem, LegendItem } from '../../common/network_data/types';
+import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
 import { useFlyout } from './waterfall_flyout/use_flyout';
 import { WaterfallFlyout } from './waterfall_flyout/waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-import type { MarkerItems } from './context/waterfall_context';
-import { WaterfallProvider } from './context/waterfall_context';
+import { MarkerItems, WaterfallProvider } from './context/waterfall_context';
 import { WaterfallChart } from './waterfall_chart';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {

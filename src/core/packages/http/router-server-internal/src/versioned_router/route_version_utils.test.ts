@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { CoreKibanaRequest } from '../request';
 import { passThroughValidation } from './core_versioned_route';

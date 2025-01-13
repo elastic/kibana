@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewFieldBase } from '../../..';
+import { DataViewFieldBase } from '../../..';
 
 /**
  * Base index pattern fields for testing

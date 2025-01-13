@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { RouteContext } from '../../types';
+import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { RouteContext } from '../../types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import type { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
-import type {
+import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
+import {
+  ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
-import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import {
   formatTelemetryUpdateEvent,
   sendTelemetryEvents,

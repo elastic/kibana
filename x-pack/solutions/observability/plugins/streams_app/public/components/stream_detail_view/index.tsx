@@ -6,8 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EntityViewTab } from '../entity_detail_view';
-import { EntityDetailViewWithoutParams } from '../entity_detail_view';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';

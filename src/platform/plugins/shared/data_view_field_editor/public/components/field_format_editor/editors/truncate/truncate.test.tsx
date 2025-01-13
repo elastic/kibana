@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEvent } from 'react';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { TruncateFormatEditor } from './truncate';
 

@@ -8,7 +8,7 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 type Duration =

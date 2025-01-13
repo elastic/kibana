@@ -8,7 +8,7 @@
  */
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import type { FtrProviderContext } from '../../services/types';
+import { FtrProviderContext } from '../../services/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

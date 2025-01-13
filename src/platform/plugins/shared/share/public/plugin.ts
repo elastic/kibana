@@ -10,20 +10,17 @@
 import './index.scss';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { ShareMenuManagerStart } from './services';
-import { ShareMenuManager } from './services';
-import type { ShareMenuRegistrySetup } from './services';
-import { ShareMenuRegistry } from './services';
+import { ShareMenuManager, ShareMenuManagerStart } from './services';
+import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
-import type {
-  BrowserShortUrlClientFactoryCreateParams} from './url_service/short_urls/short_url_client_factory';
 import {
-  BrowserShortUrlClientFactory
+  BrowserShortUrlClientFactory,
+  BrowserShortUrlClientFactoryCreateParams,
 } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import type { AnonymousAccessServiceContract } from '../common';
+import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';

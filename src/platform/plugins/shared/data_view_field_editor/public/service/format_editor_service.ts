@@ -9,8 +9,6 @@
 
 import { FieldFormatEditors } from './field_format_editors';
 
-import type {
-  FieldFormatEditorFactory} from '../components';
 import {
   bytesFormatEditorFactory,
   colorFormatEditorFactory,
@@ -24,7 +22,8 @@ import {
   stringFormatEditorFactory,
   truncateFormatEditorFactory,
   urlFormatEditorFactory,
-  histogramFormatEditorFactory
+  histogramFormatEditorFactory,
+  FieldFormatEditorFactory,
 } from '../components';
 
 /**

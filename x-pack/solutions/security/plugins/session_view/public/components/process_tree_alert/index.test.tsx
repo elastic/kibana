@@ -11,10 +11,8 @@ import {
   mockFileAlert,
   mockNetworkAlert,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import type { AppContextTestRender } from '../../test';
-import { createAppRootMockRenderer } from '../../test';
-import type { ProcessTreeAlertDeps } from '.';
-import { ProcessTreeAlert } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessTreeAlertDeps, ProcessTreeAlert } from '.';
 
 const mockAlert = mockAlerts[0];
 const TEST_ID = `sessionView:sessionViewAlertDetail-${mockAlert.kibana?.alert?.uuid}`;

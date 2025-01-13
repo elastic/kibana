@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonObject } from '@kbn/utility-types';
+import { JsonObject } from '@kbn/utility-types';
 import { Counter } from './counter';
 import { unflattenObject } from './unflatten_object';
 

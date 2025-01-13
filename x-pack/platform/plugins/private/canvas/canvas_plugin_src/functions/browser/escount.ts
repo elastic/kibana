@@ -7,7 +7,7 @@
 
 import { lastValueFrom } from 'rxjs';
 
-import type {
+import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';

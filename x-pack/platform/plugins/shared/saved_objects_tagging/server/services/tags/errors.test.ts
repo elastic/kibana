@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TagValidation } from '../../../common/validation';
+import { TagValidation } from '../../../common/validation';
 import { TagValidationError } from './errors';
 
 const createValidation = (errors: TagValidation['errors'] = {}): TagValidation => ({

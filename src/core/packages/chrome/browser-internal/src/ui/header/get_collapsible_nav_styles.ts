@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme} from '@elastic/eui';
-import { euiYScroll, mathWithUnits } from '@elastic/eui';
+import { UseEuiTheme, euiYScroll, mathWithUnits } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const getCollapsibleNavStyles = (euiThemeContext: UseEuiTheme) => {

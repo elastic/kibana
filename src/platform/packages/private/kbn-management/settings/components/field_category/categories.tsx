@@ -9,14 +9,13 @@
 
 import React from 'react';
 
-import type {
+import {
   CategorizedFields,
   UnsavedFieldChanges,
   CategoryCounts,
 } from '@kbn/management-settings-types';
 
-import type { FieldRowProps } from '@kbn/management-settings-components-field-row';
-import { FieldRow } from '@kbn/management-settings-components-field-row';
+import { FieldRow, FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { FieldCategory, type FieldCategoryProps } from './category';
 
 /**

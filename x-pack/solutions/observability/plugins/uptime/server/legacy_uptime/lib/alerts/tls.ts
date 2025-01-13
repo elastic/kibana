@@ -6,21 +6,24 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { alertsLocatorID, getAlertUrl, observabilityPaths } from '@kbn/observability-plugin/common';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import {
+  alertsLocatorID,
+  AlertsLocatorParams,
+  getAlertUrl,
+  observabilityPaths,
+} from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
-import type { UptimeAlertTypeFactory } from './types';
+import { UptimeAlertTypeFactory } from './types';
 import {
   updateState,
   generateAlertMessage,
@@ -29,7 +32,7 @@ import {
 } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import type { Cert, CertResult } from '../../../../common/runtime_types';
+import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 

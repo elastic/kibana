@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,8 +15,7 @@ import {
   fieldValidators,
 } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
-import { to } from './shared';
+import { FieldsConfig, to } from './shared';
 
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Arguments} from './vis_dimension';
-import { visDimension } from './vis_dimension';
+import { Arguments, visDimension } from './vis_dimension';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 
 describe('interpreter/functions#vis_dimension', () => {

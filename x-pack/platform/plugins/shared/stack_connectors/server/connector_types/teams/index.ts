@@ -7,11 +7,9 @@
 
 import { URL } from 'url';
 import { isString } from 'lodash';
-import type { AxiosError, AxiosResponse } from 'axios';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {
@@ -27,8 +25,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import type { Result } from '../lib/result_type';
-import { isOk, promiseResult } from '../lib/result_type';
+import { isOk, promiseResult, Result } from '../lib/result_type';
 
 export type TeamsConnectorType = ConnectorType<
   {},

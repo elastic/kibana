@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GlobalSearchRouter } from '../types';
+import { GlobalSearchRouter } from '../types';
 
 export const registerInternalSearchableTypesRoute = (router: GlobalSearchRouter) => {
   router.get(

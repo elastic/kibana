@@ -6,7 +6,7 @@
  */
 
 import { uniqBy } from 'lodash';
-import type { Datatable, ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
+import { Datatable, ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

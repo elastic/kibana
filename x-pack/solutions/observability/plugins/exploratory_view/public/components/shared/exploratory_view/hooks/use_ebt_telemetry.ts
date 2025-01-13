@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
 export const useEBTTelemetry = ({
   analytics,

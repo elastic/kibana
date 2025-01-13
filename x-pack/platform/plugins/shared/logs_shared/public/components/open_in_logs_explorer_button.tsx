@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiButtonEmptyProps } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import React from 'react';
 
 type OpenInLogsExplorerButtonProps = Pick<EuiButtonEmptyProps, 'href' | 'flush' | 'size'> & {

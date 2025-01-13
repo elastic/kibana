@@ -6,7 +6,7 @@
  */
 
 import { toHighPrecision } from '../../utils/number';
-import type { ErrorBudget } from '../models';
+import { ErrorBudget } from '../models';
 
 export function toErrorBudget(
   initial: number,

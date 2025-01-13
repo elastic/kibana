@@ -8,9 +8,8 @@
  */
 
 import { Entity } from '../entity';
-import type { ApmFields } from './apm_fields';
-import type { FaasTriggerType} from './serverless';
-import { Serverless } from './serverless';
+import { ApmFields } from './apm_fields';
+import { FaasTriggerType, Serverless } from './serverless';
 
 export class ServerlessInstance extends Entity<ApmFields> {
   invocation(params: { transactionName?: string; faasTriggerType?: FaasTriggerType } = {}) {

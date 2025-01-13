@@ -9,14 +9,13 @@
 
 import { Observable, of } from 'rxjs';
 import { catchError, map, share } from 'rxjs';
-import type { History } from 'history';
+import { History } from 'history';
 import { throttle } from 'lodash';
-import type { IStateStorage } from './types';
-import type {
-  IKbnUrlControls} from '../../state_management/url';
+import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
   getStateFromKbnUrl,
+  IKbnUrlControls,
   setStateToKbnUrl,
 } from '../../state_management/url';
 

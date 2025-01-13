@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
-import type { SemanticTextInfo } from './fields';
-import { CreateField, FieldsList } from './fields';
+import { CreateField, FieldsList, SemanticTextInfo } from './fields';
 
 interface Props {
   onCancelAddingNewFields?: () => void;

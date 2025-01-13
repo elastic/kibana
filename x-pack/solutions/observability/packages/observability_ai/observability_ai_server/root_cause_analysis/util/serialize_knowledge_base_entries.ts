@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoredKnowledgeBaseEntry } from '../tasks/get_knowledge_base_entries';
+import { ScoredKnowledgeBaseEntry } from '../tasks/get_knowledge_base_entries';
 import { toBlockquote } from './to_blockquote';
 
 export function serializeKnowledgeBaseEntries(entries: ScoredKnowledgeBaseEntry[]) {

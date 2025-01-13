@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GetInvestigationItemsResponse } from '@kbn/investigation-shared';
-import type {
+import { GetInvestigationItemsResponse } from '@kbn/investigation-shared';
+import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
+  useQuery,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 

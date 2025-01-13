@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import type {
-  EuiButtonIconProps,
-  EuiPopoverProps} from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopoverProps,
   EuiToolTip,
   EuiTitle,
   EuiSpacer,

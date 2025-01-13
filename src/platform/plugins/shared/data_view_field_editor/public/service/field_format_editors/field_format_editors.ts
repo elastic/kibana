@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatEditorFactory } from '../../components/field_format_editor';
-import type { FormatEditorServiceSetup, FormatEditorServiceStart } from '../format_editor_service';
+import { FieldFormatEditorFactory } from '../../components/field_format_editor';
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from '../format_editor_service';
 
 export class FieldFormatEditors {
   private editors: FieldFormatEditorFactory[] = [];

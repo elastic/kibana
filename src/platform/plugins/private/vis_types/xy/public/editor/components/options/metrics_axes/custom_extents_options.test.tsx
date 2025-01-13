@@ -10,8 +10,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import type { CustomExtentsOptionsProps } from './custom_extents_options';
-import { CustomExtentsOptions } from './custom_extents_options';
+import { CustomExtentsOptions, CustomExtentsOptionsProps } from './custom_extents_options';
 import { YExtents } from './y_extents';
 import { valueAxis } from './mocks';
 

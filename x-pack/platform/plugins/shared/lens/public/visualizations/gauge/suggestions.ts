@@ -20,8 +20,7 @@ import {
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization, VisualizationSuggestion } from '../../types';
-import type { GaugeVisualizationState } from './constants';
-import { gaugeTitlesByType } from './constants';
+import { gaugeTitlesByType, GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||

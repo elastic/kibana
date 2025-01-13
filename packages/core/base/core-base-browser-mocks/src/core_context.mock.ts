@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 
 function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext & {

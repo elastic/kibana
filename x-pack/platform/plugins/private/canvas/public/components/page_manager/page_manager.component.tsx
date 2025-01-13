@@ -7,8 +7,6 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import type {
-  DragDropContextProps} from '@elastic/eui';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -17,7 +15,8 @@ import {
   EuiToolTip,
   EuiDragDropContext,
   EuiDraggable,
-  EuiDroppable
+  EuiDroppable,
+  DragDropContextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,7 +25,7 @@ import { RoutingLink } from '../routing';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 import { PagePreview } from '../page_preview';
 
-import type { CanvasPage } from '../../../types';
+import { CanvasPage } from '../../../types';
 
 const strings = {
   getAddPageTooltip: () =>

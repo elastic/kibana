@@ -7,8 +7,7 @@
 
 import copy from 'copy-to-clipboard';
 import PropTypes from 'prop-types';
-import type { MouseEvent, KeyboardEvent, ReactElement } from 'react';
-import React from 'react';
+import React, { MouseEvent, KeyboardEvent, ReactElement } from 'react';
 
 interface Props {
   children: ReactElement<any>;

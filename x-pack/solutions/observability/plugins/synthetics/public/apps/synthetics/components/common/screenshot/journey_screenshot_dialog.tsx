@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { MouseEvent, KeyboardEvent } from 'react';
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, {
+  MouseEvent,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  KeyboardEvent,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,

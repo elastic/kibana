@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { JsonArray, JsonValue } from '@kbn/utility-types';
-import type { LogMessagePart } from '../../../../common/log_entry';
-import type {
+import { JsonArray, JsonValue } from '@kbn/utility-types';
+import { LogMessagePart } from '../../../../common/log_entry';
+import {
   LogMessageFormattingCondition,
   LogMessageFormattingFieldValueConditionValue,
   LogMessageFormattingInstruction,

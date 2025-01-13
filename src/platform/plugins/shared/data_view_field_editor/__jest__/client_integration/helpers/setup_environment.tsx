@@ -10,8 +10,7 @@
 // eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
 
 import { defer, BehaviorSubject } from 'rxjs';
@@ -23,13 +22,11 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
-import type { Context } from '../../../public/components/field_editor_context';
-import { FieldEditorProvider } from '../../../public/components/field_editor_context';
+import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
-import type { ApiService } from '../../../public/lib';
-import { initApi } from '../../../public/lib';
+import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
-import type { RuntimeFieldSubFields } from '../../../public/shared_imports';
+import { RuntimeFieldSubFields } from '../../../public/shared_imports';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;

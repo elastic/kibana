@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Config } from '@kbn/test';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { Config } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
 import type { TargetTags } from '../target_tags';
-import type { PageObjects } from '../page_objects';
-import type { Services } from '../services';
+import { PageObjects } from '../page_objects';
+import { Services } from '../services';
 
 export const SUITE_TAGS: Record<
   'ess' | 'serverless',

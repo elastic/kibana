@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import {
   Axis,
@@ -19,11 +18,11 @@ import {
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
-import type { Alert, ChartProps, DependencyProps } from '../types';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;

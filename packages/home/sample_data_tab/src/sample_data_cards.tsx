@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { EuiFlexGridProps} from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGridProps, EuiFlexItem } from '@elastic/eui';
 import { SampleDataCard } from '@kbn/home-sample-data-card';
 
 import { useList } from './hooks';

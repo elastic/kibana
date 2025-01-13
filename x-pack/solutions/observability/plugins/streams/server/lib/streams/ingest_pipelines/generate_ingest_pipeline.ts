@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { ProcessingDefinition, StreamDefinition } from '@kbn/streams-schema';
-import { isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
+import {
+  isDissectProcessor,
+  isGrokProcessor,
+  ProcessingDefinition,
+  StreamDefinition,
+} from '@kbn/streams-schema';
 import { get } from 'lodash';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiDescriptionList, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';

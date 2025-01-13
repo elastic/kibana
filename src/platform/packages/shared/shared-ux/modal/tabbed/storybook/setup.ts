@@ -10,7 +10,7 @@
 import type { ComponentProps } from 'react';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
-import type { TabbedModal } from '..';
+import { TabbedModal } from '..';
 
 type TabbedModalProps = ComponentProps<typeof TabbedModal>;
 type TabbedModalServiceArguments = Record<string, unknown>;

@@ -1,15 +1,14 @@
 // @ts-nocheck
 // Generated from ./src/painless/antlr/painless_lexer.g4 by ANTLR 4.13.1
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
-import type {
-	ATN,
-	CharStream,
-	DecisionState,
-	RuleContext} from "antlr4";
 import {
-	ATNDeserializer, DFA,
+	ATN,
+	ATNDeserializer,
+	CharStream,
+	DecisionState, DFA,
 	Lexer,
 	LexerATNSimulator,
+	RuleContext,
 	PredictionContextCache,
 	Token
 } from "antlr4";

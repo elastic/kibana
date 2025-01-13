@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatEditorFactory } from '../types';
+import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import type { HistogramFormatEditorParams } from './histogram';
+import { HistogramFormatEditorParams } from './histogram';
 
 export type { HistogramFormatEditor } from './histogram';
 export const histogramFormatEditorFactory: FieldFormatEditorFactory<

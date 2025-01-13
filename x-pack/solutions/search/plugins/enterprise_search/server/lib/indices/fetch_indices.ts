@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
-import type {
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
+import {
   IndicesGetResponse,
   SecurityHasPrivilegesPrivileges,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import type {
-  AlwaysShowPattern,
-  ElasticsearchIndexWithPrivileges,
-} from '../../../common/types/indices';
+import { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
 import { fetchIndexCounts } from './fetch_index_counts';

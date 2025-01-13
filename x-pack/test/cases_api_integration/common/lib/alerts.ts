@@ -8,12 +8,11 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import type { Case } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   getRuleForAlertTesting,
@@ -24,7 +23,7 @@ import {
   getQueryAlertIds,
 } from '../../../common/utils/security_solution';
 import { superUser } from './authentication/users';
-import type { User } from './authentication/types';
+import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';
 import { createCase, deleteCases } from './api/case';
 import { createComment, deleteAllComments } from './api';

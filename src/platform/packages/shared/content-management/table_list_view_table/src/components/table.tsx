@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dispatch} from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { Dispatch, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
+import {
   EuiBasicTableColumn,
+  EuiButton,
+  EuiInMemoryTable,
   CriteriaWithPagination,
   SearchFilterConfig,
   Direction,
   Query,
-  Search} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiInMemoryTable,
+  Search,
   type EuiTableSelectionType,
   useEuiTheme,
   EuiCode,

@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 export interface TaskManagerDoc {
   type: string;

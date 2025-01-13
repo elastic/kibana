@@ -7,10 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { AppDependencies } from '../../../public/types';
+import { AppDependencies } from '../../../public/types';
 import { setupEnvironment, kibanaVersion, getAppContextMock } from '../helpers';
-import type { AppTestBed} from './app.helpers';
-import { setupAppPage } from './app.helpers';
+import { AppTestBed, setupAppPage } from './app.helpers';
 
 describe('Privileges', () => {
   let testBed: AppTestBed;

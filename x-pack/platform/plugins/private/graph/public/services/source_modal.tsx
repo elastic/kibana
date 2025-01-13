@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SourceModal } from '../components/source_modal';
-import type { IndexPatternSavedObject } from '../types';
+import { IndexPatternSavedObject } from '../types';
 
 export function openSourceModal(
   {

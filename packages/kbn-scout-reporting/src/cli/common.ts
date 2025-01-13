@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ClientOptions as ESClientOptions } from '@elastic/elasticsearch';
-import { Client as ESClient } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { Client as ESClient, ClientOptions as ESClientOptions } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 /**

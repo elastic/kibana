@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SwimlaneFieldMappingConfig } from './types';
+import { SwimlaneFieldMappingConfig } from './types';
 
 const removeUnsafeFields = (fields: SwimlaneFieldMappingConfig[]): SwimlaneFieldMappingConfig[] =>
   fields.filter(

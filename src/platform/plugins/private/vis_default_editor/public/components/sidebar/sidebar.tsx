@@ -7,32 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  KeyboardEventHandler} from 'react';
 import React, {
   memo,
   useMemo,
   useState,
   useCallback,
+  KeyboardEventHandler,
   useEffect,
 } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
-import type {
+import {
   Vis,
   PersistedState,
   VisualizeEmbeddableContract,
 } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
-import type { DefaultEditorAggCommonProps } from '../agg_common_props';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { useOptionTabs } from './use_option_tabs';
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 import { render } from '../../lib/helper/rtl_helpers';
 import { ConsoleOutputEventList } from './console_output_event_list';
 

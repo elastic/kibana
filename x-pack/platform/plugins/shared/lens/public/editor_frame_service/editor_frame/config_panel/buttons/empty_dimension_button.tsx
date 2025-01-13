@@ -8,14 +8,13 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  DragDropIdentifier,
-  DropType,
-  DroppableProps} from '@kbn/dom-drag-drop';
 import {
+  DragDropIdentifier,
   useDragDropContext,
+  DropType,
   DropTargetSwapDuplicateCombine,
-  Droppable
+  Droppable,
+  DroppableProps,
 } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
@@ -23,15 +22,14 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
-import type {
+import {
   Datasource,
   VisualizationDimensionGroupConfig,
   DatasourceLayers,
+  isOperation,
   IndexPatternMap,
   DragDropOperation,
-  Visualization} from '../../../../types';
-import {
-  isOperation
+  Visualization,
 } from '../../../../types';
 
 interface EmptyButtonProps {

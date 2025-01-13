@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { GetSLOResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
-import type {
+import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
+import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
+  useQuery,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';

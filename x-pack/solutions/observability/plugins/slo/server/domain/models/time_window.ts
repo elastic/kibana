@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type {
+import {
   calendarAlignedTimeWindowSchema,
   rollingTimeWindowSchema,
   timeWindowSchema,
 } from '@kbn/slo-schema';
-import type moment from 'moment';
-import type * as t from 'io-ts';
+import moment from 'moment';
+import * as t from 'io-ts';
 
 type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
 type RollingTimeWindow = t.TypeOf<typeof rollingTimeWindowSchema>;

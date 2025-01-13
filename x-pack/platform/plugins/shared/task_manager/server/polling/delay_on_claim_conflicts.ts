@@ -11,16 +11,14 @@
 
 import stats from 'stats-lite';
 import { isNumber, random } from 'lodash';
-import type { Observable} from 'rxjs';
-import { merge, of, combineLatest, ReplaySubject } from 'rxjs';
+import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs';
-import type { Option, Some } from 'fp-ts/lib/Option';
-import { none, some, isSome } from 'fp-ts/lib/Option';
+import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
-import type { ManagedConfiguration } from '../lib/create_managed_configuration';
-import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
-import type { ClaimAndFillPoolResult } from '../lib/fill_pool';
+import { ClaimAndFillPoolResult } from '../lib/fill_pool';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 import { getCapacityInWorkers } from '../task_pool';
 

@@ -6,9 +6,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Location } from 'history';
+import { Location } from 'history';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +23,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import type { Pipeline } from '../../../../common/types';
+import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 import {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type {
-  RequiredPaletteParamTypes} from '@kbn/coloring';
 import {
   DEFAULT_PALETTE_NAME,
   FIXED_PROGRESSION,
@@ -14,7 +12,8 @@ import {
   DEFAULT_RANGE_TYPE,
   DEFAULT_MIN_STOP,
   DEFAULT_MAX_STOP,
-  DEFAULT_COLOR_STEPS
+  DEFAULT_COLOR_STEPS,
+  RequiredPaletteParamTypes,
 } from '@kbn/coloring';
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {

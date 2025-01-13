@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { Condition, FilterCondition } from '@kbn/streams-schema';
-import { isAndCondition, isFilterCondition, isOrCondition } from '@kbn/streams-schema';
+import {
+  Condition,
+  FilterCondition,
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
+} from '@kbn/streams-schema';
 
 export function isComplete(condition: Condition): boolean {
   if (isFilterCondition(condition)) {

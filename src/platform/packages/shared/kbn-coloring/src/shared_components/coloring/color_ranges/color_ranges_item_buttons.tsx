@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dispatch} from 'react';
-import React, { useCallback, useContext } from 'react';
+import React, { Dispatch, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { EuiIconProps } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconProps } from '@elastic/eui';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 
 import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';

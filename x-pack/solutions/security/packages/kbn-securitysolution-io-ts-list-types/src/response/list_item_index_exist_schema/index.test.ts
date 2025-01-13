@@ -10,8 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getListItemIndexExistSchemaResponseMock } from './index.mock';
-import type { ListItemIndexExistSchema } from '.';
-import { listItemIndexExistSchema } from '.';
+import { ListItemIndexExistSchema, listItemIndexExistSchema } from '.';
 
 describe('list_item_index_exist_schema', () => {
   test('it should validate a typical list item request', () => {

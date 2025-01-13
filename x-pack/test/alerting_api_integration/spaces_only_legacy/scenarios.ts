@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Space } from '../common/types';
+import { Space } from '../common/types';
 
 const Space1: Space = {
   id: 'space1',

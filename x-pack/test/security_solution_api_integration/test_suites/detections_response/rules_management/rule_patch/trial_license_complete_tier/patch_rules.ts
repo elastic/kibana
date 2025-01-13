@@ -13,10 +13,7 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import type {
-  RuleActionArray,
-  RuleActionThrottle,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -40,7 +37,7 @@ import {
   deleteAllAlerts,
   createRule,
 } from '../../../../../../common/utils/security_solution';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -9,7 +9,7 @@ import { boomify, isBoom } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { isCustomError, handleCustomError } from './custom_errors';
 import { isAuthError, handleAuthError } from './auth_errors';
-import type { ErrorTypes, LegacyRequest } from '../../types';
+import { ErrorTypes, LegacyRequest } from '../../types';
 import { handleESClientError, isESClientError } from './esclient_errors';
 
 export const getStatusCode = (err: ErrorTypes) => {

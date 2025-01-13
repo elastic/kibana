@@ -8,10 +8,9 @@
  */
 
 import * as React from 'react';
-import type {
-  KibanaConnectionDetailsProviderProps} from './kibana_connection_details_provider';
 import {
-  KibanaConnectionDetailsProvider
+  KibanaConnectionDetailsProvider,
+  KibanaConnectionDetailsProviderProps,
 } from './kibana_connection_details_provider';
 import { getGlobalDependencies } from './global';
 

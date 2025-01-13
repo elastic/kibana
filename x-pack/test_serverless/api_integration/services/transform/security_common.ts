@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ProvidedType } from '@kbn/test';
+import { ProvidedType } from '@kbn/test';
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import {
   TOTAL_INDEX_PRIVILEGE_SET_EDITOR,
   TOTAL_INDEX_PRIVILEGE_SET_VIEWER,
 } from '@kbn/slo-plugin/server/services/get_diagnosis';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type TransformSecurityCommon = ProvidedType<typeof TransformSecurityCommonProvider>;
 

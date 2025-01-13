@@ -8,10 +8,9 @@
  */
 
 import { gaugeFunction } from './gauge_function';
-import type { GaugeArguments} from '..';
-import { GaugeShapes } from '..';
+import { GaugeArguments, GaugeShapes } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
   EXPRESSION_GAUGE_NAME,
   GaugeCentralMajorModes,
@@ -19,7 +18,7 @@ import {
   GaugeLabelMajorModes,
   GaugeTicksPositions,
 } from '../constants';
-import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#gauge', () => {
   const fn = functionWrapper(gaugeFunction());

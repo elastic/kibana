@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateOfMap } from './search';
+import { AggregateOfMap } from './search';
 
 xdescribe('AggregateOfMap', () => {
   test('aggregations should assume buckets are there if type is explicit', () => {

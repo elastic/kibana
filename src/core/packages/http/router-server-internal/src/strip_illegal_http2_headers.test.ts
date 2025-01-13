@@ -8,8 +8,7 @@
  */
 
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 describe('stripIllegalHttp2Headers', () => {
   let logger: MockedLogger;

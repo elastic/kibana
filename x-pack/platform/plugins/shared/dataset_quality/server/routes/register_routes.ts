@@ -6,19 +6,18 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
-import type {
-  IoTsParamsObject,
-  ServerRouteRepository} from '@kbn/server-route-repository';
+import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
+  IoTsParamsObject,
+  ServerRouteRepository,
   decodeRequestParams,
   stripNullishRequestParameters,
   parseEndpoint,
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import type { DatasetQualityRequestHandlerContext } from '../types';
-import type { DatasetQualityRouteHandlerResources } from './types';
+import { DatasetQualityRequestHandlerContext } from '../types';
+import { DatasetQualityRouteHandlerResources } from './types';
 
 interface RegisterRoutes {
   core: CoreSetup;

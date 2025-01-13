@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import type {
+import {
   NoDataViewsPromptServices,
   NoDataViewsPromptProps,
 } from '@kbn/shared-ux-prompt-no-data-views-types';

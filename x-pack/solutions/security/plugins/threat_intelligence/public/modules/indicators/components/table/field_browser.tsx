@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BrowserField } from '@kbn/rule-registry-plugin/common';
-import type { VFC } from 'react';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { VFC } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface IndicatorsFieldBrowserProps {

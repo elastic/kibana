@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { ToolbarPopover } from '../popover';
-import type { IconButtonGroup, ToolbarButton } from '../buttons';
+import { ToolbarPopover } from '../popover';
+import { IconButtonGroup, ToolbarButton } from '../buttons';
 
 /** type for cases with both button or a popover could be used */
 export type ToolbarButtonType = typeof ToolbarButton | typeof ToolbarPopover;

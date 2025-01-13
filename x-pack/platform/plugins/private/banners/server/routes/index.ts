@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BannersConfigType } from '../config';
-import type { BannersRouter } from '../types';
+import { BannersConfigType } from '../config';
+import { BannersRouter } from '../types';
 import { registerInfoRoute } from './info';
 
 export const registerRoutes = (router: BannersRouter, config: BannersConfigType) => {

@@ -8,19 +8,17 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import type { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
+import { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type {
-  IEsSearchRequest,
-  IKibanaSearchRequest} from '@kbn/search-types';
 import {
+  IEsSearchRequest,
+  IKibanaSearchRequest,
   type IKibanaSearchResponse,
 } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
-import type { ISessionService} from '..';
-import { SearchSessionState } from '..';
+import { ISessionService, SearchSessionState } from '..';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';

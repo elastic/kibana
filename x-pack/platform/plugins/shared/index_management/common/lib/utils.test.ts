@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LegacyTemplateSerialized, TemplateSerialized } from '../types';
+import { LegacyTemplateSerialized, TemplateSerialized } from '../types';
 import { isLegacyTemplate } from './utils';
 
 describe('utils', () => {

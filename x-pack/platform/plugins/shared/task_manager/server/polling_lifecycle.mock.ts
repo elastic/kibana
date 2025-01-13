@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { TaskPollingLifecycle, TaskLifecycleEvent } from './polling_lifecycle';
-import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
+import { TaskPollingLifecycle, TaskLifecycleEvent } from './polling_lifecycle';
+import { of, Observable } from 'rxjs';
 
 export const taskPollingLifecycleMock = {
   create(opts: { isStarted?: boolean; events$?: Observable<TaskLifecycleEvent> }) {

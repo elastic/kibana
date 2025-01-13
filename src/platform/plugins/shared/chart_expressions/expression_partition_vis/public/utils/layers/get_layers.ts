@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Datum, PartitionLayer } from '@elastic/charts';
-import type { PaletteRegistry} from '@kbn/coloring';
-import { getColorFactory } from '@kbn/coloring';
+import { Datum, PartitionLayer } from '@elastic/charts';
+import { PaletteRegistry, getColorFactory } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalettes } from '@kbn/palettes';
 import { getDistinctSeries } from '..';
-import type { BucketColumns, PartitionVisParams } from '../../../common/types';
-import { ChartTypes } from '../../../common/types';
+import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';

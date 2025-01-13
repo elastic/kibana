@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
 import { baseFormattersPublic } from './lib';
-import type { FormatFactory } from '../common/types';
+import { FormatFactory } from '../common/types';
 import './index.scss';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

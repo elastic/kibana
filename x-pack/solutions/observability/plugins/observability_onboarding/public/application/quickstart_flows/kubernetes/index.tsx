@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
-import type { EuiStepStatus } from '@elastic/eui';
-import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiSteps } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSkeletonRectangle,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiSteps,
+  EuiStepStatus,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';

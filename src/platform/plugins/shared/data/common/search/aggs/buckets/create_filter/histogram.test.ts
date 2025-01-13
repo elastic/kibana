@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
-import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import type { IBucketAggConfig } from '../bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { createFilterHistogram } from './histogram';
-import type { RangeFilter } from '@kbn/es-query';
+import { RangeFilter } from '@kbn/es-query';
 
 function validateFilter(filter: RangeFilter) {
   expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);

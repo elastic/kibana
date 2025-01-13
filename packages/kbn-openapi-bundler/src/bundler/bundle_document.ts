@@ -39,7 +39,7 @@ export class SkipException extends Error {
  */
 export async function bundleDocument(
   absoluteDocumentPath: string,
-  processors: readonly DocumentNodeProcessor[] = []
+  processors: Readonly<DocumentNodeProcessor[]> = []
 ): Promise<ResolvedDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(

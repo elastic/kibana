@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import type {
+import {
   AndCondition,
   BinaryFilterCondition,
   Condition,

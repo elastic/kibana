@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ServerlessProjectType } from '@kbn/es';
-import type { InheritedServices } from '../../api_integration/services';
+import { ServerlessProjectType } from '@kbn/es';
+import { InheritedServices } from '../../api_integration/services';
 
 export interface CreateTestConfigOptions<TServices extends {} = InheritedServices> {
   serverlessProject: ServerlessProjectType;

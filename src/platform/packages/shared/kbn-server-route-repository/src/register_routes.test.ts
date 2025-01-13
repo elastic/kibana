@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup} from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
@@ -16,7 +15,7 @@ import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
-import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
+import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 
 describe('registerRoutes', () => {
   const post = jest.fn();

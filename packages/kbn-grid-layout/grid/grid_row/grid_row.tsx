@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import type {
+import {
   GridLayoutStateManager,
   GridRowData,
   UserInteractionEvent,

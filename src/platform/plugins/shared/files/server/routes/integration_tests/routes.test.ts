@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import type { FileJSON } from '../../../common';
 import type { rt } from '../file_kind/create';
-import type { TestEnvironmentUtils } from '../../test_utils';
-import { setupIntegrationEnvironment } from '../../test_utils';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File HTTP API', () => {
   let testHarness: TestEnvironmentUtils;

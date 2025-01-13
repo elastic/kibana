@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiAccordion, EuiCodeBlock, EuiTitle } from '@elastic/eui';
 
 export function CodeBlockAccordion({

@@ -7,11 +7,8 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import type {
-  OverviewStatusMetaData,
-  OverviewStatusState,
-} from '../../../../../common/runtime_types';
-import type { IHttpSerializedFetchError } from '..';
+import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
   clearOverviewStatusState,

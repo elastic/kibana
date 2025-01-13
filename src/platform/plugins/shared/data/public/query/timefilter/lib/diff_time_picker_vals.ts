@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 
-import type { RefreshInterval } from '../../../../common';
+import { RefreshInterval } from '../../../../common';
 import type { InputTimeRange } from '../types';
 
 const valueOf = function (o: any) {

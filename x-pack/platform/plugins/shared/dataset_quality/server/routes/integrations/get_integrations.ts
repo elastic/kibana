@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { PackageClient } from '@kbn/fleet-plugin/server';
+import { Logger } from '@kbn/core/server';
+import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import type { PackageInfo, RegistryDataStream } from '@kbn/fleet-plugin/common';
-import type { IntegrationType } from '../../../common/api_types';
+import { PackageInfo, RegistryDataStream } from '@kbn/fleet-plugin/common';
+import { IntegrationType } from '../../../common/api_types';
 
 export async function getIntegration({
   packageClient,

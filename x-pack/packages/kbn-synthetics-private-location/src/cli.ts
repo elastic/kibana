@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { parseCliOptions } from './lib/parse_cli_options';
-import type { CliOptions } from './types';
+import { CliOptions } from './types';
 import { run } from './run';
 
 export async function cli(cliOptions?: CliOptions) {

@@ -15,7 +15,7 @@ import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from
 import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import type { GridAccessMode, GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';

@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useCreateFromTemplate, useFindTemplates } from '../hooks';
 
 import { WorkpadTemplates as Component } from './workpad_templates.component';
-import type { CanvasTemplate } from '../../../../types';
+import { CanvasTemplate } from '../../../../types';
 import { Loading } from '../loading';
 
 export const WorkpadTemplates = () => {

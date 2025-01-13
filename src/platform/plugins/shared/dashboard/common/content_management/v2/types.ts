@@ -12,8 +12,8 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import type { DashboardContentType } from '../types';
-import type {
+import { DashboardContentType } from '../types';
+import {
   ControlGroupAttributesV1,
   DashboardAttributes as DashboardAttributesV1,
 } from '../v1/types';

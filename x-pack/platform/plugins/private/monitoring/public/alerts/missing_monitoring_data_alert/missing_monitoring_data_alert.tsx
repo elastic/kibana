@@ -12,8 +12,7 @@ import {
   RULE_MISSING_MONITORING_DATA,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import type { LazyExpressionProps } from './lazy_expression';
-import { LazyExpression } from './lazy_expression';
+import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 import { validate } from './validation';
 
 export function createMissingMonitoringDataAlertType(): RuleTypeModel {

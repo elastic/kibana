@@ -6,21 +6,20 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { LegacyAlertsClient } from '..';
-import type { IAlertsClient } from '../types';
-import type { AlertsService } from '../../alerts_service';
-import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import type {
+import { IAlertsClient } from '../types';
+import { AlertsService } from '../../alerts_service';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import {
   AlertInstanceContext,
   AlertInstanceState,
+  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleTypeParams,
-  SanitizedRule} from '../../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS
+  SanitizedRule,
 } from '../../types';
-import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
+import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,

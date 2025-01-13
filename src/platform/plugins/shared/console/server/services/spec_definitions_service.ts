@@ -13,7 +13,7 @@ import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
-import type { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
+import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
 import {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   GENERATED_SUBFOLDER,

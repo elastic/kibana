@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import type { FeaturesService } from '../../common/services';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FeaturesService } from '../../common/services';
 import { SpaceScenarios } from '../scenarios';
 
 export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {

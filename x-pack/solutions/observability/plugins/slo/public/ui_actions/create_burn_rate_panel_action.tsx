@@ -8,17 +8,17 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import type { SLOPublicPluginsStart } from '..';
+import { SLOPublicPluginsStart } from '..';
 import {
   ADD_BURN_RATE_ACTION_ID,
   SLO_BURN_RATE_EMBEDDABLE_ID,
 } from '../embeddable/slo/burn_rate/constants';
-import type { SLORepositoryClient } from '../types';
+import { SLORepositoryClient } from '../types';
 
 export function createBurnRatePanelAction(
   coreStart: CoreStart,

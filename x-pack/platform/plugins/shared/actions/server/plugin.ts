@@ -6,8 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type {
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -21,45 +21,43 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type {
+import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type {
+import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
   IEventLogClientService,
   IEventLogger,
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
-import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ActionsConfig, EnabledConnectorTypes} from './config';
-import { AllowedHosts, getValidatedConfig } from './config';
+import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
-import type {
-  ILicenseState} from './lib';
 import {
   ActionExecutor,
   TaskRunnerFactory,
   LicenseState,
+  ILicenseState,
   spaceIdToNamespace,
 } from './lib';
-import type {
+import {
   Services,
   ActionType,
   InMemoryConnector,
@@ -70,8 +68,7 @@ import type {
   UnsecuredServices,
 } from './types';
 
-import type { ActionsConfigurationUtilities} from './actions_config';
-import { getActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -84,7 +81,7 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import type { ActionExecutionSource } from './lib/action_execution_source';
+import { ActionExecutionSource } from './lib/action_execution_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -93,13 +90,12 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import type {
-  ConnectorWithOptionalDeprecation} from './application/connector/lib';
 import {
-  isConnectorDeprecated
+  isConnectorDeprecated,
+  ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
-import type {
+import {
   ICaseServiceAbstract,
   IServiceAbstract,
   SubActionConnectorType,

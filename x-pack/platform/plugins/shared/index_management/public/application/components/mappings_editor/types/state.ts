@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import type { InferenceToModelIdMap } from '../components/document_fields/fields';
-import type { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
-import type {
+import { EuiSelectableOption } from '@elastic/eui';
+import { InferenceToModelIdMap } from '../components/document_fields/fields';
+import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
+import {
   Field,
   NormalizedField,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
 } from './document_fields';
-import type { FieldsEditor, SearchResult } from './mappings_editor';
+import { FieldsEditor, SearchResult } from './mappings_editor';
 
 export type Mappings = MappingsTemplates &
   MappingsConfiguration & {

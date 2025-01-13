@@ -8,7 +8,7 @@
  */
 
 import { getRangeDisplayValue, mapRange } from './map_range';
-import type { FilterMeta, RangeFilter, Filter } from '@kbn/es-query';
+import { FilterMeta, RangeFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {

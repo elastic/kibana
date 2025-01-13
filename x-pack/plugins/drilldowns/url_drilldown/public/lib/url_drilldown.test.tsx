@@ -6,18 +6,16 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { IExternalUrl } from '@kbn/core/public';
+import { IExternalUrl } from '@kbn/core/public';
 import { render, waitFor } from '@testing-library/react';
-import type { Config} from './url_drilldown';
-import { UrlDrilldown } from './url_drilldown';
-import type {
-  ValueClickContext} from '@kbn/embeddable-plugin/public';
+import { Config, UrlDrilldown } from './url_drilldown';
 import {
   CONTEXT_MENU_TRIGGER,
   SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER
+  VALUE_CLICK_TRIGGER,
+  ValueClickContext,
 } from '@kbn/embeddable-plugin/public';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createPoint, rowClickData } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';

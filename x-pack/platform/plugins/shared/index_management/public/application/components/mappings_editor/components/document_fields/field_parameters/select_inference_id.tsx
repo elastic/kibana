@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type {
-  EuiSelectableOption} from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -18,6 +16,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -28,15 +27,15 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
-import type { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
-import type { CustomInferenceEndpointConfig } from '../../../types';
+import { CustomInferenceEndpointConfig } from '../../../types';
 import { UseField } from '../../../shared_imports';
 
 export interface SelectInferenceIdProps {

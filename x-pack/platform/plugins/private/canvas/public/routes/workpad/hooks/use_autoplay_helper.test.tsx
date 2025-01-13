@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
 import { useAutoplayHelper } from './use_autoplay_helper';
-import type { WorkpadRoutingContextType } from '../workpad_routing_context';
-import { WorkpadRoutingContext } from '../workpad_routing_context';
+import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
 const getMockedContext = (context: any) =>
   ({

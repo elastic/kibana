@@ -8,7 +8,7 @@
 import datemath from '@kbn/datemath';
 import { compact, pickBy } from 'lodash';
 import moment from 'moment';
-import type { UrlParams } from './types';
+import { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {

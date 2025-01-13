@@ -6,7 +6,7 @@
  */
 
 import { isAllowed, isAnonymized } from '../helpers';
-import type { AnonymizedValues, GetAnonymizedValues } from '../types';
+import { AnonymizedValues, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedValues: GetAnonymizedValues = ({
   anonymizationFields = [],

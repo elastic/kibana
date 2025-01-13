@@ -8,7 +8,7 @@
  */
 
 import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
-import type { ExtendedAnnotationLayerFn } from '../types';
+import { ExtendedAnnotationLayerFn } from '../types';
 import { strings } from '../i18n';
 
 export function extendedAnnotationLayerFunction(): ExtendedAnnotationLayerFn {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface EventLoopDelaysUsageReport {
   daily: Array<{

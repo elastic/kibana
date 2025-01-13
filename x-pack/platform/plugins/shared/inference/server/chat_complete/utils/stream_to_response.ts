@@ -6,14 +6,13 @@
  */
 
 import { toArray, map, firstValueFrom } from 'rxjs';
-import type {
+import {
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
-  ToolOptions} from '@kbn/inference-common';
-import {
   createInferenceInternalError,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
+  ToolOptions,
   withoutChunkEvents,
 } from '@kbn/inference-common';
 

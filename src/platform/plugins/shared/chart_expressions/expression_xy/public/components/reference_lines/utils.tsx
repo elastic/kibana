@@ -10,9 +10,9 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
-import type {
+import {
   IconPosition,
   ReferenceLineConfig,
   FillStyle,
@@ -21,15 +21,14 @@ import type {
   CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
-import type {
-  GroupsConfiguration,
-  AxesMap} from '../../helpers';
 import {
+  GroupsConfiguration,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
   getAxisPosition,
   getOriginalAxisPosition,
+  AxesMap,
   isReferenceLine,
 } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';

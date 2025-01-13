@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
+import { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import type { RequestHandler} from '@kbn/core/server';
-import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
-import type { MockWorkpadRouteContext } from '../../mocks';
-import { workpadRouteContextMock } from '../../mocks';
+import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
 const mockRouteContext = {
   core: {

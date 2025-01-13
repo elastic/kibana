@@ -18,7 +18,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import type { Services } from './services';
+import { Services } from './services';
 
 interface Props {
   fetchRandomNumberBetween: Services['fetchRandomNumberBetween'];

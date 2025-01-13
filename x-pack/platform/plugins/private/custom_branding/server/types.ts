@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { IRouter } from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingServerSetup {}

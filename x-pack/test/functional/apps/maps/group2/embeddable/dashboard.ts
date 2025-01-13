@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, maps } = getPageObjects(['dashboard', 'maps']);

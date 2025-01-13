@@ -6,9 +6,9 @@
  */
 
 export * from './actions';
-export type * from './cells';
+export * from './cells';
 export * from './data_provider';
-export type * from './rows';
+export * from './rows';
 
 /**
  * Warning: This version might diverge from the API response. It should not be used anymore.

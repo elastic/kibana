@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { GoogleAuth } from 'google-auth-library';
-import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import { ConnectorToken, ConnectorTokenClientContract } from '../types';
 
 interface GetOAuthJwtAccessTokenOpts {
   connectorId?: string;

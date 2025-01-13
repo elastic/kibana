@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEventHandler } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, KeyboardEventHandler } from 'react';
 import { monaco } from '@kbn/monaco';
 // TODO: circular dependency
 // import type { MonacoEditorProps } from '@kbn/code-editor/react_monaco_editor';

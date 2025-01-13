@@ -16,9 +16,8 @@ import {
   isLiteral,
   isProperNode,
 } from '../ast/helpers';
-import type { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
-import type { ESQLAstExpressionNode} from '../visitor';
-import { Visitor } from '../visitor';
+import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
+import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';

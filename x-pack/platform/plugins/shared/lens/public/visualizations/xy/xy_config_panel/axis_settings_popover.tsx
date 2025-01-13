@@ -6,12 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import type { IconType} from '@elastic/eui';
-import { EuiSwitch, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
+import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import type { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import {
   EuiIconAxisBottom,
   EuiIconAxisLeft,
@@ -26,7 +25,7 @@ import {
   AxisBoundsControl,
   AxisTicksSettings,
 } from '../../../shared_components';
-import type { XYLayerConfig, AxesSettingsConfig } from '../types';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 
 import './axis_settings_popover.scss';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';

@@ -9,17 +9,16 @@
 
 import type { Reducer, RefObject } from 'react';
 import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import type {
-  ExpressionAstExpression,
-  IInterpreterRenderHandlers} from '../../common';
 import {
+  ExpressionAstExpression,
+  IInterpreterRenderHandlers,
   isExpressionValueError,
 } from '../../common';
 import { ExpressionLoader } from '../loader';
-import type { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
+import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
 import { useDebouncedValue } from './use_debounced_value';
 import { useShallowMemo } from './use_shallow_memo';
 

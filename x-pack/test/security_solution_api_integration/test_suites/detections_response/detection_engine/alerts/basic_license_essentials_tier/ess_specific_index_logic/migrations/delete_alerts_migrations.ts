@@ -31,7 +31,7 @@ interface FinalizeResponse extends CreateResponse {
   completed?: boolean;
   error?: unknown;
 }
-import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

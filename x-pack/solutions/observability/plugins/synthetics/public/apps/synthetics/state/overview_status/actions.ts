@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
-import type { MonitorOverviewPageState } from '..';
+import { MonitorOverviewPageState } from '..';
 import { createAsyncAction } from '../utils/actions';
 
-import type { OverviewStatus } from '../../../../../common/runtime_types';
+import { OverviewStatus } from '../../../../../common/runtime_types';
 
 export const fetchOverviewStatusAction = createAsyncAction<
   { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean },

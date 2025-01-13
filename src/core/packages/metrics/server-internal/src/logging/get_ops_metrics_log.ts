@@ -8,7 +8,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import type { LogMeta } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 
 /**

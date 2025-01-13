@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type {
-  AlertingAuthorizationFilterOpts} from '../../authorization';
 import {
-  AlertingAuthorizationFilterType
+  AlertingAuthorizationFilterType,
+  AlertingAuthorizationFilterOpts,
 } from '../../authorization';
 
 export {

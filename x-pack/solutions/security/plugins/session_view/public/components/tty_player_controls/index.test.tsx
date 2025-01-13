@@ -5,11 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import type { AppContextTestRender } from '../../test';
-import { createAppRootMockRenderer } from '../../test';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import type { ProcessEvent } from '../../../common';
-import type { TTYPlayerControlsDeps } from '.';
-import { TTYPlayerControls } from '.';
+import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
 import { TTYPlayerLineMarkerType } from './tty_player_controls_markers';
 
 const MOCK_PROCESS_EVENT_START: ProcessEvent = {

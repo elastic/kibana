@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SeriesConfig, SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: number;

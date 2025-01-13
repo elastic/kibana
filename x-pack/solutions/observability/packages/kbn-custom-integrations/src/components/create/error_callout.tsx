@@ -8,14 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import type {
-  IntegrationError} from '../../types';
 import {
   AuthorizationError,
+  IntegrationError,
   IntegrationNotInstalledError,
   UnknownError,
 } from '../../types';
-import type { CreateTestSubjects } from './form';
+import { CreateTestSubjects } from './form';
 
 const TITLE = i18n.translate('customIntegrationsPackage.create.errorCallout.title', {
   defaultMessage: 'Sorry, there was an error',

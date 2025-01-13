@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import type { RenderResult} from '@testing-library/react';
-import { render, screen, within, cleanup } from '@testing-library/react';
+import { render, RenderResult, screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { ProjectType } from '@kbn/serverless-types';
+import { ProjectType } from '@kbn/serverless-types';
 
 import { ProjectSwitcherKibanaProvider, ProjectSwitcherProvider } from './services';
 import {
@@ -25,7 +24,7 @@ import {
   TEST_ID_BUTTON,
   TEST_ID_ITEM_GROUP,
 } from './switcher.component';
-import type { KibanaDependencies, Services } from './types';
+import { KibanaDependencies, Services } from './types';
 
 const renderKibanaProjectSwitcher = (
   currentProjectType: ProjectType = 'observability'

@@ -6,10 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChangeEvent} from 'react';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
-import type { RenderWizardArguments } from '../layer_wizard_registry';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 import { DEFAULT_LAYER_GROUP_LABEL, LayerGroup } from '../../layer_group';
 
 interface State {

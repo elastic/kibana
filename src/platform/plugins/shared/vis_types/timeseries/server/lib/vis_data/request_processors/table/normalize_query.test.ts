@@ -10,7 +10,7 @@
 import { normalizeQuery } from './normalize_query';
 import { overwrite } from '../../helpers';
 
-import type {
+import {
   TableRequestProcessorsFunction,
   TableRequestProcessorsParams,
   TableSearchRequest,

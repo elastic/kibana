@@ -13,8 +13,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-import type { TryInConsoleButtonProps } from './try_in_console_button';
-import { TryInConsoleButton } from './try_in_console_button';
+import { TryInConsoleButton, TryInConsoleButtonProps } from './try_in_console_button';
 
 describe('TryInConsoleButton', () => {
   let windowOpenSpy: jest.SpyInstance;

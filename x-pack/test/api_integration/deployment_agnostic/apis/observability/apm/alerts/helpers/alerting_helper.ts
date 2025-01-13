@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { ApmApiClient } from '../../../../../services/apm_api';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';

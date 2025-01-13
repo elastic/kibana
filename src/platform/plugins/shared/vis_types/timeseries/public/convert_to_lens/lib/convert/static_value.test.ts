@@ -8,10 +8,10 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { StaticValueParams } from '@kbn/visualizations-plugin/common';
+import { StaticValueParams } from '@kbn/visualizations-plugin/common';
 import { createSeries } from '../__mocks__';
-import type { Metric } from '../../../../common/types';
-import type { StaticValueColumn } from './types';
+import { Metric } from '../../../../common/types';
+import { StaticValueColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { convertToStaticValueColumn, convertToStaticValueParams } from './static_value';
 

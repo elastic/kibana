@@ -6,8 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import type { APMTransactionDurationSLOResponse, APMErrorRateSLOResponse } from './embeddable_root';
-import { APMEmbeddableRoot } from './embeddable_root';
+import {
+  APMEmbeddableRoot,
+  APMTransactionDurationSLOResponse,
+  APMErrorRateSLOResponse,
+} from './embeddable_root';
 import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
 
 interface APMAlertDetailsProps<IndicatorType> {

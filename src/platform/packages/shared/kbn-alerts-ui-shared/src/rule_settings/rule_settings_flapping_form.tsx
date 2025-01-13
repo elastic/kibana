@@ -25,7 +25,7 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleSpecificFlappingProperties, RulesSettingsFlapping } from '@kbn/alerting-types';
+import { RuleSpecificFlappingProperties, RulesSettingsFlapping } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleSettingsFlappingMessage } from './rule_settings_flapping_message';
 import { RuleSettingsFlappingInputs } from './rule_settings_flapping_inputs';

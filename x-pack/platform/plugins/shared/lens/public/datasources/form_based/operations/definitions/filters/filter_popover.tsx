@@ -15,11 +15,10 @@ import type { Query } from '@kbn/es-query';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
-import type { IndexPattern } from '../../../../../types';
-import type { FilterValue} from '.';
-import { defaultLabel } from '.';
+import { IndexPattern } from '../../../../../types';
+import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';
-import type { LensAppServices } from '../../../../../app_plugin/types';
+import { LensAppServices } from '../../../../../app_plugin/types';
 
 export const FilterPopover = ({
   filter,

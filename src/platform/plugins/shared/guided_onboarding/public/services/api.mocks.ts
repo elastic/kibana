@@ -9,7 +9,7 @@
 
 import type { GuideState, GuideStepIds } from '@kbn/guided-onboarding';
 
-import type { PluginState } from '../../common';
+import { PluginState } from '../../common';
 
 export const testGuideFirstStep: GuideStepIds = 'step1';
 export const testGuideManualCompletionStep = 'step2';

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRegistry } from '../types';
+import { IRegistry } from '../types';
 import { ExpressionRenderer } from './expression_renderer';
-import type { AnyExpressionRenderDefinition } from './types';
+import { AnyExpressionRenderDefinition } from './types';
 
 export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer> {
   private readonly renderers: Map<string, ExpressionRenderer> = new Map<

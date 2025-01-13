@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type {
-  CreateKnowledgeBaseRequestParams,
-  CreateKnowledgeBaseResponse,
-  GetKnowledgeBaseIndicesResponse,
-  ReadKnowledgeBaseRequestParams,
-  ReadKnowledgeBaseResponse} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
+  CreateKnowledgeBaseRequestParams,
+  CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  GetKnowledgeBaseIndicesResponse,
+  ReadKnowledgeBaseRequestParams,
+  ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
-import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
 /**
  * API call for getting the status of the Knowledge Base. Provide

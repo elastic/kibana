@@ -9,4 +9,4 @@ export { appModel } from './app';
 export { dragAndDropModel } from './drag_and_drop';
 export { inputsModel } from './inputs';
 export { sourcererModel } from '../../sourcerer/store';
-export type * from './types';
+export * from './types';

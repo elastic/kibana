@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, MouseEvent } from 'react';
-import React from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

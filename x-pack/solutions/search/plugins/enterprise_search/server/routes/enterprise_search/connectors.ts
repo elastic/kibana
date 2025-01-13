@@ -6,10 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -28,7 +27,7 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import { SyncJobType } from '@kbn/search-connectors';
+import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import {
   isResourceNotFoundException,
@@ -49,7 +48,7 @@ import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 
-import type { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {

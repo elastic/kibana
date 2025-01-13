@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   HasSerializableState,
   HasSnapshottableState,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import type {
+import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import {
   CanLockHoverActions,
   HasType,
   PublishesPhaseEvents,
   PublishesUnsavedChanges,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import type { MaybePromise } from '@kbn/utility-types';
-import type React from 'react';
+import { MaybePromise } from '@kbn/utility-types';
+import React from 'react';
 
 /**
  * The default embeddable API that all Embeddables must implement.

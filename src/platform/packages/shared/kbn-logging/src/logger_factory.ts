@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from './logger';
+import { Logger } from './logger';
 
 /**
  * The single purpose of `LoggerFactory` interface is to define a way to

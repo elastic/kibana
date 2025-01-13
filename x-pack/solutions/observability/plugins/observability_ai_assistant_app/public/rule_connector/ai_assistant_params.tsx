@@ -9,9 +9,11 @@ import React, { useEffect } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexItem, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
-import { useGenAIConnectorsWithoutContext } from '@kbn/observability-ai-assistant-plugin/public';
-import type { ObsAIAssistantActionParams } from './types';
+import {
+  ObservabilityAIAssistantService,
+  useGenAIConnectorsWithoutContext,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { ObsAIAssistantActionParams } from './types';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }

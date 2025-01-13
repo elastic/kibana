@@ -15,8 +15,7 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
-import type { Message, ToolOptions } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
+import { Message, MessageRole, ToolOptions } from '@kbn/inference-common';
 
 export function toolsToOpenAI(
   tools: ToolOptions['tools']

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ISearchStart } from '@kbn/data-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { search } from '../../../utils/search';
-import type { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../common/types/indicator';
 
 interface FetchIndicatorsDependencies {
   searchService: ISearchStart;

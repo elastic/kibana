@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
 } from '../../../common/constants';
-import type { CspRouter } from '../../types';
+import { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 

@@ -8,11 +8,10 @@
  */
 
 import Path from 'path';
-import type { Node, Project } from 'ts-morph';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { PluginOrPackage } from './types';
-import { ApiScope, Lifecycle } from './types';
-import type { ApiDeclaration, PluginApi } from './types';
+import { Node, Project } from 'ts-morph';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ApiScope, Lifecycle, PluginOrPackage } from './types';
+import { ApiDeclaration, PluginApi } from './types';
 import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';

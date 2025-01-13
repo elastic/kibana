@@ -10,10 +10,9 @@
 /* eslint-disable dot-notation */
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { coreMock } from '@kbn/core/server/mocks';
-import type {
-  Setup} from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 import {
-  telemetryCollectionManagerPluginMock
+  telemetryCollectionManagerPluginMock,
+  Setup,
 } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 jest.mock('rxjs', () => {

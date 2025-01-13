@@ -8,8 +8,8 @@
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type {
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
   XYByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
   XYState,
@@ -17,7 +17,7 @@ import type {
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import type {
+import {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';

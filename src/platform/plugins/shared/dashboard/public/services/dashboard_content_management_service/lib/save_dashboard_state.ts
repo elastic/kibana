@@ -18,7 +18,7 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
-import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
+import { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
 
 export const saveDashboardState = async ({

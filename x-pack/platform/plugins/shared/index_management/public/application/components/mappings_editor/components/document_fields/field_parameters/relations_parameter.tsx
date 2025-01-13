@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiToolTip,
@@ -15,21 +13,21 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
-  EuiBasicTable
+  EuiBasicTable,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  ArrayItem,
-  FieldConfig} from '../../../shared_imports';
 import {
   UseField,
   UseArray,
+  ArrayItem,
+  FieldConfig,
   TextField,
   ComboBoxField,
 } from '../../../shared_imports';
-import type { Field } from '../../../types';
+import { Field } from '../../../types';
 
 import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';

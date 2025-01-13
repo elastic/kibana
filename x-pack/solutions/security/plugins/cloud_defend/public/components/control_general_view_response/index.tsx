@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ChangeEvent } from 'react';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useMemo, useState, useCallback, ChangeEvent, useEffect } from 'react';
 import {
   EuiCallOut,
   EuiIcon,
@@ -25,14 +23,15 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiCheckbox,
+  EuiComboBoxOptionOption,
   EuiSpacer,
   euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import type { ControlGeneralViewResponseDeps, ControlFormErrorMap } from '../../types';
-import type { Response, ResponseAction } from '../../../common';
+import { ControlGeneralViewResponseDeps, ControlFormErrorMap } from '../../types';
+import { Response, ResponseAction } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 import {
   getSelectorTypeIcon,

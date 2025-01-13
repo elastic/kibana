@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { createRuleDataSchema } from '../schemas';
-import type { RuleParams } from '../../../types';
+import { TypeOf } from '@kbn/config-schema';
+import { createRuleDataSchema } from '../schemas';
+import { RuleParams } from '../../../types';
 
 type CreateRuleDataType = TypeOf<typeof createRuleDataSchema>;
 

@@ -8,8 +8,7 @@
  */
 
 import path from 'path';
-import type { FtrConfigProviderContext} from '@kbn/test';
-import { findTestPluginPaths } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));

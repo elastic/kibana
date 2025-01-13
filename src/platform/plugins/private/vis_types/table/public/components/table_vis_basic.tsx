@@ -8,18 +8,17 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import type {
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridSorting} from '@elastic/eui';
 import {
   EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
-import type { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
+import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';

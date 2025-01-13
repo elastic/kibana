@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type {
-  ChatCompleteAPI,
-  OutputAPI,
-  OutputCompositeResponse,
-  OutputOptions,
-  ToolSchema} from '@kbn/inference-common';
 import {
+  ChatCompleteAPI,
   ChatCompletionEventType,
   MessageRole,
+  OutputAPI,
+  OutputCompositeResponse,
   OutputEventType,
+  OutputOptions,
+  ToolSchema,
   isToolValidationError,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';

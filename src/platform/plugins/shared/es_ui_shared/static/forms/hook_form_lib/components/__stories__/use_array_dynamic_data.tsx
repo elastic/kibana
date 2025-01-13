@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, FC } from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -24,7 +23,7 @@ import {
 import { TextField, SelectField, SuperSelectField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { useFormData } from '../../hooks';
-import type { FormConfig } from '../../types';
+import { FormConfig } from '../../types';
 import { useFormContext } from '../../form_context';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';

@@ -8,10 +8,9 @@
 import { arrayToStringRt } from '@kbn/io-ts-utils';
 import { either } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import type { ANY_DATASET } from '../common';
+import { ANY_DATASET } from '../common';
 import { FetchFieldsMetadataError } from '../errors';
-import type { FieldAttribute, FieldName} from '../types';
-import { fieldAttributeRT, partialFieldMetadataPlainRT } from '../types';
+import { FieldAttribute, fieldAttributeRT, FieldName, partialFieldMetadataPlainRT } from '../types';
 
 const baseFindFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({

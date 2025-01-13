@@ -8,7 +8,7 @@
  */
 
 import { merge } from 'lodash';
-import type { FieldDescriptor } from '../../index_patterns_fetcher';
+import { FieldDescriptor } from '../../index_patterns_fetcher';
 
 const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
   _source: { type: '_source' },

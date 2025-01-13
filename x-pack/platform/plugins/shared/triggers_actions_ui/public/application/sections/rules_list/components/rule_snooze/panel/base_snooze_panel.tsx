@@ -28,14 +28,13 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common';
 
-import type { SnoozeSchedule } from '../../../../../../types';
-import type { SnoozeUnit } from './constants';
-import { COMMON_SNOOZE_TIMES } from './constants';
+import { SnoozeSchedule } from '../../../../../../types';
+import { COMMON_SNOOZE_TIMES, SnoozeUnit } from './constants';
 import { durationToTextString, scheduleSummary, usePreviousSnoozeInterval } from './helpers';
 import { DAYS, HOURS, MINUTES, MONTHS, WEEKS } from './translations';
 

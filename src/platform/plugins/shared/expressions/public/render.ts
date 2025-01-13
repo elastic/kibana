@@ -8,20 +8,20 @@
  */
 
 import * as Rx from 'rxjs';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import { isNumber } from 'lodash';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import type {
+import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
   IExpressionLoaderParams,
   ExpressionRendererEvent,
 } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import type { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
+import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
 import { getRenderersRegistry } from './services';
 

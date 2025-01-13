@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Choice, Fields } from './types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { Choice, Fields } from './types';
 import { useGetChoices } from './use_get_choices';
 
 export interface UseChoicesProps {

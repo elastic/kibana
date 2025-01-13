@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Rule } from '@kbn/alerting-plugin/common';
-import type {
-  BaseRule} from '.';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { Rule } from '@kbn/alerting-plugin/common';
 import {
   LargeShardSizeRule,
   CCRReadExceptionsRule,
@@ -23,7 +21,8 @@ import {
   LicenseExpirationRule,
   LogstashVersionMismatchRule,
   KibanaVersionMismatchRule,
-  ElasticsearchVersionMismatchRule
+  ElasticsearchVersionMismatchRule,
+  BaseRule,
 } from '.';
 import {
   RULE_CLUSTER_HEALTH,
@@ -41,7 +40,7 @@ import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
 } from '../../common/constants';
-import type { CommonAlertParams as CommonRuleParams } from '../../common/types/alerts';
+import { CommonAlertParams as CommonRuleParams } from '../../common/types/alerts';
 
 const BY_TYPE = {
   [RULE_CLUSTER_HEALTH]: ClusterHealthRule,

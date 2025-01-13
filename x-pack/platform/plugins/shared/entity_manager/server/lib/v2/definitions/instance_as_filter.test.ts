@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EntityV2 } from '@kbn/entities-schema';
+import { EntityV2 } from '@kbn/entities-schema';
 import { instanceAsFilter } from './instance_as_filter';
 import { readSourceDefinitions } from './source_definition';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { EntitySourceDefinition } from '../types';
+import { EntitySourceDefinition } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
 import { InvalidEntityInstance } from '../errors/invalid_entity_instance';
 

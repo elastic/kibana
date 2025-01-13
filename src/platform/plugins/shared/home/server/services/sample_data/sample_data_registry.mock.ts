@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
+import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
   SampleDataRegistry,

@@ -9,8 +9,7 @@
 
 import { noop } from 'lodash';
 import { Collector } from './collector';
-import type { CollectorSetConfig } from './collector_set';
-import { CollectorSet } from './collector_set';
+import { CollectorSet, CollectorSetConfig } from './collector_set';
 import { UsageCollector } from './usage_collector';
 
 import {

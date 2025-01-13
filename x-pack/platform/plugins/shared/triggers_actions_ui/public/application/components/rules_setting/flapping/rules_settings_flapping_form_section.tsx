@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText, EuiPanel } from '@elastic/eui';
 import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_inputs';
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
-import type { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 
 type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;
 

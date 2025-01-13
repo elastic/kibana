@@ -8,8 +8,7 @@
  */
 
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
-import type { ExportCsvActionApi } from './export_csv_action';
-import { ExportCSVAction } from './export_csv_action';
+import { ExportCSVAction, ExportCsvActionApi } from './export_csv_action';
 
 describe('Export CSV action', () => {
   let action: ExportCSVAction;

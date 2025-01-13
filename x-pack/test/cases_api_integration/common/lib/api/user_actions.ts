@@ -11,7 +11,7 @@ import {
   getCaseUserActionStatsUrl,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
-import type {
+import {
   CaseUserActionDeprecatedResponse,
   CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
@@ -20,7 +20,7 @@ import type {
   UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
-import type { User } from '../authentication/types';
+import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix } from './helpers';

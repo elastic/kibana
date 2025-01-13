@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Links } from '../../links';
+import { Links } from '../../links';
 
 interface Props {
   toggleRequestFlyout: () => void;

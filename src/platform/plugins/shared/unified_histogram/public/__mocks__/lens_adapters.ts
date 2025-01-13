@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnifiedHistogramChartLoadEvent } from '../types';
+import { UnifiedHistogramChartLoadEvent } from '../types';
 
 export const lensAdaptersMock = {
   tables: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
-import type {
+import * as t from 'io-ts';
+import {
   budgetingMethodSchema,
   groupSummarySchema,
   objectiveSchema,

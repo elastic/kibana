@@ -8,8 +8,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { Fields } from '../../entity';
-import { Entity } from '../../entity';
+import { Entity, Fields } from '../../entity';
 import { Serializable } from '../../serializable';
 
 export interface AWSRdsDocument extends Fields {

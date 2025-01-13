@@ -6,7 +6,7 @@
  */
 
 import { Dataset } from '../datasets';
-import type { DataSourceSelectionStrategy, UnresolvedDatasetSelectionPayload } from './types';
+import { DataSourceSelectionStrategy, UnresolvedDatasetSelectionPayload } from './types';
 
 export class UnresolvedDatasetSelection implements DataSourceSelectionStrategy {
   selectionType: 'unresolved';

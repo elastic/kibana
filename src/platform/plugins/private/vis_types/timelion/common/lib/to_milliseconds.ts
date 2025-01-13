@@ -8,8 +8,7 @@
  */
 
 import { keys } from 'lodash';
-import type { unitOfTime } from 'moment';
-import moment from 'moment';
+import moment, { unitOfTime } from 'moment';
 
 type Units = unitOfTime.Base | unitOfTime._quarter;
 type Values = { [key in Units]: number };

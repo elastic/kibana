@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';

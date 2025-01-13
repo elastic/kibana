@@ -7,8 +7,14 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import type { ThreatMapping, ThreatMappingEntries } from '.';
-import { concurrent_searches, items_per_search, threatMappingEntries, threat_mapping } from '.';
+import {
+  concurrent_searches,
+  items_per_search,
+  ThreatMapping,
+  threatMappingEntries,
+  ThreatMappingEntries,
+  threat_mapping,
+} from '.';
 import { foldLeftRight, getPaths, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 
 describe('threat_mapping', () => {

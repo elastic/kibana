@@ -19,14 +19,13 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import type { DocLinksStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
-import type { RuntimeField } from '../../types';
-import type { FormState } from '../runtime_field_form';
-import type {
-  Props as RuntimeFieldEditorProps} from '../runtime_field_editor/runtime_field_editor';
+import { RuntimeField } from '../../types';
+import { FormState } from '../runtime_field_form';
 import {
-  RuntimeFieldEditor
+  RuntimeFieldEditor,
+  Props as RuntimeFieldEditorProps,
 } from '../runtime_field_editor/runtime_field_editor';
 
 const geti18nTexts = (field?: RuntimeField) => {

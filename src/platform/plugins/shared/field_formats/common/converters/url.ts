@@ -12,13 +12,12 @@ import { escape, memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
-import type {
+import {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
   FieldFormatMetaParams,
-  FieldFormatParams} from '../types';
-import {
-  FIELD_FORMAT_IDS
+  FIELD_FORMAT_IDS,
+  FieldFormatParams,
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;

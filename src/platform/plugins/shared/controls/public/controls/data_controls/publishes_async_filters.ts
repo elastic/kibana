@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesFilters} from '@kbn/presentation-publishing';
-import { apiPublishesFilters } from '@kbn/presentation-publishing';
+import { PublishesFilters, apiPublishesFilters } from '@kbn/presentation-publishing';
 
 /**
  * Data control filter generation is async because

@@ -6,11 +6,10 @@
  */
 
 import { get } from 'lodash';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import 'moment-timezone';
 
-import type { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export function getSelectedForDatePicker(
   form: FormData,

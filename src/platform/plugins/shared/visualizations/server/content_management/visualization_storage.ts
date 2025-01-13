@@ -9,7 +9,7 @@
 
 import { SOContentStorage } from '@kbn/content-management-utils';
 
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { cmServicesDefinition } from './cm_services';
 import type {
   VisualizationContentType,

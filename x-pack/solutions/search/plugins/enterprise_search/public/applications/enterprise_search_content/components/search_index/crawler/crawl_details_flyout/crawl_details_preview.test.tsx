@@ -8,8 +8,7 @@ import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { set } from '@kbn/safer-lodash-set/fp';
 
@@ -17,7 +16,7 @@ import { AccordionList } from '../../../../../shared/accordion_list/accordion_li
 
 import { CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 
-import type { CrawlDetailValues } from './crawl_detail_logic';
+import { CrawlDetailValues } from './crawl_detail_logic';
 import { CrawlDetailsPreview } from './crawl_details_preview';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 

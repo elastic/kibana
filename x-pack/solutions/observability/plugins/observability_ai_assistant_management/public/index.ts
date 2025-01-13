@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
-import type {
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
+import {
+  AiAssistantManagementObservabilityPlugin,
   AiAssistantManagementObservabilityPluginSetup,
   AiAssistantManagementObservabilityPluginStart,
   ConfigSchema,
   SetupDependencies,
   StartDependencies,
 } from './plugin';
-import { AiAssistantManagementObservabilityPlugin } from './plugin';
 
 export type {
   AiAssistantManagementObservabilityPluginSetup,

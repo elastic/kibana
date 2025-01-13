@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { LensAppState} from '.';
-import { selectTriggerApplyChanges, selectChangesApplied } from '.';
+import { LensAppState, selectTriggerApplyChanges, selectChangesApplied } from '.';
 
 describe('lens selectors', () => {
   describe('selecting changes applied', () => {

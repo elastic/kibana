@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { GetInvestigationParams, GetInvestigationResponse } from '@kbn/investigation-shared';
-import { getInvestigationResponseSchema } from '@kbn/investigation-shared';
-import type { InvestigationRepository } from './investigation_repository';
+import {
+  GetInvestigationParams,
+  GetInvestigationResponse,
+  getInvestigationResponseSchema,
+} from '@kbn/investigation-shared';
+import { InvestigationRepository } from './investigation_repository';
 
 export async function getInvestigation(
   params: GetInvestigationParams,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
+import {
   BulkRequest,
   BulkResponse,
   BulkOperationContainer,
   MgetResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,

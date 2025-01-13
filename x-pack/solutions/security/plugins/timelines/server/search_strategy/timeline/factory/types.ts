@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ISearchRequestParams, IEsSearchResponse } from '@kbn/search-types';
-import type {
+import {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,
   TimelineStrategyResponseType,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type {
+import { estypes } from '@elastic/elasticsearch';
+import {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import type { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 
 export const getConversationSearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsConversationSchema> = {

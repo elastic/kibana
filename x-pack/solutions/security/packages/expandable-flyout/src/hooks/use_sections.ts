@@ -6,11 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import type { PreviewBanner } from '../components/preview_section';
-import { isPreviewBanner } from '../components/preview_section';
-import type { FlyoutPanelProps } from '../..';
-import { useExpandableFlyoutState } from '../..';
-import type { Panel } from '../types';
+import { isPreviewBanner, PreviewBanner } from '../components/preview_section';
+import { FlyoutPanelProps, useExpandableFlyoutState } from '../..';
+import { Panel } from '../types';
 
 export interface UseSectionsParams {
   /**

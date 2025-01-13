@@ -9,11 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type {
-  UiActionsStart} from '@kbn/ui-actions-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
+  UiActionsStart,
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';

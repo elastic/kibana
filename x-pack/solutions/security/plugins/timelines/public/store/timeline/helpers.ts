@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { DataProvider } from '../../../common';
+import { DataProvider } from '../../../common';
 
 interface TimelineById {
   [id: string]: {

@@ -18,9 +18,8 @@ import {
   writeFileSync,
 } from 'fs';
 import { dump, load } from 'js-yaml';
-import type { OpenAPIV3 } from 'openapi-types';
-import type { MergerConfig } from '../../src/openapi_merger';
-import { merge } from '../../src/openapi_merger';
+import { OpenAPIV3 } from 'openapi-types';
+import { merge, MergerConfig } from '../../src/openapi_merger';
 
 const ROOT_PATH = join(__dirname, '..');
 

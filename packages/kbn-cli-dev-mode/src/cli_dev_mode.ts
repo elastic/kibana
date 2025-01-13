@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import {
@@ -22,18 +22,17 @@ import {
   concatMap,
   takeUntil,
 } from 'rxjs';
-import type { CliArgs } from '@kbn/config';
+import { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { Log} from './log';
-import { CliLog } from './log';
+import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import type { CliDevConfig } from './config';
+import { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);

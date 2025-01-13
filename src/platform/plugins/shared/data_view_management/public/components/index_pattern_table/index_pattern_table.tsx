@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
 import {
   EuiBadge,
+  EuiBasicTableColumn,
   EuiButton,
   EuiIconTip,
   EuiInMemoryTable,
@@ -23,8 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import React, { useMemo, useState } from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
-import { useLocation, withRouter } from 'react-router-dom';
+import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,7 +35,7 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
-import type { IndexPatternTableItem } from '../types';
+import { IndexPatternTableItem } from '../types';
 import {
   DataViewTableController,
   dataViewTableControllerStateDefaults as defaults,

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -20,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { MASK_OPERATOR } from '../../../../common/constants';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import { AggDescriptor } from '../../../../common/descriptor_types';
 import { panelStrings } from '../../../connected_components/panel_strings';
 import { ABOVE, BELOW } from '../../../classes/layers/vector_layer/mask';
 

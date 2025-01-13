@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
-import React, { useContext } from 'react';
+import React, { FC, useContext } from 'react';
 import { connect } from 'react-redux';
 import { compose, withHandlers, withProps } from 'react-recompose';
-import type { Dispatch } from 'redux';
-import type { State, PositionedElement } from '../../../../types';
+import { Dispatch } from 'redux';
+import { State, PositionedElement } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
 // @ts-expect-error untyped local
 import { flatten } from '../../../lib/aeroelastic/functional';
@@ -34,8 +33,7 @@ import {
   groupHandlerCreators,
   alignmentDistributionHandlerCreators,
 } from '../../../lib/element_handler_creators';
-import type { Props as ComponentProps } from './edit_menu.component';
-import { EditMenu as Component } from './edit_menu.component';
+import { EditMenu as Component, Props as ComponentProps } from './edit_menu.component';
 import { WorkpadRoutingContext } from '../../../routes/workpad';
 
 type LayoutState = any;

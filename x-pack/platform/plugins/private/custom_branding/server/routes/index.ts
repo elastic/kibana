@@ -6,7 +6,7 @@
  */
 
 import { registerInfoRoute } from './info';
-import type { CustomBrandingRouter } from '../types';
+import { CustomBrandingRouter } from '../types';
 
 export const registerRoutes = (router: CustomBrandingRouter) => {
   registerInfoRoute(router);

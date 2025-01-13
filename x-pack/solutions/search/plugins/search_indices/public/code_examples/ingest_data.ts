@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IngestDataCodeExamples } from '../types';
+import { IngestDataCodeExamples } from '../types';
 
 import { JSServerlessIngestVectorDataExample } from './javascript';
 import { PythonServerlessVectorsIngestDataExample } from './python';

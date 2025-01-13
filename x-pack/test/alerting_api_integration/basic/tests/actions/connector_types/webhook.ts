@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type http from 'http';
+import http from 'http';
 import getPort from 'get-port';
 import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {

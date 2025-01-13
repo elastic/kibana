@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios, { AxiosError, AxiosHeaders } from 'axios';
-import type { Logger } from '@kbn/core/server';
+import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
+import { Logger } from '@kbn/core/server';
 import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import type {
+import {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,

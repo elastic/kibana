@@ -10,12 +10,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { RouteDefinitionParams } from '..';
 import {
   type CSPViolationReport,
   defineRecordViolations,
   type PermissionsPolicyViolationReport,
 } from './record_violations';
+import type { RouteDefinitionParams } from '..';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 

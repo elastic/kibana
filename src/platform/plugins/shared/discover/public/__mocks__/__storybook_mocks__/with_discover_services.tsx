@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent, ReactNode } from 'react';
-import React from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
@@ -22,9 +21,9 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import { LocalStorageMock } from '../local_storage_mock';
-import type { DiscoverServices } from '../../build_services';
+import { DiscoverServices } from '../../build_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { SavedQuery } from '@kbn/data-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
 
 interface DiscoverServicesProviderProps {
   children: ReactNode;

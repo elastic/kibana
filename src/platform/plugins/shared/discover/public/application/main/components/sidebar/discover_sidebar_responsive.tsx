@@ -8,13 +8,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import type { UiCounterMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import type { BehaviorSubject} from 'rxjs';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import {
@@ -24,12 +23,11 @@ import {
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
-import type { SidebarToggleState } from '../../../types';
-import { FetchStatus } from '../../../types';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   discoverSidebarReducer,
   getInitialState,

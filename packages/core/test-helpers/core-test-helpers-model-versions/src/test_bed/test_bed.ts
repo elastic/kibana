@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { startElasticsearch } from './elasticsearch';
 import { prepareModelVersionTestKit } from './test_kit';
 import type { ModelVersionTestBed } from './types';
