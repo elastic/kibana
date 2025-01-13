@@ -9861,16 +9861,9 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": [
-                                  "memory",
-                                  "cpu"
-                                ],
                                 "type": "object"
                               }
                             },
-                            "required": [
-                              "requests"
-                            ],
                             "type": "object"
                           },
                           "revision": {
@@ -10242,16 +10235,9 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "memory",
-                          "cpu"
-                        ],
                         "type": "object"
                       }
                     },
-                    "required": [
-                      "requests"
-                    ],
                     "type": "object"
                   },
                   "space_ids": {
@@ -10924,16 +10910,9 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "memory",
-                                "cpu"
-                              ],
                               "type": "object"
                             }
                           },
-                          "required": [
-                            "requests"
-                          ],
                           "type": "object"
                         },
                         "revision": {
@@ -11734,16 +11713,9 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": [
-                                  "memory",
-                                  "cpu"
-                                ],
                                 "type": "object"
                               }
                             },
-                            "required": [
-                              "requests"
-                            ],
                             "type": "object"
                           },
                           "revision": {
@@ -12780,16 +12752,9 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "memory",
-                                "cpu"
-                              ],
                               "type": "object"
                             }
                           },
-                          "required": [
-                            "requests"
-                          ],
                           "type": "object"
                         },
                         "revision": {
@@ -13159,16 +13124,9 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "memory",
-                          "cpu"
-                        ],
                         "type": "object"
                       }
                     },
-                    "required": [
-                      "requests"
-                    ],
                     "type": "object"
                   },
                   "space_ids": {
@@ -13841,16 +13799,9 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "memory",
-                                "cpu"
-                              ],
                               "type": "object"
                             }
                           },
-                          "required": [
-                            "requests"
-                          ],
                           "type": "object"
                         },
                         "revision": {
@@ -14651,16 +14602,9 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "memory",
-                                "cpu"
-                              ],
                               "type": "object"
                             }
                           },
-                          "required": [
-                            "requests"
-                          ],
                           "type": "object"
                         },
                         "revision": {
