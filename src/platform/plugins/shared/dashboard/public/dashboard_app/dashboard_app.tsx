@@ -18,7 +18,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { ViewMode } from '@kbn/presentation-publishing';
-import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
+import { DashboardApi, DashboardCreationOptions } from '..';
 import { SharedDashboardState } from '../../common';
 import {
   DASHBOARD_APP_ID,
@@ -51,6 +51,7 @@ import {
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
 import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
 
 export interface DashboardAppProps {
   history: History;

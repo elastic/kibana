@@ -23,8 +23,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { DashboardApi } from '../dashboard_api/types';
-import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
+import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
@@ -39,7 +38,7 @@ export interface DashboardCopyToCapabilities {
 export type CopyToDashboardAPI = HasType &
   HasUniqueId &
   HasParentApi<
-    { type: typeof DASHBOARD_CONTAINER_TYPE } & PublishesSavedObjectId &
+    { type: typeof DASHBOARD_API_TYPE } & PublishesSavedObjectId &
       Pick<DashboardApi, 'getDashboardPanelFromId'>
   >;
 
@@ -47,7 +46,7 @@ const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
-    apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
+    apiIsOfType(api.parentApi, DASHBOARD_API_TYPE) &&
     (api?.parentApi as unknown as Pick<DashboardApi, 'getDashboardPanelFromId'>)
       ?.getDashboardPanelFromId !== undefined &&
     apiPublishesSavedObjectId(api.parentApi)
