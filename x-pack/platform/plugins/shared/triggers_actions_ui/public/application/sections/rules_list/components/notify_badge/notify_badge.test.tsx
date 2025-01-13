@@ -17,9 +17,10 @@ describe('RulesListNotifyBadge', () => {
   const onRuleChanged = jest.fn();
   const snoozeRule = jest.fn();
   const unsnoozeRule = jest.fn();
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(new Date('1990-01-01T05:00:00.000Z'));
   });
 
   afterEach(() => {
@@ -94,8 +95,8 @@ describe('RulesListNotifyBadge', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('rulesListNotifyBadge-unsnoozed'));
-    userEvent.click(await screen.findByTestId('linkSnooze1h'), { pointerEventsCheck: 0 });
+    await user.click(screen.getByTestId('rulesListNotifyBadge-unsnoozed'));
+    await user.click(await screen.findByTestId('linkSnooze1h'));
 
     await waitFor(() => {
       expect(snoozeRule).toHaveBeenCalledWith({
@@ -103,7 +104,7 @@ describe('RulesListNotifyBadge', () => {
         id: null,
         rRule: {
           count: 1,
-          dtstart: '1990-01-01T05:00:00.200Z',
+          dtstart: '1990-01-01T05:00:00.000Z',
           tzid: 'America/New_York',
         },
       });
@@ -125,8 +126,8 @@ describe('RulesListNotifyBadge', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('rulesListNotifyBadge-snoozedIndefinitely'));
-    userEvent.click(await screen.findByTestId('ruleSnoozeCancel'), { pointerEventsCheck: 0 });
+    await user.click(screen.getByTestId('rulesListNotifyBadge-snoozedIndefinitely'));
+    await user.click(await screen.findByTestId('ruleSnoozeCancel'));
 
     await waitFor(() => {
       expect(unsnoozeRule).toHaveBeenCalled();
@@ -178,5 +179,27 @@ describe('RulesListNotifyBadge', () => {
     );
 
     expect(screen.getByTestId('rulesListNotifyBadge-invalidSnooze')).toBeInTheDocument();
+  });
+
+  it('should clear an infinitive snooze schedule', async () => {
+    render(
+      <RulesListNotifyBadge
+        snoozeSettings={{
+          name: 'rule 1',
+          muteAll: true,
+          isSnoozedUntil: moment('1990-02-01').toDate(),
+        }}
+        onRuleChanged={onRuleChanged}
+        snoozeRule={snoozeRule}
+        unsnoozeRule={unsnoozeRule}
+      />
+    );
+
+    await user.click(screen.getByTestId('rulesListNotifyBadge-snoozedIndefinitely'));
+    await user.click(screen.getByTestId('ruleSnoozeCancel'));
+
+    await waitFor(() => {
+      expect(unsnoozeRule).toHaveBeenCalledWith(undefined);
+    });
   });
 });

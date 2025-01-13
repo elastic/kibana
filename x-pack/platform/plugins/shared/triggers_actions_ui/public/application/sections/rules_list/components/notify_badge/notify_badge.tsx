@@ -256,7 +256,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, openPopover]);
 
   const onApplyUnsnooze = useCallback(
-    async (scheduleIds: string[] = []) => {
+    async (scheduleIds?: string[]) => {
       try {
         setRequestInFlightLoading(true);
         closePopover();
