@@ -72,7 +72,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
       }
     }, [celConfig, completedCelGeneration, setCelInputResult, setShowCelCreateFlyout]);
 
-    const onClose = useCallback(() => {
+    const onCancel = useCallback(() => {
       setShowCelCreateFlyout(false);
     }, [setShowCelCreateFlyout]);
 
@@ -152,7 +152,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                   isFlyoutGenerating={isFlyoutGenerating}
                   showValidation={showValidation}
                   onShowValidation={onShowValidation}
-                  onValidation={onUpdateValidation}
+                  onUpdateValidation={onUpdateValidation}
                   onAnalyzeApiGenerationComplete={onAnalyzeApiGenerationComplete}
                 />
               </EuiAccordion>
@@ -192,6 +192,9 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                       integrationSettings={integrationSettings}
                       connector={connector}
                       isFlyoutGenerating={isFlyoutGenerating}
+                      showValidation={showValidation}
+                      onShowValidation={onShowValidation}
+                      onUpdateValidation={onUpdateValidation}
                       suggestedPaths={suggestedPaths}
                       onCelInputGenerationComplete={onCelInputGenerationComplete}
                     />
@@ -206,7 +209,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
             isFlyoutGenerating={isFlyoutGenerating}
             isValid={!showValidation || (isValid && completedCelGeneration)}
             isGenerationComplete={completedCelGeneration}
-            onClose={onClose}
+            onCancel={onCancel}
             onSave={onSaveConfig}
           />
         </EuiFlyoutFooter>

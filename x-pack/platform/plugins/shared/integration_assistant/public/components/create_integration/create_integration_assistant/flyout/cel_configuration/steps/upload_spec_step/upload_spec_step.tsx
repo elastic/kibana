@@ -35,7 +35,7 @@ interface UploadSpecStepProps {
   isFlyoutGenerating: State['isFlyoutGenerating'];
   showValidation: boolean;
   onShowValidation: () => void;
-  onValidation: (updatedIsValid: boolean) => void;
+  onUpdateValidation: (updatedIsValid: boolean) => void;
   onAnalyzeApiGenerationComplete: (paths: string[]) => void;
 }
 
@@ -46,7 +46,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
     isFlyoutGenerating,
     showValidation,
     onShowValidation,
-    onValidation,
+    onUpdateValidation,
     onAnalyzeApiGenerationComplete,
   }) => {
     const { setIntegrationSettings, setIsFlyoutGenerating } = useActions();
@@ -77,8 +77,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
     );
 
     useEffect(() => {
-      onValidation(!fieldValidationErrors.title && !fieldValidationErrors.specFile);
-    }, [fieldValidationErrors, onValidation]);
+      onUpdateValidation(!fieldValidationErrors.title && !fieldValidationErrors.specFile);
+    }, [fieldValidationErrors, onUpdateValidation]);
 
     const onUploadSpecFileSuccessful = useCallback(() => {
       setFieldValidationErrors((current) => ({ ...current, specFile: false }));
@@ -136,8 +136,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
         abortController.abort();
       };
     }, [
-      fieldValidationErrors.title,
-      fieldValidationErrors.specFile,
+      fieldValidationErrors,
       http,
       connector,
       integrationSettings,
@@ -202,13 +201,15 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                       >
                         {i18n.ANALYZE}
                       </EuiButton>
-                      <EuiButtonEmpty
-                        onClick={onCancel}
-                        flush="left"
-                        data-test-subj="buttonsFooter-cancelButton"
-                      >
-                        {i18n.CANCEL}
-                      </EuiButtonEmpty>
+                      {isFlyoutGenerating && (
+                        <EuiButtonEmpty
+                          onClick={onCancel}
+                          flush="left"
+                          data-test-subj="buttonsFooter-cancelButton"
+                        >
+                          {i18n.CANCEL}
+                        </EuiButtonEmpty>
+                      )}
                     </EuiFlexGroup>
                   )}
                 </EuiFlexGroup>

@@ -31,11 +31,19 @@ interface AuthSelectionProps {
   specifiedAuthForPath: string[];
   invalidAuth: boolean;
   isGenerating: boolean;
+  showValidation: boolean;
   onChangeAuth(update: EuiComboBoxOptionOption[]): void;
 }
 
 export const AuthSelection = React.memo<AuthSelectionProps>(
-  ({ selectedAuth, specifiedAuthForPath, invalidAuth, isGenerating, onChangeAuth }) => {
+  ({
+    selectedAuth,
+    specifiedAuthForPath,
+    invalidAuth,
+    isGenerating,
+    showValidation,
+    onChangeAuth,
+  }) => {
     const options = AUTH_OPTIONS.map<EuiComboBoxOptionOption>((option) =>
       isRecommended(option, specifiedAuthForPath)
         ? {
@@ -55,11 +63,17 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
           <EuiSpacer size="s" />
           <EuiText size="s">{i18n.CONFIRM_AUTH_DESCRIPTION}</EuiText>
           <EuiSpacer size="m" />
-          <EuiFormRow label={i18n.AUTH_SELECTION_TITLE} fullWidth>
+          <EuiFormRow
+            label={i18n.AUTH_SELECTION_TITLE}
+            fullWidth
+            isInvalid={showValidation && selectedAuth === undefined}
+            error={i18n.AUTH_REQUIRED}
+          >
             <EuiComboBox
               singleSelection={{ asPlainText: true }}
               fullWidth
               isDisabled={isGenerating}
+              isInvalid={showValidation && selectedAuth === undefined}
               options={options}
               selectedOptions={selectedAuth === undefined ? undefined : [{ label: selectedAuth }]}
               onChange={onChangeAuth}

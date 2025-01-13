@@ -53,6 +53,9 @@ interface ConfirmSettingsStepProps {
   connector: State['connector'];
   isFlyoutGenerating: State['isFlyoutGenerating'];
   suggestedPaths: string[];
+  showValidation: boolean;
+  onShowValidation: () => void;
+  onUpdateValidation: (updatedIsValid: boolean) => void;
   onCelInputGenerationComplete: (path: string, auth: CelAuthType, celInputResult: CelInput) => void;
 }
 
@@ -62,6 +65,9 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     connector,
     isFlyoutGenerating,
     suggestedPaths,
+    showValidation,
+    onShowValidation,
+    onUpdateValidation,
     onCelInputGenerationComplete,
   }) => {
     const { setIsFlyoutGenerating } = useActions();
@@ -76,7 +82,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     const [selectedAuth, setSelectedAuth] = useState<string | undefined>();
 
     const [specifiedAuthForPath, setSpecifiedAuthForPath] = useState<string[]>([]);
-    const [invalidAuth, setInvalidAuth] = useState<boolean>(false);
+    const [unspecifiedAuth, setUnspecifiedAuth] = useState<boolean>(false);
 
     const [successfulGeneration, setSuccessfulGeneration] = useState<boolean>(false);
     const [generatedPair, setGeneratedPair] = useState<{
@@ -85,16 +91,15 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     }>({ path: undefined, auth: undefined });
     const [error, setError] = useState<null | string>(null);
 
+    const [fieldValidationErrors, setFieldValidationErrors] = useState({
+      path: false,
+      auth: false,
+    });
+
     const isSelectedPathGenerated =
       generatedPair.path === coalescedSelectedPath &&
       generatedPair.auth ===
         (selectedAuth && translateDisplayAuthToType(selectedAuth).toLowerCase());
-
-    console.log('pair', generatedPair);
-    console.log('is', isSelectedPathGenerated);
-    console.log('path', coalescedSelectedPath);
-    console.log('auth', selectedAuth);
-    console.log('trans auth', translateDisplayAuthToType(selectedAuth ?? ''));
 
     // sets the recommended options on load
     useEffect(() => {
@@ -116,6 +121,10 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       }
     }, [coalescedSelectedPath, integrationSettings?.apiSpec, useOtherPath]);
 
+    useEffect(() => {
+      onUpdateValidation(!fieldValidationErrors.path && !fieldValidationErrors.auth);
+    }, [fieldValidationErrors, onUpdateValidation]);
+
     const onChangeSuggestedPath = useCallback(
       (path: string) => {
         setSelectedPath(path);
@@ -131,6 +140,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       (field: EuiComboBoxOptionOption[]) => {
         const path = field && field.length ? field[0].label : undefined;
         setSelectedOtherPath(path);
+        setFieldValidationErrors((current) => ({ ...current, path: path === undefined }));
       },
       [setSelectedOtherPath]
     );
@@ -143,26 +153,34 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
         if (auth) {
           const translatedAuth = translateDisplayAuthToType(auth);
           if (specifiedAuthForPath) {
-            setInvalidAuth(!specifiedAuthForPath.includes(translatedAuth));
+            setUnspecifiedAuth(!specifiedAuthForPath.includes(translatedAuth));
           }
+          setFieldValidationErrors((current) => ({ ...current, auth: false }));
         } else {
-          setInvalidAuth(false);
+          setUnspecifiedAuth(false);
+          setFieldValidationErrors((current) => ({ ...current, auth: true }));
         }
       },
       [specifiedAuthForPath]
     );
 
     const onGenerate = useCallback(() => {
+      if (fieldValidationErrors.path || fieldValidationErrors.auth) {
+        onShowValidation();
+        return;
+      }
+
       if (
         http == null ||
         connector == null ||
         integrationSettings == null ||
         notifications?.toasts == null ||
-        (selectedPath == null && selectedOtherPath == null) ||
+        coalescedSelectedPath == null ||
         selectedAuth == null
       ) {
         return;
       }
+
       const generationStartedAt = Date.now();
       const abortController = new AbortController();
       const deps = { http, abortSignal: abortController.signal };
@@ -256,6 +274,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
         abortController.abort();
       };
     }, [
+      fieldValidationErrors,
       http,
       connector,
       integrationSettings,
@@ -285,6 +304,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
             selectedOtherPath={selectedOtherPath}
             useOtherEndpoint={useOtherPath}
             isGenerating={isFlyoutGenerating}
+            showValidation={showValidation}
             onChangeSuggestedPath={onChangeSuggestedPath}
             onChangeOtherPath={onChangeOtherPath}
           />
@@ -292,7 +312,8 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           <AuthSelection
             selectedAuth={selectedAuth}
             specifiedAuthForPath={specifiedAuthForPath}
-            invalidAuth={invalidAuth}
+            invalidAuth={unspecifiedAuth}
+            showValidation={showValidation}
             isGenerating={isFlyoutGenerating}
             onChangeAuth={onChangeAuth}
           />
@@ -312,14 +333,14 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
                 data-test-subj="generateCelInputButton"
               >
                 {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
-              </EuiButton>
-              <EuiButtonEmpty
+              </EuiButton> 
+              {isFlyoutGenerating && (<EuiButtonEmpty
                 onClick={onCancel}
                 flush="left"
                 data-test-subj="buttonsFooter-cancelButton"
               >
                 {i18n.CANCEL}
-              </EuiButtonEmpty>
+              </EuiButtonEmpty>)}
             </EuiFlexGroup>
           )}
           {error && (

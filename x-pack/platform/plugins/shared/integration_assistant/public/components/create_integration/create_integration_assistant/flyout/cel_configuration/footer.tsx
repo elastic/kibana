@@ -14,17 +14,17 @@ interface FooterProps {
   isFlyoutGenerating: State['isFlyoutGenerating'];
   isValid: boolean;
   isGenerationComplete: boolean;
-  onClose: () => void;
+  onCancel: () => void;
   onSave: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ isFlyoutGenerating, isValid, isGenerationComplete, onSave, onClose }) => {
+  ({ isFlyoutGenerating, isValid, isGenerationComplete, onSave, onCancel }) => {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            onClick={onClose}
+            onClick={onCancel}
             flush="left"
             data-test-subj="buttonsFooter-cancelButton"
           >

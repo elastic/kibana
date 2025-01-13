@@ -36,6 +36,7 @@ interface EndpointSelectionProps {
   selectedOtherPath: string | undefined;
   useOtherEndpoint: boolean;
   isGenerating: boolean;
+  showValidation: boolean;
   onChangeSuggestedPath(id: string): void;
   onChangeOtherPath(path: EuiComboBoxOptionOption[]): void;
 }
@@ -47,8 +48,9 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     selectedPath,
     selectedOtherPath,
     useOtherEndpoint,
-    onChangeSuggestedPath,
     isGenerating,
+    showValidation,
+    onChangeSuggestedPath,
     onChangeOtherPath,
   }) => {
     const allPaths = loadPaths(integrationSettings);
@@ -91,6 +93,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
               <EuiRadioGroup
                 options={options}
                 idSelected={selectedPath}
+                disabled={isGenerating}
                 onChange={onChangeSuggestedPath}
               />
             </EuiFlexItem>
@@ -98,11 +101,18 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
         )}
         {(!hasSuggestedPaths || (useOtherEndpoint && !isShowingAllPaths)) && (
           <EuiFlexGroup direction="column">
-            <EuiFormRow fullWidth>
+            <EuiFormRow
+              fullWidth
+              isDisabled={isGenerating}
+              isInvalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
+              error={i18n.PATH_REQUIRED}
+            >
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 fullWidth
                 options={otherPathOptions}
+                isDisabled={isGenerating}
+                isInvalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
                 selectedOptions={
                   selectedOtherPath === undefined ? undefined : [{ label: selectedOtherPath }]
                 }

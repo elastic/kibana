@@ -85,3 +85,15 @@ export const CANCEL = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+export const PATH_REQUIRED = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.confirmSettings.pathRequired',
+  {
+    defaultMessage: 'API endpoint is required',
+  }
+);
+export const AUTH_REQUIRED = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.confirmSettings.authRequired',
+  {
+    defaultMessage: 'Authentication method is required',
+  }
+);

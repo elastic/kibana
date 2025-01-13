@@ -57,19 +57,23 @@ interface ApiDefinitionInputProps {
 export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
   ({ integrationSettings, showValidation, isGenerating, onUploadSpecFileSuccessful }) => {
     const { setIntegrationSettings } = useActions();
+    const [uploadedFile, setUploadedFile] = useState<FileList | undefined>(undefined);
     const [isParsing, setIsParsing] = useState(false);
     const [apiFileError, setApiFileError] = useState<string>();
 
     const onChangeApiDefinition = useCallback(
       (files: FileList | null) => {
-        if (!files) {
+        if (!files || files.length === 0) {
+          setUploadedFile(undefined);
           return;
         }
 
+        setUploadedFile(files);
         setApiFileError(undefined);
         setIntegrationSettings({
           ...integrationSettings,
           apiSpec: undefined,
+          apiSpecFileName: undefined,
         });
 
         const apiDefinitionFile = files[0];
@@ -142,9 +146,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
             {apiFileError ?? ''}
           </EuiText>
         }
-        isInvalid={
-          apiFileError != null || (showValidation && integrationSettings?.apiSpec === undefined)
-        }
+        isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
         error={i18n.SPEC_FILE_REQUIRED}
       >
         <>
@@ -169,9 +171,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
             display="large"
             aria-label="Upload API definition file"
             isLoading={isParsing || isGenerating}
-            isInvalid={
-              apiFileError != null || (showValidation && integrationSettings?.apiSpec === undefined)
-            }
+            isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
             data-test-subj="apiDefinitionFilePicker"
           />
         </>
