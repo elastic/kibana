@@ -95,4 +95,19 @@ components:
         - results
       properties:
         results:
-          $ref: "./cel_input_attributes.schema.yaml#/components/schemas/CelInput"
+          $ref: "./cel_input_attributes.schema.yaml#/components/schemas/GeneratedCelDetails"
+
+    AnalyzeApiAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - suggestedPaths
+          properties:
+            suggestedPaths:
+              type: array
+              items: 
+                type: string

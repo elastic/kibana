@@ -13973,7 +13973,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\" | undefined"
+              "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -16071,7 +16071,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"left\" | \"auto\""
+          "\"right\" | \"bottom\" | \"auto\" | \"left\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
