@@ -10,9 +10,9 @@ import {
   GET_CONNECTORS_CONFIGURE_API_TAG,
   SUGGEST_USER_PROFILES_API_TAG,
 } from '../constants';
-import { HttpApiTagOperation } from '../constants/types';
+import { HttpApiPrivilegeOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
-import { constructFilesHttpOperationTag } from '../files';
+import { constructFilesHttpOperationPrivilege } from '../files';
 
 export interface CasesApiTags {
   all: readonly string[];
@@ -22,9 +22,9 @@ export interface CasesApiTags {
 }
 
 export const getApiTags = (owner: Owner): CasesApiTags => {
-  const create = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Create);
-  const deleteTag = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Delete);
-  const read = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Read);
+  const create = constructFilesHttpOperationPrivilege(owner, HttpApiPrivilegeOperation.Create);
+  const deleteTag = constructFilesHttpOperationPrivilege(owner, HttpApiPrivilegeOperation.Delete);
+  const read = constructFilesHttpOperationPrivilege(owner, HttpApiPrivilegeOperation.Read);
 
   return {
     all: [
