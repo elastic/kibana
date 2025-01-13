@@ -15,6 +15,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -71,12 +72,14 @@ export interface AssistantProviderProps {
   children: React.ReactNode;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  inferenceEnabled?: boolean;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -104,6 +107,7 @@ export interface UseAssistantContext {
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
@@ -129,6 +133,7 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
 }
@@ -147,9 +152,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   children,
   getComments,
   http,
+  inferenceEnabled = false,
   baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
@@ -280,6 +287,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       knowledgeBase: {
         ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
         ...localStorageKnowledgeBase,
@@ -287,6 +295,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
@@ -322,10 +331,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       localStorageKnowledgeBase,
       promptContexts,
       navigateToApp,
       nameSpace,
+      productDocBase,
       registerPromptContext,
       selectedSettingsTab,
       localStorageStreaming,
