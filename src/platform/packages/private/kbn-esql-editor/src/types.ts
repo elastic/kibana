@@ -14,7 +14,6 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { EsqlPluginStart } from '@kbn/esql/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface ESQLEditorProps {
@@ -72,6 +71,20 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
 }
 
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
+
+export interface EsqlPluginStartBase {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+}
+
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
@@ -80,5 +93,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
-  esql?: EsqlPluginStart;
+  esql?: EsqlPluginStartBase;
 }
