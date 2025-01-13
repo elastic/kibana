@@ -378,7 +378,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_details_tab_body[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_information[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_score_donut_chart[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_score_onboarding[\/\\]use_risk_score_toast_content.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]severity[\/\\]common[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]severity[\/\\]severity_bar.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]styled_basic_table.tsx/,
@@ -578,6 +577,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]timelines[\/\\]public[\/\\]components[\/\\]loading[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]timelines[\/\\]public[\/\\]mock[\/\\]test_providers.tsx/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]public[\/\\]applications[\/\\]resolver_test[\/\\]index.tsx/,
+    /src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]react[\/\\]kibana_context[\/\\]styled[\/\\]styled_provider.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_dotnet[\/\\]elasticsearch_dotnet_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_go[\/\\]elasticsearch_go_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_java[\/\\]elasticsearch_java_readme.tsx/,
@@ -586,6 +586,5 @@ module.exports = {
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_py[\/\\]elasticsearch_py_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_ruby[\/\\]elasticsearch_ruby_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]sample[\/\\]sample_client_readme.tsx/,
-    /packages[\/\\]react[\/\\]kibana_context[\/\\]styled[\/\\]styled_provider.tsx/,
   ],
 };

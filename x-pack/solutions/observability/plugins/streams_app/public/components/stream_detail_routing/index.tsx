@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiResizableContainer,
@@ -46,9 +45,9 @@ import { ConditionEditor } from '../condition_editor';
 import { useDebounced } from '../../util/use_debounce';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
-import illustration from '../assets/illustration.png';
 import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
+import { AssetImage } from '../asset_image';
 
 function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) {
   const [childUnderEdit, setChildUnderEdit] = React.useState<
@@ -517,13 +516,7 @@ function PreviewPanelIllustration({
           max-width: 350px;
         `}
       >
-        <EuiImage
-          src={illustration}
-          alt="Illustration"
-          className={css`
-            width: 250px;
-          `}
-        />
+        <AssetImage />
         {previewSampleFetch.loading ? (
           <EuiText size="xs" textAlign="center">
             <EuiLoadingSpinner size="s" />
