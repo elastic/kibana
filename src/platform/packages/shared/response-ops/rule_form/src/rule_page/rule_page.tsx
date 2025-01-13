@@ -16,7 +16,6 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
-  EuiStepsProps,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
