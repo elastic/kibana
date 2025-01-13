@@ -19,6 +19,7 @@ import {
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
+import { getParentId } from '@kbn/streams-schema/src/helpers/hierarchy';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -35,7 +36,6 @@ import {
   validateDescendantFields,
 } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { getParentId } from '../../../../../../../packages/kbn-streams-schema/src/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
