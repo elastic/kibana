@@ -112,13 +112,6 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
-    id: 'searchIndices',
-    path: `/app/ml/trained_models`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
-      defaultMessage: 'Indices',
-    }),
-  },
-  {
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
