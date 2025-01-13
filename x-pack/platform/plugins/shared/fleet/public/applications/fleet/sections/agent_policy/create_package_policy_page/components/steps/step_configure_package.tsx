@@ -27,6 +27,8 @@ import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
 
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+
 import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
@@ -38,6 +40,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
+  isAgentlessSelected?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -47,6 +50,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
+  isAgentlessSelected = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -87,17 +91,21 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     input.type === packageInput.type &&
                     (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                 );
-                const updatedInputs = [...packagePolicyInputs];
-                updatedInputs[indexOfUpdatedInput] = {
-                  ...updatedInputs[indexOfUpdatedInput],
+                const newInputs = [...packagePolicyInputs];
+                newInputs[indexOfUpdatedInput] = {
+                  ...newInputs[indexOfUpdatedInput],
                   ...updatedInput,
                 };
                 updatePackagePolicy({
-                  inputs: updatedInputs,
+                  inputs: newInputs,
                 });
               };
 
-              return packagePolicyInput ? (
+              return packagePolicyInput &&
+                !(
+                  (isAgentlessSelected || packagePolicy.supports_agentless === true) &&
+                  AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type)
+                ) ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
                     packageInput={packageInput}

@@ -550,5 +550,6 @@ export function useOnSubmit({
     navigateAddAgentHelp,
     handleSetupTechnologyChange,
     selectedSetupTechnology,
+    isAgentlessSelected,
   };
 }

@@ -178,6 +178,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     isInitialized,
     handleSetupTechnologyChange,
     selectedSetupTechnology,
+    isAgentlessSelected,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -416,6 +417,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
+              isAgentlessSelected={isAgentlessSelected}
             />
           )}
 
