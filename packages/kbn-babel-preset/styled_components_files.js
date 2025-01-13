@@ -378,7 +378,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_details_tab_body[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_information[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_score_donut_chart[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_score_onboarding[\/\\]use_risk_score_toast_content.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]severity[\/\\]common[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]severity[\/\\]severity_bar.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]styled_basic_table.tsx/,
