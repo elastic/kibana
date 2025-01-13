@@ -92,6 +92,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
               subActionParams: {
                 status: 'Succeeded',
                 type: ['Isolate', 'Unisolate'],
+                machineId: agentId,
                 pageSize: 1,
                 sortField: 'lastUpdateDateTimeUtc',
                 sortDirection: 'desc',
@@ -106,7 +107,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
           errors.push(err.message);
         }
       },
-      { concurrency: 4 }
+      { concurrency: 2 }
     );
 
     if (errors.length > 0) {

@@ -132,7 +132,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
       if (responseBody) {
-        return `${message}\nURL called: ${error.response?.config?.url}\nResponse body: ${responseBody}`;
+        return `${message}\nURL called:[${error.response?.config?.method}] ${error.response?.config?.url}\nResponse body: ${responseBody}`;
       }
 
       return message;
