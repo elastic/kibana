@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 
@@ -27,10 +35,17 @@ export function DashboardsTable({
   const {
     dependencies: {
       start: {
+        share,
         savedObjectsTagging: { ui: savedObjectsTaggingUi },
       },
     },
   } = useKibana();
+
+  const dashboardLocator = useMemo(
+    () => share.url.locators.get(DASHBOARD_APP_LOCATOR),
+    [share.url.locators]
+  );
+
   const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
     return [
       {
@@ -38,6 +53,15 @@ export function DashboardsTable({
         name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
           defaultMessage: 'Dashboard name',
         }),
+        render: (_, { id }) => {
+          const props = getRouterLinkProps({
+            href: dashboardLocator?.getRedirectUrl({ dashboardId: id } || ''),
+            onClick: () => {
+              return dashboardLocator?.navigate({ dashboardId: id } || '');
+            },
+          });
+          return <EuiLink {...props}>{id}</EuiLink>;
+        },
       },
       ...(!compact
         ? ([
@@ -59,7 +83,7 @@ export function DashboardsTable({
           ] satisfies Array<EuiBasicTableColumn<SanitizedDashboardAsset>>)
         : []),
     ];
-  }, [compact, savedObjectsTaggingUi]);
+  }, [compact, savedObjectsTaggingUi, dashboardLocator]);
 
   const items = useMemo(() => {
     return dashboards ?? [];
