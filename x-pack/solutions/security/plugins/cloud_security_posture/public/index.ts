@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { CspPlugin } from './plugin';
 export type { CspSecuritySolutionContext } from './types';
 export type { CloudSecurityPosturePageId } from './common/navigation/types';
@@ -12,4 +13,5 @@ export { getSecuritySolutionLink } from './common/navigation/security_solution_l
 
 export type { CspClientPluginSetup, CspClientPluginStart } from './types';
 
-export const plugin = () => new CspPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new CspPlugin(initializerContext);
