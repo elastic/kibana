@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import { EuiHealth, useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as I18n from './translations';
 
@@ -36,9 +36,7 @@ export enum SeverityLevel {
   critical = 'critical',
 }
 
-export const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionItem[] = (
-  euiTheme
-) => {
+const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionItem[] = (euiTheme) => {
   const palette = getRiskSeverityColors(euiTheme);
   return [
     {
@@ -58,6 +56,13 @@ export const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionI
       inputDisplay: <StyledEuiHealth color={palette.critical}>{I18n.CRITICAL}</StyledEuiHealth>,
     },
   ];
+};
+
+export const useSeverityOptions = () => {
+  const { euiTheme } = useEuiTheme();
+  const severityOptions = useMemo(() => getSeverityOptions(euiTheme), [euiTheme]);
+
+  return severityOptions;
 };
 
 export const defaultRiskScoreBySeverity: Record<Severity, number> = {

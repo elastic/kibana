@@ -45,13 +45,9 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import { renderHook } from '@testing-library/react';
-import { useEuiTheme } from '@elastic/eui';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
-  const { result: euiThemeResult } = renderHook(() => useEuiTheme());
-  const euiTheme = euiThemeResult.current.euiTheme;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
       const {
@@ -62,7 +58,6 @@ describe('rule helpers', () => {
         ruleActionsData,
       }: GetStepsData = getStepsData({
         rule: mockRuleWithEverything('test-id'),
-        euiTheme,
       });
       const defineRuleStepData = {
         ruleType: 'saved_query',
@@ -189,11 +184,7 @@ describe('rule helpers', () => {
 
   describe('getAboutStepsData', () => {
     test('returns name, description, and note as empty string if detailsView is true', () => {
-      const result: AboutStepRule = getAboutStepsData(
-        mockRuleWithEverything('test-id'),
-        true,
-        euiTheme
-      );
+      const result: AboutStepRule = getAboutStepsData(mockRuleWithEverything('test-id'), true);
 
       expect(result.name).toEqual('');
       expect(result.description).toEqual('');
@@ -203,7 +194,7 @@ describe('rule helpers', () => {
     test('returns note as empty string if property does not exist on rule', () => {
       const mockedRule = mockRuleWithEverything('test-id');
       delete mockedRule.note;
-      const result: AboutStepRule = getAboutStepsData(mockedRule, false, euiTheme);
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.note).toEqual('');
     });
@@ -211,7 +202,7 @@ describe('rule helpers', () => {
     test('returns customHighlightedField as empty array if property does not exist on rule', () => {
       const mockedRule = mockRuleWithEverything('test-id');
       delete mockedRule.investigation_fields;
-      const result: AboutStepRule = getAboutStepsData(mockedRule, false, euiTheme);
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.investigationFields).toEqual([]);
     });

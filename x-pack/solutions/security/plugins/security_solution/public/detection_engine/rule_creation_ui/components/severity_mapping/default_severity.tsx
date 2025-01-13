@@ -12,11 +12,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperSelect,
-  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import type { Severity } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
-import { getSeverityOptions } from '../step_about_rule/data';
+import { useSeverityOptions } from '../step_about_rule/data';
 import * as i18n from './translations';
 
 const describedByIds = ['detectionEngineStepAboutRuleSeverity'];
@@ -27,8 +26,7 @@ interface DefaultSeverityProps {
 }
 
 export function DefaultSeverity({ value, onChange }: DefaultSeverityProps) {
-  const { euiTheme } = useEuiTheme();
-  const severityOptions = getSeverityOptions(euiTheme);
+  const severityOptions = useSeverityOptions();
   return (
     <EuiFlexItem>
       <EuiFormRow

@@ -11,7 +11,6 @@ import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import type {
   Severity,
@@ -62,14 +61,12 @@ export interface GetStepsData {
 export const getStepsData = ({
   rule,
   detailsView = false,
-  euiTheme,
 }: {
   rule: RuleResponse;
   detailsView?: boolean;
-  euiTheme: EuiThemeComputed;
 }): GetStepsData => {
   const defineRuleData: DefineStepRule = getDefineStepsData(rule);
-  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView, euiTheme);
+  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
   const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
   const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
   const ruleActionsData: ActionsStepRule = getActionsStepsData(rule);
@@ -232,11 +229,7 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   return secondsToDurationString(intervalDuration);
 };
 
-export const getAboutStepsData = (
-  rule: RuleResponse,
-  detailsView: boolean,
-  euiTheme: EuiThemeComputed
-): AboutStepRule => {
+export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
   const { name, description, note, setup } = determineDetailsValue(rule, detailsView);
   const {
     author,
