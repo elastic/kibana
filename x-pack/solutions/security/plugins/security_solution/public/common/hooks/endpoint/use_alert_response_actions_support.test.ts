@@ -69,6 +69,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       responseActionsSentinelOneV1Enabled: true,
       responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+      responseActionsMSDefenderEndpointEnabled: true,
     });
 
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
@@ -76,15 +77,16 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       appContextMock.renderHook(() => useAlertResponseActionsSupport(alertDetailItemData));
   });
 
-  it.each(
-    // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'microsoft_defender_endpoint')
-  )('should return expected response for agentType: `%s`', (agentType) => {
-    alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType);
-    const { result } = renderHook();
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
+    'should return expected response for agentType: `%s`',
+    (agentType) => {
+      alertDetailItemData =
+        endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType);
+      const { result } = renderHook();
 
-    expect(result.current).toEqual(getExpectedResult({ details: { agentType } }));
-  });
+      expect(result.current).toEqual(getExpectedResult({ details: { agentType } }));
+    }
+  );
 
   it('should set `isSupported` to `false` if no alert details item data is provided', () => {
     alertDetailItemData = [];
@@ -177,9 +179,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   });
 
   it.each(
-    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint')
-      // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-      .filter((agentType) => agentType !== 'microsoft_defender_endpoint') as Array<
+    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint') as Array<
       Exclude<ResponseActionAgentType, 'endpoint'>
     >
   )('should set `isSupported` to `false` for [%s] if feature flag is disabled', (agentType) => {
@@ -190,6 +190,11 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       case 'crowdstrike':
         appContextMock.setExperimentalFlag({
           responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+        });
+        break;
+      case 'microsoft_defender_endpoint':
+        appContextMock.setExperimentalFlag({
+          responseActionsMSDefenderEndpointEnabled: false,
         });
         break;
       default:
