@@ -754,9 +754,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 pageTitleProps={{
                   'data-test-subj': 'username',
                   'aria-label': i18n.translate(
-                    'xpack.security.accountManagement.userProfile.usernameHelpText',
+                    'xpack.security.accountManagement.userProfile.usernameLabel',
                     {
-                      defaultMessage: 'User name cannot be changed after account creation.',
+                      defaultMessage: 'Username',
                     }
                   ),
                 }}
@@ -766,10 +766,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       <EuiText
                         component="span"
                         aria-label={i18n.translate(
-                          'xpack.security.accountManagement.userProfile.fullNameHelpText',
+                          'xpack.security.accountManagement.userProfile.fullNameLabel',
                           {
-                            defaultMessage:
-                              'Please contact an administrator to change your full name.',
+                            defaultMessage: 'Full name',
                           }
                         )}
                       >
@@ -781,10 +780,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       <EuiText
                         component="span"
                         aria-label={i18n.translate(
-                          'xpack.security.accountManagement.userProfile.emailHelpText',
+                          'xpack.security.accountManagement.userProfile.emailLabel',
                           {
-                            defaultMessage:
-                              'Please contact an administrator to change your email address.',
+                            defaultMessage: 'Email address',
                           }
                         )}
                       >
