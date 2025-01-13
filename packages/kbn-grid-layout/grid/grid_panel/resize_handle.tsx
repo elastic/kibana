@@ -60,7 +60,8 @@ export const ResizeHandle = ({
           background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
           cursor: se-resize;
         }
-        .kbnGrid--static & {
+        .kbnGrid--static &,
+        .kbnGridPanel--expanded & {
           opacity: 0 !important;
           display: none;
         }

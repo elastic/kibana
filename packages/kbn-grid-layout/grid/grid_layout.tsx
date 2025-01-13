@@ -112,13 +112,12 @@ export const GridLayout = ({
 
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
-     * expanded panels, mobile view, and a static (non-interactable) grid layout
+     * mobile view and a static (non-interactable) grid layout
      */
     const gridLayoutClassSubscription = combineLatest([
-      gridLayoutStateManager.expandedPanelId$,
       gridLayoutStateManager.accessMode$,
       gridLayoutStateManager.isMobileView$,
-    ]).subscribe(([currentExpandedPanelId, currentAccessMode, isMobileView]) => {
+    ]).subscribe(([currentAccessMode, isMobileView]) => {
       if (!layoutRef) return;
 
       if (isMobileView) {
@@ -127,7 +126,7 @@ export const GridLayout = ({
         layoutRef.current?.classList.remove('kbnGrid--mobileView');
       }
 
-      if (currentAccessMode === 'VIEW' || currentExpandedPanelId) {
+      if (currentAccessMode === 'VIEW') {
         layoutRef.current?.classList.add('kbnGrid--static');
       } else {
         layoutRef.current?.classList.remove('kbnGrid--static');
