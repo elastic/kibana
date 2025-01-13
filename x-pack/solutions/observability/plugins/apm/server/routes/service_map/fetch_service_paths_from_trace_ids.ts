@@ -28,9 +28,14 @@ import type {
 } from '../../../common/service_map';
 import type { EsClient } from '../../lib/helpers/get_esql_client';
 
-type QueryReturnType = {
+type QueryResult = {
   'event.id': string;
   [PARENT_ID]?: string;
+} & ConnectionNode;
+
+type Node = {
+  id: string;
+  children: Node[];
 } & ConnectionNode;
 
 export async function fetchServicePathsFromTraceIds({
@@ -56,18 +61,19 @@ export async function fetchServicePathsFromTraceIds({
   //  we use the EVAL function to create a new field that is a concatenation of the timestamp and the value of the field we want to get the latest value of.
   //  We then use the STATS function to get the latest value of the field by trace ID, event ID, event name, and service name.
   // 2. Groups the events by their ID (either span or transaction ID)
-  const { hits } = await esqlClient.esql<QueryReturnType, { transform: 'plain' }>(
+  const { hits } = await esqlClient.esql<QueryResult, { transform: 'plain' }>(
     'get_service_paths_from_trace_ids',
     {
       query: `
         FROM ${index.join(',')}
           | EVAL event.id = CASE(processor.event == "span", ${SPAN_ID}, ${TRANSACTION_ID}),
-              ${SPAN_SUBTYPE} =  CONCAT(${TIMESTAMP_US}::string, ":", ${SPAN_SUBTYPE}),
-              ${SPAN_TYPE} =  CONCAT(${TIMESTAMP_US}::string, ":", ${SPAN_TYPE}),
-              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, ":", ${AGENT_NAME}),
-              ${SERVICE_NAME} = CONCAT(${TIMESTAMP_US}::string, ":", ${SERVICE_NAME}),
-              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, ":", ${PARENT_ID}),
-              ${SERVICE_ENVIRONMENT} = CONCAT(${TIMESTAMP_US}::string, ":", ${SERVICE_ENVIRONMENT})
+              ${SPAN_DESTINATION_SERVICE_RESOURCE} =  CONCAT(${TIMESTAMP_US}::string, "|", ${SPAN_DESTINATION_SERVICE_RESOURCE}),
+              ${SPAN_SUBTYPE} =  CONCAT(${TIMESTAMP_US}::string, "|", ${SPAN_SUBTYPE}),
+              ${SPAN_TYPE} =  CONCAT(${TIMESTAMP_US}::string, "|", ${SPAN_TYPE}),
+              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${AGENT_NAME}),
+              ${SERVICE_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${SERVICE_NAME}),
+              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, "|", ${PARENT_ID}),
+              ${SERVICE_ENVIRONMENT} = CONCAT(${TIMESTAMP_US}::string, "|", ${SERVICE_ENVIRONMENT})
           | LIMIT ${terminateAfter}
           | STATS ${SPAN_DESTINATION_SERVICE_RESOURCE} = MAX(${SPAN_DESTINATION_SERVICE_RESOURCE}),
               ${SPAN_SUBTYPE} = MAX(${SPAN_SUBTYPE}),
@@ -77,13 +83,16 @@ export async function fetchServicePathsFromTraceIds({
               ${PARENT_ID} = MAX(${PARENT_ID}),
               ${TRACE_ID} = MAX(${TRACE_ID}),
               ${SERVICE_ENVIRONMENT} = MAX(${SERVICE_ENVIRONMENT}) BY event.id
-          | EVAL ${SPAN_SUBTYPE} = SPLIT(${SPAN_SUBTYPE}, ":"),
-              ${SPAN_TYPE} = SPLIT(${SPAN_TYPE}, ":"),
-              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, ":"),
-              ${SERVICE_NAME} = SPLIT(${SERVICE_NAME}, ":"),
-              ${PARENT_ID} = SPLIT(${PARENT_ID}, ":"),
-              ${SERVICE_ENVIRONMENT} = SPLIT(${SERVICE_ENVIRONMENT}, ":")
-          | EVAL ${SPAN_SUBTYPE} = TO_STRING(MV_LAST(${SPAN_SUBTYPE})),
+          | EVAL ${SPAN_DESTINATION_SERVICE_RESOURCE} = SPLIT(${SPAN_DESTINATION_SERVICE_RESOURCE}, "|"),
+              ${SPAN_SUBTYPE} = SPLIT(${SPAN_SUBTYPE}, "|"),
+              ${SPAN_TYPE} = SPLIT(${SPAN_TYPE}, "|"),
+              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, "|"),
+              ${SERVICE_NAME} = SPLIT(${SERVICE_NAME}, "|"),
+              ${PARENT_ID} = SPLIT(${PARENT_ID}, "|"),
+              ${SERVICE_ENVIRONMENT} = SPLIT(${SERVICE_ENVIRONMENT}, "|")
+          | EVAL 
+              ${SPAN_DESTINATION_SERVICE_RESOURCE} = TO_STRING(MV_LAST(${SPAN_DESTINATION_SERVICE_RESOURCE})),
+              ${SPAN_SUBTYPE} = TO_STRING(MV_LAST(${SPAN_SUBTYPE})),
               ${SPAN_TYPE} = TO_STRING(MV_LAST(${SPAN_TYPE})),
               ${AGENT_NAME} = TO_STRING(MV_LAST(${AGENT_NAME})),
               ${SERVICE_NAME} = TO_STRING(MV_LAST(${SERVICE_NAME})),
@@ -99,45 +108,17 @@ export async function fetchServicePathsFromTraceIds({
     { transform: 'plain' }
   );
 
-  const eventsById = hits.reduce((acc, hit) => {
-    const eventId = hit['event.id'];
-    if (!acc[eventId]) {
-      acc[eventId] = hit;
-    }
-    return acc;
-  }, {} as Record<string, QueryReturnType>);
+  const eventsById = getEventsById({ response: hits });
+  const entryIds = getEntryIds({ eventsById });
+  const eventTrees = getEventTrees({ eventsById, entryIds });
 
-  const { paths, discoveredServices } = buildAllPaths(eventsById);
+  const { paths, discoveredServices } = buildMapPaths({ entryIds, eventTrees });
 
   return {
-    aggregations: {
-      service_map: {
-        value: {
-          paths,
-          discoveredServices: Array.from(discoveredServices.values()),
-        },
-      },
-    },
-  } as {
-    aggregations?: {
-      service_map: {
-        value: {
-          paths: ConnectionNode[][];
-          discoveredServices: DiscoveredService[];
-        };
-      };
-    };
+    paths,
+    discoveredServices,
   };
 }
-
-const getAllEventIds = (eventsById: Record<string, QueryReturnType>) => {
-  return new Set([
-    ...Object.keys(eventsById),
-    ...Object.values(eventsById)
-      .map((event) => event[PARENT_ID])
-      .filter((parentId): parentId is string => !!parentId),
-  ]);
-};
 
 const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
   return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
@@ -150,7 +131,7 @@ function getConnectionNodeId(node: ConnectionNode): string {
   return node[SERVICE_NAME];
 }
 
-const getServiceConnectionNode = (event: ConnectionNode): ServiceConnectionNode => {
+const getServiceConnectionNode = (event: Node): ServiceConnectionNode => {
   return {
     [SERVICE_NAME]: event[SERVICE_NAME],
     [SERVICE_ENVIRONMENT]: event[SERVICE_ENVIRONMENT],
@@ -158,7 +139,7 @@ const getServiceConnectionNode = (event: ConnectionNode): ServiceConnectionNode 
   };
 };
 
-const getExternalConnectionNode = (event: ConnectionNode): ExternalConnectionNode => {
+const getExternalConnectionNode = (event: Node): ExternalConnectionNode => {
   return {
     [SPAN_DESTINATION_SERVICE_RESOURCE]: event[SPAN_DESTINATION_SERVICE_RESOURCE],
     [SPAN_TYPE]: event[SPAN_TYPE],
@@ -166,118 +147,177 @@ const getExternalConnectionNode = (event: ConnectionNode): ExternalConnectionNod
   };
 };
 
-type Node = {
-  edges: ConnectionNode[];
-} & QueryReturnType;
-
 const generatePathKey = (edges: ConnectionNode[]): string => {
   const res = edges.map((edge) => getConnectionNodeId(edge)).join('|');
   return res;
 };
 
-const buildEventPath = (
-  startEventId: string,
-  eventsById: Record<string, QueryReturnType>,
-  processedEvents = new Map<string, Node>()
-) => {
-  const stack: string[] = [startEventId];
-  const reprocessQueue = new Set<string>();
-
-  const allPaths = new Map<string, ConnectionNode[]>();
-  const allDiscoveredServices = new Map<string, DiscoveredService>();
+function getEventTrees({
+  eventsById,
+  entryIds,
+}: {
+  eventsById: Map<string, Node>;
+  entryIds: Set<string>;
+}) {
+  const eventTrees = new Map<string, Node>();
+  const events = Array.from(eventsById.values());
 
   const visited = new Set<string>();
 
-  while (stack.length > 0) {
-    const eventId = stack.pop()!;
-
-    const currentEvent = eventsById[eventId];
-
-    if (!currentEvent || processedEvents.has(eventId)) {
+  const childrenByParentId = new Map<string, Node[]>();
+  for (const event of events) {
+    if (!event.parent) {
       continue;
     }
 
-    visited.add(eventId);
+    const currentChildren = childrenByParentId.get(event.parent) || [];
+    if (currentChildren) {
+      currentChildren.push(event);
+      childrenByParentId.set(event.parent, currentChildren);
+    } else {
+      childrenByParentId.set(event.parent, [event]);
+    }
+  }
 
-    const parentId = currentEvent[PARENT_ID];
-    const processedParent = parentId ? processedEvents.get(parentId) : undefined;
-
-    if (parentId && !processedParent && !visited.has(parentId)) {
-      stack.push(parentId);
-      reprocessQueue.add(eventId);
-
+  for (const entry of entryIds) {
+    const treeRoot = eventsById.get(entry);
+    if (!treeRoot) {
       continue;
     }
 
-    if (
-      processedParent &&
-      isSpan(processedParent) &&
-      (processedParent[SERVICE_NAME] !== currentEvent[SERVICE_NAME] ||
-        processedParent[SERVICE_ENVIRONMENT] !== currentEvent[SERVICE_ENVIRONMENT])
-    ) {
-      const pathKey = generatePathKey([processedParent, currentEvent]);
-      if (!allDiscoveredServices.has(pathKey)) {
-        allDiscoveredServices.set(pathKey, {
-          from: getExternalConnectionNode(processedParent),
-          to: getServiceConnectionNode(currentEvent),
-        });
+    const stack: Node[] = [treeRoot];
+
+    while (stack.length > 0) {
+      const node = stack.pop()!;
+
+      if (visited.has(node.id)) {
+        continue;
+      }
+
+      visited.add(node.id);
+
+      const children = childrenByParentId.get(node.id) || [];
+      for (const child of children) {
+        if (!visited.has(child.id)) {
+          stack.push(child);
+          node.children.push(child);
+        }
       }
     }
 
-    const edges = [...(processedParent?.edges || [])];
-    const lastEdge = edges.length > 0 ? edges[edges.length - 1] : undefined;
+    eventTrees.set(treeRoot.id, treeRoot);
+  }
 
-    if (
-      !lastEdge ||
-      !(
-        lastEdge[SERVICE_NAME] === currentEvent[SERVICE_NAME] &&
-        lastEdge[SERVICE_ENVIRONMENT] === currentEvent[SERVICE_ENVIRONMENT]
-      )
-    ) {
-      edges.push(getServiceConnectionNode(currentEvent));
+  return eventTrees;
+}
+
+const buildMapPaths = ({
+  entryIds,
+  eventTrees,
+}: {
+  entryIds: Set<string>;
+  eventTrees: Map<string, Node>;
+}) => {
+  const allPaths = new Map<string, ConnectionNode[]>();
+  const allDiscoveredServices = new Map<string, DiscoveredService>();
+  const visited = new Set<string>();
+
+  const stack: Array<{ currentNode: Node; parentPath: ConnectionNode[]; parentNode?: Node }> = [];
+
+  for (const entryId of entryIds) {
+    const treeRoot = eventTrees.get(entryId);
+    if (treeRoot) {
+      stack.push({ currentNode: treeRoot, parentPath: [] });
     }
 
-    if (isSpan(currentEvent)) {
-      const externalNode = getExternalConnectionNode(currentEvent);
-      const newNodes = [...edges, externalNode];
-      const pathKey = generatePathKey(newNodes);
+    while (stack.length > 0) {
+      const { currentNode, parentPath, parentNode } = stack.pop()!;
 
-      if (!allPaths.has(pathKey)) {
-        allPaths.set(pathKey, newNodes);
+      if (!currentNode || visited.has(currentNode.id)) {
+        continue;
+      }
+
+      visited.add(currentNode.id);
+
+      if (
+        parentNode &&
+        isSpan(parentNode) &&
+        (parentNode[SERVICE_NAME] !== currentNode[SERVICE_NAME] ||
+          parentNode[SERVICE_ENVIRONMENT] !== currentNode[SERVICE_ENVIRONMENT])
+      ) {
+        const pathKey = generatePathKey([parentNode, currentNode]);
+        if (!allDiscoveredServices.has(pathKey)) {
+          allDiscoveredServices.set(pathKey, {
+            from: getExternalConnectionNode(parentNode),
+            to: getServiceConnectionNode(currentNode),
+          });
+        }
+      }
+
+      const currentPath = [...parentPath];
+      const lastEdge = currentPath.length > 0 ? currentPath[currentPath.length - 1] : undefined;
+
+      if (
+        !lastEdge ||
+        !(
+          lastEdge[SERVICE_NAME] === currentNode[SERVICE_NAME] &&
+          lastEdge[SERVICE_ENVIRONMENT] === currentNode[SERVICE_ENVIRONMENT]
+        )
+      ) {
+        currentPath.push(getServiceConnectionNode(currentNode));
+      }
+
+      if (isSpan(currentNode)) {
+        const externalNode = getExternalConnectionNode(currentNode);
+        const newPath = [...currentPath, externalNode];
+        const pathKey = generatePathKey(newPath);
+
+        if (!allPaths.has(pathKey)) {
+          allPaths.set(pathKey, newPath);
+        }
+      }
+
+      for (const child of currentNode.children) {
+        stack.push({ currentNode: child, parentPath: currentPath, parentNode: currentNode });
       }
     }
+  }
 
-    processedEvents.set(eventId, { edges, ...currentEvent });
+  return {
+    paths: Array.from(allPaths.values()),
+    discoveredServices: Array.from(allDiscoveredServices.values()),
+  };
+};
 
-    if (reprocessQueue.size > 0) {
-      stack.push(...reprocessQueue);
-      reprocessQueue.clear();
+function getEventsById({ response }: { response: QueryResult[] }) {
+  return response.reduce((acc, hit) => {
+    const eventId = hit['event.id'];
+    if (!acc.has(eventId)) {
+      acc.set(eventId, {
+        ...hit,
+        id: eventId,
+        parent: hit[PARENT_ID],
+        [AGENT_NAME]: hit[AGENT_NAME],
+        [SERVICE_NAME]: hit[SERVICE_NAME],
+        [SERVICE_ENVIRONMENT]: hit[SERVICE_ENVIRONMENT],
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: hit[SPAN_DESTINATION_SERVICE_RESOURCE],
+        [SPAN_ID]: hit[SPAN_ID],
+        [SPAN_SUBTYPE]: hit[SPAN_SUBTYPE],
+        children: [],
+      });
     }
+    return acc;
+  }, new Map<string, Node>());
+}
 
-    visited.delete(eventId);
+function getEntryIds({ eventsById }: { eventsById: Map<string, Node> }) {
+  const entryIds = new Set<string>();
+
+  for (const [eventId, event] of eventsById) {
+    if (!event.parent) {
+      entryIds.add(eventId);
+    }
   }
 
-  return {
-    paths: [...allPaths.values()].filter((path) => path.length > 1),
-    discoveredServices: [...allDiscoveredServices.values()],
-  };
-};
-
-const buildAllPaths = (eventsById: Record<string, QueryReturnType>) => {
-  const allDiscoveredServices: DiscoveredService[] = [];
-  const allEventIds = getAllEventIds(eventsById);
-  const allPaths: ConnectionNode[][] = [];
-
-  const processedEvents = new Map<string, Node>();
-
-  for (const eventId of allEventIds) {
-    const { discoveredServices, paths } = buildEventPath(eventId, eventsById, processedEvents);
-    allPaths.push(...paths);
-    allDiscoveredServices.push(...discoveredServices);
-  }
-
-  return {
-    paths: allPaths,
-    discoveredServices: allDiscoveredServices,
-  };
-};
+  return entryIds;
+}

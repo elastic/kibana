@@ -72,13 +72,10 @@ export async function getServiceMapFromTraceIds({
 
   logger.debug('Received scripted metric agg response');
 
-  const serviceMapScriptedAggValue =
-    serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;
-
   return {
     connections: getConnections({
-      paths: serviceMapScriptedAggValue?.paths,
+      paths: serviceMapFromTraceIdsScriptResponse?.paths,
     }),
-    discoveredServices: serviceMapScriptedAggValue?.discoveredServices ?? [],
+    discoveredServices: serviceMapFromTraceIdsScriptResponse?.discoveredServices ?? [],
   };
 }

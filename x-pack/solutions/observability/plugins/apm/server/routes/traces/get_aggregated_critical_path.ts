@@ -114,15 +114,19 @@ export async function getAggregatedCriticalPath({
   const chunks = chunk(traceIds, 50);
   const groupEventsChunked = await Promise.all(
     chunks.map(async (traceIdChunks) => {
+      const now = performance.now();
       const response = await fetchCriticalPath({
         traceIds: traceIdChunks,
         start,
         end,
         index,
         filters,
-        logger,
         esqlClient,
       });
+
+      logger.debug(
+        `Retrieved critical path in ${performance.now() - now}ms for ${traceIds.length} traces`
+      );
 
       return groupEvents(response.hits);
     })
@@ -131,15 +135,15 @@ export async function getAggregatedCriticalPath({
   const now = performance.now();
 
   const { eventsById, metadataByOperationId } = mergeGroupedEventsChunks(groupEventsChunked);
-  const { entryIds, eventTree } = processEventTree({
+
+  const entryIds = getEntryIds({ eventsById, metadataByOperationId, serviceName, transactionName });
+  const eventTree = getEventTrees({
     eventsById,
-    metadataByOperationId,
-    serviceName,
-    transactionName,
+    entryIds,
   });
   const { timeByNodeId, nodes, rootNodes, operationIdByNodeId } = buildCriticalPath({
     entryIds,
-    eventTree,
+    eventTrees: eventTree,
     metadataByOperationId,
   });
 
@@ -160,7 +164,6 @@ const fetchCriticalPath = async ({
   traceIds,
   start,
   end,
-  logger,
   esqlClient,
   filters,
   index,
@@ -168,13 +171,10 @@ const fetchCriticalPath = async ({
   traceIds: string[];
   start: number;
   end: number;
-  logger: Logger;
   esqlClient: EsClient;
   filters: QueryDslQueryContainer[];
   index: string[];
 }) => {
-  const now = performance.now();
-
   // The query does the following:
   // 1. Gets the latest event.duration, agent.name and parent.id for each event.id, event.name, and service.name.
   //  Due to the  lack of esql native aggregation to get the latest value of a field,
@@ -184,32 +184,42 @@ const fetchCriticalPath = async ({
   // 3. Sorts the events by parent ID and timestamp. Events without a parent ID are sorted last because they are the root events
   // and there could be many events with the same id. so we get the latest ingested event.
   // 4. Limits the number of events to 10,000 to try to avoid timeouts. This could lead to data loss and incomplete critical paths.
-  const response = esqlClient.esql<QueryResult, { transform: 'plain' }>(
+  return esqlClient.esql<QueryResult, { transform: 'plain' }>(
     'get_aggregated_critical_path',
     {
       query: `
         FROM ${index.join(',')}
           | EVAL event.id = CASE(processor.event == "span", ${SPAN_ID}, ${TRANSACTION_ID}),
-              event.name = CASE(processor.event == "span", ${SPAN_NAME}, ${TRANSACTION_NAME}),
-              event.type = CASE(processor.event == "span", ${SPAN_TYPE}, ${TRANSACTION_TYPE}),
-              event.duration = CONCAT(${TIMESTAMP_US}::string, ":", CASE(processor.event == "span", ${SPAN_DURATION}, ${TRANSACTION_DURATION})::string),
-              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, ":", ${AGENT_NAME}),
-              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, ":", ${PARENT_ID})
+              event.name = CONCAT(${TIMESTAMP_US}::string, "|",CASE(processor.event == "span", ${SPAN_NAME}, ${TRANSACTION_NAME})),
+              event.type = CONCAT(${TIMESTAMP_US}::string, "|",CASE(processor.event == "span", ${SPAN_TYPE}, ${TRANSACTION_TYPE})),
+              event.duration = CONCAT(${TIMESTAMP_US}::string, "|", CASE(processor.event == "span", ${SPAN_DURATION}, ${TRANSACTION_DURATION})::string),
+              ${AGENT_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${AGENT_NAME}),
+              ${SERVICE_NAME} = CONCAT(${TIMESTAMP_US}::string, "|", ${SERVICE_NAME}),
+              ${PARENT_ID} = CONCAT(${TIMESTAMP_US}::string, "|", ${PARENT_ID})
           | LIMIT 10000
           | STATS ${SPAN_SUBTYPE} = MAX(${SPAN_SUBTYPE}),
               ${PROCESSOR_EVENT} = MAX(${PROCESSOR_EVENT}),
               ${TIMESTAMP_US} = MAX(${TIMESTAMP_US}),
               ${PARENT_ID} = MAX(${PARENT_ID}),
               ${AGENT_NAME} = MAX(${AGENT_NAME}),
+              ${SERVICE_NAME} = MAX(${SERVICE_NAME}),
+              ${TRACE_ID} = MAX(${TRACE_ID}),
+              event.name = MAX(event.name),
               event.type = MAX(event.type),
-              event.duration = MAX(event.duration) BY ${TRACE_ID}, event.id, event.name, ${SERVICE_NAME}
-          | EVAL ${PARENT_ID} = SPLIT(${PARENT_ID}, ":")
-          | EVAL ${PARENT_ID} = TO_STRING(MV_LAST(${PARENT_ID}))
-          | SORT parent.id ASC NULLS LAST, timestamp.us ASC
-          | EVAL event.duration = SPLIT(event.duration, ":"),
-              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, ":")
+              event.duration = MAX(event.duration) BY event.id
+          | SORT timestamp.us ASC
+          | EVAL event.duration = SPLIT(event.duration, "|"),
+              event.name = SPLIT(event.name, "|"),
+              event.type = SPLIT(event.type, "|"),
+              ${PARENT_ID} = SPLIT(${PARENT_ID}, "|"),
+              ${AGENT_NAME} = SPLIT(${AGENT_NAME}, "|"),
+              ${SERVICE_NAME} = SPLIT(${SERVICE_NAME}, "|")
           | EVAL event.duration = TO_LONG(MV_LAST(event.duration)),
-              ${AGENT_NAME} = TO_STRING(MV_LAST(${AGENT_NAME}))
+              event.name = TO_STRING(MV_LAST(event.name)),
+              event.type = TO_STRING(MV_LAST(event.type)),
+              ${PARENT_ID} = TO_STRING(MV_LAST(${PARENT_ID})),
+              ${AGENT_NAME} = TO_STRING(MV_LAST(${AGENT_NAME})),
+              ${SERVICE_NAME} = TO_STRING(MV_LAST(${SERVICE_NAME}))
         `,
       filter: {
         bool: {
@@ -219,23 +229,162 @@ const fetchCriticalPath = async ({
     },
     { transform: 'plain' }
   );
-
-  logger.debug(
-    `Retrieved critical path in ${performance.now() - now}ms for ${traceIds.length} traces`
-  );
-
-  return response;
 };
+
+function getEntryIds({
+  eventsById,
+  metadataByOperationId,
+  serviceName,
+  transactionName,
+}: {
+  eventsById: Map<string, Event>;
+  metadataByOperationId: Map<OperationId, OperationMetadata>;
+  serviceName: string | null;
+  transactionName: string | null;
+}) {
+  const entryIds = new Set<string>();
+
+  for (const currentEvent of eventsById.values()) {
+    if (serviceName && transactionName) {
+      const metadata = metadataByOperationId.get(currentEvent.operationId);
+      if (
+        metadata &&
+        metadata[SERVICE_NAME] === serviceName &&
+        metadata[PROCESSOR_EVENT] === ProcessorEvent.transaction &&
+        metadata[TRANSACTION_NAME] === transactionName
+      ) {
+        entryIds.add(currentEvent.id);
+      }
+    } else if (!currentEvent.parentId) {
+      entryIds.add(currentEvent.id);
+    }
+  }
+
+  return entryIds;
+}
+
+function getEventTrees({
+  eventsById,
+  entryIds,
+}: {
+  eventsById: Map<string, Event>;
+  entryIds: Set<string>;
+}) {
+  const eventTrees = new Map<string, Event>();
+  const events = Array.from(eventsById.values());
+
+  const visited = new Set<string>();
+
+  const childrenByParentId = new Map<string, Event[]>();
+  for (const event of events) {
+    if (!event.parentId) {
+      continue;
+    }
+
+    const currentChildren = childrenByParentId.get(event.parentId) || [];
+    if (currentChildren) {
+      currentChildren.push(event);
+      childrenByParentId.set(event.parentId, currentChildren);
+    } else {
+      childrenByParentId.set(event.parentId, [event]);
+    }
+  }
+
+  for (const entry of entryIds) {
+    const treeRoot = eventsById.get(entry);
+    if (!treeRoot) {
+      continue;
+    }
+
+    const stack: Event[] = [treeRoot];
+
+    while (stack.length > 0) {
+      const node = stack.pop()!;
+
+      if (visited.has(node.id)) {
+        continue;
+      }
+
+      visited.add(node.id);
+
+      const children = childrenByParentId.get(node.id) || [];
+      for (const child of children) {
+        if (!visited.has(child.id)) {
+          stack.push(child);
+          node.children.push(child);
+        }
+      }
+    }
+
+    eventTrees.set(treeRoot.id, treeRoot);
+  }
+  return eventTrees;
+}
+
+function buildCriticalPath({
+  entryIds,
+  eventTrees,
+  metadataByOperationId,
+}: {
+  entryIds: Set<string>;
+  eventTrees: Map<string, Event>;
+  metadataByOperationId: Map<OperationId, OperationMetadata>;
+}) {
+  const timeByNodeId = new Map<NodeId, number>();
+  const nodes = new Map<NodeId, NodeId[]>();
+  const rootNodes = new Set<NodeId>();
+  const operationIdByNodeId = new Map<NodeId, OperationId>();
+
+  for (const entryId of entryIds) {
+    const treeRoot = eventTrees.get(entryId);
+
+    if (!treeRoot) {
+      continue;
+    }
+
+    calculateOffsetsAndSkews({
+      event: treeRoot,
+      metadataByOperationId,
+      startOfTrace: treeRoot.timestamp,
+    });
+
+    const path = buildPathToRoot({ treeRoot });
+    const nodeId = toHash(path);
+
+    spanGraph({
+      treeRoot,
+      path,
+      nodes,
+      operationIdByNodeId,
+      timeByNodeId,
+    });
+
+    if (!rootNodes.has(nodeId)) {
+      rootNodes.add(nodeId);
+    }
+  }
+
+  return {
+    timeByNodeId,
+    nodes,
+    rootNodes,
+    operationIdByNodeId,
+  };
+}
 
 const mergeGroupedEventsChunks = (groupedEventsChunks: Array<ReturnType<typeof groupEvents>>) =>
   groupedEventsChunks.reduce(
     (acc, curr) => {
       for (const [key, value] of curr.eventsById) {
-        acc.eventsById.set(key, value);
+        if (!acc.eventsById.has(key)) {
+          acc.eventsById.set(key, value);
+        }
       }
 
       for (const [key, value] of curr.metadataByOperationId) {
-        acc.metadataByOperationId.set(key, value);
+        if (!acc.metadataByOperationId.has(key)) {
+          acc.metadataByOperationId.set(key, value);
+        }
       }
 
       return acc;
@@ -302,7 +451,7 @@ const groupEvents = (response: QueryResult[]) => {
 
     eventsById.set(eventId, {
       traceId: hit[TRACE_ID],
-      id: hit['event.id'],
+      id: eventId,
       operationId,
       parentId: hit[PARENT_ID],
       processorEvent: hit[PROCESSOR_EVENT],
@@ -314,7 +463,9 @@ const groupEvents = (response: QueryResult[]) => {
       children: [],
     });
 
-    metadataByOperationId.set(operationId, metadata);
+    if (!metadataByOperationId.has(operationId)) {
+      metadataByOperationId.set(operationId, metadata);
+    }
   });
 
   return { eventsById, metadataByOperationId };
@@ -337,18 +488,18 @@ function calculateOffsetsAndSkews({
   while (stack.length > 0) {
     const { currentEvent, parent } = stack.pop()!;
 
-    if (visited.has(event.id)) {
+    if (visited.has(currentEvent.id)) {
       continue;
     }
 
-    visited.add(event.id);
+    visited.add(currentEvent.id);
 
-    event.skew = calculateClockSkew({ metadataByOperationId, event: currentEvent, parent });
-    event.offset = event.timestamp - startOfTrace;
-    event.end = event.offset + event.skew + event.duration;
+    currentEvent.skew = calculateClockSkew({ metadataByOperationId, event: currentEvent, parent });
+    currentEvent.offset = currentEvent.timestamp - startOfTrace;
+    currentEvent.end = currentEvent.offset + currentEvent.skew + currentEvent.duration;
 
-    for (const child of event.children) {
-      stack.push({ currentEvent: child, parent: event });
+    for (const child of currentEvent.children) {
+      stack.push({ currentEvent: child, parent: currentEvent });
     }
   }
 }
@@ -383,27 +534,27 @@ function calculateClockSkew({
 }
 
 function spanGraph({
-  event,
+  treeRoot: treeRoot,
   path,
   nodes,
   operationIdByNodeId,
   timeByNodeId,
 }: {
-  event: Event;
+  treeRoot: Event;
   path: string[];
   nodes: Map<NodeId, NodeId[]>;
   operationIdByNodeId: Map<NodeId, OperationId>;
   timeByNodeId: Map<NodeId, number>;
 }) {
   const stack: Array<{
-    currentEvent: Event;
+    currentNode: Event;
     currentPath: string[];
     startEvent: number;
     endEvent: number;
-  }> = [{ currentEvent: event, currentPath: path, startEvent: 0, endEvent: event.duration }];
+  }> = [{ currentNode: treeRoot, currentPath: path, startEvent: 0, endEvent: treeRoot.duration }];
 
   while (stack.length > 0) {
-    const { currentEvent, currentPath, startEvent, endEvent } = stack.pop()!;
+    const { currentNode: currentEvent, currentPath, startEvent, endEvent } = stack.pop()!;
     const nodeId = toHash(currentPath);
 
     const childNodes = nodes.get(nodeId) || [];
@@ -443,7 +594,7 @@ function spanGraph({
       }
 
       stack.push({
-        currentEvent: child,
+        currentNode: child,
         currentPath: childPath,
         startEvent: normalizedChildStart,
         endEvent: childEnd,
@@ -458,150 +609,22 @@ function spanGraph({
   }
 }
 
-export function buildCriticalPath({
-  entryIds,
-  eventTree,
-  metadataByOperationId,
-}: {
-  entryIds: Set<string>;
-  eventTree: Map<string, Event>;
-  metadataByOperationId: Map<OperationId, OperationMetadata>;
-}) {
-  const timeByNodeId = new Map<NodeId, number>();
-  const nodes = new Map<NodeId, NodeId[]>();
-  const rootNodes = new Set<NodeId>();
-  const operationIdByNodeId = new Map<NodeId, OperationId>();
+function buildPathToRoot({ treeRoot }: { treeRoot: Event }): string[] {
+  const path: string[] = [];
+  const stack: Event[] = [treeRoot];
+  const visited = new Set<string>();
 
-  for (const entryId of entryIds) {
-    const currentEvent = eventTree.get(entryId);
-
-    if (!currentEvent) {
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (!node || visited.has(node.id)) {
       continue;
     }
 
-    const path = buildPathToRoot({ event: currentEvent, eventTree });
+    visited.add(node.id);
 
-    const nodeId = toHash(path);
-
-    calculateOffsetsAndSkews({
-      event: currentEvent,
-      metadataByOperationId,
-      startOfTrace: currentEvent.timestamp,
-    });
-
-    spanGraph({
-      event: currentEvent,
-      path,
-      nodes,
-      operationIdByNodeId,
-      timeByNodeId,
-    });
-
-    if (!rootNodes.has(nodeId)) {
-      rootNodes.add(nodeId);
-    }
+    path.push(node.operationId);
+    stack.push(...node.children);
   }
 
-  return {
-    timeByNodeId,
-    nodes,
-    rootNodes,
-    operationIdByNodeId,
-  };
-}
-
-function buildPathToRoot({
-  event,
-  eventTree: processedEvents,
-}: {
-  event: Event;
-  eventTree: Map<string, Event>;
-}): string[] {
-  const path: string[] = [];
-  let current = event;
-
-  while (current) {
-    path.push(current.operationId);
-    if (!current.parentId) {
-      break;
-    }
-
-    const parentEvent = processedEvents.get(current.parentId);
-    if (parentEvent) {
-      current = parentEvent;
-    }
-  }
-
-  return path.reverse();
-}
-
-function processEventTree({
-  eventsById,
-  metadataByOperationId,
-  serviceName,
-  transactionName,
-}: {
-  eventsById: Map<string, Event>;
-  metadataByOperationId: Map<OperationId, OperationMetadata>;
-  serviceName: string | null;
-  transactionName: string | null;
-}) {
-  const entryIds = new Set<string>();
-  const eventTree = new Map<string, Event>();
-
-  for (const event of eventsById.values()) {
-    const stack: string[] = [event.id];
-    const reprocessQueue = new Set<string>();
-
-    const visited = new Set<string>();
-
-    while (stack.length > 0) {
-      const currentEventId = stack.pop()!;
-
-      const currentEvent = eventsById.get(currentEventId);
-      if (!currentEvent || eventTree.has(currentEvent.id)) {
-        continue;
-      }
-
-      visited.add(currentEventId);
-
-      if (currentEvent.parentId) {
-        const processedParent = eventTree.get(currentEvent.parentId);
-        if (processedParent) {
-          processedParent.children.push(currentEvent);
-        } else {
-          const parentEvent = eventsById.get(currentEvent.parentId);
-          if (!parentEvent && !visited.has(currentEvent.parentId)) {
-            stack.push(currentEvent.parentId);
-            reprocessQueue.add(currentEvent.id);
-          }
-        }
-      }
-
-      if (serviceName && transactionName) {
-        const metadata = metadataByOperationId.get(currentEvent.operationId);
-        if (
-          metadata &&
-          metadata[SERVICE_NAME] === serviceName &&
-          metadata[PROCESSOR_EVENT] === ProcessorEvent.transaction &&
-          metadata[TRANSACTION_NAME] === transactionName
-        ) {
-          entryIds.add(currentEvent.id);
-        }
-      } else if (!currentEvent.parentId) {
-        entryIds.add(currentEvent.id);
-      }
-
-      eventTree.set(currentEvent.id, currentEvent);
-
-      if (reprocessQueue.size > 0) {
-        stack.push(...reprocessQueue);
-        reprocessQueue.clear();
-      }
-
-      visited.delete(currentEventId);
-    }
-  }
-
-  return { entryIds, eventTree };
+  return path;
 }
