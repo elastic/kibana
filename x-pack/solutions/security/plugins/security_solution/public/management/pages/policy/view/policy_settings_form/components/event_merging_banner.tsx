@@ -21,7 +21,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
   const bannerTitle = i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventMergingBanner.title',
     {
-      defaultMessage: "We've recently changed Linux event collection",
+      defaultMessage: "We've recently changed event collection",
     }
   );
 
