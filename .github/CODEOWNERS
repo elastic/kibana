@@ -195,6 +195,9 @@ packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/response-ops/alerts_apis @elastic/response-ops
+packages/response-ops/alerts_fields_browser @elastic/response-ops
+packages/response-ops/alerts_table @elastic/response-ops
 packages/serverless/storybook/config @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core

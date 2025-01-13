@@ -11,7 +11,6 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
-import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -37,6 +36,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
+import { Alert } from '@kbn/alerting-types';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 jest.mock('../../utils/kibana_react', () => ({

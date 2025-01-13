@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import {
-  mockedTriggersActionsUiService,
-  TestProvidersComponent,
-} from '../../../../mocks/test_providers';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsFieldBrowser } from './field_browser';
+
+jest.mock('@kbn/response-ops-alerts-fields-browser', () => ({
+  FieldBrowser: jest.fn().mockReturnValue(<div data-test-subj="fieldBrowser" />),
+}));
 
 const stub = jest.fn();
 
 describe('<IndicatorsFieldBrowser />', () => {
-  it('should retrieve the field browser widget from respective service', () => {
+  it('should render the field browser widget with the correct props', () => {
     render(
       <IndicatorsFieldBrowser
         browserFields={{}}
@@ -29,8 +31,7 @@ describe('<IndicatorsFieldBrowser />', () => {
       }
     );
 
-    expect(mockedTriggersActionsUiService.getFieldBrowser).toHaveBeenCalledTimes(1);
-    expect(mockedTriggersActionsUiService.getFieldBrowser).toHaveBeenCalledWith(
+    expect(FieldBrowser).toHaveBeenCalledWith(
       expect.objectContaining({
         browserFields: {},
         columnIds: [],
@@ -39,7 +40,8 @@ describe('<IndicatorsFieldBrowser />', () => {
         options: {
           preselectedCategoryIds: ['threat', 'base', 'event', 'agent'],
         },
-      })
+      }),
+      expect.anything()
     );
   });
 });

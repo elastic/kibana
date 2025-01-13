@@ -16,8 +16,16 @@ import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 import type { FeatureIdsResponse } from '../../../containers/types';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
 
 jest.mock('../../../containers/api');
+
+// Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
+// correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
+jest.mock('@kbn/response-ops-alerts-table', () => ({
+  AlertsTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+}));
+const mockAlertsTable = jest.mocked(AlertsTable);
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -25,13 +33,10 @@ const caseData: CaseUI = {
 };
 
 describe('CaseUI View Page activity tab', () => {
-  const getAlertsStateTableMock = jest.fn();
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
-    appMockRender.coreStart.triggersActionsUi.getAlertsStateTable =
-      getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
   });
 
   afterEach(() => {
@@ -47,16 +52,19 @@ describe('CaseUI View Page activity tab', () => {
   it('should call the alerts table with correct props for security solution', async () => {
     appMockRender.render(<CaseViewAlerts caseData={caseData} />);
     await waitFor(async () => {
-      expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
-        id: 'case-details-alerts-securitySolution',
-        query: {
-          ids: {
-            values: ['alert-id-1'],
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+          id: 'case-details-alerts-securitySolution',
+          query: {
+            ids: {
+              values: ['alert-id-1'],
+            },
           },
-        },
-        showAlertStatusWithFlapping: false,
-      });
+          showAlertStatusWithFlapping: false,
+        }),
+        expect.anything()
+      );
     });
   });
 
@@ -79,17 +87,20 @@ describe('CaseUI View Page activity tab', () => {
     );
 
     await waitFor(async () => {
-      expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        ruleTypeIds: ['log-threshold'],
-        consumers: ['observability'],
-        id: 'case-details-alerts-observability',
-        query: {
-          ids: {
-            values: ['alert-id-1'],
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleTypeIds: ['log-threshold'],
+          consumers: ['observability'],
+          id: 'case-details-alerts-observability',
+          query: {
+            ids: {
+              values: ['alert-id-1'],
+            },
           },
-        },
-        showAlertStatusWithFlapping: true,
-      });
+          showAlertStatusWithFlapping: true,
+        }),
+        expect.anything()
+      );
     });
   });
 
