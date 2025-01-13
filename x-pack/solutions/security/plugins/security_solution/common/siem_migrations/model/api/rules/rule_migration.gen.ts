@@ -22,6 +22,7 @@ import {
   RuleMigrationTaskStats,
   OriginalRule,
   RuleMigration,
+  RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
   RuleMigrationResourceData,
@@ -240,14 +241,7 @@ export type RetryRuleMigrationRequestBody = z.infer<typeof RetryRuleMigrationReq
 export const RetryRuleMigrationRequestBody = z.object({
   connector_id: ConnectorId,
   langsmith_options: LangSmithOptions.optional(),
-  /**
-   * The indicator to retry only failed rules
-   */
-  failed: z.boolean().optional(),
-  /**
-   * The indicator to retry only not fully translated rules
-   */
-  not_fully_translated: z.boolean().optional(),
+  filter: RuleMigrationRetryFilter.optional(),
 });
 export type RetryRuleMigrationRequestBodyInput = z.input<typeof RetryRuleMigrationRequestBody>;
 

@@ -46,6 +46,11 @@ export enum SiemMigrationStatus {
   FAILED = 'failed',
 }
 
+export enum SiemMigrationRetryFilter {
+  FAILED = 'failed',
+  NOT_FULLY_TRANSLATED = 'not_fully_translated',
+}
+
 export enum RuleTranslationResult {
   FULL = 'full',
   PARTIAL = 'partial',

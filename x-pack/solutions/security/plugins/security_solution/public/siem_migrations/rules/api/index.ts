@@ -11,6 +11,7 @@ import type { UpdateRuleMigrationData } from '../../../../common/siem_migrations
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
   SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
@@ -170,10 +171,8 @@ export interface RetryRuleMigrationParams {
   connectorId: string;
   /** Optional LangSmithOptions to use for the for the reprocessing */
   langSmithOptions?: LangSmithOptions;
-  /** Optional indicator to retry only failed rules */
-  failed?: boolean;
-  /** Optional indicator to retry only not fully translated rules */
-  notFullyTranslated?: boolean;
+  /** Optional indicator to filter migration rules to retry */
+  filter?: SiemMigrationRetryFilter;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -182,14 +181,12 @@ export const retryRuleMigration = async ({
   migrationId,
   connectorId,
   langSmithOptions,
-  failed,
-  notFullyTranslated,
+  filter,
   signal,
 }: RetryRuleMigrationParams): Promise<RetryRuleMigrationResponse> => {
   const body: RetryRuleMigrationRequestBody = {
     connector_id: connectorId,
-    failed,
-    not_fully_translated: notFullyTranslated,
+    filter,
   };
   if (langSmithOptions) {
     body.langsmith_options = langSmithOptions;

@@ -45,8 +45,7 @@ export const registerSiemRuleMigrationsRetryRoute = (
           const {
             langsmith_options: langsmithOptions,
             connector_id: connectorId,
-            failed,
-            not_fully_translated: notFullyTranslated,
+            filter,
           } = req.body;
 
           try {
@@ -66,8 +65,8 @@ export const registerSiemRuleMigrationsRetryRoute = (
             };
 
             const filters: RuleMigrationFilters = {
-              failed,
-              ...(notFullyTranslated ? { fullyTranslated: !notFullyTranslated } : {}),
+              ...(filter === 'failed' ? { failed: true } : {}),
+              ...(filter === 'not_fully_translated' ? { fullyTranslated: false } : {}),
             };
             const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, filters);
             if (!updated) {

@@ -32,7 +32,10 @@ import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_preb
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  RuleTranslationResult,
+  SiemMigrationRetryFilter,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
 import type { FilterOptions } from './filters';
@@ -206,7 +209,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, { failed: true });
+      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
     }, [migrationId, retryRuleMigration]);
 
     const isLoading =
