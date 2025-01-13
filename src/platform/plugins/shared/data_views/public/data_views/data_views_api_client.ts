@@ -89,8 +89,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         });
 
     return request.catch((resp) => {
-      // Handle errors with a body
-      if (resp.body) {
+      // Custom errors with a body
+      if (resp?.body) {
         if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
           throw new DataViewMissingIndices(resp.body.message);
         }
@@ -98,15 +98,13 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
       }
 
-      // If the request was cancelled, pass on the AbortError so it can be handled by the caller
-      if (resp?.name === 'AbortError') {
-        const abortError = new Error(resp?.message);
-        abortError.name = 'AbortError';
-        throw abortError;
+      // Regular errors including AbortError
+      if (typeof resp?.name === 'string' && typeof resp?.message === 'string') {
+        throw resp;
       }
 
-      // Handle other errors
-      throw new Error(resp?.message ?? 'Unknown error');
+      // Other unknown errors
+      throw new Error('Unknown error');
     });
   }
 
