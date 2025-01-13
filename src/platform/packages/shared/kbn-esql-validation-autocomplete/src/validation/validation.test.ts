@@ -1731,7 +1731,7 @@ describe('validation logic', () => {
         getPreferences: /Unknown/,
         getFieldsMetadata: /Unknown/,
       };
-      return excludedCallback.map((callback) => contentByCallback[callback]) || [];
+      return excludedCallback.map((callback) => (contentByCallback as any)[callback]) || [];
     }
 
     function getPartialCallbackMocks(exclude?: string) {
