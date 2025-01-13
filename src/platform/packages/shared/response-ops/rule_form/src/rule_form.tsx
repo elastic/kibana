@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { useMemo } from 'react';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
-import {
-  RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
-  RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
-} from './translations';
-import { RuleFormPlugins } from './types';
 import './rule_form.scss';
 import { RuleFormScreenContextProvider } from './rule_form_screen_context';
+import {
+  RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
+  RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
+} from './translations';
+import { RuleFormData, RuleFormPlugins } from './types';
 
 const queryClient = new QueryClient();
 
@@ -29,10 +30,37 @@ export interface RuleFormProps {
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  consumer?: string;
+  connectorFeatureId?: string;
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
+  hideInterval?: boolean;
+  validConsumers?: RuleCreationValidConsumer[];
+  filteredRuleTypes?: string[];
+  shouldUseRuleProducer?: boolean;
+  canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
+  initialValues?: Partial<RuleFormData>;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins: _plugins, onCancel, onSubmit, id, ruleTypeId, isFlyout } = props;
+  const {
+    plugins: _plugins,
+    onCancel,
+    onSubmit,
+    id,
+    ruleTypeId,
+    isFlyout,
+    consumer,
+    connectorFeatureId,
+    multiConsumerSelection,
+    hideInterval,
+    validConsumers,
+    filteredRuleTypes,
+    shouldUseRuleProducer,
+    canShowConsumerSelection,
+    showMustacheAutocompleteSwitch,
+    initialValues,
+  } = props;
 
   const {
     http,
@@ -76,6 +104,8 @@ export const RuleForm = (props: RuleFormProps) => {
           onCancel={onCancel}
           onSubmit={onSubmit}
           isFlyout={isFlyout}
+          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
+          connectorFeatureId={connectorFeatureId}
         />
       );
     }
@@ -87,6 +117,16 @@ export const RuleForm = (props: RuleFormProps) => {
           onCancel={onCancel}
           onSubmit={onSubmit}
           isFlyout={isFlyout}
+          consumer={consumer}
+          connectorFeatureId={connectorFeatureId}
+          multiConsumerSelection={multiConsumerSelection}
+          hideInterval={hideInterval}
+          validConsumers={validConsumers}
+          filteredRuleTypes={filteredRuleTypes}
+          shouldUseRuleProducer={shouldUseRuleProducer}
+          canShowConsumerSelection={canShowConsumerSelection}
+          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
+          initialValues={initialValues}
         />
       );
     }
@@ -119,9 +159,18 @@ export const RuleForm = (props: RuleFormProps) => {
     actionTypeRegistry,
     id,
     ruleTypeId,
-    isFlyout,
     onCancel,
     onSubmit,
+    isFlyout,
+    showMustacheAutocompleteSwitch,
+    connectorFeatureId,
+    consumer,
+    multiConsumerSelection,
+    hideInterval,
+    validConsumers,
+    filteredRuleTypes,
+    shouldUseRuleProducer,
+    canShowConsumerSelection,
   ]);
 
   return (

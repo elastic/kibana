@@ -80,19 +80,19 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return <RuleForm isFlyout plugins={services} />;
-
   return triggersActionsUi?.getAddRuleFlyout({
-    metadata: discoverMetadata,
+    plugins: services,
+    // metadata: discoverMetadata,
     consumer: 'alerts',
-    onClose: (_, metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
+    onCancel: (_, metadata) => {
+      // onUpdateAdHocDataViews(metadata!.adHocDataViewList);
       onFinishAction();
     },
     onSave: async (metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
+      // onUpdateAdHocDataViews(metadata!.adHocDataViewList);
+      onFinishAction();
     },
-    canChangeTrigger: false,
+    // canChangeTrigger: false,
     ruleTypeId: ES_QUERY_ID,
     initialValues: { params: getParams() },
     validConsumers: EsQueryValidConsumer,

@@ -48,6 +48,7 @@ export interface CreateRuleFormProps {
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  initialValues?: Partial<RuleFormData>;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -65,6 +66,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     isFlyout,
     onCancel,
     onSubmit,
+    initialValues = {},
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;
@@ -165,20 +167,23 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
-          formData: getDefaultFormData({
-            ruleTypeId,
-            name: `${ruleType.name} rule`,
-            consumer: getInitialConsumer({
-              consumer,
-              ruleType,
-              shouldUseRuleProducer,
+          formData: {
+            ...getDefaultFormData({
+              ruleTypeId,
+              name: `${ruleType.name} rule`,
+              consumer: getInitialConsumer({
+                consumer,
+                ruleType,
+                shouldUseRuleProducer,
+              }),
+              schedule: getInitialSchedule({
+                ruleType,
+                minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+              }),
+              actions: [],
             }),
-            schedule: getInitialSchedule({
-              ruleType,
-              minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-            }),
-            actions: [],
-          }),
+            ...initialValues,
+          },
           plugins,
           connectors,
           connectorTypes,
