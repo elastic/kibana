@@ -524,4 +524,9 @@ export interface ISavedObjectsSecurityExtension {
    * Retrieves the current user from the request context if available
    */
   getCurrentUser: () => AuthenticatedUser | null;
+
+  /**
+   * Retrieves whether we need to include save objects names in the audit out
+   */
+  includeSavedObjectNames: () => boolean;
 }

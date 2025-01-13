@@ -8,7 +8,7 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
@@ -25,7 +25,7 @@ export interface PerformRemoveReferencesToParams {
 
 export const performRemoveReferencesTo = async <T>(
   { type, id, options }: PerformRemoveReferencesToParams,
-  { registry, helpers, client, mappings, extensions = {} }: ApiExecutionContext
+  { registry, helpers, client, mappings, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsRemoveReferencesToResponse> => {
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
@@ -33,17 +33,31 @@ export const performRemoveReferencesTo = async <T>(
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { refresh = true } = options;
 
-  const nameAttribute = registry.getNameAttribute(type);
-  const sourceIncludes = nameAttribute ? [nameAttribute] : ['name', 'title'];
+  if (securityExtension) {
+    let name;
 
-  // [Elena] Check response
-  const savedObject = await client.get({
-    index: registry.getIndex(type)!,
-    id,
-    _source_includes: sourceIncludes,
-  });
+    if (securityExtension.includeSavedObjectNames()) {
+      const nameAttribute = registry.getNameAttribute(type);
+      const sourceIncludes = nameAttribute
+        ? [`${type}.${nameAttribute}`]
+        : [`${type}.name`, `${type}.title`];
 
-  await securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
+      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+        {
+          index: commonHelper.getIndexForType(type),
+          id: serializer.generateRawId(namespace, type, id),
+          _source_includes: sourceIncludes,
+        },
+        { ignore: [404], meta: true }
+      );
+
+      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+
+      name = SavedObjectsUtils.getName(saveObject, nameAttribute);
+    }
+
+    await securityExtension.authorizeRemoveReferences({ namespace, object: { type, id, name } });
+  }
 
   const allTypes = registry.getAllTypes().map((t) => t.name);
 

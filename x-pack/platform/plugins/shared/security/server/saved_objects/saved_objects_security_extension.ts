@@ -1425,6 +1425,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   getCurrentUser() {
     return this.getCurrentUserFunc();
   }
+
+  includeSavedObjectNames() {
+    return this.auditLogger.includeSavedObjectNames;
+  }
 }
 
 /**

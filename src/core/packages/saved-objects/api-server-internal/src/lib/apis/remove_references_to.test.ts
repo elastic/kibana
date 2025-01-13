@@ -244,6 +244,41 @@ describe('SavedObjectsRepository', () => {
       });
 
       it('calls authorizeRemoveReferences with the correct parameters', async () => {
+        apiExecutionContext.client.get.mockResponse({
+          _source: {
+            foo: {
+              name: 'foo_name',
+            },
+          },
+          found: true,
+          _index: '.kibana',
+          _id: 'id',
+        });
+
+        apiExecutionContext.extensions.securityExtension.includeSavedObjectNames.mockReturnValue(
+          true
+        );
+
+        await performRemoveReferencesTo(
+          { type: 'foo', id: 'id', options: { namespace } },
+          apiExecutionContext
+        );
+
+        const securityExt = apiExecutionContext.extensions.securityExtension!;
+        expect(securityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+        expect(securityExt.authorizeRemoveReferences).toHaveBeenLastCalledWith({
+          namespace,
+          object: { type: 'foo', id: 'id', name: 'foo_name' },
+        });
+      });
+
+      it('calls authorizeRemoveReferences with the correct parameters when includeSavedObjectNames is disabled', async () => {
+        apiExecutionContext.extensions.securityExtension.includeSavedObjectNames.mockReturnValue(
+          false
+        );
+
+        expect(apiExecutionContext.client.get).not.toHaveBeenCalled();
+
         await performRemoveReferencesTo(
           { type: 'foo', id: 'id', options: { namespace } },
           apiExecutionContext
