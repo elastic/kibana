@@ -943,7 +943,7 @@ packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/packages/kbn-streams-schema @elastic/streams-program-team
+x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
