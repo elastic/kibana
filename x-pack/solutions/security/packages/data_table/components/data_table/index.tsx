@@ -19,15 +19,11 @@ import type {
 import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useEffect, useMemo, useContext, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useContext, useRef, ComponentType } from 'react';
 import { useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import type {
-  FieldBrowserOptions,
-  FieldBrowserProps,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   BrowserFields,
@@ -41,6 +37,7 @@ import {
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldBrowser, type FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -57,8 +54,6 @@ import { tableDefaults } from '../../store/data_table/defaults';
 const DATA_TABLE_ARIA_LABEL = i18n.translate('securitySolutionPackages.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
 });
-
-type GetFieldBrowser = (props: FieldBrowserProps) => void;
 
 type NonCustomizableGridProps =
   | 'id'
@@ -94,7 +89,7 @@ interface BaseDataTableProps {
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
-  getFieldBrowser: GetFieldBrowser;
+  fieldsBrowserComponent?: ComponentType;
   getFieldSpec: (fieldName: string) => FieldSpec | undefined;
   cellActionsTriggerId?: string;
 }
@@ -159,7 +154,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     totalItems,
     rowHeightsOptions,
     isEventRenderedView = false,
-    getFieldBrowser,
+    fieldsBrowserComponent = FieldBrowser,
     getFieldSpec,
     cellActionsTriggerId,
     ...otherProps
@@ -177,6 +172,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       defaultColumns,
       dataViewId,
     } = dataTable;
+    const FieldsBrowserComponent = fieldsBrowserComponent;
 
     const columnHeaders = memoizedGetColumnHeaders(columns, browserFields, isEventRenderedView);
 
@@ -238,13 +234,13 @@ export const DataTableComponent = React.memo<DataTableProps>(
                 <UnitCount data-test-subj="server-side-event-count">{unitCountText}</UnitCount>
                 {additionalControls ?? null}
                 {!isEventRenderedView ? (
-                  getFieldBrowser({
-                    browserFields,
-                    options: fieldBrowserOptions,
-                    columnIds: columnHeaders.map(({ id: columnId }) => columnId),
-                    onResetColumns,
-                    onToggleColumn,
-                  })
+                  <FieldsBrowserComponent
+                    browserFields={browserFields}
+                    options={fieldBrowserOptions}
+                    columnIds={columnHeaders.map(({ id: columnId }) => columnId)}
+                    onResetColumns={onResetColumns}
+                    onToggleColumn={onToggleColumn}
+                  />
                 ) : (
                   <></>
                 )}
@@ -270,7 +266,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         unitCountText,
         additionalControls,
         isEventRenderedView,
-        getFieldBrowser,
+        FieldsBrowserComponent,
         browserFields,
         fieldBrowserOptions,
         columnHeaders,

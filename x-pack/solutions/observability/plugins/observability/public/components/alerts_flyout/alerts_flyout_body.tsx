@@ -7,7 +7,10 @@
 import React, { ComponentProps, useCallback, useMemo, useState } from 'react';
 import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
+import {
+  AlertFieldsTable,
+  ScrollableFlyoutTabbedContent,
+} from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { AlertOverview } from '../alert_overview/alert_overview';

@@ -15,6 +15,8 @@ import {
 import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { resolveRule } from '@kbn/response-ops-rule-form';
+import { muteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/mute_alert_instance';
+import { unmuteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unmute_alert_instance';
 import {
   Rule,
   RuleType,
@@ -39,7 +41,6 @@ import type {
 import { cloneRule } from '../../../lib/rule_api/clone';
 import { loadRule } from '../../../lib/rule_api/get_rule';
 import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
-import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import {
   loadExecutionLogAggregations,
@@ -51,7 +52,6 @@ import { loadRuleState } from '../../../lib/rule_api/state';
 import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
-import { unmuteAlertInstance } from '../../../lib/rule_api/unmute_alert';
 import { snoozeRule, bulkSnoozeRules } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule, bulkUnsnoozeRules } from '../../../lib/rule_api/unsnooze';
 import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';

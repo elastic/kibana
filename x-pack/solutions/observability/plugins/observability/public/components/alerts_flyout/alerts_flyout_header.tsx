@@ -19,7 +19,7 @@ export function AlertsFlyoutHeader({ alert }: AlertsFlyoutHeaderProps) {
     <>
       <EuiSpacer size="s" />
       <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-        <h2>{alert[ALERT_RULE_NAME]}</h2>
+        <h2>{alert[ALERT_RULE_NAME]?.[0] as string}</h2>
       </EuiTitle>
     </>
   );

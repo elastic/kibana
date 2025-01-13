@@ -21,6 +21,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from './types';
 import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 function getConfig(overrides = {}) {
   return {
@@ -82,6 +83,7 @@ describe('Cases Ui Plugin', () => {
         remove: jest.fn(),
       },
       triggersActionsUi: triggersActionsUiMock.createStart(),
+      fieldFormats: fieldFormatsMock,
     };
   });
 
