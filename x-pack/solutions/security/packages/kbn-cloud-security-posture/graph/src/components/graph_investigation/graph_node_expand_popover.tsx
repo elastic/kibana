@@ -17,13 +17,59 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
 } from '../test_ids';
 
+export type NodeToggleAction = 'show' | 'hide';
+
+/**
+ * Props for the GraphNodeExpandPopover component.
+ */
 interface GraphNodeExpandPopoverProps {
+  /**
+   * Indicates whether the popover is open.
+   */
   isOpen: boolean;
+
+  /**
+   * The HTML element that the popover is anchored to.
+   */
   anchorElement: HTMLElement | null;
+
+  /**
+   * Function to close the popover.
+   */
   closePopover: () => void;
-  onShowRelatedEntitiesClick: () => void;
-  onShowActionsByEntityClick: () => void;
-  onShowActionsOnEntityClick: () => void;
+
+  /**
+   * Action to toggle related entities.
+   */
+  relatedEntitiesAction: NodeToggleAction;
+
+  /**
+   * Action to toggle actions by entity.
+   */
+  actionsByEntityAction: NodeToggleAction;
+
+  /**
+   * Action to toggle actions on entity.
+   */
+  actionsOnEntityAction: NodeToggleAction;
+
+  /**
+   * Callback function when related entities are clicked.
+   * @param action - The action to take. 'show' to show related entities, 'hide' to hide.
+   */
+  onToggleRelatedEntitiesClick: (action: NodeToggleAction) => void;
+
+  /**
+   * Callback function when actions by entity are clicked.
+   * @param action - The action to take. 'show' to show actions by entity, 'hide' to hide.
+   */
+  onToggleActionsByEntityClick: (action: NodeToggleAction) => void;
+
+  /**
+   * Callback function when actions on entity are clicked.
+   * @param action - The action to take. 'show' to show actions on entity, 'hide' to hide.
+   */
+  onToggleActionsOnEntityClick: (action: NodeToggleAction) => void;
 }
 
 export const GraphNodeExpandPopover = memo<GraphNodeExpandPopoverProps>(
@@ -31,9 +77,12 @@ export const GraphNodeExpandPopover = memo<GraphNodeExpandPopoverProps>(
     isOpen,
     anchorElement,
     closePopover,
-    onShowRelatedEntitiesClick,
-    onShowActionsByEntityClick,
-    onShowActionsOnEntityClick,
+    relatedEntitiesAction,
+    actionsByEntityAction,
+    actionsOnEntityAction,
+    onToggleRelatedEntitiesClick,
+    onToggleActionsByEntityClick,
+    onToggleActionsOnEntityClick,
   }) => {
     return (
       <GraphPopover
@@ -47,35 +96,62 @@ export const GraphNodeExpandPopover = memo<GraphNodeExpandPopoverProps>(
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
           <ExpandPopoverListItem
             iconType="users"
-            label={i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsByEntity',
-              {
-                defaultMessage: 'Show actions by this entity',
-              }
-            )}
-            onClick={onShowActionsByEntityClick}
+            label={
+              actionsByEntityAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsByEntity',
+                    {
+                      defaultMessage: 'Show actions by this entity',
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsByEntity',
+                    {
+                      defaultMessage: 'Hide actions by this entity',
+                    }
+                  )
+            }
+            onClick={() => onToggleActionsByEntityClick(actionsByEntityAction)}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID}
           />
           <ExpandPopoverListItem
             iconType="storage"
-            label={i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsOnEntity',
-              {
-                defaultMessage: 'Show actions on this entity',
-              }
-            )}
-            onClick={onShowActionsOnEntityClick}
+            label={
+              actionsOnEntityAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsOnEntity',
+                    {
+                      defaultMessage: 'Show actions on this entity',
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsOnEntity',
+                    {
+                      defaultMessage: 'Hide actions on this entity',
+                    }
+                  )
+            }
+            onClick={() => onToggleActionsOnEntityClick(actionsOnEntityAction)}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID}
           />
           <ExpandPopoverListItem
             iconType="visTagCloud"
-            label={i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEvents',
-              {
-                defaultMessage: 'Show related events',
-              }
-            )}
-            onClick={onShowRelatedEntitiesClick}
+            label={
+              relatedEntitiesAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
+                    {
+                      defaultMessage: 'Show related entities',
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
+                    {
+                      defaultMessage: 'Hide related entities',
+                    }
+                  )
+            }
+            onClick={() => onToggleRelatedEntitiesClick(relatedEntitiesAction)}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID}
           />
         </EuiListGroup>

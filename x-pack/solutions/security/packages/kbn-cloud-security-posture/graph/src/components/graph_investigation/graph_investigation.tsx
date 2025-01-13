@@ -10,20 +10,13 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BooleanRelation,
-  buildEsQuery,
-  isCombinedFilter,
-  buildCombinedFilter,
-  isFilter,
-  FilterStateStore,
-} from '@kbn/es-query';
-import type { Filter, Query, TimeRange, PhraseFilter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Graph, isEntityNode } from '../../..';
+import { Graph, NodeProps, isEntityNode } from '../../..';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
 import { useGraphLabelExpandPopover } from './use_graph_label_expand_popover';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
@@ -37,108 +30,103 @@ import {
 } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-
-const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
-
-const buildPhraseFilter = (field: string, value: string, dataViewId?: string): PhraseFilter => ({
-  meta: {
-    key: field,
-    index: dataViewId,
-    negate: false,
-    disabled: false,
-    type: 'phrase',
-    field,
-    controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-    params: {
-      query: value,
-    },
-  },
-  query: {
-    match_phrase: {
-      [field]: value,
-    },
-  },
-});
-
-/**
- * Adds a filter to the existing list of filters based on the provided key and value.
- * It will always use the first filter in the list to build a combined filter with the new filter.
- *
- * @param dataViewId - The ID of the data view to which the filter belongs.
- * @param prev - The previous list of filters.
- * @param key - The key for the filter.
- * @param value - The value for the filter.
- * @returns A new list of filters with the added filter.
- */
-const addFilter = (dataViewId: string, prev: Filter[], key: string, value: string) => {
-  const [firstFilter, ...otherFilters] = prev;
-
-  if (isCombinedFilter(firstFilter) && firstFilter?.meta?.relation === BooleanRelation.OR) {
-    return [
-      {
-        ...firstFilter,
-        meta: {
-          ...firstFilter.meta,
-          controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-          params: [
-            ...(Array.isArray(firstFilter.meta.params) ? firstFilter.meta.params : []),
-            buildPhraseFilter(key, value),
-          ],
-        },
-      },
-      ...otherFilters,
-    ];
-  } else if (isFilter(firstFilter) && firstFilter.meta?.type !== 'custom') {
-    const combinedFilter = buildCombinedFilter(
-      BooleanRelation.OR,
-      [firstFilter, buildPhraseFilter(key, value, dataViewId)],
-      {
-        id: dataViewId,
-      }
-    );
-    return [
-      {
-        ...combinedFilter,
-        meta: {
-          ...combinedFilter.meta,
-          controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-        },
-      },
-      ...otherFilters,
-    ];
-  } else {
-    return [
-      {
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        ...buildPhraseFilter(key, value, dataViewId),
-      },
-      ...prev,
-    ];
-  }
-};
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  addFilter,
+  containsFilter,
+  removeFilter,
+} from './search_filters';
+import { NodeToggleAction } from './graph_node_expand_popover';
 
 const useGraphPopovers = (
   dataViewId: string,
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>
+  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
+  searchFilters: Filter[]
 ) => {
+  const getRelatedEntitiesAction = useCallback(
+    (node: NodeProps) => {
+      return containsFilter(searchFilters, RELATED_ENTITY, node.id) ? 'hide' : 'show';
+    },
+    [searchFilters]
+  );
+  const getActionsByEntityAction = useCallback(
+    (node: NodeProps) => {
+      return containsFilter(searchFilters, ACTOR_ENTITY_ID, node.id) ? 'hide' : 'show';
+    },
+    [searchFilters]
+  );
+  const getActionsOnEntityAction = useCallback(
+    (node: NodeProps) => {
+      return containsFilter(searchFilters, TARGET_ENTITY_ID, node.id) ? 'hide' : 'show';
+    },
+    [searchFilters]
+  );
+
+  const onToggleExploreRelatedEntitiesClick = useCallback(
+    (node: NodeProps, action: NodeToggleAction) => {
+      if (action === 'show') {
+        setSearchFilters((prev) => addFilter(dataViewId, prev, RELATED_ENTITY, node.id));
+      } else if (action === 'hide') {
+        setSearchFilters((prev) => removeFilter(prev, RELATED_ENTITY, node.id));
+      }
+    },
+    [dataViewId, setSearchFilters]
+  );
+
+  const onToggleActionsByEntityClick = useCallback(
+    (node: NodeProps, action: NodeToggleAction) => {
+      if (action === 'show') {
+        setSearchFilters((prev) => addFilter(dataViewId, prev, ACTOR_ENTITY_ID, node.id));
+      } else if (action === 'hide') {
+        setSearchFilters((prev) => removeFilter(prev, ACTOR_ENTITY_ID, node.id));
+      }
+    },
+    [dataViewId, setSearchFilters]
+  );
+
+  const onToggleActionsOnEntityClick = useCallback(
+    (node: NodeProps, action: NodeToggleAction) => {
+      if (action === 'show') {
+        setSearchFilters((prev) => addFilter(dataViewId, prev, TARGET_ENTITY_ID, node.id));
+      } else if (action === 'hide') {
+        setSearchFilters((prev) => removeFilter(prev, TARGET_ENTITY_ID, node.id));
+      }
+    },
+    [dataViewId, setSearchFilters]
+  );
+
   const nodeExpandPopover = useGraphNodeExpandPopover({
-    onExploreRelatedEntitiesClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, RELATED_ENTITY, node.id));
-    },
-    onShowActionsByEntityClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, ACTOR_ENTITY_ID, node.id));
-    },
-    onShowActionsOnEntityClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, TARGET_ENTITY_ID, node.id));
-    },
+    getRelatedEntitiesAction,
+    getActionsByEntityAction,
+    getActionsOnEntityAction,
+    onToggleExploreRelatedEntitiesClick,
+    onToggleActionsByEntityClick,
+    onToggleActionsOnEntityClick,
   });
 
-  const labelExpandPopover = useGraphLabelExpandPopover({
-    onShowEventsWithThisActionClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? ''));
+  const getEventsWithThisActionToggleAction = useCallback(
+    (node: NodeProps) => {
+      return containsFilter(searchFilters, EVENT_ACTION, node.data.label ?? '') ? 'hide' : 'show';
     },
+    [searchFilters]
+  );
+
+  const onShowEventsWithThisActionClick = useCallback(
+    (node: NodeProps, action: NodeToggleAction) => {
+      if (action === 'show') {
+        setSearchFilters((prev) =>
+          addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? '')
+        );
+      } else if (action === 'hide') {
+        setSearchFilters((prev) => removeFilter(prev, EVENT_ACTION, node.data.label ?? ''));
+      }
+    },
+    [dataViewId, setSearchFilters]
+  );
+
+  const labelExpandPopover = useGraphLabelExpandPopover({
+    getEventsWithThisActionToggleAction,
+    onShowEventsWithThisActionClick,
   });
 
   const openPopoverCallback = useCallback(
@@ -223,9 +211,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const [searchToggled, setSearchToggled] = useState(!showToggleSearch);
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
-    const controlledFilter = searchFilters.find(
-      (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
-    );
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -268,7 +253,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
       dataView?.id ?? '',
-      setSearchFilters
+      setSearchFilters,
+      searchFilters
     );
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
@@ -312,6 +298,23 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data?.nodes]);
+
+    const searchFilterCounter = useMemo(() => {
+      const controlledFilter = searchFilters.find(
+        (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
+      );
+
+      const controlledFilterCount =
+        controlledFilter && Array.isArray(controlledFilter.meta?.params)
+          ? controlledFilter.meta.params.length
+          : 0;
+      const queryCounter = kquery.query.trim().length > 0 ? 1 : 0;
+      return (
+        searchFilters.length +
+        (controlledFilterCount > 1 ? controlledFilterCount - 1 : 0) +
+        queryCounter
+      );
+    }, [kquery.query, searchFilters]);
 
     return (
       <>
@@ -381,13 +384,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   showToggleSearch={showToggleSearch}
                   onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
-                  searchFilterCounter={
-                    controlledFilter && Array.isArray(controlledFilter.meta?.params)
-                      ? controlledFilter.meta.params.length
-                      : controlledFilter
-                      ? 1
-                      : 0
-                  }
+                  searchFilterCounter={searchFilterCounter}
                 />
               </Panel>
             </Graph>

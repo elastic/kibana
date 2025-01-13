@@ -14,16 +14,24 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
 } from '../test_ids';
+import type { NodeToggleAction } from './graph_node_expand_popover';
 
 interface GraphLabelExpandPopoverProps {
   isOpen: boolean;
   anchorElement: HTMLElement | null;
   closePopover: () => void;
-  onShowEventsWithThisActionClick: () => void;
+  eventsWithThisActionToggleAction: NodeToggleAction;
+  onShowEventsWithThisActionClick: (action: NodeToggleAction) => void;
 }
 
 export const GraphLabelExpandPopover = memo<GraphLabelExpandPopoverProps>(
-  ({ isOpen, anchorElement, closePopover, onShowEventsWithThisActionClick }) => {
+  ({
+    isOpen,
+    anchorElement,
+    closePopover,
+    eventsWithThisActionToggleAction,
+    onShowEventsWithThisActionClick,
+  }) => {
     return (
       <GraphPopover
         panelPaddingSize="s"
@@ -36,11 +44,18 @@ export const GraphLabelExpandPopover = memo<GraphLabelExpandPopoverProps>(
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
           <ExpandPopoverListItem
             iconType="users"
-            label={i18n.translate(
-              'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventsWithThisAction',
-              { defaultMessage: 'Show events with this action' }
-            )}
-            onClick={onShowEventsWithThisActionClick}
+            label={
+              eventsWithThisActionToggleAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventsWithThisAction',
+                    { defaultMessage: 'Show events with this action' }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideEventsWithThisAction',
+                    { defaultMessage: 'Hide events with this action' }
+                  )
+            }
+            onClick={() => onShowEventsWithThisActionClick(eventsWithThisActionToggleAction)}
             data-test-subj={GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID}
           />
         </EuiListGroup>

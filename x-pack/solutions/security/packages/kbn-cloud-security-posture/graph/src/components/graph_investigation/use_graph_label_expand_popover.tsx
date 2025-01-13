@@ -10,12 +10,15 @@ import { useGraphPopover } from '../../..';
 import type { ExpandButtonClickCallback, NodeProps } from '../types';
 import type { PopoverActions } from '../graph/use_graph_popover';
 import { GraphLabelExpandPopover } from './graph_label_expand_popover';
+import type { NodeToggleAction } from './graph_node_expand_popover';
 
 interface UseGraphLabelExpandPopoverArgs {
-  onShowEventsWithThisActionClick: (node: NodeProps) => void;
+  getEventsWithThisActionToggleAction: (node: NodeProps) => NodeToggleAction;
+  onShowEventsWithThisActionClick: (node: NodeProps, action: NodeToggleAction) => void;
 }
 
 export const useGraphLabelExpandPopover = ({
+  getEventsWithThisActionToggleAction,
   onShowEventsWithThisActionClick,
 }: UseGraphLabelExpandPopoverArgs) => {
   const { id, state, actions } = useGraphPopover('label-expand-popover');
@@ -69,8 +72,11 @@ export const useGraphLabelExpandPopover = ({
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
-      onShowEventsWithThisActionClick={() => {
-        onShowEventsWithThisActionClick(selectedNode.current as NodeProps);
+      eventsWithThisActionToggleAction={
+        selectedNode.current ? getEventsWithThisActionToggleAction(selectedNode.current) : 'show'
+      }
+      onShowEventsWithThisActionClick={(action) => {
+        onShowEventsWithThisActionClick(selectedNode.current as NodeProps, action);
         closePopoverHandler();
       }}
     />

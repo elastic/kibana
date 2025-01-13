@@ -8,18 +8,24 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import { useGraphPopover } from '../../..';
 import type { ExpandButtonClickCallback, NodeProps } from '../types';
-import { GraphNodeExpandPopover } from './graph_node_expand_popover';
+import { GraphNodeExpandPopover, type NodeToggleAction } from './graph_node_expand_popover';
 
 interface UseGraphNodeExpandPopoverArgs {
-  onExploreRelatedEntitiesClick: (node: NodeProps) => void;
-  onShowActionsByEntityClick: (node: NodeProps) => void;
-  onShowActionsOnEntityClick: (node: NodeProps) => void;
+  getRelatedEntitiesAction: (node: NodeProps) => NodeToggleAction;
+  getActionsByEntityAction: (node: NodeProps) => NodeToggleAction;
+  getActionsOnEntityAction: (node: NodeProps) => NodeToggleAction;
+  onToggleExploreRelatedEntitiesClick: (node: NodeProps, action: NodeToggleAction) => void;
+  onToggleActionsByEntityClick: (node: NodeProps, action: NodeToggleAction) => void;
+  onToggleActionsOnEntityClick: (node: NodeProps, action: NodeToggleAction) => void;
 }
 
 export const useGraphNodeExpandPopover = ({
-  onExploreRelatedEntitiesClick,
-  onShowActionsByEntityClick,
-  onShowActionsOnEntityClick,
+  getRelatedEntitiesAction,
+  getActionsByEntityAction,
+  getActionsOnEntityAction,
+  onToggleExploreRelatedEntitiesClick,
+  onToggleActionsByEntityClick,
+  onToggleActionsOnEntityClick,
 }: UseGraphNodeExpandPopoverArgs) => {
   const { id, state, actions } = useGraphPopover('node-expand-popover');
   const { openPopover, closePopover } = actions;
@@ -69,16 +75,25 @@ export const useGraphNodeExpandPopover = ({
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
-      onShowRelatedEntitiesClick={() => {
-        onExploreRelatedEntitiesClick(selectedNode.current as NodeProps);
+      relatedEntitiesAction={
+        selectedNode.current ? getRelatedEntitiesAction(selectedNode.current as NodeProps) : 'show'
+      }
+      actionsByEntityAction={
+        selectedNode.current ? getActionsByEntityAction(selectedNode.current as NodeProps) : 'show'
+      }
+      actionsOnEntityAction={
+        selectedNode.current ? getActionsOnEntityAction(selectedNode.current as NodeProps) : 'show'
+      }
+      onToggleRelatedEntitiesClick={(action) => {
+        onToggleExploreRelatedEntitiesClick(selectedNode.current as NodeProps, action);
         closePopoverHandler();
       }}
-      onShowActionsByEntityClick={() => {
-        onShowActionsByEntityClick(selectedNode.current as NodeProps);
+      onToggleActionsByEntityClick={(action) => {
+        onToggleActionsByEntityClick(selectedNode.current as NodeProps, action);
         closePopoverHandler();
       }}
-      onShowActionsOnEntityClick={() => {
-        onShowActionsOnEntityClick(selectedNode.current as NodeProps);
+      onToggleActionsOnEntityClick={(action) => {
+        onToggleActionsOnEntityClick(selectedNode.current as NodeProps, action);
         closePopoverHandler();
       }}
     />
