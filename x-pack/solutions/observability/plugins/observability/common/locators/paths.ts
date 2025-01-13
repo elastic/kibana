@@ -15,6 +15,7 @@ export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been m
 export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
+export const CREATE_RULE_PATH = '/alerts/rules/create/:ruleTypeId' as const;
 export const CASES_PATH = '/cases' as const;
 export const ANNOTATIONS_PATH = '/annotations' as const;
 export const SETTINGS_PATH = '/slos/settings' as const;
@@ -35,13 +36,18 @@ export const paths = {
     alertDetails: (alertId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
-    ruleDetails: (ruleId: string) =>
-      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    ruleDetails: (ruleId: string) => {
+      return `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`;
+    },
+    ruleCreate: (ruleTypeId: string) => {
+      return `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/create/${encodeURIComponent(ruleTypeId)}`;
+    },
   },
 };
 
 export const relativePaths = {
   observability: {
     ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    ruleCreate: (ruleTypeId: string) => `${RULES_PATH}/create/${encodeURIComponent(ruleTypeId)}`,
   },
 };
