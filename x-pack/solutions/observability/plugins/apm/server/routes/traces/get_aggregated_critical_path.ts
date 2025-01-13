@@ -128,22 +128,29 @@ export async function getAggregatedCriticalPath({
         `Retrieved critical path in ${performance.now() - now}ms for ${traceIds.length} traces`
       );
 
-      return groupEvents(response.hits);
+      const { eventsById, metadataByOperationId } = groupEvents(response.hits);
+      const entryIds = getEntryIds({
+        eventsById,
+        metadataByOperationId,
+        serviceName,
+        transactionName,
+      });
+
+      const eventTrees = getEventTrees({
+        eventsById,
+        entryIds,
+      });
+
+      return { entryIds, eventTrees, metadataByOperationId };
     })
   );
 
   const now = performance.now();
 
-  const { eventsById, metadataByOperationId } = mergeGroupedEventsChunks(groupEventsChunked);
-
-  const entryIds = getEntryIds({ eventsById, metadataByOperationId, serviceName, transactionName });
-  const eventTree = getEventTrees({
-    eventsById,
-    entryIds,
-  });
+  const { entryIds, eventTrees, metadataByOperationId } = mergeChunks(groupEventsChunked);
   const { timeByNodeId, nodes, rootNodes, operationIdByNodeId } = buildCriticalPath({
     entryIds,
-    eventTrees: eventTree,
+    eventTrees,
     metadataByOperationId,
   });
 
@@ -372,12 +379,24 @@ function buildCriticalPath({
   };
 }
 
-const mergeGroupedEventsChunks = (groupedEventsChunks: Array<ReturnType<typeof groupEvents>>) =>
+const mergeChunks = (
+  groupedEventsChunks: Array<{
+    entryIds: Set<string>;
+    eventTrees: Map<string, Event>;
+    metadataByOperationId: Map<OperationId, OperationMetadata>;
+  }>
+) =>
   groupedEventsChunks.reduce(
     (acc, curr) => {
-      for (const [key, value] of curr.eventsById) {
-        if (!acc.eventsById.has(key)) {
-          acc.eventsById.set(key, value);
+      for (const key of curr.entryIds) {
+        if (!acc.entryIds.has(key)) {
+          acc.entryIds.add(key);
+        }
+      }
+
+      for (const [key, value] of curr.eventTrees) {
+        if (!acc.eventTrees.has(key)) {
+          acc.eventTrees.set(key, value);
         }
       }
 
@@ -390,11 +409,13 @@ const mergeGroupedEventsChunks = (groupedEventsChunks: Array<ReturnType<typeof g
       return acc;
     },
     {
-      eventsById: new Map<string, Event>(),
+      entryIds: new Set<string>(),
+      eventTrees: new Map<string, Event>(),
       metadataByOperationId: new Map<OperationId, OperationMetadata>(),
     }
   );
 
+const hashCache = new Map<string, string>();
 function toHash(item: any): string {
   const FNV_32_INIT = 0x811c9dc5;
   const FNV_32_PRIME = 0x01000193;
@@ -410,6 +431,9 @@ function toHash(item: any): string {
   }
 
   const str = deterministicSerialize(item);
+  if (hashCache.has(str)) {
+    return hashCache.get(str)!;
+  }
 
   let rv = FNV_32_INIT;
 
@@ -421,7 +445,9 @@ function toHash(item: any): string {
     rv *= FNV_32_PRIME;
   }
 
-  return rv.toString(16);
+  const result = rv.toString(16);
+  hashCache.set(str, result);
+  return result;
 }
 
 const groupEvents = (response: QueryResult[]) => {
