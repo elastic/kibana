@@ -10,10 +10,7 @@ import { ILogsSharedLogEntriesDomain } from './log_entries_domain';
 export const createLogsSharedLogEntriesDomainMock =
   (): jest.Mocked<ILogsSharedLogEntriesDomain> => {
     return {
-      getLogEntriesAround: jest.fn(),
       getLogEntries: jest.fn(),
-      getLogSummaryBucketsBetween: jest.fn(),
-      getLogSummaryHighlightBucketsBetween: jest.fn(),
       getLogEntryDatasets: jest.fn(),
     };
   };
