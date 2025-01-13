@@ -19,7 +19,8 @@ export const policyFactory = (
   licenseUid = '',
   clusterUuid = '',
   clusterName = '',
-  serverless = false
+  serverless = false,
+  isGlobalTelemetryEnabled = false
 ): PolicyConfig => {
   const policy: PolicyConfig = {
     meta: {
@@ -31,6 +32,7 @@ export const policyFactory = (
       serverless,
     },
     global_manifest_version: 'latest',
+    global_telemetry_enabled: isGlobalTelemetryEnabled,
     windows: {
       events: {
         credential_access: true,

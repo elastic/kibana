@@ -83,6 +83,7 @@ import type {
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
+import { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -118,6 +119,7 @@ describe('Fleet integrations', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
+  const telemetryConfigProvider = new TelemetryConfigProvider();
   let productFeaturesService: ProductFeaturesService;
   let endpointMetadataService: EndpointMetadataService;
   let logger: Logger;
@@ -189,7 +191,8 @@ describe('Fleet integrations', () => {
         licenseService,
         exceptionListClient,
         cloudService,
-        productFeaturesService
+        productFeaturesService,
+        telemetryConfigProvider
       );
 
       return callback(
