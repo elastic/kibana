@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
-require('./assistant/attack_discovery').cli();
+require('../../../../../../src/setup_node_env');
+require('./attack_discovery').cli();

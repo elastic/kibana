@@ -6,9 +6,12 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { HORIZONTAL_LINE } from '../../endpoint/common/constants';
-import { createEsClient, createKbnClient } from '../../endpoint/common/stack_services';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import {
+  createEsClient,
+  createKbnClient,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { HORIZONTAL_LINE } from '@kbn/security-solution-plugin/scripts/endpoint/common/constants';
+import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { loadAttackDiscoveryData } from './load';
 
 export const cli = () => {

@@ -14,7 +14,7 @@ import type { KbnClient } from '@kbn/test';
 const PIPELINE_NAME = 'insights_pipeline';
 const DIRECTORY_PATH = path.resolve(
   __dirname,
-  '../../../../../../x-pack/test/security_solution_cypress/cypress/fixtures/assistant/attack_discovery'
+  '../../../../../../test/security_solution_cypress/cypress/fixtures/assistant/attack_discovery'
 );
 const MAPPING_FILE_PATH = path.join(DIRECTORY_PATH, 'mapping.json');
 
