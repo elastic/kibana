@@ -83,6 +83,7 @@ export const renderApp = (
     security,
     share,
     ml,
+    fleet,
   } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
@@ -116,6 +117,7 @@ export const renderApp = (
     coreSecurity: core.security,
     data: plugins.data,
     esConfig,
+    fleet,
     getChromeStyle$: chrome.getChromeStyle$,
     getNavLinks: chrome.navLinks.getAll,
     guidedOnboarding,
