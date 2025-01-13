@@ -71,13 +71,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-execution-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              },
+              "ExecutionContextSetup",
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
@@ -95,13 +89,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-execution-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              },
+              "ExecutionContextSetup",
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",

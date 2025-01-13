@@ -99,13 +99,7 @@
         ],
         "signature": [
           "(url: string, basePath: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           ", apps: Map<string, ",
           "App",
           "<unknown>>, currentUrl?: string) => ",
@@ -139,13 +133,7 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IBasePath",
-                "text": "IBasePath"
-              }
+              "IBasePath"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,

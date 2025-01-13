@@ -162,6 +162,8 @@ describe('create()', () => {
         isSystemAction: false,
       },
     ]);
+    actionsClient.listTypes.mockReset();
+    actionsClient.listTypes.mockResolvedValue([]);
 
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 

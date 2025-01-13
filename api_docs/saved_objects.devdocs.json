@@ -35,14 +35,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
@@ -52,19 +44,19 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/attribute_service.tsx"
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/attribute_service.tsx"
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
           },
           {
             "plugin": "dashboard",
@@ -89,6 +81,14 @@
           {
             "plugin": "discover",
             "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
           },
           {
             "plugin": "links",
@@ -674,21 +674,9 @@
             "description": [],
             "signature": [
               "() => { attributes: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               "; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1140,13 +1128,7 @@
             "label": "unresolvedIndexPatternReference",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1184,13 +1166,7 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">) => Promise<",
               {
                 "pluginId": "savedObjects",
@@ -1200,13 +1176,7 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1229,13 +1199,7 @@
                     "text": "SavedObject"
                   },
                   "<",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectAttributes",
-                    "text": "SavedObjectAttributes"
-                  },
+                  "SavedObjectAttributes",
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1313,21 +1277,9 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">>(object: T, references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1357,13 +1309,7 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",

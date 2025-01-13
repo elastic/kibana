@@ -51,13 +51,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
@@ -75,13 +69,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
@@ -99,13 +87,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
@@ -123,13 +105,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
@@ -147,13 +123,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-metrics-collectors-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-                "section": "def-server.EventLoopDelaysMonitor",
-                "text": "EventLoopDelaysMonitor"
-              }
+              "EventLoopDelaysMonitor"
             ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,

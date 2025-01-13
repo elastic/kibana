@@ -23,14 +23,26 @@ interface MessageBase<TRole extends MessageRole> {
   role: TRole;
 }
 
+export interface MessageContentText {
+  type: 'text';
+  text: string;
+}
+
+export interface MessageContentImage {
+  type: 'image';
+  source: { data: string; mimeType: string };
+}
+
+export type MessageContent = string | Array<MessageContentText | MessageContentImage>;
+
 /**
  * Represents a message from the user.
  */
 export type UserMessage = MessageBase<MessageRole.User> & {
   /**
-   * The text content of the user message
+   * The text or image content of the user message
    */
-  content: string;
+  content: MessageContent;
 };
 
 /**
