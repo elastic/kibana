@@ -46,7 +46,7 @@ export const OnboardingPage = React.memo(() => {
           restrictWidth={PAGE_CONTENT_WIDTH}
           paddingSize="xl"
           bottomBorder="extended"
-          style={{ backgroundColor: euiTheme.colors.body }}
+          style={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
         >
           <Routes>
             <Route

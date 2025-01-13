@@ -134,7 +134,7 @@ describe('collectMultiNamespaceReferences', () => {
     ...objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
   ) {
     const docs = objects.map(({ type, id }) => expect.objectContaining({ _id: `${type}:${id}` }));
-    expect(client.mget).toHaveBeenNthCalledWith(n, { body: { docs } }, expect.anything());
+    expect(client.mget).toHaveBeenNthCalledWith(n, { docs }, expect.anything());
   }
 
   it('returns an empty array if no object args are passed in', async () => {
