@@ -13,7 +13,7 @@ import {
   builtinFunctions,
 } from '../../esql/lib/esql_lexer_rules';
 /*
- * This rule is used inside json root to start a sql highlighting sequence
+ * This rule is used inside json root to start an esql highlighting sequence
  */
 export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
   return [
@@ -33,14 +33,14 @@ export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
 
 /*
  * This function creates a group of rules needed for sql highlighting in console.
- * It reuses the lexer ruls from the "sql" language, but since not all rules are referenced in the root
+ * It reuses the lexer rules from the "esql" language, but since not all rules are referenced in the root
  * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
 export const buildEsqlRules = (esqlRoot: string = 'esql_root') => {
   const { root, comment, numbers, strings } = esqlLexerRules.tokenizer;
   return {
     [esqlRoot]: [
-      // the rule to end sql highlighting and get back to the previous tokenizer state
+      // the rule to end esql highlighting and get back to the previous tokenizer state
       [
         /"""/,
         {
