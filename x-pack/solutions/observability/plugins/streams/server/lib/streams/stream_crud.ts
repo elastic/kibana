@@ -8,7 +8,7 @@
 import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import { StreamLifecycle } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';

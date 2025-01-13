@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { IndicesDataStream, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  QueryDslQueryContainer,
+  Result,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -13,9 +17,11 @@ import {
   IngestStreamDefinition,
   StreamDefinition,
   WiredStreamDefinition,
+  assertsSchema,
   isIngestStream,
+  isRootStream,
   isWiredStream,
-  streamDefintionSchema,
+  streamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, difference, keyBy, omit } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
@@ -35,45 +41,23 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
-  getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from './stream_crud';
 import { MalformedChildren } from './errors/malformed_children';
+import { validateRootStreamChanges } from './helpers/validate_stream';
 
-export interface EnableStreamsResponse {
+interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
-  result: 'noop' | 'created';
+  result: TResult;
 }
 
-export interface DisableStreamsResponse {
-  acknowledged: true;
-  result: 'noop' | 'deleted';
-}
-
-export interface DeleteStreamResponse {
-  acknowledged: true;
-  result: 'noop' | 'deleted';
-}
-
-export interface SyncStreamResponse {
-  acknowledged: true;
-  result: 'updated' | 'created';
-}
-
-export interface ForkStreamResponse {
-  acknowledged: true;
-  result: 'created';
-}
-
-export interface ResyncStreamsResponse {
-  acknowledged: true;
-  result: 'updated';
-}
-
-export interface UpsertStreamResponse {
-  acknowledged: true;
-  result: 'updated' | 'created';
-}
+export type EnableStreamsResponse = AcknowledgeResponse<'noop' | 'created'>;
+export type DisableStreamsResponse = AcknowledgeResponse<'noop' | 'deleted'>;
+export type DeleteStreamResponse = AcknowledgeResponse<'noop' | 'deleted'>;
+export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
+export type ForkStreamResponse = AcknowledgeResponse<'created'>;
+export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
+export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 
 function getRootStreamName(type: 'logs') {
   return type;
@@ -94,9 +78,16 @@ export class StreamsClient {
   ) {}
 
   async isStreamsEnabled(): Promise<boolean> {
-    const logsStreamExists = await this.existsStream('logs');
+    const rootLogsStreamExists = await this.getStream('logs')
+      .then((definition) => isWiredStream(definition))
+      .catch((error) => {
+        if (is404(error)) {
+          return false;
+        }
+        throw error;
+      });
 
-    return logsStreamExists;
+    return rootLogsStreamExists;
   }
 
   async enableStreams(): Promise<EnableStreamsResponse> {
@@ -155,6 +146,7 @@ export class StreamsClient {
         definition,
         scopedClusterClient,
         logger,
+        dataStream: await this.getDataStream(definition.name),
       });
     }
 
@@ -198,13 +190,17 @@ export class StreamsClient {
     parentDefinition?: WiredStreamDefinition;
   }> {
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
-      if (isResponseError(error) && error.statusCode === 404) {
+      if (is404(error)) {
         return undefined;
       }
       throw error;
     });
 
     let parentDefinition: WiredStreamDefinition | undefined;
+
+    if (isRootStream(definition) && isRootStream(existingDefinition)) {
+      validateRootStreamChanges(existingDefinition as WiredStreamDefinition, definition);
+    }
 
     if (isWiredStream(definition)) {
       const [ancestors, descendants] = await Promise.all([
@@ -220,7 +216,9 @@ export class StreamsClient {
         ? ancestors.find((parent) => parent.name === parentId)
         : undefined;
 
-      if (parentDefinition && !isWiredStream(parentDefinition)) {
+      // If no existing definition exists, this is a fork via upsert,
+      // and we need to validate whether the parent is a wired stream
+      if (!existingDefinition && parentId && parentDefinition && !isWiredStream(parentDefinition)) {
         throw new MalformedStreamId('Cannot fork a stream that is not managed');
       }
 
@@ -228,6 +226,7 @@ export class StreamsClient {
         ancestors,
         fields: definition.stream.ingest.wired.fields,
       });
+
       validateDescendantFields({
         descendants,
         fields: definition.stream.ingest.wired.fields,
@@ -346,17 +345,14 @@ export class StreamsClient {
       ),
     ])
       .then(([response]) => {
-        return streamDefintionSchema.parse(response._source);
+        const source = response._source;
+        assertsSchema(streamDefinitionSchema, source);
+        return source;
       })
-      .catch((error) => {
-        if (isResponseError(error) && error.statusCode === 404) {
-          return this.dependencies.scopedClusterClient.asCurrentUser.indices
-            .getDataStream({
-              name,
-            })
-            .then(async (response) => {
-              return await this.getDataStreamAsReadStreamDefinition(response.data_streams[0]);
-            });
+      .catch(async (error) => {
+        if (is404(error)) {
+          const dataStream = await this.getDataStream(name);
+          return await this.getDataStreamAsIngestStream(dataStream);
         }
         throw error;
       });
@@ -364,19 +360,29 @@ export class StreamsClient {
     return definition;
   }
 
-  private async getDataStreamAsReadStreamDefinition(
+  async getDataStream(name: string): Promise<IndicesDataStream> {
+    return this.dependencies.scopedClusterClient.asCurrentUser.indices
+      .getDataStream({ name })
+      .then((response) => {
+        const dataStream = response.data_streams[0];
+        if (!dataStream) {
+          throw new Error('Data stream not found');
+        }
+        return dataStream;
+      });
+  }
+
+  private async getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
-  ): Promise<ReadStreamDefinition> {
-    const definition: ReadStreamDefinition = {
-      name,
+  ): Promise<IngestStreamDefinition> {
+    const definition: IngestStreamDefinition = {
+      name: dataStream.name,
       stream: {
         ingest: {
           routing: [],
           processing: [],
         },
       },
-      lifecycle: getDataStreamLifecycle(dataStream),
-      inherited_fields: {},
     };
 
     definition.elasticsearch_assets = await getUnmanagedElasticsearchAssets({
@@ -391,7 +397,7 @@ export class StreamsClient {
     const exists = await this.getStream(name)
       .then(() => true)
       .catch((error) => {
-        if (isResponseError(error) && error.statusCode === 404) {
+        if (is404(error)) {
           return false;
         }
         throw error;
@@ -449,7 +455,9 @@ export class StreamsClient {
     });
 
     const streams = streamsSearchResponse.hits.hits.flatMap((hit) => {
-      return streamDefintionSchema.parse(hit._source);
+      const source = hit._source;
+      assertsSchema(streamDefinitionSchema, source);
+      return source;
     });
 
     const privileges = await checkAccessBulk({
@@ -487,11 +495,11 @@ export class StreamsClient {
         });
       }
 
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger, assetClient });
-
       for (const child of definition.stream.ingest.routing) {
         await this.deleteStream(child.name);
       }
+
+      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger, assetClient });
     }
 
     await this.dependencies.storageClient.delete({ id: definition.name });
@@ -516,7 +524,7 @@ export class StreamsClient {
 
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
     const definition = await this.getStream(name).catch((error) => {
-      if (isResponseError(error) && error.statusCode === 404) {
+      if (is404(error)) {
         return undefined;
       }
       throw error;
@@ -537,7 +545,10 @@ export class StreamsClient {
   }
 
   private async updateStoredStream(
-    definition: Omit<StreamDefinition, 'dashboards' | 'elasticsearch_assets'>
+    definition: Omit<
+      StreamDefinition,
+      'dashboards' | 'elasticsearch_assets' | 'inherited_fields' | 'lifecycle'
+    >
   ) {
     return this.dependencies.storageClient.index({
       id: definition.name,
@@ -555,7 +566,7 @@ export class StreamsClient {
     return this.getStream(getRootStreamName(type));
   }
 
-  async getAncestors(name: string): Promise<WiredReadStreamDefinition[]> {
+  async getAncestors(name: string): Promise<WiredStreamDefinition[]> {
     const ancestorIds = getAncestors(name);
 
     return this.getManagedStreams({
@@ -564,7 +575,7 @@ export class StreamsClient {
           filter: [{ terms: { name: ancestorIds } }],
         },
       },
-    }).then((streams) => streams.filter(isWiredReadStream));
+    }).then((streams) => streams.filter(isWiredStream));
   }
 
   async getDescendants(name: string): Promise<WiredStreamDefinition[]> {

@@ -13,8 +13,10 @@ import {
   isWiredStream,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { isResponseError } from '@kbn/es-errors';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
+import { getDataStreamLifecycle } from '../../lib/streams/stream_crud';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -39,7 +41,7 @@ export const readStreamRoute = createServerRoute({
 
       const name = params.path.id;
 
-      const [streamDefinition, dashboards, ancestors] = await Promise.all([
+      const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
         streamsClient.getStream(name),
         assetClient.getAssetIds({
           entityId: name,
@@ -47,11 +49,15 @@ export const readStreamRoute = createServerRoute({
           assetType: 'dashboard',
         }),
         streamsClient.getAncestors(name),
+        streamsClient.getDataStream(name),
       ]);
+
+      const lifecycle = getDataStreamLifecycle(dataStream);
 
       if (!isWiredStream(streamDefinition)) {
         return {
           ...streamDefinition,
+          lifecycle,
           dashboards,
           inherited_fields: {},
         };
@@ -60,6 +66,7 @@ export const readStreamRoute = createServerRoute({
       const body: WiredReadStreamDefinition = {
         ...streamDefinition,
         dashboards,
+        lifecycle,
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
@@ -71,7 +78,7 @@ export const readStreamRoute = createServerRoute({
 
       return body;
     } catch (e) {
-      if (e instanceof DefinitionNotFound) {
+      if (e instanceof DefinitionNotFound || (isResponseError(e) && e.statusCode === 404)) {
         throw notFound(e);
       }
 

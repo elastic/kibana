@@ -6,11 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  IndicesGetResponse,
-  ClusterGetComponentTemplateResponse,
-  IndicesGetIndexTemplateResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
@@ -18,28 +15,24 @@ import {
   forkStream,
   indexDocument,
 } from './helpers/requests';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
 
   const apiClient = createStreamsRepositorySupertestClient(supertest);
 
-  type Resources = [
-    IndicesGetResponse,
-    ClusterGetComponentTemplateResponse,
-    IndicesGetIndexTemplateResponse
-  ];
+  interface Resources {
+    indices: string[];
+    componentTemplates: string[];
+    indexTemplates: string[];
+  }
 
   function getResources(): Promise<Resources> {
     return Promise.all([
       esClient.indices.get({
-        index: ['logs*', '-logs-*'],
+        index: ['logs*'],
+        allow_no_indices: true,
       }),
       esClient.cluster.getComponentTemplate({
         name: 'logs*',
@@ -47,7 +40,15 @@ export default function ({ getService }: FtrProviderContext) {
       esClient.indices.getIndexTemplate({
         name: 'logs*',
       }),
-    ]);
+    ]).then(([indicesResponse, componentTemplateResponse, indexTemplateResponse]) => {
+      return {
+        indices: Object.keys(indicesResponse.indices ?? {}),
+        componentTemplates: componentTemplateResponse.component_templates.map(
+          (template) => template.name
+        ),
+        indexTemplates: indexTemplateResponse.index_templates.map((template) => template.name),
+      };
+    });
   }
 
   describe('Basic functionality', () => {
@@ -85,6 +86,18 @@ export default function ({ getService }: FtrProviderContext) {
             expect(await getResources()).to.eql(resources);
           });
 
+          it('returns a 404 for logs', async () => {
+            await apiClient
+              .fetch('GET /api/streams/{id}', {
+                params: {
+                  path: {
+                    id: 'logs',
+                  },
+                },
+              })
+              .expect(404);
+          });
+
           it('is disabled', async () => {
             expect(await getEnabled()).to.eql(false);
           });
@@ -113,14 +126,13 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const response = await indexDocument(esClient, 'logs', doc);
         expect(response.result).to.eql('created');
-        await waitForDocumentInIndex({ esClient, indexName: 'logs', retryService, logger });
-
         const result = await fetchDocument(esClient, 'logs', response._id);
         expect(result._index).to.match(/^\.ds\-logs-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -131,11 +143,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
           condition: {
             field: 'log.logger',
-            operator: 'eq',
+            operator: 'eq' as const,
             value: 'nginx',
           },
         };
-        const response = await forkStream(supertest, 'logs', body);
+        const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -150,14 +162,14 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const response = await indexDocument(esClient, 'logs', doc);
         expect(response.result).to.eql('created');
-        await waitForDocumentInIndex({ esClient, indexName: 'logs.nginx', retryService, logger });
 
         const result = await fetchDocument(esClient, 'logs.nginx', response._id);
         expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -166,9 +178,9 @@ export default function ({ getService }: FtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          condition: { field: 'log.level', operator: 'eq', value: 'info' },
+          condition: { field: 'log.level', operator: 'eq' as const, value: 'info' },
         };
-        const response = await forkStream(supertest, 'logs.nginx', body);
+        const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -183,19 +195,14 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const response = await indexDocument(esClient, 'logs', doc);
         expect(response.result).to.eql('created');
-        await waitForDocumentInIndex({
-          esClient,
-          indexName: 'logs.nginx.access',
-          retryService,
-          logger,
-        });
 
         const result = await fetchDocument(esClient, 'logs.nginx.access', response._id);
         expect(result._index).to.match(/^\.ds\-logs.nginx.access-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -204,9 +211,9 @@ export default function ({ getService }: FtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          condition: { field: 'log', operator: 'eq', value: 'error' },
+          condition: { field: 'log', operator: 'eq' as const, value: 'error' },
         };
-        const response = await forkStream(supertest, 'logs.nginx', body);
+        const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -222,20 +229,13 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await indexDocument(esClient, 'logs', doc);
         expect(response.result).to.eql('created');
 
-        await waitForDocumentInIndex({
-          esClient,
-          indexName: 'logs.nginx',
-          retryService,
-          logger,
-          docCountTarget: 2,
-        });
-
         const result = await fetchDocument(esClient, 'logs.nginx', response._id);
         expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'error', logger: 'nginx' },
+          'log.level': 'error',
+          'log.logger': 'nginx',
         });
       });
 
@@ -244,9 +244,9 @@ export default function ({ getService }: FtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          condition: { field: 'code', operator: 'gte', value: '500' },
+          condition: { field: 'code', operator: 'gte' as const, value: '500' },
         };
-        const response = await forkStream(supertest, 'logs', body);
+        const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -269,15 +269,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response1.result).to.eql('created');
         const response2 = await indexDocument(esClient, 'logs', doc2);
         expect(response2.result).to.eql('created');
-
-        await waitForDocumentInIndex({
-          esClient,
-          indexName: 'logs.number-test',
-          retryService,
-          logger,
-          docCountTarget: 2,
-          retries: 20,
-        });
       });
 
       it('Fork logs to logs.string-test', async () => {
@@ -287,12 +278,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
           condition: {
             or: [
-              { field: 'message', operator: 'contains', value: '500' },
-              { field: 'message', operator: 'contains', value: 400 },
+              { field: 'message', operator: 'contains' as const, value: '500' },
+              { field: 'message', operator: 'contains' as const, value: 400 },
             ],
           },
         };
-        const response = await forkStream(supertest, 'logs', body);
+        const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -311,17 +302,9 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const response1 = await indexDocument(esClient, 'logs', doc1);
         expect(response1.result).to.eql('created');
+
         const response2 = await indexDocument(esClient, 'logs', doc2);
         expect(response2.result).to.eql('created');
-
-        await waitForDocumentInIndex({
-          esClient,
-          indexName: 'logs.string-test',
-          retryService,
-          logger,
-          docCountTarget: 2,
-          retries: 20,
-        });
       });
     });
   });

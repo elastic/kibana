@@ -15,14 +15,11 @@ import {
   simulateFieldsForStream,
 } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
 
   const apiClient = createStreamsRepositorySupertestClient(supertest);
 
@@ -40,7 +37,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       await indexDocument(esClient, 'logs', doc);
-      await waitForDocumentInIndex({ esClient, indexName: 'logs', retryService, logger });
     });
 
     after(async () => {
@@ -80,12 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
           condition: {
             field: 'log.logger',
-            operator: 'eq',
+            operator: 'eq' as const,
             value: 'nginx',
           },
         };
 
-        await forkStream(supertest, 'logs', forkBody);
+        await forkStream(apiClient, 'logs', forkBody);
         const response = await simulateFieldsForStream(supertest, 'logs.nginx', {
           field_definitions: [{ name: 'message', type: 'keyword' }],
         });

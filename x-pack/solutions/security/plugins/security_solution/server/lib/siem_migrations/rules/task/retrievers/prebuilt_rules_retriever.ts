@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 import type { RuleMigrationPrebuiltRule } from '../../types';
+import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
 
 export class PrebuiltRulesRetriever {
-  constructor(private readonly dataClient: RuleMigrationsDataClient) {}
+  constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
+
+  // TODO:
+  // 1. Implement the `initialize` method to retrieve prebuilt rules and keep them in memory.
+  // 2. Improve the `retrieveRules` method to return the real prebuilt rules instead of the ELSER index doc.
+
+  public async populateIndex() {
+    return this.clients.data.prebuiltRules.create({
+      rulesClient: this.clients.rules,
+      soClient: this.clients.savedObjects,
+    });
+  }
 
   public async getRules(
     semanticString: string,
     techniqueIds: string
   ): Promise<RuleMigrationPrebuiltRule[]> {
-    return this.prebuiltRulesRetriever(semanticString, techniqueIds);
+    return this.clients.data.prebuiltRules.retrieveRules(semanticString, techniqueIds);
   }
-
-  private prebuiltRulesRetriever = async (
-    semanticString: string,
-    techniqueIds: string
-  ): Promise<RuleMigrationPrebuiltRule[]> => {
-    const rules = await this.dataClient.prebuiltRules.retrieveRules(semanticString, techniqueIds);
-
-    return rules;
-  };
 }

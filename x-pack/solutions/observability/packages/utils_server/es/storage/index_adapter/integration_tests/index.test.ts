@@ -422,7 +422,10 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function stopServers() {
-    await kibanaServer.stop();
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+
     await esServer.stop();
 
     jest.clearAllMocks();

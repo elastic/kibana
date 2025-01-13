@@ -12,7 +12,11 @@ import {
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
-import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  IngestPipeline,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
 import { generateLayer } from '../component_templates/generate_layer';
 import { upsertComponent } from '../component_templates/manage_component_templates';
@@ -197,15 +201,17 @@ async function ensureStreamManagedPipelineReference(
 
 export async function syncIngestStreamDefinitionObjects({
   definition,
+  dataStream,
   scopedClusterClient,
 }: SyncStreamParamsBase & {
+  dataStream: IndicesDataStream;
   definition: IngestStreamDefinition;
 }) {
   if (definition.stream.ingest.routing.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
-    name: definition.name,
+    dataStream,
     scopedClusterClient,
   });
   const executionPlan: ExecutionPlanStep[] = [];

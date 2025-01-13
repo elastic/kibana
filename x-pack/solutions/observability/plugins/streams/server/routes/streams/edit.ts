@@ -12,6 +12,7 @@ import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
+  RootStreamImmutabilityException,
   SecurityException,
 } from '../../lib/streams/errors';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
@@ -49,7 +50,8 @@ export const editStreamRoute = createServerRoute({
       if (
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
-        e instanceof MalformedStreamId
+        e instanceof MalformedStreamId ||
+        e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);
       }

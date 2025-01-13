@@ -69,6 +69,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test',
     ingest: {
+      routing: [],
       processing: [],
       wired: {
         fields: {

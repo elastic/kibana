@@ -10,6 +10,8 @@ import { Agent } from 'supertest';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StreamConfigDefinition } from '@kbn/streams-schema';
+import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
@@ -34,16 +36,32 @@ export async function fetchDocument(esClient: Client, index: string, id: string)
   return response.hits.hits[0];
 }
 
-export async function forkStream(supertest: Agent, root: string, body: JsonObject) {
-  const req = supertest.post(`/api/streams/${root}/_fork`).set('kbn-xsrf', 'xxx');
-  const response = await req.send(body).expect(200);
-  return response.body;
+export async function forkStream(
+  client: StreamsSupertestRepositoryClient,
+  root: string,
+  body: ClientRequestParamsOf<
+    StreamsRouteRepository,
+    'POST /api/streams/{id}/_fork'
+  >['params']['body']
+) {
+  return client
+    .fetch(`POST /api/streams/{id}/_fork`, {
+      params: {
+        path: {
+          id: root,
+        },
+        body,
+      },
+    })
+    .expect(200)
+    .then((response) => response.body);
 }
 
 export async function putStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
-  body: StreamConfigDefinition
+  body: StreamConfigDefinition,
+  expectStatusCode: number = 200
 ) {
   return await apiClient
     .fetch('PUT /api/streams/{id}', {
@@ -54,7 +72,7 @@ export async function putStream(
         body,
       },
     })
-    .expect(200)
+    .expect(expectStatusCode)
     .then((response) => response.body);
 }
 
