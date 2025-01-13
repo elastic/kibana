@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import React from 'react';
-import { isDescendandOf } from '@kbn/streams-schema/src/helpers/hierarchy';
+import { isDescendandOf } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
@@ -78,7 +78,7 @@ export function StreamDeleteModal({
                   defaultMessage: 'The following streams will be deleted:',
                 })}
               </EuiText>
-              <EuiListGroup flush={true}>
+              <EuiListGroup flush={true} maxWidth={false}>
                 {streamsToBeDeleted.map((stream) => (
                   <li key={stream}>
                     <EuiListGroupItem
