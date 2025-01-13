@@ -49,7 +49,7 @@ export function AddProcessorFlyout({
 }: AddProcessorFlyoutProps) {
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -74,7 +74,10 @@ export function AddProcessorFlyout({
         { defaultMessage: 'Add processor' }
       )}
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
+        <EuiButton
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!methods.formState.isValid && methods.formState.isSubmitted}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmAddProcessor',
             { defaultMessage: 'Add processor' }
@@ -107,7 +110,7 @@ export function EditProcessorFlyout({
     [processor]
   );
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -146,7 +149,10 @@ export function EditProcessorFlyout({
         />
       }
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)} disabled={!hasChanges}>
+        <EuiButton
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!hasChanges || !methods.formState.isValid}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
             { defaultMessage: 'Update processor' }
