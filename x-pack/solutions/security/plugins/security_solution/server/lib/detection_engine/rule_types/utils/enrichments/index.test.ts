@@ -185,7 +185,6 @@ describe('enrichEvents', () => {
     // disable risk score enrichments
     mockIsIndexExist.mockImplementationOnce(() => false);
     mockIsIndexExist.mockImplementationOnce(() => false);
-    mockIsIndexExist.mockImplementationOnce(() => false);
     // enable for asset criticality
     mockIsIndexExist.mockImplementation(() => true);
 
