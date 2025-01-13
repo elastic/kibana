@@ -5988,6 +5988,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-langchain@link:x-pack/platform/packages/shared/ai-infra/inference-langchain":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""

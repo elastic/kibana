@@ -1062,6 +1062,8 @@
       "@kbn/inference-common/*": ["x-pack/platform/packages/shared/ai-infra/inference-common/*"],
       "@kbn/inference-endpoint-ui-common": ["x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common"],
       "@kbn/inference-endpoint-ui-common/*": ["x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/*"],
+      "@kbn/inference-langchain": ["x-pack/platform/packages/shared/ai-infra/inference-langchain"],
+      "@kbn/inference-langchain/*": ["x-pack/platform/packages/shared/ai-infra/inference-langchain/*"],
       "@kbn/inference-plugin": ["x-pack/platform/plugins/shared/inference"],
       "@kbn/inference-plugin/*": ["x-pack/platform/plugins/shared/inference/*"],
       "@kbn/infra-forge": ["x-pack/platform/packages/private/kbn-infra-forge"],
