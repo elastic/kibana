@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'remoteClusters',
     'indexManagement',
     'crossClusterReplication',
-    'searchIndexDetail',
+    'searchIndexDetailsPage',
   ]);
   const security = getService('security');
   const retry = getService('retry');
@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       it('Verify that the follower index is duplicating from the remote.', async () => {
         await pageObjects.indexManagement.clickIndexAt(0);
-        await pageObjects.searchIndexDetail.expectIndexDetailsPageIsLoaded();
+        await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
         await pageObjects.common.navigateToApp('indexManagement');
         await retry.waitForWithTimeout('indices table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');

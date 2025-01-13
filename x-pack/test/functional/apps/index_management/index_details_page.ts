@@ -8,7 +8,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'searchIndexDetail']);
+  const pageObjects = getPageObjects([
+    'common',
+    'indexManagement',
+    'header',
+    'searchIndexDetailsPage',
+  ]);
   const log = getService('log');
   const security = getService('security');
 
@@ -24,8 +29,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // display hidden indices to have some rows in the indices table
       await pageObjects.indexManagement.toggleHiddenIndices();
       // click the first index in the table and wait for the index details page
-      await pageObjects.searchIndexDetail.openIndicesDetailFromIndexManagementIndicesListTable(0);
-      await pageObjects.searchIndexDetail.expectIndexDetailsPageIsLoaded();
+      await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
+        0
+      );
+      await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
     });
   });
 };

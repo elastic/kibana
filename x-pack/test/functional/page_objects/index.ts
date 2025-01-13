@@ -57,8 +57,8 @@ import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
-import { SearchNavigationServiceProvider } from './search_navigation';
-import { SearchIndexDetailProvider } from './search_index_detail';
+import { SearchIndexDetailPageProvider } from './search_index_details_page';
+import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -101,8 +101,8 @@ export const pageObjects = {
   searchApiKeys: SearchApiKeysProvider,
   searchClassicNavigation: SearchClassicNavigationProvider,
   searchStart: SearchStartProvider,
-  searchIndexDetail: SearchIndexDetailProvider,
-  searchNavigation: SearchNavigationServiceProvider,
+  searchIndexDetailsPage: SearchIndexDetailPageProvider,
+  searchNavigation: SearchNavigationProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,

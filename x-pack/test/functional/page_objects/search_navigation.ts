@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
-export function SearchNavigationServiceProvider({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, header } = getPageObjects([
-    'header',
-    'common',
-    'indexManagement',
-  ]);
+  const { common, indexManagement, header } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
   return {
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearch/start', {
+        await common.navigateToApp('elasticsearchStart', {
           shouldLoginIfPrompted: false,
         });
         if (!expectRedirect) {
