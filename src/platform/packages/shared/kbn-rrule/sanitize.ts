@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment-timezone';
 import type { Options } from './types';
 
 export function sanitizeOptions(opts: Options) {
@@ -40,6 +41,10 @@ export function sanitizeOptions(opts: Options) {
   }
 
   // Omit invalid options
+  if (moment.tz.zone(options.tzid) == null) {
+    options.tzid = moment.tz.guess();
+  }
+
   if (options.bymonth) {
     // Only months between 1 and 12 are valid
     options.bymonth = options.bymonth.filter(

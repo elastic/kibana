@@ -134,6 +134,36 @@ export class RRule {
       return dates;
     }
   }
+
+  static isValid(options: ConstructorOptions): boolean {
+    try {
+      const sanitizedOptions = sanitizeOptions(options as Options);
+
+      if (moment.tz.zone(options.tzid) == null) {
+        return false;
+      }
+
+      if (options.bymonth != null && !sanitizedOptions.bymonth == null) {
+        return false;
+      }
+
+      if (options.bymonthday != null && !sanitizedOptions.bymonthday == null) {
+        return false;
+      }
+
+      if (options.byweekday != null && !sanitizedOptions.byweekday == null) {
+        return false;
+      }
+
+      if (options.byyearday != null && !sanitizedOptions.byyearday == null) {
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 const parseByWeekdayPos = function (byweekday: ConstructorOptions['byweekday']) {

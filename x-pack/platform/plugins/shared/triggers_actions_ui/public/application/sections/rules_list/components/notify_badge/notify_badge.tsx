@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RRuleParams } from '@kbn/alerting-types';
+import { Weekday } from '@kbn/rrule/types';
+import { RRule } from '@kbn/rrule';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
@@ -476,15 +478,15 @@ const getSnoozeScheduleIds = (snooze: NonNullable<RuleSnoozeSettings['snoozeSche
 };
 
 const isValidateRRule = (rRule: RRuleParams): boolean => {
-  const validWeekDays = new Set(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+  const { dtstart, until, wkst, byweekday, ...rest } = rRule;
 
-  if (moment.tz.zone(rRule.tzid) == null) {
-    return false;
-  }
+  const rRuleOptions = {
+    ...rest,
+    dtstart: new Date(rRule.dtstart),
+    until: until ? new Date(until) : null,
+    wkst: wkst ? Weekday[wkst] : null,
+    byweekday: byweekday ?? null,
+  };
 
-  if (rRule.byweekday && !rRule.byweekday.every((value) => validWeekDays.has(value as string))) {
-    return false;
-  }
-
-  return true;
+  return RRule.isValid(rRuleOptions);
 };
