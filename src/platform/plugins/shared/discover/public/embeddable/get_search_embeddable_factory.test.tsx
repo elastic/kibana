@@ -252,7 +252,7 @@ describe('saved search embeddable', () => {
       const initialRuntimeState = {
         ...getInitialRuntimeState(),
         nonPersistedDisplayOptions: {
-          solutionNavIdOverride: 'override-solution-nav-id',
+          solutionNavIdOverride: 'search' as const,
         },
       };
       await factory.buildEmbeddable(
@@ -265,7 +265,7 @@ describe('saved search embeddable', () => {
       );
       await waitOneTick(); // wait for build to complete
       expect(resolveRootProfileSpy).toHaveBeenCalledWith({
-        solutionNavId: 'override-solution-nav-id',
+        solutionNavId: 'search',
       });
     });
 
