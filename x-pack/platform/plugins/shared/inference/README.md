@@ -7,6 +7,16 @@ external LLM APIs. Its goals are:
 - Abstract away differences between different LLM providers like OpenAI, Bedrock and Gemini.
 - Allow us to move gradually to the \_inference endpoint without disrupting engineers.
 
+## Usage with langchain
+
+The inference APIs are meant to be usable directly, and self-sufficient to power any RAG workflow. 
+
+However, if you'd still rather use langchain, we're also supporting it via various
+utilities exposed from the `@kbn/inference-langchain` package.
+
+The most notable one would be the `InferenceChatModel` class, which allows to use the inference APIs
+as source for langchain.
+
 ## Architecture and examples
 
 ![architecture-schema](https://github.com/user-attachments/assets/e65a3e47-bce1-4dcf-bbed-4f8ac12a104f)
