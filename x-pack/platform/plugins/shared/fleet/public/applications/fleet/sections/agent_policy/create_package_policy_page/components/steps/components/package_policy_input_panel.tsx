@@ -20,7 +20,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { SetupTechnology } from '../../../../../../types';
+import type { SetupTechnology } from '../../../../../../types';
 import type {
   NewPackagePolicyInput,
   PackageInfo,
@@ -33,8 +33,6 @@ import type {
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
-
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../../common/constants';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
@@ -82,9 +80,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
-  setupTechnology: SetupTechnology;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  setupTechnology?: SetupTechnology;
 }> = memo(
   ({
     packageInput,
@@ -98,7 +96,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isEditPage = false,
   }) => {
     const defaultDataStreamId = useDataStreamId();
-    const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
+    const { isAgentlessEnabled } = useAgentless();
 
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
@@ -164,14 +162,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
     const titleElementId = useMemo(() => htmlIdGenerator()(), []);
 
-    const shouldDisableInput = useMemo(
-      () =>
-        isAgentlessIntegration(packageInfo) &&
-        setupTechnology === SetupTechnology.AGENTLESS &&
-        AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type),
-      [isAgentlessIntegration, packageInfo, packagePolicyInput.type, setupTechnology]
-    );
-
     return (
       <>
         {/* Header / input-level toggle */}
@@ -194,9 +184,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               checked={packagePolicyInput.enabled}
-              disabled={shouldDisableInput || packagePolicyInput.keep_enabled}
+              disabled={packagePolicyInput.keep_enabled}
               onChange={(e) => {
-                const enabled = e.target.checked;
+                const enabled = packagePolicyInput.keep_enabled ? e.target.checked : false;
                 updatePackagePolicyInput({
                   enabled,
                   streams: packagePolicyInput.streams.map((stream) => ({
@@ -299,7 +289,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     ) {
                       updatedInput.enabled = false;
                     }
-
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
