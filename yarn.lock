@@ -6280,7 +6280,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
+"@kbn/mapbox-gl@link:src/platform/packages/private/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
 
