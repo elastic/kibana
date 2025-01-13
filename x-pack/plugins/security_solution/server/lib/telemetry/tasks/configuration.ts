@@ -51,7 +51,7 @@ export function createTelemetryConfigurationTaskConfig() {
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
         log.l('Got telemetry configuration artifact', {
-          artifact: configArtifact,
+          artifact: configArtifact ?? '<null>',
         });
 
         telemetryConfiguration.max_detection_alerts_batch =
@@ -105,6 +105,11 @@ export function createTelemetryConfigurationTaskConfig() {
           telemetryConfiguration.pagination_config = configArtifact.pagination_config;
           _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
           _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
+        }
+
+        if (configArtifact.indices_metadata_config) {
+          log.l('Updating indices metadata configuration');
+          telemetryConfiguration.indices_metadata_config = configArtifact.indices_metadata_config;
         }
 
         await taskMetricsService.end(trace);

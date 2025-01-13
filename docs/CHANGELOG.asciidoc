@@ -131,6 +131,28 @@ Machine Learning::
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
 
+For information about the {kib} 8.16.1 release, review the following information.
+
+The 8.16.1 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.1]]
+=== Known issues
+
+[discrete]
+[[known-201115]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
+====
+
 The 8.16.1 release includes the following bug fixes.
 
 [float]
@@ -195,6 +217,20 @@ More information can be found in the {observability-guide}/apm-collect-applicati
 For information about how to create APM API keys, please check the {observability-guide}/apm-api-key.html#apm-create-an-api-key[API key documentation].
 
 For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
+[discrete]
+[[known-201115-2]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
 ====
 
 [float]
