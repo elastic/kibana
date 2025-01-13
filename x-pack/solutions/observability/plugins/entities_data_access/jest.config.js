@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ProductName } from './product';
+const path = require('path');
 
-export const LATEST_MANIFEST_FORMAT_VERSION = '2.0.0';
-
-export interface ArtifactManifest {
-  formatVersion: string;
-  productName: ProductName;
-  productVersion: string;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: path.resolve(__dirname, '../../../../..'),
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/entities_data_access'],
+};
