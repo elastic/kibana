@@ -77,13 +77,13 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
+import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { useAgentless } from './hooks/setup_technology';
 import { SetupTechnologySelector } from './components/setup_technology_selector';
+import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -176,6 +176,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     validationResults,
     hasAgentPolicyError,
     isInitialized,
+    handleSetupTechnologyChange,
+    selectedSetupTechnology,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -185,6 +187,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
     hasFleetAddAgentsPrivileges,
+    setNewAgentPolicy,
+    setSelectedPolicyTab,
   });
 
   const setPolicyValidation = useCallback(
@@ -351,15 +355,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
   const { isAgentlessIntegration } = useAgentless();
-  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
-    newAgentPolicy,
-    setNewAgentPolicy,
-    updateAgentPolicies,
-    updatePackagePolicy,
-    setSelectedPolicyTab,
-    packageInfo,
-    packagePolicy,
-  });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -421,7 +416,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
-              setupTechnology={selectedSetupTechnology}
             />
           )}
 

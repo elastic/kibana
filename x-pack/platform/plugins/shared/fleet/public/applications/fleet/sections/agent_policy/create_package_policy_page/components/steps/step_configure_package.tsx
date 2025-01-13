@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -21,15 +21,11 @@ import {
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
 
-import { SetupTechnology } from '../../../../../types';
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
-
-import { useAgentless } from '../../single_page_layout/hooks/setup_technology';
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 
 import { PackagePolicyInputPanel } from './components';
 
@@ -42,7 +38,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
-  setupTechnology?: SetupTechnology;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -52,36 +47,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
-  setupTechnology,
 }) => {
-  const setupTechnologyRef = useRef<SetupTechnology | undefined>(setupTechnology);
-  const { isAgentlessIntegration } = useAgentless();
-
-  // sync the inputs with the agentless selector change
-  useEffect(() => {
-    setupTechnologyRef.current = setupTechnology;
-  });
-  const prevSetupTechnology = setupTechnologyRef.current;
-  const isAgentlessSelected =
-    isAgentlessIntegration(packageInfo) && setupTechnology === SetupTechnology.AGENTLESS;
-
-  const newInputs = useMemo(() => {
-    return packagePolicy.inputs.map((input) => {
-      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
-        return { ...input, enabled: false, keep_enabled: false };
-      }
-      return input;
-    });
-  }, [isAgentlessSelected, packagePolicy.inputs]);
-
-  useEffect(() => {
-    if (prevSetupTechnology !== setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-      updatePackagePolicy({
-        inputs: newInputs,
-      });
-    }
-  }, [newInputs, prevSetupTechnology, setupTechnology, updatePackagePolicy, packagePolicy]);
-
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
     () =>
@@ -100,8 +66,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
+            const packagePolicyInputs = packagePolicy.inputs;
             return inputs.map((packageInput) => {
-              const packagePolicyInput = newInputs.find(
+              const packagePolicyInput = packagePolicyInputs.find(
                 (input) =>
                   input.type === packageInput.type &&
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
@@ -115,25 +82,24 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               );
 
               const updatePackagePolicyInput = (updatedInput: Partial<NewPackagePolicyInput>) => {
-                const indexOfUpdatedInput = newInputs.findIndex(
+                const indexOfUpdatedInput = packagePolicyInputs.findIndex(
                   (input) =>
                     input.type === packageInput.type &&
                     (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                 );
-                const updatedInputs = [...newInputs];
+                const updatedInputs = [...packagePolicyInputs];
                 updatedInputs[indexOfUpdatedInput] = {
                   ...updatedInputs[indexOfUpdatedInput],
                   ...updatedInput,
                 };
                 updatePackagePolicy({
-                  inputs: newInputs,
+                  inputs: updatedInputs,
                 });
               };
 
               return packagePolicyInput ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
-                    setupTechnology={setupTechnology}
                     packageInput={packageInput}
                     packageInfo={packageInfo}
                     packageInputStreams={packageInputStreams}

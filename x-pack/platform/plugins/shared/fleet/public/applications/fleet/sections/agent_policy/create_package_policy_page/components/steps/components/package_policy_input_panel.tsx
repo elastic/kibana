@@ -20,7 +20,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import type { SetupTechnology } from '../../../../../../types';
 import type {
   NewPackagePolicyInput,
   PackageInfo,
@@ -82,7 +81,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
-  setupTechnology?: SetupTechnology;
 }> = memo(
   ({
     packageInput,
@@ -91,7 +89,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     packagePolicyInput,
     updatePackagePolicyInput,
     inputValidationResults,
-    setupTechnology,
     forceShowErrors,
     isEditPage = false,
   }) => {
