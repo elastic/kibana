@@ -36,6 +36,7 @@ import {
   ReadStreamDefinition,
   WiredStreamConfigDefinition,
 } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { useKibana } from '../../hooks/use_kibana';
@@ -119,8 +120,18 @@ export function StreamDetailRouting({
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
+  const { appParams, core } = useKibana();
   const theme = useEuiTheme().euiTheme;
   const routingAppState = useRoutingState({ definition });
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges:
+      Boolean(routingAppState.childUnderEdit) || routingAppState.hasChildStreamsOrderChanged,
+    history: appParams.history,
+    http: core.http,
+    navigateToUrl: core.application.navigateToUrl,
+    openConfirm: core.overlays.openConfirm,
+  });
 
   if (!definition) {
     return null;
