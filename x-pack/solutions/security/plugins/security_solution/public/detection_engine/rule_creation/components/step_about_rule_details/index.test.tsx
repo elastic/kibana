@@ -30,7 +30,7 @@ describe('StepAboutRuleToggleDetails', () => {
   let stepDataMock: AboutStepRule;
 
   beforeEach(() => {
-    stepDataMock = mockAboutStepRule;
+    stepDataMock = mockAboutStepRule();
   });
 
   test('it renders loading component when "loading" is true', () => {

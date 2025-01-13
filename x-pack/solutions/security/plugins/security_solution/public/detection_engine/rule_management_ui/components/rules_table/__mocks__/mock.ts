@@ -195,7 +195,7 @@ export const mockRuleWithEverything = (id: string): RuleResponse => ({
 });
 
 // TODO: update types mapping
-export const mockAboutStepRule: AboutStepRule = {
+export const mockAboutStepRule = (): AboutStepRule => ({
   author: ['Elastic'],
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
@@ -218,7 +218,7 @@ export const mockAboutStepRule: AboutStepRule = {
   setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
   maxSignals: 100,
-};
+});
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
   actions: [],

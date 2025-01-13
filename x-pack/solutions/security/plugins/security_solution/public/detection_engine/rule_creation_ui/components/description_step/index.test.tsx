@@ -60,7 +60,7 @@ describe('description_step', () => {
   beforeEach(() => {
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
     mockFilterManager = new FilterManager(setupMock.uiSettings);
-    mockAboutStep = mockAboutStepRule;
+    mockAboutStep = mockAboutStepRule();
   });
 
   describe('StepRuleDescription', () => {

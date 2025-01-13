@@ -61,7 +61,7 @@ describe('<RulePreview />', () => {
 
   it('should render rule preview and its sub sections', () => {
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule,
+      aboutRuleData: mockAboutStepRule(),
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
@@ -86,7 +86,7 @@ describe('<RulePreview />', () => {
 
   it('should not render actions if action is not available', () => {
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule,
+      aboutRuleData: mockAboutStepRule(),
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
     });

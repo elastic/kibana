@@ -80,7 +80,7 @@ describe('<RulePanel />', () => {
       isExistingRule: true,
     });
     mockGetStepsData.mockReturnValue({
-      aboutRuleData: mockAboutStepRule,
+      aboutRuleData: mockAboutStepRule(),
       defineRuleData: mockDefineStepRule(),
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
