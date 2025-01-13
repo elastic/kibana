@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
-    describe('create and configure connector', () => {
+    describe('Connector lifecycle', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.common.navigateToApp('serverlessConnectors');
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
@@ -56,64 +56,64 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           TEST_CONNECTOR_NAME
         );
       });
-    });
-    describe('connector table', () => {
-      it('searchBar and select, filters connector table', async () => {
-        await pageObjects.common.navigateToApp('serverlessConnectors');
+      describe('connector table', () => {
+        it('searchBar and select, filters connector table', async () => {
+          await pageObjects.common.navigateToApp('serverlessConnectors');
 
-        // Ensure the page is rendered and we have items
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
+          // Ensure the page is rendered and we have items
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
 
-        // Filter the table to just our connector
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
-          TEST_CONNECTOR_NAME
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
-          TEST_CONNECTOR_NAME
-        );
+          // Filter the table to just our connector
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+            TEST_CONNECTOR_NAME
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
+            TEST_CONNECTOR_NAME
+          );
 
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
-          'Type'
-        );
-        await testSubjects.click('clearSearchButton');
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
-          'confluence'
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveNoItems();
-        await testSubjects.click('clearSearchButton');
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
-          'Name'
-        );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
+            'Type'
+          );
+          await testSubjects.click('clearSearchButton');
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+            'confluence'
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveNoItems();
+          await testSubjects.click('clearSearchButton');
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
+            'Name'
+          );
+        });
       });
-    });
-    describe('delete connector', () => {
-      it('can delete a connector', async () => {
-        await pageObjects.common.navigateToApp('serverlessConnectors');
+      describe('delete connector', () => {
+        it('can delete a connector', async () => {
+          await pageObjects.common.navigateToApp('serverlessConnectors');
 
-        // Ensure the page is rendered and we have items
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
-          TEST_CONNECTOR_NAME
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
-          TEST_CONNECTOR_NAME
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
+          // Ensure the page is rendered and we have items
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+            TEST_CONNECTOR_NAME
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
+            TEST_CONNECTOR_NAME
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
 
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.openDeleteConnectorModal();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmDeleteConnectorModalComponentsExists();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorIncorrectName(
-          'invalid'
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorWithCorrectName(
-          TEST_CONNECTOR_NAME
-        );
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorTableIsDisappearedAfterDelete();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.openDeleteConnectorModal();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmDeleteConnectorModalComponentsExists();
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorIncorrectName(
+            'invalid'
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorWithCorrectName(
+            TEST_CONNECTOR_NAME
+          );
+          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorTableIsDisappearedAfterDelete();
+        });
       });
     });
   });
