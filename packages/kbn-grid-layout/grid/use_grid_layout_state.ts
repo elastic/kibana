@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
-import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-import { cloneDeep } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, pick } from 'lodash';
+import { useEffect, useMemo, useRef } from 'react';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 import {
   ActivePanel,
   GridAccessMode,
@@ -56,10 +57,27 @@ export const useGridLayoutState = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
   useEffect(() => {
     accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
+
+  const runtimeSettings$ = useMemo(
+    () =>
+      new BehaviorSubject<RuntimeGridSettings>({
+        ...gridSettings,
+        columnPixelWidth: 0,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    const runtimeSettings = runtimeSettings$.getValue();
+    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth: runtimeSettings.columnPixelWidth,
+      });
+  }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
@@ -71,10 +89,7 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
-      ...gridSettings,
-      columnPixelWidth: 0,
-    });
+
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
     );
@@ -104,20 +119,35 @@ export const useGridLayoutState = ({
     const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
+        const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
-          (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
-          gridSettings.columnCount;
-        document.documentElement.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+          (elementWidth -
+            currentRuntimeSettings.gutterSize * (currentRuntimeSettings.columnCount - 1)) /
+          currentRuntimeSettings.columnCount;
 
-        gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
+        if (columnPixelWidth !== currentRuntimeSettings.columnPixelWidth)
+          gridLayoutStateManager.runtimeSettings$.next({
+            ...currentRuntimeSettings,
+            columnPixelWidth,
+          });
         gridLayoutStateManager.isMobileView$.next(
           shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
         );
       });
 
+    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
+      .subscribe(({ gutterSize, columnPixelWidth, rowHeight }) => {
+        document.documentElement.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+        document.documentElement.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
+        document.documentElement.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+      });
+
     return () => {
       resizeSubscription.unsubscribe();
+      globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
