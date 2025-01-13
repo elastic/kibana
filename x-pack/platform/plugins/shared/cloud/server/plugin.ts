@@ -211,25 +211,23 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         path: '/app/cloud/onboarding',
         validate: {
           query: schema.maybe(
-            schema.object(
-              {
-                next: schema.maybe(schema.string()),
-                onboarding_token: schema.maybe(schema.string()),
-              },
-              { unknowns: 'ignore' }
-            )
+            schema.object({
+              next: schema.maybe(schema.string()),
+              onboarding_token: schema.maybe(schema.string()),
+            })
           ),
         },
         security: {
           authz: {
             enabled: false,
-            reason: 'any user can open kibana from cloud ui',
+            reason:
+              'Authorization at the API level isn’t required, as it’s implicitly enforced by the scoped `uiSettings` and `SavedObjects` clients used to handle the request.',
           },
         },
       },
       async (context, request, response) => {
-        const { uiSettings } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
+        const { uiSettings, savedObjects } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
         const nextCandidateRoute = parseNextURL(request.url.href);
 
         const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
@@ -242,7 +240,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
-              const soClient = coreStart.savedObjects.getScopedClient(request, {
+              const soClient = savedObjects.getClient({
                 includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
               });
 
