@@ -14238,11 +14238,6 @@ paths:
                                   type: string
                                 memory:
                                   type: string
-                              required:
-                                - memory
-                                - cpu
-                          required:
-                            - requests
                         revision:
                           type: number
                         schema_version:
@@ -14498,11 +14493,6 @@ paths:
                           type: string
                         memory:
                           type: string
-                      required:
-                        - memory
-                        - cpu
-                  required:
-                    - requests
                 space_ids:
                   items:
                     type: string
@@ -14974,11 +14964,6 @@ paths:
                                 type: string
                               memory:
                                 type: string
-                            required:
-                              - memory
-                              - cpu
-                        required:
-                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -15535,11 +15520,6 @@ paths:
                                   type: string
                                 memory:
                                   type: string
-                              required:
-                                - memory
-                                - cpu
-                          required:
-                            - requests
                         revision:
                           type: number
                         schema_version:
@@ -16075,11 +16055,6 @@ paths:
                                 type: string
                               memory:
                                 type: string
-                            required:
-                              - memory
-                              - cpu
-                        required:
-                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -16333,11 +16308,6 @@ paths:
                           type: string
                         memory:
                           type: string
-                      required:
-                        - memory
-                        - cpu
-                  required:
-                    - requests
                 space_ids:
                   items:
                     type: string
@@ -16809,11 +16779,6 @@ paths:
                                 type: string
                               memory:
                                 type: string
-                            required:
-                              - memory
-                              - cpu
-                        required:
-                          - requests
                       revision:
                         type: number
                       schema_version:
@@ -17369,11 +17334,6 @@ paths:
                                 type: string
                               memory:
                                 type: string
-                            required:
-                              - memory
-                              - cpu
-                        required:
-                          - requests
                       revision:
                         type: number
                       schema_version:
