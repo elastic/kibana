@@ -194,6 +194,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     timelines: timelinesUi,
     spaces: spacesApi,
   } = useKibana().services;
+
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
