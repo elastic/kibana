@@ -211,10 +211,13 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         path: '/app/cloud/onboarding',
         validate: {
           query: schema.maybe(
-            schema.object({
-              next: schema.maybe(schema.string()),
-              onboarding_token: schema.maybe(schema.string()),
-            })
+            schema.object(
+              {
+                next: schema.maybe(schema.string()),
+                onboarding_token: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            )
           ),
         },
         security: {
