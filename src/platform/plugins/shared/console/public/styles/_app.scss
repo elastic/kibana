@@ -148,11 +148,11 @@
 }
 
 .monaco__status_code_line--primary {
-  background-color: transparentize($euiColorVis1, .9);
+  background-color: transparentize($euiColorPrimary, .9);
 }
 
 .monaco__status_code_line_number--primary {
-  background-color: transparentize($euiColorVis1, .5);
+  background-color: transparentize($euiColorPrimary, .5);
 }
 
 .monaco__status_code_line--success {
