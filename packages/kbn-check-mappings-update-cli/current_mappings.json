@@ -1642,7 +1642,7 @@
       },
       "resources": {
         "index": false,
-        "type": "object"
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2016,7 +2016,7 @@
       },
       "resources": {
         "index": false,
-        "type": "object"
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
