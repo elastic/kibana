@@ -414,7 +414,7 @@ src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
-x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
+x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
