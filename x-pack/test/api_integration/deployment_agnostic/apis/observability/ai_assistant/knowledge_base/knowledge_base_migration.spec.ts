@@ -19,6 +19,32 @@ import {
   TINY_ELSER,
 } from './helpers';
 
+interface InferenceChunk {
+  text: string;
+  embeddings: any;
+}
+
+interface InferenceData {
+  inference_id: string;
+  chunks: InferenceChunk[];
+}
+
+interface LegacySemanticTextField {
+  semantic_text: {
+    text: string;
+    inference: InferenceData;
+  };
+}
+
+interface SemanticTextField {
+  semantic_text: string;
+  _inference_fields?: {
+    semantic_text?: {
+      inference: InferenceData;
+    };
+  };
+}
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const esArchiver = getService('esArchiver');
@@ -32,22 +58,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   async function getKnowledgeBaseEntries() {
     const res = (await es.search({
       index: '.kibana-observability-ai-assistant-kb*',
+      // Add fields parameter to include inference metadata
+      fields: ['_inference_fields'],
       body: {
         query: {
           match_all: {},
         },
       },
-    })) as SearchResponse<
-      KnowledgeBaseEntry & {
-        semantic_text: {
-          text: string;
-          inference: { inference_id: string; chunks: Array<{ text: string; embeddings: any }> };
-        };
-      }
-    >;
+    })) as SearchResponse<KnowledgeBaseEntry & (LegacySemanticTextField | SemanticTextField)>;
 
     return res.hits.hits;
   }
+
   // Failing: See https://github.com/elastic/kibana/issues/206474
   describe.skip('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
     // security_exception: action [indices:admin/settings/update] is unauthorized for user [testing-internal] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_usage_counters_1,.kibana_1,.kibana_ingest_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]
@@ -98,29 +120,39 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const hasSemanticTextEmbeddings = hits.every((hit) => hit._source?.semantic_text);
           expect(hasSemanticTextEmbeddings).to.be(true);
 
-          expect(
-            orderBy(hits, '_source.title').map(({ _source }) => {
-              const { text, inference } = _source?.semantic_text!;
+        expect(
+          orderBy(hits, '_source.title').map(({ _source }) => {
+            let text: string | undefined;
+            let inference: InferenceData | undefined;
 
-              return {
-                text,
-                inferenceId: inference.inference_id,
-                chunkCount: inference.chunks.length,
-              };
-            })
-          ).to.eql([
-            {
-              text: 'To infinity and beyond!',
-              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
-              chunkCount: 1,
-            },
-            {
-              text: "The user's favourite color is blue.",
-              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
-              chunkCount: 1,
-            },
-          ]);
-        });
+            if (_source && '_inference_fields' in _source) {
+              const newSource = _source as SemanticTextField;
+              text = newSource.semantic_text;
+              inference = newSource._inference_fields?.semantic_text?.inference;
+            } else {
+              const oldSource = _source as LegacySemanticTextField;
+              text = oldSource.semantic_text.text;
+              inference = oldSource.semantic_text.inference;
+            }
+
+            return {
+              text: text ?? '',
+              inferenceId: inference?.inference_id,
+              chunkCount: inference?.chunks?.length ?? 0,
+            };
+          })
+        ).to.eql([
+          {
+            text: 'To infinity and beyond!',
+            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+            chunkCount: 1,
+          },
+          {
+            text: "The user's favourite color is blue.",
+            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+            chunkCount: 1,
+          },
+        ]);
       });
 
       it('returns entries correctly via API', async () => {
