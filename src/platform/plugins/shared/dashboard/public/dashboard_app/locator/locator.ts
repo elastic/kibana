@@ -18,8 +18,6 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardLocatorParams } from '../..';
-import { coreServices, shareService } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
@@ -109,18 +107,4 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       state: getSerializableRecord(cleanEmptyKeys(state)),
     };
   };
-}
-
-export function createDashboardLocator() {
-  return shareService?.url.locators.create(
-    new DashboardAppLocatorDefinition({
-      useHashedUrl: coreServices.uiSettings.get('state:storeInSessionStorage'),
-      getDashboardFilterFields: async (dashboardId: string) => {
-        return (
-          (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-            .dashboardInput?.filters ?? []
-        );
-      },
-    })
-  );
 }
