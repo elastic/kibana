@@ -104,7 +104,7 @@ export interface DiscoverDataStateContainer {
    */
   subscribe: () => () => void;
   /**
-   * resetting all data observable to initial state
+   * resetting all data observable to given state, if not state is given the initial state is set
    */
   reset: (status?: FetchStatus) => void;
 

@@ -12,7 +12,10 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 
 export enum FetchStatus {
+  // the data fetching is in the setup phase, no request has been sent yet
   SETUP = 'setup',
+  // the data fetching has not started yet, it's just being used when discover:searchOnPageLoad is set to false
+  // Discover then doesn't start the data fetching on page load initially
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading',
   LOADING_MORE = 'loading_more',

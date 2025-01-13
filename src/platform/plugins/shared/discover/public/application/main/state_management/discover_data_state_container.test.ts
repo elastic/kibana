@@ -117,6 +117,27 @@ describe('test getDataStateContainer', () => {
     unsubscribe();
   });
 
+  test('reset sets back to a given state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
+    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+
+    const dataState = stateContainer.dataState;
+    const unsubscribe = dataState.subscribe();
+
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+    });
+
+    dataState.reset(FetchStatus.SETUP);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.SETUP);
+    });
+    unsubscribe();
+  });
+
   test('refetch$ accepts "fetch_more" signal', (done) => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
