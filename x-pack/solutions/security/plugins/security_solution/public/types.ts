@@ -21,6 +21,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { PluginStart as ListsPluginStart } from '@kbn/lists-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -161,6 +162,7 @@ export interface StartPlugins {
   core: CoreStart;
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -198,6 +200,7 @@ export type StartServices = CoreStart &
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
+    productDocBase: ProductDocBasePluginStart;
   };
 
 export type StartRenderServices = Pick<
