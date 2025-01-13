@@ -7,45 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line max-classes-per-file
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutReportEvent } from './event';
-
-/**
- * Generic error raised by a Scout report
- */
-export class ScoutReportError extends Error {}
+import { ScoutReport, ScoutReportError } from '../base';
 
 /**
  *
  */
-export class ScoutReport {
-  log: ToolingLog;
-  workDir: string;
-  concluded = false;
-
+export class ScoutEventsReport extends ScoutReport {
   constructor(log?: ToolingLog) {
+    super('Scout Events report', log);
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-report-'));
   }
 
   public get eventLogPath(): string {
     return path.join(this.workDir, `event-log.ndjson`);
-  }
-
-  private raiseIfConcluded(additionalInfo?: string) {
-    if (this.concluded) {
-      let message = `Report at ${this.workDir} was concluded`;
-
-      if (additionalInfo) {
-        message += `: ${additionalInfo}`;
-      }
-
-      throw new ScoutReportError(message);
-    }
   }
 
   /**
@@ -76,26 +56,11 @@ export class ScoutReport {
     }
 
     // Create the destination directory
-    this.log.info(`Saving Scout report to ${destination}`);
+    this.log.info(`Saving ${this.reportName} to ${destination}`);
     fs.mkdirSync(destination, { recursive: true });
 
     // Copy the workdir data to the destination
     fs.cpSync(this.workDir, destination, { recursive: true });
-  }
-
-  /**
-   * Call this when you're done adding information to this report.
-   *
-   * ⚠️**This will delete all the contents of the report's working directory**
-   */
-  conclude() {
-    // Remove the working directory
-    this.log.info(`Removing Scout report working directory ${this.workDir}`);
-    fs.rmSync(this.workDir, { recursive: true, force: true });
-
-    // Mark this report as concluded
-    this.concluded = true;
-    this.log.success('Scout report has concluded.');
   }
 }
 

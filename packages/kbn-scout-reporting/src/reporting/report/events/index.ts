@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPluginManifestData, type PluginManifest } from './get_plugin_manifest_data';
-export { stripRunCommand, stripFilePath } from './strip_utils';
-export { parseStdout } from './parse_stdout';
-export { getRunTarget } from './get_run_target';
-export { getTestIDForTitle, generateTestRunId } from './test_id_generator';
+export { ScoutEventsReport } from './report';
+export { ScoutReportEventAction } from './event';

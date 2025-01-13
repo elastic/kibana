@@ -9,15 +9,11 @@
 
 import path from 'path';
 import fs from 'fs';
-import {
-  getManifestPath,
-  readPluginManifest,
-  getPluginManifestData,
-} from './get_plugin_manifest_data';
+import { getManifestPath, readPluginManifest, getPluginManifestData } from './plugin_manufest';
 
 jest.mock('fs');
 
-describe('get_plugin_manufest_data', () => {
+describe('plugin_manifest', () => {
   describe('getManifestPath', () => {
     it('should resolve the manifest path correctly for a valid config path', () => {
       const configPath = '/plugins/my_plugin/ui_tests/playwright.config.ts';

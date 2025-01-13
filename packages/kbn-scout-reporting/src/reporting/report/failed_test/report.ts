@@ -7,46 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line max-classes-per-file
-import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { saveTestFailuresReport } from './save_test_failures';
-import { buildFailureHtml } from './build_test_failure_html';
+import { buildFailureHtml } from './html';
 import { TestFailure } from './test_failure';
+import { ScoutReport, ScoutReportError } from '../base';
 
-/**
- * Generic error raised by a Scout report
- */
-export class ScoutReportError extends Error {}
+const saveTestFailuresReport = (
+  reportPath: string,
+  testFailureHtml: string,
+  log: ToolingLog,
+  message: string
+): void => {
+  try {
+    fs.writeFileSync(reportPath, testFailureHtml, 'utf-8');
+    log.info(message);
+  } catch (error) {
+    log.error(`Failed to save report at ${reportPath}: ${error.message}`);
+  }
+};
 
-export class ScoutFailureReport {
-  log: ToolingLog;
-  workDir: string;
-  reportName: string;
-  concluded = false;
-
+export class ScoutFailureReport extends ScoutReport {
   constructor(log?: ToolingLog) {
-    this.log = log || new ToolingLog();
-    this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-failures-report-'));
-    this.reportName = 'Scout Test Failures report';
+    super('Scout Failure report', log);
   }
 
   public get testFailuresPath(): string {
     return path.join(this.workDir, `test-failures.ndjson`);
-  }
-
-  private raiseIfConcluded(additionalInfo?: string) {
-    if (this.concluded) {
-      let message = `Report at ${this.workDir} was concluded`;
-
-      if (additionalInfo) {
-        message += `: ${additionalInfo}`;
-      }
-
-      throw new ScoutReportError(message);
-    }
   }
 
   /**
@@ -112,21 +100,6 @@ export class ScoutFailureReport {
       this.log,
       `Summary report is saved at ${testFailuresSummaryReportPath}`
     );
-  }
-
-  /**
-   * Call this when you're done adding information to this report.
-   *
-   * ⚠️**This will delete all the contents of the report's working directory**
-   */
-  conclude() {
-    // Remove the working directory
-    this.log.info(`Removing Scout report working directory ${this.workDir}`);
-    fs.rmSync(this.workDir, { recursive: true, force: true });
-
-    // Mark this report as concluded
-    this.concluded = true;
-    this.log.success('Scout report has concluded.');
   }
 
   /**

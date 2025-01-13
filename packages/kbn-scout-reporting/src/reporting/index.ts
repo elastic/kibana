@@ -10,7 +10,7 @@
 import type { ReporterDescription } from 'playwright/test';
 import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
-export * from './report/event/report';
+export * from './report/events/report';
 
 // Playwright event-based reporting
 export const scoutPlaywrightReporter = (
@@ -26,4 +26,4 @@ export const scoutFailedTestsReporter = (
   return ['@kbn/scout-reporting/src/reporting/playwright/failed_test/index.ts', options];
 };
 
-export { generateTestRunId, getTestIDForTitle } from './playwright/common';
+export { generateTestRunId, getTestIDForTitle } from '../helpers';

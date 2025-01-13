@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import stripANSI from 'strip-ansi';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-export const saveTestFailuresReport = (
-  reportPath: string,
-  testFailureHtml: string,
-  log: ToolingLog,
-  message: string
-): void => {
-  try {
-    fs.writeFileSync(reportPath, testFailureHtml, 'utf-8');
-    log.info(message);
-  } catch (error) {
-    log.error(`Failed to save report at ${reportPath}: ${error.message}`);
-  }
-};
+export const stripFilePath = (filePath: string): string =>
+  stripANSI(filePath.replaceAll(`${REPO_ROOT}/`, ''));
+
+export function parseStdout(stdout: Array<string | Buffer>): string {
+  const stdoutContent = stdout
+    .map((chunk) => (Buffer.isBuffer(chunk) ? chunk.toString() : chunk))
+    .join('');
+
+  // Escape special HTML characters
+  return stripANSI(stdoutContent);
+}

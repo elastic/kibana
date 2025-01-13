@@ -36,7 +36,7 @@ import {
   getTestIDForTitle,
   stripRunCommand,
   stripFilePath,
-} from '../common';
+} from '../../../helpers';
 
 /**
  * Scout Failed Test reporter
