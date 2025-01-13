@@ -24,12 +24,13 @@ import {
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
-import { bulkInsert, updateTimestamps } from './helpers';
+import { bulkInsert, eventually, updateTimestamps } from './helpers';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 import type {
   SecuritySolutionPluginStart,
@@ -396,4 +397,25 @@ export function getTelemetryTaskType(task: SecurityTelemetryTask): string {
   } else {
     return '';
   }
+}
+
+export async function runSoonConfigTask(
+  tasks: SecurityTelemetryTask[],
+  taskManagerPlugin: TaskManagerStartContract
+) {
+  const configTaskType = 'security:telemetry-configuration';
+  const configTask = getTelemetryTask(tasks, configTaskType);
+  const runAfter = new Date();
+  await eventually(async () => {
+    await taskManagerPlugin.runSoon(configTask.getTaskId());
+  });
+
+  // wait until the task finishes
+  await eventually(async () => {
+    const hasRun = await taskManagerPlugin
+      .get(configTask.getTaskId())
+      .then((t) => new Date(t.state.lastExecutionTimestamp) > runAfter)
+      .catch(() => false);
+    expect(hasRun).toBe(true);
+  });
 }

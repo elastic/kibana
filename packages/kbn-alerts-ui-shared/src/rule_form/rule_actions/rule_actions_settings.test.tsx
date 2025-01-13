@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleActionsSettings } from './rule_actions_settings';
 import { getAction } from '../../common/test_utils/actions_test_utils';
-import { RuleTypeModel } from '../../common';
+import type { RuleTypeModel } from '../../common';
 import { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { RuleActionsNotifyWhenProps } from './rule_actions_notify_when';

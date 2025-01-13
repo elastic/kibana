@@ -171,7 +171,10 @@ export function fetchAll(
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
-      .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
+      .catch((e) => {
+        sendErrorMsg(dataSubjects.documents$, e, { query });
+        sendErrorMsg(dataSubjects.main$, e);
+      });
 
     // Return a promise that will resolve once all the requests have finished or failed
     return firstValueFrom(

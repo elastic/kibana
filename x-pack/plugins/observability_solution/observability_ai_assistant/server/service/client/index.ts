@@ -86,6 +86,7 @@ import {
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -734,6 +735,10 @@ export class ObservabilityAIAssistantClient {
 
   setupKnowledgeBase = async (modelId: string | undefined) => {
     const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+
+    if (!modelId) {
+      modelId = await getElserModelId({ core, logger });
+    }
 
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);

@@ -37,7 +37,7 @@ export const getDefaultFormData = ({
   ruleTypeId: RuleFormData['ruleTypeId'];
   name: RuleFormData['name'];
   consumer: RuleFormData['consumer'];
-  actions: RuleFormData['actions'];
+  actions?: RuleFormData['actions'];
   schedule?: RuleFormData['schedule'];
 }) => {
   return {
@@ -49,7 +49,7 @@ export const getDefaultFormData = ({
     consumer,
     ruleTypeId,
     name,
-    actions,
+    actions: actions ?? [],
     alertDelay: { active: 1 },
   };
 };

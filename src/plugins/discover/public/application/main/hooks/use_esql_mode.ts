@@ -64,13 +64,19 @@ export function useEsqlMode({
         switchMap(async (next) => {
           const { query: nextQuery } = next;
 
-          if (!nextQuery || next.fetchStatus === FetchStatus.ERROR) {
+          if (!nextQuery) {
             return;
           }
 
           if (!isOfAggregateQueryType(nextQuery)) {
             // cleanup for a "regular" query
             cleanup();
+            return;
+          }
+
+          if (next.fetchStatus === FetchStatus.ERROR) {
+            // An error occurred, but it's still considered an initial fetch
+            prev.current.initialFetch = false;
             return;
           }
 
