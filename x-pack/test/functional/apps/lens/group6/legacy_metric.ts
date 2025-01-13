@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       const styleObj = await lens.getLegacyMetricStyle();
       expect(styleObj['background-color']).to.be(undefined);
-      expect(styleObj.color).to.be('rgb(214, 191, 87)');
+      expect(styleObj.color).to.be('rgb(252, 216, 131)');
     });
 
     it('should change the color of the metric when tweaking the values in the panel', async () => {
@@ -51,14 +51,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await lens.waitForVisualization('legacyMtrVis');
       const styleObj = await lens.getLegacyMetricStyle();
-      expect(styleObj.color).to.be('rgb(32, 146, 128)');
+      expect(styleObj.color).to.be('rgb(36, 194, 146)');
     });
 
     it('should change the color when reverting the palette', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization('legacyMtrVis');
       const styleObj = await lens.getLegacyMetricStyle();
-      expect(styleObj.color).to.be('rgb(204, 86, 66)');
+      expect(styleObj.color).to.be('rgb(246, 114, 106)');
     });
 
     it('should reset the color stops when changing palette to a predefined one', async () => {
