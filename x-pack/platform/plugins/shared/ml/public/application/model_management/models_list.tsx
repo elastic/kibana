@@ -39,6 +39,8 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useEuiMaxBreakpoint } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
@@ -582,6 +584,8 @@ export const ModelsList: FC<Props> = ({
   const isElserCalloutVisible =
     !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
 
+  const euiMaxBreakpointL = useEuiMaxBreakpoint('l');
+
   const tableItems = useMemo(() => {
     if (pageState.showAll) {
       return items;
@@ -647,6 +651,12 @@ export const ModelsList: FC<Props> = ({
           selection={selection}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
+            // This is a workaround for https://github.com/elastic/eui/issues/8259
+            css: css`
+              ${euiMaxBreakpointL} {
+                min-block-size: 10.875rem;
+              }
+            `,
           })}
           pagination={pagination}
           onTableChange={onTableChange}
