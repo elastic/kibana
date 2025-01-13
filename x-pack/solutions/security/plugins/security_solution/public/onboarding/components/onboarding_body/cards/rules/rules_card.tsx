@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';

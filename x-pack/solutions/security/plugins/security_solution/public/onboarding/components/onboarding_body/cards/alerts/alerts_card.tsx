@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { css } from '@emotion/css';
@@ -22,7 +22,7 @@ import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_ITEMS } from './alerts_card_config
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
 import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
-import { CardSelectorAssetListItem } from '../types';
+import type { CardSelectorAssetListItem } from '../types';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
