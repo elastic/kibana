@@ -8,11 +8,13 @@ This tool is developed for our team working on the Elastic Observability platfor
 
 - An Elasticsearch instance
 
+You'll need an instance configured with cross cluster search for the [edge-rca](https://studious-disco-k66oojq.pages.github.io/edge-rca/) cluster. To create one, utilize [oblt-cli](https://studious-disco-k66oojq.pages.github.io/user-guide/cluster-create-ccs/) and select `edge-rca` as the remote cluster.
+
 ## Running archive
 
 Run the tool using:
 
-`$ node x-pack/solutions/observability/plugins/investigate_app/scripts/archive/index.js`
+`$ node x-pack/solutions/observability/plugins/investigate_app/scripts/archive/index.js --kibana http://admin:[YOUR_CLUSTER_PASSWORD]@localhost:5601`
 
 This will archive the observability alerts index to use as fixtures within the tests.
 
