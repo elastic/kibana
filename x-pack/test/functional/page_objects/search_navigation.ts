@@ -9,7 +9,11 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, header } = getPageObjects(['common']);
+  const { common, indexManagement, header } = getPageObjects([
+    'common',
+    'indexManagement',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
 
   return {
