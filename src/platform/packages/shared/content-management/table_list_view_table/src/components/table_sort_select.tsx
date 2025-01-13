@@ -30,7 +30,7 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt';
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | 'typeTitle';
 
 const i18nText = {
   accessedDescSort: i18n.translate(
@@ -60,6 +60,12 @@ const i18nText = {
       defaultMessage: 'Recently updated',
     }
   ),
+  typeAsc: i18n.translate('contentManagement.tableList.listing.tableSortSelect.typeAscLabel', {
+    defaultMessage: 'Type A-Z',
+  }),
+  typeDesc: i18n.translate('contentManagement.tableList.listing.tableSortSelect.typeDescLabel', {
+    defaultMessage: 'Type Z-A',
+  }),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
     defaultMessage: 'Sort by',
   }),
@@ -92,6 +98,18 @@ export function TableSortSelect({
       {
         label: i18nText.nameDescSort,
         column: 'attributes.title',
+        direction: 'desc',
+        append: <EuiIcon type="sortDown" />,
+      },
+      {
+        label: i18nText.typeAsc,
+        column: 'typeTitle',
+        direction: 'asc',
+        append: <EuiIcon type="sortUp" />,
+      },
+      {
+        label: i18nText.typeDesc,
+        column: 'typeTitle',
         direction: 'desc',
         append: <EuiIcon type="sortDown" />,
       },
