@@ -7884,7 +7884,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
+"@kbn/use-tracked-promise@link:src/platform/packages/shared/kbn-use-tracked-promise":
   version "0.0.0"
   uid ""
 
