@@ -102,12 +102,12 @@ function _buildSource(
       emit('unenrolled');
     }
     ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
-    else if (${field('audit_unenrolled_reason')}.size() > 0 && ${field(
-    'audit_unenrolled_reason'
-  )}.value == 'uninstall'){emit('uninstalled');}
-    else if (${field('audit_unenrolled_reason')}.size() > 0 && ${field(
-    'audit_unenrolled_reason'
-  )}.value == 'orphaned'){emit('orphaned');}
+    else if (doc.containsKey('audit_unenrolled_reason') && ${field(
+      'audit_unenrolled_reason'
+    )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'uninstall'){emit('uninstalled');}
+    else if (doc.containsKey('audit_unenrolled_reason') && ${field(
+      'audit_unenrolled_reason'
+    )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'orphaned'){emit('orphaned');}
     else if (
         lastCheckinMillis > 0
         && lastCheckinMillis
