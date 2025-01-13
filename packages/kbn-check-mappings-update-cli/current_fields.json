@@ -3,7 +3,9 @@
     "actionTypeId",
     "name"
   ],
-  "action_task_params": [],
+  "action_task_params": [
+    "apiKeyId"
+  ],
   "ad_hoc_run_params": [
     "apiKeyId",
     "createdAt",
@@ -169,6 +171,9 @@
     "external_service.pushed_by.full_name",
     "external_service.pushed_by.profile_uid",
     "external_service.pushed_by.username",
+    "observables",
+    "observables.typeKey",
+    "observables.value",
     "owner",
     "settings",
     "settings.syncAlerts",
@@ -762,7 +767,10 @@
   ],
   "maintenance-window": [
     "enabled",
-    "events"
+    "events",
+    "expirationDate",
+    "title",
+    "updatedAt"
   ],
   "map": [
     "bounds",
@@ -1098,6 +1106,7 @@
     "enabled",
     "ownerId",
     "partition",
+    "priority",
     "retryAt",
     "runAt",
     "schedule",

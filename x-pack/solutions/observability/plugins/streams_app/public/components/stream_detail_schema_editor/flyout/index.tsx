@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { SamplePreviewTable } from './sample_preview_table';
@@ -57,9 +57,9 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary {...props} />
-          {isEditing && definition.children.length > 0 ? (
+          {isEditing && definition.stream.ingest.routing.length > 0 ? (
             <EuiFlexItem grow={false}>
-              <ChildrenAffectedCallout childStreams={definition.children} />
+              <ChildrenAffectedCallout childStreams={definition.stream.ingest.routing} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>

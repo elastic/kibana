@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { useAnomaliesColumns } from './columns';

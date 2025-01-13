@@ -151,8 +151,16 @@ describe('buildPackage', () => {
   });
 
   it('Should call createAgentInput for each datastream', async () => {
-    expect(createAgentInput).toHaveBeenCalledWith(firstDatastreamPath, firstDataStreamInputTypes);
-    expect(createAgentInput).toHaveBeenCalledWith(secondDatastreamPath, secondDataStreamInputTypes);
+    expect(createAgentInput).toHaveBeenCalledWith(
+      firstDatastreamPath,
+      firstDataStreamInputTypes,
+      undefined
+    );
+    expect(createAgentInput).toHaveBeenCalledWith(
+      secondDatastreamPath,
+      secondDataStreamInputTypes,
+      undefined
+    );
   });
 
   it('Should call createPipeline for each datastream', async () => {
@@ -287,15 +295,9 @@ describe('renderPackageManifestYAML', () => {
 
 describe('isValidName', () => {
   it('should return true for valid names', () => {
-    expect(isValidName('validName')).toBe(true);
-    expect(isValidName('Valid_Name')).toBe(true);
-    expect(isValidName('anotherValidName')).toBe(true);
-  });
-
-  it('should return false for names with numbers', () => {
-    expect(isValidName('invalid123')).toBe(false);
-    expect(isValidName('123invalid')).toBe(false);
-    expect(isValidName('invalid_123')).toBe(false);
+    expect(isValidName('validname')).toBe(true);
+    expect(isValidName('valid_name')).toBe(true);
+    expect(isValidName('anothervalidname')).toBe(true);
   });
 
   it('should return false for empty string', () => {

@@ -35,6 +35,7 @@
     "@kbn/datemath",
     "@kbn/ui-theme",
     "@kbn/i18n-react",
+    "@kbn/charts-theme",
   ],
   "exclude": ["target/**/*"]
 }

@@ -193,6 +193,12 @@ npx playwright test --config <plugin-path>/ui_tests/playwright.config.ts
 
 We welcome contributions to improve and extend `kbn-scout`. This guide will help you get started, add new features, and align with existing project standards.
 
+Make sure to run unit tests before opening the PR:
+
+```bash
+node scripts/jest --config packages/kbn-scout/jest.config.js
+```
+
 #### Setting Up the Environment
 
 Ensure you have the latest local copy of the Kibana repository.

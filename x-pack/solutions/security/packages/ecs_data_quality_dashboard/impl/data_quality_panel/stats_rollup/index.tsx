@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { EMPTY_STAT } from '../constants';
 import { useDataQualityContext } from '../data_quality_context';
@@ -15,19 +15,25 @@ import * as i18n from '../stat_label/translations';
 import { Stat } from '../stat';
 import { getIncompatibleStatBadgeColor } from '../utils/get_incompatible_stat_badge_color';
 
-const StyledStatWrapperFlexItem = styled(EuiFlexItem)`
-  padding: 0 ${({ theme }) => theme.eui.euiSize};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  border-color: ${({ theme }) => theme.eui.euiBorderColor};
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-  &:last-child {
-    padding-right: 0;
-    border-right: none;
-  }
-  &:first-child {
-    padding-left: 0;
-  }
-`;
+  return {
+    statWrapper: css({
+      padding: `0 ${euiTheme.size.base}`,
+      borderRight: euiTheme.border.thin,
+      borderColor: euiTheme.border.color,
+
+      '&:last-child': {
+        paddingRight: 0,
+        borderRight: 'none',
+      },
+      '&:first-child': {
+        paddingLeft: 0,
+      },
+    }),
+  };
+};
 
 interface Props {
   docsCount?: number;
@@ -46,6 +52,7 @@ const StatsRollupComponent: React.FC<Props> = ({
   pattern,
   sizeInBytes,
 }) => {
+  const styles = useStyles();
   const { formatNumber, formatBytes } = useDataQualityContext();
 
   return (
@@ -55,7 +62,7 @@ const StatsRollupComponent: React.FC<Props> = ({
       gutterSize="none"
       justifyContent="flexEnd"
     >
-      <StyledStatWrapperFlexItem grow={false}>
+      <EuiFlexItem css={styles.statWrapper} grow={false}>
         <Stat
           tooltipText={
             pattern != null
@@ -67,9 +74,9 @@ const StatsRollupComponent: React.FC<Props> = ({
         >
           {i18n.INCOMPATIBLE_FIELDS}
         </Stat>
-      </StyledStatWrapperFlexItem>
+      </EuiFlexItem>
 
-      <StyledStatWrapperFlexItem grow={false}>
+      <EuiFlexItem css={styles.statWrapper} grow={false}>
         <Stat
           tooltipText={
             pattern != null
@@ -80,9 +87,9 @@ const StatsRollupComponent: React.FC<Props> = ({
         >
           {i18n.INDICES_CHECKED}
         </Stat>
-      </StyledStatWrapperFlexItem>
+      </EuiFlexItem>
 
-      <StyledStatWrapperFlexItem grow={false}>
+      <EuiFlexItem css={styles.statWrapper} grow={false}>
         <Stat
           tooltipText={
             pattern != null ? i18n.TOTAL_INDICES_PATTERN_TOOL_TIP : i18n.TOTAL_INDICES_TOOL_TIP
@@ -91,10 +98,10 @@ const StatsRollupComponent: React.FC<Props> = ({
         >
           {i18n.INDICES}
         </Stat>
-      </StyledStatWrapperFlexItem>
+      </EuiFlexItem>
 
       {sizeInBytes != null && (
-        <StyledStatWrapperFlexItem grow={false}>
+        <EuiFlexItem css={styles.statWrapper} grow={false}>
           <Stat
             tooltipText={
               pattern != null ? i18n.TOTAL_SIZE_PATTERN_TOOL_TIP : i18n.TOTAL_SIZE_TOOL_TIP
@@ -103,10 +110,10 @@ const StatsRollupComponent: React.FC<Props> = ({
           >
             {i18n.SIZE}
           </Stat>
-        </StyledStatWrapperFlexItem>
+        </EuiFlexItem>
       )}
 
-      <StyledStatWrapperFlexItem grow={false}>
+      <EuiFlexItem css={styles.statWrapper} grow={false}>
         <Stat
           tooltipText={
             pattern != null ? i18n.TOTAL_DOCS_PATTERN_TOOL_TIP : i18n.TOTAL_DOCS_TOOL_TIP
@@ -115,7 +122,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         >
           {i18n.DOCS}
         </Stat>
-      </StyledStatWrapperFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

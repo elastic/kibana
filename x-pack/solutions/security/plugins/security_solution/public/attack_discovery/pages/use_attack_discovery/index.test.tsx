@@ -155,11 +155,10 @@ describe('useAttackDiscovery', () => {
     await act(async () => {
       await result.current.fetchAttackDiscoveries();
     });
-    expect(mockedUseKibana.services.http.fetch).toHaveBeenCalledWith(
+    expect(mockedUseKibana.services.http.post).toHaveBeenCalledWith(
       '/internal/elastic_assistant/attack_discovery',
       {
         body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}`,
-        method: 'POST',
         version: '1',
       }
     );
@@ -172,7 +171,7 @@ describe('useAttackDiscovery', () => {
   it('handles fetch errors correctly', async () => {
     const errorMessage = 'Fetch error';
     const error = new Error(errorMessage);
-    (mockedUseKibana.services.http.fetch as jest.Mock).mockRejectedValue(error);
+    (mockedUseKibana.services.http.post as jest.Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
 

@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import { ReadStreamDefinition } from '../../../common/types';
+import {
+  FieldDefinitionConfig,
+  isWiredReadStream,
+  ReadStreamDefinition,
+  WiredReadStreamDefinition,
+} from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readAncestors, readStream } from '../../lib/streams/stream_crud';
@@ -27,37 +32,42 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({
-    response,
-    params,
-    request,
-    logger,
-    getScopedClients,
-  }): Promise<ReadStreamDefinition> => {
+  handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
+      const dashboards = await assetClient.getAssetIds({
+        entityId: streamEntity.name,
+        entityType: 'stream',
+        assetType: 'dashboard',
+      });
 
-      if (streamEntity.definition.managed === false) {
+      if (!isWiredReadStream(streamEntity)) {
         return {
-          ...streamEntity.definition,
-          inheritedFields: [],
+          ...streamEntity,
+          dashboards,
+          inherited_fields: {},
         };
       }
 
       const { ancestors } = await readAncestors({
-        id: streamEntity.definition.id,
+        name: streamEntity.name,
         scopedClusterClient,
       });
 
-      const body = {
-        ...streamEntity.definition,
-        inheritedFields: ancestors.flatMap(({ definition: { id, fields } }) =>
-          fields.map((field) => ({ ...field, from: id }))
-        ),
+      const body: WiredReadStreamDefinition = {
+        ...streamEntity,
+        dashboards,
+        inherited_fields: ancestors.reduce((acc, def) => {
+          Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
+            acc[key] = { ...fieldDef, from: def.name };
+          });
+          return acc;
+          // TODO: replace this with a proper type
+        }, {} as Record<string, FieldDefinitionConfig & { from: string }>),
       };
 
       return body;

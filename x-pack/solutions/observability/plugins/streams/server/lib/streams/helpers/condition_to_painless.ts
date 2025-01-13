@@ -11,8 +11,10 @@ import {
   Condition,
   FilterCondition,
   UnaryFilterCondition,
-} from '../../../../common/types';
-import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
+} from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (isFilterCondition(conditionOrField)) {

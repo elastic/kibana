@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockUserProfiles } from './mock';
@@ -39,16 +39,13 @@ describe('useBulkGetUserProfiles hook', () => {
     const userProfiles = useKibana().services.security.userProfiles;
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'bulkGet');
     const assigneesIds = new Set(['user1']);
-    const { result, waitForNextUpdate } = renderHook(
-      () => useBulkGetUserProfiles({ uids: assigneesIds }),
-      {
-        wrapper: TestProviders,
-      }
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useBulkGetUserProfiles({ uids: assigneesIds }), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.data).toEqual(mockUserProfiles);
   });
 });

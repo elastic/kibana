@@ -13,7 +13,7 @@
         "signature": [
           "(appBasePath?: string, path?: string) => string"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -42,7 +42,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,23 +60,11 @@
         "description": [],
         "signature": [
           "(app: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.App",
-            "text": "App"
-          },
+          "App",
           "<unknown>) => ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.PublicAppInfo",
-            "text": "PublicAppInfo"
-          }
+          "PublicAppInfo"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/get_app_info.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,16 +76,10 @@
             "label": "app",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.App",
-                "text": "App"
-              },
+              "App",
               "<unknown>"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/get_app_info.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,26 +99,14 @@
         ],
         "signature": [
           "(url: string, basePath: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           ", apps: Map<string, ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.App",
-            "text": "App"
-          },
+          "App",
           "<unknown>>, currentUrl?: string) => ",
           "ParsedAppUrl",
           " | undefined"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +120,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -163,15 +133,9 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IBasePath",
-                "text": "IBasePath"
-              }
+              "IBasePath"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,16 +149,10 @@
             "description": [],
             "signature": [
               "Map<string, ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.App",
-                "text": "App"
-              },
+              "App",
               "<unknown>>"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -209,7 +167,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -230,7 +188,7 @@
         "signature": [
           "(url: string) => string"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/relative_to_absolute.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -244,7 +202,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/relative_to_absolute.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -265,7 +223,7 @@
         "signature": [
           "(url: string, { trailing, leading, duplicates, }?: { trailing?: boolean | undefined; leading?: boolean | undefined; duplicates?: boolean | undefined; }) => string"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,7 +237,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,7 +249,7 @@
             "tags": [],
             "label": "{\n    trailing = false,\n    leading = false,\n    duplicates = true,\n  }",
             "description": [],
-            "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+            "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -305,7 +263,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -319,7 +277,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -333,7 +291,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -355,16 +313,10 @@
         "label": "DEFAULT_APP_VISIBILITY",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.AppDeepLinkLocations",
-            "text": "AppDeepLinkLocations"
-          },
+          "AppDeepLinkLocations",
           "[]"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/constants.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -377,16 +329,10 @@
         "label": "DEFAULT_LINK_VISIBILITY",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.AppDeepLinkLocations",
-            "text": "AppDeepLinkLocations"
-          },
+          "AppDeepLinkLocations",
           "[]"
         ],
-        "path": "packages/core/application/core-application-browser-internal/src/utils/constants.ts",
+        "path": "src/core/packages/application/browser-internal/src/utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
