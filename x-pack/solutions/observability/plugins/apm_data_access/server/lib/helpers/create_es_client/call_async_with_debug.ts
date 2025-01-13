@@ -10,7 +10,7 @@
 import chalk from 'chalk';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import type { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 

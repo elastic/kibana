@@ -230,7 +230,9 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
-    "@kbn/ai-assistant-icon"
+    "@kbn/charts-theme"
   ]
 }

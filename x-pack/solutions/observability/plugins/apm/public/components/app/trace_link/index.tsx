@@ -16,7 +16,7 @@ import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transac
 import { getRedirectToTracePageUrl } from './get_redirect_to_trace_page_url';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 
 const CentralizedContainer = euiStyled.div`
   height: 100%;

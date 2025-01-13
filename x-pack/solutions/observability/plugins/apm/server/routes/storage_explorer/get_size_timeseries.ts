@@ -14,10 +14,10 @@ import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { ApmPluginRequestHandlerContext } from '../typings';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type SizeTimeseriesResponse = Array<{
   serviceName: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
 import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';

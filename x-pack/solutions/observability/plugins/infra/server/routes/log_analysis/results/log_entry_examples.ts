@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
-import { InfraBackendLibs } from '../../../lib/infra_types';
+import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryExamples } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';

@@ -8,7 +8,7 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elas
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 interface Props {

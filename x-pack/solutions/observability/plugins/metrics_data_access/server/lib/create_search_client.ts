@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
-import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import type { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
+import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
 export const createSearchClient =
   (requestContext: RequestHandlerContext, framework: KibanaFramework) =>

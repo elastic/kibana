@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { ActorRefFrom, EmittedFrom } from 'xstate';
+import { actions, createMachine } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
 import type { LogViewNotificationChannel } from '@kbn/logs-shared-plugin/public';
-import { OmitDeprecatedState } from '@kbn/xstate-utils';
+import type { OmitDeprecatedState } from '@kbn/xstate-utils';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
+import type { LogStreamQueryStateMachineDependencies } from '../../../log_stream_query_state';
 import {
   createLogStreamQueryStateMachine,
   DEFAULT_TIMERANGE,
-  LogStreamQueryStateMachineDependencies,
 } from '../../../log_stream_query_state';
 import {
   waitForInitialQueryParameters,

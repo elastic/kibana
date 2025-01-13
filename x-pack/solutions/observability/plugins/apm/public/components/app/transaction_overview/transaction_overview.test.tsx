@@ -6,8 +6,9 @@
  */
 
 import { queryByLabelText } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { CoreStart } from '@kbn/core/public';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';

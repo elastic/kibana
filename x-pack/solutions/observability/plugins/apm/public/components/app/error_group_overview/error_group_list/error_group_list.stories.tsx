@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
-import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { Meta, Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { ErrorGroupList } from '.';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 

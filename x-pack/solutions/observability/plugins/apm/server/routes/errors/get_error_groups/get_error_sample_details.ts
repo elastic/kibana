@@ -33,10 +33,10 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;

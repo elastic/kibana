@@ -6,7 +6,8 @@
  */
 
 import type { Story } from '@storybook/react';
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
