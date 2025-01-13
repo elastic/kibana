@@ -23,11 +23,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
       crowdstrike: true,
+      microsoft_defender_endpoint: true,
     },
   },
   unisolate: {
@@ -35,11 +37,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
       crowdstrike: true,
+      microsoft_defender_endpoint: true,
     },
   },
   upload: {
@@ -47,11 +51,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   'get-file': {
@@ -59,11 +65,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   'kill-process': {
@@ -71,11 +79,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   execute: {
@@ -83,11 +93,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   'suspend-process': {
@@ -95,11 +107,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   'running-processes': {
@@ -107,11 +121,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: true,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   scan: {
@@ -119,11 +135,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
   runscript: {
@@ -131,11 +149,13 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
     manual: {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: true,
+      microsoft_defender_endpoint: false,
     },
   },
 };

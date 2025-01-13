@@ -363,7 +363,7 @@ export function LayerPanel(props: LayerPanelProps) {
         className="lnsLayerPanel"
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
-        <EuiPanel paddingSize="none">
+        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
