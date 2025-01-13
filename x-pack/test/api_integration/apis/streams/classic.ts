@@ -99,7 +99,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getResponse.body).to.eql({
         name: TEST_STREAM_NAME,
         dashboards: [],
-        inherited_fields: [],
+        inherited_fields: {},
+        lifecycle: {
+          policy: 'logs',
+          type: 'ilm',
+        },
         stream: {
           ingest: {
             processing: [

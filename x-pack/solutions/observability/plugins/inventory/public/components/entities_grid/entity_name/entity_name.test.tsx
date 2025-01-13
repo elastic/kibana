@@ -21,7 +21,7 @@ describe('EntityName', () => {
     entityId: '1',
     entityType: 'service',
     entityDisplayName: 'entity_name',
-    entityIdentityFields: ['service.name', 'service.environment'],
+    entityIdentityFields: { source1: ['service.name', 'service.environment'] },
     entityDefinitionId: 'entity_definition_id',
     entitySchemaVersion: '1',
     entityDefinitionVersion: '1',
