@@ -198,6 +198,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: true,
+        model: 'gpt-4o',
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
@@ -239,6 +240,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: false,
+        model: 'gpt-4o',
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
