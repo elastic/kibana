@@ -18,7 +18,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardLocatorParams } from '../..';
-import { coreServices, shareService, untilPluginStartServicesReady } from '../../services/kibana_services';
+import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 /**

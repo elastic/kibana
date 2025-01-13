@@ -15,14 +15,16 @@ let locatorPromise: Promise<DashboardAppLocator | undefined>;
 export function getLocator() {
   if (locatorPromise) return locatorPromise;
 
-  locatorPromise = new Promise(async (resolve) => {
-    const [{ createDashboardLocator }] = await Promise.all([
-      import('./locator'),
-      untilPluginStartServicesReady(),
-    ]);
-
-    resolve(createDashboardLocator());
+  locatorPromise = new Promise(async (resolve, reject) => {
+    try {
+      const [{ createDashboardLocator }] = await Promise.all([
+        import('./locator'),
+        untilPluginStartServicesReady(),
+      ]);
+      resolve(createDashboardLocator());
+    } catch (error) {
+      reject(error);
+    }
   });
   return locatorPromise;
 }
-
