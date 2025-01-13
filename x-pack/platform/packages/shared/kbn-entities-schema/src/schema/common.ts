@@ -44,7 +44,9 @@ export const docCountMetricSchema = z.object({
   filter: filterSchema,
 });
 
-export const durationSchema = z.string().regex(/^\d+[m|d|s|h]$/);
+export const durationSchema = z.string().regex(/^\d+[m|d|s|h]$/, {
+  message: 'Must be a number followed by one of the units: m, d, s, or h',
+});
 
 export const durationSchemaWithMinimum = (minimumMinutes: number) =>
   durationSchema.refine(
