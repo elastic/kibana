@@ -96,6 +96,7 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { generateFakeToolCallId } from './src/utils';
 
 export { truncateList } from './src/truncate_list';
 export {
