@@ -198,7 +198,6 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: true,
-        model: 'gpt-4o',
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
@@ -220,7 +219,6 @@ describe('ActionsClientChatOpenAI', () => {
             subAction: 'unified_completion_async_iterator',
             subActionParams: {
               body: {
-                model: 'gpt-4o',
                 messages: [{ role: 'user', content: 'Do you know my name?' }],
 
                 n: defaultStreamingArgs.n,
@@ -241,7 +239,6 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: false,
-        model: 'gpt-4o',
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
@@ -264,7 +261,6 @@ describe('ActionsClientChatOpenAI', () => {
               subActionParams: {
                 body: {
                   temperature: 0.2,
-                  model: 'gpt-4o',
                   n: 99,
                   stop: ['a stop sequence'],
                   tools: [{ function: jest.fn(), type: 'function' }],
