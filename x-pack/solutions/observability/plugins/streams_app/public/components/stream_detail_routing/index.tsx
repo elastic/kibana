@@ -42,6 +42,7 @@ import {
 } from '@kbn/streams-schema';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { DraggableProvided } from '@hello-pangea/dnd';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -246,13 +247,16 @@ function ControlBar({
   refreshDefinition: () => void;
 }) {
   const {
-    core: { notifications },
+    core,
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+
+  const { notifications } = core;
+  const router = useStreamsAppRouter();
 
   const { signal } = useAbortController();
 
@@ -337,6 +341,28 @@ function ControlBar({
         title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
           defaultMessage: 'Stream saved',
         }),
+        text: toMountPoint(
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                target="_blank"
+                href={router.link('/{key}/{tab}/{subtab}', {
+                  path: {
+                    key: routingAppState.childUnderEdit?.child.name!,
+                    tab: 'management',
+                    subtab: 'route',
+                  },
+                })}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.view', {
+                  defaultMessage: 'Open stream in new tab',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          core
+        ),
       });
       routingAppState.setChildUnderEdit(undefined);
       refreshDefinition();
