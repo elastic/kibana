@@ -220,7 +220,7 @@ For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}1
 ====
 
 [discrete]
-[[known-201115]]
+[[known-201115-2]]
 .Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
 [%collapsible]
 ====
