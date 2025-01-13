@@ -817,7 +817,7 @@ class AgentPolicyService {
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
-          'resources',
+          'agentless',
           'monitoring_pprof_enabled',
           'monitoring_http',
           'monitoring_diagnostics',

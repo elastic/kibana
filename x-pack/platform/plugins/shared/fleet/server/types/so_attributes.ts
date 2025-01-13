@@ -17,6 +17,7 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
+  AgentlessPolicy,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -65,12 +66,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
-  resources?: {
-    requests?: {
-      memory?: string;
-      cpu?: string;
-    };
-  };
+  agentless?: AgentlessPolicy;
   version?: string;
 }
 

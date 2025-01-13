@@ -343,10 +343,12 @@ describe('Agentless Agent service', () => {
         name: 'agentless agent policy',
         namespace: 'default',
         supports_agentless: true,
-        resources: {
-          requests: {
-            memory: '1Gi',
-            cpu: '500m',
+        agentless: {
+          resources: {
+            requests: {
+              memory: '1Gi',
+              cpu: '500m',
+            },
           },
         },
         global_data_tags: [

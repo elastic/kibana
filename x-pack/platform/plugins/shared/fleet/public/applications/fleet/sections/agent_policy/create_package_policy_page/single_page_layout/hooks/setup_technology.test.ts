@@ -506,7 +506,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should have resources on the request when creating agentless policy with resources', async () => {
+  it('should have agentless resources section on the request when creating agentless policy with resources', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -540,10 +540,12 @@ describe('useSetupTechnology', () => {
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          resources: {
-            requests: {
-              memory: '256Mi',
-              cpu: '100m',
+          agentless: {
+            resources: {
+              requests: {
+                memory: '256Mi',
+                cpu: '100m',
+              },
             },
           },
         })
@@ -551,7 +553,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should have empty resources on the request when creating agentless policy without resources', async () => {
+  it('should have empty agentless section on the request when creating agentless policy without resources', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -585,7 +587,47 @@ describe('useSetupTechnology', () => {
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          resources: {},
+          agentless: {},
+        })
+      );
+    });
+  });
+
+  it('should not have agentless section on the request when creating regular policy', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'not-cspm');
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          agentless: {},
         })
       );
     });

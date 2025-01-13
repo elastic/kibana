@@ -1640,9 +1640,24 @@
         "index": false,
         "type": "flattened"
       },
-      "resources": {
-        "index": false,
-        "type": "flattened"
+      "agentless": {
+        "dynamic": false,
+        "properties": {
+          "resources": {
+            "properties": {
+              "requests": {
+                "properties": {
+                  "cpu": {
+                    "type": "keyword"
+                  },
+                  "memory": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2014,9 +2029,24 @@
         "index": false,
         "type": "flattened"
       },
-      "resources": {
-        "index": false,
-        "type": "flattened"
+      "agentless": {
+        "dynamic": false,
+        "properties": {
+          "resources": {
+            "properties": {
+              "requests": {
+                "properties": {
+                  "cpu": {
+                    "type": "keyword"
+                  },
+                  "memory": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "inactivity_timeout": {
         "type": "integer"
