@@ -341,6 +341,7 @@ function applyAutomaticAllPrivilegeGrants(
         'config-global',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });
@@ -358,6 +359,7 @@ function applyAutomaticReadPrivilegeGrants(
         'telemetry',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });
