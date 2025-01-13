@@ -98,7 +98,7 @@ export class ScoutFailureReport extends ScoutReport {
       testFailuresSummaryReportPath,
       JSON.stringify(summaryContent, null, 2),
       this.log,
-      `Summary report is saved at ${testFailuresSummaryReportPath}`
+      `Test Failures Summary is saved at ${testFailuresSummaryReportPath}`
     );
   }
 

@@ -16,14 +16,14 @@ export * from './report/events/report';
 export const scoutPlaywrightReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright/events/index.ts', options];
+  return ['@kbn/scout-reporting/src/reporting/playwright/events', options];
 };
 
 // Playwright failed test reporting
 export const scoutFailedTestsReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright/failed_test/index.ts', options];
+  return ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options];
 };
 
 export { generateTestRunId, getTestIDForTitle } from '../helpers';
