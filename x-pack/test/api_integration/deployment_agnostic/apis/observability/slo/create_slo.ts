@@ -115,7 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '.slo-observability.sli-v3.4*',
       ]);
       expect(summaryTransformResponse.transforms[0].dest).eql({
-        index: '.slo-observability.summary-v3.3',
+        index: '.slo-observability.summary-v3.4',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
     });
