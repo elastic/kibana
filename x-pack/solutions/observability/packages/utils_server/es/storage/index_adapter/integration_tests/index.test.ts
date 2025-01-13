@@ -397,6 +397,13 @@ describe('StorageIndexAdapter', () => {
   async function createServers() {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
+      settings: {
+        kbn: {
+          cliArgs: {
+            oss: false,
+          },
+        },
+      },
     });
 
     esServer = await startES();
@@ -416,7 +423,10 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function stopServers() {
-    await kibanaServer.stop();
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+
     await esServer.stop();
 
     jest.clearAllMocks();
