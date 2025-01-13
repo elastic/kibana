@@ -17,7 +17,7 @@ This document builds off of [Keeping Chromium Up-To-Date](https://docs.google.co
 
 - Next up we want to determine the version of chromium that's been verified to work with this specific version of puppeteer, we so by run a utility script created solely for this purpose within Kibana; `node scripts/chromium_version.js 23.3.1`, On running the aforementioned script we would get a result very similar to the one below;
 
-  ![image][./chromium_version_command.png]
+  ![image](./chromium_version_command.png)
 
   The important information to take note of here is the chromium revision and commit value. The revision value is important for selecting the appropriate chromium that has been pre-built by google, whilst the commit version we use to build our variant of headless chromium that gets distributed for linux variants of kibana.
 
@@ -39,17 +39,17 @@ For example to determine the appropriate version for Mac;
 
 - Select Mac, in the search field we provide the expected revision number for the current puppeteer version, for the purpose of this guide, the revision number to input is `1331488`. It's worth pointing out that it oftentimes happens that the specific revision doesn't exists; As is the case for this specific revision see image below;
 
-  ![image][./browser_snapshots_filter1.png]
+  ![image](./browser_snapshots_filter1.png)
 
   In the event that this is the case, we can opt to delete the last digit from the revision (or whatever heuristics works for you), so we might find an existing revision that's as close as possible to the expected revision number.
 
-  ![image][./browser_snapshots_filter2.png]
+  ![image](./browser_snapshots_filter2.png)
 
   On doing this we are presented with a couple of options, in this case we would opt to pick revision `1331485` as it's the closest to the expected `1331488` revision.
 
 - After deciding on a revision copy this value and update the revision value in paths.ts for the selected package with it's archive path titled ‘Mac', we might then go ahead to open the directory, within the directory we would typically be presented with couple of files like so;
 
-  ![image][./browser_snapshots_listing.png]
+  ![image](./browser_snapshots_listing.png)
 
   For whichever platform we are performing this task for, we want to download the file that matches the current platform we are updating's `archiveFilename` value, in this case it's titled `chrome-mac.zip`.
 - We then download this file, so we can compute it's checksum, (we use sha256), so that we can verify later on for users that will be downloading this same archive that they got the correct one.
