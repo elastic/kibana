@@ -77,7 +77,13 @@ import { FindBackfillParams } from '../application/backfill/methods/find/types';
 import { DisableRuleParams } from '../application/rule/methods/disable';
 import { EnableRuleParams } from '../application/rule/methods/enable_rule';
 import { findGaps } from '../application/rule/methods/find_gaps';
-import { FindGapsParams } from '../lib/rule_gaps/types';
+import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
+import { GetRulesWithGapsParams } from '../application/rule/methods/get_rules_with_gaps/types';
+
+import { getRulesWithGaps } from '../application/rule/methods/get_rules_with_gaps';
+import { getGapsInfoByRuleIds } from '../application/rule/methods/get_gaps_info_by_rule_ids';
+import { GetGapsInfoByRuleIdsParams } from '../application/rule/methods/get_gaps_info_by_rule_ids/types';
+import { FindGapsParams, FindGapByIdParams } from '../lib/rule_gaps/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -211,4 +217,12 @@ export class RulesClient {
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
+
+  public fillGapById = (params: FindGapByIdParams) => fillGapById(this.context, params);
+
+  public getRulesWithGaps = (params: GetRulesWithGapsParams) =>
+    getRulesWithGaps(this.context, params);
+
+  public getGapsInfoByRuleIds = (params: GetGapsInfoByRuleIdsParams) =>
+    getGapsInfoByRuleIds(this.context, params);
 }

@@ -9,10 +9,8 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { findGapsRoute } from './find_gaps_route';
-import { Gap } from '../../../../lib/rule_gaps/gap';
+import { getRulesWithGapsRoute } from './get_rules_with_gaps_route';
 
 const rulesClient = rulesClientMock.create();
 
@@ -20,87 +18,68 @@ jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-describe('findGapsRoute', () => {
+describe('getRulesWithGapsRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  const mockFindOptions = {
-    rule_ids: ['abc'],
+  const mockBody = {
     start: '2023-11-16T08:00:00.000Z',
     end: '2023-11-17T08:00:00.000Z',
-    page: 1,
-    per_page: 10,
   };
 
-  const createMockGap = () => {
-    const gap = new Gap({
-      timestamp: '2024-01-30T00:00:00.000Z',
-      range: {
-        gte: '2023-11-16T08:00:00.000Z',
-        lte: '2023-11-16T20:00:00.000Z',
-      },
-      internalFields: {
-        _id: 'gap-1',
-        _index: 'test-index',
-        _seq_no: 1,
-        _primary_term: 1,
-      },
-    });
-    return gap;
-  };
-
-  const mockFindResult = {
-    page: 1,
-    perPage: 10,
+  const mockResult = {
     total: 1,
-    data: [createMockGap()],
+    ruleIds: ['rule-1'],
   };
 
-  test('should find gaps with the proper parameters', async () => {
+  test('should get rules with gaps with the proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findGapsRoute(router, licenseState);
+    getRulesWithGapsRoute(router, licenseState);
 
-    rulesClient.findGaps.mockResolvedValueOnce(mockFindResult);
+    rulesClient.getRulesWithGaps.mockResolvedValueOnce(mockResult);
     const [config, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockFindOptions });
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
 
-    expect(config.path).toEqual('/internal/alerting/rules/gaps/_find');
+    expect(config.path).toEqual('/internal/alerting/rules/gaps/_get_rules');
 
     await handler(context, req, res);
 
-    expect(rulesClient.findGaps).toHaveBeenLastCalledWith(transformRequestV1(mockFindOptions));
+    expect(rulesClient.getRulesWithGaps).toHaveBeenLastCalledWith(mockBody);
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformResponseV1(mockFindResult),
+      body: {
+        total: 1,
+        rule_ids: ['rule-1'],
+      },
     });
   });
 
-  test('ensures the license allows for finding gaps', async () => {
+  test('ensures the license allows for getting rules with gaps', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findGapsRoute(router, licenseState);
+    getRulesWithGapsRoute(router, licenseState);
 
-    rulesClient.findGaps.mockResolvedValueOnce(mockFindResult);
+    rulesClient.getRulesWithGaps.mockResolvedValueOnce(mockResult);
     const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockFindOptions });
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockBody });
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents finding gaps when appropriate', async () => {
+  test('ensures the license check prevents getting rules with gaps when appropriate', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findGapsRoute(router, licenseState);
+    getRulesWithGapsRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
     const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockFindOptions });
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockBody });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });
