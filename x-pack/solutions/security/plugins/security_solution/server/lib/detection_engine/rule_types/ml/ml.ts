@@ -62,7 +62,7 @@ interface MachineLearningRuleExecutorParams {
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
-  isLoggedRequestsEnabled: boolean;
+  isLoggedRequestsEnabled?: boolean;
 }
 
 export const mlExecutor = async ({
@@ -82,7 +82,7 @@ export const mlExecutor = async ({
   alertWithSuppression,
   experimentalFeatures,
   scheduleNotificationResponseActionsService,
-  isLoggedRequestsEnabled,
+  isLoggedRequestsEnabled = false,
 }: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
