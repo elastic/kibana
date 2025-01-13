@@ -66,6 +66,7 @@ export const addQueriesToCache = (
   // the cachedQueries Map might not contain all
   // the localStorage queries
   const queries = getHistoryItems('desc');
+  cachedQueries.clear();
   queries.forEach((queryItem) => {
     const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
     cachedQueries.set(trimmedQueryString, queryItem);
@@ -87,6 +88,7 @@ export const addQueriesToCache = (
 
     // queries to store in the localstorage
     allQueries = sortedByDate.slice(0, maxQueriesAllowed);
+
     // clear and reset the queries in the cache
     cachedQueries.clear();
     allQueries.forEach((queryItem) => {

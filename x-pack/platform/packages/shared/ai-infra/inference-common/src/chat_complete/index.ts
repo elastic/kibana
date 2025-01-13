@@ -29,10 +29,16 @@ export {
 } from './events';
 export {
   MessageRole,
+  type MessageContent,
+  type MessageContentImage,
+  type MessageContentText,
   type Message,
   type AssistantMessage,
   type UserMessage,
   type ToolMessage,
+  type AssistantMessageOf,
+  type MessageOf,
+  type ToolMessageOf,
 } from './messages';
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {

@@ -10,9 +10,11 @@ import {
   createIndexMock,
   populateIndexMock,
   loadMappingFileMock,
+  loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
+  ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
 
 import {
@@ -24,7 +26,6 @@ import {
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
-import { inferenceManagerMock } from '../inference_endpoint/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
 
@@ -36,11 +37,12 @@ const callOrder = (fn: { mock: { invocationCallOrder: number[] } }): number => {
   return fn.mock.invocationCallOrder[0];
 };
 
+const TEST_FORMAT_VERSION = '2.0.0';
+
 describe('PackageInstaller', () => {
   let logger: MockedLogger;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let productDocClient: ReturnType<typeof installClientMock.create>;
-  let endpointManager: ReturnType<typeof inferenceManagerMock.create>;
 
   let packageInstaller: PackageInstaller;
 
@@ -48,15 +50,19 @@ describe('PackageInstaller', () => {
     logger = loggerMock.create();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     productDocClient = installClientMock.create();
-    endpointManager = inferenceManagerMock.create();
     packageInstaller = new PackageInstaller({
       artifactsFolder,
       logger,
       esClient,
       productDocClient,
-      endpointManager,
       artifactRepositoryUrl,
       kibanaVersion,
+    });
+
+    loadManifestFileMock.mockResolvedValue({
+      formatVersion: TEST_FORMAT_VERSION,
+      productName: 'kibana',
+      productVersion: '8.17',
     });
   });
 
@@ -65,9 +71,11 @@ describe('PackageInstaller', () => {
     createIndexMock.mockReset();
     populateIndexMock.mockReset();
     loadMappingFileMock.mockReset();
+    loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
+    ensureDefaultElserDeployedMock.mockReset();
   });
 
   describe('installPackage', () => {
@@ -87,7 +95,7 @@ describe('PackageInstaller', () => {
         productVersion: '8.16',
       });
       const indexName = getProductDocIndexName('kibana');
-      expect(endpointManager.ensureInternalElserInstalled).toHaveBeenCalledTimes(1);
+      expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
@@ -101,10 +109,14 @@ describe('PackageInstaller', () => {
       expect(loadMappingFileMock).toHaveBeenCalledTimes(1);
       expect(loadMappingFileMock).toHaveBeenCalledWith(zipArchive);
 
+      expect(loadManifestFileMock).toHaveBeenCalledTimes(1);
+      expect(loadManifestFileMock).toHaveBeenCalledWith(zipArchive);
+
       expect(createIndexMock).toHaveBeenCalledTimes(1);
       expect(createIndexMock).toHaveBeenCalledWith({
         indexName,
         mappings,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -113,6 +125,7 @@ describe('PackageInstaller', () => {
       expect(populateIndexMock).toHaveBeenCalledWith({
         indexName,
         archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -128,12 +141,11 @@ describe('PackageInstaller', () => {
     it('executes the steps in the right order', async () => {
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
-      expect(callOrder(endpointManager.ensureInternalElserInstalled)).toBeLessThan(
-        callOrder(downloadToDiskMock)
-      );
+      expect(callOrder(ensureDefaultElserDeployedMock)).toBeLessThan(callOrder(downloadToDiskMock));
       expect(callOrder(downloadToDiskMock)).toBeLessThan(callOrder(openZipArchiveMock));
       expect(callOrder(openZipArchiveMock)).toBeLessThan(callOrder(loadMappingFileMock));
       expect(callOrder(loadMappingFileMock)).toBeLessThan(callOrder(createIndexMock));
+      expect(callOrder(loadManifestFileMock)).toBeLessThan(callOrder(createIndexMock));
       expect(callOrder(createIndexMock)).toBeLessThan(callOrder(populateIndexMock));
       expect(callOrder(populateIndexMock)).toBeLessThan(
         callOrder(productDocClient.setInstallationSuccessful)

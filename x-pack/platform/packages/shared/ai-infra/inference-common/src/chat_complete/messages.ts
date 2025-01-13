@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCall } from './tools';
+import type { ToolCall, ToolCallsOf, ToolNamesOf, ToolOptions, ToolResponsesOf } from './tools';
 
 /**
  * Enum for all possible {@link Message} roles.
@@ -23,14 +23,26 @@ interface MessageBase<TRole extends MessageRole> {
   role: TRole;
 }
 
+export interface MessageContentText {
+  type: 'text';
+  text: string;
+}
+
+export interface MessageContentImage {
+  type: 'image';
+  source: { data: string; mimeType: string };
+}
+
+export type MessageContent = string | Array<MessageContentText | MessageContentImage>;
+
 /**
  * Represents a message from the user.
  */
 export type UserMessage = MessageBase<MessageRole.User> & {
   /**
-   * The text content of the user message
+   * The text or image content of the user message
    */
-  content: string;
+  content: MessageContent;
 };
 
 /**
@@ -52,17 +64,32 @@ export type AssistantMessage = MessageBase<MessageRole.Assistant> & {
 /**
  * Represents a tool invocation result, following a request from the LLM to execute a tool.
  */
-export type ToolMessage<TToolResponse extends Record<string, any> | unknown> =
-  MessageBase<MessageRole.Tool> & {
-    /**
-     * The call id matching the {@link ToolCall} this tool message is for.
-     */
-    toolCallId: string;
-    /**
-     * The response from the tool invocation.
-     */
-    response: TToolResponse;
-  };
+export type ToolMessage<
+  TName extends string = string,
+  TToolResponse extends Record<string, any> | unknown = Record<string, any> | unknown,
+  TToolData extends Record<string, any> | undefined = Record<string, any> | undefined
+> = MessageBase<MessageRole.Tool> & {
+  /*
+   * The name of the tool called. Used for refining the type of the response.
+   */
+  name: TName;
+  /**
+   * The call id matching the {@link ToolCall} this tool message is for.
+   */
+  toolCallId: string;
+  /**
+   * The response from the tool invocation.
+   */
+  response: TToolResponse;
+} & (TToolData extends undefined
+    ? {}
+    : {
+        /**
+         * Additional data from the tool invocation, that is not sent to the LLM
+         * but can be used to attach baggage (such as timeseries or debug data)
+         */
+        data: TToolData;
+      });
 
 /**
  * Mixin composed of all the possible types of messages in a chatComplete discussion.
@@ -72,4 +99,30 @@ export type ToolMessage<TToolResponse extends Record<string, any> | unknown> =
  * - {@link AssistantMessage}
  * - {@link ToolMessage}
  */
-export type Message = UserMessage | AssistantMessage | ToolMessage<unknown>;
+export type Message = UserMessage | AssistantMessage | ToolMessage;
+
+/**
+ * Utility type to get the Assistant message type of a {@link ToolOptions} type.
+ */
+export type AssistantMessageOf<TToolOptions extends ToolOptions> = Omit<
+  AssistantMessage,
+  'toolCalls'
+> &
+  ToolCallsOf<TToolOptions>;
+
+/**
+ * Utility type to get the Tool message type of a {@link ToolOptions} type.
+ */
+
+export type ToolMessageOf<TToolOptions extends ToolOptions> = ToolMessage<
+  ToolNamesOf<TToolOptions>,
+  ToolResponsesOf<TToolOptions['tools']>
+>;
+
+/**
+ * Utility type to get the mixin Message type of a {@link ToolOptions} type.
+ */
+export type MessageOf<TToolOptions extends ToolOptions> =
+  | UserMessage
+  | AssistantMessageOf<TToolOptions>
+  | ToolMessageOf<TToolOptions>;

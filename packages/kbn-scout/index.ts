@@ -8,7 +8,7 @@
  */
 
 export * as cli from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
+export { expect, test, tags, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
 export type {
   ScoutPage,
   ScoutPlaywrightOptions,

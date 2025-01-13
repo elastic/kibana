@@ -12,22 +12,10 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           " | ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
-          "<object, unknown>) => ",
+          "CoreSetup",
+          "<{}, unknown>) => ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -37,7 +25,7 @@
           },
           "<TRepository, TClientOptions>"
         ],
-        "path": "packages/kbn-server-route-repository-client/src/create_repository_client.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,24 +37,12 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               " | ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
+              "CoreSetup",
+              "<{}, unknown>"
             ],
-            "path": "packages/kbn-server-route-repository-client/src/create_repository_client.ts",
+            "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +61,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,7 +75,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+            "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,7 +94,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -132,7 +108,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+            "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -160,7 +136,7 @@
           },
           "<TServerRouteRepository, TAdditionalClientOptions>"
         ],
-        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,13 +157,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -198,7 +168,7 @@
               },
               "<TServerRouteRepository, TEndpoint>>"
             ],
-            "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+            "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -212,7 +182,7 @@
                 "signature": [
                   "TEndpoint"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -234,16 +204,10 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -268,13 +232,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -289,7 +247,7 @@
               "Observable",
               "<TReturnType> : never : never"
             ],
-            "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+            "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -303,7 +261,7 @@
                 "signature": [
                   "TEndpoint"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -325,16 +283,10 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -390,7 +342,7 @@
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
-        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -403,15 +355,9 @@
         "label": "DefaultClientOptions",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptions",
-            "text": "HttpFetchOptions"
-          }
+          "HttpFetchOptions"
         ],
-        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

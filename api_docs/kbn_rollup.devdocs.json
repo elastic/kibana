@@ -29,7 +29,7 @@
         "signature": [
           "({ children }: RollupDeprecationTooltipProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+        "path": "x-pack/platform/packages/private/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "RollupDeprecationTooltipProps"
             ],
-            "path": "x-pack/packages/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+            "path": "x-pack/platform/packages/private/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,7 +63,7 @@
         "tags": [],
         "label": "ROLLUP_DEPRECATION_BADGE_LABEL",
         "description": [],
-        "path": "x-pack/packages/rollup/src/constants/index.ts",
+        "path": "x-pack/platform/packages/private/rollup/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -203,7 +203,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByText(
-        `The saved search 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
+        `The saved Discover session 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);

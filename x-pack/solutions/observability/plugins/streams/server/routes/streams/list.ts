@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
+import { ListStreamsResponse } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { listStreams } from '../../lib/streams/stream_crud';
-import { StreamDefinition } from '../../../common';
 
 export const listStreamsRoute = createServerRoute({
   endpoint: 'GET /api/streams',
@@ -25,18 +25,10 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    response,
-    request,
-    getScopedClients,
-  }): Promise<{ definitions: StreamDefinition[]; trees: StreamTree[] }> => {
+  handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      const { definitions } = await listStreams({ scopedClusterClient });
-
-      const trees = asTrees(definitions);
-
-      return { definitions, trees };
+      return await listStreams({ scopedClusterClient });
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);
@@ -46,33 +38,3 @@ export const listStreamsRoute = createServerRoute({
     }
   },
 });
-
-export interface StreamTree {
-  id: string;
-  children: StreamTree[];
-}
-
-function asTrees(definitions: Array<{ id: string; managed?: boolean }>) {
-  const trees: StreamTree[] = [];
-  const ids = definitions
-    .filter((definition) => definition.managed)
-    .map((definition) => definition.id);
-
-  ids.sort((a, b) => a.split('.').length - b.split('.').length);
-
-  ids.forEach((id) => {
-    let currentTree = trees;
-    let existingNode: StreamTree | undefined;
-    // traverse the tree following the prefix of the current id.
-    // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
-    while ((existingNode = currentTree.find((node) => id.startsWith(node.id)))) {
-      currentTree = existingNode.children;
-    }
-    if (!existingNode) {
-      const newNode = { id, children: [] };
-      currentTree.push(newNode);
-    }
-  });
-
-  return trees;
-}

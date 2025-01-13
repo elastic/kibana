@@ -76,9 +76,11 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
         name: schema.maybe(schema.string()),
       }),
       schema.object({
+        name: schema.string(),
         role: schema.literal(MessageRole.Tool),
         toolCallId: schema.string(),
         response: schema.recordOf(schema.string(), schema.any()),
+        data: schema.maybe(schema.recordOf(schema.string(), schema.any())),
       }),
     ])
   ),
@@ -107,6 +109,9 @@ export function registerChatCompleteRoute({
       .getStartServices()
       .then(([coreStart, pluginsStart]) => pluginsStart.actions);
 
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => abortController.abort());
+
     const client = createInferenceClient({ request, actions, logger });
 
     const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
@@ -119,6 +124,7 @@ export function registerChatCompleteRoute({
       tools,
       functionCalling,
       stream,
+      abortSignal: abortController.signal,
     });
   }
 

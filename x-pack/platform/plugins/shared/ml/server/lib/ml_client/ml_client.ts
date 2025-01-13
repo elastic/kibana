@@ -472,7 +472,7 @@ export function getMlClient(
           throw error;
         }
         if (error.statusCode === 404) {
-          throw new MLJobNotFound(error.body.error.reason);
+          throw new MLJobNotFound(formatJobNotFoundError(error.body.error.reason));
         }
         throw error;
       }
@@ -785,4 +785,15 @@ function filterAll(ids: string[]) {
   // if _all is one of many ids, the endpoint should look for
   // something called _all, which will subsequently fail.
   return ids.length === 1 && ids[0] === '_all' ? [] : ids;
+}
+
+function formatJobNotFoundError(errorReason: string) {
+  const failingJobMatch = errorReason.match(/No known job with id '([^']+)'/);
+  const failingJobIds = failingJobMatch?.[1]?.split(',');
+  const errorMessage = failingJobIds?.length
+    ? `No known job or group with ${
+        failingJobIds.length === 1 ? 'id' : 'ids'
+      } '${failingJobIds.join("', '")}'`
+    : errorReason;
+  return errorMessage;
 }

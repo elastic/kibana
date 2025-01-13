@@ -52,9 +52,25 @@ export function wrapWithSimulatedFunctionCalling({
       return message;
     })
     .map((message) => {
+      let content = message.content;
+
+      if (typeof content === 'string') {
+        content = replaceFunctionsWithTools(content);
+      } else if (Array.isArray(content)) {
+        content = content.map((contentPart) => {
+          if (contentPart.type === 'text') {
+            return {
+              ...contentPart,
+              text: replaceFunctionsWithTools(contentPart.text),
+            };
+          }
+          return contentPart;
+        });
+      }
+
       return {
         ...message,
-        content: message.content ? replaceFunctionsWithTools(message.content) : message.content,
+        content,
       };
     });
 
@@ -79,7 +95,7 @@ export function wrapWithSimulatedFunctionCalling({
   };
 }
 
-const convertToolResponseMessage = (message: ToolMessage<unknown>): UserMessage => {
+const convertToolResponseMessage = (message: ToolMessage): UserMessage => {
   return {
     role: MessageRole.User,
     content: JSON.stringify({

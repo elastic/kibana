@@ -17,7 +17,7 @@
         "tags": [],
         "label": "IndexAdapter",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -39,7 +39,7 @@
             "tags": [],
             "label": "totalFieldsLimit",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,7 +54,7 @@
               "ClusterPutComponentTemplateRequest",
               "[]"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,7 +69,7 @@
               "IndicesPutIndexTemplateRequest",
               "[]"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,7 +80,7 @@
             "tags": [],
             "label": "installed",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,7 +94,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,7 +108,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -129,7 +129,7 @@
                     "text": "IndexAdapterParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -149,7 +149,7 @@
               "GetComponentTemplateOpts",
               ") => void"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -163,7 +163,7 @@
                 "signature": [
                   "GetComponentTemplateOpts"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -189,7 +189,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -209,7 +209,7 @@
                     "text": "SetIndexTemplateParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -229,7 +229,7 @@
               "GetInstallFnParams",
               ") => (promise: Promise<void>, description?: string | undefined) => Promise<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -243,7 +243,7 @@
                 "signature": [
                   "GetInstallFnParams"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -269,7 +269,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -289,7 +289,7 @@
                     "text": "InstallParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,7 +315,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -335,7 +335,7 @@
                     "text": "InstallParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -370,7 +370,7 @@
             "text": "IndexAdapter"
           }
         ],
-        "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -384,7 +384,7 @@
             "signature": [
               "Map<string, Promise<void>>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +406,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,7 +420,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -434,7 +434,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -455,7 +455,7 @@
                     "text": "IndexAdapterParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -483,7 +483,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -503,7 +503,7 @@
                     "text": "InstallParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -537,7 +537,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -557,7 +557,7 @@
                     "text": "InstallParams"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -577,7 +577,7 @@
             "signature": [
               "(indexSuffix: string) => Promise<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -591,7 +591,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -611,7 +611,7 @@
             "signature": [
               "(indexSuffix: string) => string"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -625,7 +625,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -645,7 +645,7 @@
             "signature": [
               "(indexSuffix: string) => Promise<string | undefined>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -659,7 +659,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -682,7 +682,7 @@
         "signature": [
           "({ logger, esClient, template, totalFieldsLimit, }: CreateOrUpdateComponentTemplateOpts) => Promise<void>"
         ],
-        "path": "packages/kbn-index-adapter/src/create_or_update_component_template.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/create_or_update_component_template.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -696,7 +696,7 @@
             "signature": [
               "CreateOrUpdateComponentTemplateOpts"
             ],
-            "path": "packages/kbn-index-adapter/src/create_or_update_component_template.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/create_or_update_component_template.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -717,7 +717,7 @@
         "signature": [
           "({ logger, esClient, template, }: CreateOrUpdateIndexTemplateOpts) => Promise<void>"
         ],
-        "path": "packages/kbn-index-adapter/src/create_or_update_index_template.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/create_or_update_index_template.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -731,7 +731,7 @@
             "signature": [
               "CreateOrUpdateIndexTemplateOpts"
             ],
-            "path": "packages/kbn-index-adapter/src/create_or_update_index_template.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/create_or_update_index_template.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -758,7 +758,7 @@
           },
           "; attempt?: number | undefined; }) => Promise<T>"
         ],
-        "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/retry_transient_es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -772,7 +772,7 @@
             "signature": [
               "() => Promise<T>"
             ],
-            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/retry_transient_es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -784,7 +784,7 @@
             "tags": [],
             "label": "{ logger, attempt = 0 }",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/retry_transient_es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -804,7 +804,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/retry_transient_es_errors.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -818,7 +818,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "path": "x-pack/solutions/security/packages/index-adapter/src/retry_transient_es_errors.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -837,7 +837,7 @@
         "tags": [],
         "label": "AllowedValue",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -851,7 +851,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,7 +865,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -879,7 +879,7 @@
         "tags": [],
         "label": "EcsMetadata",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -900,7 +900,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -911,7 +911,7 @@
             "tags": [],
             "label": "dashed_name",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -922,7 +922,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -936,7 +936,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -950,7 +950,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -961,7 +961,7 @@
             "tags": [],
             "label": "flat_name",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -975,7 +975,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -989,7 +989,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1000,7 +1000,7 @@
             "tags": [],
             "label": "level",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1021,7 +1021,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,7 +1032,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1046,7 +1046,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,7 +1060,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1074,7 +1074,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1085,7 +1085,7 @@
             "tags": [],
             "label": "short",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1096,7 +1096,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1110,7 @@
             "signature": [
               "Record<string, { type: string; }> | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1124,7 +1124,7 @@
         "tags": [],
         "label": "IndexAdapterParams",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1135,7 +1135,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1149,7 +1149,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1163,7 +1163,7 @@
         "tags": [],
         "label": "InstallParams",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1183,7 +1183,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1195,24 +1195,12 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               " | Promise<",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ">"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1227,7 +1215,7 @@
               "Subject",
               "<void>"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1241,7 +1229,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1255,7 +1243,7 @@
         "tags": [],
         "label": "MultiField",
         "description": [],
-        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1266,7 +1254,7 @@
             "tags": [],
             "label": "flat_name",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1277,7 +1265,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1288,7 +1276,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1316,7 +1304,7 @@
           },
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1339,7 +1327,7 @@
           },
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1354,7 +1342,7 @@
         "signature": [
           "(indexSuffix: string) => Promise<void>"
         ],
-        "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1366,7 +1354,7 @@
             "tags": [],
             "label": "indexSuffix",
             "description": [],
-            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1381,7 +1369,15 @@
         "label": "SchemaFieldMapKeys",
         "description": [],
         "signature": [
-          "Key extends string ? NonNullable<T[Key]> extends Record<string, unknown> ? `${Key}` | `${Key}.${",
+          "Key extends string ? NonNullable<T[Key]> extends any[] ? NonNullable<T[Key]> extends Record<string, any>[] ? `${Key}` | `${Key}.${",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.SchemaFieldMapKeys",
+            "text": "SchemaFieldMapKeys"
+          },
+          "<NonNullable<T[Key]>[number], keyof NonNullable<T[Key]>[number]>}` : `${Key}` : NonNullable<T[Key]> extends Record<string, any> ? `${Key}` | `${Key}.${",
           {
             "pluginId": "@kbn/index-adapter",
             "scope": "server",
@@ -1391,7 +1387,7 @@
           },
           "<NonNullable<T[Key]>, keyof NonNullable<T[Key]>>}` : `${Key}` : never"
         ],
-        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1406,7 +1402,7 @@
         "signature": [
           "GetComponentTemplateOpts"
         ],
-        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1423,7 +1419,7 @@
           "IndicesPutIndexTemplateIndexTemplateMapping",
           " | undefined; componentTemplateRefs?: string[] | undefined; isDataStream?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/index_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1448,7 +1444,7 @@
           },
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

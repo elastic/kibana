@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../../common/types';
+import { StreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { conditionToPainless } from '../helpers/condition_to_painless';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
+import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(id: string, definition: StreamDefinition) {
   return {
     id: getProcessingPipelineName(id),
     processors: [
-      ...(isRoot(definition.id) ? logsDefaultPipelineProcessors : []),
-      ...definition.processing.map((processor) => {
-        const { type, ...config } = processor.config;
-        return {
-          [type]: {
-            ...config,
-            if: processor.condition ? conditionToPainless(processor.condition) : undefined,
-          },
-        };
-      }),
+      ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
+      ...formatToIngestProcessors(definition.stream.ingest.processing),
       {
         pipeline: {
           name: `${id}@stream.reroutes`,
@@ -35,6 +27,17 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
     ],
     _meta: {
       description: `Default pipeline for the ${id} stream`,
+      managed: true,
+    },
+    version: ASSET_VERSION,
+  };
+}
+
+export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
+  return {
+    processors: formatToIngestProcessors(definition.stream.ingest.processing),
+    _meta: {
+      description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,
