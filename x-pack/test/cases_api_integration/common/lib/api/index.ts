@@ -60,6 +60,7 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseFindUserActionsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -992,7 +993,7 @@ export const findInternalCaseUserActions = async ({
   auth?: { user: User; space: string | null };
 }): Promise<UserActionInternalFindResponse> => {
   const { body: userActions } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${getInternalCaseFindUserActionsUrl(caseID)}`)
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindUserActionsUrl(caseID)}`)
     .query(options)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
