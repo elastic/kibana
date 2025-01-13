@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable ban/ban */
-
-
 import { act, waitFor } from '@testing-library/react';
 
 import { useStartServices } from '../../../../hooks';
