@@ -91,17 +91,11 @@ export const getValuesFromQueryField = (queryString: string) => {
 
 export const getFlyoutStyling = () => {
   return `
-          overflow-y: auto;
-          pointer-events: none;
           .euiFlyoutBody__overflow {
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
-            overflow-y: hidden;
             transform: initial;
-            > * {
-              pointer-events: auto;
-            }
           }
           .euiFlyoutBody__overflowContent {
             block-size: 100%;

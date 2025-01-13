@@ -19,8 +19,6 @@ import { ESQLControlsFlyout } from './control_flyout';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import type { ESQLControlState } from './types';
 
-import './flyout.scss';
-
 interface Context {
   queryString: string;
   core: CoreStart;
@@ -86,7 +84,6 @@ export async function executeAction({
     {
       size: 's',
       'data-test-subj': 'create_esql_control_flyout',
-      className: 'esqlControls__overlay',
       isResizable: true,
       type: 'push',
       paddingSize: 'm',
