@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import datemath from '@kbn/datemath';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
+import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { ToolingLog } from '@kbn/tooling-log';
-import { concatMap, defer, lastValueFrom, switchMap, toArray, tap, OperatorFunction } from 'rxjs';
+import { defer, lastValueFrom, toArray } from 'rxjs';
 import {
   KibanaClient,
   type ChatClient,
@@ -165,111 +165,62 @@ export class RCAKibanaClient extends KibanaClient {
       to: string;
       alert?: EcsFieldsResponse;
     }) {
-      const chat$ = defer(() => {
-        that.log.debug(`Calling root cause analysis API`);
-        const serviceName = alert?.['service.name'] as string | undefined;
-        if (!alert) {
-          throw new Error(
-            'Alert not found. Please ensure you have loaded test fixture data prior to running tests.'
-          );
-        }
-        if (!serviceName) {
-          throw new Error(
-            'Service name is missing from the alert data. Please double check your alert fixture.'
-          );
-        }
-        const context = getRCAContext(alert, serviceName);
-        const body = {
-          investigationId,
-          connectorId: connectorIdOverride || '34002e09-65be-4332-9084-2649c86abacb',
-          context,
-          rangeFrom: from,
-          rangeTo: to,
-          serviceName: 'controller',
-          completeInBackground: false,
-        };
+      that.log.debug(`Calling root cause analysis API`);
+      const serviceName = alert?.['service.name'] as string | undefined;
+      if (!alert) {
+        throw new Error(
+          'Alert not found. Please ensure you have loaded test fixture data prior to running tests.'
+        );
+      }
+      if (!serviceName) {
+        throw new Error(
+          'Service name is missing from the alert data. Please double check your alert fixture.'
+        );
+      }
+      const context = getRCAContext(alert, serviceName);
+      const body = {
+        investigationId,
+        connectorId: connectorIdOverride || '34002e09-65be-4332-9084-2649c86abacb',
+        context,
+        rangeFrom: from,
+        rangeTo: to,
+        serviceName: 'controller',
+        completeInBackground: false,
+      };
 
-        return that.axios.post(
+      const chat$ = defer(async () => {
+        const response = await that.axios.post(
           that.getUrl({
             pathname: '/internal/observability/investigation/root_cause_analysis',
           }),
           body,
           { responseType: 'stream', timeout: NaN }
         );
-      }).pipe(
-        switchMap((response) => streamIntoObservable(response.data)),
-        serializeRCAResponse(),
-        tap((event) => {
-          switch (true) {
-            case event.includes('"name":"endProcessAndWriteReport"'):
-              that.log.info(`Root cause analysis completed.`);
-              break;
-            case event.includes('"name":"observe"'):
-              that.log.info(`Observing...`);
-              break;
-            case event.includes('"name":"error"'):
-              that.log.error(`Encountered an error!`);
-              break;
-            case event.includes('"name":"investigateEntity"'):
-              that.log.info(`Investigating entity...`);
-              break;
-            default:
-              that.log.info(`Analyzing root cause...`);
-              break;
-          }
-        }),
-        toArray()
-      );
 
-      const message = await lastValueFrom(chat$);
-      const eventString = message.join('');
+        return {
+          response: {
+            body: new ReadableStream({
+              start(controller) {
+                response.data.on('data', (chunk) => {
+                  controller.enqueue(chunk);
+                });
 
-      const events = extractEvents(eventString, []);
+                response.data.on('end', () => {
+                  controller.close();
+                });
 
-      return events;
-    }
+                response.data.on('error', (err) => {
+                  controller.error(err);
+                });
+              },
+            }),
+          },
+        };
+      }).pipe(httpResponseIntoObservable(), toArray());
 
-    function extractEvents(
-      input: string,
-      events: RootCauseAnalysisEvent[]
-    ): RootCauseAnalysisEvent[] {
-      for (let i = 0; i < input.length; i++) {
-        // two JSON objects back to back
-        if (input[i] === '}' && input[i + 1] === '{') {
-          const firstObject = input.slice(0, i + 1);
-          const rest = input.slice(i + 1);
-          const parsedObject = JSON.parse(firstObject) as { event: RootCauseAnalysisEvent };
-          return extractEvents(rest, [...events, parsedObject.event]);
-        }
-      }
-      return [...events, (JSON.parse(input) as { event: RootCauseAnalysisEvent }).event];
-    }
+      const events = await lastValueFrom(chat$);
 
-    function serializeRCAResponse(): OperatorFunction<Buffer, string> {
-      return (source$) => {
-        const processed$ = source$.pipe(
-          concatMap((buffer: Buffer) =>
-            buffer
-              .toString('utf-8')
-              .split('\n')
-              .map((line) => line.trim())
-              .filter(Boolean)
-              .filter((line) => {
-                const isKeepAliveRegex = /^: keep-alive/;
-                const isEventRegex = /^event: /;
-                const isKeepAlive = isKeepAliveRegex.test(line);
-                const isEvent = isEventRegex.test(line);
-                return !isKeepAlive && !isEvent;
-              })
-              .map((line) => {
-                const parsedLine = line.replace('data:', '').trim();
-                return parsedLine;
-              })
-          )
-        );
-
-        return processed$;
-      };
+      return events.map((event) => event.event);
     }
 
     return {
