@@ -530,9 +530,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage: 'Join table with another table.',
     }),
     examples: [
-      '… | <LEFT | RIGHT | LOOKUP> JOIN index ON index.field = index2.field',
-      '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
-      '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
+      '… | LOOKUP JOIN lookup_index ON join_field',
+      // TODO: Uncomment when other join types are implemented
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index ON index.field = index2.field',
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
     options: [],
     modes: [],
