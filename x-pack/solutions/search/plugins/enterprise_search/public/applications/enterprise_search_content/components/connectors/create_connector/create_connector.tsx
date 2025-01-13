@@ -67,7 +67,6 @@ export const CreateConnector: React.FC = () => {
   const stepStates = generateStepState(currentStep);
 
   useEffect(() => {
-    // console.log('isAgentlessEnabled', isAgentlessEnabled);
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
       !isAgentlessEnabled
