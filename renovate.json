@@ -1855,7 +1855,7 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/kibana-visualization Color related modules",
+      "groupName": "@elastic/kibana-visualizations Color related modules",
       "matchDepNames": [
         "chroma-js",
         "color",
