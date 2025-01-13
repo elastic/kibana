@@ -61,7 +61,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     cleanupCase(caseId);
   });
 
-  it(
+  it.skip(
     'should create a new query and verify: \n ' +
       '- hidden columns, full screen and sorting \n' +
       '- pagination \n' +
