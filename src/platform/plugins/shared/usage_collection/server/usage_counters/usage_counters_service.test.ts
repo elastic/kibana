@@ -191,7 +191,7 @@ describe('UsageCountersService', () => {
   });
 
   it('retries errors by `retryCount` times before failing to store', async () => {
-    const retryConst = 1;
+    const retryConst = 2;
     const usageCountersService = new UsageCountersService({
       logger,
       retryCount: retryConst,
@@ -227,8 +227,8 @@ describe('UsageCountersService', () => {
     await tickWithDelay(100);
     // number of incrementCounter calls + number of retries
     expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
-    expect(logger.warn).toHaveBeenNthCalledWith(1, 'Error: failed, retrying attempt 2');
-    expect(logger.warn).toHaveBeenNthCalledWith(2, mockError);
+    expect(logger.warn).toHaveBeenNthCalledWith(1, `${mockError}, retrying attempt ${retryConst}`);
+    expect(logger.warn).toHaveBeenNthCalledWith(3, mockError);
     expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
       kibana: {
         usageCounters: {
