@@ -19,6 +19,7 @@ export function validateAncestorFields({
     for (const fieldName in fields) {
       if (
         Object.hasOwn(fields, fieldName) &&
+        isWiredReadStream(ancestor) &&
         Object.entries(ancestor.stream.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
@@ -43,6 +44,7 @@ export function validateDescendantFields({
     for (const fieldName in fields) {
       if (
         Object.hasOwn(fields, fieldName) &&
+        isWiredReadStream(descendant) &&
         Object.entries(descendant.stream.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
             attr.type !== fields[fieldName].type && descendantFieldName === fieldName

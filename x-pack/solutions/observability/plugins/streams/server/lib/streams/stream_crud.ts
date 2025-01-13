@@ -8,6 +8,7 @@
 import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { AssetClient } from './assets/asset_client';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -28,13 +29,32 @@ interface DeleteStreamParams extends BaseParams {
   assetClient: AssetClient;
 }
 
+export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle {
+  if (
+    dataStream.ilm_policy &&
+    (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
+  ) {
+    return {
+      type: 'ilm',
+      policy: dataStream.ilm_policy,
+    };
+  }
+  return {
+    type: 'dlm',
+    data_retention: dataStream.lifecycle?.data_retention
+      ? String(dataStream.lifecycle.data_retention)
+      : undefined,
+  };
+}
+
 export async function deleteUnmanagedStreamObjects({
   id,
   scopedClusterClient,
   logger,
 }: DeleteStreamParams) {
+  const dataStream = await getDataStream({ name: id, scopedClusterClient });
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
-    name: id,
+    dataStream,
     scopedClusterClient,
   });
   const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
@@ -119,29 +139,13 @@ interface ReadStreamParams extends BaseParams {
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {
-  name: string;
+  dataStream: IndicesDataStream;
 }
 
 export async function getUnmanagedElasticsearchAssets({
-  name,
+  dataStream,
   scopedClusterClient,
 }: ReadUnmanagedAssetsParams) {
-  let dataStream: IndicesDataStream | undefined;
-  try {
-    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
-    dataStream = response.data_streams[0];
-  } catch (e) {
-    if (e.meta?.statusCode === 404) {
-      // fall through and throw not found
-    } else {
-      throw e;
-    }
-  }
-
-  if (!dataStream) {
-    throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
-  }
-
   // retrieve linked index template, component template and ingest pipeline
   const templateName = dataStream.template;
   const componentTemplates: string[] = [];
@@ -174,7 +178,7 @@ export async function getUnmanagedElasticsearchAssets({
     },
     {
       type: 'data_stream' as const,
-      id: name,
+      id: dataStream.name,
     },
   ];
 }
@@ -298,4 +302,28 @@ async function tryGettingPipeline({ scopedClusterClient, id }: ReadStreamParams)
     }
     throw e;
   }
+}
+
+async function getDataStream({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<IndicesDataStream> {
+  let dataStream: IndicesDataStream | undefined;
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
+    dataStream = response.data_streams[0];
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      // fall through and throw not found
+    } else {
+      throw e;
+    }
+  }
+  if (!dataStream) {
+    throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
+  }
+  return dataStream;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesDataStream, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -18,6 +18,7 @@ import {
   streamDefintionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, difference, keyBy, omit } from 'lodash';
+import { errors } from '@elastic/elasticsearch';
 import { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
@@ -34,6 +35,7 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
+  getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from './stream_crud';
 import { MalformedChildren } from './errors/malformed_children';
@@ -75,6 +77,10 @@ export interface UpsertStreamResponse {
 
 function getRootStreamName(type: 'logs') {
   return type;
+}
+
+function is404(error: unknown): error is errors.ResponseError & { statusCode: 404 } {
+  return isResponseError(error) && error.statusCode === 404;
 }
 
 export class StreamsClient {
@@ -345,14 +351,11 @@ export class StreamsClient {
       .catch((error) => {
         if (isResponseError(error) && error.statusCode === 404) {
           return this.dependencies.scopedClusterClient.asCurrentUser.indices
-            .resolveIndex({
+            .getDataStream({
               name,
             })
-            .then((response) => {
-              if (response.data_streams.find((dataStream) => dataStream.name === name)) {
-                return this.getDataStreamAsStream(name);
-              }
-              throw error;
+            .then(async (response) => {
+              return await this.getDataStreamAsReadStreamDefinition(response.data_streams[0]);
             });
         }
         throw error;
@@ -361,8 +364,10 @@ export class StreamsClient {
     return definition;
   }
 
-  private async getDataStreamAsStream(name: string): Promise<IngestStreamDefinition> {
-    const definition: IngestStreamDefinition = {
+  private async getDataStreamAsReadStreamDefinition(
+    dataStream: IndicesDataStream
+  ): Promise<ReadStreamDefinition> {
+    const definition: ReadStreamDefinition = {
       name,
       stream: {
         ingest: {
@@ -370,10 +375,12 @@ export class StreamsClient {
           processing: [],
         },
       },
+      lifecycle: getDataStreamLifecycle(dataStream),
+      inherited_fields: {},
     };
 
     definition.elasticsearch_assets = await getUnmanagedElasticsearchAssets({
-      name,
+      dataStream,
       scopedClusterClient: this.dependencies.scopedClusterClient,
     });
 
@@ -534,7 +541,13 @@ export class StreamsClient {
   ) {
     return this.dependencies.storageClient.index({
       id: definition.name,
-      document: omit(definition, 'elasticsearch_assets', 'dashboards'),
+      document: omit(
+        definition,
+        'elasticsearch_assets',
+        'dashboards',
+        'inherited_fields',
+        'lifecycle'
+      ),
     });
   }
 
@@ -542,7 +555,7 @@ export class StreamsClient {
     return this.getStream(getRootStreamName(type));
   }
 
-  async getAncestors(name: string): Promise<WiredStreamDefinition[]> {
+  async getAncestors(name: string): Promise<WiredReadStreamDefinition[]> {
     const ancestorIds = getAncestors(name);
 
     return this.getManagedStreams({
@@ -551,7 +564,7 @@ export class StreamsClient {
           filter: [{ terms: { name: ancestorIds } }],
         },
       },
-    }).then((streams) => streams.filter(isWiredStream));
+    }).then((streams) => streams.filter(isWiredReadStream));
   }
 
   async getDescendants(name: string): Promise<WiredStreamDefinition[]> {
