@@ -12,6 +12,7 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type {
+  MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
@@ -57,6 +58,11 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS:
           return responseActionsClientMock.createConnectorActionExecuteResponse({
             data: createMicrosoftMachineMock(),
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftGetMachineListApiResponseMock(),
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST:
@@ -159,9 +165,23 @@ const createMicrosoftGetActionsApiResponseMock =
     };
   };
 
+const createMicrosoftGetMachineListApiResponseMock =
+  (): MicrosoftDefenderEndpointAgentListResponse => {
+    return {
+      '@odata.context': 'some-context',
+      '@odata.count': 1,
+      total: 1,
+      page: 1,
+      pageSize: 0,
+      value: [createMicrosoftMachineMock()],
+    };
+  };
+
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
+  createMsConnectorActionsClient: createMsConnectorActionsClientMock,
   createMachineAction: createMicrosoftMachineActionMock,
   createMachine: createMicrosoftMachineMock,
   createGetActionsApiResponse: createMicrosoftGetActionsApiResponseMock,
+  createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
 };
