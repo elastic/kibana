@@ -4096,7 +4096,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/calculate-auto@link:packages/kbn-calculate-auto":
+"@kbn/calculate-auto@link:src/platform/packages/shared/kbn-calculate-auto":
   version "0.0.0"
   uid ""
 
@@ -4144,7 +4144,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/charts-theme@link:packages/kbn-charts-theme":
+"@kbn/charts-theme@link:src/platform/packages/shared/kbn-charts-theme":
   version "0.0.0"
   uid ""
 
@@ -5204,15 +5204,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server-internal@link:packages/core/user-settings/core-user-settings-server-internal":
+"@kbn/core-user-settings-server-internal@link:src/core/packages/user-settings/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server-mocks@link:packages/core/user-settings/core-user-settings-server-mocks":
+"@kbn/core-user-settings-server-mocks@link:src/core/packages/user-settings/server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-settings-server@link:packages/core/user-settings/core-user-settings-server":
+"@kbn/core-user-settings-server@link:src/core/packages/user-settings/server":
   version "0.0.0"
   uid ""
 
@@ -5504,7 +5504,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/observability_solution/entities_data_access":
+"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/entities_data_access":
   version "0.0.0"
   uid ""
 
@@ -5516,7 +5516,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entityManager-app-plugin@link:x-pack/solutions/observability/plugins/observability_solution/entity_manager_app":
+"@kbn/entityManager-app-plugin@link:x-pack/solutions/observability/plugins/entity_manager_app":
   version "0.0.0"
   uid ""
 
@@ -6616,7 +6616,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/palettes@link:packages/kbn-palettes":
+"@kbn/palettes@link:src/platform/packages/shared/kbn-palettes":
   version "0.0.0"
   uid ""
 
@@ -6844,7 +6844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-form@link:packages/response-ops/rule_form":
+"@kbn/response-ops-rule-form@link:src/platform/packages/shared/response-ops/rule_form":
   version "0.0.0"
   uid ""
 
@@ -6956,7 +6956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-search-component@link:packages/kbn-saved-search-component":
+"@kbn/saved-search-component@link:src/platform/packages/shared/kbn-saved-search-component":
   version "0.0.0"
   uid ""
 
@@ -7616,7 +7616,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-schema@link:x-pack/packages/kbn-streams-schema":
+"@kbn/streams-schema@link:x-pack/solutions/observability/packages/kbn-streams-schema":
   version "0.0.0"
   uid ""
 
@@ -7888,7 +7888,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
+"@kbn/use-tracked-promise@link:src/platform/packages/shared/kbn-use-tracked-promise":
   version "0.0.0"
   uid ""
 
