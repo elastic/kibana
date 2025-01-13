@@ -31,6 +31,7 @@ export interface VersionedRouterArgs {
   defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   /** Whether Kibana is running in a dev environment */
   isDev?: boolean;
+  kibanaVersion?: string;
   /**
    * List of internal paths that should use the default handler resolution strategy. By default this
    * is no routes ([]) because ONLY Elastic clients are intended to call internal routes.
@@ -58,6 +59,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     log,
     defaultHandlerResolutionStrategy,
     isDev,
+    kibanaVersion,
     useVersionResolutionStrategyForInternalPaths,
   }: VersionedRouterArgs) {
     return new CoreVersionedRouter(
@@ -65,6 +67,7 @@ export class CoreVersionedRouter implements VersionedRouter {
       log,
       defaultHandlerResolutionStrategy,
       isDev,
+      kibanaVersion,
       useVersionResolutionStrategyForInternalPaths
     );
   }
@@ -73,6 +76,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     private readonly log: Logger,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
     public readonly isDev: boolean = false,
+    public readonly kibanaVersion: string = '',
     useVersionResolutionStrategyForInternalPaths: string[] = []
   ) {
     this.pluginId = this.router.pluginId;
@@ -95,6 +99,7 @@ export class CoreVersionedRouter implements VersionedRouter {
           useVersionResolutionStrategyForInternalPaths:
             this.useVersionResolutionStrategyForInternalPaths,
           isDev: this.isDev,
+          kibanaVersion: this.kibanaVersion,
         },
       });
       this.routes.add(route);
