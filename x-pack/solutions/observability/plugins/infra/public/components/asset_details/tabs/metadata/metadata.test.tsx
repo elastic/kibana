@@ -16,18 +16,18 @@ import { ContextProviders } from '../../context_providers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_search_session');
+jest.mock('../../../../hooks/use_reload_request_time');
 
 const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const useSearchSessionContextMock = useSearchSessionContext as jest.MockedFunction<
-  typeof useSearchSessionContext
+const useRequestTimeContextMock = useReloadRequestTimeContext as jest.MockedFunction<
+  typeof useReloadRequestTimeContext
 >;
 
 const mockUseKibana = () => {
@@ -39,10 +39,10 @@ const mockUseKibana = () => {
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
 };
 
-const mockSearchSessionContext = () => {
-  useSearchSessionContextMock.mockReturnValue({
-    updateSearchSessionId: jest.fn(),
-    searchSessionId: '',
+const mockRequestTimeContext = () => {
+  useRequestTimeContextMock.mockReturnValue({
+    updateReloadRequestTime: jest.fn(),
+    reloadRequestTime: 0,
   });
 };
 
@@ -73,11 +73,13 @@ const renderHostMetadata = () =>
   );
 
 beforeEach(() => {
+  jest.useFakeTimers();
   mockUseKibana();
-  mockSearchSessionContext();
+  mockRequestTimeContext();
 });
 
 afterEach(() => {
+  jest.useRealTimers();
   jest.clearAllMocks();
 });
 

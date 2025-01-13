@@ -67,7 +67,7 @@ describe('Processor: Set', () => {
     } = testBed;
 
     // Add required fields
-    form.setInputValue('valueFieldInput', 'value');
+    form.setInputValue('textValueField.input', 'value');
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
     await saveNewProcessor();
@@ -83,18 +83,17 @@ describe('Processor: Set', () => {
     const {
       actions: { saveNewProcessor },
       form,
-      find,
     } = testBed;
 
     // Add required fields
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set value field
-    form.setInputValue('valueFieldInput', 'value');
+    form.setInputValue('textValueField.input', 'value');
 
     // Toggle to copy_from field and set a random value
-    find('toggleCustomField').simulate('click');
-    form.setInputValue('copyFromInput', 'copy_from');
+    form.toggleEuiSwitch('toggleCustomField.input');
+    form.setInputValue('copyFromInput.input', 'copy_from');
 
     // Save the field with new changes
     await saveNewProcessor();
@@ -117,11 +116,11 @@ describe('Processor: Set', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Shouldnt be able to set mediaType if value is not a template string
-    form.setInputValue('valueFieldInput', 'hello');
+    form.setInputValue('textValueField.input', 'hello');
     expect(exists('mediaTypeSelectorField')).toBe(false);
 
     // Set value to a template snippet and media_type to a non-default value
-    form.setInputValue('valueFieldInput', '{{{hello}}}');
+    form.setInputValue('textValueField.input', '{{{hello}}}');
     form.setSelectValue('mediaTypeSelectorField', 'text/plain');
 
     // Save the field with new changes
@@ -145,7 +144,7 @@ describe('Processor: Set', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    form.setInputValue('valueFieldInput', '{{{hello}}}');
+    form.setInputValue('textValueField.input', '{{{hello}}}');
     form.toggleEuiSwitch('overrideField.input');
     form.toggleEuiSwitch('ignoreEmptyField.input');
 
@@ -158,6 +157,39 @@ describe('Processor: Set', () => {
       value: '{{{hello}}}',
       ignore_empty_value: true,
       override: false,
+    });
+  });
+
+  test('saves with json parameter value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+      component,
+    } = testBed;
+
+    form.setInputValue('textValueField.input', 'value');
+
+    find('toggleTextField').simulate('click');
+
+    form.setInputValue('fieldNameField.input', 'field_1');
+    await act(async () => {
+      find('jsonValueField').simulate('change', {
+        jsonContent: '{"value_1":"""aaa"bbb""", "value_2":"aaa(bbb"}',
+      });
+
+      // advance timers to allow the form to validate
+      jest.advanceTimersByTime(0);
+    });
+    component.update();
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    expect(processors[0][SET_TYPE]).toEqual({
+      field: 'field_1',
+      // eslint-disable-next-line prettier/prettier
+      value: { value_1: 'aaa\"bbb', value_2: 'aaa(bbb' },
     });
   });
 });

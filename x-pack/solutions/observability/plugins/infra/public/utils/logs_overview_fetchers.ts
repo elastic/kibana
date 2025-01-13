@@ -11,7 +11,8 @@ import type {
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_VIEW, getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
+import moment from 'moment';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import type { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
@@ -67,13 +68,13 @@ export function getLogsOverviewDataFetcher(
       params,
       data
     );
-    const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+    const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
     const appLink = logsLocator.getRedirectUrl({
       timeRange: {
-        startTime: params.absoluteTime.start,
-        endTime: params.absoluteTime.end,
+        from: moment(params.absoluteTime.start).toISOString(),
+        to: moment(params.absoluteTime.end).toISOString(),
       },
     });
 

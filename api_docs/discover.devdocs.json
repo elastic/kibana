@@ -61,54 +61,6 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-public.LogsExplorerTabs",
-        "type": "Function",
-        "tags": [],
-        "label": "LogsExplorerTabs",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.LogsExplorerTabsProps",
-            "text": "LogsExplorerTabsProps"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/shared-ux-utility",
-            "scope": "common",
-            "docId": "kibKbnSharedUxUtilityPluginApi",
-            "section": "def-common.WithSuspenseExtendedDeps",
-            "text": "WithSuspenseExtendedDeps"
-          },
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "src/platform/plugins/shared/discover/public/components/logs_explorer_tabs/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabs.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -906,13 +858,7 @@
             "label": "i18n",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -926,13 +872,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -946,13 +886,7 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -966,13 +900,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1026,13 +954,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1102,13 +1024,7 @@
             "description": [],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
@@ -1124,13 +1040,7 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
@@ -1147,13 +1057,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1167,13 +1071,7 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              }
+              "UserProfileService"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1550,13 +1448,7 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1570,13 +1462,7 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1590,13 +1476,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1610,13 +1490,7 @@
             "label": "settings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1741,13 +1615,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -2686,56 +2554,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-public.LogsExplorerTabsProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogsExplorerTabsProps",
-        "description": [],
-        "path": "src/platform/plugins/shared/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabsProps.services",
-            "type": "Object",
-            "tags": [],
-            "label": "services",
-            "description": [],
-            "signature": [
-              "{ share?: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.SharePublicStart",
-                "text": "SharePublicStart"
-              },
-              " | undefined; }"
-            ],
-            "path": "src/platform/plugins/shared/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabsProps.selectedTab",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "selectedTab",
-            "description": [],
-            "signature": [
-              "\"discover\" | \"logs-explorer\""
-            ],
-            "path": "src/platform/plugins/shared/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3750,13 +3568,7 @@
           ">> & { attributes?: (",
           "SavedSearchAttributes",
           " & { references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[] | undefined; }) | undefined; savedObjectId?: string | undefined; nonPersistedDisplayOptions?: ",
           {
             "pluginId": "discover",
@@ -3991,13 +3803,7 @@
             "description": [],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "discover",
@@ -4020,13 +3826,7 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/platform/plugins/shared/discover/server/index.ts",

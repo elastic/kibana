@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { RawAction, ActionTypeExecutorResult } from '../../../../types';
-import { getSystemActionKibanaPrivileges } from '../../../../lib/get_system_action_kibana_privileges';
+import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import { ConnectorExecuteParams } from './types';
@@ -20,7 +20,6 @@ export async function execute(
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
   const { actionId, params, source, relatedSavedObjects } = connectorExecuteParams;
-  const additionalPrivileges = getSystemActionKibanaPrivileges(context, actionId, params);
   let actionTypeId: string | undefined;
 
   try {
@@ -42,6 +41,12 @@ export async function execute(
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
   }
 
+  const additionalPrivileges = getActionKibanaPrivileges(
+    context,
+    actionTypeId,
+    params,
+    source?.type
+  );
   await context.authorization.ensureAuthorized({
     operation: 'execute',
     additionalPrivileges,

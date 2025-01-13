@@ -26,6 +26,7 @@ export interface StatusIconProps {
   type: keyof typeof STATUS_ICON_TYPES;
   label: string;
 }
+
 export const StatusIcon: React.FunctionComponent<StatusIconProps> = ({ type, label }) => {
   const icon = typeToIconMap[type];
 

@@ -1099,6 +1099,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     HostEntity:
       type: object
@@ -1169,6 +1170,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - related.entity
       type: string
     IndexPattern:
       type: string

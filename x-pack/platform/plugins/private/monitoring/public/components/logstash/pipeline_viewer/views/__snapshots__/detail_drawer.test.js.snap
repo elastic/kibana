@@ -13,9 +13,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
       <EuiFlexItem
         grow={false}
       >
-        <EuiIcon
-          className="lspvDetailDrawerIcon"
-        />
+        <EuiIcon />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
@@ -66,9 +64,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       <EuiFlexItem
         grow={false}
       >
-        <EuiIcon
-          className="lspvDetailDrawerIcon"
-        />
+        <EuiIcon />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
@@ -114,7 +110,17 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -162,7 +168,17 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -210,7 +226,17 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -258,7 +284,17 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -315,9 +351,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
       <EuiFlexItem
         grow={false}
       >
-        <EuiIcon
-          className="lspvDetailDrawerIcon"
-        />
+        <EuiIcon />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
@@ -357,7 +391,17 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -405,7 +449,17 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -453,7 +507,17 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -501,7 +565,17 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                className="lspvDetailDrawerSparklineContainer"
+                css={
+                  Object {
+                    "map": undefined,
+                    "name": "b37u90",
+                    "next": undefined,
+                    "styles": "
+  width: 7vw;
+",
+                    "toString": [Function],
+                  }
+                }
               >
                 <Sparkline
                   options={
@@ -558,9 +632,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
       <EuiFlexItem
         grow={false}
       >
-        <EuiIcon
-          className="lspvDetailDrawerIcon"
-        />
+        <EuiIcon />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
@@ -603,9 +675,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <EuiIcon
-          className="lspvDetailDrawerIcon"
-        />
+        <EuiIcon />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>

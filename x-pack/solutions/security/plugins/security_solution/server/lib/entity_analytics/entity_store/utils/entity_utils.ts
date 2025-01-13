@@ -11,16 +11,11 @@ import {
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
-import { IDENTITY_FIELD_MAP } from '../../../../../common/entity_analytics/entity_store/constants';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
 import { type EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
-
-export const getIdentityFieldForEntityType = (entityType: EntityType) => {
-  return IDENTITY_FIELD_MAP[entityType];
-};
 
 export const buildIndexPatterns = async (
   space: string,

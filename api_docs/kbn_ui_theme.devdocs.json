@@ -70,34 +70,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
-            "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           },
