@@ -151,8 +151,16 @@ describe('buildPackage', () => {
   });
 
   it('Should call createAgentInput for each datastream', async () => {
-    expect(createAgentInput).toHaveBeenCalledWith(firstDatastreamPath, firstDataStreamInputTypes);
-    expect(createAgentInput).toHaveBeenCalledWith(secondDatastreamPath, secondDataStreamInputTypes);
+    expect(createAgentInput).toHaveBeenCalledWith(
+      firstDatastreamPath,
+      firstDataStreamInputTypes,
+      undefined
+    );
+    expect(createAgentInput).toHaveBeenCalledWith(
+      secondDatastreamPath,
+      secondDataStreamInputTypes,
+      undefined
+    );
   });
 
   it('Should call createPipeline for each datastream', async () => {
