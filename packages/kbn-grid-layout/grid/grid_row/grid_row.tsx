@@ -99,19 +99,13 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
               // apply "targetted row" styles
-              const gridColor = euiTheme.colors.backgroundLightAccentSecondary;
               rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
                 gutterSize / 2
               }px`;
               rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
                 rowHeight + gutterSize
               }px`;
-              rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-        linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
-              rowRef.style.backgroundColor = `${transparentize(
-                euiTheme.colors.backgroundLightAccentSecondary,
-                0.25
-              )}`;
+              rowRef.style.backgroundImage = `radial-gradient(at top left, ${euiTheme.colors.accentSecondary} 2px, transparent 2px)`;
             } else {
               // undo any "targetted row" styles
               rowRef.style.backgroundPosition = ``;

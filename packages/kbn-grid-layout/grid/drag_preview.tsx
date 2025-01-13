@@ -63,7 +63,7 @@ export const DragPreview = ({
         display: none;
         pointer-events: none;
         border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
         transition: opacity 100ms linear;
       `}
     />
