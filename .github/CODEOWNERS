@@ -417,7 +417,7 @@ x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
