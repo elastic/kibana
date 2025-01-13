@@ -64,7 +64,7 @@ describe('#bulkGet', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -93,7 +93,7 @@ describe('#bulkGet', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
-    mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -112,7 +112,7 @@ describe('#bulkGet', () => {
       allowedTypes,
       logger,
       extensions: {
-        securityExtension: mockSecurityExt,
+        securityExtension,
       },
     });
 
@@ -424,8 +424,8 @@ describe('#bulkGet', () => {
       });
     });
 
-    describe('securityExtension', () => {
-      it('is called with correct params', async () => {
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkGet', async () => {
         const response = getMockMgetResponse(registry, [obj1, obj2]);
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
@@ -433,7 +433,7 @@ describe('#bulkGet', () => {
 
         await bulkGet(repository, [obj1, obj2]);
 
-        expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledWith(
+        expect(securityExtension.authorizeBulkGet).toHaveBeenCalledWith(
           expect.objectContaining({
             objects: expect.arrayContaining([
               expect.objectContaining({

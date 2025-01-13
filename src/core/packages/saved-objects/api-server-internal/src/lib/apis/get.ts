@@ -14,6 +14,7 @@ import {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
 import { ApiExecutionContext } from './types';
 
@@ -60,6 +61,10 @@ export const performGet = async <T>(
       type,
       id,
       existingNamespaces: body?._source?.namespaces ?? [],
+      name: SavedObjectsUtils.getName(
+        { attributes: body?._source?.[type] },
+        registry.getNameAttribute(type)
+      ),
     },
     objectNotFound,
   });
