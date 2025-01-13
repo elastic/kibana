@@ -146,13 +146,7 @@
             ],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               "> | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
@@ -1038,24 +1032,24 @@
                 "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
                 "plugin": "management",
                 "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
                 "plugin": "kibanaOverview",
-                "path": "src/plugins/kibana_overview/public/application.tsx"
+                "path": "src/platform/plugins/private/kibana_overview/public/application.tsx"
               },
               {
                 "plugin": "@kbn/core",
@@ -1110,13 +1104,7 @@
             ],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
@@ -1131,13 +1119,7 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
@@ -1160,13 +1142,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",

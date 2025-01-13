@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState, useRef, RefObject } from 'react';
+import type { RefObject } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export const useIntersectingState = <T>(ref: RefObject<HTMLElement>, currentState: T) => {
   const [intersectionObserverEntry, setIntersectionObserverEntry] =

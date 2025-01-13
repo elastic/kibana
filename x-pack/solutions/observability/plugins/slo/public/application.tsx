@@ -145,7 +145,7 @@ function App() {
   const routes = getRoutes(isServerless);
 
   return (
-    <Routes>
+    <Routes enableExecutionContextTracking={true}>
       {Object.keys(routes).map((path) => {
         const { handler, exact } = routes[path];
         const Wrapper = () => {

@@ -187,13 +187,7 @@
             "text": "APMPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
-            "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "apm",
@@ -234,13 +228,7 @@
                 "label": "initContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
@@ -260,13 +248,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "APMPluginStartDependencies",
               ", unknown>, plugins: ",
@@ -289,13 +271,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "APMPluginStartDependencies",
                   ", unknown>"
@@ -332,13 +308,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               "APMPluginStartDependencies",
               ") => void"
@@ -355,13 +325,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
                 "deprecated": false,
@@ -4442,13 +4406,7 @@
           "<SaveApmIndicesBodySchema>; }>, ",
           "APMRouteHandlerResources",
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
+          "SavedObject",
           "<{}>, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/settings/apm-indices\": ",
@@ -7958,7 +7916,7 @@
           "<number, string, unknown>; }>]>; }>, ",
           "APMRouteHandlerResources",
           ", ",
-          "GroupResourceNodesResponse",
+          "ServiceMapResponse",
           ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/observability_overview/has_data\": ",

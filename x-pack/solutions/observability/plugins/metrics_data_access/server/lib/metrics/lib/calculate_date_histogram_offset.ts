@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAPITimerange } from '../../../../common/http_api';
+import type { MetricsAPITimerange } from '../../../../common/http_api';
 import { calculateBucketSize } from './calculate_bucket_size';
 
 export const calculateDateHistogramOffset = (timerange: MetricsAPITimerange): string => {

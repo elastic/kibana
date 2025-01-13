@@ -35,6 +35,7 @@ import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { appContextService } from '../../..';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 1000;
 
@@ -133,8 +134,10 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  await createDefaultIndexPatterns(savedObjectsImporter);
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  await installManagedIndexPattern({
+    savedObjectsClient,
+    savedObjectsImporter,
+  });
 
   return await installKibanaSavedObjects({
     logger,
@@ -142,6 +145,19 @@ export async function installKibanaAssets(options: {
     kibanaAssets: assetsToInstall,
     assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
   });
+}
+
+export async function installManagedIndexPattern({
+  savedObjectsClient,
+  savedObjectsImporter,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: SavedObjectsImporterContract;
+}) {
+  if (appContextService.getConfig()?.enableManagedLogsAndMetricsDataviews === true) {
+    await createDefaultIndexPatterns(savedObjectsImporter);
+    await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  }
 }
 
 export async function createDefaultIndexPatterns(

@@ -11,7 +11,7 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const CF_COMMAND_REGEXP =
-  /aws cloudformation create-stack --stack-name (\S+) --template-url \S+ --parameters ParameterKey=FirehoseStreamNameForLogs,ParameterValue=(\S+) .+? --capabilities CAPABILITY_IAM/;
+  /aws cloudformation create-stack --stack-name (\S+) --template-url \S+ --parameters ParameterKey=FirehoseStreamName,ParameterValue=(\S+) .+? --capabilities CAPABILITY_IAM/;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);
@@ -60,9 +60,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const AWS_SERVICE_ID = 'vpc-flow';
       await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
       const copiedCommand = await browser.getClipboardValue();
-      const [, _stackName, logsStreamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
+      const [, _stackName, streamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
 
-      expect(logsStreamName).toBeDefined();
+      expect(streamName).toBeDefined();
 
       await browser.execute(`window.dispatchEvent(new Event("blur"))`);
 
@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .rate(1)
           .generator((timestamp) => {
             return log.create().dataset(DATASET).timestamp(timestamp).defaults({
-              'aws.kinesis.name': logsStreamName,
+              'aws.kinesis.name': streamName,
             });
           })
       );
@@ -89,11 +89,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const AWS_SERVICE_ID = 'vpc-flow';
       await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
       const copiedCommand = await browser.getClipboardValue();
-      const [, _stackName, logsStreamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
+      const [, _stackName, streamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
 
       await testSubjects.missingOrFail('observabilityOnboardingFirehosePanelExistingDataCallout');
 
-      expect(logsStreamName).toBeDefined();
+      expect(streamName).toBeDefined();
 
       // Simulate Firehose stream ingesting log files
       const to = new Date().toISOString();
@@ -104,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .rate(1)
           .generator((timestamp) => {
             return log.create().dataset(DATASET).timestamp(timestamp).defaults({
-              'aws.kinesis.name': logsStreamName,
+              'aws.kinesis.name': streamName,
             });
           })
       );

@@ -6,7 +6,10 @@
  */
 
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { ConnectionStatsItem, ConnectionStatsItemWithImpact } from '../../../../common/connections';
+import type {
+  ConnectionStatsItem,
+  ConnectionStatsItemWithImpact,
+} from '../../../../common/connections';
 
 export function getConnectionStatsItemsWithRelativeImpact(
   items: ConnectionStatsItem[]

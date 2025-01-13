@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
-import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
-import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../../../plugin';
+import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
+import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../../hooks/use_monitor_query_filters';
 
 interface MonitorErrorsCountProps {
@@ -22,6 +23,8 @@ export const OverviewErrorsCount = ({ from, to }: MonitorErrorsCountProps) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+  const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const filters = useMonitorFilters({});
 
@@ -44,6 +47,7 @@ export const OverviewErrorsCount = ({ from, to }: MonitorErrorsCountProps) => {
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
           filters,
+          color: isAmsterdam ? euiTheme.colors.vis.euiColorVis1 : euiTheme.colors.vis.euiColorVis6,
         },
       ]}
     />

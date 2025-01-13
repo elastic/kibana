@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { XYBrushEvent } from '@elastic/charts';
-import { History } from 'history';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { XYBrushEvent } from '@elastic/charts';
+import type { History } from 'history';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { fromQuery, toQuery } from '../../links/url_helpers';
 
 export const onBrushEnd = ({ x, history }: { x: XYBrushEvent['x']; history: History }) => {

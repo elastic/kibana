@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiForm,
   EuiButton,
@@ -19,14 +20,15 @@ import {
   EuiFlexItem,
   EuiText,
   EuiPopoverTitle,
-  WithEuiThemeProps,
   withEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
+} from '../../../../../../../common/http_api/snapshot_api';
+import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';

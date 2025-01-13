@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
-import React, { ComponentType } from 'react';
+import type cytoscape from 'cytoscape';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';

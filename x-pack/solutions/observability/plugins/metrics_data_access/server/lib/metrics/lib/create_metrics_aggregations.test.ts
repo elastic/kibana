@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAPIRequest } from '../../../../common/http_api';
+import type { MetricsAPIRequest } from '../../../../common/http_api';
 import moment from 'moment';
 import { createMetricsAggregations } from './create_metrics_aggregations';
 
