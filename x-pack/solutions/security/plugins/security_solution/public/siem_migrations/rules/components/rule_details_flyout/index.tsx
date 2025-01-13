@@ -112,6 +112,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
               elastic_rule: {
                 title: ruleName,
                 query: ruleQuery,
+                query_language: 'esql',
               },
             },
           ]);

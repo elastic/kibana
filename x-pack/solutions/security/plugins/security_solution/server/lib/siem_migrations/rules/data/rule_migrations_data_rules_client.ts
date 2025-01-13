@@ -116,9 +116,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
               {
                 doc: {
                   ...rest,
-                  elastic_rule: elasticRule?.query
-                    ? { ...elasticRule, query_language: 'esql' }
-                    : elasticRule,
+                  elastic_rule: elasticRule,
                   translation_result:
                     translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
                   updated_by: profileId,
