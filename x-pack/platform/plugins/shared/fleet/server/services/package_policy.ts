@@ -1135,7 +1135,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           removeProtection,
         });
       },
-      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
 
     const assetRemovePromise = removeOldAssets({
