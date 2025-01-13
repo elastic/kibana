@@ -11,7 +11,7 @@ import type {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';

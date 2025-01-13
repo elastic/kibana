@@ -18,7 +18,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import type {
   AlertsTableProps,
   AlertsTableImperativeApi,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/response-ops-alerts-table/types';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

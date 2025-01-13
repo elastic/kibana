@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
+import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -31,12 +33,11 @@ import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
-import { defaultAlertsTableColumns } from '../../alerts_table/configuration';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
-const AlertsTable = lazy(() => import('../../alerts_table/alerts_table'));
+const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
 export type RuleComponentProps = {
   rule: Rule;
@@ -71,7 +72,17 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleComponentProps) {
-  const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
+  const {
+    ruleTypeRegistry,
+    actionTypeRegistry,
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
+  } = useKibana().services;
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
@@ -110,6 +121,15 @@ export function RuleComponent({
           showAlertStatusWithFlapping
           columns={alertsTableColumns}
           lastReloadRequestTime={lastReloadRequestTime}
+          services={{
+            data,
+            http,
+            notifications,
+            fieldFormats,
+            application,
+            licensing,
+            settings,
+          }}
         />
       );
     }
@@ -123,13 +143,20 @@ export function RuleComponent({
     });
   }, [
     alerts,
-    onMuteAction,
+    application,
+    data,
+    fieldFormats,
+    http,
     lastReloadRequestTime,
+    licensing,
+    notifications,
+    onMuteAction,
     readOnly,
     rule.id,
     ruleType.hasAlertsMappings,
     ruleType.hasFieldsForAAD,
     ruleType.id,
+    settings,
   ]);
 
   const tabs = [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';

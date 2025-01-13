@@ -6842,6 +6842,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-rule-form@link:src/platform/packages/shared/response-ops/rule_form":
   version "0.0.0"
   uid ""

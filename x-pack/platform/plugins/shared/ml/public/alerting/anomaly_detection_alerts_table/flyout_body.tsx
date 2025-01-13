@@ -9,14 +9,17 @@ import { get } from 'lodash';
 import React from 'react';
 import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { GetAlertsTableProp } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
+import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import { getAlertFormatters } from './render_cell_value';
 
 export const AlertsTableFlyoutBody: GetAlertsTableProp<'renderFlyoutBody'> = ({
   alert,
   columns,
-  fieldFormats,
 }) => {
+  const {
+    services: { fieldFormats },
+  } = useAlertsTableContext();
   const formatter = getAlertFormatters(fieldFormats);
   return (
     <EuiPanel>
