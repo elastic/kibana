@@ -170,7 +170,7 @@ export class UsageCountersService {
           Rx.retry({
             count: this.retryCount,
             delay: (error, retryIndex) => {
-              this.logger.warn(`Error: ${error.message}, retrying attempt ${retryIndex + 1}`);
+              this.logger.warn(`Error: ${error.message}, retrying attempt ${retryIndex + 1}`); // extra warning logger
               return Rx.timer(backoffDelay(retryIndex));
             },
           }),

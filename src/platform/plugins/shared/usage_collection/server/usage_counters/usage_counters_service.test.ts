@@ -199,7 +199,7 @@ describe('UsageCountersService', () => {
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockError = new Error('failed in a mock from this test.');
+    const mockError = new Error('failed');
     const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
       switch (key) {
         case 'test-counter:counterA:count:server:20210409':
@@ -227,13 +227,8 @@ describe('UsageCountersService', () => {
     await tickWithDelay(100);
     // number of incrementCounter calls + number of retries
     expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
-    // expect(logger.warn).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
-    //   kibana: {
-    //     usageCounters: {
-    //       results: [mockError, 'pass'],
-    //     },
-    //   },
-    // });
+    expect(logger.warn).toHaveBeenNthCalledWith(1, 'Error: failed, retrying attempt 2');
+    expect(logger.warn).toHaveBeenNthCalledWith(2, mockError);
     expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
       kibana: {
         usageCounters: {
