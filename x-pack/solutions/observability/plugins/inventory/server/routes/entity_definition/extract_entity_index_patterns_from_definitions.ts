@@ -6,20 +6,14 @@
  */
 
 import type { EntitySourceDefinition } from '@kbn/entityManager-plugin/server/lib/v2/types';
+import { concat, uniq, compact } from 'lodash';
 
 export const extractEntityIndexPatternsFromDefinitions = (
   entityDefinitionsSource: EntitySourceDefinition[]
 ) =>
   entityDefinitionsSource.reduce(
-    (acc, { ['type_id']: typeId }) => (
-      (acc[typeId] = [
-        ...new Set(
-          entityDefinitionsSource
-            .filter((sourceToFilter) => sourceToFilter.type_id === typeId)
-            .flatMap((filteredSource) => filteredSource.index_patterns)
-        ),
-      ]),
-      acc
+    (acc, { ['type_id']: typeId, index_patterns: indexPatterns }) => (
+      (acc[typeId] = compact(uniq(concat(acc[typeId], indexPatterns)))), acc
     ),
     {} as Record<string, string[]>
   );
