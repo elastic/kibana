@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+export const CEL_EXISTING_AUTH_CONFIG_FIELDS = [
+  'oauth_id',
+  'oauth_secret',
+  'username',
+  'password',
+  'digest_username',
+  'digest_password',
+];
+
 export const DEFAULT_CEL_PROGRAM = `# // Fetch the agent's public IP every minute and note when the last request was made.
 # // It does not use the Resource URL configuration value.
 # bytes(get("https://api.ipify.org/?format=json").Body).as(body, {
@@ -16,6 +25,8 @@ export const DEFAULT_CEL_PROGRAM = `# // Fetch the agent's public IP every minut
 #     })],
 #     "cursor": {"last_requested_at": now}
 # })`;
+
+export const DEFAULT_URL = 'https://server.example.com:8089/api';
 
 export const INPUTS_INCLUDE_SSL_CONFIG = [
   'aws-cloudwatch',
