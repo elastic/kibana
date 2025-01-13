@@ -102,7 +102,6 @@ import type { ExternalCallback } from '..';
 
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
