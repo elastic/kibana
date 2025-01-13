@@ -127,11 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when toggling the chart visibility', async () => {
-        await expectSearches(type, 2, async () => {
+      it('should send no requests (documents + chart) when toggling the chart visibility', async () => {
+        await expectSearches(type, 0, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
-        await expectSearches(type, 2, async () => {
+        await expectSearches(type, 0, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
       });
