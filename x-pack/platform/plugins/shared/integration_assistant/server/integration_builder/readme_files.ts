@@ -10,6 +10,7 @@ import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
 import { DataStream } from '../../common';
 import { createSync, ensureDirSync } from '../util';
+import { INPUTS_INCLUDE_SSL_CONFIG } from './constants';
 
 export function createReadme(
   packageDir: string,
@@ -58,12 +59,30 @@ function createReadmeFile(
   });
 
   const template = env.getTemplate(templateName);
+  const uniqueInputs = getUniqueListInputs(datastreams);
 
   const renderedTemplate = template.render({
     package_name: integrationName,
     datastreams,
     fields,
+    inputs: uniqueInputs,
+    include_ssl: shouldIncludeSSLDocumentation(uniqueInputs),
   });
 
   createSync(joinPath(targetDir, 'README.md'), renderedTemplate);
+}
+
+function getUniqueListInputs(datastreams: DataStream[]): string[] {
+  const uniqueInputs = new Set<string>();
+  datastreams.forEach((datastream) => {
+    datastream.inputTypes.forEach((inputType) => {
+      uniqueInputs.add(inputType);
+    });
+  });
+
+  return Array.from(uniqueInputs);
+}
+
+function shouldIncludeSSLDocumentation(inputs: string[]): boolean {
+  return inputs.some((item) => INPUTS_INCLUDE_SSL_CONFIG.includes(item));
 }

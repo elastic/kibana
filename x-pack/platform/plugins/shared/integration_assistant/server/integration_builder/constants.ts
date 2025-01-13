@@ -16,3 +16,15 @@ export const DEFAULT_CEL_PROGRAM = `# // Fetch the agent's public IP every minut
 #     })],
 #     "cursor": {"last_requested_at": now}
 # })`;
+
+export const INPUTS_INCLUDE_SSL_CONFIG = [
+  'aws-cloudwatch',
+  'aws-s3',
+  'azure-blob-storage',
+  'azure-eventhub',
+  'gcp-pubsub',
+  'gcs',
+  'http_endpoint',
+  'kafka',
+  'tcp',
+];
