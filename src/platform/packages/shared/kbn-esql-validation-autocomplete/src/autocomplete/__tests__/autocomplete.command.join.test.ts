@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup } from './helpers';
+import { setup, getFieldNamesByType } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('<type> JOIN <index> [ AS <alias> ] ON <condition> [, <condition> [, ...]]', () => {
@@ -99,6 +99,18 @@ describe('autocomplete.suggest', () => {
         const labels = suggestions.map((s) => s.label);
 
         expect(labels).toEqual(['ON']);
+      });
+
+      test('suggests fields after ON keyword', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON /');
+        const labels = suggestions.map((s) => s.text).sort();
+        const expected = getFieldNamesByType('any')
+          .sort()
+          .map((field) => field + ' ');
+
+        expect(labels).toEqual(expected);
       });
     });
   });

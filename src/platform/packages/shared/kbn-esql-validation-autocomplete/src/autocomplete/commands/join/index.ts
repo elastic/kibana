@@ -111,6 +111,12 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
   }
 
   const suggestions: SuggestionRawDefinition[] = [];
+  const fields = await getColumnsByType(['any'], [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+
+  suggestions.push(...fields);
 
   return suggestions;
 };
