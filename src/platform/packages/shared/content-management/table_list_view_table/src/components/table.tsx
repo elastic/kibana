@@ -71,6 +71,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
+  hasSortByTypeOption: boolean;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -95,6 +96,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableFilter,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
+  hasSortByTypeOption,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -191,12 +193,19 @@ export function Table<T extends UserContentCommonSchema>({
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
             hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
+            hasSortByTypeOption={hasSortByTypeOption}
             onChange={onSortChange}
           />
         );
       },
     };
-  }, [hasUpdatedAtMetadata, onSortChange, tableSort, hasRecentlyAccessedMetadata]);
+  }, [
+    hasUpdatedAtMetadata,
+    onSortChange,
+    tableSort,
+    hasRecentlyAccessedMetadata,
+    hasSortByTypeOption,
+  ]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;

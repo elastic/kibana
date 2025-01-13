@@ -75,11 +75,13 @@ interface Props {
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
+  hasSortByTypeOption: boolean;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
 export function TableSortSelect({
   tableSort,
+  hasSortByTypeOption,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
   onChange,
@@ -101,19 +103,24 @@ export function TableSortSelect({
         direction: 'desc',
         append: <EuiIcon type="sortDown" />,
       },
-      {
-        label: i18nText.typeAsc,
-        column: 'typeTitle',
-        direction: 'asc',
-        append: <EuiIcon type="sortUp" />,
-      },
-      {
-        label: i18nText.typeDesc,
-        column: 'typeTitle',
-        direction: 'desc',
-        append: <EuiIcon type="sortDown" />,
-      },
     ];
+
+    if (hasSortByTypeOption) {
+      opts.push(
+        {
+          label: i18nText.typeAsc,
+          column: 'typeTitle',
+          direction: 'asc',
+          append: <EuiIcon type="sortUp" />,
+        },
+        {
+          label: i18nText.typeDesc,
+          column: 'typeTitle',
+          direction: 'desc',
+          append: <EuiIcon type="sortDown" />,
+        }
+      );
+    }
 
     if (hasRecentlyAccessedMetadata) {
       opts = [

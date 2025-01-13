@@ -160,6 +160,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   };
   selectedIds: string[];
   totalItems: number;
+  hasSortByTypeOption: boolean;
   hasUpdatedAtMetadata: boolean;
   hasCreatedByMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
@@ -420,6 +421,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
+      hasSortByTypeOption: false,
       hasCreatedByMetadata: false,
       hasRecentlyAccessedMetadata: recentlyAccessed ? recentlyAccessed.get().length > 0 : false,
       selectedIds: [],
@@ -453,6 +455,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     selectedIds,
     totalItems,
     hasUpdatedAtMetadata,
+    hasSortByTypeOption,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
     pagination: _pagination,
@@ -1202,6 +1205,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           searchQuery={searchQuery}
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          hasSortByTypeOption={hasSortByTypeOption}
           hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
           tableSort={tableSort}
           tableFilter={tableFilter}
