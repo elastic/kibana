@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataStream } from '../../common';
 import { configure, Environment } from 'nunjucks';
 import { join as joinPath } from 'path';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
+import { DataStream } from '../../common';
 import { createSync, ensureDirSync } from '../util';
 import { createReadme } from './readme_files';
 
