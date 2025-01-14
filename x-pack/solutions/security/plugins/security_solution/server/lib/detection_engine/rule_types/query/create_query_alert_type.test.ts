@@ -21,6 +21,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
+const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
@@ -114,7 +115,8 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
-  it('executes but writes a warning if no indices are found', async () => {
+  it('short-circuits and writes a warning if no indices are found', async () => {
+    (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
@@ -156,13 +158,13 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
 
-    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
-    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).not.toHaveBeenCalled();
     expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'Indexes matching "auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*" were not found.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       })
     );
   });
@@ -186,7 +188,7 @@ describe('Custom Query Alerts', () => {
     const params = getQueryRuleParams();
 
     // mock field caps so as not to short-circuit on "no indices found"
-    services.scopedClusterClient.asInternalUser.fieldCaps.mockResolvedValue({
+    services.scopedClusterClient.asInternalUser.fieldCaps.mockResolvedValueOnce({
       // @ts-expect-error our fieldCaps mock only seems to use the last value of the overloaded FieldCapsApi
       body: {
         indices: params.index!,
