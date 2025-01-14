@@ -12041,7 +12041,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -54196,6 +54196,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -54420,6 +54421,42 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - '@timestamp'
+        - service
+        - entity
     Security_Entity_Analytics_API_StoreStatus:
       enum:
         - not_installed
