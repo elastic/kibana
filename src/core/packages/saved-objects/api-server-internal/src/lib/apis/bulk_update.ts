@@ -188,7 +188,7 @@ export const performBulkUpdate = async <T>(
     const { type, id, objectNamespace, esRequestIndex: index, documentToSave } = element.value;
     const preflightResult = bulkGetResponse!.body.docs[index];
     const name = SavedObjectsUtils.getName(
-      documentToSave[type] as SavedObject<T>,
+      { attributes: documentToSave[type] as SavedObject<T> },
       registry.getNameAttribute(type)
     );
 
