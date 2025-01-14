@@ -8,8 +8,7 @@
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiTitle,
@@ -22,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
@@ -104,13 +104,19 @@ const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
   </StyledFlexGroup>
 );
 
-const tabPaddingClassName = css`
-  padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
-`;
+export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
 
-export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <div className={tabPaddingClassName}>{children}</div>
-);
+  return (
+    <div
+      css={css`
+        padding: 0 ${euiTheme.size.m} ${euiTheme.size.xl} ${euiTheme.size.m};
+      `}
+    >
+      {children}
+    </div>
+  );
+};
 
 interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
