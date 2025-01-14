@@ -1203,29 +1203,6 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
       expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
     });
-
-    it(`unfreezes a frozen index`, async () => {
-      httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, {
-        ...testIndexMock,
-        isFrozen: true,
-      });
-
-      await act(async () => {
-        testBed = await setup({ httpSetup });
-      });
-      testBed.component.update();
-
-      // already sent 6 requests while setting up the component
-      const numberOfRequests = 6;
-      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-
-      await testBed.actions.contextMenu.clickManageIndexButton();
-      await testBed.actions.contextMenu.clickIndexAction('unfreezeIndexMenuButton');
-      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/unfreeze`, {
-        body: JSON.stringify({ indices: [testIndexName] }),
-      });
-      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
-    });
   });
 
   describe('index name with a percent sign', () => {

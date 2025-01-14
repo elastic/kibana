@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           index: 2,
           message:
-            'Invalid entity type "invalid_entity", expected to be one of: user, host, service, universal',
+            'Invalid entity type "invalid_entity", expected to be one of: user, host, service',
         },
         {
           index: 3,
