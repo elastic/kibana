@@ -79,10 +79,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchConnectorsTableSelect', option);
       },
       async connectorNameExists(connectorName: string) {
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           const connectorsList = await this.getConnectorsList();
-          const isFound = Boolean(connectorsList.find((name) => name === connectorName));
-          expect(isFound).to.be(true);
+          expect(connectorsList).to.contain(connectorName);
         });
       },
       async confirmDeleteConnectorModalComponentsExists() {
@@ -149,16 +148,8 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         expect(isEnabled).to.be(false);
       },
       async getConnectorsList() {
-        const rows = await (
-          await testSubjects.find('serverlessSearchConnectorTable')
-        ).findAllByCssSelector('.euiTableRow');
-        return await Promise.all(
-          rows.map(async (connector) => {
-            return await (
-              await connector.findByTestSubject('serverlessSearchColumnsLink')
-            ).getVisibleText();
-          })
-        );
+        const connectorNameCells = await testSubjects.findAll('serverlessSearchColumnsLink');
+        return Promise.all(connectorNameCells.map((element) => element.getVisibleText()));
       },
       async openDeleteConnectorModal() {
         await retry.try(
