@@ -12,8 +12,8 @@ import type { CoverageOverviewMitreTechnique } from '../../../rule_management/mo
 import { getTotalRuleCount } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
-import { getCardBackgroundColor } from './helpers';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
+import { useCoverageColors } from './use_coverage_colors';
 import * as i18n from './translations';
 
 export interface CoverageOverviewMitreTechniquePanelProps {
@@ -34,11 +34,11 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   const {
     state: { filter },
   } = useCoverageOverviewDashboardContext();
+
+  const { getColorsForValue } = useCoverageColors();
+
   const totalRuleCount = getTotalRuleCount(technique, filter.activity);
-  const techniqueBackgroundColor = useMemo(
-    () => getCardBackgroundColor(totalRuleCount),
-    [totalRuleCount]
-  );
+  const techniqueColors = getColorsForValue(totalRuleCount);
 
   const handlePanelOnClick = useCallback(
     () => setIsPopoverOpen(!isPopoverOpen),
@@ -68,11 +68,12 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
     <EuiPanel
       data-test-subj="coverageOverviewTechniquePanel"
       className={css`
-        background: ${techniqueBackgroundColor};
+        background: ${techniqueColors?.backgroundColor};
+        color: ${techniqueColors?.textColor};
         width: ${coverageOverviewPanelWidth}px;
       `}
       hasShadow={false}
-      hasBorder={!techniqueBackgroundColor}
+      hasBorder={!techniqueColors}
       paddingSize="s"
       onClick={handlePanelOnClick}
       element="div"

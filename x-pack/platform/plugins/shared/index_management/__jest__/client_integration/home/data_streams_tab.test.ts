@@ -1162,30 +1162,30 @@ describe('Data Streams tab', () => {
   });
 
   describe('data stream privileges', () => {
+    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+    const dataStreamFullPermissions = createDataStreamPayload({
+      name: 'dataStreamFullPermissions',
+      privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+    });
+    const dataStreamNoDelete = createDataStreamPayload({
+      name: 'dataStreamNoDelete',
+      privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+    });
+    const dataStreamNoEditRetention = createDataStreamPayload({
+      name: 'dataStreamNoEditRetention',
+      privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+    });
+
+    const dataStreamNoPermissions = createDataStreamPayload({
+      name: 'dataStreamNoPermissions',
+      privileges: { delete_index: false, manage_data_stream_lifecycle: false },
+    });
+
     describe('delete', () => {
-      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
-      const dataStreamWithDelete = createDataStreamPayload({
-        name: 'dataStreamWithDelete',
-        privileges: { delete_index: true, manage_data_stream_lifecycle: true },
-      });
-      const dataStreamNoDelete = createDataStreamPayload({
-        name: 'dataStreamNoDelete',
-        privileges: { delete_index: false, manage_data_stream_lifecycle: true },
-      });
-      const dataStreamNoEditRetention = createDataStreamPayload({
-        name: 'dataStreamNoEditRetention',
-        privileges: { delete_index: true, manage_data_stream_lifecycle: false },
-      });
-
-      const dataStreamNoPermissions = createDataStreamPayload({
-        name: 'dataStreamNoPermissions',
-        privileges: { delete_index: false, manage_data_stream_lifecycle: false },
-      });
-
       beforeEach(async () => {
         setLoadDataStreamsResponse([
-          dataStreamWithDelete,
+          dataStreamFullPermissions,
           dataStreamNoDelete,
           dataStreamNoEditRetention,
           dataStreamNoPermissions,
@@ -1203,10 +1203,10 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
+          ['', 'dataStreamFullPermissions', 'green', '1', 'Standard', '7 days', 'Delete'],
           ['', 'dataStreamNoDelete', 'green', '1', 'Standard', '7 days', ''],
           ['', 'dataStreamNoEditRetention', 'green', '1', 'Standard', '7 days', 'Delete'],
           ['', 'dataStreamNoPermissions', 'green', '1', 'Standard', '7 days', ''],
-          ['', 'dataStreamWithDelete', 'green', '1', 'Standard', '7 days', 'Delete'],
         ]);
       });
 
@@ -1220,7 +1220,7 @@ describe('Data Streams tab', () => {
         clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
-        selectDataStream('dataStreamWithDelete', true);
+        selectDataStream('dataStreamFullPermissions', true);
         clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
@@ -1235,33 +1235,10 @@ describe('Data Streams tab', () => {
           find,
         } = testBed;
         setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
-        await clickNameAt(0);
-
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
-      });
-
-      test('hides edit data retention button if no permissions', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
         await clickNameAt(1);
 
         testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('editDataRetentionButton').exists()).toBeFalsy();
-      });
-
-      test('hides manage button if no permissions', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
-        await clickNameAt(2);
-
-        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
       });
 
       test('displays delete button in detail panel', async () => {
@@ -1269,11 +1246,110 @@ describe('Data Streams tab', () => {
           actions: { clickNameAt },
           find,
         } = testBed;
-        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
-        await clickNameAt(3);
+        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
+        await clickNameAt(0);
 
         testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeTruthy();
+      });
+    });
+
+    describe('edit data retention', () => {
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([
+          dataStreamFullPermissions,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
+
+        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('displays/hides bulk edit retention action depending on data streams privileges', async () => {
+        const {
+          actions: { selectDataStream, clickManageDataStreamsButton },
+          find,
+        } = testBed;
+
+        selectDataStream('dataStreamNoEditRetention', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamFullPermissions', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamNoEditRetention', false);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+      });
+
+      test('hides edit retention button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
+        await clickNameAt(2);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeFalsy();
+      });
+
+      test('displays edit retention button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamFullPermissions.name, dataStreamFullPermissions);
+        await clickNameAt(0);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeTruthy();
+      });
+    });
+
+    describe('with no permissions', () => {
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([
+          dataStreamFullPermissions,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
+
+        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('hides manage button in details panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+        await clickNameAt(3);
+
+        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('hides manage button for bulk actions', async () => {
+        const {
+          actions: { selectDataStream },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+
+        selectDataStream('dataStreamNoPermissions', true);
+        expect(find('dataStreamActionsPopoverButton').exists()).toBeFalsy();
       });
     });
   });

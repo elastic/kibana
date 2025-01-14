@@ -3666,6 +3666,60 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.removeAliases",
+        "type": "Function",
+        "tags": [],
+        "label": "removeAliases",
+        "description": [
+          "\nRemoves all but the specified alias from the concrete index(es) specified by said alias. Necessary when migrating an index to a data stream, as that index may only have one alias (name of data stream that going to be created)"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", alias: string) => Promise<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.removeAliases.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.removeAliases.$2",
+            "type": "string",
+            "tags": [],
+            "label": "alias",
+            "description": [
+              "The name of the alias to be preserved"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-common.removePolicyFromIndex",
         "type": "Function",
         "tags": [],

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import AdmZip from 'adm-zip';
-import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
-import { join as joinPath } from 'path';
+import AdmZip from 'adm-zip';
 import { dump } from 'js-yaml';
-import { NAME_REGEX_PATTERN } from '../../common/constants';
+import nunjucks from 'nunjucks';
+import { join as joinPath } from 'path';
 import type { DataStream, Integration } from '../../common';
+import { DATASTREAM_NAME_REGEX_PATTERN, NAME_REGEX_PATTERN } from '../../common/constants';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
+import { Field, flattenObjectsList } from '../util/samples';
 import { createAgentInput } from './agent';
+import { FORMAT_VERSION, KIBANA_MINIMUM_VERSION } from './constants';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 import { createReadme } from './readme_files';
-import { Field, flattenObjectsList } from '../util/samples';
 
 const initialVersion = '1.0.0';
 
@@ -48,15 +49,15 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
   const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
     const dataStreamName = dataStream.name;
-    if (!isValidName(dataStreamName)) {
+    if (!isValidDatastreamName(dataStreamName)) {
       throw new Error(
-        `Invalid datastream name: ${dataStreamName}, Should only contain letters, numbers and underscores`
+        `Invalid datastream name: ${dataStreamName}, Name must be at least 2 characters long and can only contain lowercase letters, numbers, and underscores`
       );
     }
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
     const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
-    createAgentInput(specificDataStreamDir, dataStream.inputTypes);
+    createAgentInput(specificDataStreamDir, dataStream.inputTypes, dataStream.celInput);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
     const fields = createFieldMapping(
       integration.name,
@@ -77,9 +78,15 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   removeDirSync(workingDir);
   return zipBuffer;
 }
+
 export function isValidName(input: string): boolean {
   return input.length > 0 && NAME_REGEX_PATTERN.test(input);
 }
+
+export function isValidDatastreamName(input: string): boolean {
+  return input.length > 0 && DATASTREAM_NAME_REGEX_PATTERN.test(input);
+}
+
 function createDirectories(
   workingDir: string,
   integration: Integration,
@@ -235,14 +242,14 @@ export function renderPackageManifestYAML(integration: Integration): string {
   const uniqueInputsList = Object.values(uniqueInputs);
 
   const packageData = createPackageManifestDict(
-    '3.1.4', // format_version
+    FORMAT_VERSION, // format_version
     integration.title, // package_title
     integration.name, // package_name
     initialVersion, // package_version
     integration.description, // package_description
     integration.logo, // package_logo
     '@elastic/custom-integrations', // package_owner
-    '^8.13.0', // min_version
+    KIBANA_MINIMUM_VERSION, // min_version
     uniqueInputsList // inputs
   );
 
