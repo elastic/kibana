@@ -89,7 +89,7 @@ export class ObservabilityOnboardingPlugin
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      keywords: [],
+      keywords: ['add data'],
       async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
@@ -116,7 +116,7 @@ export class ObservabilityOnboardingPlugin
           },
         });
       },
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
     });
 
     this.locators = {
