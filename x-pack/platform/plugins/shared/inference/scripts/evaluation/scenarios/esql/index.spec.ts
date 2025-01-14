@@ -140,7 +140,10 @@ async function evaluateEsqlQuery({
     esqlDescription: docBase.getSystemMessage(),
   });
 
-  const requestedDocumentation = docBase.getDocumentation(usedCommands);
+  const requestedDocumentation = docBase.getDocumentation(usedCommands, {
+    generateMissingKeywordDoc: false,
+  });
+  requestedDocumentation.commands_and_functions = docBase.getSystemMessage();
 
   const evaluation = await evaluationClient.evaluate({
     input: `
@@ -170,6 +173,447 @@ async function evaluateEsqlQuery({
 const buildTestDefinitions = (): Section[] => {
   const testDefinitions: Section[] = [
     {
+      title: 'ES|QL commands and functions usage',
+      tests: [
+        {
+          title: 'using FLOOR and CEIL',
+          question: `
+          The user is visualizing the "paris_distance" index.
+
+          Generate a query returning the 5 users closest to Paris,
+          and for each of them their id and the distance, rounded down and then rounded up.
+
+          You should use the FLOOR and CEIL functions to answer this question.
+
+          The relevant fields are:
+          - user_id: keyword
+          - distance: float - the distance between the user and Paris, in km
+          Note: there are other fields
+          `,
+          expected: `FROM paris_distance
+          | SORT distance ASC
+          | LIMIT 5
+          | EVAL distance_down = FLOOR(distance), distance_up = CEIL(distance)
+          | KEEP user_id, distance_down, distance_up`,
+        },
+        {
+          title: 'using MV_COUNT, MV_MAX, MV_MIN and MV_AVG',
+          question: `
+          The user is visualizing the "sets" index, representing sets of numbers.
+          Each row is composed of a set_id (identifier, unique per row), and of a **multi-valued** integer
+          field, "values"
+
+          Returns the 5 rows containing the most values, sorted by number of values,
+          and for each of them, return:
+           - their id
+           - the min element
+           - the max element
+           - the average of the elements
+
+          The relevant fields of this index are:
+          - set_id: keyword - the set unique identified
+          - values: multivalued integer field - the set values
+          Note: there are other fields
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM sets
+          | EVAL count = MV_COUNT(values)
+          | SORT count DESC
+          | LIMIT 5
+          | EVAL min = MV_MIN(values), max = MV_MAX(values), avg = MV_AVG(value)
+          | KEEP set_id, min, max, avg
+          """
+
+          The query **MUST** use MV_COUNT, MV_MIN, MV_MAX and MV_AVG and **NOT** use their aggregation equivalent
+          or STATS BY given the "values" field is multivalued. Not respecting this particular condition should totally fail the criteria.
+            `,
+          ],
+        },
+        {
+          title: 'using LENGTH, BIT_LENGTH, BYTE_LENGTH',
+          question: `
+          The user is visualizing the "messages" index, storing text messages
+          Each row is composed of a "message_id" (keyword, unique identifier), and of "content"
+          field (text, content of the message).
+
+          Returns the 10 messages that have the most characters, sorted by number of characters,
+          and for each of them, return the following:
+          - id of the message
+          - length in characters of the message
+          - length in bytes of the messages
+          - length in bits of the message
+
+          The relevant fields of this index are:
+          - message_id: keyword - the message unique identified
+          - content: text - content of the message
+          Note: there are no other fields
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM messages
+          | EVAL length = LENGTH(content), bytes = BYTE_LENGTH(content), bits = BIT_LENGTH(content)
+          | SORT length DESC
+          | LIMIT 10
+          """
+
+          In addition, the query **MUST**:
+          - use the LENGTH function
+          - use at least one of BIT_LENGTH and/or BYTE_LENGTH functions
+          - if only one of BIT_LENGTH or BYTE_LENGTH is used, properly do the conversion (1byte=8bits)
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using CIDR_MATCH and IP_PREFIX',
+          question: `
+          The user is visualizing the "proxy_logs" index, storing access logs entries
+
+          The relevant fields of this index are:
+          - @timestamp: date - the time of the access
+          - source_ip: ip - source of the access
+          - destination_ip: ip - destination of the access
+          - status: integer - status code of the response
+          Note: there are no other fields
+
+          Generate a query that shows the number of requests coming from the 192.168.5.0/8 subnet,
+          grouped by 8bits (/8) subnetworks of the destination IP and sorted by number of entries.
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM proxy_logs
+          | WHERE CIDR_MATCH(source_ip, "192.168.5.0/8")
+          | STATS count = COUNT(*) BY subnet = IP_PREFIX(destination_ip, 8, 0)
+          | SORT count DESC
+          """
+
+          In addition, the query **MUST**:
+          - use CIDR_MATCH in the WHERE clause
+          - use IP_PREFIX in a STATS aggregation
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using GREATEST and LEAST',
+          question: `
+          The user is visualizing the "number_tuple" index, representing a 3-tuple of number.
+
+          The relevant fields of this index are:
+          - bag_id: keyword - a unique identifier
+          - number_1: the first number of the tuple
+          - number_2: the second number of the tuple
+          - number_3: the third number of the tuple
+          Note: there are no other fields
+
+          Generate a query that shows, for each bag:
+          - the bag id
+          - the sum of the 3 numbers
+          - the highest of the 3 numbers
+          - the lowest of the 3 numbers
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM number_tuple
+          | EVAL sum = number_1 + number_2 + number_3, highest = GREATEST(number_1, number_2, number_3), lowest = LEAST(number_1, number_2, number_3)
+          | KEEP bag_id, sum, highest, lowest
+          """
+
+          In addition, the query **MUST**:
+          - use GREATEST
+          - use LEAST
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using MIN, MAX, MEDIAN, PERCENTILE',
+          question: `
+          The user is visualizing the "access_logs" index, representing access logs to some http server.
+
+          The relevant fields of this index are:
+          - @timestamp: the timestamp of the access
+          - status_code: the http status code
+          - response_time: the response time of the remote server
+          - response_length: the length of the response body, in bytes
+          Note: there are other fields
+
+          Generate a query that shows entries over the past 30 days and grouped by status code:
+          - the minimum response time
+          - the maximum response time
+          - the median response time
+          - the 90 percentile of the response time
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM access_logs
+          | WHERE @timestamp > NOW() - 30d
+          | STATS min=MIN(response_time), max=MAX(response_time), med=MEDIAN(response_time), p90=PERCENTILE(response_time, 90) BY status_code
+          | KEEP status_code, min, max, med, p90
+          """
+
+          In addition, the query **MUST**:
+          - use aggregations with STATS
+          - use MIN
+          - use MAX
+          - use MEDIAN
+          - use PERCENTILE
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using LOCATE',
+          question: `
+          The user is visualizing the "messages" index, representing text messages.
+
+          The relevant fields of this index are:
+          - @timestamp: the datetime the message was sent at
+          - message_id: the unique id of the message
+          - content: the text content of the message
+          Note: there are other fields
+
+          Generate a query that shows, for the 10 most recent messages containing the string "hello" in the content
+          - the message id
+          - the datetime the message was sent at
+          - the first position of the "hello" string in message content
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM messages
+          | WHERE content LIKE "*hello*"
+          | SORT @timestamp DESC
+          | LIMIT 10
+          | EVAL position=LOCATE(content, "hello")
+          | KEEP message_id, @timestamp, position
+          """
+
+          In addition, the query **MUST**:
+          - use one of LIKE, RLIKE or LOCATE for the WHERE clause
+          - use EVAL and not STATS
+          - use LOCATE to find the position of "hello"
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using TO_BASE64 and FROM_BASE64',
+          question: `
+          The user is visualizing the "messages" index, representing text messages.
+
+          The relevant fields of this index are:
+          - @timestamp: the datetime the message was sent at
+          - message_id: the unique id of the message
+          - content: the content of the message encoded as b64
+          Note: there are other fields
+
+          Generate a query that shows, for the 10 most recent messages:
+          - the message id, encoded as base64
+          - the datetime the message was sent at
+          - the message content, decoded from base64
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM messages
+          | SORT @timestamp DESC
+          | LIMIT 10
+          | EVAL id_encoded=TO_BASE64(message_id), content_decoded=FROM_BASE64(content)
+          | KEEP id_encoded, @timestamp, content_decoded
+          """
+
+          In addition, the query **MUST**:
+          - use TO_BASE64 to encode message_id
+          - use FROM_BASE64 to decode content
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using POW, PI, LOG and EXP',
+          question: `
+          The user is visualizing the "points" index, representing two dimension points.
+
+          The relevant fields of this index are:
+          - x: integer - the x position of the point
+          - y: integer - the y position of the point
+          Note: there are other fields
+
+          Generate a query returning, for all rows:
+          - x
+          - y
+          - x^pi
+          - log2(x)
+          - e^y
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM points
+          | EVAL pow=POW(x, PI()), log=LOG(2, x) exp=EXP(y)
+          | KEEP x, y, pow, log, exp
+          """
+
+          In addition, the query **MUST**:
+          - use POW and PI
+          - use LOG with the right base (2) as first parameter
+          - use EXP or E
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using CASE',
+          question: `
+          The user is visualizing the "sample_data" index.
+
+          The relevant fields of this index are:
+          - @timestamp: timestamp of the entry
+          - message: text - the log message
+          Note: there are other fields
+
+          Generate a query returning, for all rows:
+          - @timestamp
+          - message
+          - a column displaying:
+             - IF message contains "error" then "ERROR"
+             - ELIF message contains "http" then "NETWORK"
+             - ELSE  "UNKNOWN"
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM sample_data
+          | EVAL eval=CASE(message LIKE "*error*", "ERROR", message LIKE "*http*", "NETWORK", "UNKNOWN")
+          | KEEP @timestamp, message, eval
+          """
+
+          In addition, the query **MUST**:
+          - use CASE for the evaluated column
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using DATE_DIFF',
+          question: `
+          The user is visualizing the "personal_info" index.
+
+          The relevant fields of this index are:
+          - user_name: keyword - the name of the person
+          - birth_date: datetime - the person's birth date
+          - wedding_date: datetime - the person's wedding date if wed, null otherwise
+          Note: there are other fields
+
+          Generate a query returning, for the 15 older persons that got wed:
+          - their user name
+          - their age when they got wed
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM personal_info
+          | WHERE wedding_date IS NOT NULL
+          | LIMIT 15
+          | EVAL wedding_age=DATE_DIFF("years", birth_date, wedding_date)
+          | KEEP user_name, wedding_age
+          """
+
+          In addition, the query **MUST**:
+          - use DATE_DIFF or DATE_EXTRACT to evaluate the wedding age
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using DATE_EXTRACT',
+          question: `
+          The user is visualizing the "personal_info" index.
+
+          The relevant fields of this index are:
+          - user_name: keyword - the name of the person
+          - birth_date: datetime - the person's birth date
+
+          Generate a query returning, for the all entries in the index:
+          - their user name
+          - their year of birth
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM personal_info
+          | EVAL birth_year=DATE_EXTRACT("year", birth_date)
+          | KEEP user_name, birth_year
+          """
+
+          In addition, the query **MUST**:
+          - use DATE_EXTRACT or DATE_TRUNC to evaluate the year of birth with the parameters at the correct position
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using DATE_PARSE',
+          question: `
+          The user is visualizing the "personal_info" index.
+
+          The relevant fields of this index are:
+          - user_name: keyword - the name of the person
+          - birth_date: string - the person birth date as a string following the "yyyy-MM-dd" format, e.g. "1987-11-30"
+
+          Generate a query returning, for the all entries in the index, sorted by date of birth
+          - their user name
+          - their date of birth
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM personal_info
+          | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
+          | KEEP user_name, birth
+          | SORT birth
+          """
+
+          In addition, the query **MUST**:
+          - use DATE_PARSE with the correct format as first parameter ("yyyy-MM-dd")
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+      ],
+    },
+    {
       title: 'ES|QL query generation',
       tests: [
         {
@@ -197,13 +641,13 @@ const buildTestDefinitions = (): Section[] => {
         {
           title: 'Generates a query to show employees which have a palindrome as last name',
           question: `From the employees index, I want to find all employees with a palindrome as last name
-         (which can be read the same backward and forward), and then return their last name and first name
-      - last_name
-      - first_name`,
-          criteria: [
-            `The assistant should not provide an ES|QL query, and explicitly mention that there is no
-            way to check for palindromes using ES|QL.`,
-          ],
+      (which can be read the same backward and forward), and then return their last name and first name.
+      Assume the following fields:
+      - last_name: Last name of the employee (capitalized)
+      - first_name: First name of the employee (capitalized)`,
+          expected: `FROM employees
+        | WHERE TO_LOWER(last_name) == REVERSE(TO_LOWER(last_name))
+        | KEEP last_name, first_name`,
         },
         {
           title: 'Generates a query to show the top 10 domains by doc count',
@@ -268,7 +712,7 @@ const buildTestDefinitions = (): Section[] => {
       - message
       - level
       - @timestamp`,
-          expected: `│ FROM sample_logs
+          expected: `FROM sample_logs
       | WHERE source IN ("foo", "bar") AND LENGTH(message) > 62 AND message NOT LIKE "*dolly*" AND level == "INFO"
       | STATS COUNT(*) BY day = BUCKET(@timestamp, 1d)
       | SORT day ASC`,
