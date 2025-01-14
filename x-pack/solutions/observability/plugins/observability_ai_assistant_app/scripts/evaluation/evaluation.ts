@@ -26,7 +26,7 @@ import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
-export function runEvaluations() {
+function runEvaluations() {
   yargs(process.argv.slice(2))
     .command('*', 'Run AI Assistant evaluations', options, (argv) => {
       run(
@@ -308,3 +308,5 @@ export function runEvaluations() {
     })
     .parse();
 }
+
+runEvaluations();

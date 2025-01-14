@@ -7,6 +7,4 @@
 
 require('@kbn/babel-register').install();
 
-const evaluation = require('./evaluation');
-
-evaluation.runEvaluations();
+require('./evaluation');
