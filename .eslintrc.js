@@ -2077,6 +2077,8 @@ module.exports = {
         '**/__stories__/**/*',
         '**/mocks/**/*',
         '**/__mocks__/**/*',
+        '**/*.stories.test.tsx',
+        '**/*.stories.test.ts',
       ],
       rules: {
         // @storybook/addon-essentials contains many packages which are not defined in package.json
