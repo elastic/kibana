@@ -25,14 +25,16 @@ import {
 } from '@kbn/controls-plugin/common';
 import { SerializedSearchSourceFields, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { getReferencesForPanelId, prefixReferencesFromPanel } from '../../../common';
 import type {
   ControlGroupAttributes,
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
   DashboardOptions,
-  ItemAttrsToSavedObjectAttrsReturn,
+  ItemAttrsToSavedObjectReturn,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -131,24 +133,46 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
   };
 }
 
-function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
+function panelsOut(
+  panelsJSON: string,
+  references: SavedObjectReference[],
+  embeddable: EmbeddableStart
+): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON) as SavedDashboardPanel[];
   return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+    ({
+      embeddableConfig,
       gridData,
-      id,
-      panelConfig: embeddableConfig,
+      id: savedObjectId,
       panelIndex,
       panelRefName,
       title,
       type,
       version,
-    })
+    }) => {
+      const panelReferences = getReferencesForPanelId(panelIndex, references);
+      const { type: embeddableType, ...injectedAttributes } = embeddable.inject(
+        { type, savedObjectId, ...embeddableConfig },
+        panelReferences
+      );
+      return {
+        gridData,
+        id: savedObjectId,
+        panelConfig: injectedAttributes,
+        panelIndex,
+        panelRefName,
+        title,
+        type,
+        version,
+      };
+    }
   );
 }
 
 export function dashboardAttributesOut(
-  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
+  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
+  references: SavedObjectReference[],
+  embeddable: EmbeddableStart
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -171,7 +195,7 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: kibanaSavedObjectMetaOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: optionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: panelsOut(panelsJSON) }),
+    ...(panelsJSON && { panels: panelsOut(panelsJSON, references, embeddable) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
@@ -206,13 +230,31 @@ function controlGroupInputIn(
 }
 
 function panelsIn(
-  panels: DashboardAttributes['panels']
+  panels: DashboardAttributes['panels'],
+  embeddable: EmbeddableStart,
+  references: SavedObjectReference[],
+  incomingReferences?: SavedObjectReference[]
 ): DashboardSavedObjectAttributes['panelsJSON'] {
-  const updatedPanels = panels.map(({ panelIndex, gridData, panelConfig, ...restPanel }) => {
+  const updatedPanels = panels.map(({ panelIndex, gridData, type, panelConfig, ...restPanel }) => {
     const idx = panelIndex ?? uuidv4();
+    const updatedPanelConfig = incomingReferences
+      ? embeddable.inject(
+          {
+            type,
+            ...panelConfig,
+          },
+          getReferencesForPanelId(idx, incomingReferences)
+        )
+      : panelConfig;
+    const { state: extractedPanelConfig, references: panelReferences } = embeddable.extract({
+      type,
+      ...updatedPanelConfig,
+    });
+    references.push(...prefixReferencesFromPanel(idx, panelReferences));
     return {
       ...restPanel,
-      embeddableConfig: panelConfig,
+      type,
+      embeddableConfig: extractedPanelConfig,
       panelIndex: idx,
       gridData: {
         ...gridData,
@@ -274,9 +316,12 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   };
 };
 
-export const itemAttrsToSavedObjectAttrs = (
-  attributes: DashboardAttributes
-): ItemAttrsToSavedObjectAttrsReturn => {
+export const itemAttrsToSavedObject = (
+  attributes: DashboardAttributes,
+  embeddable: EmbeddableStart,
+  incomingReferences?: SavedObjectReference[]
+): ItemAttrsToSavedObjectReturn => {
+  const soReferences: SavedObjectReference[] = [];
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
     const soAttributes = {
@@ -288,15 +333,15 @@ export const itemAttrsToSavedObjectAttrs = (
         optionsJSON: JSON.stringify(options),
       }),
       ...(panels && {
-        panelsJSON: panelsIn(panels),
+        panelsJSON: panelsIn(panels, embeddable, soReferences, incomingReferences),
       }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes: soAttributes, error: null };
+    return { attributes: soAttributes, references: soReferences, error: null };
   } catch (e) {
-    return { attributes: null, error: e };
+    return { attributes: null, references: null, error: e };
   }
 };
 
@@ -317,12 +362,14 @@ export interface SavedObjectToItemOptions {
 
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: false,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: true,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<PartialDashboardItem>;
@@ -331,6 +378,7 @@ export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: boolean /* partial arg is used to enforce the correct savedObject type */,
   { allowedAttributes, allowedReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
@@ -344,15 +392,15 @@ export function savedObjectToItem(
     attributes,
     error,
     namespaces,
-    references,
+    references = [],
     version,
     managed,
   } = savedObject;
 
   try {
     const attributesOut = allowedAttributes
-      ? pick(dashboardAttributesOut(attributes), allowedAttributes)
-      : dashboardAttributesOut(attributes);
+      ? pick(dashboardAttributesOut(attributes, references, embeddable), allowedAttributes)
+      : dashboardAttributesOut(attributes, references, embeddable);
 
     // if includeReferences is provided, only include references of those types
     const referencesOut = allowedReferences

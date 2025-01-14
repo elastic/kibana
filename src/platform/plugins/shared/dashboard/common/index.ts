@@ -27,7 +27,11 @@ export {
   createExtract,
 } from './dashboard_container/persistable_state/dashboard_container_references';
 
-export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
+export {
+  prefixReferencesFromPanel,
+  getReferencesForControls,
+  getReferencesForPanelId,
+} from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
   convertPanelsArrayToPanelMap,
