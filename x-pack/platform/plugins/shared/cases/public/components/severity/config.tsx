@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useEuiTheme, EuiHealth } from '@elastic/eui';
+import { useEuiTheme, EuiHealth, type EuiThemeComputed } from '@elastic/eui';
 import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
@@ -30,27 +30,36 @@ export const severities = {
   },
 };
 
-export const SeverityHealth: React.FC<Props> = ({ severity }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const severityData = {
+export const getSeverityData = (euiTheme: EuiThemeComputed) => {
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+  return {
     low: {
-      color: euiTheme.flags.hasVisColorAdjustment ? '#54B399' : '#CAD3E2',
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorSeverity5,
       label: LOW,
     },
     medium: {
-      color: euiTheme.flags.hasVisColorAdjustment ? '#D6BF57' : '#FCD883',
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.vis.euiColorSeverity7,
       label: MEDIUM,
     },
     high: {
-      color: euiTheme.flags.hasVisColorAdjustment ? '#DA8B45' : '#FC9188',
+      color: isAmsterdam
+        ? euiTheme.colors.vis.euiColorVis7
+        : euiTheme.colors.vis.euiColorSeverity10,
       label: HIGH,
     },
     critical: {
-      color: euiTheme.flags.hasVisColorAdjustment ? '#E7664C' : '#C61E25',
+      color: isAmsterdam
+        ? euiTheme.colors.vis.euiColorVis9
+        : euiTheme.colors.vis.euiColorSeverity14,
       label: CRITICAL,
     },
   };
+};
+
+export const SeverityHealth: React.FC<Props> = ({ severity }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const severityData = getSeverityData(euiTheme);
 
   const { color, label } = severityData[severity];
 
