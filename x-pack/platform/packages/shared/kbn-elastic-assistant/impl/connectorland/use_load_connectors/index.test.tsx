@@ -8,6 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -45,17 +46,6 @@ const loadConnectorsResult = mockConnectors.map((c) => ({
   isSystemAction: false,
 }));
 
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
-    try {
-      const res = await fn();
-      return Promise.resolve(res);
-    } catch (e) {
-      opts.onError(e);
-    }
-  }),
-}));
-
 const http = {
   get: jest.fn().mockResolvedValue(connectorsApiResponse),
 };
@@ -63,24 +53,52 @@ const toasts = {
   addError: jest.fn(),
 };
 const defaultProps = { http, toasts } as unknown as Props;
+
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
   it('should call api to load action types', async () => {
-    renderHook(() => useLoadConnectors(defaultProps));
+    renderHook(() => useLoadConnectors(defaultProps), {
+      wrapper: TestProviders,
+    });
     await waitFor(() => {
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connectors');
       expect(toasts.addError).not.toHaveBeenCalled();
     });
   });
 
-  it('should return sorted action types, removing isMissingSecrets and wrong action type ids', async () => {
-    const { result } = renderHook(() => useLoadConnectors(defaultProps));
+  it('should return sorted action types, removing isMissingSecrets and wrong action type ids, excluding .inference results', async () => {
+    const { result } = renderHook(() => useLoadConnectors(defaultProps), {
+      wrapper: TestProviders,
+    });
     await waitFor(() => {
-      expect(result.current).resolves.toStrictEqual(
-        // @ts-ignore ts does not like config, but we define it in the mock data
-        loadConnectorsResult.map((c) => ({ ...c, apiProvider: c.config.apiProvider }))
+      expect(result.current.data).toStrictEqual(
+        loadConnectorsResult
+          .filter((c) => c.actionTypeId !== '.inference')
+          // @ts-ignore ts does not like config, but we define it in the mock data
+          .map((c) => ({ ...c, apiProvider: c.config.apiProvider }))
+      );
+    });
+  });
+
+  it('includes preconfigured .inference results when inferenceEnabled is true', async () => {
+    const { result } = renderHook(
+      () => useLoadConnectors({ ...defaultProps, inferenceEnabled: true }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => {
+      expect(result.current.data).toStrictEqual(
+        mockConnectors
+          .filter(
+            (c) =>
+              c.actionTypeId !== '.inference' ||
+              (c.actionTypeId === '.inference' && c.isPreconfigured)
+          )
+          // @ts-ignore ts does not like config, but we define it in the mock data
+          .map((c) => ({ ...c, referencedByCount: 0, apiProvider: c?.config?.apiProvider }))
       );
     });
   });
@@ -88,7 +106,9 @@ describe('useLoadConnectors', () => {
     const mockHttp = {
       get: jest.fn().mockRejectedValue(new Error('this is an error')),
     } as unknown as Props['http'];
-    renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
+    renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }), {
+      wrapper: TestProviders,
+    });
     await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

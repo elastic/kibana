@@ -10,11 +10,10 @@
 import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { ClusterHealth } from './cluster_health';
-import { getHeathBarLinearGradient } from './gradient';
+import { useHeathBarLinearGradient } from './gradient';
 
 interface Props {
   clusters: Record<string, estypes.ClusterDetails>;
@@ -25,6 +24,8 @@ export function ClustersHealth({ clusters }: Props) {
   let partial = 0;
   let skipped = 0;
   let failed = 0;
+  const { euiTheme } = useEuiTheme();
+
   Object.values(clusters).forEach((clusterDetails) => {
     if (clusterDetails.status === 'successful') {
       successful++;
@@ -76,11 +77,11 @@ export function ClustersHealth({ clusters }: Props) {
 
       <div
         css={css`
-          background: ${getHeathBarLinearGradient(successful, partial, skipped, failed)};
-          border-radius: ${euiThemeVars.euiBorderRadiusSmall};
-          height: ${euiThemeVars.euiSizeS};
-          margin-top: ${euiThemeVars.euiSizeXS};
-          margin-bottom: ${euiThemeVars.euiSizeS};
+          background: ${useHeathBarLinearGradient(successful, partial, skipped, failed)};
+          border-radius: ${euiTheme.border.radius.small};
+          height: ${euiTheme.size.s};
+          margin-top: ${euiTheme.size.xs};
+          margin-bottom: ${euiTheme.size.s};
         `}
       />
     </>
