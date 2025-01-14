@@ -7,11 +7,13 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { defineQueryRolesRoutes } from './query';
+import { API_VERSIONS } from '../../../../common/constants';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 interface TestOptions {
@@ -143,13 +145,18 @@ describe('Query roles', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const versionedRouterMock = mockRouteDefinitionParams.router
+        .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
       mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue(features);
       mockRouteDefinitionParams.subFeaturePrivilegeIterator =
         featuresPluginMock.createSetup().subFeaturePrivilegeIterator;
 
       defineQueryRolesRoutes(mockRouteDefinitionParams);
-      const [[, routeHandler]] = mockRouteDefinitionParams.router.post.mock.calls;
+      const { handler: routeHandler } = versionedRouterMock.getRoute(
+        'post',
+        '/api/security/role/_query'
+      ).versions[API_VERSIONS.roles.public.v1];
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {

@@ -39,6 +39,7 @@ export class RolesAPIClient {
 
   public queryRoles = async (params?: QueryRoleParams) => {
     return await this.http.post<QueryRolesResult>(`/api/security/role/_query`, {
+      version,
       body: JSON.stringify(params || {}),
     });
   };

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '../..';
+import { API_VERSIONS } from '../../../../common/constants';
 import { transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -24,119 +25,130 @@ export function defineQueryRolesRoutes({
   logger,
   buildFlavor,
 }: RouteDefinitionParams) {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: '/api/security/role/_query',
+      access: 'public',
+      summary: `Query roles`,
       options: {
-        summary: `Query roles`,
-        access: 'public',
         tags: ['oas-tags:roles'],
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.roles.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Core's scoped ES cluster client`,
+          },
+        },
+        validate: {
+          request: {
+            body: schema.object({
+              query: schema.maybe(schema.string()),
+              from: schema.maybe(schema.number()),
+              size: schema.maybe(schema.number()),
+              sort: schema.maybe(
+                schema.object({
+                  field: schema.string(),
+                  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+                })
+              ),
+              filters: schema.maybe(
+                schema.object({
+                  showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
+                })
+              ),
+            }),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
+          },
         },
       },
-      validate: {
-        body: schema.object({
-          query: schema.maybe(schema.string()),
-          from: schema.maybe(schema.number()),
-          size: schema.maybe(schema.number()),
-          sort: schema.maybe(
-            schema.object({
-              field: schema.string(),
-              direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-            })
-          ),
-          filters: schema.maybe(
-            schema.object({
-              showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
-            })
-          ),
-        }),
-      },
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client;
-        const features = await getFeatures();
+      createLicensedRouteHandler(async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client;
+          const features = await getFeatures();
 
-        const { query, size, from, sort, filters } = request.body;
+          const { query, size, from, sort, filters } = request.body;
 
-        let showReservedRoles = filters?.showReservedRoles;
+          let showReservedRoles = filters?.showReservedRoles;
 
-        if (buildFlavor === 'serverless') {
-          showReservedRoles = false;
-        }
+          if (buildFlavor === 'serverless') {
+            showReservedRoles = false;
+          }
 
-        const queryPayload: {
-          bool: {
-            must: QueryClause[];
-            should: QueryClause[];
-            must_not: QueryClause[];
-            minimum_should_match?: number;
-          };
-        } = { bool: { must: [], should: [], must_not: [] } };
-
-        const nonReservedRolesQuery = [
-          {
+          const queryPayload: {
             bool: {
-              must_not: {
-                exists: {
-                  field: 'metadata._reserved',
+              must: QueryClause[];
+              should: QueryClause[];
+              must_not: QueryClause[];
+              minimum_should_match?: number;
+            };
+          } = { bool: { must: [], should: [], must_not: [] } };
+
+          const nonReservedRolesQuery = [
+            {
+              bool: {
+                must_not: {
+                  exists: {
+                    field: 'metadata._reserved',
+                  },
                 },
               },
             },
-          },
-        ];
-        queryPayload.bool.should.push(...nonReservedRolesQuery);
-        queryPayload.bool.minimum_should_match = 1;
+          ];
+          queryPayload.bool.should.push(...nonReservedRolesQuery);
+          queryPayload.bool.minimum_should_match = 1;
 
-        if (query) {
-          queryPayload.bool.must.push({
-            wildcard: {
-              name: {
-                value: `*${query}*`,
+          if (query) {
+            queryPayload.bool.must.push({
+              wildcard: {
+                name: {
+                  value: `*${query}*`,
+                },
               },
+            });
+          }
+
+          if (showReservedRoles) {
+            queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
+          }
+
+          const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
+
+          const queryRoles = await esClient.asCurrentUser.security.queryRole({
+            query: queryPayload,
+            from,
+            size,
+            sort: transformedSort,
+          });
+
+          const transformedRoles = (queryRoles.roles || []).map((role) =>
+            transformElasticsearchRoleToRole({
+              features,
+              // @ts-expect-error `remote_cluster` is not known in `Role` type
+              elasticsearchRole: role,
+              name: role.name,
+              application: authz.applicationName,
+              logger,
+            })
+          );
+
+          return response.ok<QueryRolesResult>({
+            body: {
+              roles: transformedRoles,
+              count: queryRoles.count,
+              total: queryRoles.total,
             },
           });
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
         }
-
-        if (showReservedRoles) {
-          queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
-        }
-
-        const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
-
-        const queryRoles = await esClient.asCurrentUser.security.queryRole({
-          query: queryPayload,
-          from,
-          size,
-          sort: transformedSort,
-        });
-
-        const transformedRoles = (queryRoles.roles || []).map((role) =>
-          transformElasticsearchRoleToRole({
-            features,
-            // @ts-expect-error `remote_cluster` is not known in `Role` type
-            elasticsearchRole: role,
-            name: role.name,
-            application: authz.applicationName,
-            logger,
-          })
-        );
-
-        return response.ok<QueryRolesResult>({
-          body: {
-            roles: transformedRoles,
-            count: queryRoles.count,
-            total: queryRoles.total,
-          },
-        });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
-      }
-    })
-  );
+      })
+    );
 }
