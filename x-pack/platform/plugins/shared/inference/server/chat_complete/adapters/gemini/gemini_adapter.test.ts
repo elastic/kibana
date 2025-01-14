@@ -32,6 +32,7 @@ describe('geminiAdapter', () => {
       tools: params.tools,
       toolConfig: params.toolConfig,
       systemInstruction: params.systemInstruction,
+      temperature: params.temperature,
     };
   }
 
@@ -498,6 +499,23 @@ describe('geminiAdapter', () => {
         subAction: 'invokeStream',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
+        }),
+      });
+    });
+
+    it('propagates the temperature parameter', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.6,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          temperature: 0.6,
         }),
       });
     });

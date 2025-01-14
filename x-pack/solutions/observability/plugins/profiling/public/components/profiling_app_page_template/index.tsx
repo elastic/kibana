@@ -12,7 +12,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -116,7 +115,6 @@ export function ProfilingAppPageTemplate({
           <EuiFlexItem grow={false}>
             <EuiPanel hasShadow={false} color="subdued">
               <PrimaryProfilingSearchBar />
-              <EuiHorizontalRule />
             </EuiPanel>
           </EuiFlexItem>
         )}
