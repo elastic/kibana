@@ -189,7 +189,27 @@ export const GenerateServiceTokenResponseSchema = schema.object({
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
+  router.versioned
+    .get({
+      path: '/internal/fleet/telemetry/usage',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      getTelemetryUsageHandler
+    );
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       .post({
@@ -287,4 +307,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       generateServiceTokenHandler
     );
+};
+const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, response) => {
+  const fetchUsage = appContextService.getFetchUsage();
+  if (!fetchUsage) {
+    throw new Error('Fetch usage is not initialized.');
+  }
+  const usage = await fetchUsage(new AbortController());
+
+  return response.ok({
+    body: {
+      usage,
+    },
+  });
 };
