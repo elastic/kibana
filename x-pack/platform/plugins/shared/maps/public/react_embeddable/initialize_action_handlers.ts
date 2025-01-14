@@ -33,7 +33,7 @@ export function initializeActionHandlers(getApi: () => MapApi | undefined) {
         ...getActionContext(),
         filters,
       };
-      const action = getUiActions().getAction(actionId);
+      const action = await getUiActions().getAction(actionId);
       if (!action) {
         throw new Error('Unable to apply filter, could not locate action');
       }
@@ -60,8 +60,8 @@ export function initializeActionHandlers(getApi: () => MapApi | undefined) {
       );
       return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
     },
-    onSingleValueTrigger: (actionId: string, key: string, value: RawValue) => {
-      const action = getUiActions().getAction(actionId);
+    onSingleValueTrigger: async (actionId: string, key: string, value: RawValue) => {
+      const action = await getUiActions().getAction(actionId);
       if (!action) {
         throw new Error('Unable to apply action, could not locate action');
       }
