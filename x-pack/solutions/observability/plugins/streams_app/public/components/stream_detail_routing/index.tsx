@@ -39,6 +39,7 @@ import {
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { DraggableProvided } from '@hello-pangea/dnd';
+import { IToasts, Toast } from '@kbn/core/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -50,10 +51,31 @@ import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { AssetImage } from '../asset_image';
 
-function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) {
-  const [childUnderEdit, setChildUnderEdit] = React.useState<
-    { isNew: boolean; child: StreamChild } | undefined
-  >();
+interface ChildUnderEdit {
+  isNew: boolean;
+  child: StreamChild;
+}
+
+function useRoutingState({
+  definition,
+  toasts,
+}: {
+  definition?: ReadStreamDefinition;
+  toasts: IToasts;
+}) {
+  const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
+
+  const [childUnderEdit, setChildUnderEdit] = React.useState<ChildUnderEdit | undefined>();
+
+  const selectChildUnderEdit = useCallback(
+    (child: ChildUnderEdit | undefined) => {
+      if (lastDisplayedToast) {
+        toasts.remove(lastDisplayedToast.id);
+      }
+      setChildUnderEdit(child);
+    },
+    [lastDisplayedToast, toasts]
+  );
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
   const [childStreams, setChildStreams] = React.useState<
@@ -76,6 +98,9 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
 
   const onChildStreamDragEnd = useCallback(
     (event: DropResult) => {
+      if (lastDisplayedToast) {
+        toasts.remove(lastDisplayedToast.id);
+      }
       setDraggingChildStream(undefined);
       if (typeof event.source.index === 'number' && typeof event.destination?.index === 'number') {
         setChildStreams([
@@ -83,7 +108,7 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
         ]);
       }
     },
-    [childStreams]
+    [childStreams, lastDisplayedToast, toasts]
   );
 
   const cancelChanges = useCallback(() => {
@@ -97,9 +122,10 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   return {
+    setLastDisplayedToast,
     debouncedChildUnderEdit,
     childUnderEdit,
-    setChildUnderEdit,
+    selectChildUnderEdit,
     saveInProgress,
     setSaveInProgress,
     showDeleteModal,
@@ -122,7 +148,7 @@ export function StreamDetailRouting({
 }) {
   const { appParams, core } = useKibana();
   const theme = useEuiTheme().euiTheme;
-  const routingAppState = useRoutingState({ definition });
+  const routingAppState = useRoutingState({ definition, toasts: core.notifications.toasts });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
@@ -149,7 +175,7 @@ export function StreamDetailRouting({
       {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
         <StreamDeleteModal
           closeModal={closeModal}
-          clearChildUnderEdit={() => routingAppState.setChildUnderEdit(undefined)}
+          clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
           id={routingAppState.childUnderEdit.child.name}
         />
@@ -316,21 +342,23 @@ function ControlBar({
       }
 
       routingAppState.setSaveInProgress(false);
-      notifications.toasts.addSuccess({
+      const toast = notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
           defaultMessage: 'Stream saved',
         }),
       });
-      routingAppState.setChildUnderEdit(undefined);
+      routingAppState.setLastDisplayedToast(toast);
+      routingAppState.selectChildUnderEdit(undefined);
       refreshDefinition();
     } catch (error) {
       routingAppState.setSaveInProgress(false);
-      notifications.toasts.addError(error, {
+      const toast = notifications.toasts.addError(error, {
         title: i18n.translate('xpack.streams.failedToSave', {
           defaultMessage: 'Failed to save',
         }),
         toastMessage: 'body' in error ? error.body.message : error.message,
       });
+      routingAppState.setLastDisplayedToast(toast);
     }
   }
 
@@ -579,7 +607,7 @@ function ChildStreamList({
   definition,
   routingAppState: {
     childUnderEdit,
-    setChildUnderEdit,
+    selectChildUnderEdit,
     childStreams,
     onChildStreamDragEnd,
     onChildStreamDragStart,
@@ -644,13 +672,13 @@ function ChildStreamList({
                           edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
                           onEditStateChange={() => {
                             if (child.name === childUnderEdit?.child.name) {
-                              setChildUnderEdit(undefined);
+                              selectChildUnderEdit(undefined);
                             } else {
-                              setChildUnderEdit({ isNew: false, child });
+                              selectChildUnderEdit({ isNew: false, child });
                             }
                           }}
                           onChildChange={(newChild) => {
-                            setChildUnderEdit({
+                            selectChildUnderEdit({
                               isNew: false,
                               child: newChild,
                             });
@@ -670,10 +698,10 @@ function ChildStreamList({
               child={childUnderEdit.child}
               onChildChange={(newChild) => {
                 if (!newChild) {
-                  setChildUnderEdit(undefined);
+                  selectChildUnderEdit(undefined);
                   return;
                 }
-                setChildUnderEdit({
+                selectChildUnderEdit({
                   isNew: true,
                   child: newChild,
                 });
@@ -687,7 +715,7 @@ function ChildStreamList({
                 iconType="plus"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={() => {
-                  setChildUnderEdit({
+                  selectChildUnderEdit({
                     isNew: true,
                     child: {
                       name: `${definition.name}.child`,
