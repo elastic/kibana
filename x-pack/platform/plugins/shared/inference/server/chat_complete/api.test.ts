@@ -84,6 +84,7 @@ describe('createChatCompleteApi', () => {
     await chatComplete({
       connectorId: 'connectorId',
       messages: [{ role: MessageRole.User, content: 'question' }],
+      temperature: 0.7,
     });
 
     expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
@@ -91,6 +92,7 @@ describe('createChatCompleteApi', () => {
       messages: [{ role: MessageRole.User, content: 'question' }],
       executor: inferenceExecutor,
       logger,
+      temperature: 0.7,
     });
   });
 
