@@ -36,15 +36,16 @@ export interface RetrieveDocumentationParams {
   maxDocumentTokens?: number;
   /**
    * The token reduction strategy to apply for documents exceeding max token count.
-   * - truncate: Will keep the N first tokens
-   * - summarize: Will call the LLM asking to generate a contextualized summary of the document
+   * - "highlight": Use Elasticsearch semantic highlighter to build a summary (concatenating highlights)
+   * - "truncate": Will keep the N first tokens
+   * - "summarize": Will call the LLM asking to generate a contextualized summary of the document
    *
-   * Overall, `summarize` is way more efficient, but significantly slower, given that an additional
+   * Overall, `summarize` is more efficient, but significantly slower, given that an additional
    * LLM call will be performed.
    *
-   * Defaults to `summarize`
+   * Defaults to `highlight`
    */
-  tokenReductionStrategy?: 'truncate' | 'summarize';
+  tokenReductionStrategy?: 'highlight' | 'truncate' | 'summarize';
   /**
    * The request that initiated the task.
    */
@@ -53,6 +54,9 @@ export interface RetrieveDocumentationParams {
    * Id of the LLM connector to use for the task.
    */
   connectorId: string;
+  /**
+   * Optional functionCalling parameter to pass down to the inference APIs.
+   */
   functionCalling?: FunctionCallingMode;
 }
 
@@ -60,6 +64,7 @@ export interface RetrievedDocument {
   title: string;
   url: string;
   content: string;
+  summarized: boolean;
 }
 
 export interface RetrieveDocumentationResult {
