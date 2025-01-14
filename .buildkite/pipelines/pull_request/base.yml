@@ -55,7 +55,7 @@ steps:
       preemptible: true
       diskSizeGb: 75
     key: linting
-    timeout_in_minutes: 60
+    timeout_in_minutes: 360
     retry:
       automatic:
         - exit_status: '-1'
