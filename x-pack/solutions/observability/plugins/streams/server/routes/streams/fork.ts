@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isWiredStream, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  conditionSchema,
+  isChildOf,
+  isWiredReadStream,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -17,7 +22,6 @@ import {
 import { createServerRoute } from '../create_server_route';
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { isChildOf } from '../../lib/streams/helpers/hierarchy';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
@@ -51,14 +55,14 @@ export const forkStreamsRoute = createServerRoute({
 
       validateCondition(params.body.condition);
 
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
       const rootDefinition = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
 
-      if (!isWiredStream(rootDefinition)) {
+      if (!isWiredReadStream(rootDefinition)) {
         throw new MalformedStreamId('Cannot fork a stream that is not managed');
       }
 
@@ -76,7 +80,7 @@ export const forkStreamsRoute = createServerRoute({
         );
       }
 
-      if (!isChildOf(rootDefinition, childDefinition)) {
+      if (!isChildOf(rootDefinition.name, childDefinition.name)) {
         throw new MalformedStreamId(
           `The ID (${params.body.stream.name}) from the new stream must start with the parent's id (${rootDefinition.name}), followed by a dot and a name`
         );
@@ -91,6 +95,7 @@ export const forkStreamsRoute = createServerRoute({
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: childDefinition,
         rootDefinition,
         logger,
@@ -103,6 +108,7 @@ export const forkStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: rootDefinition,
         rootDefinition,
         logger,
