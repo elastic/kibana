@@ -661,10 +661,14 @@ export const UnifiedDataTable = ({
         rows={rows}
         dataView={dataView}
         fieldFormats={fieldFormats}
+        scrollToRow={(rowIndex) =>
+          // TODO: scroll to the column too?
+          dataGridRef.current?.scrollToItem?.({ rowIndex, columnIndex: 0, align: 'start' })
+        }
         onChange={setUISearchTerm}
       />
     );
-  }, [uiSearchTerm, setUISearchTerm, rows, dataView, fieldFormats, visibleColumns]);
+  }, [uiSearchTerm, setUISearchTerm, rows, dataView, fieldFormats, visibleColumns, dataGridRef]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({

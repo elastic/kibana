@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldSearch } from '@elastic/eui';
+import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -20,6 +20,7 @@ export interface SearchControlProps {
   rows: DataTableRecord[];
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
+  scrollToRow: (rowIndex: number) => void;
   onChange: (searchTerm: string | undefined) => void;
 }
 
@@ -29,15 +30,18 @@ export const SearchControl: React.FC<SearchControlProps> = ({
   rows,
   dataView,
   fieldFormats,
+  scrollToRow,
   onChange,
 }) => {
-  const { matchesCount, isProcessing } = useFindSearchMatches({
-    visibleColumns,
-    rows,
-    uiSearchTerm,
-    dataView,
-    fieldFormats,
-  });
+  const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
+    useFindSearchMatches({
+      visibleColumns,
+      rows,
+      uiSearchTerm,
+      dataView,
+      fieldFormats,
+      scrollToRow,
+    });
 
   // TODO: needs debouncing
   const onChangeUiSearchTerm = useCallback(
@@ -53,7 +57,25 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       compressed
       isClearable
       isLoading={isProcessing}
-      append={matchesCount || undefined}
+      append={
+        matchesCount ? (
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
+            {/* TODO: disabled states */}
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="arrowUp"
+                aria-label="Previous match"
+                onClick={goToPrevMatch}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* TODO: i18n */}
+              <EuiButtonIcon iconType="arrowDown" aria-label="Next match" onClick={goToNextMatch} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : undefined
+      }
       placeholder="Search in the table" // TODO: i18n
       value={uiSearchTerm}
       onChange={onChangeUiSearchTerm}

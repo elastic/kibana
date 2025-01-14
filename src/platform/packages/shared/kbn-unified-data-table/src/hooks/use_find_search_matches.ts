@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -21,11 +21,15 @@ export interface UseFindSearchMatchesProps {
   uiSearchTerm: string | undefined;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
+  scrollToRow: (rowIndex: number) => void;
 }
 
 export interface UseFindSearchMatchesReturn {
   matchesCount: number;
+  activeMatchPosition: number;
   isProcessing: boolean;
+  goToPrevMatch: () => void;
+  goToNextMatch: () => void;
 }
 
 export const useFindSearchMatches = ({
@@ -34,15 +38,18 @@ export const useFindSearchMatches = ({
   uiSearchTerm,
   dataView,
   fieldFormats,
+  scrollToRow,
 }: UseFindSearchMatchesProps): UseFindSearchMatchesReturn => {
   const [matchesMap, setMatchesMap] = useState<MatchesMap>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
+  const [activeMatchPosition, setActiveMatchPosition] = useState<number>(1);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   useEffect(() => {
     if (!rows?.length || !uiSearchTerm?.length) {
       setMatchesMap(DEFAULT_MATCHES);
       setMatchesCount(0);
+      setActiveMatchPosition(1);
       return;
     }
 
@@ -79,10 +86,12 @@ export const useFindSearchMatches = ({
 
     setMatchesMap(totalMatchesCount > 0 ? result : DEFAULT_MATCHES);
     setMatchesCount(totalMatchesCount);
+    setActiveMatchPosition(1);
     setIsProcessing(false);
   }, [
     setMatchesMap,
     setMatchesCount,
+    setActiveMatchPosition,
     setIsProcessing,
     visibleColumns,
     rows,
@@ -91,8 +100,60 @@ export const useFindSearchMatches = ({
     fieldFormats,
   ]);
 
+  const scrollToMatch = useCallback(
+    (matchPosition: number) => {
+      const rowIndices = Object.keys(matchesMap);
+      let traversedMatchesCount = 0;
+
+      for (const rowIndex of rowIndices) {
+        const matchesPerFieldName = matchesMap[rowIndex];
+        const fieldNames = Object.keys(matchesPerFieldName);
+
+        for (const fieldName of fieldNames) {
+          const matchesCountForFieldName = matchesPerFieldName[fieldName];
+
+          if (
+            traversedMatchesCount < matchPosition &&
+            traversedMatchesCount + matchesCountForFieldName >= matchPosition
+          ) {
+            scrollToRow(Number(rowIndex));
+            return;
+          }
+
+          traversedMatchesCount += matchesCountForFieldName;
+        }
+      }
+    },
+    [matchesMap, scrollToRow]
+  );
+
+  const goToPrevMatch = useCallback(() => {
+    setActiveMatchPosition((prev) => {
+      if (prev - 1 < 1) {
+        return prev;
+      }
+      const nextMatchPosition = prev - 1;
+      scrollToMatch(nextMatchPosition);
+      return nextMatchPosition;
+    });
+  }, [setActiveMatchPosition, scrollToMatch]);
+
+  const goToNextMatch = useCallback(() => {
+    setActiveMatchPosition((prev) => {
+      if (prev + 1 > matchesCount) {
+        return prev;
+      }
+      const nextMatchPosition = prev + 1;
+      scrollToMatch(nextMatchPosition);
+      return nextMatchPosition;
+    });
+  }, [setActiveMatchPosition, scrollToMatch, matchesCount]);
+
   return {
     matchesCount,
+    activeMatchPosition,
+    goToPrevMatch,
+    goToNextMatch,
     isProcessing,
   };
 };
