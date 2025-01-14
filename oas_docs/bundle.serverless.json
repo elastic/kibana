@@ -9279,6 +9279,30 @@
                             },
                             "type": "array"
                           },
+                          "agentless": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "resources": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "cpu": {
+                                        "type": "string"
+                                      },
+                                      "memory": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "agents": {
                             "type": "number"
                           },
@@ -9848,24 +9872,6 @@
                               }
                             ]
                           },
-                          "resources": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "requests": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "cpu": {
-                                    "type": "string"
-                                  },
-                                  "memory": {
-                                    "type": "string"
-                                  }
-                                },
-                                "type": "object"
-                              }
-                            },
-                            "type": "object"
-                          },
                           "revision": {
                             "type": "number"
                           },
@@ -10056,6 +10062,30 @@
                     },
                     "type": "array"
                   },
+                  "agentless": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "type": "string"
+                              },
+                              "memory": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "data_output_id": {
                     "nullable": true,
                     "type": "string"
@@ -10222,24 +10252,6 @@
                     "nullable": true,
                     "type": "object"
                   },
-                  "resources": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "requests": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "cpu": {
-                            "type": "string"
-                          },
-                          "memory": {
-                            "type": "string"
-                          }
-                        },
-                        "type": "object"
-                      }
-                    },
-                    "type": "object"
-                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -10327,6 +10339,30 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
                         },
                         "agents": {
                           "type": "number"
@@ -10897,24 +10933,6 @@
                             }
                           ]
                         },
-                        "resources": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "requests": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "cpu": {
-                                  "type": "string"
-                                },
-                                "memory": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "type": "object"
-                        },
                         "revision": {
                           "type": "number"
                         },
@@ -11130,6 +11148,30 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "agentless": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "resources": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "cpu": {
+                                        "type": "string"
+                                      },
+                                      "memory": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
                           },
                           "agents": {
                             "type": "number"
@@ -11699,24 +11741,6 @@
                                 "type": "array"
                               }
                             ]
-                          },
-                          "resources": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "requests": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "cpu": {
-                                    "type": "string"
-                                  },
-                                  "memory": {
-                                    "type": "string"
-                                  }
-                                },
-                                "type": "object"
-                              }
-                            },
-                            "type": "object"
                           },
                           "revision": {
                             "type": "number"
@@ -12170,6 +12194,30 @@
                           },
                           "type": "array"
                         },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -12738,24 +12786,6 @@
                               "type": "array"
                             }
                           ]
-                        },
-                        "resources": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "requests": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "cpu": {
-                                  "type": "string"
-                                },
-                                "memory": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "type": "object"
                         },
                         "revision": {
                           "type": "number"
@@ -12945,6 +12975,30 @@
                     },
                     "type": "array"
                   },
+                  "agentless": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "type": "string"
+                              },
+                              "memory": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "data_output_id": {
                     "nullable": true,
                     "type": "string"
@@ -13111,24 +13165,6 @@
                     "nullable": true,
                     "type": "object"
                   },
-                  "resources": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "requests": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "cpu": {
-                            "type": "string"
-                          },
-                          "memory": {
-                            "type": "string"
-                          }
-                        },
-                        "type": "object"
-                      }
-                    },
-                    "type": "object"
-                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -13216,6 +13252,30 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
                         },
                         "agents": {
                           "type": "number"
@@ -13785,24 +13845,6 @@
                               "type": "array"
                             }
                           ]
-                        },
-                        "resources": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "requests": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "cpu": {
-                                  "type": "string"
-                                },
-                                "memory": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "type": "object"
                         },
                         "revision": {
                           "type": "number"
@@ -14020,6 +14062,30 @@
                           },
                           "type": "array"
                         },
+                        "agentless": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "resources": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "requests": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "cpu": {
+                                      "type": "string"
+                                    },
+                                    "memory": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -14588,24 +14654,6 @@
                               "type": "array"
                             }
                           ]
-                        },
-                        "resources": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "requests": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "cpu": {
-                                  "type": "string"
-                                },
-                                "memory": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "type": "object"
                         },
                         "revision": {
                           "type": "number"

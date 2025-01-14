@@ -211,10 +211,10 @@ const getAdditionalAgentlessPolicyInfo = (
     ? {}
     : {
         agentless: agentlessInfo?.resources
-        ? {
-            resources: agentlessInfo?.resources,
-          }
-        : {},
+          ? {
+              resources: agentlessInfo?.resources,
+            }
+          : {},
         global_data_tags: agentlessInfo
           ? [
               {
