@@ -38,8 +38,9 @@ import {
   ReadStreamDefinition,
   WiredStreamConfigDefinition,
   isRoot,
-  isDescendandOf,
+  isDescendantOf,
 } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -124,6 +125,7 @@ export function StreamDetailRouting({
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
+  const { appParams, core } = useKibana();
   const theme = useEuiTheme().euiTheme;
   const routingAppState = useRoutingState({ definition });
 
@@ -145,6 +147,14 @@ export function StreamDetailRouting({
   );
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges:
+      Boolean(routingAppState.childUnderEdit) || routingAppState.hasChildStreamsOrderChanged,
+    history: appParams.history,
+    http: core.http,
+    navigateToUrl: core.application.navigateToUrl,
+    openConfirm: core.overlays.openConfirm,
+  });
 
   if (!definition) {
     return null;
@@ -671,44 +681,48 @@ function ChildStreamList({
         <CurrentStreamEntry definition={definition} />
         <EuiDragDropContext onDragEnd={onChildStreamDragEnd} onDragStart={onChildStreamDragStart}>
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
-            {childStreams.map((child, i) => (
-              <EuiDraggable
-                key={child.name}
-                index={i}
-                draggableId={child.name}
-                hasInteractiveChildren={true}
-                customDragHandle={true}
-                spacing="none"
-              >
-                {(provided) => (
-                  <NestedView key={i} isBeingDragged={draggingChildStream === child.name}>
-                    <RoutingStreamEntry
-                      availableStreams={availableStreams}
-                      draggableProvided={provided}
-                      child={
-                        !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
-                          ? childUnderEdit.child
-                          : child
-                      }
-                      edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
-                      onEditStateChange={() => {
-                        if (child.name === childUnderEdit?.child.name) {
-                          setChildUnderEdit(undefined);
-                        } else {
-                          setChildUnderEdit({ isNew: false, child });
-                        }
-                      }}
-                      onChildChange={(newChild) => {
-                        setChildUnderEdit({
-                          isNew: false,
-                          child: newChild,
-                        });
-                      }}
-                    />
-                  </NestedView>
-                )}
-              </EuiDraggable>
-            ))}
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {childStreams.map((child, i) => (
+                <EuiFlexItem key={`${child.name}-${i}-flex-item`} grow={false}>
+                  <EuiDraggable
+                    key={child.name}
+                    index={i}
+                    draggableId={child.name}
+                    hasInteractiveChildren={true}
+                    customDragHandle={true}
+                    spacing="none"
+                  >
+                    {(provided) => (
+                      <NestedView key={i} isBeingDragged={draggingChildStream === child.name}>
+                        <RoutingStreamEntry
+                          draggableProvided={provided}
+                          child={
+                            !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
+                              ? childUnderEdit.child
+                              : child
+                          }
+                          edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
+                          onEditStateChange={() => {
+                            if (child.name === childUnderEdit?.child.name) {
+                              setChildUnderEdit(undefined);
+                            } else {
+                              setChildUnderEdit({ isNew: false, child });
+                            }
+                          }}
+                          onChildChange={(newChild) => {
+                            setChildUnderEdit({
+                              isNew: false,
+                              child: newChild,
+                            });
+                          }}
+                          availableStreams={availableStreams}
+                        />
+                      </NestedView>
+                    )}
+                  </EuiDraggable>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
         {childUnderEdit?.isNew ? (
@@ -827,7 +841,7 @@ function RoutingStreamEntry({
   edit?: boolean;
   availableStreams: string[];
 }) {
-  const children = availableStreams.filter((stream) => isDescendandOf(child.name, stream)).length;
+  const children = availableStreams.filter((stream) => isDescendantOf(child.name, stream)).length;
   const router = useStreamsAppRouter();
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
