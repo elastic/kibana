@@ -11,3 +11,35 @@ import { configure } from 'enzyme';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 
 configure({ adapter: new Adapter() });
+
+/* eslint-env jest */
+
+/**
+ * This is a workaround to fix snapshot serialization of emotion when rendering React@18 using `import { render } from 'enzyme'`
+ */
+let mockInsideEnzymeRender = false;
+jest.mock('@emotion/use-insertion-effect-with-fallbacks', () => {
+  const actual = jest.requireActual('@emotion/use-insertion-effect-with-fallbacks');
+  return {
+    ...actual,
+    useInsertionEffectAlwaysWithSyncFallback: (cb) => {
+      // if we are inside enzyme render, then force the sync fallback
+      return mockInsideEnzymeRender ? cb() : actual.useInsertionEffectAlwaysWithSyncFallback(cb);
+    },
+  };
+});
+
+jest.mock('enzyme', () => {
+  const actual = jest.requireActual('enzyme');
+  return {
+    ...actual,
+    render: (node, options) => {
+      try {
+        mockInsideEnzymeRender = true;
+        return actual.render(node, options);
+      } finally {
+        mockInsideEnzymeRender = false;
+      }
+    },
+  };
+});
