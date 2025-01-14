@@ -1260,7 +1260,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
-
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant @elastic/obs-ai-assistant
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
