@@ -46,13 +46,28 @@ export const registerSiemRuleMigrationsGetRoute = (
           sort_direction: sortDirection,
           search_term: searchTerm,
           ids,
+          is_prebuilt: isPrebuilt,
+          is_installed: isInstalled,
+          is_fully_translated: isFullyTranslated,
+          is_partially_translated: isPartiallyTranslated,
+          is_untranslatable: isUntranslatable,
+          is_failed: isFailed,
         } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
           const options: RuleMigrationGetOptions = {
-            filters: { searchTerm, ids },
+            filters: {
+              searchTerm,
+              ids,
+              prebuilt: isPrebuilt,
+              installed: isInstalled,
+              fullyTranslated: isFullyTranslated,
+              partiallyTranslated: isPartiallyTranslated,
+              untranslatable: isUntranslatable,
+              failed: isFailed,
+            },
             sort: { sortField, sortDirection },
             size: perPage,
             from: page && perPage ? page * perPage : 0,
