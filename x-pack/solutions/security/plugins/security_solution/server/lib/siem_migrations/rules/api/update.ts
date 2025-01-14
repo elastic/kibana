@@ -14,7 +14,7 @@ import {
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
-import { transformRuleMigrationToUpdate } from './util/update_rules';
+import { transformToInternalUpdateRuleMigrationData } from './util/update_rules';
 
 export const registerSiemRuleMigrationsUpdateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -40,7 +40,9 @@ export const registerSiemRuleMigrationsUpdateRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            const transformedRuleToUpdate = rulesToUpdate.map(transformRuleMigrationToUpdate);
+            const transformedRuleToUpdate = rulesToUpdate.map(
+              transformToInternalUpdateRuleMigrationData
+            );
             await ruleMigrationsClient.data.rules.update(transformedRuleToUpdate);
 
             return res.ok({ body: { updated: true } });

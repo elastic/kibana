@@ -11,6 +11,7 @@ import {
   RuleMigrationTranslationResultEnum,
   type RuleMigrationTranslationResult,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { InternalUpdateRuleMigrationData } from '../../types';
 
 export const isValidEsqlQuery = (esqlQuery: string) => {
   const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
@@ -29,11 +30,8 @@ export const isValidEsqlQuery = (esqlQuery: string) => {
 };
 
 export const convertEsqlQueryToTranslationResult = (
-  esqlQuery?: string
+  esqlQuery: string
 ): RuleMigrationTranslationResult | undefined => {
-  if (esqlQuery === undefined) {
-    return undefined;
-  }
   if (esqlQuery === '') {
     return RuleMigrationTranslationResultEnum.untranslatable;
   }
@@ -42,18 +40,14 @@ export const convertEsqlQueryToTranslationResult = (
     : RuleMigrationTranslationResultEnum.partial;
 };
 
-export const transformRuleMigrationToUpdate = (
+export const transformToInternalUpdateRuleMigrationData = (
   ruleMigration: UpdateRuleMigrationData
-): UpdateRuleMigrationData => {
-  const {
-    translation_result: translationResult,
-    elastic_rule: elasticRule,
-    ...rest
-  } = ruleMigration;
+): InternalUpdateRuleMigrationData => {
+  if (ruleMigration.elastic_rule?.query == null) {
+    return ruleMigration;
+  }
   return {
-    ...rest,
-    elastic_rule: elasticRule,
-    translation_result:
-      translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
+    ...ruleMigration,
+    translation_result: convertEsqlQueryToTranslationResult(ruleMigration.elastic_rule.query),
   };
 };
