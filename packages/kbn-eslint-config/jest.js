@@ -17,6 +17,7 @@ module.exports = {
         'jest/no-focused-tests': 'error',
         'jest/no-identical-title': 'error',
         'import/order': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
       },
     }
   ]
