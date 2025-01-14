@@ -277,9 +277,13 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
    * Get items from all non-write indices for the specified ids.
    */
   private async getDanglingItems({ ids }: { ids: string[] }) {
+    if (!ids.length) {
+      return [];
+    }
+
     const writeIndex = await this.getCurrentWriteIndexName();
 
-    if (writeIndex && ids.length) {
+    if (writeIndex) {
       const danglingItemsResponse = await this.search({
         track_total_hits: false,
         query: {
@@ -323,25 +327,28 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     const attemptIndex = async (): Promise<IndexResponse> => {
       const [danglingItem] = id ? await this.getDanglingItems({ ids: [id] }) : [undefined];
 
-      if (danglingItem) {
-        await wrapEsCall(
-          this.esClient.delete({
-            id: danglingItem.id,
-            index: danglingItem.index,
-            refresh: false,
+      const [indexResponse] = await Promise.all([
+        wrapEsCall(
+          this.esClient.index({
+            ...request,
+            id,
+            refresh,
+            index: this.getWriteTarget(),
+            require_alias: true,
           })
-        );
-      }
+        ),
+        danglingItem
+          ? wrapEsCall(
+              this.esClient.delete({
+                id: danglingItem.id,
+                index: danglingItem.index,
+                refresh,
+              })
+            )
+          : Promise.resolve(),
+      ]);
 
-      return wrapEsCall(
-        this.esClient.index({
-          ...request,
-          id,
-          refresh,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        })
-      );
+      return indexResponse;
     };
 
     return this.validateComponentsBeforeWriting(attemptIndex).then(async (response) => {

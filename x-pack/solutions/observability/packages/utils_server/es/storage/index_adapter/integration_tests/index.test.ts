@@ -498,12 +498,9 @@ describe('StorageIndexAdapter', () => {
       _meta: {
         version,
       },
+      dynamic: 'strict',
       properties: {
         foo: {
-          meta: {
-            multi_value: 'false',
-            required: 'true',
-          },
           type: 'keyword',
         },
       },
