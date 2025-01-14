@@ -7,7 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isWiredStream, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  conditionSchema,
+  isChildOf,
+  isCompleteCondition,
+  isWiredReadStream,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
+import { errors } from '@elastic/elasticsearch';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -21,13 +28,12 @@ import {
   listStreams,
   streamsEnabled,
   validateAncestorFields,
+  checkAccess,
 } from '../../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
-import { isChildOf } from '../../../lib/streams/helpers/hierarchy';
 import { validateCondition } from '../../../lib/streams/helpers/condition_fields';
-import { checkReadAccess } from '../../../lib/streams/stream_crud';
 import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
-import { getFields, isComplete } from '../../../lib/streams/helpers/condition_fields';
+import { getFields } from '../../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork',
@@ -60,14 +66,14 @@ export const forkStreamsRoute = createServerRoute({
 
       validateCondition(params.body.condition);
 
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
       const rootDefinition = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
 
-      if (!isWiredStream(rootDefinition)) {
+      if (!isWiredReadStream(rootDefinition)) {
         throw new MalformedStreamId('Cannot fork a stream that is not managed');
       }
 
@@ -85,7 +91,7 @@ export const forkStreamsRoute = createServerRoute({
         );
       }
 
-      if (!isChildOf(rootDefinition, childDefinition)) {
+      if (!isChildOf(rootDefinition.name, childDefinition.name)) {
         throw new MalformedStreamId(
           `The ID (${params.body.stream.name}) from the new stream must start with the parent's id (${rootDefinition.name}), followed by a dot and a name`
         );
@@ -100,6 +106,7 @@ export const forkStreamsRoute = createServerRoute({
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: childDefinition,
         rootDefinition,
         logger,
@@ -112,6 +119,7 @@ export const forkStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: rootDefinition,
         rootDefinition,
         logger,
@@ -150,7 +158,7 @@ export const resyncStreamsRoute = createServerRoute({
   },
   params: z.object({}),
   handler: async ({ logger, request, getScopedClients }): Promise<{ acknowledged: true }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
     const { streams } = await listStreams({ scopedClusterClient });
 
@@ -162,6 +170,7 @@ export const resyncStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition,
         logger,
       });
@@ -215,15 +224,15 @@ export const sampleStreamRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
-      if (!hasAccess) {
+      const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+      if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
       const searchBody = {
         query: {
           bool: {
             must: [
-              isComplete(params.body.condition)
+              isCompleteCondition(params.body.condition)
                 ? conditionToQueryDsl(params.body.condition)
                 : { match_all: {} },
               {
@@ -260,16 +269,20 @@ export const sampleStreamRoute = createServerRoute({
       };
       const results = await scopedClusterClient.asCurrentUser.search({
         index: params.path.id,
+        allow_no_indices: true,
         ...searchBody,
       });
 
       return { documents: results.hits.hits.map((hit) => hit._source) };
-    } catch (e) {
-      if (e instanceof DefinitionNotFound) {
-        throw notFound(e);
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.meta.statusCode === 404) {
+        throw notFound(error);
+      }
+      if (error instanceof DefinitionNotFound) {
+        throw notFound(error);
       }
 
-      throw internal(e);
+      throw internal(error);
     }
   },
 });

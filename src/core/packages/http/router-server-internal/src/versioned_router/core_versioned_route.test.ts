@@ -542,22 +542,19 @@ describe('Versioned route', () => {
       authz: {
         requiredPrivileges: ['foo', 'bar', 'baz'],
       },
+      authc: undefined,
     };
     const securityConfig1: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo'],
       },
-      authc: {
-        enabled: 'optional',
-      },
+      authc: undefined,
     };
     const securityConfig2: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo', 'bar'],
       },
-      authc: {
-        enabled: true,
-      },
+      authc: undefined,
     };
     const versionedRoute = versionedRouter
       .get({ path: '/test/{id}', access: 'internal', security: securityConfigDefault })
@@ -668,5 +665,43 @@ describe('Versioned route', () => {
       - [authz.requiredPrivileges.0.0.anyRequired]: array size is [1], but cannot be smaller than [2]
       - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
     `);
+  });
+
+  it('should correctly merge security configuration for versions', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const validSecurityConfig: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    const route = versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      security: validSecurityConfig,
+    });
+
+    route.addVersion(
+      {
+        version: '1',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo', 'bar'],
+          },
+        },
+      },
+      handlerFn
+    );
+
+    // @ts-expect-error for test purpose
+    const security = route.getSecurity({ headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' } });
+
+    expect(security.authc).toEqual({ enabled: 'optional' });
+
+    expect(security.authz).toEqual({ requiredPrivileges: ['foo', 'bar'] });
   });
 });

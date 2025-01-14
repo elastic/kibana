@@ -6,6 +6,7 @@
  */
 
 import { esqlRoutes } from './esql/route';
+import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
 import { managementRoutes } from './streams/management/route';
@@ -13,10 +14,11 @@ import { schemaRoutes } from './streams/schema/route';
 
 export const streamsRouteRepository = {
   ...esqlRoutes,
+  ...dashboardRoutes,
   ...crudRoutes,
-  ...schemaRoutes,
   ...enablementRoutes,
   ...managementRoutes,
+  ...schemaRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

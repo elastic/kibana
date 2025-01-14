@@ -7,10 +7,9 @@
 import { z } from '@kbn/zod';
 import { internal, notFound } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
-import { isWiredStream } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema } from '@kbn/streams-schema';
+import { fieldDefinitionConfigSchema, isWiredReadStream } from '@kbn/streams-schema';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
-import { checkReadAccess, readAncestors, readStream } from '../../../lib/streams/stream_crud';
+import { checkAccess, readAncestors, readStream } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
@@ -34,8 +33,8 @@ export const unmappedFieldsRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
-      if (!hasAccess) {
+      const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+      if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
 
@@ -71,14 +70,14 @@ export const unmappedFieldsRoute = createServerRoute({
       // Mapped fields from the stream's definition and inherited from ancestors
       const mappedFields = new Set<string>();
 
-      if (isWiredStream(streamEntity)) {
+      if (isWiredReadStream(streamEntity)) {
         Object.keys(streamEntity.stream.ingest.wired.fields).forEach((name) =>
           mappedFields.add(name)
         );
       }
 
       const { ancestors } = await readAncestors({
-        id: params.path.id,
+        name: params.path.id,
         scopedClusterClient,
       });
 
@@ -133,8 +132,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
-      if (!hasAccess) {
+      const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+      if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
 

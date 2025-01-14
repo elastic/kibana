@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { DATA_STREAM_API_ROUTES } from '../../constants';
@@ -49,8 +49,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DATA_STREAM_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
       },
       summary: `Get data streams`,
       options: {

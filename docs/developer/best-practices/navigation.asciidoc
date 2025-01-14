@@ -120,7 +120,7 @@ const MySPALink = () =>
 ----
 
 As it would be too much boilerplate to do this for each {kib} link in your app, there is a handy wrapper that helps with it: 
-{kib-repo}tree/{branch}/packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx[RedirectAppLinks].
+{kib-repo}tree/{branch}/src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx[RedirectAppLinks].
 
 [source,typescript jsx]
 ----

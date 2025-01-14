@@ -12,21 +12,25 @@ import { badRequest, internal, notFound } from '@hapi/boom';
 import {
   isWiredStream,
   isWiredStreamConfig,
+  isWiredReadStream,
+  isRootStream,
   streamConfigDefinitionSchema,
   StreamDefinition,
   WiredStreamConfigDefinition,
   WiredStreamDefinition,
   ListStreamsResponse,
   FieldDefinitionConfig,
-  isIngestStream,
   ReadStreamDefinition,
+  getParentId,
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
-import { getParentId } from '../../../lib/streams/helpers/hierarchy';
+import { isEqual } from 'lodash';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
+  RootStreamImmutabilityException,
   SecurityException,
 } from '../../../lib/streams/errors';
 import { createServerRoute } from '../../create_server_route';
@@ -43,6 +47,7 @@ import {
 } from '../../../lib/streams/stream_crud';
 import { MalformedChildren } from '../../../lib/streams/errors/malformed_children';
 import { validateCondition } from '../../../lib/streams/helpers/condition_fields';
+import { AssetClient } from '../../../lib/streams/assets/asset_client';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -61,28 +66,33 @@ export const readStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
+      const dashboards = await assetClient.getAssetIds({
+        entityId: streamEntity.name,
+        entityType: 'stream',
+        assetType: 'dashboard',
+      });
 
-      // TODO: I have no idea why I can just do `isIngestStream` here but when I do,
-      // streamEntity becomes `streamEntity: never` in the statements afterwards
-      if (!isWiredStream(streamEntity) && isIngestStream(streamEntity)) {
+      if (!isWiredReadStream(streamEntity)) {
         return {
           ...streamEntity,
+          dashboards,
           inherited_fields: {},
         };
       }
 
       const { ancestors } = await readAncestors({
-        id: streamEntity.name,
+        name: streamEntity.name,
         scopedClusterClient,
       });
 
-      const body = {
+      const body: WiredReadStreamDefinition = {
         ...streamEntity,
+        dashboards,
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
@@ -119,7 +129,7 @@ export const listStreamsRoute = createServerRoute({
   handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      return listStreams({ scopedClusterClient });
+      return await listStreams({ scopedClusterClient });
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);
@@ -150,7 +160,7 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, logger, request, getScopedClients }) => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamDefinition: StreamDefinition = { stream: params.body, name: params.path.id };
 
       if (!isWiredStream(streamDefinition)) {
@@ -159,11 +169,22 @@ export const editStreamRoute = createServerRoute({
           definition: streamDefinition,
           rootDefinition: undefined,
           logger,
+          assetClient,
         });
         return { acknowledged: true };
       }
 
-      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.ingest.routing);
+      const currentStreamDefinition = (await readStream({
+        scopedClusterClient,
+        id: params.path.id,
+      })) as WiredStreamDefinition;
+
+      if (isRootStream(streamDefinition)) {
+        await validateRootStreamChanges(currentStreamDefinition, streamDefinition);
+      }
+
+      await validateStreamChildren(currentStreamDefinition, params.body.ingest.routing);
+
       if (isWiredStreamConfig(params.body)) {
         await validateAncestorFields(
           scopedClusterClient,
@@ -207,6 +228,7 @@ export const editStreamRoute = createServerRoute({
 
         await syncStream({
           scopedClusterClient,
+          assetClient,
           definition: childDefinition,
           logger,
         });
@@ -217,11 +239,13 @@ export const editStreamRoute = createServerRoute({
         definition: { ...streamDefinition, name: params.path.id },
         rootDefinition: parentDefinition,
         logger,
+        assetClient,
       });
 
       if (parentId) {
         parentDefinition = await updateParentStreamAfterEdit(
           scopedClusterClient,
+          assetClient,
           parentId,
           params.path.id,
           logger
@@ -237,7 +261,8 @@ export const editStreamRoute = createServerRoute({
       if (
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
-        e instanceof MalformedStreamId
+        e instanceof MalformedStreamId ||
+        e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);
       }
@@ -249,6 +274,7 @@ export const editStreamRoute = createServerRoute({
 
 async function updateParentStreamAfterEdit(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   parentId: string,
   id: string,
   logger: Logger
@@ -267,6 +293,7 @@ async function updateParentStreamAfterEdit(
 
     await syncStream({
       scopedClusterClient,
+      assetClient,
       definition: parentDefinition,
       logger,
     });
@@ -275,16 +302,11 @@ async function updateParentStreamAfterEdit(
 }
 
 async function validateStreamChildren(
-  scopedClusterClient: IScopedClusterClient,
-  id: string,
+  currentStreamDefinition: WiredStreamDefinition,
   children: WiredStreamConfigDefinition['ingest']['routing']
 ) {
   try {
-    const oldDefinition = await readStream({
-      scopedClusterClient,
-      id,
-    });
-    const oldChildren = oldDefinition.stream.ingest.routing.map((child) => child.name);
+    const oldChildren = currentStreamDefinition.stream.ingest.routing.map((child) => child.name);
     const newChildren = new Set(children.map((child) => child.name));
     children.forEach((child) => {
       validateCondition(child.condition);
@@ -299,6 +321,33 @@ async function validateStreamChildren(
     if (!(e instanceof DefinitionNotFound)) {
       throw e;
     }
+  }
+}
+
+/*
+ * Changes to mappings (fields) and processing rules are not allowed on the root stream.
+ * Changes to routing rules are allowed.
+ */
+async function validateRootStreamChanges(
+  currentStreamDefinition: WiredStreamDefinition,
+  nextStreamDefinition: WiredStreamDefinition
+) {
+  const hasFieldChanges = !isEqual(
+    currentStreamDefinition.stream.ingest.wired.fields,
+    nextStreamDefinition.stream.ingest.wired.fields
+  );
+
+  if (hasFieldChanges) {
+    throw new RootStreamImmutabilityException('Root stream fields cannot be changed');
+  }
+
+  const hasProcessingChanges = !isEqual(
+    currentStreamDefinition.stream.ingest.processing,
+    nextStreamDefinition.stream.ingest.processing
+  );
+
+  if (hasProcessingChanges) {
+    throw new RootStreamImmutabilityException('Root stream processing rules cannot be changed');
   }
 }
 
@@ -326,9 +375,21 @@ export const deleteStreamRoute = createServerRoute({
     getScopedClients,
   }): Promise<{ acknowledged: true }> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
-      await deleteStream(scopedClusterClient, params.path.id, logger);
+      const parentId = getParentId(params.path.id);
+      if (parentId) {
+        // need to update parent first to cut off documents streaming down
+        await updateParentStreamAfterDelete(
+          scopedClusterClient,
+          assetClient,
+          params.path.id,
+          parentId,
+          logger
+        );
+      }
+
+      await deleteStream(scopedClusterClient, assetClient, params.path.id, logger);
 
       return { acknowledged: true };
     } catch (e) {
@@ -351,13 +412,14 @@ export const deleteStreamRoute = createServerRoute({
 
 export async function deleteStream(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   id: string,
   logger: Logger
 ) {
   try {
     const definition = await readStream({ scopedClusterClient, id });
-    if (!isWiredStream(definition)) {
-      await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger });
+    if (!isWiredReadStream(definition)) {
+      await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger, assetClient });
       return;
     }
 
@@ -367,11 +429,11 @@ export async function deleteStream(
     }
 
     // need to update parent first to cut off documents streaming down
-    await updateParentStreamAfterDelete(scopedClusterClient, id, parentId, logger);
+    await updateParentStreamAfterDelete(scopedClusterClient, assetClient, id, parentId, logger);
     for (const child of definition.stream.ingest.routing) {
-      await deleteStream(scopedClusterClient, child.name, logger);
+      await deleteStream(scopedClusterClient, assetClient, child.name, logger);
     }
-    await deleteStreamObjects({ scopedClusterClient, id, logger });
+    await deleteStreamObjects({ scopedClusterClient, id, logger, assetClient });
   } catch (e) {
     if (e instanceof DefinitionNotFound) {
       logger.debug(`Stream definition for ${id} not found.`);
@@ -383,6 +445,7 @@ export async function deleteStream(
 
 async function updateParentStreamAfterDelete(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   id: string,
   parentId: string,
   logger: Logger
@@ -398,6 +461,7 @@ async function updateParentStreamAfterDelete(
 
   await syncStream({
     scopedClusterClient,
+    assetClient,
     definition: parentDefinition,
     logger,
   });
