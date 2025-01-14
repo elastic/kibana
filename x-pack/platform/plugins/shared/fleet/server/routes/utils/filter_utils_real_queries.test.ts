@@ -19,12 +19,9 @@ import {
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
-import { appContextService } from '../../services/app_context';
-
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
 
 jest.mock('../../services/app_context');
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
