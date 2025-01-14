@@ -45,6 +45,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
+import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
@@ -212,6 +213,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
+    registerDeprecations({ core, config: this.config, logger: this.logger });
+
     if (experimentalFeatures.riskScoringPersistence) {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
@@ -241,6 +244,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         telemetry: core.analytics,
         taskManager: plugins.taskManager,
+        experimentalFeatures,
       });
     }
 

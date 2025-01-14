@@ -44,5 +44,6 @@
     "@kbn/utils",
     "@kbn/zod",
     "@kbn/tooling-log",
+    "@kbn/ai-assistant-icon"
   ]
 }

@@ -191,23 +191,11 @@
                   "<unknown> | undefined; appBasePath?: string | undefined; onAppLeave?: ((handler: ",
                   "AppLeaveHandler",
                   ") => void) | undefined; setHeaderActionMenu?: ((menuMount: ",
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined) => void) | undefined; theme$?: ",
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-public.CoreTheme",
-                    "text": "CoreTheme"
-                  },
+                  "CoreTheme",
                   "> | undefined; }"
                 ],
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",

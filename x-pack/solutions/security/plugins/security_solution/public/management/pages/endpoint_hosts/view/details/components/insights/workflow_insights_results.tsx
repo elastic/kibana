@@ -16,8 +16,10 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsResultsProps {
@@ -51,6 +53,7 @@ export const WorkflowInsightsResults = ({
   const {
     application: { navigateToUrl },
   } = useKibana().services;
+  const { canWriteTrustedApplications } = useUserPrivileges().endpointPrivileges;
 
   useEffect(() => {
     setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
@@ -106,6 +109,9 @@ export const WorkflowInsightsResults = ({
     } else if (results?.length) {
       return results.flatMap((insight, index) => {
         return (insight.remediation.exception_list_items ?? []).map((item) => {
+          const { ariaLabel, tooltipContent, tooltipNoPermissions } =
+            WORKFLOW_INSIGHTS.issues.remediationButton;
+
           return (
             <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
               <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
@@ -128,17 +134,23 @@ export const WorkflowInsightsResults = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-                  <EuiButtonIcon
-                    aria-label={WORKFLOW_INSIGHTS.issues.insightRemediationButtonAriaLabel}
-                    iconType="popout"
-                    href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.preventDefault();
-                      if (insight.id) {
-                        openArtifactCreationPage({ remediation: item, id: insight.id });
-                      }
-                    }}
-                  />
+                  <EuiToolTip
+                    content={canWriteTrustedApplications ? tooltipContent : tooltipNoPermissions}
+                    position={'top'}
+                  >
+                    <EuiButtonIcon
+                      isDisabled={!canWriteTrustedApplications}
+                      aria-label={ariaLabel}
+                      iconType="popout"
+                      href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
+                      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.preventDefault();
+                        if (insight.id) {
+                          openArtifactCreationPage({ remediation: item, id: insight.id });
+                        }
+                      }}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -147,7 +159,7 @@ export const WorkflowInsightsResults = ({
       });
     }
     return null;
-  }, [openArtifactCreationPage, results, showEmptyResultsCallout]);
+  }, [canWriteTrustedApplications, openArtifactCreationPage, results, showEmptyResultsCallout]);
 
   return (
     <>

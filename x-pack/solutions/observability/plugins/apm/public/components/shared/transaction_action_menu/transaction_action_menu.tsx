@@ -26,7 +26,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
@@ -125,7 +125,7 @@ function ActionMenuSections({
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
 
-  const logsLocators = getLogsLocatorsFromUrlService(share.url);
+  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
 
   const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
 
@@ -154,7 +154,7 @@ function ActionMenuSections({
     rangeFrom,
     rangeTo,
     environment,
-    logsLocators,
+    logsLocator,
     dataViewId: dataView?.id,
     assetDetailsLocator,
   });

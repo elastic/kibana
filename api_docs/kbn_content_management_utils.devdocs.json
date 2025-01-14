@@ -103,13 +103,7 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<unknown>) => Types[\"Item\"]; additionalSearchFields?: string[] | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
@@ -549,21 +543,9 @@
         "description": [],
         "signature": [
           "(params: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          },
+          "SavedObjectsCreateOptions",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          }
+          "SavedObjectsCreateOptions"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
@@ -577,13 +559,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              }
+              "SavedObjectsCreateOptions"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
@@ -675,13 +651,7 @@
             "text": "StorageContext"
           },
           ", savedObject: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindResult",
-            "text": "SavedObjectsFindResult"
-          },
+          "SavedObjectsFindResult",
           "<unknown>) => ReturnItem; }"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
@@ -964,13 +934,7 @@
             "text": "SearchArgsToSOFindOptionsOptionsDefault"
           },
           ">) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          }
+          "SavedObjectsFindOptions"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
@@ -1019,21 +983,9 @@
         "description": [],
         "signature": [
           "({ included, excluded, }?: { included?: string[] | undefined; excluded?: string[] | undefined; }) => { hasReference: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
+          "SavedObjectsFindOptionsReference",
           "[] | undefined; hasNoReference: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
+          "SavedObjectsFindOptionsReference",
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/utils.ts",
@@ -1102,21 +1054,9 @@
             "text": "CMCrudTypes"
           },
           ">(params: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
@@ -1131,13 +1071,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
+              "SavedObjectsUpdateOptions",
               "<Types[\"Attributes\"]>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
@@ -1945,13 +1879,7 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<unknown>) => ReturnItem"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
@@ -1987,13 +1915,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindResult",
-                    "text": "SavedObjectsFindResult"
-                  },
+                  "SavedObjectsFindResult",
                   "<unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
@@ -2342,21 +2264,9 @@
               "\nSearch for documents having a reference to the specified objects.\nUse `hasReferenceOperator` to specify the operator to use when searching for multiple references."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
@@ -2389,21 +2299,9 @@
               "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
@@ -2504,13 +2402,7 @@
               "\nSearch against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsPitParams",
-                "text": "SavedObjectsPitParams"
-              },
+              "SavedObjectsPitParams",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
@@ -2590,13 +2482,7 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.MutatingOperationRefreshSetting",
-                "text": "MutatingOperationRefreshSetting"
-              },
+              "MutatingOperationRefreshSetting",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
@@ -3145,13 +3031,7 @@
         "description": [],
         "signature": [
           "(params: Types[\"CreateOptions\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          }
+          "SavedObjectsCreateOptions"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
@@ -3201,13 +3081,7 @@
         "description": [],
         "signature": [
           "(params: Types[\"SearchIn\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          }
+          "SavedObjectsFindOptions"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
@@ -3271,13 +3145,7 @@
         "description": [],
         "signature": [
           "(params: Types[\"UpdateOptions\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",

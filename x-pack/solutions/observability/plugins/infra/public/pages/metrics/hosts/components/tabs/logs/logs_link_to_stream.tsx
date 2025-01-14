@@ -5,9 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  getLogsLocatorFromUrlService,
+  type LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
+import moment from 'moment';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {
@@ -20,15 +23,14 @@ interface LogsLinkToStreamProps {
 export const LogsLinkToStream = ({ startTime, endTime, query, logView }: LogsLinkToStreamProps) => {
   const { services } = useKibanaContextForPlugin();
   const { share } = services;
-  const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
 
   return (
     <OpenInLogsExplorerButton
       href={logsLocator.getRedirectUrl({
-        time: endTime,
         timeRange: {
-          startTime,
-          endTime,
+          from: moment(startTime).toISOString(),
+          to: moment(endTime).toISOString(),
         },
         filter: query,
         logView,

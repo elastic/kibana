@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { CRAWLERS_PATH, NEW_CRAWLER_PATH } from '../../routes';
+import { CRAWLERS_PATH, CRAWLERS_ELASTIC_MANAGED_PATH, NEW_CRAWLER_PATH } from '../../routes';
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
 import { Connectors } from './connectors';
@@ -20,8 +20,11 @@ export const CrawlersRouter: React.FC = () => {
       <Route path={NEW_CRAWLER_PATH}>
         <NewSearchIndexPage type="crawler" />
       </Route>
-      <Route path={CRAWLERS_PATH}>
-        <Connectors isCrawler />
+      <Route exact path={CRAWLERS_PATH}>
+        <Connectors isCrawler isCrawlerSelfManaged />
+      </Route>
+      <Route exact path={CRAWLERS_ELASTIC_MANAGED_PATH}>
+        <Connectors isCrawler isCrawlerSelfManaged={false} />
       </Route>
     </Routes>
   );

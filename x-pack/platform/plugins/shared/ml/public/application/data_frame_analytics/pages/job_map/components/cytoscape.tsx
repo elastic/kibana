@@ -108,7 +108,7 @@ export function Cytoscape({
 
     return () => {
       if (cy) {
-        cy.removeListener('data', undefined, dataHandler as cytoscape.EventHandler);
+        cy.removeListener('data', dataHandler);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

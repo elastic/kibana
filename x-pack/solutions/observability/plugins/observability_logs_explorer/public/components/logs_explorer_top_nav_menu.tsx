@@ -17,7 +17,6 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
@@ -45,18 +44,12 @@ export const LogsExplorerTopNavMenu = () => {
 
 const ProjectTopNav = () => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibanaContextForPlugin();
 
   return (
     <EuiHeader
       data-test-subj="logsExplorerHeaderMenu"
       css={{ boxShadow: 'none', backgroundColor: euiTheme.colors.backgroundBasePlain }}
     >
-      <EuiHeaderSection>
-        <EuiHeaderSectionItem>
-          <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
       <EuiHeaderSection
         side="right"
         css={css`
