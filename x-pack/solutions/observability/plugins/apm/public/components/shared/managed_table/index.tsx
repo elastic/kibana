@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';

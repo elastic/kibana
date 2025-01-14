@@ -8,14 +8,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
+import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
-import { ITableColumn, ManagedTable } from '../managed_table';
+import type { ITableColumn } from '../managed_table';
+import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { getSpanMetricColumns, SpanMetricGroup } from './get_span_metric_columns';
+import type { SpanMetricGroup } from './get_span_metric_columns';
+import { getSpanMetricColumns } from './get_span_metric_columns';
 
 export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'location'> & {
   name: string;

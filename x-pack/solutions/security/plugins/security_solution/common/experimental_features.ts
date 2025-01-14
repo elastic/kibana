@@ -26,7 +26,7 @@ export const allowedExperimentalValues = Object.freeze({
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -183,18 +183,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
-
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables graph visualization in alerts flyout

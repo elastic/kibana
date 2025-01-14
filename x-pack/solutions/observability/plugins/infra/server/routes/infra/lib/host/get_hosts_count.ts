@@ -7,8 +7,8 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
-import { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
-import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
+import type { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
+import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
 import { getDocumentsFilter } from '../helpers/query';

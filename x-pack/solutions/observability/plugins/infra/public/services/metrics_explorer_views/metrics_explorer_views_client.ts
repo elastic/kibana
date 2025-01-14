@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CreateMetricsExplorerViewResponsePayload,
-  createMetricsExplorerViewRequestPayloadRT,
   FindMetricsExplorerViewResponsePayload,
-  findMetricsExplorerViewResponsePayloadRT,
   GetMetricsExplorerViewResponsePayload,
-  getMetricsExplorerViewUrl,
-  metricsExplorerViewResponsePayloadRT,
   UpdateMetricsExplorerViewResponsePayload,
   CreateMetricsExplorerViewAttributesRequestPayload,
   UpdateMetricsExplorerViewAttributesRequestPayload,
+} from '../../../common/http_api/latest';
+import {
+  createMetricsExplorerViewRequestPayloadRT,
+  findMetricsExplorerViewResponsePayloadRT,
+  getMetricsExplorerViewUrl,
+  metricsExplorerViewResponsePayloadRT,
 } from '../../../common/http_api/latest';
 import {
   DeleteMetricsExplorerViewError,
   FetchMetricsExplorerViewError,
   UpsertMetricsExplorerViewError,
 } from '../../../common/metrics_explorer_views';
-import { IMetricsExplorerViewsClient } from './types';
+import type { IMetricsExplorerViewsClient } from './types';
 
 export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   constructor(private readonly http: HttpStart) {}

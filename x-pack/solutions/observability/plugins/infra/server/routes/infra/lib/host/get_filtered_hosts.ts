@@ -6,10 +6,10 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
 import { HOST_NAME_FIELD, SYSTEM_INTEGRATION } from '../../../../../common/constants';
-import { GetHostParameters } from '../types';
+import type { GetHostParameters } from '../types';
 import { getFilterByIntegration } from '../helpers/query';
 
 export const getFilteredHostNames = async ({

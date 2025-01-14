@@ -10,7 +10,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';

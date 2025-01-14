@@ -11,10 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eu
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { InfraFormatter } from '../../../../common/inventory/types';
+import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import {
   createDotNetAgentInstructions,
   createDjangoAgentInstructions,
@@ -19,10 +19,10 @@ import {
   createRackAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 // TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
 import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,

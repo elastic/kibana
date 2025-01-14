@@ -6,7 +6,8 @@
  */
 import createContainer from 'constate';
 import { useCallback, useEffect, useState } from 'react';
-import { buildEsQuery, Filter, fromKueryExpression, TimeRange, type Query } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
 import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
@@ -16,11 +17,11 @@ import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_reques
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
+import type { StringDateRange } from './use_unified_search_url_state';
 import {
   useHostsUrlState,
   type HostsState,
   type StringDateRangeTimestamp,
-  StringDateRange,
 } from './use_unified_search_url_state';
 import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 

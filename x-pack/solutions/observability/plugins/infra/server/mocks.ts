@@ -13,7 +13,7 @@ import {
   createMetricsExplorerViewsServiceSetupMock,
   createMetricsExplorerViewsServiceStartMock,
 } from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
-import { InfraPluginSetup, InfraPluginStart } from './types';
+import type { InfraPluginSetup, InfraPluginStart } from './types';
 
 const createInfraSetupMock = () => {
   const infraSetupMock: jest.Mocked<InfraPluginSetup> = {

@@ -21,7 +21,7 @@ import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   ruleParamsRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import { InfraBackendLibs } from '../../infra_types';
+import type { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,

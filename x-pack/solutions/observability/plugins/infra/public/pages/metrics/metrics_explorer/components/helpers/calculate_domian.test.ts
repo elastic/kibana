@@ -6,8 +6,8 @@
  */
 
 import { calculateDomain } from './calculate_domain';
-import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 import { Color } from '../../../../../../common/color_palette';
 describe('calculateDomain()', () => {
   const series: MetricsExplorerSeries = {

@@ -10,10 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { withTheme } from '@kbn/kibana-react-plugin/common';
+import type { SectionLinkProps } from '@kbn/observability-shared-plugin/public';
 import {
   Section,
-  SectionLinkProps,
   SectionTitle,
   SectionSubtitle,
   SectionLinks,
@@ -31,7 +32,10 @@ import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
+import type {
+  InfraWaffleMapNode,
+  InfraWaffleMapOptions,
+} from '../../../../../common/inventory/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {

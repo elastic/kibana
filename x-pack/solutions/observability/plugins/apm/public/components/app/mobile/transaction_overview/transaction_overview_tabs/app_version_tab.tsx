@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { TabContentProps } from '.';
+import type { TabContentProps } from '.';
 import { isPending } from '../../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import { SERVICE_VERSION } from '../../../../../../common/es_fields/apm';

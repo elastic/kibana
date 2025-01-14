@@ -15,7 +15,7 @@ import { podCpuUsage } from './tsvb/pod_cpu_usage';
 import { podLogUsage } from './tsvb/pod_log_usage';
 import { podMemoryUsage } from './tsvb/pod_memory_usage';
 import { podNetworkTraffic } from './tsvb/pod_network_traffic';
-import { InventoryMetrics } from '../../../types';
+import type { InventoryMetrics } from '../../../types';
 
 const podSnapshotMetrics = { cpu, memory, rx, tx };
 

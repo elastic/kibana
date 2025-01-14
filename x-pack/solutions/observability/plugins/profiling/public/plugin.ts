@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { NavigationSection } from '@kbn/observability-shared-plugin/public';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map, take } from 'rxjs';
 import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
 import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
 export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;

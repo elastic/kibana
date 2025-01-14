@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat, JobType } from '../../../../../common/http_api/latest';
+import type { IdFormat, JobType } from '../../../../../common/http_api/latest';
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 
 interface RequestArgs<T extends JobType> {

@@ -10,14 +10,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker, useUrlState } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   MutationContext,
   SavedViewResult,
   ServerError,
   UpdateViewParams,
 } from '../../common/saved_views';
-import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
-import {
+import type { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
+import type {
   CreateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
