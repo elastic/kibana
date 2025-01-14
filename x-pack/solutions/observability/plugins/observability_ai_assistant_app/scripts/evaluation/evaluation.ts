@@ -25,7 +25,7 @@ import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
-export function runEvaluations<KibanaClientType extends KibanaClient>() {
+export function runEvaluations() {
   yargs(process.argv.slice(2))
     .command('*', 'Run AI Assistant evaluations', options, (argv) => {
       run(
@@ -75,8 +75,9 @@ export function runEvaluations<KibanaClientType extends KibanaClient>() {
           await kibanaClient.installKnowledgeBase();
 
           const scenarios =
-            argv.files !== undefined &&
-            castArray(argv.files).map((file) => Path.join(process.cwd(), file));
+            (argv.files !== undefined &&
+              castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
+            fastGlob.sync(Path.join(__dirname, './scenarios/**/*.spec.ts'));
 
           if (!scenarios.length) {
             throw new Error('No scenarios to run');
