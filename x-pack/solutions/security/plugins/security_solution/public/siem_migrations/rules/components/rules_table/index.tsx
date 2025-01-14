@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
+import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
@@ -235,19 +236,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                disabled={!canMigrationRuleBeInstalled}
-                onClick={() => {
-                  installSingleRule(ruleMigration, true);
-                  closeRulePreview();
-                }}
-                fill
-                data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
-              >
-                {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
+            {isMigrationPrebuiltRule(ruleMigration.elastic_rule) && (
+              <EuiFlexItem>
+                <EuiButton
+                  disabled={!canMigrationRuleBeInstalled}
+                  onClick={() => {
+                    installSingleRule(ruleMigration, true);
+                    closeRulePreview();
+                  }}
+                  fill
+                  data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
+                >
+                  {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       },
