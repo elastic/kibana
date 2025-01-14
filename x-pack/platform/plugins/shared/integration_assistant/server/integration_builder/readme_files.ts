@@ -59,7 +59,7 @@ function createReadmeFile(
   });
 
   const template = env.getTemplate(templateName);
-  const uniqueInputs = getUniqueListInputs(datastreams);
+  const uniqueInputs = getUniqueInputs(datastreams);
 
   const renderedTemplate = template.render({
     package_name: integrationName,
@@ -72,7 +72,7 @@ function createReadmeFile(
   createSync(joinPath(targetDir, 'README.md'), renderedTemplate);
 }
 
-function getUniqueListInputs(datastreams: DataStream[]): string[] {
+function getUniqueInputs(datastreams: DataStream[]): string[] {
   const uniqueInputs = new Set<string>();
   datastreams.forEach((datastream) => {
     datastream.inputTypes.forEach((inputType) => {
