@@ -183,6 +183,7 @@ export async function internalBulkResolve<T>(
     if (isLeft(either)) {
       return either.value;
     }
+
     const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
     let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
     const aliasInfo = aliasInfoArray[aliasInfoIndex++];
