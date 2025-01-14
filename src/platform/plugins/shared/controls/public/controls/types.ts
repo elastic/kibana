@@ -45,9 +45,6 @@ export type DefaultControlApi = PublishesDataLoading &
     setBlockingError: (error: Error | undefined) => void;
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
-    getTypeDisplayName?: () => string;
-    isEditingEnabled?: () => boolean;
-    onEdit?: () => void;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<

@@ -33,11 +33,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     getIconType: () => 'editorChecklist',
     getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
-      const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
-      const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
-      const variableType$ = new BehaviorSubject<ESQLVariableType>(
-        initialState.variableType ?? ESQLVariableType.VALUES
-      );
       // initialize the variable
       esqlVariablesService.addVariable({
         key: initialState.variableName,
@@ -75,7 +70,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               initialState: state,
             });
           },
-          selectedOptions$,
+          selectedOptions$: selections.selectedOptions$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
             return {
@@ -118,8 +113,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             useBatchedPublishingSubjects(
               selections.availableOptions$,
               selections.selectedOptions$,
-              variableName$,
-              variableType$
+              selections.variableName$,
+              selections.variableType$
             );
 
           return (
@@ -152,7 +147,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                   esqlVariablesService.updateVariable({
                     key: variableName,
                     value: selectedValues[0],
-                    type: variableType,
+                    type: variableType as ESQLVariableType,
                   });
                 }}
               />

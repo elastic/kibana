@@ -9,13 +9,16 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import type { ESQLControlState } from './types';
 
 export function initializeESQLControlSelections(initialState: ESQLControlState) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
-  const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
+  const variableType$ = new BehaviorSubject<ESQLVariableType>(
+    initialState.variableType ?? ESQLVariableType.VALUES
+  );
   const controlType$ = new BehaviorSubject<string>(initialState.controlType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
   const title$ = new BehaviorSubject<string | undefined>(initialState.title);

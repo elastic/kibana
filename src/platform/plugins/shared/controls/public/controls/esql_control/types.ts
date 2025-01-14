@@ -10,15 +10,22 @@ import type { PublishesPanelTitle, PublishingSubject } from '@kbn/presentation-p
 import type { ESQLControlState as ControlState } from '@kbn/esql/public';
 import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
-import type { CanClearVariables } from '../../types';
 
-interface PublishesSelectedOptions {
-  selectedOptions$: PublishingSubject<string[]>;
+interface CanClearVariables {
+  clearVariables: () => void;
 }
+
+export const isVariablesControl = (control: unknown): control is CanClearVariables => {
+  return typeof (control as CanClearVariables).clearVariables === 'function';
+};
 
 export interface ESQLControlState extends DefaultControlState, Omit<ControlState, 'width'> {}
 
 export type ESQLControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
-  CanClearVariables &
-  PublishesSelectedOptions;
+  CanClearVariables & {
+    selectedOptions$: PublishingSubject<string[]>;
+    getTypeDisplayName?: () => string;
+    isEditingEnabled?: () => boolean;
+    onEdit?: () => void;
+  };
