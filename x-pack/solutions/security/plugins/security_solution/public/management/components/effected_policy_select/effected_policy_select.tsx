@@ -47,7 +47,7 @@ const StyledEuiSelectable = styled.div`
 `;
 
 const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
-  @media only screen and (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+  @media only screen and (max-width: ${({ theme }) => theme.euiTheme.breakpoint.m}) {
     align-items: center;
   }
 `;
@@ -56,7 +56,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.euiSizeL};
+    padding-right: ${({ theme }) => theme.euiTheme.size.l};
   }
 `;
 
