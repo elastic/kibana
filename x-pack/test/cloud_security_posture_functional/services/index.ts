@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { QueryBarProvider } from './query_bar_provider';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('cloud data', function () {
-    loadTestFile(require.resolve('./set_cloud_data_route'));
-  });
-}
+export const services = {
+  queryBarProvider: QueryBarProvider,
+};
