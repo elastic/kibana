@@ -11,7 +11,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { isEmpty } from 'lodash';
 
-export const getTimelineRowTypeIndicator: UnifiedDataTableProps['getRowIndicator'] = (
+export const getTimelineRowTypeIndicator: NonNullable<UnifiedDataTableProps['getRowIndicator']> = (
   row: DataTableRecord,
   euiTheme: EuiThemeComputed
 ) => {

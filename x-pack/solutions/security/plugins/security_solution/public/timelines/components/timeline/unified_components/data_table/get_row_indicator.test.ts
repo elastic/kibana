@@ -1,0 +1,173 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getTimelineRowTypeIndicator } from './get_row_indicator';
+import type { EuiThemeComputed } from '@elastic/eui';
+
+const mockEuiTheme = {
+  colors: {
+    primary: 'primary',
+    accent: 'accent',
+    warning: 'warning',
+    lightShade: 'lightShade',
+  },
+} as EuiThemeComputed;
+
+const TEST_CASES = [
+  {
+    description: 'Eql Event type and Alert',
+    row: {
+      flattened: {
+        'event.kind': 'signal',
+        'eql.parentId': '123',
+        'eql.sequenceNumber': '1-3',
+      },
+    },
+    expectation: {
+      color: 'accent',
+      label: 'EQL Non Sequence',
+    },
+  },
+  {
+    description: 'eql event type but non-alert',
+    row: {
+      flattened: {
+        'eql.parentId': '123',
+        'eql.sequenceNumber': '1-3',
+      },
+    },
+    expectation: {
+      color: 'accent',
+      label: 'EQL Non Sequence',
+    },
+  },
+
+  {
+    description: 'eql even sequence event type',
+    row: {
+      flattened: {
+        'event.kind': 'signal',
+        'eql.parentId': '123',
+        'eql.sequenceNumber': '2-4',
+      },
+    },
+    expectation: {
+      color: 'primary',
+      label: 'EQL Sequence',
+    },
+  },
+  {
+    description: 'non-eql raw event',
+    row: {
+      flattened: {},
+    },
+    expectation: {
+      color: 'lightShade',
+      label: 'Event',
+    },
+  },
+  {
+    description: 'eql event sequence and raw event',
+    row: {
+      flattened: {
+        'eql.parentId': '123',
+        'eql.sequenceNumber': '2-4',
+      },
+    },
+    expectation: {
+      color: 'primary',
+      label: 'EQL Sequence',
+    },
+  },
+];
+
+describe('getTimelineRowTypeIndicator', () => {
+  describe('Alert', () => {
+    it('should return correct label and color for EQL Event', () => {
+      const row = {
+        flattened: {
+          'event.kind': 'signal',
+          'eql.parentId': '123',
+          'eql.sequenceNumber': '1-3',
+        },
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toEqual({
+        color: 'accent',
+        label: 'EQL Non Sequence',
+      });
+    });
+    it('should return correct label and color for non-EQL Event', () => {
+      const row = {
+        flattened: {
+          'event.kind': 'signal',
+        },
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toEqual({
+        color: 'warning',
+        label: 'Alert',
+      });
+    });
+  });
+
+  describe('Event', () => {
+    it('should return correct label and color for EQL Event', () => {
+      const row = {
+        flattened: {
+          'eql.parentId': '123',
+          'eql.sequenceNumber': '1-3',
+        },
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toEqual({
+        color: 'accent',
+        label: 'EQL Non Sequence',
+      });
+    });
+    it('should return correct label and color for non-EQL Event', () => {
+      const row = {
+        flattened: {},
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toMatchObject({
+        color: 'lightShade',
+        label: 'Event',
+      });
+    });
+  });
+
+  describe('EQL Event Type', () => {
+    it('should return correct label and color for Even EQL Sequence', () => {
+      const row = {
+        flattened: {
+          'eql.parentId': '123',
+          'eql.sequenceNumber': '2-4',
+        },
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toEqual({
+        color: 'primary',
+        label: 'EQL Sequence',
+      });
+    });
+    it('should return correct label and color for Non-Even EQL Sequence', () => {
+      const row = {
+        flattened: {
+          'eql.parentId': '123',
+          'eql.sequenceNumber': '1-4',
+        },
+      } as unknown as DataTableRecord;
+      const rowIndicator = getTimelineRowTypeIndicator(row, mockEuiTheme);
+      expect(rowIndicator).toEqual({
+        color: 'accent',
+        label: 'EQL Non Sequence',
+      });
+    });
+  });
+});
