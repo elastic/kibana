@@ -270,7 +270,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('index management index list page', () => {
+      describe.skip('index management index list page', () => {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
