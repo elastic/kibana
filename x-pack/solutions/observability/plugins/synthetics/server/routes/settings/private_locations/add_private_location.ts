@@ -90,15 +90,12 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const soClient = routeContext.server.coreStart.savedObjects.createInternalRepository();
-
     const { spaces } = location;
 
-    const result = await soClient.create<PrivateLocationAttributes>(
+    const result = await savedObjectsClient.create<PrivateLocationAttributes>(
       privateLocationSavedObjectName,
       formattedLocation,
       {
-        id: location.agentPolicyId,
         initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
       }
     );

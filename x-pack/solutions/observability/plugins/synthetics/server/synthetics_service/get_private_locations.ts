@@ -31,7 +31,10 @@ export const getPrivateLocations = async (
     ]);
 
     return uniqBy(
-      [...results.map((r) => ({ ...r.attributes, spaces: r.namespaces })), ...legacyLocations],
+      [
+        ...results.map((r) => ({ ...r.attributes, spaces: r.namespaces, id: r.id })),
+        ...legacyLocations,
+      ],
       'id'
     );
   } catch (getErr) {
