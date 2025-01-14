@@ -194,7 +194,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
             throw new Error('Missing OpenAPI spec');
           }
 
-          const path = !useOtherPath ? selectedPath : selectedOtherPath;
+          const path = coalescedSelectedPath;
           const auth = translateDisplayAuthToType(selectedAuth).toLowerCase() as CelAuthType;
 
           if (!path || !auth) {
@@ -279,13 +279,13 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       connector,
       integrationSettings,
       notifications?.toasts,
-      selectedPath,
-      selectedOtherPath,
+      coalescedSelectedPath,
       selectedAuth,
       setIsFlyoutGenerating,
       useOtherPath,
       reportCelGenerationComplete,
       onCelInputGenerationComplete,
+      onShowValidation
     ]);
 
     const onCancel = useCallback(() => {
