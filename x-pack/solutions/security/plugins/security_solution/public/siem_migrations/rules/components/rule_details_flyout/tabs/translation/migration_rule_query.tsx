@@ -8,10 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
@@ -19,11 +19,11 @@ import {
 import { css } from '@emotion/react';
 import { VALIDATION_WARNING_CODES } from '../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../common/hooks/use_form_with_warnings';
-import { EsqlQueryEdit } from '../../../../../../detection_engine/rule_creation/components/esql_query_edit';
 import { Field, Form, getUseField } from '../../../../../../shared_imports';
 import type { RuleTranslationSchema } from './types';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { EsqlEditor } from './esql_editor';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -31,12 +31,13 @@ interface MigrationRuleQueryProps {
   title: string;
   ruleName?: string;
   query: string;
+  queryLanguage: string;
   canEdit?: boolean;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
-  ({ title, ruleName, query, canEdit, onTranslationUpdate }) => {
+  ({ title, ruleName, query, canEdit, queryLanguage, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
 
     const formDefaultValue: RuleTranslationSchema = useMemo(() => {
@@ -69,6 +70,13 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
         setEditMode(false);
       }
     }, [form, onTranslationUpdate]);
+
+    const codeBlockLanguage = useMemo(() => {
+      if (queryLanguage === 'spl') {
+        return 'splunk-spl';
+      }
+      return 'sql';
+    }, [queryLanguage]);
 
     const headerComponent = useMemo(() => {
       return (
@@ -108,10 +116,12 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
             <h3>{ruleName}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="xs">{query}</EuiMarkdownFormat>
+          <EuiCodeBlock language={codeBlockLanguage} fontSize="s" paddingSize="s">
+            {query}
+          </EuiCodeBlock>
         </>
       );
-    }, [canEdit, editMode, onEdit, query, ruleName]);
+    }, [editMode, canEdit, onEdit, ruleName, codeBlockLanguage, query]);
 
     const editQueryComponent = useMemo(() => {
       if (!editMode) {
@@ -146,14 +156,7 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
               },
             }}
           />
-          <EuiSpacer size="m" />
-          <EsqlQueryEdit
-            path="queryBar"
-            dataView={{
-              title: '',
-              fields: [],
-            }}
-          />
+          <EsqlEditor path="queryBar" />
         </Form>
       );
     }, [editMode, form, onCancel, onSave]);

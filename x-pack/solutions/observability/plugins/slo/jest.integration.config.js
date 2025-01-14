@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemMigrations.rules.pageTitle', {
-  defaultMessage: 'Translated rules',
-});
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/slo'],
+};
