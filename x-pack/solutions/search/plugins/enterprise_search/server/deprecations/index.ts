@@ -16,6 +16,35 @@ import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
 
+const NATIVE_SERVICE_TYPES = [
+  'azure_blob_storage',
+  'box',
+  'confluence',
+  'dropbox',
+  'github',
+  'gmail',
+  'google_cloud_storage',
+  'google_drive',
+  'jira',
+  'mssql',
+  'mongodb',
+  'mysql',
+  'network_drive',
+  'notion',
+  'onedrive',
+  'oracle',
+  'outlook',
+  'postgresql',
+  's3',
+  'salesforce',
+  'servicenow',
+  'sharepoint_online',
+  'sharepoint_server',
+  'slack',
+  'microsoft_teams',
+  'zoom',
+];
+
 export const getRegisteredDeprecations = (
   config: ConfigType,
   cloud: CloudSetup,
@@ -257,37 +286,10 @@ export async function getNativeConnectorDeprecations(
         },
       });
     } else {
-      const nativeServiceTypes = [
-        'azure_blob_storage',
-        'box',
-        'confluence',
-        'dropbox',
-        'github',
-        'gmail',
-        'google_cloud_storage',
-        'google_drive',
-        'jira',
-        'mssql',
-        'mongodb',
-        'mysql',
-        'network_drive',
-        'notion',
-        'onedrive',
-        'oracle',
-        'outlook',
-        'postgresql',
-        's3',
-        'salesforce',
-        'servicenow',
-        'sharepoint_online',
-        'sharepoint_server',
-        'slack',
-        'microsoft_teams',
-        'zoom',
-      ];
-      const nativeTypesStr = '- `' + nativeServiceTypes.join('`\n- `') + '`\n\n';
+
+      const nativeTypesStr = '- `' + NATIVE_SERVICE_TYPES.join('`\n- `') + '`\n\n';
       const fauxNativeConnectors = nativeConnectors.filter(
-        (hit) => !nativeServiceTypes.includes(hit.service_type!)
+        (hit) => !NATIVE_SERVICE_TYPES.includes(hit.service_type!)
       );
 
       if (fauxNativeConnectors.length > 0) {
