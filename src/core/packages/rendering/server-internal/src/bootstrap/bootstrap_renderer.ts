@@ -64,11 +64,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     let darkMode: DarkModeValue = false;
     let themeName: string = DEFAULT_THEME_NAME;
 
-    if (packageInfo.buildFlavor !== 'serverless') {
-      themeName = 'borealis';
-    }
-
     try {
+      // parse before updating the var just like darkMode below
+      themeName = await uiSettingsClient.get('theme:name');
+
       const authenticated = isAuthenticated(request);
 
       if (authenticated) {
@@ -79,8 +78,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
-
-        themeName = await uiSettingsClient.get('theme:name');
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES

@@ -17,9 +17,9 @@ import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
 export interface GetCoreSettingsOptions {
-  isServerless: boolean;
   isDist: boolean;
   isThemeSwitcherEnabled: boolean | undefined;
+  defaultTheme?: string;
 }
 
 export const getCoreSettings = (

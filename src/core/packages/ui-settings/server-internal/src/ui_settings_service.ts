@@ -53,7 +53,6 @@ export class UiSettingsService
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly isDist: boolean;
   private readonly isDev: boolean;
-  private readonly isServerless: boolean;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
@@ -64,7 +63,6 @@ export class UiSettingsService
     this.isDist = coreContext.env.packageInfo.dist;
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
     this.isDev = coreContext.env.mode.dev;
-    this.isServerless = coreContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
@@ -76,8 +74,8 @@ export class UiSettingsService
     this.register(
       getCoreSettings({
         isDist: this.isDist,
-        isServerless: this.isServerless,
         isThemeSwitcherEnabled: experimental?.themeSwitcherEnabled,
+        defaultTheme: experimental?.defaultTheme,
       })
     );
 
