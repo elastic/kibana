@@ -163,6 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 21, 2015 @ 06:31:44.000',
           'Sep 24, 2015 @ 00:00:00.000'
         );
+        await waitForLoadingToFinish();
         await expectSearches(type, 1, async () => {
           // show chart, we expect a request for the chart data, since the time range changed
           await discover.toggleChartVisibility();
