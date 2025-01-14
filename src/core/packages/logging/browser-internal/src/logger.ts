@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
+import { apm } from '@elastic/apm-rum';
+import type { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
 
 function isError(x: any): x is Error {
@@ -24,6 +25,7 @@ export class BaseLogger extends AbstractLogger {
     meta?: Meta
   ): LogRecord {
     if (isError(errorOrMessage)) {
+      apm.captureError(Object.assign({}, errorOrMessage, { meta, context: this.context, level }));
       return {
         context: this.context,
         error: errorOrMessage,
