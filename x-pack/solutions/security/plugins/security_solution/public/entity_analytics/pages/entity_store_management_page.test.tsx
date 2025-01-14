@@ -8,7 +8,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityStoreManagementPage } from './entity_store_management_page';
-import { TestProviders } from '../../common/mock';
+import { TestProviders, mockGlobalState } from '../../common/mock';
+
+const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
 
 jest.mock('../components/entity_store/components/engines_status', () => ({
   EngineStatus: () => <span>{'Mocked Engine Status Tab'}</span>,
@@ -22,6 +24,7 @@ jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+  useEnableExperimental: () => mockedExperimentalFeatures,
 }));
 
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(true);
