@@ -87,7 +87,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     );
   }
 
-  it('renders "Setting up Knowledge base" message while while inference endpoint is installing', () => {
+  it('renders "Setting up Knowledge base" message while inference endpoint is installing', () => {
     renderComponent({
       knowledgeBase: {
         isInstalling: true,
