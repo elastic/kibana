@@ -23,7 +23,7 @@ visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }])
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
     const mockDashboardApi = {
-      viewMode: new BehaviorSubject<ViewMode>(viewMode),
+      viewMode$: new BehaviorSubject<ViewMode>(viewMode),
     } as unknown as DashboardApi;
     return mountWithIntl(
       <DashboardContext.Provider value={mockDashboardApi}>

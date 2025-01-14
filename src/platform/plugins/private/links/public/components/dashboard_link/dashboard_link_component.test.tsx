@@ -310,9 +310,9 @@ describe('Dashboard link component', () => {
   test('current dashboard title updates when parent changes', async () => {
     const parentApi = {
       ...createMockLinksParent({}),
-      panelTitle: new BehaviorSubject<string | undefined>('old title'),
-      panelDescription: new BehaviorSubject<string | undefined>('old description'),
-      savedObjectId: new BehaviorSubject<string | undefined>('123'),
+      title$: new BehaviorSubject<string | undefined>('old title'),
+      description$: new BehaviorSubject<string | undefined>('old description'),
+      savedObjectId$: new BehaviorSubject<string | undefined>('123'),
     };
 
     const { rerender } = render(
@@ -328,7 +328,7 @@ describe('Dashboard link component', () => {
     );
     expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
 
-    parentApi.panelTitle.next('new title');
+    parentApi.title$.next('new title');
     rerender(
       <DashboardLinkComponent
         link={{
