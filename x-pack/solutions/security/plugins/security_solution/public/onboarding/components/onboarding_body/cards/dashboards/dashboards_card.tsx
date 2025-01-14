@@ -31,7 +31,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
 
-  const [selectedAlertId, setSelectedAlertId] = useStoredSelectedCardItemId(
+  const [selectedDashboardId, setSelectedDashboardId] = useStoredSelectedCardItemId(
     'dashboards',
     spaceId,
     DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id
