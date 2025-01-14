@@ -18,8 +18,8 @@ import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsSetup extends Record<string, any> = never,
+  TPluginsStart extends Record<string, any> = never
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 

@@ -6,13 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  deleteStream,
-  enableStreams,
-  fetchDocument,
-  forkStream,
-  indexDocument,
-} from './helpers/requests';
+import { enableStreams, fetchDocument, forkStream, indexDocument } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { cleanUpRootStream } from './helpers/cleanup';
@@ -25,8 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Basic functionality', () => {
     after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
       await cleanUpRootStream(esClient);
+      await esClient.indices.deleteDataStream({
+        name: ['logs*'],
+      });
     });
 
     // Note: Each step is dependent on the previous
@@ -53,7 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -90,7 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -128,7 +126,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -168,7 +167,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'error', logger: 'nginx' },
+          'log.level': 'error',
+          'log.logger': 'nginx',
         });
       });
 

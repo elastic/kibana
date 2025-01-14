@@ -14,6 +14,12 @@ export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
   router.post(
     {
       path: `${API_BASE_PATH}/{indexName}/index_settings`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

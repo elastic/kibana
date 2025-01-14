@@ -43,10 +43,12 @@ export const getIndexTemplate = ({
     namespace,
   };
 
-  const dataStreamFields = dataStreamAdapter.getIndexTemplateFields(
-    indexPatterns.alias,
-    indexPatterns.pattern
-  );
+  const patterns: string[] = [indexPatterns.pattern];
+  if (indexPatterns.reindexedPattern) {
+    patterns.push(indexPatterns.reindexedPattern);
+  }
+
+  const dataStreamFields = dataStreamAdapter.getIndexTemplateFields(indexPatterns.alias, patterns);
 
   const indexLifecycle = {
     name: ilmPolicyName,

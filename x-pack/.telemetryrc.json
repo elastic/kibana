@@ -2,9 +2,7 @@
   {
     "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_plugins.json",
     "root": "plugins/",
-    "exclude": [
-      "platform/plugins/private/monitoring/server/telemetry_collection/"
-    ]
+    "exclude": []
   },
   {
     "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_monitoring.json",
@@ -14,7 +12,9 @@
   {
     "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_platform.json",
     "root": "platform/",
-    "exclude": []
+    "exclude": [
+      "platform/plugins/private/monitoring/server/telemetry_collection/"
+    ]
   },
   {
     "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_observability.json",
