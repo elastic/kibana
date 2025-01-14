@@ -1775,7 +1775,7 @@ export const waitForFleetAgentActionToComplete = async (
 export const installIntegration = async (
   kbnClient: KbnClient,
   integrationName: string,
-  version?: string
+  version: string
 ): Promise<InstallPackageResponse> => {
   return kbnClient
     .request<InstallPackageResponse>({
