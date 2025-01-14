@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UpgradeWarning } from '../components/upgrade';
@@ -99,7 +98,6 @@ export const OverviewPage: FC = () => {
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
-  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm', 'l', 'xl']);
 
   return (
     <>
