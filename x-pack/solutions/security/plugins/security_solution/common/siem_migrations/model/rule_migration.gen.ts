@@ -343,10 +343,6 @@ export const UpdateRuleMigrationData = z.object({
    */
   elastic_rule: ElasticRulePartial.optional(),
   /**
-   * The rule translation result.
-   */
-  translation_result: RuleMigrationTranslationResult.optional(),
-  /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
   comments: RuleMigrationComments.optional(),
