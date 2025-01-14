@@ -12,29 +12,31 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { UserInteractionEvent, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager } from '../types';
+import { useGridLayoutEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = ({
-  interactionStart,
+  gridLayoutStateManager,
+  rowIndex,
+  panelId,
 }: {
-  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+  rowIndex: number;
+  panelId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const attachLayoutEvents = useGridLayoutEvents({
+    interactionType: 'resize',
+    gridLayoutStateManager,
+    panelId,
+    rowIndex,
+  });
+
   return (
     <button
       className="kbnGridPanel__resizeHandle"
-      onMouseDown={(e) => {
-        interactionStart('resize', e);
-      }}
-      onMouseUp={(e) => {
-        interactionStart('drop', e);
-      }}
-      onTouchStart={(e) => {
-        interactionStart('resize', e);
-      }}
-      onTouchEnd={(e) => {
-        interactionStart('drop', e);
-      }}
+      onMouseDown={attachLayoutEvents}
+      onTouchStart={attachLayoutEvents}
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}
@@ -71,6 +73,7 @@ export const ResizeHandle = ({
         .kbnGridPanel__dragHandle:has(~ &:focus) {
           opacity: 0 !important;
         }
+        touch-action: none;
       `}
     />
   );

@@ -10,6 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
+import { clone, cloneDeep } from 'lodash';
 import {
   ActivePanel,
   GridAccessMode,
@@ -44,6 +45,7 @@ export const gridLayoutStateManagerMock: GridLayoutStateManager = {
   expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
   isMobileView$: new BehaviorSubject<boolean>(false),
   gridLayout$,
+  stableGridLayout$: cloneDeep(gridLayout$),
   runtimeSettings$,
   panelRefs: { current: [] },
   rowRefs: { current: [] },

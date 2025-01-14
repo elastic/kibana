@@ -59,13 +59,18 @@ describe('GridLayout', () => {
   const touchStart = (handle: HTMLElement, options = { touches: [{ clientX: 0, clientY: 0 }] }) => {
     fireEvent.touchStart(handle, options);
   };
-  const touchMoveTo = (options = { touches: [{ clientX: 256, clientY: 128 }] }) => {
+
+  const touchMoveTo = (
+    handle: HTMLElement,
+    options = { touches: [{ clientX: 256, clientY: 128 }] }
+  ) => {
     const realTouchEvent = window.TouchEvent;
     // @ts-expect-error
     window.TouchEvent = TouchEventFake;
-    fireEvent.touchMove(document, new TouchEventFake(options.touches));
+    fireEvent.touchMove(handle, new TouchEventFake(options.touches));
     window.TouchEvent = realTouchEvent;
   };
+
   const touchEnd = (handle: HTMLElement) => {
     fireEvent.touchEnd(handle);
   };
@@ -151,7 +156,7 @@ describe('GridLayout', () => {
 
       const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
       touchStart(panel1DragHandle);
-      touchMoveTo({ touches: [{ clientX: 256, clientY: 128 }] });
+      touchMoveTo(panel1DragHandle, { touches: [{ clientX: 256, clientY: 128 }] });
       expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
 
       touchEnd(panel1DragHandle);

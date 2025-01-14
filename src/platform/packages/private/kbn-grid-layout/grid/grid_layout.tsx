@@ -16,7 +16,6 @@ import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings } from './types';
-import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
@@ -47,7 +46,7 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
-  useGridLayoutEvents({ gridLayoutStateManager });
+
   const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
@@ -152,12 +151,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          setInteractionEvent={(nextInteractionEvent) => {
-            if (!nextInteractionEvent) {
-              gridLayoutStateManager.activePanel$.next(undefined);
-            }
-            gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-          }}
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
           }
