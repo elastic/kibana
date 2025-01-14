@@ -39250,7 +39250,11 @@
             }
           }
         },
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Query roles",
         "tags": []
       }
