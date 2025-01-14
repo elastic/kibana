@@ -221,14 +221,20 @@ export const GridExample = ({
                         iconSide="right"
                         onClick={() => setIsSettingsPopoverOpen(!isSettingsPopoverOpen)}
                       >
-                        Grid layout settings
+                        {i18n.translate('examples.gridExample.settingsPopover.title', {
+                          defaultMessage: 'Layout settings',
+                        })}
                       </EuiButton>
                     }
                     isOpen={isSettingsPopoverOpen}
                     closePopover={() => setIsSettingsPopoverOpen(false)}
                   >
                     <>
-                      <EuiFormRow label="View mode">
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.viewMode', {
+                          defaultMessage: 'View mode',
+                        })}
+                      >
                         <EuiButtonGroup
                           legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
                             defaultMessage: 'Layout options',
@@ -257,7 +263,11 @@ export const GridExample = ({
                           }}
                         />
                       </EuiFormRow>
-                      <EuiFormRow label="Gutter size">
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.gutterSize', {
+                          defaultMessage: 'Gutter size',
+                        })}
+                      >
                         <EuiRange
                           min={1}
                           max={30}
@@ -267,7 +277,11 @@ export const GridExample = ({
                           showValue
                         />
                       </EuiFormRow>
-                      <EuiFormRow label="Row height">
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.rowHeight', {
+                          defaultMessage: 'Row height',
+                        })}
+                      >
                         <EuiRange
                           min={5}
                           max={30}
@@ -276,7 +290,6 @@ export const GridExample = ({
                           onChange={(e) => setRowHeight(parseInt(e.currentTarget.value, 10))}
                           showLabels
                           showValue
-                          aria-label="An example of EuiRange with showValue prop"
                         />
                       </EuiFormRow>
                     </>
