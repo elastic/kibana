@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
   isWiredStream,
   isWiredStreamConfig,
@@ -103,6 +104,79 @@ export const readStreamRoute = createServerRoute({
       };
 
       return body;
+    } catch (e) {
+      if (e instanceof DefinitionNotFound) {
+        throw notFound(e);
+      }
+
+      throw internal(e);
+    }
+  },
+});
+
+export interface StreamDetailsResponse {
+  details: {
+    count: number;
+  };
+}
+
+export const streamDetailRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{id}/_details',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    query: z.object({
+      start: z.string(),
+      end: z.string(),
+    }),
+  }),
+  handler: async ({
+    response,
+    params,
+    request,
+    logger,
+    getScopedClients,
+  }): Promise<StreamDetailsResponse> => {
+    try {
+      const { scopedClusterClient } = await getScopedClients({ request });
+      const streamEntity = await readStream({
+        scopedClusterClient,
+        id: params.path.id,
+      });
+
+      // check doc count
+      const docCountResponse = await scopedClusterClient.asCurrentUser.search({
+        index: streamEntity.name,
+        body: {
+          track_total_hits: true,
+          query: {
+            range: {
+              '@timestamp': {
+                gte: params.query.start,
+                lte: params.query.end,
+              },
+            },
+          },
+          size: 0,
+        },
+      });
+
+      const count = (docCountResponse.hits.total as SearchTotalHits).value;
+
+      return {
+        details: {
+          count,
+        },
+      };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);
@@ -470,6 +544,7 @@ async function updateParentStreamAfterDelete(
 
 export const crudRoutes = {
   ...readStreamRoute,
+  ...streamDetailRoute,
   ...listStreamsRoute,
   ...editStreamRoute,
   ...deleteStreamRoute,
