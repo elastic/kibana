@@ -16,11 +16,8 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridProps,
-  EuiThemeComputed,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { getFieldValue } from '@kbn/discover-utils';
-import { isEmpty } from 'lodash';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -52,6 +49,7 @@ import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { getTimelineRowTypeIndicator } from './get_row_indicator';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -373,48 +371,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
-    const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = useCallback(
-      (row: DataTableRecord, euiTheme: EuiThemeComputed) => {
-        const isAlert = getFieldValue(row, 'event.kind') === 'signal';
-
-        const isEql =
-          !isEmpty(getFieldValue(row, 'eql.parentId')) &&
-          !isEmpty(getFieldValue(row, 'eql.sequenceNumber'));
-
-        if (isEql) {
-          const sequenceNumber = ((getFieldValue(row, 'eql.sequenceNumber') as string) ?? '').split(
-            '-'
-          )[0];
-
-          const isEvenSequence = parseInt(sequenceNumber, 10) % 2 === 0;
-
-          if (isEvenSequence) {
-            return {
-              color: euiTheme.colors.primary,
-              label: 'EQL Sequence',
-            };
-          }
-          return {
-            color: euiTheme.colors.accent,
-            label: 'EQL Non Sequence',
-          };
-        }
-
-        if (isAlert) {
-          return {
-            color: euiTheme.colors.warning,
-            label: 'Alert',
-          };
-        }
-
-        return {
-          color: euiTheme.colors.lightShade,
-          label: 'Event',
-        };
-      },
-      []
-    );
-
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -468,7 +424,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             onUpdatePageIndex={onUpdatePageIndex}
-            getRowIndicator={getRowIndicator}
+            getRowIndicator={getTimelineRowTypeIndicator}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

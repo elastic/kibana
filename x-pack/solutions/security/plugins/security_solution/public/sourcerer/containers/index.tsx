@@ -124,7 +124,6 @@ export const useSourcererDataView = (
         title: selectedPatterns.join(','),
         getName: () => selectedPatterns.join(','),
       },
-      x: 'asdas',
       indicesExist,
       loading: loading || sourcererDataView.loading,
       // all active & inactive patterns in DATA_VIEW
