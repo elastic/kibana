@@ -37,8 +37,8 @@ export const RulesCard: OnboardingCardComponent = ({
     DEFAULT_RULES_CARD_ITEM_SELECTED.id
   );
   const selectedCardItem = useMemo<CardSelectorAssetListItem>(
-    () => RULES_CARD_ITEMS_BY_ID[selectedAlertId],
-    [selectedAlertId]
+    () => RULES_CARD_ITEMS_BY_ID[selectedRuleId],
+    [selectedRuleId]
   );
 
   const isIntegrationsCardComplete = useMemo(
@@ -57,9 +57,9 @@ export const RulesCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedAlertId(item.id);
+      setSelectedRuleId(item.id);
     },
-    [setSelectedAlertId]
+    [setSelectedRuleId]
   );
 
   return (

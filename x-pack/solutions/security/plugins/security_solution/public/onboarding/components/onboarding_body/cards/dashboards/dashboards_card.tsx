@@ -37,8 +37,8 @@ export const DashboardsCard: OnboardingCardComponent = ({
     DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id
   );
   const selectedCardItem = useMemo<CardSelectorAssetListItem>(
-    () => DASHBOARDS_CARD_ITEMS_BY_ID[selectedAlertId],
-    [selectedAlertId]
+    () => DASHBOARDS_CARD_ITEMS_BY_ID[selectedDashboardId],
+    [selectedDashboardId]
   );
 
   const isIntegrationsCardComplete = useMemo(
@@ -57,9 +57,9 @@ export const DashboardsCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedAlertId(item.id);
+      setSelectedDashboardId(item.id);
     },
-    [setSelectedAlertId]
+    [setSelectedDashboardId]
   );
 
   return (
