@@ -74,7 +74,6 @@ import {
   registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
 } from './collectors/workplace_search/telemetry';
 import { getRegisteredDeprecations } from './deprecations';
-import { registerDeprecationRoutes } from './routes/enterprise_search/deprecations';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';
@@ -91,6 +90,7 @@ import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
+import { registerDeprecationRoutes } from './routes/enterprise_search/deprecations';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';

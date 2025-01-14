@@ -57,22 +57,12 @@ export const getRegisteredDeprecations = (
         ctx.esClient.asInternalUser,
         ctx.savedObjectsClient
       );
-      const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl)
+      const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
       const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
         await getCrawlerDeprecations(ctx, docsUrl),
-        await getNativeConnectorDeprecations(
-          ctx,
-          hasAgentless,
-          hasFleetServer,
-          cloud,
-          docsUrl
-        )
-      ])
-      return [
-        ...entSearchDetails,
-        ...crawlerDetails,
-        ...nativeConnectorsDetails,
-      ];
+        await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
+      ]);
+      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails];
     },
   };
 };
@@ -289,7 +279,6 @@ export async function getNativeConnectorDeprecations(
         },
       });
     } else {
-
       const nativeTypesStr = '- `' + NATIVE_SERVICE_TYPES.join('`\n- `') + '`\n\n';
       const fauxNativeConnectors = nativeConnectors.filter(
         (hit) => !NATIVE_SERVICE_TYPES.includes(hit.service_type!)
