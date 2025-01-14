@@ -20,7 +20,7 @@ export const GridRowHeader = ({
   rowTitle?: string;
 }) => {
   return (
-    <>
+    <div className="kbnGridRowHeader">
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s">
         <EuiButtonIcon
@@ -36,6 +36,6 @@ export const GridRowHeader = ({
         </EuiTitle>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-    </>
+    </div>
   );
 };

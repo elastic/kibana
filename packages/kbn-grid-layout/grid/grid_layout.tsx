@@ -8,11 +8,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
+
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings } from './types';
@@ -48,6 +48,7 @@ export const GridLayout = ({
     accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
+  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
@@ -89,6 +90,9 @@ export const GridLayout = ({
         setRowCount(newRowCount);
       });
 
+    /**
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes
+     */
     const onLayoutChangeSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.interactionEvent$,
@@ -106,9 +110,33 @@ export const GridLayout = ({
         }
       });
 
+    /**
+     * This subscription adds and/or removes the necessary class names related to styling for
+     * mobile view and a static (non-interactable) grid layout
+     */
+    const gridLayoutClassSubscription = combineLatest([
+      gridLayoutStateManager.accessMode$,
+      gridLayoutStateManager.isMobileView$,
+    ]).subscribe(([currentAccessMode, isMobileView]) => {
+      if (!layoutRef) return;
+
+      if (isMobileView) {
+        layoutRef.current?.classList.add('kbnGrid--mobileView');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--mobileView');
+      }
+
+      if (currentAccessMode === 'VIEW') {
+        layoutRef.current?.classList.add('kbnGrid--static');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--static');
+      }
+    });
+
     return () => {
       rowCountSubscription.unsubscribe();
       onLayoutChangeSubscription.unsubscribe();
+      gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -138,21 +166,20 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
-  const gridClassNames = classNames('kbnGrid', {
-    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
-    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
-  });
-
   return (
     <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
       <div
         ref={(divElement) => {
+          layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className={gridClassNames}
+        className="kbnGrid"
         css={css`
-          &.kbnGrid--hasExpandedPanel {
-            height: 100%;
+          &:has(.kbnGridPanel--expanded) {
+            ${expandedPanelStyles}
+          }
+          &.kbnGrid--mobileView {
+            ${singleColumnStyles}
           }
         `}
       >
@@ -161,3 +188,50 @@ export const GridLayout = ({
     </GridHeightSmoother>
   );
 };
+
+const singleColumnStyles = css`
+  .kbnGridRow {
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+  }
+
+  .kbnGridPanel {
+    grid-area: unset !important;
+  }
+`;
+
+const expandedPanelStyles = css`
+  height: 100%;
+
+  & .kbnGridRowContainer:has(.kbnGridPanel--expanded) {
+    // targets the grid row container that contains the expanded panel
+    .kbnGridRowHeader {
+      height: 0px; // used instead of 'display: none' due to a11y concerns
+    }
+    .kbnGridRow {
+      display: block !important; // overwrite grid display
+      height: 100%;
+      .kbnGridPanel {
+        &.kbnGridPanel--expanded {
+          height: 100% !important;
+        }
+        &:not(.kbnGridPanel--expanded) {
+          // hide the non-expanded panels
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+        }
+      }
+    }
+  }
+
+  & .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded)) {
+    // targets the grid row containers that **do not** contain the expanded panel
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+`;

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { debounce } from 'lodash';
 import classNames from 'classnames';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
@@ -28,20 +26,6 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
-export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
-  const [width, setWidth] = useState<number>(0);
-  const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
-  const { ref } = useResizeObserver<HTMLDivElement>({
-    onResize: (dimensions) => {
-      if (dimensions.width) {
-        if (width === 0 || skipDebounce) setWidth(dimensions.width);
-        if (dimensions.width !== width) onWidthChange(dimensions.width);
-      }
-    },
-  });
-  return { ref, width };
-};
-
 export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
@@ -51,7 +35,6 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     dashboardTitle,
     description,
     expandedPanelId,
-    focusedPanelId,
     panels,
     viewMode,
     useMargins,
@@ -61,7 +44,6 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     dashboardApi.panelTitle,
     dashboardApi.panelDescription,
     dashboardApi.expandedPanelId,
-    dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.settings.useMargins$,
@@ -75,10 +57,9 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     return Object.keys(panels).length;
   }, [panels]);
 
-  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
-
   const classes = classNames({
     dshDashboardViewport: true,
+    'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
@@ -150,20 +131,13 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
       )}
       {panelCount === 0 && <DashboardEmptyScreen />}
       <div
-        ref={resizeRef}
         className={classes}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
-            otherwise, there is a race condition where the panels can end up being squashed 
-            TODO only render when dashboardInitialized
-        */}
-        {viewportWidth !== 0 && (
-          <DashboardGrid dashboardContainer={dashboardContainer} viewportWidth={viewportWidth} />
-        )}
+        <DashboardGrid dashboardContainer={dashboardContainer} />
       </div>
     </div>
   );
