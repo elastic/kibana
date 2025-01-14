@@ -1626,22 +1626,7 @@
       },
       "agentless": {
         "dynamic": false,
-        "properties": {
-          "resources": {
-            "properties": {
-              "requests": {
-                "properties": {
-                  "cpu": {
-                    "type": "keyword"
-                  },
-                  "memory": {
-                    "type": "keyword"
-                  }
-                }
-              }
-            }
-          }
-        }
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -2015,22 +2000,7 @@
       },
       "agentless": {
         "dynamic": false,
-        "properties": {
-          "resources": {
-            "properties": {
-              "requests": {
-                "properties": {
-                  "cpu": {
-                    "type": "keyword"
-                  },
-                  "memory": {
-                    "type": "keyword"
-                  }
-                }
-              }
-            }
-          }
-        }
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
