@@ -19,6 +19,7 @@ import { DATASET_VAR_NAME } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 
 import { packageToPackagePolicy } from '.';
+import { inputNotAllowedInAgentless } from './agentless_policy_helper';
 
 export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
 
@@ -196,10 +197,15 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       throw new PackagePolicyValidationError(`Input not found: ${inputId}`);
     }
 
-    if (enabled === false) {
+    if (
+      inputNotAllowedInAgentless(packagePolicyInput, packagePolicy?.supports_agentless) ||
+      enabled === false
+    ) {
       packagePolicyInput.enabled = false;
+      packagePolicyInput.keep_enabled = false;
     } else {
       packagePolicyInput.enabled = true;
+      packagePolicyInput.keep_enabled = true;
     }
 
     if (inputLevelVars) {
@@ -213,7 +219,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
       }
 
-      if (streamEnabled === false) {
+      if (
+        streamEnabled === false ||
+        inputNotAllowedInAgentless(packagePolicyInput, packagePolicy?.supports_agentless)
+      ) {
         packagePolicyStream.enabled = false;
       } else {
         packagePolicyStream.enabled = true;

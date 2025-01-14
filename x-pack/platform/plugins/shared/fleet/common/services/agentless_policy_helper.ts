@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { PackageInfo, RegistryPolicyTemplate } from '../types';
+import { AGENTLESS_DISABLED_INPUTS } from '../constants';
+import { PackagePolicyValidationError } from '../errors';
+import type {
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicyInput,
+  RegistryPolicyTemplate,
+} from '../types';
 
 export const isAgentlessIntegration = (
   packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
@@ -49,3 +56,31 @@ export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemp
         policyTemplate.deployment_modes.default.enabled === false)
   );
 };
+
+/*
+ * Check if the package policy inputs is not allowed in agentless
+ */
+export function inputNotAllowedInAgentless(
+  packagePolicyInput: PackagePolicyInput | NewPackagePolicyInput,
+  supportsAgentless?: boolean | null
+) {
+  return supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(packagePolicyInput.type);
+}
+
+/*
+ * Throw error if trying to enabling an input that is not allowed in agentless
+ */
+export function checkAgentlessInputs(
+  packagePolicyInputs: NewPackagePolicyInput[],
+  supportsAgentless?: boolean | null
+) {
+  return packagePolicyInputs.forEach((input) => {
+    if (inputNotAllowedInAgentless(input, supportsAgentless) && input.enabled === true) {
+      throw new PackagePolicyValidationError(
+        `Input ${input.type} is not allowed: types '${AGENTLESS_DISABLED_INPUTS.map(
+          (name) => name
+        ).join(', ')}' cannot be enabled for an Agentless integration`
+      );
+    }
+  });
+}

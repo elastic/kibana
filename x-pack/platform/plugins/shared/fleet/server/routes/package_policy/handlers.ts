@@ -58,6 +58,8 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
+import { checkAgentlessInputs } from '../../../common/services/agentless_policy_helper';
+
 import {
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
@@ -386,6 +388,10 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
+    checkAgentlessInputs(
+      newData.inputs,
+      newData.supports_agentless || packagePolicy.supports_agentless
+    );
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (

@@ -105,6 +105,8 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
+import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -1911,14 +1913,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
+          // disable some inputs in case of agentless integration
+          const enabled = inputNotAllowedInAgentless(input, newPolicy?.supports_agentless)
+            ? false
+            : input.enabled;
           return {
             ...defaultInput,
-            enabled: input.enabled,
+            enabled,
+            keep_enabled: enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled: input.enabled,
+              enabled,
             })),
           } as NewPackagePolicyInput;
         });
@@ -1927,7 +1934,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           name: newPolicy.name,
           namespace: newPolicy?.namespace ?? '',
           description: newPolicy.description ?? '',
-          enabled: newPolicy.enabled ?? true,
+          enabled: newPolicy.enabled,
           package: {
             ...newPP.package!,
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
