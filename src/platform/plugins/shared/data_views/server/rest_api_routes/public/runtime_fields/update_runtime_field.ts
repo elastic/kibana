@@ -14,7 +14,7 @@ import { DataViewsService } from '../../../../common/data_views';
 import { RuntimeField } from '../../../../common/types';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSchemaUpdate } from '../../../schemas';
+import { runtimeFieldSchemaUpdate } from '../../../../common/schema/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,

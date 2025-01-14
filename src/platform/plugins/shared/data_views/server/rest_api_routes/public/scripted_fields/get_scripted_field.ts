@@ -16,7 +16,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
 import { INITIAL_REST_VERSION } from '../../../constants';
-import { fieldSpecSchemaFields } from '../../../schemas';
+import { fieldSpecSchemaFields } from '../../../../common/schema/schemas';
 import { FieldSpecRestResponse } from '../../route_types';
 
 export const registerGetScriptedFieldRoute = (

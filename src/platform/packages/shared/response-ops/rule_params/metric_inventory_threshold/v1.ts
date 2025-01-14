@@ -9,7 +9,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { dataViewSpecSchema } from '../common/data_view_spec_schema';
+import { dataViewSpecSchema } from '@kbn/data-views-plugin/common';
 
 import {
   LEGACY_COMPARATORS,
