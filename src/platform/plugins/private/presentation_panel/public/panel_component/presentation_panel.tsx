@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_presentation_panel.scss';
-
 import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
@@ -18,6 +16,7 @@ import { css } from '@emotion/react';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { getErrorLoadingPanel } from './presentation_panel_strings';
+import { usePanelErrorCss } from './use_panel_error_css';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -27,6 +26,7 @@ export const PresentationPanel = <
     hidePanelChrome?: boolean;
   }
 ) => {
+  const panelErrorCss = usePanelErrorCss();
   const { Component, hidePanelChrome, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
@@ -88,7 +88,8 @@ export const PresentationPanel = <
     return (
       <EuiFlexGroup
         alignItems="center"
-        className="eui-fullHeight embPanel__error"
+        css={panelErrorCss}
+        className="eui-fullHeight"
         data-test-subj="embeddableError"
         justifyContent="center"
       >
