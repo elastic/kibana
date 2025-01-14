@@ -125,8 +125,8 @@ export const GridExample = ({
   const customLayoutCss = useMemo(() => {
     return css`
       .kbnGridLayout--targettedRow {
-        background-position: top - calc((var(--kbnGridGutterSize) / 2) * 1px) left -
-          calc((var(--kbnGridGutterSize) / 2) * 1px);
+        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+          calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
           calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
         background-image: linear-gradient(
