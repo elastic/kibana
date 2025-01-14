@@ -38,8 +38,8 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           cluster: ['manage_connector', 'monitor_connector'],
         },
       });
-      const canManageConnectors = privileges.cluster['manage_connector'];
-      const canReadConnectors = privileges.cluster['monitor_connector'];
+      const canManageConnectors = privileges.cluster.manage_connector;
+      const canReadConnectors = privileges.cluster.monitor_connector;
 
       const connectors = canReadConnectors ? await fetchConnectors(client.asCurrentUser) : [];
 
