@@ -234,7 +234,7 @@ export async function getNativeConnectorDeprecations(
             }),
             i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.convertPretenders', {
               defaultMessage:
-                'Select "Convert to Client" for any connectors where `is_native: true`.',
+                'On the connector Overview tab, select "Convert Connector" for any Native Connectors.',
             }),
           ],
           api: {
