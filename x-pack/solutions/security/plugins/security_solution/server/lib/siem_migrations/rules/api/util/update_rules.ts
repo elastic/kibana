@@ -6,10 +6,11 @@
  */
 
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
+import type { UpdateRuleMigrationData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleMigrationTranslationResultEnum,
   type RuleMigrationTranslationResult,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export const isValidEsqlQuery = (esqlQuery: string) => {
   const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
@@ -39,4 +40,20 @@ export const convertEsqlQueryToTranslationResult = (
   return isValidEsqlQuery(esqlQuery)
     ? RuleMigrationTranslationResultEnum.full
     : RuleMigrationTranslationResultEnum.partial;
+};
+
+export const transformRuleMigrationToUpdate = (
+  ruleMigration: UpdateRuleMigrationData
+): UpdateRuleMigrationData => {
+  const {
+    translation_result: translationResult,
+    elastic_rule: elasticRule,
+    ...rest
+  } = ruleMigration;
+  return {
+    ...rest,
+    elastic_rule: elasticRule,
+    translation_result:
+      translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
+  };
 };

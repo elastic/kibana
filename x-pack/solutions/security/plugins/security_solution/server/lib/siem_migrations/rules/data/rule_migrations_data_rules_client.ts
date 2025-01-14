@@ -29,7 +29,6 @@ import {
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { convertEsqlQueryToTranslationResult } from './utils';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -107,20 +106,12 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         .bulk({
           refresh: 'wait_for',
           operations: ruleMigrationsSlice.flatMap((ruleMigration) => {
-            const {
-              id,
-              translation_result: translationResult,
-              elastic_rule: elasticRule,
-              ...rest
-            } = ruleMigration;
+            const { id, ...rest } = ruleMigration;
             return [
               { update: { _index: index, _id: id } },
               {
                 doc: {
                   ...rest,
-                  elastic_rule: elasticRule,
-                  translation_result:
-                    translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
                   updated_by: profileId,
                   updated_at: updatedAt,
                 },
