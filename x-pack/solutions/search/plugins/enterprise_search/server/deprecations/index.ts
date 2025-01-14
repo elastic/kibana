@@ -356,6 +356,8 @@ export async function getNativeConnectorDeprecations(
                 defaultMessage:
                   'In versions >= 9.x, Elastic-managed connectors are run through the Elastic Integrations ecosystem. ' +
                   'This requires the Integration Server to be present in your deployment.\n\n' +
+                  'Unless you are running more than 1000 connectors, a single instance of the smallest Integration Server' +
+                  'should be sufficient.\n\n' +
                   'For full details, see the documentation.' +
                   `\n\n[Click here to manage your deployment](${
                     cloud.baseUrl + '/deployments/' + cloud.deploymentId
@@ -389,7 +391,8 @@ export async function getNativeConnectorDeprecations(
               i18n.translate(
                 'xpack.enterpriseSearch.deprecations.missingIntegrationServer.addCapacity',
                 {
-                  defaultMessage: "Click the button to '+ Add capacity' and choose a size/count",
+                  defaultMessage: "Click the button to '+ Add capacity' and choose a size/count. For most customers," +
+                    "the smallest option in a single zone is sufficient.",
                 }
               ),
               i18n.translate(
