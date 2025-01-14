@@ -24,20 +24,25 @@ export const PKG_DIRS: Record<string, string> = {
   'xpack|search|private': resolve(REPO_ROOT, 'x-pack/solutions/search/packages'),
 };
 
+function folderName(pkgId: string) {
+  return pkgId.slice(1).replace('/', '-');
+}
+
+export function determineDevPackageDir(pkgId: string) {
+  return resolve(REPO_ROOT, 'packages', folderName(pkgId));
+}
+
 export function determinePackageDir({
   pkgId,
-  devOnly,
   group,
   visibility,
   xpack,
 }: {
   pkgId: string;
-  devOnly: boolean;
   group: 'observability' | 'platform' | 'security' | 'search';
   visibility: 'private' | 'shared';
   xpack: boolean;
 }) {
-  const folderName = pkgId.slice(1).replace('/', '-');
-  const dir = devOnly ? 'packages' : PKG_DIRS[`${xpack ? 'xpack' : 'oss'}|${group}|${visibility}`];
-  return resolve(REPO_ROOT, dir, folderName);
+  const dir = PKG_DIRS[`${xpack ? 'xpack' : 'oss'}|${group}|${visibility}`];
+  return resolve(REPO_ROOT, dir, folderName(pkgId));
 }

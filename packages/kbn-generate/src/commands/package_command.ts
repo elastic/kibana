@@ -20,7 +20,7 @@ import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-erro
 import { sortPackageJson } from '@kbn/sort-package-json';
 
 import { validateElasticTeam } from '../lib/validate_elastic_team';
-import { PKG_TEMPLATE_DIR, determinePackageDir } from '../paths';
+import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
 
@@ -66,7 +66,10 @@ export const PackageCommand: GenerateCommand = {
     }
 
     const web = !!flags.web;
-    const devOnly = !!flags.dev;
+    const dev = !!flags.dev;
+    let group: 'platform' | 'observability' | 'security' | 'search' = 'platform';
+    let visibility: 'private' | 'shared' = 'private';
+    let calculatedPackageDir: string;
 
     const owner =
       flags.owner ||
@@ -85,53 +88,61 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
-    const { group } = await inquirer.prompt<{
-      group: 'platform' | 'observability' | 'security' | 'search';
-    }>({
-      type: 'list',
-      choices: [
-        { name: 'Platform', value: 'platform' },
-        { name: 'Observability', value: 'observability' },
-        { name: 'Security', value: 'security' },
-        { name: 'Search', value: 'search' },
-      ],
-      name: 'group',
-      message: `What group is this package part of?`,
-    });
-
-    let xpack: boolean;
-    if (group === 'platform') {
-      const resXpack = await inquirer.prompt<{ xpack: boolean }>({
-        type: 'list',
-        default: false,
-        choices: [
-          { name: 'Yes', value: true },
-          { name: 'No', value: false },
-        ],
-        name: 'xpack',
-        message: `Does this package have x-pack licensed code?`,
-      });
-      xpack = resXpack.xpack;
+    if (dev) {
+      calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
-      xpack = true;
+      group = (
+        await inquirer.prompt<{
+          group: 'platform' | 'observability' | 'security' | 'search';
+        }>({
+          type: 'list',
+          choices: [
+            { name: 'Platform', value: 'platform' },
+            { name: 'Observability', value: 'observability' },
+            { name: 'Security', value: 'security' },
+            { name: 'Search', value: 'search' },
+          ],
+          name: 'group',
+          message: `What group is this package part of?`,
+        })
+      ).group;
+
+      let xpack: boolean;
+
+      if (group === 'platform') {
+        const resXpack = await inquirer.prompt<{ xpack: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes', value: true },
+            { name: 'No', value: false },
+          ],
+          name: 'xpack',
+          message: `Does this package have x-pack licensed code?`,
+        });
+        xpack = resXpack.xpack;
+      } else {
+        xpack = true;
+      }
+
+      visibility = (
+        await inquirer.prompt<{
+          visibility: 'private' | 'shared';
+        }>({
+          type: 'list',
+          choices: [
+            { name: 'Private', value: 'private' },
+            { name: 'Shared', value: 'shared' },
+          ],
+          name: 'visibility',
+          message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
+        })
+      ).visibility;
+
+      calculatedPackageDir = determinePackageDir({ pkgId, group, visibility, xpack });
     }
 
-    const { visibility } = await inquirer.prompt<{
-      visibility: 'private' | 'shared';
-    }>({
-      type: 'list',
-      choices: [
-        { name: 'Private', value: 'private' },
-        { name: 'Shared', value: 'shared' },
-      ],
-      name: 'visibility',
-      message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
-    });
-
-    const packageDir = flags.dir
-      ? Path.resolve(`${flags.dir}`)
-      : determinePackageDir({ pkgId, devOnly, group, visibility, xpack });
-
+    const packageDir = flags.dir ? Path.resolve(`${flags.dir}`) : calculatedPackageDir;
     const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
 
     try {
@@ -188,7 +199,7 @@ export const PackageCommand: GenerateCommand = {
         pkg: {
           id: pkgId,
           web,
-          dev: devOnly,
+          dev,
           owner,
           group,
           visibility,
@@ -212,7 +223,7 @@ export const PackageCommand: GenerateCommand = {
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));
 
-    const [addDeps, removeDeps] = devOnly
+    const [addDeps, removeDeps] = dev
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
