@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import React from 'react';
-import { isDescendandOf } from '@kbn/streams-schema';
+import { isDescendantOf } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
@@ -51,7 +51,7 @@ export function StreamDeleteModal({
   const [deleteInProgress, setDeleteInProgress] = React.useState(false);
   const modalTitleId = useGeneratedHtmlId();
   const streamsToBeDeleted = availableStreams.filter(
-    (stream) => stream === id || isDescendandOf(id, stream)
+    (stream) => stream === id || isDescendantOf(id, stream)
   );
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>

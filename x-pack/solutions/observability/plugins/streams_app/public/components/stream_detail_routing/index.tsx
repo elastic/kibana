@@ -27,6 +27,8 @@ import {
   useEuiTheme,
   euiDragDropReorder,
   DragStart,
+  EuiBreadcrumbs,
+  EuiBreadcrumb,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -775,43 +777,27 @@ function ChildStreamList({
 
 function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
   const router = useStreamsAppRouter();
+  const breadcrumbs: EuiBreadcrumb[] = definition.name.split('.').map((_part, pos, parts) => {
+    const parentId = parts.slice(0, pos + 1).join('.');
+    const isBreadcrumbsTail = parentId === definition.name;
+
+    return {
+      text: parentId,
+      href: isBreadcrumbsTail
+        ? undefined
+        : router.link('/{key}/{tab}/{subtab}', {
+            path: {
+              key: parentId,
+              tab: 'management',
+              subtab: 'route',
+            },
+          }),
+    };
+  });
+
   return (
     <>
-      {!isRoot(definition.name) && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" wrap>
-            {definition.name.split('.').map((part, i, parts) => {
-              const parentId = parts.slice(0, i + 1).join('.');
-              if (parentId === definition.name) {
-                return (
-                  <EuiText size="s" key={part}>
-                    {'/ '}
-                    {parentId}
-                  </EuiText>
-                );
-              }
-              return (
-                <EuiText size="s" key={part}>
-                  {!isRoot(parentId) && '/ '}
-                  <EuiLink
-                    key={part}
-                    data-test-subj="streamsAppCurrentStreamEntryParentButton"
-                    href={router.link('/{key}/{tab}/{subtab}', {
-                      path: {
-                        key: parentId,
-                        tab: 'management',
-                        subtab: 'route',
-                      },
-                    })}
-                  >
-                    {parentId}
-                  </EuiLink>
-                </EuiText>
-              );
-            })}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      {!isRoot(definition.name) && <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />}
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
           <EuiText size="s">{definition.name}</EuiText>
