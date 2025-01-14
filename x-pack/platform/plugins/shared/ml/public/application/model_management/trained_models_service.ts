@@ -134,15 +134,25 @@ export class TrainedModelsService {
       ),
       take(1),
       switchMap(() => {
+        // Manually update the model state
+        const currentModels = this.modelItems;
+        const updatedModels = currentModels.map((model) =>
+          model.model_id === modelId ? { ...model, state: MODEL_STATE.STARTING } : model
+        );
+        this._modelItems$.next(updatedModels);
+
         return from(
           this.trainedModelsApiService.startModelAllocation(
             modelId,
             deploymentParams,
             adaptiveAllocationsParams
           )
-        ).pipe(finalize(() => this.removeActiveOperation('deploying', modelId)));
+        );
       }),
-      switchMap(() => this.fetchModels$())
+      finalize(() => {
+        this.removeActiveOperation('deploying', modelId);
+        this.fetchModels$().subscribe();
+      })
     );
   }
 
