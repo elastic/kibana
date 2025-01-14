@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud data', function () {
-    loadTestFile(require.resolve('./set_cloud_data_route'));
+    loadTestFile(require.resolve('./relay_state'));
   });
 }

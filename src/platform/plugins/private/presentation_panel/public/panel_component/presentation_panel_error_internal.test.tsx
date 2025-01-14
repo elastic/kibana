@@ -9,16 +9,16 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { PresentationPanelError } from './presentation_panel_error';
+import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 
-describe('PresentationPanelError', () => {
+describe('PresentationPanelErrorInternal', () => {
   test('should display error', async () => {
-    render(<PresentationPanelError error={new Error('Simulated error')} />);
+    render(<PresentationPanelErrorInternal error={new Error('Simulated error')} />);
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
   });
 
   test('should display error with empty message', async () => {
-    render(<PresentationPanelError error={new Error('')} />);
+    render(<PresentationPanelErrorInternal error={new Error('')} />);
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
   });
 });
