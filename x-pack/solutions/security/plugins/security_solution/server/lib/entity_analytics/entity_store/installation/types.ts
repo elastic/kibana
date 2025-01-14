@@ -60,15 +60,12 @@ export interface EntityEngineInstallationDescriptor {
     | IngestProcessorContainer[]
     | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
 
-  // /**
-  //  * The options for the field retention enrich policy.
-  //  * Used to determine which fields to retain.
-  //  * Values are:
-  //  * `all` - retain all fields,
-  //  * `pattern` - retain fields that match a pattern.
-  //  */
-  // retentionStrategy: { select: 'all' } | { select: 'pattern'; pattern: string };
-
+  /**
+   * Whether the extracted entity data is dynamic.
+   * If true, it means we don't know which fields will be extracted from the definition itself, and we need to apply field retention to all the incoming doc's fields.
+   *
+   * This is mainly used for the Asset Inventory use case.
+   */
   dynamic: boolean;
 }
 
