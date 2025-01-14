@@ -346,7 +346,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     () =>
       pliAuthBlockView?.Component && !isPackageInfoLoading
         ? pliAuthBlockView.Component
-        : ({ children }) => <>{children}</>, // when no UI Extension is registered, render children
+        : ({ children }: { children?: React.ReactNode }) => <>{children}</>, // when no UI Extension is registered, render children
     [isPackageInfoLoading, pliAuthBlockView?.Component]
   );
 
@@ -435,21 +435,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
-      isInitialized,
       isPackageInfoLoading,
-      agentPolicies,
+      isInitialized,
       packageInfo,
+      agentPolicies,
+      spaceSettings?.allowedNamespacePrefixes,
       packagePolicy,
       updatePackagePolicy,
       validationResults,
       formState,
-      integrationInfo?.name,
       extensionView,
-      handleExtensionViewOnChange,
-      spaceSettings?.allowedNamespacePrefixes,
-      handleSetupTechnologyChange,
       isAgentlessIntegration,
       selectedSetupTechnology,
+      integrationInfo?.name,
+      isAgentlessSelected,
+      handleExtensionViewOnChange,
+      handleSetupTechnologyChange,
     ]
   );
 

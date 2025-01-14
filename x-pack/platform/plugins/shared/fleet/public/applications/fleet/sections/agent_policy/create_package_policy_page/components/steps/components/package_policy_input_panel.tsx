@@ -183,7 +183,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               checked={packagePolicyInput.enabled}
               disabled={packagePolicyInput.keep_enabled}
               onChange={(e) => {
-                const enabled = packagePolicyInput.keep_enabled ? e.target.checked : false;
+                const enabled = e.target.checked;
                 updatePackagePolicyInput({
                   enabled,
                   streams: packagePolicyInput.streams.map((stream) => ({
@@ -286,6 +286,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     ) {
                       updatedInput.enabled = false;
                     }
+
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
