@@ -63,6 +63,3 @@ export class ScoutEventsReport extends ScoutReport {
     fs.cpSync(this.workDir, destination, { recursive: true });
   }
 }
-
-export * from './event';
-export * from './persistence';

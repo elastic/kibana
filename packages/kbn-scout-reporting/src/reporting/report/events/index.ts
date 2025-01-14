@@ -8,4 +8,5 @@
  */
 
 export { ScoutEventsReport } from './report';
-export { ScoutReportEventAction } from './event';
+export * from './event';
+export * from './persistence';

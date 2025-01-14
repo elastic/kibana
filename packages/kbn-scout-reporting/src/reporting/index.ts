@@ -10,7 +10,7 @@
 import type { ReporterDescription } from 'playwright/test';
 import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
-export * from './report/events/report';
+export * from './report';
 
 // Playwright event-based reporting
 export const scoutPlaywrightReporter = (
