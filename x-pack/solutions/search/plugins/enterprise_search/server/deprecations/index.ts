@@ -28,16 +28,21 @@ export const getRegisteredDeprecations = (
         ctx.esClient.asInternalUser,
         ctx.savedObjectsClient
       );
-      return [
-        ...getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl),
-        ...(await getCrawlerDeprecations(ctx, docsUrl)),
-        ...(await getNativeConnectorDeprecations(
+      const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl)
+      const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
+        await getCrawlerDeprecations(ctx, docsUrl),
+        await getNativeConnectorDeprecations(
           ctx,
           hasAgentless,
           hasFleetServer,
           cloud,
           docsUrl
-        )),
+        )
+      ])
+      return [
+        ...entSearchDetails,
+        ...crawlerDetails,
+        ...nativeConnectorsDetails,
       ];
     },
   };
