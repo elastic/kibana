@@ -35,7 +35,6 @@ const DEFAULT_DISABLED_ACTIONS = [
 export type LensChartProps = BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
-    reloadRequestTime?: number;
     description?: string;
   } & {
     lensAttributes: UseLensAttributesParams;
