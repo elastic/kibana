@@ -109,7 +109,8 @@ async function startEs(props: EsRunProps) {
       'scripts/es',
       'snapshot',
       '--license=trial',
-      // Temporarily disabling APM
+      // Temporarily disabling APM because the token needs to be added to the keystore
+      // and cannot be set via command line
       // ...(JOURNEY_APM_CONFIG.active
       //   ? [
       //       '-E',
