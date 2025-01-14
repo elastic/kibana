@@ -58,7 +58,7 @@ describe('SLO usage collector fetcher', () => {
     await stopServers();
   });
 
-  describe('soomething', () => {
+  describe('with some SLOs', () => {
     beforeEach(async () => {
       await Promise.all([
         sloRepository.create(createSLO({ indicator: createAPMTransactionErrorRateIndicator() })),
@@ -80,7 +80,7 @@ describe('SLO usage collector fetcher', () => {
       ]);
     });
 
-    it('without any SLOs', async () => {
+    it('returns the correct metrics', async () => {
       const results = await fetcher({ soClient, esClient });
 
       expect(results.slo).toMatchInlineSnapshot(`
