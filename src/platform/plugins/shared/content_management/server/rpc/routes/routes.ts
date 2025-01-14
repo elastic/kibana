@@ -42,6 +42,13 @@ export function initRpcRoutes(
   router.post(
     {
       path: '/api/content_management/rpc/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization, because it's a wrapper around Saved Object client",
+        },
+      },
       validate: {
         params: schema.object({
           // @ts-ignore We validate above that procedureNames has at least one item
