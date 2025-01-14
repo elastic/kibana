@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
@@ -17,7 +17,7 @@ export default {
   argTypes: {},
 };
 
-const Template: Story<ActionsProps> = (props) => {
+const Template: StoryFn<ActionsProps> = (props) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
       <ActionsComponent

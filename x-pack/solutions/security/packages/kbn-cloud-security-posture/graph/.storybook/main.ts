@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
+import { merge as webpackMerge } from 'webpack-merge';
+import merge from 'lodash/merge';
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 
@@ -19,18 +21,19 @@ const graphWebpack: Configuration = {
       ),
     },
   },
-  node: {
-    fs: 'empty',
-    stream: false,
-    os: false,
+};
+
+const sbConfig: StorybookConfig = {
+  ...merge(defaultConfig, {
+    framework: {
+      options: {
+        strictMode: true,
+      },
+    },
+  }),
+  webpackFinal(config, options) {
+    return webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, graphWebpack);
   },
 };
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
-  ...mergeWebpackFinal(graphWebpack),
-};
+module.exports = sbConfig;

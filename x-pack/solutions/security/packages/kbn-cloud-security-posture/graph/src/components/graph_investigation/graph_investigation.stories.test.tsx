@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { setProjectAnnotations } from '@storybook/react';
-import { composeStories } from '@storybook/testing-react';
+import { setProjectAnnotations, composeStories } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -20,14 +20,14 @@ export default {
   description: 'CDR - Graph visualization',
   argTypes: {
     showToggleSearch: {
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
     },
     showInvestigateInTimeline: {
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
     },
   },
   decorators: [ReactQueryStorybookDecorator, KibanaReactStorybookDecorator],
-};
+} as Meta;
 
 const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
@@ -49,7 +49,7 @@ const defaultProps: GraphInvestigationProps = {
   showInvestigateInTimeline: false,
 };
 
-const Template: Story<Partial<GraphInvestigationProps>> = (props) => {
+const Template: StoryFn<Partial<GraphInvestigationProps>> = (props) => {
   return <GraphInvestigation {...defaultProps} {...props} />;
 };
 
