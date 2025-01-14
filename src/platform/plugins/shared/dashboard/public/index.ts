@@ -18,7 +18,7 @@ export {
 export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/content_management';
 export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
-export { LazyDashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';
+export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';
 export type { DashboardLocatorParams } from './dashboard_container/types';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
