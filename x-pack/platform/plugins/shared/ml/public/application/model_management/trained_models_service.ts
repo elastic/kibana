@@ -17,7 +17,6 @@ import {
   shareReplay,
   tap,
   from,
-  filter,
   take,
   finalize,
   withLatestFrom,
@@ -126,29 +125,20 @@ export class TrainedModelsService {
   ) {
     this.addActiveOperation({ modelId, type: 'deploying' });
 
-    return this.getModel$(modelId).pipe(
-      filter(
-        (model) =>
-          isBaseNLPModelItem(model) &&
-          (model.state === MODEL_STATE.DOWNLOADED || model.state === MODEL_STATE.STARTED)
-      ),
-      take(1),
-      switchMap(() => {
-        // Manually update the model state
-        const currentModels = this.modelItems;
-        const updatedModels = currentModels.map((model) =>
-          model.model_id === modelId ? { ...model, state: MODEL_STATE.STARTING } : model
-        );
-        this._modelItems$.next(updatedModels);
+    // Manually update the model state
+    const currentModels = this.modelItems;
+    const updatedModels = currentModels.map((model) =>
+      model.model_id === modelId ? { ...model, state: MODEL_STATE.STARTING } : model
+    );
+    this._modelItems$.next(updatedModels);
 
-        return from(
-          this.trainedModelsApiService.startModelAllocation(
-            modelId,
-            deploymentParams,
-            adaptiveAllocationsParams
-          )
-        );
-      }),
+    return from(
+      this.trainedModelsApiService.startModelAllocation(
+        modelId,
+        deploymentParams,
+        adaptiveAllocationsParams
+      )
+    ).pipe(
       finalize(() => {
         this.removeActiveOperation('deploying', modelId);
         this.fetchModels$().subscribe();
