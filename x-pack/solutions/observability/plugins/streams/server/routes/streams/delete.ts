@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { isWiredStream } from '@kbn/streams-schema';
+import { getParentId, isWiredReadStream } from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -24,7 +24,6 @@ import {
   deleteUnmanagedStreamObjects,
 } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
 
 export const deleteStreamRoute = createServerRoute({
@@ -94,7 +93,7 @@ export async function deleteStream(
 ) {
   try {
     const definition = await readStream({ scopedClusterClient, id });
-    if (!isWiredStream(definition)) {
+    if (!isWiredReadStream(definition)) {
       await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger, assetClient });
       return;
     }

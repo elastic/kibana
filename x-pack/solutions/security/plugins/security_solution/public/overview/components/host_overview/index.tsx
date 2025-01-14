@@ -10,12 +10,13 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { HostItem } from '../../../../common/search_strategy';
-import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -37,7 +38,6 @@ import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {
@@ -100,7 +100,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      riskEntity: RiskScoreEntity.host,
+      riskEntity: EntityType.host,
       skip: hostName == null,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
@@ -133,10 +133,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       return [
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.HOST_RISK_SCORE}
-              riskScoreEntity={RiskScoreEntity.host}
-            />
+            <RiskScoreHeaderTitle title={i18n.HOST_RISK_SCORE} riskScoreEntity={EntityType.host} />
           ),
           description: (
             <>
@@ -152,7 +149,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
               <EuiFlexItem grow={false}>
                 <RiskScoreHeaderTitle
                   title={i18n.HOST_RISK_LEVEL}
-                  riskScoreEntity={RiskScoreEntity.host}
+                  riskScoreEntity={EntityType.host}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

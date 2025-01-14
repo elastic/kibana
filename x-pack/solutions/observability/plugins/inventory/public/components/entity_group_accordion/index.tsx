@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { EntityCountBadge } from './entity_count_badge';
 import { GroupedEntitiesGrid } from './grouped_entities_grid';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(
   'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
@@ -26,10 +27,12 @@ export interface Props {
 export function EntityGroupAccordion({ groupValue, groupLabel, groupCount, isLoading }: Props) {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
+  const { setSingleEntityType } = useUnifiedSearchContext();
 
   const onToggle = useCallback(() => {
+    if (!open) setSingleEntityType(groupValue);
     setOpen((opened) => !opened);
-  }, []);
+  }, [groupValue, open, setSingleEntityType]);
 
   return (
     <>
