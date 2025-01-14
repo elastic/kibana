@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
@@ -15,6 +15,7 @@ import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
+import { MLEmptyPromptCard } from '../../../../../components/overview/ml_empty_prompt_card';
 
 export const AnalyticsEmptyPrompt: FC = () => {
   const {
@@ -41,34 +42,22 @@ export const AnalyticsEmptyPrompt: FC = () => {
   };
 
   return (
-    <EuiEmptyPrompt
-      layout="horizontal"
-      hasBorder={true}
-      hasShadow={false}
-      icon={
-        <EuiImage
-          size="fullWidth"
-          src={dfaImage}
-          alt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-            defaultMessage: 'Trained analysis of your data',
-          })}
+    <MLEmptyPromptCard
+      iconSrc={dfaImage}
+      iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
+        defaultMessage: 'Trained analysis of your data',
+      })}
+      title={
+        <FormattedMessage
+          id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
+          defaultMessage="Trained analysis of your data"
         />
       }
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-            defaultMessage="Trained analysis of your data"
-          />
-        </h4>
-      }
       body={
-        <p>
-          <FormattedMessage
-            id="xpack.ml.overview.analyticsList.emptyPromptText"
-            defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.ml.overview.analyticsList.emptyPromptText"
+          defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
+        />
       }
       actions={[
         <EuiButton
@@ -81,15 +70,19 @@ export const AnalyticsEmptyPrompt: FC = () => {
             defaultMessage: 'Create data frame analytics job',
           })}
         </EuiButton>,
+        <EuiButtonEmpty
+          target="_blank"
+          href={docLinks.links.ml.dataFrameAnalytics}
+          data-test-subj="mlAnalyticsReadDocumentationButton"
+          iconType="popout"
+          iconSide="left"
+        >
+          <FormattedMessage
+            id="xpack.ml.common.readDocumentationLink"
+            defaultMessage="Read documentation"
+          />
+        </EuiButtonEmpty>,
       ]}
-      // footer={
-      //   <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
-      //     <FormattedMessage
-      //       id="xpack.ml.common.readDocumentationLink"
-      //       defaultMessage="Read documentation"
-      //     />
-      //   </EuiLink>
-      // }
       data-test-subj="mlNoDataFrameAnalyticsFound"
     />
   );

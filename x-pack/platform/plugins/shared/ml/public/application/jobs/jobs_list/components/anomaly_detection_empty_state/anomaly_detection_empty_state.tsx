@@ -8,12 +8,13 @@
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
+import { MLEmptyPromptCard } from '../../../../components/overview/ml_empty_prompt_card';
 
 export const AnomalyDetectionEmptyState: FC = () => {
   const canCreateJob = usePermissionCheck('canCreateJob');
@@ -35,27 +36,28 @@ export const AnomalyDetectionEmptyState: FC = () => {
   };
 
   return (
-    <EuiEmptyPrompt
-      css={{ height: '100%', '.euiEmptyPrompt__main': { height: '100%' } }}
+    <MLEmptyPromptCard
       layout="horizontal"
       hasBorder={true}
       hasShadow={false}
-      icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
+      iconSrc={adImage}
+      iconAlt={
+        <FormattedMessage
+          id="xpack.ml.overview.anomalyDetection.title"
+          defaultMessage="Anomaly detection"
+        />
+      }
       title={
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
-            defaultMessage="Spot anomalies faster"
-          />
-        </h4>
+        <FormattedMessage
+          id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
+          defaultMessage="Spot anomalies faster"
+        />
       }
       body={
-        <p>
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.emptyPromptText"
-            defaultMessage="Start automatically spotting anomalies hiding in your time series data and resolve issues faster."
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.ml.overview.anomalyDetection.emptyPromptText"
+          defaultMessage="Start automatically spotting anomalies hiding in your time series data and resolve issues faster."
+        />
       }
       actions={[
         <EuiButton
@@ -69,18 +71,19 @@ export const AnomalyDetectionEmptyState: FC = () => {
             defaultMessage="Create anomaly detection job"
           />
         </EuiButton>,
+        <EuiButtonEmpty
+          target="_blank"
+          href={docLinks.links.ml.anomalyDetection}
+          data-test-subj="mlAnalyticsReadDocumentationButton"
+          iconType="popout"
+          iconSide="left"
+        >
+          <FormattedMessage
+            id="xpack.ml.common.readDocumentationLink"
+            defaultMessage="Read documentation"
+          />
+        </EuiButtonEmpty>,
       ]}
-      // footer={
-      //   <>
-      //     <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
-      //       <FormattedMessage
-      //         id="xpack.ml.common.readDocumentationLink"
-      //         defaultMessage="Read documentation"
-      //       />
-      //     </EuiLink>
-      //     ,
-      //   </>
-      // }
       data-test-subj="mlAnomalyDetectionEmptyState"
     />
   );

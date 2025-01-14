@@ -8,13 +8,14 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
+import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
   const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
@@ -44,15 +45,6 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const redirectToCreateJobSelectIndexPage = useCallback(async () => {
-    if (!mlManagementLocator) return;
-
-    await mlManagementLocator.navigate({
-      sectionId: 'ml',
-      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
-    });
-  }, [mlManagementLocator]);
-
   const redirectToMultiMetricExplorer = useCallback(async () => {
     if (!mlLocator) return;
 
@@ -70,25 +62,10 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       appId: `anomaly_detection`,
     });
   }, [mlManagementLocator]);
+  const showEmptyState = !hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob;
 
   const availableActions = useMemo(() => {
-    const actions = [];
-    if (!hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob) {
-      actions.push(
-        <EuiButton
-          color="primary"
-          onClick={redirectToCreateJobSelectIndexPage}
-          isDisabled={disableCreateAnomalyDetectionJob}
-          data-test-subj="mlCreateNewJobButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.createJobButtonText"
-            defaultMessage="Create anomaly detection job"
-          />
-        </EuiButton>
-      );
-      return actions;
-    }
+    const actions: EuiButtonProps[] = [];
     if (hasADJobs) {
       actions.push(
         <EuiButton
@@ -125,16 +102,20 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   }, [
     disableCreateAnomalyDetectionJob,
     hasADJobs,
-    redirectToCreateJobSelectIndexPage,
     canCreateJob,
     canGetJobs,
     redirectToMultiMetricExplorer,
     redirectToManageJobs,
   ]);
 
-  return (
+  const { euiTheme } = useEuiTheme();
+  return showEmptyState ? (
+    <AnomalyDetectionEmptyState />
+  ) : (
     <EuiEmptyPrompt
-      css={{ height: '100%', '.euiEmptyPrompt__main': { height: '100%' } }}
+      css={{
+        '.euiEmptyPrompt__main': { height: '100%', minWidth: euiTheme.breakpoint.m },
+      }}
       layout="horizontal"
       hasBorder={true}
       hasShadow={false}
@@ -156,18 +137,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         </p>
       }
       actions={availableActions}
-      // footer={
-      //   <>
-      //     <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
-      //       <FormattedMessage
-      //         id="xpack.ml.common.readDocumentationLink"
-      //         defaultMessage="Read documentation"
-      //       />
-      //     </EuiLink>
-      //     ,
-      //   </>
-      // }
-      data-test-subj="mlAnomalyDetectionEmptyState"
+      data-test-subj="mlOverviewAnomalyDetectionCard"
     />
   );
 };

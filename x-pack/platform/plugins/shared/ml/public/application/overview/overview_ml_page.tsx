@@ -30,7 +30,7 @@ import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
-
+import { useEnabledFeatures } from '../contexts/ml';
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
   adJobs: true,
@@ -75,7 +75,7 @@ export const MLOverviewCard = ({
         title={title}
       >
         <EuiFlexItem grow={true}>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiText size="s">{description}</EuiText>
         </EuiFlexItem>
         <EuiButtonEmpty
@@ -94,13 +94,12 @@ export const MLOverviewCard = ({
 
 export const OverviewPage: FC = () => {
   const {
-    services: { docLinks },
+    services: { docLinks, capabilities },
   } = useMlKibana();
+  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
-
   const navigateToPath = useNavigateToPath();
-
-  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
+  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm', 'l', 'xl']);
 
   return (
     <>
@@ -113,6 +112,7 @@ export const OverviewPage: FC = () => {
       </MlPageHeader>
       <div>
         <UpgradeWarning />
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
@@ -124,15 +124,21 @@ export const OverviewPage: FC = () => {
                 </h3>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexGrid gutterSize="m" responsive={false} columns={isMobile ? 1 : 2}>
-              <EuiFlexItem>
-                <AnomalyDetectionOverviewCard />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <DataFrameAnalyticsOverviewCard />
-              </EuiFlexItem>
-            </EuiFlexGrid>
+            <EuiFlexGroup gutterSize="m" responsive={true} wrap={true}>
+              {isADEnabled ? (
+                <EuiFlexItem>
+                  <AnomalyDetectionOverviewCard />
+                </EuiFlexItem>
+              ) : null}
+              {isDFAEnabled ? (
+                <EuiFlexItem>
+                  <DataFrameAnalyticsOverviewCard />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
 
           <EuiFlexGroup direction="column">
             <EuiTitle size="s">
@@ -290,7 +296,7 @@ export const OverviewPage: FC = () => {
               </EuiFlexItem>
             </EuiFlexGrid>
           </EuiFlexGroup>
-
+          <EuiSpacer size="s" />
           <EuiFlexGroup direction="column">
             <EuiTitle size="s">
               <h3>
