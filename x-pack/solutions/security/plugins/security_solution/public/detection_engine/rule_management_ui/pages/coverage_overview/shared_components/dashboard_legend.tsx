@@ -18,7 +18,7 @@ import { coverageOverviewLegendWidth } from '../constants';
 import * as i18n from '../translations';
 import { useCoverageColors } from '../use_coverage_colors';
 
-const LegendLabel = ({ label, color }: { label: string; color: string }) => (
+const LegendLabel = ({ label, color }: { label: string; color?: string }) => (
   <EuiFacetButton
     size="xs"
     element="span"
