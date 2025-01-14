@@ -222,7 +222,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]guided_onboarding_tour[\/\\]tour_step.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_actions[\/\\]actions.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_actions[\/\\]header_actions.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_page[\/\\]editable_title.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_page[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_page[\/\\]title.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]header_section[\/\\]index.tsx/,
