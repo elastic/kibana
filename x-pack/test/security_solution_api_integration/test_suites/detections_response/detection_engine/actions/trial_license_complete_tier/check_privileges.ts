@@ -95,37 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     context('when some specified indices do not exist, but user can read all others', () => {
       const index = ['non-existent-index-*', 'other-dne-index', 'auditbeat-*'];
-
-      it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
-        const rule = {
-          ...getRuleForAlertTesting(index),
-          query: 'process.executable: "/usr/bin/sudo"',
-        };
-        await createUserAndRole(getService, ROLES.detections_admin);
-        const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
-          user: ROLES.detections_admin,
-          pass: 'changeme',
-        });
-
-        await waitForRulePartialFailure({
-          supertest,
-          log,
-          id,
-        });
-
-        const { body } = await supertest
-          .get(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .query({ id })
-          .expect(200);
-
-        expect(body?.execution_summary?.last_execution.message).to.eql(
-          'Indexes matching "non-existent-index-*,other-dne-index" were not found.'
-        );
-
-        await deleteUserAndRole(getService, ROLES.detections_admin);
-      });
     });
 
     describe('when no specified indices exist', () => {

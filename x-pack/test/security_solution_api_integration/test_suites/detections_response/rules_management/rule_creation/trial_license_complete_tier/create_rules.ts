@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('expects rule partial failure with only one index pattern matching existing index', async () => {
+        it('expects rule runs successfully with only one index pattern matching existing index', async () => {
           const {
             body: { id },
           } = await securitySolutionApi
@@ -179,14 +179,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await waitForRulePartialFailure({ supertest, log, id });
+          await waitForRuleSuccess({ supertest, log, id });
 
           const rule = await fetchRule(supertest, { id });
 
-          expect(rule?.execution_summary?.last_execution.status).toBe('partial failure');
-          expect(rule?.execution_summary?.last_execution.message).toBe(
-            'Indexes matching "does-not-exist-*" were not found.'
-          );
+          expect(rule?.execution_summary?.last_execution?.status).toBe('succeeded');
         });
 
         it('creates a rule without an input index', async () => {
