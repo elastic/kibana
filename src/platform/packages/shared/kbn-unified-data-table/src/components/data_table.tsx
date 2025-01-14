@@ -651,11 +651,20 @@ export const UnifiedDataTable = ({
     onUpdatePageIndex,
   ]);
 
-  const [uiSearchTerm, setUISearchTerm] = useState('');
+  const [uiSearchTerm, setUISearchTerm] = useState<string>();
 
   const uiSearchControl = useMemo(() => {
-    return <SearchControl uiSearchTerm={uiSearchTerm} onChange={setUISearchTerm} />;
-  }, [uiSearchTerm, setUISearchTerm]);
+    return (
+      <SearchControl
+        uiSearchTerm={uiSearchTerm}
+        visibleColumns={visibleColumns}
+        rows={rows}
+        dataView={dataView}
+        fieldFormats={fieldFormats}
+        onChange={setUISearchTerm}
+      />
+    );
+  }, [uiSearchTerm, setUISearchTerm, rows, dataView, fieldFormats, visibleColumns]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({

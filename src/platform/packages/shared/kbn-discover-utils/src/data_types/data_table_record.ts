@@ -119,4 +119,17 @@ export class DataTableRecord {
         )
       : formattedFieldValue;
   }
+
+  findSearchMatchesInFormattedValue({
+    formattedFieldValue,
+    uiSearchTerm,
+  }: {
+    formattedFieldValue: string;
+    uiSearchTerm: string | undefined;
+  }): number {
+    return uiSearchTerm?.length
+      ? // TODO: implement better matching to account for html tags
+        (formattedFieldValue.match(new RegExp(uiSearchTerm, 'gi')) || []).length
+      : 0;
+  }
 }

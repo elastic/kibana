@@ -8,14 +8,37 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { useFindSearchMatches } from '../hooks/use_find_search_matches';
 
 export interface SearchControlProps {
   uiSearchTerm: string | undefined;
+  visibleColumns: string[];
+  rows: DataTableRecord[];
+  dataView: DataView;
+  fieldFormats: FieldFormatsStart;
   onChange: (searchTerm: string | undefined) => void;
 }
 
-export const SearchControl: React.FC<SearchControlProps> = ({ uiSearchTerm, onChange }) => {
+export const SearchControl: React.FC<SearchControlProps> = ({
+  uiSearchTerm,
+  visibleColumns,
+  rows,
+  dataView,
+  fieldFormats,
+  onChange,
+}) => {
+  const { matchesCount, isProcessing } = useFindSearchMatches({
+    visibleColumns,
+    rows,
+    uiSearchTerm,
+    dataView,
+    fieldFormats,
+  });
+
   // TODO: needs debouncing
   const onChangeUiSearchTerm = useCallback(
     (event) => {
@@ -26,8 +49,11 @@ export const SearchControl: React.FC<SearchControlProps> = ({ uiSearchTerm, onCh
   );
 
   return (
-    <EuiFieldText
+    <EuiFieldSearch
       compressed
+      isClearable
+      isLoading={isProcessing}
+      append={matchesCount || undefined}
       placeholder="Search in the table" // TODO: i18n
       value={uiSearchTerm}
       onChange={onChangeUiSearchTerm}
