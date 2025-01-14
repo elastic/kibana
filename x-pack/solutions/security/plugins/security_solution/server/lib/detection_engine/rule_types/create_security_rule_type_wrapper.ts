@@ -27,7 +27,6 @@ import {
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
-  checkUnmatchedIndexPatterns,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -261,14 +260,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
-              const unMatchedIndicesWarningMessage = await checkUnmatchedIndexPatterns({
-                existingIndices,
-                indexPatterns: inputIndex,
-              });
-
-              if (unMatchedIndicesWarningMessage != null) {
-                wrapperWarnings.push(unMatchedIndicesWarningMessage);
-              }
 
               if (existingIndices.length > 0) {
                 const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);

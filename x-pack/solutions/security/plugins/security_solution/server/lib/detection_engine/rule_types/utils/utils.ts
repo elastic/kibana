@@ -131,21 +131,6 @@ export const hasReadIndexPrivileges = async (args: {
   return warningMessage;
 };
 
-export const checkUnmatchedIndexPatterns = async (args: {
-  indexPatterns: string[];
-  existingIndices: string[];
-}): Promise<string | undefined> => {
-  let warningMessage: string | undefined;
-  const { indexPatterns, existingIndices } = args;
-  const unmatchedIndexPatterns = indexPatterns.filter((index) => !existingIndices.includes(index));
-
-  if (unmatchedIndexPatterns.length > 0) {
-    warningMessage = `Indexes matching "${unmatchedIndexPatterns.join()}" were not found.`;
-  }
-
-  return warningMessage;
-};
-
 export const hasTimestampFields = async (args: {
   timestampField: string;
   // any is derived from here
