@@ -30,7 +30,7 @@ To load the fixtures needed for the tests, first run:
 
 Run the tool using:
 
-`$ node x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/index.js --kibana http://admin:[YOUR_CLUSTER_PASSWORD]@localhost:5601`
+`$ $ node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --files=x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/scenarios/rca/index.spec.ts --kibana http://admin:[YOUR_CLUSTER_PASSWORD]@localhost:5601`
 
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 

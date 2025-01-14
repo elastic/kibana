@@ -19,7 +19,7 @@ This tool is developed for our team working on the Elastic Observability platfor
 - Run Elasticsearch locally: `yarn es snapshot --license trial`
 - Start Kibana (Default address for Kibana in dev mode: `http://localhost:5601`)
 - Run this command to start evaluating:
-  `$ node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --files=x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/scenarios/rca/index.spec.ts`
+  `$ node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js`
 
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 
@@ -36,10 +36,10 @@ elasticsearch.ignoreVersionMismatch: true
 ```
 
 - Start Kibana
-- Run this command to start evaluating: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --files=x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/scenarios/rca/index.spec.ts --kibana http://<username>:<password>@localhost:5601`
+- Run this command to start evaluating: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601`
 
 By default the script will use the Elasticsearch credentials specified in `kibana.dev.yml`, if you want to override it use the `--es` flag when running the evaluation script:
-E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --files=x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/scenarios/rca/index.spec.ts --kibana http://<username>:<password>@localhost:5601 --es https://<username>:<password>@<hosted-url>:<port>`
+E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601 --es https://<username>:<password>@<hosted-url>:<port>`
 
 The `--kibana` and `--es` flags override the default credentials. Only basic auth is supported.
 
