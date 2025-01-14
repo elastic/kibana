@@ -9,7 +9,6 @@ import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/ap
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { StreamLifecycle } from '@kbn/streams-schema';
-import { AssetClient } from './assets/asset_client';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';
@@ -26,7 +25,6 @@ interface BaseParams {
 interface DeleteStreamParams extends BaseParams {
   id: string;
   logger: Logger;
-  assetClient: AssetClient;
 }
 
 export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle {
@@ -94,12 +92,7 @@ export async function deleteUnmanagedStreamObjects({
   }
 }
 
-export async function deleteStreamObjects({
-  id,
-  scopedClusterClient,
-  logger,
-  assetClient,
-}: DeleteStreamParams) {
+export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: id,

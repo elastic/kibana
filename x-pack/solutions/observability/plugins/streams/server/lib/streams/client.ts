@@ -19,6 +19,9 @@ import {
   StreamDefinition,
   WiredStreamDefinition,
   assertsSchema,
+  getAncestors,
+  getParentId,
+  isChildOf,
   isIngestStream,
   isRootStream,
   isWiredStream,
@@ -28,7 +31,6 @@ import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
-import { getAncestors, getParentId, isChildOf } from './helpers/hierarchy';
 import {
   syncIngestStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
@@ -391,7 +393,7 @@ export class StreamsClient {
         `The stream with ID (${name}) already exists as a child of the parent stream`
       );
     }
-    if (!isChildOf(parentDefinition, childDefinition)) {
+    if (!isChildOf(parentDefinition.name, childDefinition.name)) {
       throw new MalformedStreamId(
         `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
       );
@@ -601,7 +603,6 @@ export class StreamsClient {
         scopedClusterClient,
         id: definition.name,
         logger,
-        assetClient,
       });
     } else {
       const parentId = getParentId(definition.name);
@@ -624,7 +625,7 @@ export class StreamsClient {
         await this.deleteStream(child.name);
       }
 
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger, assetClient });
+      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
     }
 
     await assetClient.syncAssetList({
