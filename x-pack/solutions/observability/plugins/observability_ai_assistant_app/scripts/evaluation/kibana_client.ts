@@ -25,7 +25,7 @@ import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assis
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
@@ -120,7 +120,7 @@ export class KibanaClient {
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any,
-    axiosParams: { responseType?: 'json' | 'stream'; timeout?: number } = {}
+    axiosParams: Partial<AxiosRequestConfig> = {}
   ) {
     const url = this.getUrl(props);
     return this.axios<T>({
