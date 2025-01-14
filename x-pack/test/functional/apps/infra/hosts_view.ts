@@ -986,13 +986,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
       describe('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
+            await setCustomDashboardsEnabled(true);
             await loginWithReadOnlyUser();
             await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-            await setCustomDashboardsEnabled(true);
             await pageObjects.header.waitUntilLoadingHasFinished();
 
             await pageObjects.timePicker.setAbsoluteRange(
@@ -1014,9 +1013,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
-            await browser.scrollTop();
-            await pageObjects.assetDetails.clickOverviewTab();
-            await browser.refresh();
+            await pageObjects.assetDetails.dashboardsTabExistsOrFail();
             await pageObjects.assetDetails.clickDashboardsTab();
             await pageObjects.assetDetails.addDashboardExists();
             const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
