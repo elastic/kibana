@@ -13,21 +13,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  const availableObservabilityIndicies = ['Anomaly detection jobs', 'Trained models'];
+  const availableMLObjectTypes = ['Anomaly detection jobs', 'Trained models'];
 
   describe('Memory usage page', function () {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
-    it('opens page with all available observability indicies selected', async () => {
+    it('opens page with all available ML object types for Observability', async () => {
       await ml.navigation.navigateToMl();
       await svlMl.navigation.observability.navigateToMemoryUsage();
 
       await ml.memoryUsage.assertJobTreeComboBoxExists();
 
       const selectedItems = await ml.memoryUsage.getSelectedChartItems();
-      expect(selectedItems).to.eql(availableObservabilityIndicies);
+      expect(selectedItems).to.eql(availableMLObjectTypes);
 
       // Make sure there are no other available indicies
       const options = await ml.memoryUsage.getJobTreeComboBoxOptions();

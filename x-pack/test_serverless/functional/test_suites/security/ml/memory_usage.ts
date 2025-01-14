@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  const availableSecurityIndicies = [
+  const availableMLObjectTypes = [
     'Anomaly detection jobs',
     'Data frame analytics jobs',
     'Trained models',
@@ -24,14 +24,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
-    it('opens page with all available security indicies selected', async () => {
+    it('opens page with all available ML object types for Security', async () => {
       await ml.navigation.navigateToMl();
       await svlMl.navigation.security.navigateToMemoryUsage();
 
       await ml.memoryUsage.assertJobTreeComboBoxExists();
 
       const selectedItems = await ml.memoryUsage.getSelectedChartItems();
-      expect(selectedItems).to.eql(availableSecurityIndicies);
+      expect(selectedItems).to.eql(availableMLObjectTypes);
 
       // Make sure there are no other available indicies
       const options = await ml.memoryUsage.getJobTreeComboBoxOptions();

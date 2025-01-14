@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
-    it('displays only indicies available for observability type project', async () => {
+    it('displays only notification types for observability projects', async () => {
       await svlMl.navigation.observability.navigateToNotifications();
       const availableTypeFilters = await ml.notifications.getAvailableTypeFilters();
 

@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
-    it('displays only indicies available for security type project', async () => {
+    it('displays only notification types for security projects', async () => {
       await svlMl.navigation.security.navigateToNotifications();
       const availableTypeFilters = await ml.notifications.getAvailableTypeFilters();
 
