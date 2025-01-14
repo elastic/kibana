@@ -6,22 +6,28 @@
  */
 
 import React, { memo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { css, cx } from '@emotion/css';
 
-import { borderCss } from './conditions.styles';
 import { EntryContent } from './entry_content';
 import { OsCondition } from './os_conditions';
 import type { CriteriaConditionsProps, Entry } from './types';
 
 export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
   ({ os, entries, dataTestSubj, showValueListModal }) => {
+    const { euiTheme } = useEuiTheme();
+    const borderStyles = css`
+      border: ${euiTheme.border.thin};
+    `;
+    const panelStyles = cx('eui-xScroll', borderStyles);
+
     return (
       <EuiPanel
         color="subdued"
         hasBorder={true}
         hasShadow={false}
         data-test-subj={dataTestSubj}
-        className={borderCss}
+        className={panelStyles}
       >
         {os?.length ? <OsCondition os={os} dataTestSubj={dataTestSubj} /> : null}
         {entries.map((entry: Entry, index: number) => {
