@@ -42,12 +42,10 @@ interface SyncStreamParamsBase {
 
 export async function syncWiredStreamDefinitionObjects({
   definition,
-  parentDefinition,
   scopedClusterClient,
   logger,
 }: SyncStreamParamsBase & {
   definition: WiredStreamDefinition;
-  parentDefinition?: WiredStreamDefinition;
 }) {
   const componentTemplate = generateLayer(definition.name, definition);
   await upsertComponent({
@@ -76,18 +74,6 @@ export async function syncWiredStreamDefinitionObjects({
     logger,
     template: generateIndexTemplate(definition.name),
   });
-
-  if (parentDefinition) {
-    const parentReroutePipeline = generateReroutePipeline({
-      definition: parentDefinition,
-    });
-
-    await upsertIngestPipeline({
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
-      pipeline: parentReroutePipeline,
-    });
-  }
 
   await upsertDataStream({
     esClient: scopedClusterClient.asCurrentUser,

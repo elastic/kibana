@@ -52,6 +52,8 @@ function getIndexTemplateName(name: string) {
   return `${name}`;
 }
 
+// TODO: this function is here to strip properties when we add back optional/multi-value
+// which should be implemented in pipelines
 function toElasticsearchMappingProperty(property: StorageMappingProperty): MappingProperty {
   return property;
 }

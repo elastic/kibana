@@ -125,12 +125,6 @@ export async function deleteStreamObjects({
     id: getReroutePipelineName(id),
     logger,
   });
-  await assetClient.syncAssetList({
-    entityId: id,
-    entityType: 'stream',
-    assetType: 'dashboard',
-    assetIds: [],
-  });
 }
 
 interface ReadStreamParams extends BaseParams {
