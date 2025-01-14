@@ -26,8 +26,8 @@ export const DetailPanelDescriptionList = ({ listItems }: DetailPanelDescription
       columnWidths={[2, 3]}
       listItems={listItems}
       css={styles.descriptionList}
-      titleProps={{ style: styles.tabListTitle }}
-      descriptionProps={{ style: styles.tabListDescription }}
+      titleProps={{ css: styles.tabListTitle }}
+      descriptionProps={{ css: styles.tabListDescription }}
       data-test-subj="sessionView:detail-panel-description-list"
     />
   );
