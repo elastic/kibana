@@ -86,6 +86,7 @@ describe('#setup', () => {
       license,
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -112,6 +113,7 @@ describe('#setup', () => {
       }),
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -140,6 +142,7 @@ describe('#setup', () => {
       license,
       config: {
         enabled: false,
+        include_saved_object_names: false,
         appender: undefined,
       },
       logging,
@@ -266,6 +269,7 @@ describe('#asScoped', () => {
       license,
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -296,6 +300,7 @@ describe('#asScoped', () => {
       license,
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -383,6 +388,7 @@ describe('#withoutRequest', () => {
       license,
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -410,6 +416,7 @@ describe('#withoutRequest', () => {
       license,
       config: {
         enabled: true,
+        include_saved_object_names: false,
         appender: {
           type: 'console',
           layout: {
@@ -442,6 +449,7 @@ describe('#createLoggingConfig', () => {
       .pipe(
         createLoggingConfig({
           enabled: true,
+          include_saved_object_names: false,
           appender: {
             type: 'console',
             layout: {
@@ -484,6 +492,7 @@ describe('#createLoggingConfig', () => {
       features$.pipe(
         createLoggingConfig({
           enabled: false,
+          include_saved_object_names: false,
           appender: {
             type: 'console',
             layout: {
@@ -506,6 +515,7 @@ describe('#createLoggingConfig', () => {
       features$.pipe(
         createLoggingConfig({
           enabled: true,
+          include_saved_object_names: false,
           appender: {
             type: 'console',
             layout: {
