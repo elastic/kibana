@@ -101,7 +101,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     expect(screen.getByText('Setting up Knowledge base', { exact: false })).toBeInTheDocument();
   });
-  it('renders "Setting up Knowledge base" message while while model is being deployed without deployment or allocation state yet being reported', () => {
+  it('renders "Setting up Knowledge base" message while model is being deployed without deployment or allocation state yet being reported', () => {
     renderComponent({
       knowledgeBase: {
         isInstalling: false,
