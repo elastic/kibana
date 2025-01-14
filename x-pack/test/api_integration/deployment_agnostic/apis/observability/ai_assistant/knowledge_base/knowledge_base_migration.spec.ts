@@ -120,39 +120,40 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const hasSemanticTextEmbeddings = hits.every((hit) => hit._source?.semantic_text);
           expect(hasSemanticTextEmbeddings).to.be(true);
 
-        expect(
-          orderBy(hits, '_source.title').map(({ _source }) => {
-            let text: string | undefined;
-            let inference: InferenceData | undefined;
+          expect(
+            orderBy(hits, '_source.title').map(({ _source }) => {
+              let text: string | undefined;
+              let inference: InferenceData | undefined;
 
-            if (_source && '_inference_fields' in _source) {
-              const newSource = _source as SemanticTextField;
-              text = newSource.semantic_text;
-              inference = newSource._inference_fields?.semantic_text?.inference;
-            } else {
-              const oldSource = _source as LegacySemanticTextField;
-              text = oldSource.semantic_text.text;
-              inference = oldSource.semantic_text.inference;
-            }
+              if (_source && '_inference_fields' in _source) {
+                const newSource = _source as SemanticTextField;
+                text = newSource.semantic_text;
+                inference = newSource._inference_fields?.semantic_text?.inference;
+              } else {
+                const oldSource = _source as LegacySemanticTextField;
+                text = oldSource.semantic_text.text;
+                inference = oldSource.semantic_text.inference;
+              }
 
-            return {
-              text: text ?? '',
-              inferenceId: inference?.inference_id,
-              chunkCount: inference?.chunks?.length ?? 0,
-            };
-          })
-        ).to.eql([
-          {
-            text: 'To infinity and beyond!',
-            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
-            chunkCount: 1,
-          },
-          {
-            text: "The user's favourite color is blue.",
-            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
-            chunkCount: 1,
-          },
-        ]);
+              return {
+                text: text ?? '',
+                inferenceId: inference?.inference_id,
+                chunkCount: inference?.chunks?.length ?? 0,
+              };
+            })
+          ).to.eql([
+            {
+              text: 'To infinity and beyond!',
+              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+              chunkCount: 1,
+            },
+            {
+              text: "The user's favourite color is blue.",
+              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+              chunkCount: 1,
+            },
+          ]);
+        });
       });
 
       it('returns entries correctly via API', async () => {
