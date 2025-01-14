@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { type ReactElement, useMemo } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { AlertsTable as DefaultAlertsTable } from '@kbn/response-ops-alerts-table';
 import type { SetRequired } from 'type-fest';
+import type { CaseViewAlertsTableProps } from '../types';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { getManualAlertIds } from './helpers';
@@ -23,9 +24,16 @@ import { useKibana } from '../../../common/lib/kibana';
 interface CaseViewAlertsProps {
   caseData: CaseUI;
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
+  renderAlertsTable?: (props: CaseViewAlertsTableProps) => ReactElement;
 }
 
-export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
+export const CaseViewAlerts = ({
+  caseData,
+  renderAlertsTable: AlertsTable = DefaultAlertsTable as NonNullable<
+    CaseViewAlertsProps['renderAlertsTable']
+  >,
+  onAlertsTableLoaded,
+}: CaseViewAlertsProps) => {
   const { services } = useKibana();
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;
@@ -75,17 +83,24 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
         query={alertIdsQuery}
         showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
         onLoaded={onAlertsTableLoaded}
-        services={{
-          data,
-          http,
-          notifications,
-          fieldFormats,
-          application,
-          settings,
-          // In the Cases UI the licensing service is defined
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          licensing: licensing!,
-        }}
+        // Only provide the services to the default alerts table.
+        // Spreading from object to avoid incorrectly overriding
+        // services to `undefined` in custom solution tables
+        {...(AlertsTable === DefaultAlertsTable
+          ? {
+              services: {
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                settings,
+                // In the Cases UI the licensing service is defined
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                licensing: licensing!,
+              },
+            }
+          : {})}
       />
     </EuiFlexItem>
   );
