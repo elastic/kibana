@@ -81,9 +81,9 @@ export function getEnterpriseSearchNodeDeprecation(
           }),
         ]
       );
-      addendum = `\n\n[Click here to manage your deployment](${
-        cloud.baseUrl + '/deployments/' + cloud.deploymentId
-      }).`;
+      addendum = `\n\n[${i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.manage',{
+        defaultMessage: 'Click here to manage your deployment'
+      })}](${cloud.baseUrl + '/deployments/' + cloud.deploymentId}).`;
     } else {
       steps.push(
         ...[
