@@ -214,7 +214,7 @@ export class JourneyFtrHarness {
       initializeApmInitListener();
     });
 
-    initializeApmInitListener();
+    await initializeApmInitListener();
 
     if (!process.env.NO_BROWSER_LOG) {
       this.page.on('console', this.onConsoleEvent);
