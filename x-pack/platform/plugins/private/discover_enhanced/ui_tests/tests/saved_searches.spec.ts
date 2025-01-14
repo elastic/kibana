@@ -71,10 +71,10 @@ test.describe('Discover app - saved searches', { tag: ['@ess', '@svlSearch', '@s
       state: 'visible',
     });
 
-    // await pageObjects.dashboard.customizePanel({
-    //   name: PANEL_NAME,
-    //   customTimeRageCommonlyUsed: { value: 'Last_90 days' },
-    // });
+    await pageObjects.dashboard.customizePanel({
+      name: PANEL_NAME,
+      customTimeRageCommonlyUsed: { value: 'Last_90 days' },
+    });
     await expect(
       page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults'),
       'No results message in Saved Search panel should be visible'

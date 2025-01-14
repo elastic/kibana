@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       const partitionVisExists = await testSubjects.exists('partitionVisChart');
-      expect(partitionVisExists).to.be(false);
+      expect(partitionVisExists).to.be(true);
     });
 
     it('can add a filter pill by clicking on the Lens chart', async () => {

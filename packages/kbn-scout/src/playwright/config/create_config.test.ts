@@ -18,17 +18,23 @@ jest.mock('@kbn/scout-reporting', () => ({
 }));
 
 describe('createPlaywrightConfig', () => {
+  const mockGenerateTestRunId = generateTestRunId as jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return a valid default Playwright configuration', () => {
-    (generateTestRunId as jest.Mock).mockReturnValue('test-run-id');
+    const testRunId = 'test-run-id';
+    mockGenerateTestRunId.mockImplementationOnce(() => testRunId);
 
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
 
+    expect(mockGenerateTestRunId).toHaveBeenCalledTimes(1);
+
     expect(config.testDir).toBe(testDir);
+    expect(config.retries).toBe(0);
     expect(config.workers).toBe(1);
     expect(config.fullyParallel).toBe(false);
     expect(config.use).toEqual({
@@ -43,12 +49,12 @@ describe('createPlaywrightConfig', () => {
       ['html', { open: 'never', outputFolder: './output/reports' }],
       ['json', { outputFile: './output/reports/test-results.json' }],
       [
-        '@kbn/scout-reporting/src/reporting/playwright/events/index.ts',
-        { name: 'scout-playwright', runId: 'test-run-id' },
+        '@kbn/scout-reporting/src/reporting/playwright/events',
+        { name: 'scout-playwright', runId: testRunId },
       ],
       [
-        '@kbn/scout-reporting/src/reporting/playwright/failed_test/index.ts',
-        { name: 'scout-playwright-failed-tests', runId: 'test-run-id' },
+        '@kbn/scout-reporting/src/reporting/playwright/failed_test',
+        { name: 'scout-playwright-failed-tests', runId: testRunId },
       ],
     ]);
     expect(config.timeout).toBe(60000);
