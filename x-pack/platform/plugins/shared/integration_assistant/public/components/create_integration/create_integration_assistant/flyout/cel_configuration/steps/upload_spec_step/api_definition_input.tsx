@@ -51,18 +51,11 @@ interface ApiDefinitionInputProps {
   integrationSettings: IntegrationSettings | undefined;
   showValidation: boolean;
   isGenerating: boolean;
-  onUploadSpecFileSuccessful: () => void;
-  onClearSuccess: () => void;
+  onModifySpecFile: (hasFile: boolean) => void;
 }
 
 export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
-  ({
-    integrationSettings,
-    showValidation,
-    isGenerating,
-    onUploadSpecFileSuccessful,
-    onClearSuccess,
-  }) => {
+  ({ integrationSettings, showValidation, isGenerating, onModifySpecFile }) => {
     const { setIntegrationSettings } = useActions();
     const [uploadedFile, setUploadedFile] = useState<FileList | undefined>(undefined);
     const [isParsing, setIsParsing] = useState(false);
@@ -72,7 +65,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
       (files: FileList | null) => {
         if (!files || files.length === 0) {
           setUploadedFile(undefined);
-          onClearSuccess();
+          onModifySpecFile(false);
           return;
         }
 
@@ -139,9 +132,9 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
         reader.onabort = handleReaderError;
 
         reader.readAsText(apiDefinitionFile);
-        onUploadSpecFileSuccessful();
+        onModifySpecFile(true);
       },
-      [setIntegrationSettings, integrationSettings, onUploadSpecFileSuccessful, onClearSuccess]
+      [setIntegrationSettings, integrationSettings, onModifySpecFile]
     );
 
     return (
@@ -149,13 +142,8 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
         fullWidth
         isDisabled={isGenerating}
         label={i18n.API_DEFINITION_TITLE}
-        helpText={
-          <EuiText color="danger" size="xs">
-            {apiFileError ?? ''}
-          </EuiText>
-        }
         isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
-        error={i18n.SPEC_FILE_REQUIRED}
+        error={apiFileError ? apiFileError : i18n.SPEC_FILE_REQUIRED}
       >
         <>
           <EuiText size="s">

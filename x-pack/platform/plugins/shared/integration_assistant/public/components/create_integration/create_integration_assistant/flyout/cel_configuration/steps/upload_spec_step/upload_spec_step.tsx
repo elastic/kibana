@@ -80,12 +80,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
       onUpdateValidation(!fieldValidationErrors.title && !fieldValidationErrors.specFile);
     }, [fieldValidationErrors, onUpdateValidation]);
 
-    const onUploadSpecFileSuccessful = useCallback(() => {
-      setFieldValidationErrors((current) => ({ ...current, specFile: false }));
-      setSuccessfulGeneration(false);
-    }, []);
-
-    const onClearSuccess = useCallback(() => {
+    const onModifySpecFile = useCallback((hasFile: boolean) => {
+      setFieldValidationErrors((current) => ({ ...current, specFile: !hasFile }));
       setSuccessfulGeneration(false);
     }, []);
 
@@ -184,8 +180,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                     integrationSettings={integrationSettings}
                     isGenerating={isFlyoutGenerating}
                     showValidation={showValidation}
-                    onUploadSpecFileSuccessful={onUploadSpecFileSuccessful}
-                    onClearSuccess={onClearSuccess}
+                    onModifySpecFile={onModifySpecFile}
                   />
                   {successfulGeneration ? (
                     <EuiCallOut title={i18n.SUCCESS} color="success" iconType="check" />
