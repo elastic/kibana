@@ -81,9 +81,12 @@ export function getEnterpriseSearchNodeDeprecation(
           }),
         ]
       );
-      addendum = `\n\n[${i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.manage',{
-        defaultMessage: 'Click here to manage your deployment'
-      })}](${cloud.baseUrl + '/deployments/' + cloud.deploymentId}).`;
+      addendum = `\n\n[${i18n.translate(
+        'xpack.enterpriseSearch.deprecations.entsearchhost.manage',
+        {
+          defaultMessage: 'Click here to manage your deployment',
+        }
+      )}](${cloud.baseUrl + '/deployments/' + cloud.deploymentId}).`;
     } else {
       steps.push(
         ...[
@@ -113,8 +116,8 @@ export function getEnterpriseSearchNodeDeprecation(
           type: 'markdown',
           content: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
             values: {
-              addendum: addendum,
-              migration_link: docsUrl
+              addendum,
+              migration_link: docsUrl,
             },
             defaultMessage:
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
@@ -391,8 +394,9 @@ export async function getNativeConnectorDeprecations(
               i18n.translate(
                 'xpack.enterpriseSearch.deprecations.missingIntegrationServer.addCapacity',
                 {
-                  defaultMessage: "Click the button to '+ Add capacity' and choose a size/count. For most customers," +
-                    "the smallest option in a single zone is sufficient.",
+                  defaultMessage:
+                    "Click the button to '+ Add capacity' and choose a size/count. For most customers," +
+                    'the smallest option in a single zone is sufficient.',
                 }
               ),
               i18n.translate(
