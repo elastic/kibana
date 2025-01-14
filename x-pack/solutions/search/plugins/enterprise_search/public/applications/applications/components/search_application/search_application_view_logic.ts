@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { SchemaField } from '../../../../../common/types/search_applications';
+import { type SchemaField } from '../../../../../common/types/search_applications';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   FetchSearchApplicationApiLogic,
-  FetchSearchApplicationApiLogicActions,
+  type FetchSearchApplicationApiLogicActions,
 } from '../../api/search_applications/fetch_search_application_api_logic';
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 
@@ -22,7 +22,7 @@ import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import {
   SearchApplicationsListLogic,
-  SearchApplicationsListActions,
+  type SearchApplicationsListActions,
 } from '../search_applications/search_applications_list_logic';
 
 import { SearchApplicationNameLogic } from './search_application_name_logic';

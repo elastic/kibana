@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClient } from '@kbn/test';
+import { type KbnClient } from '@kbn/test';
 import {
   guideStateSavedObjectsType,
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,
-  PluginStateSO,
+  type PluginStateSO,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects';
-import { GuideState } from '@kbn/guided-onboarding';
+import { type GuideState } from '@kbn/guided-onboarding';
 
 export const createPluginState = async (client: KbnClient, state: PluginStateSO) => {
   await client.savedObjects.create({

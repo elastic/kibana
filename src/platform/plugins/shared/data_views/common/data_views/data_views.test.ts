@@ -13,11 +13,11 @@ import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
-  UiSettingsCommon,
-  PersistenceAPI,
-  SavedObject,
-  DataViewSpec,
-  IDataViewsApiClient,
+  type UiSettingsCommon,
+  type PersistenceAPI,
+  type SavedObject,
+  type DataViewSpec,
+  type IDataViewsApiClient,
 } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 import { DataViewMissingIndices } from '../lib';

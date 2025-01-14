@@ -6,12 +6,12 @@
  */
 
 import { repeat } from 'lodash';
-import { Observable, OperatorFunction } from 'rxjs';
+import { Observable, type OperatorFunction } from 'rxjs';
 import {
-  BufferFlushEvent,
+  type BufferFlushEvent,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
+  type StreamingChatResponseEventWithoutError,
+  type TokenCountEvent,
 } from '../../../common/conversation_complete';
 
 // The Cloud proxy currently buffers 4kb or 8kb of data until flushing.

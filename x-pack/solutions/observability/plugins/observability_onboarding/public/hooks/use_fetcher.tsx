@@ -11,7 +11,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import {
-  AutoAbortedObservabilityClient,
+  type AutoAbortedObservabilityClient,
   callObservabilityOnboardingApi,
 } from '../services/rest/create_call_api';
 

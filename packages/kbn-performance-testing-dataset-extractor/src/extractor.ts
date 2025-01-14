@@ -11,12 +11,12 @@ import fs from 'fs/promises';
 import moment from 'moment';
 import { existsSync } from 'fs';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ESClient, Document, TransactionDocument } from './es_client';
+import { type ToolingLog } from '@kbn/tooling-log';
+import { type SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { ESClient, type Document, type TransactionDocument } from './es_client';
 import { getESRequests, getKibanaRequests } from './request';
 import { requestsToStreams } from './stream';
-import { CLIParams, Request } from './types';
+import { type CLIParams, type Request } from './types';
 import { DATE_FORMAT } from './constants';
 
 const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {

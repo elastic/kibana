@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuProps,
+  type EuiContextMenuProps,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';

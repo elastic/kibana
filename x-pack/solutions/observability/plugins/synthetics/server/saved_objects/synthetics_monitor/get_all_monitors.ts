@@ -6,9 +6,9 @@
  */
 
 import {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResult,
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+  type SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils';
@@ -16,7 +16,7 @@ import { periodToMs } from '../../routes/overview_status/utils';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
+  type EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
 

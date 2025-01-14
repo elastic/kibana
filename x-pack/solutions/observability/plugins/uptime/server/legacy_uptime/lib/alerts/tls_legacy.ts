@@ -9,17 +9,17 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { type ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
   AlertsClientError,
   DEFAULT_AAD_CONFIG,
-  GetViewInAppRelativeUrlFnOpts,
+  type GetViewInAppRelativeUrlFnOpts,
 } from '@kbn/alerting-plugin/server';
-import { LegacyUptimeRuleTypeFactory } from './types';
+import { type LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { Cert, CertResult } from '../../../../common/runtime_types';
+import { type Cert, type CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';

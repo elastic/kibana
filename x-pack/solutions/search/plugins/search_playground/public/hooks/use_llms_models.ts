@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
-import { ComponentType, useMemo } from 'react';
+import { type ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
-import { LLMModel } from '../types';
+import { type LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
 

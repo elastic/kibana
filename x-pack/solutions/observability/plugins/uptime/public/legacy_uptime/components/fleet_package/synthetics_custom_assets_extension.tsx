@@ -9,12 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  PackageAssetsComponent,
-  CustomAssetsAccordionProps,
+  type PackageAssetsComponent,
+  type CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
+import { type ClientPluginsStart } from '../../../plugin';
 import { PLUGIN } from '../../../../common/constants/plugin';
 
 export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {

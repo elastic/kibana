@@ -11,8 +11,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiSelectable, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
-import { MLInferencePipelineOption, PipelineSelectLogic } from './pipeline_select_logic';
-import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_select_option';
+import { type MLInferencePipelineOption, PipelineSelectLogic } from './pipeline_select_logic';
+import { PipelineSelectOption, type PipelineSelectOptionProps } from './pipeline_select_option';
 
 export const PipelineSelect: React.FC = () => {
   const {

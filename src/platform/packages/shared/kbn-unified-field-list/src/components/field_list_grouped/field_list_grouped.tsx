@@ -16,7 +16,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
-import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
+import { ExistenceFetchStatus, type FieldsGroup, type FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;

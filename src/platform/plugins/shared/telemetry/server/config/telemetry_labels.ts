@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
 
 /**
  * Labels to enrich the context of the telemetry generated.

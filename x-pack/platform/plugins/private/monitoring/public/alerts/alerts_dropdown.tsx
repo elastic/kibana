@@ -8,14 +8,14 @@
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitoringStartServices } from '../types';
+import { type MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 import { WatcherMigrationStep } from './enable_alerts_modal';
 

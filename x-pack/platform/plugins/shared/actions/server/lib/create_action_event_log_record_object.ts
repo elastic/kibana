@@ -7,9 +7,9 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { RelatedSavedObjects } from './related_saved_objects';
-import { ActionExecutionSource, isSavedObjectExecutionSource } from './action_execution_source';
+import { type IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { type RelatedSavedObjects } from './related_saved_objects';
+import { type ActionExecutionSource, isSavedObjectExecutionSource } from './action_execution_source';
 
 export type Event = Exclude<IEvent, undefined>;
 

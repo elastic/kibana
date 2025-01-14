@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { type VFC } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { Indicator } from '../../../../../common/types/indicator';
+import { type Indicator } from '../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { CODE_BLOCK_TEST_ID } from './test_ids';
 

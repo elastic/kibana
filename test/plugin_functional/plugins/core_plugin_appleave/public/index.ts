@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { CoreAppLeavePlugin, CoreAppLeavePluginSetup, CoreAppLeavePluginStart } from './plugin';
+import { type PluginInitializer } from '@kbn/core/public';
+import { CoreAppLeavePlugin, type CoreAppLeavePluginSetup, type CoreAppLeavePluginStart } from './plugin';
 
 export const plugin: PluginInitializer<CoreAppLeavePluginSetup, CoreAppLeavePluginStart> = () =>
   new CoreAppLeavePlugin();

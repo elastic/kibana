@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
-  EuiFieldSearchProps,
+  type EuiFieldSearchProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { CloudDefendPageTitle } from '../../components/cloud_defend_page_title';
 import { CloudDefendPage } from '../../components/cloud_defend_page';
 import { PoliciesTable } from '../../components/policies_table';
-import { useCloudDefendPolicies, UseCloudDefendPoliciesProps } from './use_cloud_defend_policies';
+import { useCloudDefendPolicies, type UseCloudDefendPoliciesProps } from './use_cloud_defend_policies';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE } from '../../common/constants';

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { Filter, Query, isFilterPinned, TimeRange } from '@kbn/es-query';
+import { type SerializableRecord } from '@kbn/utility-types';
+import { type Filter, type Query, isFilterPinned, type TimeRange } from '@kbn/es-query';
 import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
+import { type LocatorDefinition } from '@kbn/share-plugin/common';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

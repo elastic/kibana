@@ -8,24 +8,24 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
-import { MovingAverageParams } from '../../types';
+import { type SchemaConfig } from '../../..';
+import { type MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
-  MetricAggregationColumnWithoutSpecialParams,
+  type MetricAggregationColumnWithoutSpecialParams,
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {
-  MovingAverageColumn,
-  DerivativeColumn,
-  CumulativeSumColumn,
-  FormulaColumn,
-  ExtendedColumnConverterArgs,
-  OtherParentPipelineAggs,
-  AggBasedColumn,
+  type MovingAverageColumn,
+  type DerivativeColumn,
+  type CumulativeSumColumn,
+  type FormulaColumn,
+  type ExtendedColumnConverterArgs,
+  type OtherParentPipelineAggs,
+  type AggBasedColumn,
 } from './types';
 import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
 import { getMetricFromParentPipelineAgg } from '../utils';

@@ -10,12 +10,12 @@ import { TelemetryService } from './telemetry_service';
 import {
   NavigationTarget,
   NavigationSource,
-  DatasetDetailsNavigatedEbtProps,
-  DatasetDetailsEbtProps,
-  WithTrackingId,
-  WithDuration,
-  DatasetEbtProps,
-  DatasetNavigatedEbtProps,
+  type DatasetDetailsNavigatedEbtProps,
+  type DatasetDetailsEbtProps,
+  type WithTrackingId,
+  type WithDuration,
+  type DatasetEbtProps,
+  type DatasetNavigatedEbtProps,
 } from './types';
 
 // Mock uuidv4

@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ContentFrom,
-  ExtractionRuleFieldRule,
+  type ExtractionRuleFieldRule,
   FieldType,
   MultipleObjectsHandling,
 } from '../../../../../../../../common/types/extraction_rules';

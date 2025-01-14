@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, TimelionConfig } from './config';
+import { type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, type TimelionConfig } from './config';
 
 export const config: PluginConfigDescriptor<TimelionConfig> = {
   exposeToBrowser: {

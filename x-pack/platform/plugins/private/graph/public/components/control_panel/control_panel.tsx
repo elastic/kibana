@@ -9,12 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import {
-  ControlType,
-  TermIntersect,
-  UrlTemplate,
-  Workspace,
-  WorkspaceField,
-  WorkspaceNode,
+  type ControlType,
+  type TermIntersect,
+  type UrlTemplate,
+  type Workspace,
+  type WorkspaceField,
+  type WorkspaceNode,
 } from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
@@ -24,7 +24,7 @@ import { SelectedNodeEditor } from './selected_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
-import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import { type GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 
 export interface TargetOptions {

@@ -6,12 +6,12 @@
  */
 
 import {
-  FindInvestigationsParams,
-  FindInvestigationsResponse,
+  type FindInvestigationsParams,
+  type FindInvestigationsResponse,
   findInvestigationsResponseSchema,
 } from '@kbn/investigation-shared';
-import { InvestigationRepository, Search } from './investigation_repository';
-import { InvestigationStatus } from '../models/investigation';
+import { type InvestigationRepository, type Search } from './investigation_repository';
+import { type InvestigationStatus } from '../models/investigation';
 
 export async function findInvestigations(
   params: FindInvestigationsParams,

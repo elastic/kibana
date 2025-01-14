@@ -7,17 +7,17 @@
 
 import React from 'react';
 import {
-  ExpressionRendererEvent,
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
+  type ExpressionRendererEvent,
+  type ReactExpressionRendererProps,
+  type ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import { type DefaultInspectorAdapters, type RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
-import { LensInspector } from '../lens_inspector_service';
-import { UserMessage } from '../types';
+import { type LensInspector } from '../lens_inspector_service';
+import { type UserMessage } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;

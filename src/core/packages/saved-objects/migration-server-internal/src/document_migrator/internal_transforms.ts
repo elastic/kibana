@@ -9,16 +9,16 @@
 
 import { isFunction } from 'lodash';
 import {
-  ISavedObjectTypeRegistry,
-  SavedObjectsType,
-  SavedObjectUnsanitizedDoc,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsType,
+  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
+  type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { Logger } from '@kbn/logging';
+import { type Logger } from '@kbn/logging';
 import { migrations as coreMigrationsMap } from './migrations';
 import { type Transform, TransformType } from './types';
 import { convertMigrationFunction } from './utils';

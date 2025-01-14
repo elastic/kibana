@@ -9,7 +9,7 @@
 
 import '../../storage/hashed_item_store/mock';
 import {
-  History,
+  type History,
   createBrowserHistory,
   createHashHistory,
   createMemoryHistory,
@@ -18,7 +18,7 @@ import {
 import {
   getRelativeToHistoryPath,
   createKbnUrlControls,
-  IKbnUrlControls,
+  type IKbnUrlControls,
   setStateToKbnUrl,
   getStateFromKbnUrl,
 } from './kbn_url_storage';

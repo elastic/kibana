@@ -21,15 +21,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  ReindexWarning,
-  ReindexWarningTypes,
-  ReindexStatusResponse,
+  type ReindexWarning,
+  type ReindexWarningTypes,
+  type ReindexStatusResponse,
 } from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
 import {
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
-  WarningCheckboxProps,
+  type WarningCheckboxProps,
 } from './warning_step_checkbox';
 
 interface CheckedIds {

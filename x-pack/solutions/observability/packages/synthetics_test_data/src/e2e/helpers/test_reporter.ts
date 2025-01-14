@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Journey, Step } from '@elastic/synthetics/dist/dsl';
-import { Reporter, ReporterOptions } from '@elastic/synthetics';
+import { type Journey, type Step } from '@elastic/synthetics/dist/dsl';
+import { type Reporter, type ReporterOptions } from '@elastic/synthetics';
 import {
-  JourneyEndResult,
-  JourneyStartResult,
-  StepEndResult,
+  type JourneyEndResult,
+  type JourneyStartResult,
+  type StepEndResult,
 } from '@elastic/synthetics/dist/common_types';
 
 import { yellow, green, cyan, red, bold } from 'chalk';

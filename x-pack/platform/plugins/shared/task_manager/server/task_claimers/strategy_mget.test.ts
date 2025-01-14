@@ -15,28 +15,28 @@ import { NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL } from './strategy_mget';
 
 import {
   TaskStatus,
-  ConcreteTaskInstance,
-  ConcreteTaskInstanceVersion,
+  type ConcreteTaskInstance,
+  type ConcreteTaskInstanceVersion,
   TaskPriority,
   TaskCost,
-  PartialConcreteTaskInstance,
+  type PartialConcreteTaskInstance,
 } from '../task';
-import { SearchOpts, StoreOpts } from '../task_store';
-import { asTaskClaimEvent, TaskEvent } from '../task_events';
+import { type SearchOpts, type StoreOpts } from '../task_store';
+import { asTaskClaimEvent, type TaskEvent } from '../task_events';
 import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import {
   TaskClaiming,
-  OwnershipClaimingOpts,
-  TaskClaimingOpts,
+  type OwnershipClaimingOpts,
+  type TaskClaimingOpts,
   TASK_MANAGER_MARK_AS_CLAIMED,
 } from '../queries/task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { ClaimOwnershipResult } from '.';
-import { FillPoolResult } from '../lib/fill_pool';
+import { type ClaimOwnershipResult } from '.';
+import { type FillPoolResult } from '../lib/fill_pool';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import type { MustNotCondition } from '../queries/query_clauses';
 import {

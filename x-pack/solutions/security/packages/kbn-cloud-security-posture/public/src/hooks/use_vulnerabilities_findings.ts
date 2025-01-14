@@ -9,10 +9,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import {
-  SearchRequest,
-  SearchResponse,
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
+  type SearchRequest,
+  type SearchResponse,
+  type AggregationsMultiBucketAggregateBase,
+  type AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CspVulnerabilityFinding,

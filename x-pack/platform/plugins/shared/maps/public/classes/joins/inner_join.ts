@@ -7,7 +7,7 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
-import { Feature, GeoJsonProperties } from 'geojson';
+import { type Feature, type GeoJsonProperties } from 'geojson';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
@@ -15,16 +15,16 @@ import {
   SOURCE_TYPES,
 } from '../../../common/constants';
 import {
-  ESDistanceSourceDescriptor,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
-  JoinSourceDescriptor,
-  TableSourceDescriptor,
+  type ESDistanceSourceDescriptor,
+  type ESTermSourceDescriptor,
+  type JoinDescriptor,
+  type JoinSourceDescriptor,
+  type TableSourceDescriptor,
 } from '../../../common/descriptor_types';
-import { IVectorSource } from '../sources/vector_source';
-import { IField } from '../fields/field';
-import { PropertiesMap } from '../../../common/elasticsearch_util';
-import { IJoinSource } from '../sources/join_sources';
+import { type IVectorSource } from '../sources/vector_source';
+import { type IField } from '../fields/field';
+import { type PropertiesMap } from '../../../common/elasticsearch_util';
+import { type IJoinSource } from '../sources/join_sources';
 import {
   ESDistanceSource,
   isSpatialSourceComplete,

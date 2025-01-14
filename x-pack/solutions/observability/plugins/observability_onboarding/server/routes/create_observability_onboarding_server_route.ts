@@ -6,8 +6,8 @@
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import {
-  ObservabilityOnboardingRouteCreateOptions,
-  ObservabilityOnboardingRouteHandlerResources,
+  type ObservabilityOnboardingRouteCreateOptions,
+  type ObservabilityOnboardingRouteHandlerResources,
 } from './types';
 
 export const createObservabilityOnboardingServerRoute = createServerRouteFactory<

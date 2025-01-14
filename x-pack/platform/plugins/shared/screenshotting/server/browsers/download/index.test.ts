@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
+import { ChromiumArchivePaths, type PackageInfo } from '@kbn/screenshotting-server';
 import { access, readdir } from 'fs/promises';
 import mockFs from 'mock-fs';
 import path from 'path';

@@ -24,27 +24,27 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import { type IconType } from '@elastic/eui/src/components/icon/icon';
+import { type Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
+  type ReactExpressionRendererProps,
+  type ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
-  Datasource,
-  Visualization,
-  FramePublicAPI,
-  DatasourceMap,
-  VisualizationMap,
-  DatasourceLayers,
-  UserMessagesGetter,
+  type Datasource,
+  type Visualization,
+  type FramePublicAPI,
+  type DatasourceMap,
+  type VisualizationMap,
+  type DatasourceLayers,
+  type UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -58,7 +58,7 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
-  DatasourceStates,
+  type DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,

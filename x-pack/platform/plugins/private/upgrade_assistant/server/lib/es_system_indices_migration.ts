@@ -6,11 +6,11 @@
  */
 
 import { flow, flatMap, map, flatten, uniq } from 'lodash/fp';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 import {
-  SystemIndicesMigrationStatus,
-  SystemIndicesMigrationFeature,
-  SystemIndicesMigrationStarted,
+  type SystemIndicesMigrationStatus,
+  type SystemIndicesMigrationFeature,
+  type SystemIndicesMigrationStarted,
 } from '../../common/types';
 
 export const convertFeaturesToIndicesArray = (

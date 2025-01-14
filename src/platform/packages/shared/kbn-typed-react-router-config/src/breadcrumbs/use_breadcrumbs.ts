@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
-import { MouseEvent, useEffect, useMemo } from 'react';
+import { type ApplicationStart, type ChromeBreadcrumb, type ChromeStart } from '@kbn/core/public';
+import { type MouseEvent, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 function addClickHandlers(

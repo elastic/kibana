@@ -7,14 +7,14 @@
 
 import { createListIndex, deleteList, exportList, findLists, importList, readListIndex } from '.';
 import {
-  ApiPayload,
-  DeleteListParams,
-  ExportListParams,
-  FindListsParams,
-  ImportListParams,
+  type ApiPayload,
+  type DeleteListParams,
+  type ExportListParams,
+  type FindListsParams,
+  type ImportListParams,
 } from '../types';
 
-import { HttpFetchOptions } from '@kbn/core-http-browser';
+import { type HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 import { getFoundListSchemaMock } from './mocks/response/found_list_schema.mock';

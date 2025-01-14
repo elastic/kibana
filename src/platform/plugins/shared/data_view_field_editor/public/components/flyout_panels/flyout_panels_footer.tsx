@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
+import { EuiFlyoutFooter, type EuiFlyoutFooterProps } from '@elastic/eui';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 

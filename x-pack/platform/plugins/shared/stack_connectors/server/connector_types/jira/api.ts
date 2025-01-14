@@ -6,17 +6,17 @@
  */
 
 import {
-  PushToServiceApiHandlerArgs,
-  HandshakeApiHandlerArgs,
-  GetIncidentApiHandlerArgs,
-  ExternalServiceApi,
-  Incident,
-  GetFieldsByIssueTypeHandlerArgs,
-  GetIssueTypesHandlerArgs,
-  GetIssuesHandlerArgs,
-  PushToServiceResponse,
-  GetIssueHandlerArgs,
-  GetCommonFieldsHandlerArgs,
+  type PushToServiceApiHandlerArgs,
+  type HandshakeApiHandlerArgs,
+  type GetIncidentApiHandlerArgs,
+  type ExternalServiceApi,
+  type Incident,
+  type GetFieldsByIssueTypeHandlerArgs,
+  type GetIssueTypesHandlerArgs,
+  type GetIssuesHandlerArgs,
+  type PushToServiceResponse,
+  type GetIssueHandlerArgs,
+  type GetCommonFieldsHandlerArgs,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};

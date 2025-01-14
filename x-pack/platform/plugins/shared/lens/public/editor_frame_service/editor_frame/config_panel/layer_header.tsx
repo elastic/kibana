@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StaticHeader } from '../../../shared_components';
 import {
-  DatasourceMap,
-  FramePublicAPI,
-  VisualizationLayerWidgetProps,
-  VisualizationMap,
+  type DatasourceMap,
+  type FramePublicAPI,
+  type VisualizationLayerWidgetProps,
+  type VisualizationMap,
 } from '../../../types';
 import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
 

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { StreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import { type StreamDefinition, isWiredStream } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';

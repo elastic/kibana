@@ -11,7 +11,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
-  SavedObjectsManagementColumnServiceSetup,
+  type SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
 import { SavedObjectsManagementColumn } from './types';
 

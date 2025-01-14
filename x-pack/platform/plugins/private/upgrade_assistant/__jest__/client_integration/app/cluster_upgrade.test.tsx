@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import { AppTestBed, setupAppPage } from './app.helpers';
+import { type AppTestBed, setupAppPage } from './app.helpers';
 
 describe('Cluster upgrade', () => {
   let testBed: AppTestBed;

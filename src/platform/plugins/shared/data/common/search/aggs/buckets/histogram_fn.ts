@@ -9,10 +9,10 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { ExtendedBoundsOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
+import { type Assign } from '@kbn/utility-types';
+import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { type ExtendedBoundsOutput } from '../../expressions';
+import { type AggExpressionType, type AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggHistogramFnName = 'aggHistogram';
 

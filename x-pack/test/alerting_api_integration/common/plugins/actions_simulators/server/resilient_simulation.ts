@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type IKibanaResponse,
+  type IRouter,
 } from '@kbn/core/server';
-import { ProxyArgs, Simulator } from './simulator';
+import { type ProxyArgs, Simulator } from './simulator';
 
 export const resilientFailedResponse = {
   errors: {

@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFormControlLayoutDelimited,
   EuiFieldNumber,
-  EuiFieldNumberProps,
+  type EuiFieldNumberProps,
   EuiFormRow,
 } from '@elastic/eui';
 
-import { FieldHook } from '../../../shared_imports';
+import { type FieldHook } from '../../../shared_imports';
 
 interface Props {
   min: FieldHook<number>;

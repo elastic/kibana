@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from '@kbn/core/public';
+import { type CoreStart, type HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ApplicationStart } from '@kbn/core/public';
-import { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { type ApplicationStart } from '@kbn/core/public';
+import { type NotificationsSetup, type IUiSettingsClient, type OverlayStart, type HttpStart } from '@kbn/core/public';
+import { type ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
@@ -26,11 +26,11 @@ import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
 import {
-  DocumentationService,
-  UiMetricService,
-  ApiService,
-  BreadcrumbService,
-  FileReaderService,
+  type DocumentationService,
+  type UiMetricService,
+  type ApiService,
+  type BreadcrumbService,
+  type FileReaderService,
 } from './services';
 
 export interface AppServices {

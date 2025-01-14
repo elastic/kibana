@@ -13,7 +13,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFilterButton,
-  EuiFilterButtonProps,
+  type EuiFilterButtonProps,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,

@@ -9,11 +9,11 @@ import '../../_mocks_/index_name_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow, type ShallowWrapper } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { CrawlDetailsSummary, CrawlerDetailsSummaryProps } from './crawl_details_summary';
+import { CrawlDetailsSummary, type CrawlerDetailsSummaryProps } from './crawl_details_summary';
 
 const MOCK_PROPS: CrawlerDetailsSummaryProps = {
   crawlDepth: 8,

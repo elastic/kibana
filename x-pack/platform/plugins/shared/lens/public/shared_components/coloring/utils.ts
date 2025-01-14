@@ -8,23 +8,23 @@
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 import {
-  DataBounds,
-  PaletteRegistry,
-  PaletteOutput,
-  CustomPaletteParams,
+  type DataBounds,
+  type PaletteRegistry,
+  type PaletteOutput,
+  type CustomPaletteParams,
   getFallbackDataBounds,
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
   enforceColorContrast,
-  ColorMapping,
+  type ColorMapping,
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
-import { DataType } from '../../types';
+import { type Datatable, type DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { type KbnPalettes } from '@kbn/palettes';
+import { type DataType } from '../../types';
 
 /**
  * Returns array of colors for provided palette or colorMapping

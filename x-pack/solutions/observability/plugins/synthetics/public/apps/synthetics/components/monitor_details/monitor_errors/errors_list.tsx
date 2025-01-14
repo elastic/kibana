@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo } from 'react';
+import React, { type MouseEvent, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -20,7 +20,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
-import { Ping, PingState } from '../../../../../../common/runtime_types';
+import { type Ping, type PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';

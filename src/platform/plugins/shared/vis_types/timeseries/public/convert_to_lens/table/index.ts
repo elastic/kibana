@@ -9,15 +9,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { getIndexPatternIds, type Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getColumnState } from '../lib/configurations/table';
 import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
-import { ConvertTsvbToLensVisualization } from '../types';
-import { Layer as ExtendedLayer, excludeMetaFromColumn, Column } from '../lib/convert';
+import { type ConvertTsvbToLensVisualization } from '../types';
+import { type Layer as ExtendedLayer, excludeMetaFromColumn, type Column } from '../lib/convert';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
   const newLayers: Record<string, Layer> = {};

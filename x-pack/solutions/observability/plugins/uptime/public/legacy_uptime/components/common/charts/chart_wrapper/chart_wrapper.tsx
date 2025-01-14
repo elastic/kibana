@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, HTMLAttributes } from 'react';
+import React, { type FC, type PropsWithChildren, type HTMLAttributes } from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {

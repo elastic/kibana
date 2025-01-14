@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { type CustomPaletteParams, type PaletteOutput } from '@kbn/coloring';
 import {
-  CollapseFunction,
-  Column,
-  MetricVisConfiguration,
+  type CollapseFunction,
+  type Column,
+  type MetricVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { VisParams } from '../../types';
+import { type VisParams } from '../../types';
 
 export const getConfiguration = (
   layerId: string,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, useRef, type FC, type PropsWithChildren } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';

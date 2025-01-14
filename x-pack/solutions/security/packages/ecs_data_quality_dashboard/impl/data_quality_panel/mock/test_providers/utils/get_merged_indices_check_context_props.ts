@@ -7,8 +7,8 @@
 
 import { getCheckStateStub } from '../../../stub/get_check_state_stub';
 import {
-  UseIndicesCheckCheckState,
-  UseIndicesCheckReturnValue,
+  type UseIndicesCheckCheckState,
+  type UseIndicesCheckReturnValue,
 } from '../../../hooks/use_indices_check/types';
 
 export const getMergedIndicesCheckContextProps = (

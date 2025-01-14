@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiRange, type EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { type AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpression,
   buildExpressionFunction,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunctionBuilder,
+  type ExpressionAstExpressionBuilder,
+  type ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { OperationDefinition } from '.';
+import { type OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -26,7 +26,7 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { type FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';

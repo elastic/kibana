@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { type TimefilterContract } from '@kbn/data-plugin/public';
+import { type PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
-  NavigateToLensContext,
-  PartitionVisConfiguration,
+  type NavigateToLensContext,
+  type PartitionVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import { type Vis } from '@kbn/visualizations-plugin/public';
 
 export type ConvertPieToLensVisualization = (
   vis: Vis<PartitionVisParams>,

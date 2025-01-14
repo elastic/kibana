@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { type ComponentStory } from '@storybook/react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../../utils/kibana_react.storybook_decorator';
-import { FieldSelector as Component, Props } from './field_selector';
+import { FieldSelector as Component, type Props } from './field_selector';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../../constants';
 
 export default {

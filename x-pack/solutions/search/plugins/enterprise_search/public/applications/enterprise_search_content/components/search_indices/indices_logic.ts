@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { IngestionMethod } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
-import { Meta } from '../../../../../common/types/pagination';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { type Meta } from '../../../../../common/types/pagination';
+import { type Actions } from '../../../shared/api_logic/create_api_logic';
 import {
-  CancelSyncsActions,
+  type CancelSyncsActions,
   CancelSyncsApiLogic,
 } from '../../api/connector/cancel_syncs_api_logic';
 import {
   DeleteIndexApiLogic,
-  DeleteIndexApiLogicArgs,
-  DeleteIndexApiLogicValues,
+  type DeleteIndexApiLogicArgs,
+  type DeleteIndexApiLogicValues,
 } from '../../api/index/delete_index_api_logic';
 import {
-  FetchIndexActions,
+  type FetchIndexActions,
   FetchIndexApiLogic,
-  FetchIndexApiResponse,
+  type FetchIndexApiResponse,
 } from '../../api/index/fetch_index_api_logic';
 import {
-  FetchIndicesApiActions,
+  type FetchIndicesApiActions,
   FetchIndicesAPILogic,
 } from '../../api/index/fetch_indices_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
+import { type ElasticsearchViewIndex } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {

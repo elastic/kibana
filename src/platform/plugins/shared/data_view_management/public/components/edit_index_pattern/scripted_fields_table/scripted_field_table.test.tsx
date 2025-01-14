@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow, type ShallowWrapper } from 'enzyme';
 
 import { ScriptedFieldsTable } from '.';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView } from '@kbn/data-views-plugin/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',

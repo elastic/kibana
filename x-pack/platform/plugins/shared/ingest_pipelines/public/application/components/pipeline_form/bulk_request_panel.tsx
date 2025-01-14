@@ -13,7 +13,7 @@ import {
   EuiCodeBlock,
   EuiText,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
 } from '@elastic/eui';
 
 const bulkRequestExample = `PUT books/_bulk?pipeline=my-pipeline

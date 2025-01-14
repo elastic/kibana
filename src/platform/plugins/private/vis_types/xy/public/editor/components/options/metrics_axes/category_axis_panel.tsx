@@ -12,12 +12,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { Position } from '@elastic/charts';
+import { type Position } from '@elastic/charts';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { LabelOptions, SetAxisLabel } from './label_options';
-import { CategoryAxis } from '../../../../types';
+import { LabelOptions, type SetAxisLabel } from './label_options';
+import { type CategoryAxis } from '../../../../types';
 import { getPositions } from '../../../collections';
 
 const positions = getPositions();

@@ -6,25 +6,25 @@
  */
 
 import {
-  Message,
-  ToolDefinition,
-  ToolChoice,
-  ToolCallsOf,
+  type Message,
+  type ToolDefinition,
+  type ToolChoice,
+  type ToolCallsOf,
   withoutChunkEvents,
   withoutTokenCountEvents,
-  ToolMessage,
-  MessageOf,
+  type ToolMessage,
+  type MessageOf,
   MessageRole,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { Logger } from '@kbn/logging';
+import { type InferenceClient } from '@kbn/inference-plugin/server';
+import { type Logger } from '@kbn/logging';
 import {
   defer,
   last,
   merge,
-  Observable,
+  type Observable,
   of,
-  OperatorFunction,
+  type OperatorFunction,
   share,
   switchMap,
   toArray,

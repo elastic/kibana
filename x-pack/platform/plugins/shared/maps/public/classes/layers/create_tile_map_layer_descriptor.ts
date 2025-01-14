@@ -6,11 +6,11 @@
  */
 
 import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  LayerDescriptor,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
+  type AggDescriptor,
+  type ColorDynamicOptions,
+  type LayerDescriptor,
+  type SizeDynamicOptions,
+  type VectorStylePropertiesDescriptor,
 } from '../../../common/descriptor_types';
 import {
   AGG_TYPE,

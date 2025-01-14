@@ -7,16 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
-  CoreSetup,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type IKibanaResponse,
+  type IRouter,
+  type CoreSetup,
 } from '@kbn/core/server';
 import { range, chunk } from 'lodash';
-import { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { PerfApi, PerfResult } from './types';
+import { type TaskManagerStartContract, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { type PerfApi, type PerfResult } from './types';
 
 const scope = 'perf-testing';
 

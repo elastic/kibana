@@ -15,7 +15,7 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSelectable,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
-import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
+import { EuiFormRow, type EuiFormRowProps } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ControllerRenderProps, ControllerFieldState, useFormContext } from 'react-hook-form';
+import { type ControllerRenderProps, type ControllerFieldState, useFormContext } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
-import { FieldMeta, FormConfig } from '../types';
+import { type FieldMeta, type FormConfig } from '../types';
 
 type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
   component: React.ComponentType<any>;

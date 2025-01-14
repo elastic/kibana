@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { readListIndex, ApiParams } from '@kbn/securitysolution-list-api';
+import { readListIndex, type ApiParams } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { READ_INDEX_QUERY_KEY } from '../constants';

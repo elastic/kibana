@@ -10,11 +10,11 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ApplicationStart,
-  NotificationsStart,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type ApplicationStart,
+  type NotificationsStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
@@ -25,7 +25,7 @@ import type {
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api.service';
+import { type ApiService, apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  ExternalServiceValidation,
+  type ServiceNowPublicConfigurationType,
+  type ServiceNowSecretConfigurationType,
+  type ExternalServiceValidation,
 } from './types';
 
 import * as i18n from './translations';

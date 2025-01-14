@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
 import {
-  LogsSharedClientCoreSetup,
-  LogsSharedClientPluginClass,
-  LogsSharedClientSetupDeps,
-  LogsSharedClientStartDeps,
+  type LogsSharedClientCoreSetup,
+  type LogsSharedClientPluginClass,
+  type LogsSharedClientSetupDeps,
+  type LogsSharedClientStartDeps,
 } from './types';
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {

@@ -13,11 +13,11 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
-  EmbeddableExpression,
+  type EmbeddableExpression,
 } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter } from '../../../types';
+import { type ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

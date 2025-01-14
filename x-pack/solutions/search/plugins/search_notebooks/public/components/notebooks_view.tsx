@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SearchNotebooks } from './search_notebooks';
-import { AppMetricsTracker, NotebookListValue } from '../types';
+import { type AppMetricsTracker, type NotebookListValue } from '../types';
 
 export interface SearchNotebooksViewProps {
   core: CoreStart;

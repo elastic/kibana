@@ -9,11 +9,11 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { MlInferenceError } from '../../../../../../common/types/pipelines';
+import { type MlInferenceError } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';

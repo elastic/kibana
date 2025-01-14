@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Groupings, SLODefinition, SLOId, Summary } from '../../domain/models';
+import { type Groupings, type SLODefinition, type SLOId, type Summary } from '../../domain/models';
 
 interface SummaryResult {
   sloId: SLOId;

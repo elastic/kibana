@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
-  EuiSuperSelectOption,
+  type EuiSuperSelectOption,
 } from '@elastic/eui';
 
 import * as i18n from './translations';

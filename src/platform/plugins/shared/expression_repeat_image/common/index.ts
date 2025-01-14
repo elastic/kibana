@@ -10,5 +10,5 @@
 // TODO: https://github.com/elastic/kibana/issues/110893
 
 export * from './constants';
-export * from './types';
+export type * from './types';
 export * from './expression_functions';

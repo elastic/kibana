@@ -7,17 +7,17 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  AnalyticsServiceSetup,
+  type AnalyticsServiceSetup,
   type AuditLogger,
-  AuthenticatedUser,
-  ElasticsearchClient,
-  Logger,
+  type AuthenticatedUser,
+  type ElasticsearchClient,
+  type Logger,
 } from '@kbn/core/server';
 
 import {
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
+  type KnowledgeBaseEntryCreateProps,
+  type KnowledgeBaseEntryResponse,
+  type KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import {
@@ -25,7 +25,7 @@ import {
   CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
 } from '../../lib/telemetry/event_based_telemetry';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
-import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
+import { type CreateKnowledgeBaseEntrySchema, type UpdateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
   auditLogger?: AuditLogger;

@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
+  type EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,

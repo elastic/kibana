@@ -9,10 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  StaticValueParams,
-  StaticValueColumn as BaseStaticValueColumn,
+  type StaticValueParams,
+  type StaticValueColumn as BaseStaticValueColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
+import { type CommonColumnsConverterArgs, type FormulaColumn, type StaticValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';

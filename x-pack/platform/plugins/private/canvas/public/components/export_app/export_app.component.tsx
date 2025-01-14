@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { type FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 // @ts-expect-error untyped local
 import { WorkpadPage } from '../workpad_page';
 import { RoutingLink } from '../routing';
-import { CanvasWorkpad } from '../../../types';
+import { type CanvasWorkpad } from '../../../types';
 
 export interface Props {
   workpad: CanvasWorkpad;

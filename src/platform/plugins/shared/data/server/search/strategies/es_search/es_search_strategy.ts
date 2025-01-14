@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
+import { firstValueFrom, from, type Observable } from 'rxjs';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import { type estypes } from '@elastic/elasticsearch';
 import { shimHitsTotal, getTotalLoaded } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';

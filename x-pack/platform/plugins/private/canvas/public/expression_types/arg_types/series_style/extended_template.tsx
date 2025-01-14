@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
+import React, { type FunctionComponent, type ChangeEvent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ResolvedArgProps, ResolvedLabels } from '../../arg';
-import { ExpressionAstExpression } from '../../../../types';
+import { type ResolvedArgProps, type ResolvedLabels } from '../../arg';
+import { type ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;

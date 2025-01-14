@@ -10,7 +10,7 @@ import { AlertingApiProvider } from './alerting_api';
 import { DataViewApiProvider } from './data_view_api';
 import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { PackageApiProvider } from './package_api';
-import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
+import { RoleScopedSupertestProvider, type SupertestWithRoleScope } from './role_scoped_supertest';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ApmApiProvider } from './apm_api';

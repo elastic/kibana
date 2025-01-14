@@ -15,9 +15,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { collectionActions } from './lib/collection_actions';
 import {
   ColorRules,
-  ColorRulesProps,
+  type ColorRulesProps,
   colorRulesOperatorsList,
-  ColorRulesOperator,
+  type ColorRulesOperator,
 } from './color_rules';
 import { Operator } from '../../../common/operators_utils';
 

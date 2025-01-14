@@ -8,7 +8,7 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, type LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
 jest.spyOn(process, 'uptime').mockReturnValue(10);

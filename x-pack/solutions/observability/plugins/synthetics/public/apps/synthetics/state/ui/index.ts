@@ -8,11 +8,11 @@
 import { createReducer } from '@reduxjs/toolkit';
 
 import {
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
+  type SYNTHETICS_STATUS_RULE,
+  type SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
 import {
-  PopoverState,
+  type PopoverState,
   toggleIntegrationsPopover,
   setBasePath,
   setEsKueryString,

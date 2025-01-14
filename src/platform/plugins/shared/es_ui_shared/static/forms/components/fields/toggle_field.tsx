@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, type EuiSwitchEvent, useGeneratedHtmlId } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook<boolean>;

@@ -19,9 +19,9 @@ import {
   type FieldsGroup,
   type FieldListItem,
   type OverrideFieldGroupDetails,
-  FieldsGroupNames,
+  type FieldsGroupNames,
   ExistenceFetchStatus,
-  AdditionalFieldGroups,
+  type AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {

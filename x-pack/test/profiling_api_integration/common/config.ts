@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { type FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
-import { ProfilingFtrConfigName } from '../configs';
+import { format, type UrlObject } from 'url';
+import { type ProfilingFtrConfigName } from '../configs';
 import { createProfilingApiClient } from './api_supertest';
 import { createProfilingUsers } from './create_profiling_users';
 import {
@@ -16,9 +16,9 @@ import {
   ProfilingUsername,
 } from './create_profiling_users/authentication';
 import {
-  FtrProviderContext,
-  InheritedFtrProviderContext,
-  InheritedServices,
+  type FtrProviderContext,
+  type InheritedFtrProviderContext,
+  type InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
 

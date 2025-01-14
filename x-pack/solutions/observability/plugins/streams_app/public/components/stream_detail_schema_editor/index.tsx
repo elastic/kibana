@@ -11,10 +11,10 @@ import {
   EuiProgress,
   EuiSearchBar,
   EuiPortal,
-  Query,
+  type Query,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { type WiredReadStreamDefinition } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';

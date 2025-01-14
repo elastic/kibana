@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParsedQuery, stringify } from 'query-string';
+import { type ParsedQuery, stringify } from 'query-string';
 import { format as formatUrl } from 'url';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '..';

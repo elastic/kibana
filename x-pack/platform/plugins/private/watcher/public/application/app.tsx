@@ -6,28 +6,28 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import {
-  DocLinksStart,
-  HttpSetup,
-  ToastsSetup,
-  IUiSettingsClient,
-  ApplicationStart,
-  ExecutionContextStart,
-  ThemeServiceStart,
-  I18nStart,
-  UserProfileService,
+  type DocLinksStart,
+  type HttpSetup,
+  type ToastsSetup,
+  type IUiSettingsClient,
+  type ApplicationStart,
+  type ExecutionContextStart,
+  type ThemeServiceStart,
+  type I18nStart,
+  type UserProfileService,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Redirect, withRouter, type RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { type RegisterManagementAppArgs, type ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
-import { LicenseStatus } from '../../common/types/license_status';
+import { type ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { type LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
+import { type LicenseStatus } from '../../common/types/license_status';
 import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';

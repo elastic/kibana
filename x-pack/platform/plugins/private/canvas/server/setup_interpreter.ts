@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { type ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { functions } from '../canvas_plugin_src/functions/server';
 import {
   initFunctions as initExternalFunctions,
-  InitializeArguments,
+  type InitializeArguments,
 } from '../canvas_plugin_src/functions/external';
 
 export function setupInterpreter(

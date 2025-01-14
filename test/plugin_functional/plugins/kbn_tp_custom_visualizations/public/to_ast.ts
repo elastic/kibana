@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { type VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
-  SelfChangingVisExpressionFunctionDefinition,
-  SelfChangingVisParams,
+  type SelfChangingVisExpressionFunctionDefinition,
+  type SelfChangingVisParams,
 } from './self_changing_vis_fn';
 
 export const toExpressionAst: VisToExpressionAst<SelfChangingVisParams> = (vis) => {

@@ -23,7 +23,7 @@ import {
   mergeResponseContent,
   prepareRoutes,
   setXState,
-  GetOpId,
+  type GetOpId,
 } from './util';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';

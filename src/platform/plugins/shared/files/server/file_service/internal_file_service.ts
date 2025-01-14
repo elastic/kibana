@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { type AuditEvent, type AuditLogger } from '@kbn/security-plugin/server';
 import pLimit from 'p-limit';
 
-import { BlobStorageService } from '../blob_storage_service';
-import { InternalFileShareService } from '../file_share_service';
-import { FileMetadata, File as IFile, FileKind, FileJSON, FilesMetrics } from '../../common';
+import { type BlobStorageService } from '../blob_storage_service';
+import { type InternalFileShareService } from '../file_share_service';
+import { type FileMetadata, type File as IFile, type FileKind, type FileJSON, type FilesMetrics } from '../../common';
 import { File, toJSON } from '../file';
-import { FileKindsRegistry } from '../../common/file_kinds_registry';
+import { type FileKindsRegistry } from '../../common/file_kinds_registry';
 import { FileNotFoundError } from './errors';
 import type { FileMetadataClient } from '../file_client';
 import type {
@@ -27,7 +27,7 @@ import type {
   GetByIdArgs,
   BulkGetByIdArgs,
 } from './file_action_types';
-import { createFileClient, FileClientImpl } from '../file_client/file_client';
+import { createFileClient, type FileClientImpl } from '../file_client/file_client';
 
 const bulkDeleteConcurrency = pLimit(10);
 

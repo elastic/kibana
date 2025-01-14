@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, ReactElement, useState } from 'react';
+import React, { type FunctionComponent, type ReactElement, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiIcon,
   EuiButtonIcon,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FormattedStatus, getLevelSortValue } from '../lib';
+import { type FormattedStatus, getLevelSortValue } from '../lib';
 import { StatusExpandedRow } from './status_expanded_row';
 
 interface StatusTableProps {

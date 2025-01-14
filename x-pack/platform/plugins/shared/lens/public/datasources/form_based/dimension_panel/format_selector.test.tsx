@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
-import { GenericIndexPatternColumn } from '../../..';
-import { LensAppServices } from '../../../app_plugin/types';
+import { FormatSelector, type FormatSelectorProps } from './format_selector';
+import { type GenericIndexPatternColumn } from '../../..';
+import { type LensAppServices } from '../../../app_plugin/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';

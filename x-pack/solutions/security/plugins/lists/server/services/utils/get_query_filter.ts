@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BoolQuery, EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import { type BoolQuery, type EsQueryConfig, type Query, buildEsQuery } from '@kbn/es-query';
 
 import { escapeQuotes } from './escape_query';
 

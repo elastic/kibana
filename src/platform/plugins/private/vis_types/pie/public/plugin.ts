@@ -8,17 +8,17 @@
  */
 
 import {
-  CoreSetup,
-  CoreStart,
-  DocLinksStart,
-  PluginInitializerContext,
-  ThemeServiceStart,
+  type CoreSetup,
+  type CoreStart,
+  type DocLinksStart,
+  type PluginInitializerContext,
+  type ThemeServiceStart,
 } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { type ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PiePublicConfig } from '../server/config';
 import { pieVisType } from './vis_type';
 import { setDataViewsStart } from './services';

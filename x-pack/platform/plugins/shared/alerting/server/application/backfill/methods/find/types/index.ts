@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { findBackfillQuerySchema, findBackfillResultSchema } from '../schemas';
+import { type TypeOf } from '@kbn/config-schema';
+import { type findBackfillQuerySchema, type findBackfillResultSchema } from '../schemas';
 
 export type FindBackfillParams = TypeOf<typeof findBackfillQuerySchema>;
 export type FindBackfillResult = TypeOf<typeof findBackfillResultSchema>;

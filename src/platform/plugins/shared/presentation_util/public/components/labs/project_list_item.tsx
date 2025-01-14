@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 
-import { ProjectID, EnvironmentName, Project, environmentNames } from '../../../common/labs';
+import { type ProjectID, type EnvironmentName, type Project, environmentNames } from '../../../common/labs';
 import { EnvironmentSwitch } from './environment_switch';
 
 import { LabsStrings } from '../../i18n';

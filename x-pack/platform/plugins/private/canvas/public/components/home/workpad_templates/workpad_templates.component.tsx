@@ -10,13 +10,13 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButtonEmpty,
-  EuiSearchBarProps,
-  SearchFilterConfig,
+  type EuiSearchBarProps,
+  type SearchFilterConfig,
 } from '@elastic/eui';
 
-import { CanvasTemplate } from '../../../../types';
+import { type CanvasTemplate } from '../../../../types';
 import { tagsRegistry } from '../../../lib/tags_registry';
 import { TagList } from '../../tag_list';
 

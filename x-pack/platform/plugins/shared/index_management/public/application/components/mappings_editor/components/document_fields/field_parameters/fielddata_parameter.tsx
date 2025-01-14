@@ -20,9 +20,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { UseField, Field, UseMultiFields, FieldHook } from '../../../shared_imports';
+import { UseField, Field, UseMultiFields, type FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { NormalizedField } from '../../../types';
+import { type NormalizedField } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 import { FielddataFrequencyFilterPercentage } from './fielddata_frequency_filter_percentage';

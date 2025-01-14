@@ -15,7 +15,7 @@ import {
   updateProgressAction,
   addToEntityAction,
   deleteEntityAction,
-  ReducerStreamApiAction,
+  type ReducerStreamApiAction,
 } from '../../common/api/reducer_stream/reducer_actions';
 import { reducerStreamRequestBodySchema } from './schemas/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';

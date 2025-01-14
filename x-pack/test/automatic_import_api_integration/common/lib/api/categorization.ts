@@ -6,12 +6,12 @@
  */
 import type SuperTest from 'supertest';
 import {
-  CategorizationRequestBody,
+  type CategorizationRequestBody,
   CATEGORIZATION_GRAPH_PATH,
-  CategorizationResponse,
+  type CategorizationResponse,
 } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
+import { type User } from '../authentication/types';
 import { BadRequestError } from '../error/error';
 
 export const postCategorization = async ({

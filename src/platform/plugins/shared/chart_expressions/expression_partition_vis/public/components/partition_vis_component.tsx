@@ -10,34 +10,34 @@
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   Chart,
-  Datum,
-  LayerValue,
+  type Datum,
+  type LayerValue,
   Partition,
   Position,
   Settings,
-  TooltipProps,
+  type TooltipProps,
   TooltipType,
-  SeriesIdentifier,
-  PartitionElementEvent,
-  SettingsProps,
+  type SeriesIdentifier,
+  type PartitionElementEvent,
+  type SettingsProps,
   Tooltip,
-  TooltipValue,
+  type TooltipValue,
 } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LegendToggle, type ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { type PersistedState } from '@kbn/visualizations-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
-  Datatable,
-  DatatableColumn,
-  IInterpreterRenderHandlers,
+  type Datatable,
+  type DatatableColumn,
+  type IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
@@ -77,7 +77,7 @@ import {
   partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import { type ColumnCellValueActions, type FilterEvent, type StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {

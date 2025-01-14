@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title
 import {
   CloudPosturePage,
   CspNoDataPage,
-  CspNoDataPageProps,
+  type CspNoDataPageProps,
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';

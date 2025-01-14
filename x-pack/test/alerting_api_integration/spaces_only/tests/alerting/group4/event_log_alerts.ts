@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { type IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogAlertTests({ getService }: FtrProviderContext) {

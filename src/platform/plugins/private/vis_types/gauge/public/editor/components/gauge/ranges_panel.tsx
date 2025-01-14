@@ -13,14 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ColorRanges,
-  SetColorRangeValue,
+  type SetColorRangeValue,
   SwitchOption,
   ColorSchemaOptions,
   PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/charts-plugin/public';
-import { GaugeOptionsInternalProps } from '.';
-import { Gauge } from '../../../types';
+import { type ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/charts-plugin/public';
+import { type GaugeOptionsInternalProps } from '.';
+import { type Gauge } from '../../../types';
 
 function RangesPanel({
   showElasticChartsOptions,

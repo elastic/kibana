@@ -25,15 +25,15 @@ import {
 
 import {
   TODO_CONTENT_ID,
-  Todo,
-  TodoCreateIn,
-  TodoDeleteIn,
-  TodoSearchIn,
-  TodoUpdateIn,
-  TodoUpdateOut,
-  TodoCreateOut,
-  TodoSearchOut,
-  TodoDeleteOut,
+  type Todo,
+  type TodoCreateIn,
+  type TodoDeleteIn,
+  type TodoSearchIn,
+  type TodoUpdateIn,
+  type TodoUpdateOut,
+  type TodoCreateOut,
+  type TodoSearchOut,
+  type TodoDeleteOut,
 } from '../../../common/examples/todos';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();

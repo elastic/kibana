@@ -31,7 +31,7 @@ import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
-  ControlGroupRendererApi,
+  type ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';

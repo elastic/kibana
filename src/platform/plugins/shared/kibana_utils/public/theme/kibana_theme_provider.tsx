@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { Observable } from 'rxjs';
+import React, { type FC, type PropsWithChildren } from 'react';
+import { type Observable } from 'rxjs';
 
-import { EuiProviderProps } from '@elastic/eui';
-import { CoreTheme } from '@kbn/core-theme-browser';
+import { type EuiProviderProps } from '@elastic/eui';
+import { type CoreTheme } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-context-theme';
 

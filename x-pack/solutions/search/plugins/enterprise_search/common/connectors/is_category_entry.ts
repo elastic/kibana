@@ -6,8 +6,8 @@
  */
 
 import {
-  ConnectorConfigProperties,
-  ConnectorConfigCategoryProperties,
+  type ConnectorConfigProperties,
+  type ConnectorConfigCategoryProperties,
 } from '@kbn/search-connectors';
 
 export function isCategoryEntry(

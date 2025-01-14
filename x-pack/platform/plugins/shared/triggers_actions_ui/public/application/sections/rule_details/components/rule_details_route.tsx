@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { ToastsApi } from '@kbn/core/public';
+import { type RouteComponentProps } from 'react-router-dom';
+import { type ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
-import { RuleType, ActionType, ResolvedRule } from '../../../../types';
+import { type RuleType, type ActionType, type ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 import {
-  ComponentOpts as RuleApis,
+  type ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import {
-  ComponentOpts as ActionApis,
+  type ComponentOpts as ActionApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';

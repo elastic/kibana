@@ -9,17 +9,17 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createSeries } from '../__mocks__';
-import { Metric } from '../../../../common/types';
+import { type Metric } from '../../../../common/types';
 import {
-  AvgColumn,
-  CardinalityColumn,
-  CountColumn,
-  CounterRateColumn,
-  FormulaColumn,
-  MaxColumn,
-  MinColumn,
-  StandardDeviationColumn,
-  SumColumn,
+  type AvgColumn,
+  type CardinalityColumn,
+  type CountColumn,
+  type CounterRateColumn,
+  type FormulaColumn,
+  type MaxColumn,
+  type MinColumn,
+  type StandardDeviationColumn,
+  type SumColumn,
 } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { convertToStandartDeviationColumn } from './std_deviation';

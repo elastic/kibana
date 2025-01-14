@@ -6,13 +6,13 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
+import { type RuleParamsV1, type RuleResponseV1 } from '../../../response';
 
 import {
-  actionSchemaV1,
-  actionFrequencySchemaV1,
-  updateParamsSchemaV1,
-  updateBodySchemaV1,
+  type actionSchemaV1,
+  type actionFrequencySchemaV1,
+  type updateParamsSchemaV1,
+  type updateBodySchemaV1,
 } from '..';
 
 export type UpdateRuleAction = TypeOf<typeof actionSchemaV1>;

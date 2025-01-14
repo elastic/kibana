@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { type FunctionComponent, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import {
@@ -15,7 +15,7 @@ import {
   useFormContext,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
+import { type FieldsConfig, from, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField, TARGET_FIELD_PATH } from './common_fields/target_field';
 

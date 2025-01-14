@@ -6,31 +6,31 @@
  */
 
 import {
-  Logger,
-  CoreStart,
-  SavedObjectsFindResponse,
-  SavedObjectsClientContract,
+  type Logger,
+  type CoreStart,
+  type SavedObjectsFindResponse,
+  type SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { type EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { type InvalidateAPIKeysParams, type SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  RunContext,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  type RunContext,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import {
-  AggregationsStringTermsBucketKeys,
-  AggregationsTermsAggregateBase,
+  type AggregationsStringTermsBucketKeys,
+  type AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InvalidateAPIKeyResult } from '../rules_client';
-import { AlertingConfig } from '../config';
+import { type InvalidateAPIKeyResult } from '../rules_client';
+import { type AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
-import { AlertingPluginsStart } from '../plugin';
-import { InvalidatePendingApiKey } from '../types';
+import { type AlertingPluginsStart } from '../plugin';
+import { type InvalidatePendingApiKey } from '../types';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import { type AdHocRunSO } from '../data/ad_hoc_run/types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 const PAGE_SIZE = 100;

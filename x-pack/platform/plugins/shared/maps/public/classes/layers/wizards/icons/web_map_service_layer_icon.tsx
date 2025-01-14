@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 
 export const WebMapServiceLayerIcon: FunctionComponent = () => (
   <svg

@@ -18,9 +18,9 @@ import {
 } from './customization_provider';
 import {
   createCustomizationService,
-  DiscoverCustomization,
-  DiscoverCustomizationId,
-  DiscoverCustomizationService,
+  type DiscoverCustomization,
+  type DiscoverCustomizationId,
+  type DiscoverCustomizationService,
 } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {

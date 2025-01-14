@@ -8,7 +8,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFormRow, EuiFormRowProps, EuiIconTip, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, type EuiFormRowProps, EuiIconTip, EuiRange, type EuiRangeProps } from '@elastic/eui';
 
 export interface RuleSettingsRangeInputProps {
   label: EuiFormRowProps['label'];

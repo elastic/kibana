@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isNestedField, FieldSpec, DataView } from '@kbn/data-plugin/common';
+import { isNestedField, type FieldSpec, type DataView } from '@kbn/data-plugin/common';
 import {
-  FieldFormat,
-  FieldFormatsRegistry,
-  FIELD_FORMAT_IDS,
+  type FieldFormat,
+  type FieldFormatsRegistry,
+  type FIELD_FORMAT_IDS,
 } from '@kbn/field-formats-plugin/common';
 
 import { FieldNotFoundError } from './errors';

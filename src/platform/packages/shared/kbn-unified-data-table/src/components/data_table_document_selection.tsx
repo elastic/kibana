@@ -14,7 +14,7 @@ import {
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridCellValueElementProps,
+  type EuiDataGridCellValueElementProps,
   EuiDataGridToolbarControl,
   EuiPopover,
   EuiFlexGroup,

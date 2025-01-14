@@ -12,7 +12,7 @@ import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
-  AppTestBed,
+  type AppTestBed,
   getDoubleEncodedPolicyEditPath,
   getEncodedPolicyEditPath,
   setup,

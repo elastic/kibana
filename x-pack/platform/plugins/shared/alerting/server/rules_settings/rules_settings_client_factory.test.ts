@@ -8,7 +8,7 @@
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   RulesSettingsClientFactory,
-  RulesSettingsClientFactoryOpts,
+  type RulesSettingsClientFactoryOpts,
 } from './rules_settings_client_factory';
 import {
   savedObjectsClientMock,
@@ -16,7 +16,7 @@ import {
   loggingSystemMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { type AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 

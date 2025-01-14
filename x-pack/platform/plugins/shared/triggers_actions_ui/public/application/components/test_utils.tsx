@@ -8,9 +8,9 @@
 import React, { useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm, type FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { ConnectorServices } from '../../types';
+import { type ConnectorServices } from '../../types';
 import { ConnectorProvider } from '../context/connector_context';
 
 interface FormTestProviderProps {

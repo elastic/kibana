@@ -8,16 +8,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { type AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
-import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction, type Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
-import { OperationDefinition } from '..';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { type OperationDefinition } from '..';
+import { type FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import { IndexPattern, IndexPatternField } from '../../../../../types';
+import { type IndexPattern, type IndexPatternField } from '../../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;

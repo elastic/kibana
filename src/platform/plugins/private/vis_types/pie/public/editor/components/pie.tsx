@@ -31,16 +31,16 @@ import {
   LongLegendOptions,
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
-import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { LegendSize, type VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
-  PartitionVisParams,
+  type PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { TruncateLabelsOption } from './truncate_labels';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+import { type PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';

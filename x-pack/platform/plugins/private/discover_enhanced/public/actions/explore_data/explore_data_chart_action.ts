@@ -8,12 +8,12 @@
 import {
   apiIsOfType,
   apiPublishesPartialUnifiedSearch,
-  HasParentApi,
-  PublishesUnifiedSearch,
+  type HasParentApi,
+  type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { KibanaLocation } from '@kbn/share-plugin/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { type KibanaLocation } from '@kbn/share-plugin/public';
+import { type Action } from '@kbn/ui-actions-plugin/public';
+import { type ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';

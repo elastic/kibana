@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
@@ -16,7 +16,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
-  TaskManagerDoc,
+  type TaskManagerDoc,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

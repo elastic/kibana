@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_START, AlertConsumers } from '@kbn/rule-data-utils';
 import {
-  AlertsTableConfigurationRegistry,
-  RenderCustomActionsRowArgs,
+  type AlertsTableConfigurationRegistry,
+  type RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';

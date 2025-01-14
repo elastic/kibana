@@ -6,23 +6,23 @@
  */
 
 import Boom from '@hapi/boom';
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
-  CoreSetup,
-  CoreStart,
-  CustomHttpResponseOptions,
-  ICustomClusterClient,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  ResponseError,
+  type CoreSetup,
+  type CoreStart,
+  type CustomHttpResponseOptions,
+  type ICustomClusterClient,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type Logger,
+  type Plugin,
+  type PluginInitializerContext,
+  type ResponseError,
 } from '@kbn/core/server';
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { RouteMethod } from '@kbn/core/server';
+import { type RouteMethod } from '@kbn/core/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -34,26 +34,26 @@ import {
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { RulesFactory } from './rules';
-import { configSchema, createConfig, MonitoringConfig } from './config';
+import { type configSchema, createConfig, type MonitoringConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
-import { EndpointTypes, Globals } from './static_globals';
+import { type EndpointTypes, Globals } from './static_globals';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import {
-  IBulkUploader,
-  LegacyRequest,
-  LegacyShimDependencies,
-  MonitoringConfigSchema,
-  MonitoringCore,
-  MonitoringLicenseService,
-  MonitoringPluginSetup,
-  PluginsSetup,
-  PluginsStart,
-  RequestHandlerContextMonitoringPlugin,
-  MonitoringRouteConfig,
+  type IBulkUploader,
+  type LegacyRequest,
+  type LegacyShimDependencies,
+  type MonitoringConfigSchema,
+  type MonitoringCore,
+  type MonitoringLicenseService,
+  type MonitoringPluginSetup,
+  type PluginsSetup,
+  type PluginsStart,
+  type RequestHandlerContextMonitoringPlugin,
+  type MonitoringRouteConfig,
 } from './types';
 
 // This is used to test the version of kibana

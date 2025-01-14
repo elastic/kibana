@@ -8,13 +8,13 @@
 import { evaluate } from '@kbn/tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import {
-  Datatable,
-  DatatableRow,
-  PointSeries,
-  PointSeriesColumnName,
-  PointSeriesColumns,
+  type Datatable,
+  type DatatableRow,
+  type PointSeries,
+  type PointSeriesColumnName,
+  type PointSeriesColumns,
 } from '@kbn/expressions-plugin/common';
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 import { unquoteString } from '../../../../common/lib/unquote_string';

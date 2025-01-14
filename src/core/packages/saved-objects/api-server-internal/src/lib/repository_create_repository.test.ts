@@ -10,7 +10,7 @@
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from './repository';
 import { kibanaMigratorMock } from '../mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('./repository');
 

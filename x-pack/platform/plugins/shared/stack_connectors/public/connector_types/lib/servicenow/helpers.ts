@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { lazy, ComponentType } from 'react';
-import { EuiSelectOption } from '@elastic/eui';
+import { lazy, type ComponentType } from 'react';
+import { type EuiSelectOption } from '@elastic/eui';
 import {
-  ActionConnector,
+  type ActionConnector,
   deprecatedMessage,
-  IErrorObject,
+  type IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { AppInfo, Choice, RESTApiError } from './types';
+import { type AppInfo, type Choice, type RESTApiError } from './types';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 

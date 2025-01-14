@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable, PassThrough, TransformOptions } from 'stream';
+import { type Readable, PassThrough, type TransformOptions } from 'stream';
 
 /**
  *  Write the data and errors from a list of stream providers

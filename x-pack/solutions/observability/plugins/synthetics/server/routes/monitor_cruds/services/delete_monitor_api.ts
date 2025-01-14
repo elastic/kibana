@@ -6,15 +6,15 @@
  */
 
 import pMap from 'p-map';
-import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { validatePermissions } from '../edit_monitor';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  MonitorFields,
-  SyntheticsMonitor,
-  SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes,
+  type EncryptedSyntheticsMonitorAttributes,
+  type MonitorFields,
+  type SyntheticsMonitor,
+  type SyntheticsMonitorWithId,
+  type SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
@@ -23,7 +23,7 @@ import {
   sendErrorTelemetryEvents,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
-import { RouteContext } from '../../types';
+import { type RouteContext } from '../../types';
 
 export class DeleteMonitorAPI {
   routeContext: RouteContext;

@@ -14,7 +14,7 @@ import { Form, UseField } from '../components';
 import React from 'react';
 import { useForm } from '.';
 import { emptyField } from '../../helpers/field_validators';
-import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from '..';
+import { type FieldHook, type FieldValidateResponse, VALIDATION_TYPES, type FieldConfig } from '..';
 
 describe('useField() hook', () => {
   beforeAll(() => {

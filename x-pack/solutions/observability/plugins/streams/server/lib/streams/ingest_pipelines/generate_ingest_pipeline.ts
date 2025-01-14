@@ -8,8 +8,8 @@
 import {
   isDissectProcessor,
   isGrokProcessor,
-  ProcessingDefinition,
-  StreamDefinition,
+  type ProcessingDefinition,
+  type StreamDefinition,
 } from '@kbn/streams-schema';
 import { get } from 'lodash';
 import { ASSET_VERSION } from '../../../../common/constants';

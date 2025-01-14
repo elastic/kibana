@@ -14,17 +14,17 @@
  * intl context around them.
  */
 
-import { I18nProvider, IntlShape } from '@kbn/i18n-react';
+import { I18nProvider, type IntlShape } from '@kbn/i18n-react';
 import {
   mount,
-  ReactWrapper,
+  type ReactWrapper,
   render,
   shallow,
-  MountRendererProps,
-  ShallowRendererProps,
-  ComponentType,
+  type MountRendererProps,
+  type ShallowRendererProps,
+  type ComponentType,
 } from 'enzyme';
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 import propTypes from 'prop-types';
 import { createIntl } from '@formatjs/intl';

@@ -10,14 +10,14 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
-  BenchmarkData,
-  Cluster,
-  ComplianceDashboardData,
-  ComplianceDashboardDataV2,
-  PostureTrend,
+  type BenchmarkData,
+  type Cluster,
+  type ComplianceDashboardData,
+  type ComplianceDashboardDataV2,
+  type PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { type FtrProviderContext } from '../ftr_provider_context';
 import {
   getBenchmarkScoreMockData,
   kspmComplianceDashboardDataMockV1,

@@ -18,11 +18,11 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
-  InstanceInfo,
+  type InstanceInfo,
 } from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
-import { PluginManifest } from '@kbn/core-plugins-server';
+import { type PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';

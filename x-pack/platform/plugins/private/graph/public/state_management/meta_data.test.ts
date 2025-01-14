@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
+import { createMockGraphStore, type MockedGraphEnvironment } from './mocks';
 import { syncBreadcrumbSaga, updateMetaData } from './meta_data';
 
 describe('breadcrumb sync saga', () => {

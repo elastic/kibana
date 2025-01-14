@@ -7,11 +7,11 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
-  CreateInvestigationItemParams,
-  CreateInvestigationItemResponse,
+  type CreateInvestigationItemParams,
+  type CreateInvestigationItemResponse,
 } from '@kbn/investigation-shared';
 import { v4 } from 'uuid';
-import { InvestigationRepository } from './investigation_repository';
+import { type InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationItem(
   investigationId: string,

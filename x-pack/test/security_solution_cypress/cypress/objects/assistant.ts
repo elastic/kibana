@@ -6,12 +6,12 @@
  */
 
 import {
-  ConversationCategory,
-  ConversationCreateProps,
-  ConversationResponse,
-  Provider,
+  type ConversationCategory,
+  type ConversationCreateProps,
+  type ConversationResponse,
+  type Provider,
 } from '@kbn/elastic-assistant-common';
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { type PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const getMockConversation = (body?: Partial<ConversationCreateProps>) => ({
   title: 'Test Conversation',

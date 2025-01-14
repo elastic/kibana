@@ -10,7 +10,7 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlyoutProps,
+  type EuiFlyoutProps,
   EuiIcon,
   EuiPanel,
   EuiPopover,

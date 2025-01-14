@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { getWindow } from '../../lib/get_window';
 

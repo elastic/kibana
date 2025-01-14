@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
-import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
+import { type IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
 import {
   WaterfallChartSidebarContainer,
   WaterfallChartSidebarContainerInnerPanel,
@@ -15,7 +15,7 @@ import {
   WaterfallChartSidebarFlexItem,
   WaterfallChartSidebarWrapper,
 } from './styles';
-import { WaterfallChartProps } from './waterfall_chart';
+import { type WaterfallChartProps } from './waterfall_chart';
 
 interface SidebarProps {
   items: Required<IWaterfallContext>['sidebarItems'];

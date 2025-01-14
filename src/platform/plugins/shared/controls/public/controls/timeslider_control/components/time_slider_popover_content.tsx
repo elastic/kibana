@@ -10,12 +10,12 @@
 import React from 'react';
 import { useMemo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, type EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { TimeSliderStrings } from './time_slider_strings';
 import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
 import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
-import { Timeslice } from '../types';
+import { type Timeslice } from '../types';
 
 interface Props {
   isAnchored: boolean;

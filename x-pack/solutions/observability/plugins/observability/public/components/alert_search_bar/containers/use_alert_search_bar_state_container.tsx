@@ -11,11 +11,11 @@ import * as t from 'io-ts';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import { type SavedQuery, type TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
-  IKbnUrlStateStorage,
+  type IKbnUrlStateStorage,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
 import { datemathStringRT } from '../../../utils/datemath';
@@ -25,8 +25,8 @@ import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 import {
   useContainer,
   DEFAULT_STATE,
-  AlertSearchBarStateContainer,
-  AlertSearchBarContainerState,
+  type AlertSearchBarStateContainer,
+  type AlertSearchBarContainerState,
 } from './state_container';
 
 export const alertSearchBarState = t.partial({

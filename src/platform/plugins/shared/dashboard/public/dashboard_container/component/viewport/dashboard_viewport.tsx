@@ -17,9 +17,9 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
+  type ControlGroupApi,
+  type ControlGroupRuntimeState,
+  type ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';

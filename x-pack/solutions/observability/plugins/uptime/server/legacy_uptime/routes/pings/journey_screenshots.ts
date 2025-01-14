@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IKibanaResponse } from '@kbn/core-http-server';
+import { type IKibanaResponse } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
-import { isRefResult, RefResult } from '../../../../common/runtime_types/ping/synthetics';
-import { UMServerLibs } from '../../lib/lib';
+import { isRefResult, type RefResult } from '../../../../common/runtime_types/ping/synthetics';
+import { type UMServerLibs } from '../../lib/lib';
 import {
   getJourneyScreenshot,
-  ScreenshotReturnTypesUnion,
+  type ScreenshotReturnTypesUnion,
 } from '../../lib/requests/get_journey_screenshot';
-import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
+import { type RouteContext, type UMRestApiRouteFactory, type UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
 export interface ClientContract {

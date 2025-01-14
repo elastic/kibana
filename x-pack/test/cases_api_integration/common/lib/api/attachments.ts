@@ -11,17 +11,17 @@ import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import { type Case, AttachmentType } from '@kbn/cases-plugin/common';
 import {
-  BulkGetAttachmentsResponse,
-  AttachmentRequest,
-  BulkCreateAttachmentsRequest,
-  AttachmentPatchRequest,
-  AttachmentsFindResponse,
-  PostFileAttachmentRequest,
+  type BulkGetAttachmentsResponse,
+  type AttachmentRequest,
+  type BulkCreateAttachmentsRequest,
+  type AttachmentPatchRequest,
+  type AttachmentsFindResponse,
+  type PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
-import { User } from '../authentication/types';
+import { type Attachments, type Attachment } from '@kbn/cases-plugin/common/types/domain';
+import { type User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 import { createCase } from './case';

@@ -7,7 +7,7 @@
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
-  ExecutionResponseItem,
+  type ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';

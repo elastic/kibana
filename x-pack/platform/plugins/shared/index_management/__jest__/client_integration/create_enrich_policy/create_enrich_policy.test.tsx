@@ -14,7 +14,7 @@ import {
   getFieldsFromIndices,
   getMatchingDataStreams,
 } from '../helpers/fixtures';
-import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
+import { type CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
 import { getESPolicyCreationApiCall } from '../../../common/lib';
 
 jest.mock('@kbn/code-editor', () => {

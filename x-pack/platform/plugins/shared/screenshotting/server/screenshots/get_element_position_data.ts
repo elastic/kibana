@@ -6,9 +6,9 @@
  */
 
 import type { HeadlessChromiumDriver } from '../browsers';
-import { Layout } from '../layouts';
+import { type Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { Actions, EventLogger } from './event_logger';
+import { Actions, type EventLogger } from './event_logger';
 
 export interface AttributesMap {
   [key: string]: string | null;

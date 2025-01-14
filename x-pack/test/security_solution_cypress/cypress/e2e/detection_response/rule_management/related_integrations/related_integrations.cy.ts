@@ -6,8 +6,8 @@
  */
 
 import {
-  PerformRuleInstallationResponseBody,
-  RelatedIntegration,
+  type PerformRuleInstallationResponseBody,
+  type RelatedIntegration,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { generateEvent } from '../../../../objects/event';
 import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
@@ -21,7 +21,7 @@ import {
 import {
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
-  SAMPLE_PREBUILT_RULE,
+  type SAMPLE_PREBUILT_RULE,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanFleet } from '../../../../tasks/api_calls/fleet';
 import {
@@ -34,7 +34,7 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
-  PackagePolicyWithoutAgentPolicyId,
+  type PackagePolicyWithoutAgentPolicyId,
 } from '../../../../tasks/api_calls/integrations';
 import {
   disableAutoRefresh,

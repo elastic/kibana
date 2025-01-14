@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
@@ -14,10 +14,10 @@ import { createDatasetQualityDetailsControllerLazyFactory } from './controller/d
 import { DataStreamsStatsService } from './services/data_streams_stats';
 import { DataStreamDetailsService } from './services/data_stream_details';
 import {
-  DatasetQualityPluginSetup,
-  DatasetQualityPluginStart,
-  DatasetQualitySetupDeps,
-  DatasetQualityStartDeps,
+  type DatasetQualityPluginSetup,
+  type DatasetQualityPluginStart,
+  type DatasetQualitySetupDeps,
+  type DatasetQualityStartDeps,
 } from './types';
 
 export class DatasetQualityPlugin

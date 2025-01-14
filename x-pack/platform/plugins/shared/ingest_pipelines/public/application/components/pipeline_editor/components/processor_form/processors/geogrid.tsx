@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -20,7 +20,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, from } from './shared';
+import { type FieldsConfig, from } from './shared';
 import { TargetField } from './common_fields/target_field';
 
 const fieldsConfig: FieldsConfig = {

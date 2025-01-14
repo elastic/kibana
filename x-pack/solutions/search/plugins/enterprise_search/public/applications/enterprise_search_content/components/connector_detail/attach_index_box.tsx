@@ -13,7 +13,7 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+import { type Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 

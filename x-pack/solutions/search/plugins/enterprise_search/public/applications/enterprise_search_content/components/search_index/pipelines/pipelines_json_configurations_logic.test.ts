@@ -14,7 +14,7 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import {
   IndexPipelinesConfigurationsLogic,
-  IndexPipelinesConfigurationsValues,
+  type IndexPipelinesConfigurationsValues,
 } from './pipelines_json_configurations_logic';
 
 const indexName = 'unit-test-index';

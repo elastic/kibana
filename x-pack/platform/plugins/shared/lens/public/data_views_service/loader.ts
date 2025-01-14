@@ -7,13 +7,13 @@
 
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import {
-  DataViewsContract,
-  DataView,
-  DataViewSpec,
-  DataViewField,
+  type DataViewsContract,
+  type DataView,
+  type DataViewSpec,
+  type DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
+import { type IndexPattern, type IndexPatternField, type IndexPatternMap, type IndexPatternRef } from '../types';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 

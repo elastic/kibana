@@ -10,14 +10,14 @@
 import {
   apiCanAccessViewMode,
   apiHasLegacyLibraryTransforms,
-  EmbeddableApiContext,
+  type EmbeddableApiContext,
   getPanelTitle,
-  PublishesPanelTitle,
-  CanAccessViewMode,
+  type PublishesPanelTitle,
+  type CanAccessViewMode,
   getInheritedViewMode,
-  HasLegacyLibraryTransforms,
+  type HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';

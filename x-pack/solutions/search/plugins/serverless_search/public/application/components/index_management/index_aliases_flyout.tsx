@@ -9,7 +9,7 @@ import React from 'react';
 
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,

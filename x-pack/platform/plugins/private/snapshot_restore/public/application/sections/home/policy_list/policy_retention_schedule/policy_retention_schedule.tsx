@@ -25,9 +25,9 @@ import {
 import { useServices } from '../../../../app_context';
 import {
   RetentionSettingsUpdateModalProvider,
-  UpdateRetentionSettings,
+  type UpdateRetentionSettings,
   RetentionExecuteModalProvider,
-  ExecuteRetention,
+  type ExecuteRetention,
 } from '../../../../components';
 
 interface Props {

@@ -19,7 +19,7 @@ import {
 import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
 import { readFileSync } from 'fs';
 
-import { readPkcs12Keystore, Pkcs12ReadResult, readPkcs12Truststore } from './pkcs12';
+import { readPkcs12Keystore, type Pkcs12ReadResult, readPkcs12Truststore } from './pkcs12';
 
 const reformatPem = (pem: string) => {
   // ensure consistency in line endings when comparing two PEM files

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn, RenderCellValue } from '@elastic/eui';
+import { type EuiDataGridColumn, type RenderCellValue } from '@elastic/eui';
 import React from 'react';
-import { LogCategory } from '../../types';
+import { type LogCategory } from '../../types';
 import {
   LogCategoriesGridChangeTimeCell,
-  LogCategoriesGridChangeTimeCellDependencies,
+  type LogCategoriesGridChangeTimeCellDependencies,
   logCategoriesGridChangeTimeColumn,
 } from './log_categories_grid_change_time_cell';
 import {
@@ -23,7 +23,7 @@ import {
 } from './log_categories_grid_count_cell';
 import {
   LogCategoriesGridHistogramCell,
-  LogCategoriesGridHistogramCellDependencies,
+  type LogCategoriesGridHistogramCellDependencies,
   logCategoriesGridHistoryColumn,
 } from './log_categories_grid_histogram_cell';
 import {

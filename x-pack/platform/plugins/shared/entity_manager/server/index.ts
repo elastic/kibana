@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { EntityManagerConfig } from '../common/config';
-import { EntityManagerServerPluginSetup, EntityManagerServerPluginStart, config } from './plugin';
-import { EntityManagerRouteRepository } from './routes';
+import { type PluginInitializerContext } from '@kbn/core-plugins-server';
+import { type EntityManagerConfig } from '../common/config';
+import { type EntityManagerServerPluginSetup, type EntityManagerServerPluginStart, config } from './plugin';
+import { type EntityManagerRouteRepository } from './routes';
 
 export type {
   EntityManagerConfig,

@@ -10,12 +10,12 @@
 import React from 'react';
 import { sortBy } from 'lodash';
 
-import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import { EuiIcon, type EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { type AppMountParameters } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { ManagementApp, ManagementSection } from '../../utils';
+import { type ManagementApp, type ManagementSection } from '../../utils';
 
-import { ManagementItem } from '../../utils/management_item';
+import { type ManagementItem } from '../../utils/management_item';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];

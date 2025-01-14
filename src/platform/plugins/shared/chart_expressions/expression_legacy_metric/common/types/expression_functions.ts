@@ -9,17 +9,17 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import {
-  Datatable,
-  DefaultInspectorAdapters,
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-  ExpressionValueRender,
-  Style,
+  type Datatable,
+  type DefaultInspectorAdapters,
+  type ExecutionContext,
+  type ExpressionFunctionDefinition,
+  type ExpressionValueRender,
+  type Style,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
-import { VisParams, visType, LabelPositionType, MetricAlignment } from './expression_renderers';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { type ColorMode, type CustomPaletteState } from '@kbn/charts-plugin/common';
+import { type VisParams, type visType, type LabelPositionType, type MetricAlignment } from './expression_renderers';
+import { type EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
   autoScaleMetricAlignment?: MetricAlignment;

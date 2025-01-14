@@ -6,12 +6,12 @@
  */
 
 import {
-  fetchHistoricalSummaryParamsSchema,
-  FetchHistoricalSummaryResponse,
+  type fetchHistoricalSummaryParamsSchema,
+  type FetchHistoricalSummaryResponse,
 } from '@kbn/slo-schema';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { RoleCredentials } from '../../shared/services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { type FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 

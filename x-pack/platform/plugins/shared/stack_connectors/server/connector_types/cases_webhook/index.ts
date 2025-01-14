@@ -12,12 +12,12 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import {
-  CasesWebhookActionParamsType,
-  CasesWebhookExecutorResultData,
-  CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
-  ExecutorParams,
-  ExecutorSubActionPushParams,
+  type CasesWebhookActionParamsType,
+  type CasesWebhookExecutorResultData,
+  type CasesWebhookPublicConfigurationType,
+  type CasesWebhookSecretConfigurationType,
+  type ExecutorParams,
+  type ExecutorSubActionPushParams,
 } from './types';
 import { createExternalService } from './service';
 import {

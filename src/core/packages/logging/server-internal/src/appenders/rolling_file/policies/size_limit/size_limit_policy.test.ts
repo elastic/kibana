@@ -8,7 +8,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { LogRecord, LogLevel } from '@kbn/logging';
+import { type LogRecord, LogLevel } from '@kbn/logging';
 import { SizeLimitTriggeringPolicy } from './size_limit_policy';
 import { RollingFileContext } from '../../rolling_file_context';
 

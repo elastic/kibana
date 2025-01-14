@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { type ExpectExpression, expectExpressionProvider, type ExpressionResult } from './helpers';
+import { type FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({
   getService,

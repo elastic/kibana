@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   CreateSearchApplicationApiLogic,
-  CreateSearchApplicationApiLogicActions,
+  type CreateSearchApplicationApiLogicActions,
 } from '../../api/search_applications/create_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 

@@ -11,8 +11,8 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import { type OptionsListRequestBody, type OptionsListSuggestions } from '../../../common/options_list/types';
+import { type EsBucket, type OptionsListSuggestionAggregationBuilder } from '../types';
 
 /**
  * Search for an exact match based on the provided search string.

@@ -8,19 +8,19 @@
  */
 
 import {
-  ArrowFunction,
-  VariableDeclaration,
-  PropertyDeclaration,
-  PropertySignature,
-  ShorthandPropertyAssignment,
-  PropertyAssignment,
+  type ArrowFunction,
+  type VariableDeclaration,
+  type PropertyDeclaration,
+  type PropertySignature,
+  type ShorthandPropertyAssignment,
+  type PropertyAssignment,
 } from 'ts-morph';
-import { ApiDeclaration, TypeKind } from '../types';
+import { type ApiDeclaration, TypeKind } from '../types';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { getSignature } from './get_signature';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { BuildApiDecOpts } from './types';
+import { type BuildApiDecOpts } from './types';
 
 /**
  * Arrow functions are handled differently than regular functions because you need the arrow function

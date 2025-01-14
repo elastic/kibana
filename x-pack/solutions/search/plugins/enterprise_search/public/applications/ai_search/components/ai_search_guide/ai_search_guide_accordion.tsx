@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   EuiAccordion,
@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiTitle,
   EuiText,
-  IconType,
+  type IconType,
   EuiPanel,
 } from '@elastic/eui';
 

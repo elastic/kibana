@@ -8,11 +8,11 @@
 import { type TypeOf } from '@kbn/config-schema';
 import { isJSONObject, isString, isBoolean, isNumber, isStringArray, isBooleanArray } from '../lib';
 import {
-  versionSchema,
-  throttledActionSchema,
-  rawAlertInstanceSchema,
-  metaSchema,
-  lastScheduledActionsSchema,
+  type versionSchema,
+  type throttledActionSchema,
+  type rawAlertInstanceSchema,
+  type metaSchema,
+  type lastScheduledActionsSchema,
 } from './schema';
 
 type VersionSchema = TypeOf<typeof versionSchema>;

@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, type EuiFieldNumberProps } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

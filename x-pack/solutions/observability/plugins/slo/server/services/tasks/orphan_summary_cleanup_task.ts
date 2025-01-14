@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { type ElasticsearchClient, type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  type ConcreteTaskInstance,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
+import { type AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { StoredSLODefinition } from '../../domain/models';
+import { type StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
-import { SLOConfig } from '../../types';
+import { type SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 

@@ -9,12 +9,12 @@
 
 import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
-import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { search, AggParamOption } from '@kbn/data-plugin/public';
-import { AggParamEditorProps } from '../agg_param_props';
+import { search, type AggParamOption } from '@kbn/data-plugin/public';
+import { type AggParamEditorProps } from '../agg_param_props';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
 // we check if Elasticsearch interval is valid to show a user appropriate error message

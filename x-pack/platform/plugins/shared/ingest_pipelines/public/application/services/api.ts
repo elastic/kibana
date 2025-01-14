@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
+import { type HttpSetup, type ResponseErrorBody } from '@kbn/core/public';
 
 import type { FieldCopyAction, GeoipDatabase, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
-  UseRequestConfig,
-  SendRequestConfig,
-  SendRequestResponse,
+  type UseRequestConfig,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
-import { UiMetricService } from './ui_metric';
+import { type UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,
   UIM_PIPELINE_UPDATE,

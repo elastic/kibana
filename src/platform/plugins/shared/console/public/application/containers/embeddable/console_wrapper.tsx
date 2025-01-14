@@ -8,41 +8,41 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import {
-  HttpSetup,
-  NotificationsStart,
-  CoreTheme,
-  DocLinksStart,
-  CoreStart,
+  type HttpSetup,
+  type NotificationsStart,
+  type CoreTheme,
+  type DocLinksStart,
+  type CoreStart,
 } from '@kbn/core/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { type UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiWindowEvent } from '@elastic/eui';
-import { ObjectStorageClient } from '../../../../common/types';
+import { type ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
 import {
   getAutocompleteInfo,
-  AutocompleteInfo,
-  History,
-  Settings,
-  Storage,
+  type AutocompleteInfo,
+  type History,
+  type Settings,
+  type Storage,
   createHistory,
   createSettings,
   getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
 import {
-  MetricsTracker,
-  EmbeddableConsoleDependencies,
-  ConsoleStartServices,
+  type MetricsTracker,
+  type EmbeddableConsoleDependencies,
+  type ConsoleStartServices,
 } from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
-import { EsHostService } from '../../lib/es_host_service';
+import { type EsHostService } from '../../lib/es_host_service';
 
 import {
   ServicesContextProvider,

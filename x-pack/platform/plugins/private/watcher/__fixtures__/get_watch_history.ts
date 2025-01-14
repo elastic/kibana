@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import { ACTION_STATES, WATCH_STATES } from '../common/constants';
-import { ClientWatchStatusModel, ClientActionStatusModel } from '../common/types';
+import { type ClientWatchStatusModel, type ClientActionStatusModel } from '../common/types';
 
 interface WatchHistory {
   id: string;

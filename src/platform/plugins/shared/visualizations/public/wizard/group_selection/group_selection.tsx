@@ -8,7 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { type ReactNode, useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -29,7 +29,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart } from '@kbn/core/public';
+import { type DocLinksStart } from '@kbn/core/public';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';

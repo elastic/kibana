@@ -16,23 +16,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutIcons,
-  EuiIconProps,
+  type EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
   EuiPortal,
   EuiTextArea,
   htmlIdGenerator,
-  PopoverAnchorPosition,
+  type PopoverAnchorPosition,
   toSentenceCase,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
-import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
+import { type CoreStart, type DocLinksStart, type Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
+import { type DataView, type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
@@ -42,7 +42,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { buildQueryFromFilters, type Filter } from '@kbn/es-query';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -55,7 +55,7 @@ import type {
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { type AutocompleteService, type QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getCoreStart } from '../services';
 import './query_string_input.scss';
 

@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  IndexBadge,
-  IndexToggle,
-  IndicesListColumn,
-  EmptyListContent,
-  IndexContent,
-  ExtensionsSetup,
-  IndexDetailsPageRoute,
+  type IndexBadge,
+  type IndexToggle,
+  type IndicesListColumn,
+  type EmptyListContent,
+  type IndexContent,
+  type ExtensionsSetup,
+  type IndexDetailsPageRoute,
 } from '@kbn/index-management-shared-types';
-import { IndexDetailsTab } from '../../common/constants';
+import { type IndexDetailsTab } from '../../common/constants';
 
 export class ExtensionsService {
   private _actions: any[] = [];

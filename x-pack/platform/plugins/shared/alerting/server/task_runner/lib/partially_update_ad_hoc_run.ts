@@ -6,14 +6,14 @@
  */
 
 import {
-  SavedObjectsClient,
+  type SavedObjectsClient,
   SavedObjectsErrorHelpers,
-  SavedObjectsUpdateOptions,
+  type SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
 import { omit, pick } from 'lodash';
-import { AdHocRunSO } from '../../data/ad_hoc_run/types';
+import { type AdHocRunSO } from '../../data/ad_hoc_run/types';
 import {
-  AdHocRunAttributesNotPartiallyUpdatable,
+  type AdHocRunAttributesNotPartiallyUpdatable,
   AdHocRunAttributesToEncrypt,
   AdHocRunAttributesIncludedInAAD,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,

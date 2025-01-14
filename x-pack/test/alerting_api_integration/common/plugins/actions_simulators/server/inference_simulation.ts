@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 
-import { ProxyArgs, Simulator } from './simulator';
+import { type ProxyArgs, Simulator } from './simulator';
 
 export class InferenceSimulator extends Simulator {
   private readonly returnError: boolean;

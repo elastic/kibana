@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, FC, useMemo } from 'react';
+import React, { Fragment, type FC, useMemo } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -30,7 +30,7 @@ import type {
   IBasePath,
 } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel, type FailedImport } from '../../../lib';
 import './import_summary.scss';
 
 const DEFAULT_ICON = 'apps';

@@ -14,7 +14,7 @@ import {
 } from './actions';
 import {
   SavedObjectsManagementActionService,
-  SavedObjectsManagementActionServiceSetup,
+  type SavedObjectsManagementActionServiceSetup,
 } from './action_service';
 import { SavedObjectsManagementAction } from './types';
 

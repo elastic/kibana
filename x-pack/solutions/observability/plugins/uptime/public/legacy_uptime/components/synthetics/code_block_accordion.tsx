@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion, EuiCodeBlock } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 interface Props {
   buttonContent: string;

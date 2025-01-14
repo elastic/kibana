@@ -9,17 +9,17 @@ import moment from 'moment';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
-import { Story } from '@storybook/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { type Story } from '@storybook/react';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
+import { type TimeRange } from '@kbn/es-query';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type IUiSettingsClient } from '@kbn/core/public';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChartWrapper } from './wrapper';
-import { Aggregation, ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { type Aggregation, type ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 export default {
   component: IndicatorsBarChartWrapper,

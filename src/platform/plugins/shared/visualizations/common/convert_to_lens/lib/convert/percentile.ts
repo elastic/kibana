@@ -8,11 +8,11 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
-import { isFieldValid, PercentileParams } from '../..';
+import { type SchemaConfig } from '../../..';
+import { isFieldValid, type PercentileParams } from '../..';
 import { getAggIdAndValue, getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
-import { PercentileColumn, CommonColumnConverterArgs } from './types';
+import { type PercentileColumn, type CommonColumnConverterArgs } from './types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
 export const convertToPercentileParams = (percentile: number): PercentileParams => ({

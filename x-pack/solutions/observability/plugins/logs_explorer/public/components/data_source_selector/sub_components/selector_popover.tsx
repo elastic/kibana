@@ -11,14 +11,14 @@ import {
   EuiIcon,
   EuiPanel,
   EuiPopover,
-  EuiPopoverProps,
+  type EuiPopoverProps,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import {
-  DatasetSelection,
-  DataSourceSelection,
-  DataViewSelection,
+  type DatasetSelection,
+  type DataSourceSelection,
+  type DataViewSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
 import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';

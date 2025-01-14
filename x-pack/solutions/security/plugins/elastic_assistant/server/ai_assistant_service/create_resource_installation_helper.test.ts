@@ -11,8 +11,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createResourceInstallationHelper,
   errorResult,
-  InitializationPromise,
-  ResourceInstallationHelper,
+  type InitializationPromise,
+  type ResourceInstallationHelper,
   successResult,
   calculateDelay,
   getShouldRetry,

@@ -18,7 +18,7 @@ import {
 
 import {
   serializeCounterKey,
-  UsageCountersSavedObjectAttributes,
+  type UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from '../rollups/constants';

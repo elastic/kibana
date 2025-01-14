@@ -7,10 +7,10 @@
 
 import { isBoolean, isString, uniq } from 'lodash';
 import {
-  BinaryFilterCondition,
-  Condition,
-  FilterCondition,
-  UnaryFilterCondition,
+  type BinaryFilterCondition,
+  type Condition,
+  type FilterCondition,
+  type UnaryFilterCondition,
   isAndCondition,
   isFilterCondition,
   isOrCondition,

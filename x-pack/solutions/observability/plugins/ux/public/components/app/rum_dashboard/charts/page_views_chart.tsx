@@ -9,12 +9,12 @@ import moment from 'moment';
 import React, { useCallback } from 'react';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { type AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { useHistory } from 'react-router-dom';
 
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { type BreakdownItem } from '../../../../../typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useExpViewAttributes } from './use_exp_view_attrs';

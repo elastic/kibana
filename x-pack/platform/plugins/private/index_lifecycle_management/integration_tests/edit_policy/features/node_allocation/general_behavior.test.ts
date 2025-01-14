@@ -6,10 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { type HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../../helpers';
 import {
-  GeneralNodeAllocationTestBed,
+  type GeneralNodeAllocationTestBed,
   setupGeneralNodeAllocation,
 } from './general_behavior.helpers';
 import {

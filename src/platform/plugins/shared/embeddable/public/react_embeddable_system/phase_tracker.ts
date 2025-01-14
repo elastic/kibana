@@ -8,7 +8,7 @@
  */
 
 import {
-  PhaseEvent,
+  type PhaseEvent,
   apiPublishesDataLoading,
   apiPublishesRendered,
 } from '@kbn/presentation-publishing';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 
 export const searchConfigurationSchema = schema.object({
   query: schema.object({

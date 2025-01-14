@@ -10,16 +10,16 @@
 import { mapValues } from 'lodash';
 import {
   mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
+  type MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataViewPersistableStateService, DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService, type DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   createSearchSource,
   extractReferences,
   injectReferences,
   SearchSource,
-  SearchSourceDependencies,
-  SerializedSearchSourceFields,
+  type SearchSourceDependencies,
+  type SerializedSearchSourceFields,
 } from '.';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
 

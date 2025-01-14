@@ -10,8 +10,8 @@
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
 import {
-  ExpressionRenderDefinition,
-  IInterpreterRenderHandlers,
+  type ExpressionRenderDefinition,
+  type IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 
 export const defaultHandlers: IInterpreterRenderHandlers = {

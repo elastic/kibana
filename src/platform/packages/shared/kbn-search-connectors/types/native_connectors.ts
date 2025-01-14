@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType, FeatureName, FieldType, NativeConnector } from './connectors';
+import { DisplayType, FeatureName, FieldType, type NativeConnector } from './connectors';
 
 // assigning these to a local var significantly improves bundle size
 // because it reduces references to the imported modules.

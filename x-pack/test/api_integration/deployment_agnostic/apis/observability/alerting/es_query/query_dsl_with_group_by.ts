@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { ActionDocument } from './types';
+import { cleanup, generate, type Dataset, type PartialConfig } from '@kbn/data-forge';
+import { type RoleCredentials, type InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { type DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { type ActionDocument } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

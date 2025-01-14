@@ -6,9 +6,9 @@
  */
 
 import {
-  FoundListSchema,
-  ListSchema,
-  FoundListsBySizeSchema,
+  type FoundListSchema,
+  type ListSchema,
+  type FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715

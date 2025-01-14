@@ -10,9 +10,9 @@
 import { schema } from '@kbn/config-schema';
 import { ExpiryDateInThePastError } from '../../../file_share_service/errors';
 import type { FilesClient } from '../../../../common/files_client';
-import { CreateHandler, FileKindRouter } from '../types';
+import { type CreateHandler, type FileKindRouter } from '../types';
 
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
+import { type CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
 import type { FileKind, FileShareJSONWithToken } from '../../../../common/types';
 import { getById } from '../helpers';
 

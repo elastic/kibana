@@ -9,7 +9,7 @@ import { isDevMode } from '@kbn/xstate-utils';
 import { useInterpret } from '@xstate/react';
 import {
   createOriginInterpreterStateMachine,
-  OriginInterpreterStateMachineDependencies,
+  type OriginInterpreterStateMachineDependencies,
 } from './state_machine';
 
 export const OriginInterpreter: React.FC<OriginInterpreterStateMachineDependencies> = ({

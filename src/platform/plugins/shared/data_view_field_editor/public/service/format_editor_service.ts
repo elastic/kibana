@@ -23,7 +23,7 @@ import {
   truncateFormatEditorFactory,
   urlFormatEditorFactory,
   histogramFormatEditorFactory,
-  FieldFormatEditorFactory,
+  type FieldFormatEditorFactory,
 } from '../components';
 
 /**

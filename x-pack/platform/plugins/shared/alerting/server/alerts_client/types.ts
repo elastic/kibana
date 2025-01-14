@@ -6,37 +6,37 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import { type DeepPartial } from '@kbn/utility-types';
+import { type SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_REVISION,
-  ALERT_RULE_TAGS,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  ALERT_UUID,
-  SPACE_IDS,
+  type ALERT_RULE_CATEGORY,
+  type ALERT_RULE_CONSUMER,
+  type ALERT_RULE_EXECUTION_UUID,
+  type ALERT_RULE_NAME,
+  type ALERT_RULE_PARAMETERS,
+  type ALERT_RULE_PRODUCER,
+  type ALERT_RULE_REVISION,
+  type ALERT_RULE_TAGS,
+  type ALERT_RULE_TYPE_ID,
+  type ALERT_RULE_UUID,
+  type ALERT_UUID,
+  type SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { Alert as LegacyAlert } from '../alert/alert';
+import { type Alert as LegacyAlert } from '../alert/alert';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertsFilter,
-  SummarizedAlerts,
-  RawAlertInstance,
-  RuleAlertData,
-  WithoutReservedActionGroups,
+  type AlertInstanceContext,
+  type AlertInstanceState,
+  type AlertsFilter,
+  type SummarizedAlerts,
+  type RawAlertInstance,
+  type RuleAlertData,
+  type WithoutReservedActionGroups,
 } from '../types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { type AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { type RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { type RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { type MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;

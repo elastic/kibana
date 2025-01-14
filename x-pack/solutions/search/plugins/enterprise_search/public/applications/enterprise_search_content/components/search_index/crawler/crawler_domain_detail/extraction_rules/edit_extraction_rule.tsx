@@ -32,8 +32,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ExtractionFilter,
-  ExtractionRule,
-  ExtractionRuleBase,
+  type ExtractionRule,
+  type ExtractionRuleBase,
 } from '../../../../../../../../common/types/extraction_rules';
 import { docLinks } from '../../../../../../shared/doc_links';
 

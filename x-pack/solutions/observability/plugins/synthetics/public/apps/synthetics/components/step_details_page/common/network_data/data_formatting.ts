@@ -7,21 +7,21 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
+import { type MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
-import { WaterfallData, WaterfallMetadata } from './types';
+import { type NetworkEvent } from '../../../../../../../common/runtime_types';
+import { type WaterfallData, type WaterfallMetadata } from './types';
 import {
   FriendlyFlyoutLabels,
   FriendlyMimetypeLabels,
   FriendlyTimingLabels,
-  ItemMatcher,
-  LegendItem,
+  type ItemMatcher,
+  type LegendItem,
   Metadata,
   MimeType,
   MimeTypesMap,
-  WaterfallNetworkItem,
-  WaterfallTooltipItem,
+  type WaterfallNetworkItem,
+  type WaterfallTooltipItem,
   TIMING_ORDER,
   Timings,
 } from './types';

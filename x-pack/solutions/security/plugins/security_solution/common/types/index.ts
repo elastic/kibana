@@ -8,9 +8,9 @@
 import type { Status } from '../api/detection_engine';
 
 export * from './timeline';
-export * from './header_actions';
-export * from './session_view';
-export * from './bulk_actions';
+export type * from './header_actions';
+export type * from './session_view';
+export type * from './bulk_actions';
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';

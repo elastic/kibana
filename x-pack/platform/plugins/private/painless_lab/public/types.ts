@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { type HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { type DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import { type LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import {
-  AnalyticsServiceStart,
-  I18nStart,
-  ThemeServiceStart,
-  UserProfileService,
+  type AnalyticsServiceStart,
+  type I18nStart,
+  type ThemeServiceStart,
+  type UserProfileService,
 } from '@kbn/core/public';
 
 export interface PluginDependencies {

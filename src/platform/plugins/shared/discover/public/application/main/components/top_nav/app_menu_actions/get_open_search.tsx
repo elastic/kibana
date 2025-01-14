@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { AppMenuActionId, AppMenuActionType, AppMenuActionPrimary } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, type AppMenuActionPrimary } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
 

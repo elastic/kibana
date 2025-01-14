@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import {
-  ConnectorUsageCollector,
-  ConnectorTokenClientContract,
+  type ConnectorUsageCollector,
+  type ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ExternalService, ExternalServiceCredentials, SNProductsConfigValue } from './types';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ExternalService, type ExternalServiceCredentials, type SNProductsConfigValue } from './types';
 
-import { ServiceNowPublicConfigurationType, ServiceFactory } from './types';
+import { type ServiceNowPublicConfigurationType, type ServiceFactory } from './types';
 import { getAxiosInstance } from './utils';
 
 interface CreateServiceWrapperOpts<T = ExternalService> {

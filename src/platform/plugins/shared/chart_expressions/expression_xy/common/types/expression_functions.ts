@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import { type AxisProps, type HorizontalAlignment, type Position, type VerticalAlignment } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
@@ -18,46 +18,46 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import {
-  LegendSize,
-  XYLegendValue,
-  LegendLayout,
-  ExpressionValueVisDimension,
+  type LegendSize,
+  type XYLegendValue,
+  type LegendLayout,
+  type ExpressionValueVisDimension,
 } from '@kbn/visualizations-plugin/common';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { type EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
-import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import { type MakeOverridesSerializable, type Simplify } from '@kbn/chart-expressions-common/types';
 import {
-  AxisExtentModes,
-  FillStyles,
-  FittingFunctions,
-  IconPositions,
-  LayerTypes,
-  LineStyles,
-  SeriesTypes,
-  ValueLabelModes,
-  XScaleTypes,
-  XYCurveTypes,
-  YScaleTypes,
-  AxisModes,
-  REFERENCE_LINE,
-  DATA_DECORATION_CONFIG,
-  REFERENCE_LINE_DECORATION_CONFIG,
-  LEGEND_CONFIG,
-  DATA_LAYER,
-  AXIS_EXTENT_CONFIG,
-  EXTENDED_DATA_LAYER,
-  REFERENCE_LINE_LAYER,
-  ANNOTATION_LAYER,
-  EndValues,
-  X_AXIS_CONFIG,
-  Y_AXIS_CONFIG,
-  AvailableReferenceLineIcons,
-  XY_VIS,
-  LAYERED_XY_VIS,
-  EXTENDED_ANNOTATION_LAYER,
-  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+  type AxisExtentModes,
+  type FillStyles,
+  type FittingFunctions,
+  type IconPositions,
+  type LayerTypes,
+  type LineStyles,
+  type SeriesTypes,
+  type ValueLabelModes,
+  type XScaleTypes,
+  type XYCurveTypes,
+  type YScaleTypes,
+  type AxisModes,
+  type REFERENCE_LINE,
+  type DATA_DECORATION_CONFIG,
+  type REFERENCE_LINE_DECORATION_CONFIG,
+  type LEGEND_CONFIG,
+  type DATA_LAYER,
+  type AXIS_EXTENT_CONFIG,
+  type EXTENDED_DATA_LAYER,
+  type REFERENCE_LINE_LAYER,
+  type ANNOTATION_LAYER,
+  type EndValues,
+  type X_AXIS_CONFIG,
+  type Y_AXIS_CONFIG,
+  type AvailableReferenceLineIcons,
+  type XY_VIS,
+  type LAYERED_XY_VIS,
+  type EXTENDED_ANNOTATION_LAYER,
+  type EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
-import { XYRender } from './expression_renderers';
+import { type XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;

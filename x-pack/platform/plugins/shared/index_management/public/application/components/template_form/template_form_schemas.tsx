@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
 import {
-  FormSchema,
+  type FormSchema,
   FIELD_TYPES,
   VALIDATION_TYPES,
-  FieldConfig,
+  type FieldConfig,
   fieldFormatters,
   fieldValidators,
 } from '../../../shared_imports';

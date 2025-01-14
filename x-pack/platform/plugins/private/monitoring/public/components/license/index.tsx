@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, type FunctionComponent } from 'react';
 import {
   EuiPage,
   EuiPageBody,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
+import { firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ILicense } from '../common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
+import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
+import { type ILicense } from '../common/types';
+import { type LicensingPluginSetup, type LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';

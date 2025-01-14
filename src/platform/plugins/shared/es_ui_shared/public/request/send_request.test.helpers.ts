@@ -9,10 +9,10 @@
 
 import sinon from 'sinon';
 
-import { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
+import { type HttpSetup, type HttpFetchOptions } from '@kbn/core/public';
 import {
-  SendRequestConfig,
-  SendRequestResponse,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as originalSendRequest,
 } from './send_request';
 

@@ -7,9 +7,9 @@
 
 import { sentinelOneConnectorMocks } from './mocks';
 import {
-  SentinelOneDownloadAgentFileParams,
-  SentinelOneFetchAgentFilesParams,
-  SentinelOneGetActivitiesParams,
+  type SentinelOneDownloadAgentFileParams,
+  type SentinelOneFetchAgentFilesParams,
+  type SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

@@ -22,11 +22,11 @@ import {
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { type LayerWizard, type RenderWizardArguments } from '../../layers';
 import {
-  ColorDynamicOptions,
-  ESPewPewSourceDescriptor,
-  SizeDynamicOptions,
+  type ColorDynamicOptions,
+  type ESPewPewSourceDescriptor,
+  type SizeDynamicOptions,
 } from '../../../../common/descriptor_types';
 import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 

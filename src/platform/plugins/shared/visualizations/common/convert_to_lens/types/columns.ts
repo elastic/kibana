@@ -7,30 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataType, FilterQuery, TimeScaleUnit } from './common';
-import { Operation, OperationWithReferences, OperationWithSourceField } from './operations';
+import { type DataType, type FilterQuery, type TimeScaleUnit } from './common';
+import { type Operation, type OperationWithReferences, type OperationWithSourceField } from './operations';
 import {
-  AvgParams,
-  CardinalityParams,
-  DateHistogramParams,
-  FiltersParams,
-  MaxParams,
-  MedianParams,
-  MinParams,
-  RangeParams,
-  StandardDeviationParams,
-  SumParams,
-  TermsParams,
-  PercentileParams,
-  PercentileRanksParams,
-  CountParams,
-  LastValueParams,
-  CumulativeSumParams,
-  CounterRateParams,
-  DerivativeParams,
-  MovingAverageParams,
-  FormulaParams,
-  StaticValueParams,
+  type AvgParams,
+  type CardinalityParams,
+  type DateHistogramParams,
+  type FiltersParams,
+  type MaxParams,
+  type MedianParams,
+  type MinParams,
+  type RangeParams,
+  type StandardDeviationParams,
+  type SumParams,
+  type TermsParams,
+  type PercentileParams,
+  type PercentileRanksParams,
+  type CountParams,
+  type LastValueParams,
+  type CumulativeSumParams,
+  type CounterRateParams,
+  type DerivativeParams,
+  type MovingAverageParams,
+  type FormulaParams,
+  type StaticValueParams,
 } from './params';
 
 export interface BaseColumn<OperationType extends Operation, Params = undefined> {

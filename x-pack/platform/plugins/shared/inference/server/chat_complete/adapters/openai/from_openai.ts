@@ -7,9 +7,9 @@
 
 import type OpenAI from 'openai';
 import {
-  ChatCompletionChunkEvent,
+  type ChatCompletionChunkEvent,
   ChatCompletionEventType,
-  ChatCompletionTokenCountEvent,
+  type ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 
 export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompletionChunkEvent {

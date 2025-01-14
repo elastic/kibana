@@ -7,7 +7,7 @@
 
 import {
   type AttackDiscovery,
-  Replacements,
+  type Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 

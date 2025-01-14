@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiText, type IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 

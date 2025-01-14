@@ -8,10 +8,10 @@
 import {
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
-  AlertConsumers,
-  DefaultAlertFieldName,
+  type AlertConsumers,
+  type DefaultAlertFieldName,
 } from '@kbn/rule-data-utils';
-import { FILTERS, FilterStateStore, PhrasesFilter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore, type PhrasesFilter } from '@kbn/es-query';
 
 const $state = {
   store: FilterStateStore.APP_STATE,

@@ -6,8 +6,8 @@
  */
 
 import {
-  AggregationsBuckets,
-  AggregationsStringTermsBucketKeys,
+  type AggregationsBuckets,
+  type AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 

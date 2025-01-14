@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MonitorOverviewPageState } from '..';
+import { type MonitorOverviewPageState } from '..';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
-  FetchMonitorOverviewQueryArgs,
-  OverviewStatus,
+  type FetchMonitorOverviewQueryArgs,
+  type OverviewStatus,
   OverviewStatusCodec,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';

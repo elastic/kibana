@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, type FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -18,15 +18,15 @@ import {
   EuiPanel,
   EuiSelectable,
   EuiSpacer,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../../../common/types';
+import { type SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
-import { PolicyValidation, ValidatePolicyHelperData } from '../../../../../../services/validation';
+import { type PolicyValidation, type ValidatePolicyHelperData } from '../../../../../../services/validation';
 
 import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';

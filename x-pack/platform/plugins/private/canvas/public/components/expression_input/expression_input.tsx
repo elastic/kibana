@@ -10,7 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 
 import {
   LazyExpressionInput,
-  ExpressionInputProps,
+  type ExpressionInputProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 

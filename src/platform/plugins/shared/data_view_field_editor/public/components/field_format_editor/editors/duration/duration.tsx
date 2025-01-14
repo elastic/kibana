@@ -8,17 +8,17 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from '@kbn/field-formats-plugin/common';
+import { type DurationFormat } from '@kbn/field-formats-plugin/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
+import { DefaultFormatEditor, defaultState, type FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
-import { FormatEditorProps } from '../types';
+import { type FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;

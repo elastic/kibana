@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, type RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPageBody,

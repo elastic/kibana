@@ -10,12 +10,12 @@
 import moment from 'moment';
 
 import {
-  RunContext,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  type RunContext,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import { type EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { type CoreSetup, type Logger, type SavedObjectReference } from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {

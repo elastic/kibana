@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ParamsSchema, Params } from './rule_type_params';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { ParamsSchema, type Params } from './rule_type_params';
+import { type ObjectType, type TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
+import { type CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import { Comparator } from '../../../common/comparator_types';
 
 const DefaultParams: Writable<Partial<Params>> = {

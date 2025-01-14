@@ -7,9 +7,9 @@
 
 import { getType } from '@kbn/interpreter';
 import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  DatatableColumnType,
+  type ExpressionFunctionDefinition,
+  type Datatable,
+  type DatatableColumnType,
 } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 

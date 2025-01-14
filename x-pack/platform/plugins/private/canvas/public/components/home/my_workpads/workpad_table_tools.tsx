@@ -15,7 +15,7 @@ import { useDownloadWorkpad } from '../../hooks';
 
 import {
   WorkpadTableTools as Component,
-  Props as ComponentProps,
+  type Props as ComponentProps,
 } from './workpad_table_tools.component';
 import { WorkpadsContext } from './my_workpads';
 

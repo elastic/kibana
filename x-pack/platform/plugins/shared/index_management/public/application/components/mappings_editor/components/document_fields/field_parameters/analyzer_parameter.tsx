@@ -9,14 +9,14 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
+import { UseField, TextField, type FieldConfig, type FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
 import { PARAMETERS_OPTIONS, getSuperSelectOption, INDEX_DEFAULT } from '../../../constants';
 import {
-  IndexSettings,
-  IndexSettingsInterface,
-  SelectOption,
-  SuperSelectOption,
+  type IndexSettings,
+  type IndexSettingsInterface,
+  type SelectOption,
+  type SuperSelectOption,
 } from '../../../types';
 import { useConfig } from '../../../config_context';
 import { AnalyzerParameterSelects } from './analyzer_parameter_selects';

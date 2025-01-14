@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/public';
-import { FunctionComponent } from 'react';
-import { DeleteFieldProviderProps } from './components';
-import { OpenFieldDeleteModalOptions } from './open_delete_modal';
-import { OpenFieldEditorOptions } from './open_editor';
-import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
+import { type FieldSpec } from '@kbn/data-views-plugin/public';
+import { type FunctionComponent } from 'react';
+import { type DeleteFieldProviderProps } from './components';
+import { type OpenFieldDeleteModalOptions } from './open_delete_modal';
+import { type OpenFieldEditorOptions } from './open_editor';
+import { type FormatEditorServiceSetup, type FormatEditorServiceStart } from './service';
 import {
-  DataPublicPluginStart,
-  DataViewsPublicPluginStart,
-  FieldFormatsStart,
-  RuntimeField,
-  UsageCollectionStart,
-  RuntimeType,
-  SerializedFieldFormat,
+  type DataPublicPluginStart,
+  type DataViewsPublicPluginStart,
+  type FieldFormatsStart,
+  type RuntimeField,
+  type UsageCollectionStart,
+  type RuntimeType,
+  type SerializedFieldFormat,
 } from './shared_imports';
 
 /**

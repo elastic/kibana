@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingPublicPlugin, AlertingUIConfig } from './plugin';
+import { AlertingPublicPlugin, type AlertingUIConfig } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createManagementSectionMock,

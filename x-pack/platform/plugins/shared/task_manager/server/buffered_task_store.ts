@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TaskStore } from './task_store';
-import { ConcreteTaskInstance, PartialConcreteTaskInstance } from './task';
-import { Updatable } from './task_running';
-import { createBuffer, Operation, BufferOptions, Entity } from './lib/bulk_operation_buffer';
+import { type TaskStore } from './task_store';
+import { type ConcreteTaskInstance, type PartialConcreteTaskInstance } from './task';
+import { type Updatable } from './task_running';
+import { createBuffer, type Operation, type BufferOptions, type Entity } from './lib/bulk_operation_buffer';
 import { unwrapPromise, asErr, asOk } from './lib/result_type';
 
 // by default allow updates to be buffered for up to 50ms

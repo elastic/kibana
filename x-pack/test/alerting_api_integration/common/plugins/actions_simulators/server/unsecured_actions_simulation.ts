@@ -7,14 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CoreSetup,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
+  type CoreSetup,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type IKibanaResponse,
+  type IRouter,
 } from '@kbn/core/server';
-import { FixtureStartDeps } from './plugin';
+import { type FixtureStartDeps } from './plugin';
 
 export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDeps>) {
   router.post(

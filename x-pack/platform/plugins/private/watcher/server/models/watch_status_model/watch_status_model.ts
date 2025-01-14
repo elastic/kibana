@@ -9,9 +9,9 @@ import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import {
-  WatchStatusModelEs,
-  ServerWatchStatusModel,
-  ClientWatchStatusModel,
+  type WatchStatusModelEs,
+  type ServerWatchStatusModel,
+  type ClientWatchStatusModel,
 } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from '../action_status_model';

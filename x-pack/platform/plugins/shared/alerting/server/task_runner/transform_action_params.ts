@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { ActionContextVariables, SummaryActionContextVariables } from '@kbn/alerting-types';
-import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { type PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { type ActionContextVariables, type SummaryActionContextVariables } from '@kbn/alerting-types';
+import { type AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import {
-  RuleActionParams,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleTypeParams,
-  SanitizedRule,
+  type RuleActionParams,
+  type AlertInstanceState,
+  type AlertInstanceContext,
+  type RuleTypeParams,
+  type SanitizedRule,
 } from '../types';
 
 export interface TransformActionParamsOptions {

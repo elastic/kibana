@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ManagementSection, RegisterManagementSectionArgs } from './management_section';
+import { ManagementSection, type RegisterManagementSectionArgs } from './management_section';
 
 describe('ManagementSection', () => {
   const createSection = (

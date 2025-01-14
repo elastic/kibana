@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  scheduleBackfillErrorSchema,
-  scheduleBackfillParamSchema,
-  scheduleBackfillParamsSchema,
-  scheduleBackfillResultSchema,
-  scheduleBackfillResultsSchema,
+  type scheduleBackfillErrorSchema,
+  type scheduleBackfillParamSchema,
+  type scheduleBackfillParamsSchema,
+  type scheduleBackfillResultSchema,
+  type scheduleBackfillResultsSchema,
 } from '../schemas';
 
 export type ScheduleBackfillParam = TypeOf<typeof scheduleBackfillParamSchema>;

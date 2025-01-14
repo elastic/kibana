@@ -7,8 +7,8 @@
 import type SuperTest from 'supertest';
 
 import {
-  CoverageOverviewFilter,
-  CoverageOverviewResponse,
+  type CoverageOverviewFilter,
+  type CoverageOverviewResponse,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 

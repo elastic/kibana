@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type Plugin, type CoreSetup } from '@kbn/core/public';
+import { type DataViewsPublicPluginStart, type DataView } from '@kbn/data-views-plugin/public';
 import {
-  DateHistogramIndexPatternColumn,
-  LensPublicSetup,
-  LensPublicStart,
+  type DateHistogramIndexPatternColumn,
+  type LensPublicSetup,
+  type LensPublicStart,
 } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import { type DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { type TypedLensByValueInput, type PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import image from './image.png';
 
 export interface SetupDependencies {

@@ -9,7 +9,7 @@
 
 import {
   EuiContextMenuItem,
-  EuiContextMenuItemProps,
+  type EuiContextMenuItemProps,
   EuiContextMenuPanel,
   EuiDataGridToolbarControl,
   EuiFlexGroup,
@@ -18,14 +18,14 @@ import {
   EuiIconTip,
   EuiPopover,
   EuiSwitch,
-  EuiSwitchProps,
+  type EuiSwitchProps,
   EuiText,
   EuiTitle,
-  EuiTitleSize,
+  type EuiTitleSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
+import React, { type FC, type PropsWithChildren, type ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
 

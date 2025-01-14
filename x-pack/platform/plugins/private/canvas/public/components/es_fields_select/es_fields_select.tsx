@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import {
   ESFieldsSelect as Component,
-  ESFieldsSelectProps as Props,
+  type ESFieldsSelectProps as Props,
 } from './es_fields_select.component';
 import { getDataViewFields } from '../../lib/data_view_helpers';
 

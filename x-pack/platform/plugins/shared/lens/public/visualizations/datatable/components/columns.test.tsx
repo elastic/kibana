@@ -6,14 +6,14 @@
  */
 import React from 'react';
 import {
-  EuiButtonEmptyProps,
-  EuiDataGridColumnCellAction,
-  EuiDataGridColumnCellActionProps,
+  type EuiButtonEmptyProps,
+  type EuiDataGridColumnCellAction,
+  type EuiDataGridColumnCellActionProps,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { render, screen } from '@testing-library/react';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { RowHeightMode } from '../../../../common/types';
 import type { FormatFactory } from '../../../../common/types';
 import type { LensCellValueAction } from '../../../types';

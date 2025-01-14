@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { journey, step, expect, Page } from '@elastic/synthetics';
+import { journey, step, expect, type Page } from '@elastic/synthetics';
 import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 

@@ -8,38 +8,38 @@
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import { type SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
-  MigrateFunction,
-  MigrateFunctionsObject,
+  type MigrateFunction,
+  type MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
 import {
-  LensDocShapePre712,
-  OperationTypePre712,
-  LensDocShapePost712,
-  LensDocShape713,
-  LensDocShape714,
-  LensDocShape715,
-  VisStatePost715,
-  VisStatePre715,
-  VisState716,
-  VisState810,
-  VisState820,
-  VisState830,
-  CustomVisualizationMigrations,
-  LensDocShape810,
-  LensDocShape830,
-  VisStatePre830,
-  XYVisStatePre850,
-  VisState850,
-  LensDocShape850,
-  LensDocShape860,
+  type LensDocShapePre712,
+  type OperationTypePre712,
+  type LensDocShapePost712,
+  type LensDocShape713,
+  type LensDocShape714,
+  type LensDocShape715,
+  type VisStatePost715,
+  type VisStatePre715,
+  type VisState716,
+  type VisState810,
+  type VisState820,
+  type VisState830,
+  type CustomVisualizationMigrations,
+  type LensDocShape810,
+  type LensDocShape830,
+  type VisStatePre830,
+  type XYVisStatePre850,
+  type VisState850,
+  type LensDocShape850,
+  type LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
 import { RowHeightMode, type LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
-import { LensDocShape } from './saved_object_migrations';
+import { type LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712

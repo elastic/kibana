@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
-import { CloudProvider, getCloudProviderIcon } from './get_cloud_provider_icon';
+import { EuiIcon, type EuiIconProps } from '@elastic/eui';
+import { type CloudProvider, getCloudProviderIcon } from './get_cloud_provider_icon';
 
 export interface CloudProviderIconProps extends Omit<EuiIconProps, 'type'> {
   cloudProvider?: CloudProvider;

@@ -18,8 +18,8 @@ import {
   getFindExceptionListItemSchemaMultipleMock,
 } from './index.mock';
 import {
-  FindExceptionListItemSchema,
-  FindExceptionListItemSchemaDecoded,
+  type FindExceptionListItemSchema,
+  type FindExceptionListItemSchemaDecoded,
   findExceptionListItemSchema,
 } from '.';
 

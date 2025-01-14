@@ -10,9 +10,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryUpdateProps,
-  PerformKnowledgeBaseEntryBulkActionResponse,
+  type KnowledgeBaseEntryCreateProps,
+  type KnowledgeBaseEntryUpdateProps,
+  type PerformKnowledgeBaseEntryBulkActionResponse,
 } from '@kbn/elastic-assistant-common';
 import type { User } from './auth/types';
 

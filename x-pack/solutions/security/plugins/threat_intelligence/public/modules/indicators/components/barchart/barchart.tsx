@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { type VFC } from 'react';
 import {
   Axis,
   BarSeries,
@@ -15,8 +15,8 @@ import {
   Settings,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { type EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
+import { type TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IndicatorBarchartLegendAction } from './legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';

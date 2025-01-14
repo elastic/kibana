@@ -6,22 +6,22 @@
  */
 
 import {
-  Criteria,
-  Direction,
+  type Criteria,
+  type Direction,
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiLoadingChart,
-  EuiTableSortingType,
+  type EuiTableSortingType,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
-  MetricsFetchDataResponse,
-  MetricsFetchDataSeries,
-  NumberOrNull,
-  StringOrNull,
+  type MetricsFetchDataResponse,
+  type MetricsFetchDataSeries,
+  type NumberOrNull,
+  type StringOrNull,
 } from '../../../../..';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';

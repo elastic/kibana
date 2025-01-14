@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PathLike, readdir, stat, Stats } from 'fs';
+import { type PathLike, readdir, stat, type Stats } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, Observable } from 'rxjs';
+import { bindNodeCallback, from, type Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';

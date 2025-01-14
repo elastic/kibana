@@ -7,8 +7,8 @@
 
 import {
   PERFORM_RULE_INSTALLATION_URL,
-  RuleVersionSpecifier,
-  PerformRuleInstallationResponseBody,
+  type RuleVersionSpecifier,
+  type PerformRuleInstallationResponseBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';

@@ -6,25 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import { type SanitizedRule, type RawAlertInstance, type AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  AlertData,
-  AlertCluster,
-  AlertState,
-  AlertMessage,
-  CCRReadExceptionsUIMeta,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
-  AlertInstanceState,
-  CommonAlertParams,
-  CommonAlertFilter,
-  CCRReadExceptionsStats,
+  type AlertData,
+  type AlertCluster,
+  type AlertState,
+  type AlertMessage,
+  type CCRReadExceptionsUIMeta,
+  type AlertMessageTimeToken,
+  type AlertMessageLinkToken,
+  type AlertInstanceState,
+  type CommonAlertParams,
+  type CommonAlertFilter,
+  type CCRReadExceptionsStats,
 } from '../../common/types/alerts';
 import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';

@@ -10,11 +10,11 @@ import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import {
   createMockVisualization,
   createMockDatasource,
-  DatasourceMock,
+  type DatasourceMock,
   createMockFramePublicAPI,
 } from '../../mocks';
-import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
-import { DatasourceStates, DataViewsState } from '../../state_management';
+import { type TableSuggestion, type DatasourceSuggestion, type Visualization } from '../../types';
+import { type DatasourceStates, type DataViewsState } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

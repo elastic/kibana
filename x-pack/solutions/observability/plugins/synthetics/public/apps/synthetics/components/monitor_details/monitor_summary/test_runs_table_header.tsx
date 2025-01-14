@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@e
 
 import { StatusFilter } from './status_filter';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
-import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, type Ping } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
 import { stringifyUrlParams } from '../../../utils/url_params';
 

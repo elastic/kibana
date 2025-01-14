@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxisConfiguration, mapVerticalToHorizontalPlacement } from '../../helpers';
+import { type AxisConfiguration, mapVerticalToHorizontalPlacement } from '../../helpers';
 
 function createCombinationsFrom(strings: string): string[] {
   return strings.split('').flatMap((str, i, allStrings) => [

@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
   fieldValidators,
-  ValidationFunc,
-  ValidationConfig,
-  ValidationError,
+  type ValidationFunc,
+  type ValidationConfig,
+  type ValidationError,
 } from '../../../../shared_imports';
 
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PhaseWithDownsample, PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
-import { FormInternal } from '../types';
+import { type PhaseWithDownsample, type PhaseWithTiming, type PolicyFromES } from '../../../../../common/types';
+import { type FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 

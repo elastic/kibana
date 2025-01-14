@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/logging';
+import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ConfigMappingSchema,
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  SwimlaneSecretsConfigurationSchema,
-  SwimlaneServiceConfigurationSchema,
+  type ConfigMappingSchema,
+  type ExecutorParamsSchema,
+  type ExecutorSubActionPushParamsSchema,
+  type SwimlaneSecretsConfigurationSchema,
+  type SwimlaneServiceConfigurationSchema,
 } from './schema';
 
 export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;

@@ -26,7 +26,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  EuiFlyoutProps,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

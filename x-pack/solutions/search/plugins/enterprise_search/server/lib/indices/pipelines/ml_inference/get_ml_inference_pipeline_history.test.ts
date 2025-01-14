@@ -5,13 +5,13 @@
  * 2.0.
  */
 import {
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
-  SearchResponse,
+  type AggregationsMultiBucketAggregateBase,
+  type AggregationsStringRareTermsBucketKeys,
+  type SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
+import { type MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
 import { fetchMlInferencePipelineHistory } from './get_ml_inference_pipeline_history';
 

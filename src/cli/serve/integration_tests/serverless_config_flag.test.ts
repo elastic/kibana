@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process';
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from 'child_process';
 import type { Readable } from 'stream';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';

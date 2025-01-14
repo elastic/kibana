@@ -10,7 +10,7 @@ import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import {
   createObservabilityLogsExplorerStateMachine,
-  ObservabilityLogsExplorerStateMachineDependencies,
+  type ObservabilityLogsExplorerStateMachineDependencies,
 } from './state_machine';
 
 export const useObservabilityLogsExplorerPageState = (

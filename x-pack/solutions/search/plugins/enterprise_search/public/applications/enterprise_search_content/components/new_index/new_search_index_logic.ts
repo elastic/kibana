@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import {
   AddConnectorApiLogic,
-  AddConnectorApiLogicArgs,
-  AddConnectorApiLogicResponse,
+  type AddConnectorApiLogicArgs,
+  type AddConnectorApiLogicResponse,
 } from '../../api/connector/add_connector_api_logic';
 import {
   CreateCrawlerIndexApiLogic,
-  CreateCrawlerIndexArgs,
-  CreateCrawlerIndexResponse,
+  type CreateCrawlerIndexArgs,
+  type CreateCrawlerIndexResponse,
 } from '../../api/crawler/create_crawler_index_api_logic';
 import {
   CreateApiIndexApiLogic,
-  CreateApiIndexApiLogicArgs,
-  CreateApiIndexApiLogicResponse,
+  type CreateApiIndexApiLogicArgs,
+  type CreateApiIndexApiLogicResponse,
 } from '../../api/index/create_api_index_api_logic';
 
 import {
   IndexExistsApiLogic,
-  IndexExistsApiParams,
-  IndexExistsApiResponse,
+  type IndexExistsApiParams,
+  type IndexExistsApiResponse,
 } from '../../api/index/index_exists_api_logic';
 
 import { isValidIndexName } from '../../utils/validate_index_name';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import { flashIndexCreatedToast } from './new_index_created_toast';
-import { LanguageForOptimization } from './types';
+import { type LanguageForOptimization } from './types';
 import { getLanguageForOptimization } from './utils';
 
 export interface NewSearchIndexValues {

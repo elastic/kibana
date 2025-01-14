@@ -8,10 +8,10 @@
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
-  GlobalSearchPluginSetup,
-  GlobalSearchPluginStart,
-  RouteHandlerGlobalSearchContext,
-  GlobalSearchRequestHandlerContext,
+  type GlobalSearchPluginSetup,
+  type GlobalSearchPluginStart,
+  type RouteHandlerGlobalSearchContext,
+  type GlobalSearchRequestHandlerContext,
 } from './types';
 import { searchServiceMock } from './services/search_service.mock';
 import { contextMock } from './services/context.mock';

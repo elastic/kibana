@@ -9,8 +9,8 @@
 
 import { compact, shuffle } from 'lodash';
 import { Readable } from 'stream';
-import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import { apm, type ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
+import { type Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

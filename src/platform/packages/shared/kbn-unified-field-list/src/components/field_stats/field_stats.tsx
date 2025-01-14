@@ -38,11 +38,11 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  PartialTheme,
+  type PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import { buildEsQuery, type Query, type Filter, type AggregateQuery } from '@kbn/es-query';
+import { type OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
 import {
-  SessionViewPluginStart,
-  SessionViewPluginStartDeps,
-  SessionViewPluginSetup,
-  SessionViewPluginSetupDeps,
-  SessionViewDeps,
+  type SessionViewPluginStart,
+  type SessionViewPluginStartDeps,
+  type SessionViewPluginSetup,
+  type SessionViewPluginSetupDeps,
+  type SessionViewDeps,
 } from './types';
 import { getSessionViewLazy } from './methods';
 

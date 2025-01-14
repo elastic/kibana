@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type AxiosError, type AxiosInstance, type AxiosResponse } from 'axios';
+import { type TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/core/server';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ConnectorUsageCollector, type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExecutorParamsSchemaITSM,
-  ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchemaITSM,
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
-  ExecutorParamsSchemaSIR,
-  ExecutorSubActionPushParamsSchemaSIR,
-  ExecutorSubActionGetChoicesParamsSchema,
-  ExecutorParamsSchemaITOM,
-  ExecutorSubActionAddEventParamsSchema,
-  ExternalIncidentServiceConfigurationBaseSchema,
-  ExecutorSubActionCloseIncidentParamsSchema,
+  type ExecutorParamsSchemaITSM,
+  type ExecutorSubActionCommonFieldsParamsSchema,
+  type ExecutorSubActionGetIncidentParamsSchema,
+  type ExecutorSubActionHandshakeParamsSchema,
+  type ExecutorSubActionPushParamsSchemaITSM,
+  type ExternalIncidentServiceConfigurationSchema,
+  type ExternalIncidentServiceSecretConfigurationSchema,
+  type ExecutorParamsSchemaSIR,
+  type ExecutorSubActionPushParamsSchemaSIR,
+  type ExecutorSubActionGetChoicesParamsSchema,
+  type ExecutorParamsSchemaITOM,
+  type ExecutorSubActionAddEventParamsSchema,
+  type ExternalIncidentServiceConfigurationBaseSchema,
+  type ExecutorSubActionCloseIncidentParamsSchema,
 } from './schema';
-import { SNProductsConfigValue } from '../../../../common/servicenow_config';
+import { type SNProductsConfigValue } from '../../../../common/servicenow_config';
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
 

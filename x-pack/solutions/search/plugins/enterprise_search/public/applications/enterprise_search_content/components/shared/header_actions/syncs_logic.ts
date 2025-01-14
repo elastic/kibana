@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
+import { type Connector } from '@kbn/search-connectors';
 
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import {
-  CancelSyncsApiArgs,
+  type CancelSyncsApiArgs,
   CancelSyncsApiLogic,
 } from '../../../api/connector/cancel_syncs_api_logic';
 import {
   StartAccessControlSyncApiLogic,
-  StartAccessControlSyncArgs,
+  type StartAccessControlSyncArgs,
 } from '../../../api/connector/start_access_control_sync_api_logic';
 import {
   StartIncrementalSyncApiLogic,
-  StartIncrementalSyncArgs,
+  type StartIncrementalSyncArgs,
 } from '../../../api/connector/start_incremental_sync_api_logic';
-import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
+import { StartSyncApiLogic, type StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,

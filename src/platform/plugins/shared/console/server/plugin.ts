@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { type CoreSetup, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
-import { ConsoleConfig, ConsoleConfig7x } from './config';
+import { type ConsoleConfig, type ConsoleConfig7x } from './config';
 
 import { registerRoutes } from './routes';
 
-import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
+import { type ESConfigForProxy, type ConsoleSetup, type ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
 
 interface PluginsSetup {

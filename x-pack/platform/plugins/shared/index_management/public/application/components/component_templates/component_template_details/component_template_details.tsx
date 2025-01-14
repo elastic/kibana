@@ -35,8 +35,8 @@ import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
-import { ComponentTemplateTabs, TabType } from './tabs';
-import { ManageButton, ManageAction } from './manage_button';
+import { ComponentTemplateTabs, type TabType } from './tabs';
+import { ManageButton, type ManageAction } from './manage_button';
 
 export interface Props {
   componentTemplateName: string;

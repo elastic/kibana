@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionGeoPoint, GeoPoint } from './geo_point';
+import { type ExpressionFunctionGeoPoint, type GeoPoint } from './geo_point';
 
 export const geoPointToAst = (point: GeoPoint) => {
   return buildExpression([

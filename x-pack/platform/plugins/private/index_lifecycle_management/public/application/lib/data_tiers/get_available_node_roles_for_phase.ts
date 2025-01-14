@@ -6,9 +6,9 @@
  */
 
 import {
-  DataTierRole,
-  ListNodesRouteResponse,
-  PhaseWithAllocation,
+  type DataTierRole,
+  type ListNodesRouteResponse,
+  type PhaseWithAllocation,
 } from '../../../../common/types';
 
 import { phaseToNodePreferenceMap } from '../../../../common/constants';

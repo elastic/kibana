@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { type FtrProviderContext } from '../../../../ftr_provider_context';
 import { assertIdFormats } from './assert_id_formats';
-import { createMlJobHelper, MlJobHelper } from './ml_job_helper';
+import { createMlJobHelper, type MlJobHelper } from './ml_job_helper';
 import { createRequestTracker } from './request_tracker';
 import {
   hashedRateJob,

@@ -11,7 +11,7 @@
  */
 
 import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { type FtrProviderContext } from '../../ftr_provider_context';
 
 const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',

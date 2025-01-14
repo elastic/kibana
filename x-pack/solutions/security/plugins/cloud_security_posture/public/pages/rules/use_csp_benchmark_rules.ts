@@ -6,8 +6,8 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import {
-  FindCspBenchmarkRuleRequest,
-  FindCspBenchmarkRuleResponse,
+  type FindCspBenchmarkRuleRequest,
+  type FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { useKibana } from '../../common/hooks/use_kibana';
 

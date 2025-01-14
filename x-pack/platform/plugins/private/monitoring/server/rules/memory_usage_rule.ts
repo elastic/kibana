@@ -7,25 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { type AlertInstanceContext, type RawAlertInstance, type SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { type RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
-  AlertData,
-  AlertCluster,
-  AlertState,
-  AlertMessage,
-  AlertMemoryUsageState,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
-  AlertInstanceState,
-  CommonAlertParams,
-  AlertMemoryUsageNodeStats,
-  CommonAlertFilter,
+  type AlertData,
+  type AlertCluster,
+  type AlertState,
+  type AlertMessage,
+  type AlertMemoryUsageState,
+  type AlertMessageTimeToken,
+  type AlertMessageLinkToken,
+  type AlertInstanceState,
+  type CommonAlertParams,
+  type AlertMemoryUsageNodeStats,
+  type CommonAlertFilter,
 } from '../../common/types/alerts';
 import { RULE_MEMORY_USAGE, RULE_DETAILS } from '../../common/constants';
 import { ROUNDED_FLOAT } from '../../common/formatting';

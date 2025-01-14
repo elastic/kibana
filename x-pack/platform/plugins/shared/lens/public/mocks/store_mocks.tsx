@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import React, { type PropsWithChildren, type ReactElement } from 'react';
+import { type ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import { PreloadedState } from '@reduxjs/toolkit';
-import { RenderOptions, render } from '@testing-library/react';
+import { type PreloadedState } from '@reduxjs/toolkit';
+import { type RenderOptions, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { LensAppServices } from '../app_plugin/types';
-import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
+import { type LensAppServices } from '../app_plugin/types';
+import { makeConfigureStore, type LensAppState, type LensState, type LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
-import { DatasourceMap, VisualizationMap } from '../types';
+import { type DatasourceMap, type VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';

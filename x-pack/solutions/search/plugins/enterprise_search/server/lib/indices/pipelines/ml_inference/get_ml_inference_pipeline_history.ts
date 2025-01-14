@@ -6,13 +6,13 @@
  */
 
 import {
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
+  type AggregationsMultiBucketAggregateBase,
+  type AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
+import { type MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
 export const fetchMlInferencePipelineHistory = async (
   client: ElasticsearchClient,

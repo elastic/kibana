@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { escapeKuery, escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { isQuery, SavedQueryAttributes } from '../../common';
+import { isQuery, type SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 import type { SavedQueryRestResponse } from './route_types';
 

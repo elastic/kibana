@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { type DataView } from '@kbn/data-views-plugin/common';
 import {
   BooleanRelation,
   buildEmptyFilter,
   buildCombinedFilter,
-  FilterMeta,
-  RangeFilter,
+  type FilterMeta,
+  type RangeFilter,
 } from '@kbn/es-query';
 import { mapCombined } from './map_combined';
 

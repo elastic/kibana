@@ -13,7 +13,7 @@ import { GroupMenu } from './group_menu';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import {
-  GroupByState,
+  type GroupByState,
   selectOverviewState,
   setOverviewGroupByAction,
 } from '../../../../../state/overview';

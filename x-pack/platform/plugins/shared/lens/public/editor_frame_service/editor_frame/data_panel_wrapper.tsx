@@ -9,19 +9,19 @@ import './data_panel_wrapper.scss';
 
 import React, { useMemo, memo, useEffect, useCallback } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { type DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { Easteregg } from './easteregg';
 import {
-  StateSetter,
-  DatasourceDataPanelProps,
-  DatasourceMap,
-  FramePublicAPI,
-  VisualizationMap,
+  type StateSetter,
+  type DatasourceDataPanelProps,
+  type DatasourceMap,
+  type FramePublicAPI,
+  type VisualizationMap,
 } from '../../types';
 import {
   useLensDispatch,

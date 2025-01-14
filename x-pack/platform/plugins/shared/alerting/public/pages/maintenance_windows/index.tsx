@@ -31,7 +31,7 @@ import {
   MAINTENANCE_WINDOW_DEEP_LINK_IDS,
   MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-  MaintenanceWindowStatus,
+  type MaintenanceWindowStatus,
 } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {

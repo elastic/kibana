@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { isEqual } from 'lodash';
 import { getIndexPatterns } from '../utils';
-import { IndexPatternTableItem } from '../types';
+import { type IndexPatternTableItem } from '../types';
 import { stateSelectorFactory } from '../state_helpers';
 
 export interface DataViewTableControllerState {

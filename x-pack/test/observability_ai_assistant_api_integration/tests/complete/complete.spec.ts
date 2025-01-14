@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Response } from 'supertest';
+import { type Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
-  ChatCompletionChunkEvent,
-  ConversationCreateEvent,
-  ConversationUpdateEvent,
-  MessageAddEvent,
-  StreamingChatResponseEvent,
+  type ChatCompletionChunkEvent,
+  type ConversationCreateEvent,
+  type ConversationUpdateEvent,
+  type MessageAddEvent,
+  type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { type ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   createLlmProxy,
   isFunctionTitleRequest,
-  LlmProxy,
-  LlmResponseSimulator,
+  type LlmProxy,
+  type LlmResponseSimulator,
 } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   decodeEvents,
   getConversationCreatedEvent,

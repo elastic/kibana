@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { catchError, from, Observable, of } from 'rxjs';
+import { catchError, from, type Observable, of } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs';
 import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../types';
 

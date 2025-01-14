@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  TheHiveConfigSchema,
-  TheHiveSecretsSchema,
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExecutorSubActionCreateAlertParamsSchema,
-  TheHiveFailureResponseSchema,
-  TheHiveIncidentResponseSchema,
+  type TheHiveConfigSchema,
+  type TheHiveSecretsSchema,
+  type ExecutorParamsSchema,
+  type ExecutorSubActionPushParamsSchema,
+  type ExecutorSubActionCreateAlertParamsSchema,
+  type TheHiveFailureResponseSchema,
+  type TheHiveIncidentResponseSchema,
 } from './schema';
 
 export type TheHiveConfig = TypeOf<typeof TheHiveConfigSchema>;

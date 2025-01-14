@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiStepStatus,
+  type EuiStepStatus,
 } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';

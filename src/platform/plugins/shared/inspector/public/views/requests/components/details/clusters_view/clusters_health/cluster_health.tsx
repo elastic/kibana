@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
+import { EuiHealth, EuiText, type EuiTextProps } from '@elastic/eui';
 import { useHealthHexCodes } from './gradient';
 
 interface Props {

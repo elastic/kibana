@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleTableItem, SnoozeSchedule } from '../../../../types';
+import { type RuleTableItem, type SnoozeSchedule } from '../../../../types';
 import {
-  ComponentOpts as BulkOperationsComponentOpts,
+  type ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { isRuleSnoozed } from '../../../lib';

@@ -7,37 +7,37 @@
 
 import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { type ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { type CloudSetup, type CloudStart } from '@kbn/cloud-plugin/public';
+import { type ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
-  AppMountParameters,
-  CoreStart,
-  CoreSetup,
-  HttpSetup,
-  Plugin,
-  PluginInitializerContext,
+  type AppMountParameters,
+  type CoreStart,
+  type CoreSetup,
+  type HttpSetup,
+  type Plugin,
+  type PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppDeepLink,
+  type AppDeepLink,
   type AppUpdater,
   AppStatus,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { type LensPublicStart } from '@kbn/lens-plugin/public';
+import { type LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { type MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
+import { type SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { type SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
+import { type SecurityPluginSetup, type SecurityPluginStart } from '@kbn/security-plugin/public';
+import { type SharePluginSetup, type SharePluginStart } from '@kbn/share-plugin/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -52,7 +52,7 @@ import {
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-import { ClientConfigType, InitialAppData } from '../common/types';
+import { type ClientConfigType, type InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';

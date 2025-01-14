@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import createSagaMiddleware, { type SagaMiddleware } from 'redux-saga';
+import { combineReducers, createStore, type Store, type AnyAction, type Dispatch, applyMiddleware } from 'redux';
+import { type ChromeStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
+import { type ContentClient } from '@kbn/content-management-plugin/public';
 import {
   fieldsReducer,
-  FieldsState,
+  type FieldsState,
   syncNodeStyleSaga,
   syncFieldsSaga,
   updateSaveButtonSaga,
 } from './fields';
-import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
+import { type UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
 import {
-  AdvancedSettingsState,
+  type AdvancedSettingsState,
   advancedSettingsReducer,
   syncSettingsSaga,
 } from './advanced_settings';
-import { DatasourceState, datasourceReducer } from './datasource';
+import { type DatasourceState, datasourceReducer } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
-import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
+import { type IndexPatternProvider, type Workspace, type GraphSavePolicy, type AdvancedSettings } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
-import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
+import { metaDataReducer, type MetaDataState, syncBreadcrumbSaga } from './meta_data';
+import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, type WorkspaceState } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;

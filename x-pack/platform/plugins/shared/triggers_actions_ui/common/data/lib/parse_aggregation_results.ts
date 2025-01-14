@@ -6,10 +6,10 @@
  */
 
 import {
-  SearchResponse,
-  SearchHit,
-  SearchHitsMetadata,
-  AggregationsSingleMetricAggregateBase,
+  type SearchResponse,
+  type SearchHit,
+  type SearchHitsMetadata,
+  type AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Group } from '@kbn/observability-alerting-rule-utils';
 

@@ -10,7 +10,7 @@
 import { mockPackage } from './env.test.mocks';
 import type { Package } from '@kbn/repo-packages';
 
-import { Env, RawPackageInfo } from './env';
+import { Env, type RawPackageInfo } from './env';
 import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';

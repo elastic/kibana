@@ -6,7 +6,7 @@
  */
 
 import { select } from './select';
-import { Json, Selector, Vector2d, Vector3d, TransformMatrix2d, TransformMatrix3d } from '.';
+import { type Json, type Selector, type Vector2d, type Vector3d, type TransformMatrix2d, type TransformMatrix3d } from '.';
 import {
   mvMultiply as mult2d,
   ORIGIN as UNIT2D,

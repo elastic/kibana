@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { TabsParams } from '../../page_objects/infra_logs_page';
+import { type WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { type FtrProviderContext } from '../../ftr_provider_context';
+import { type TabsParams } from '../../page_objects/infra_logs_page';
 
 export function LogStreamPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['infraLogs']);

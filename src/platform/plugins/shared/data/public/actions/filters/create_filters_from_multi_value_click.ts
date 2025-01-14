@@ -10,11 +10,11 @@
 import {
   buildCombinedFilter,
   toggleFilterNegated,
-  Filter,
+  type Filter,
   compareFilters,
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
-import { Truthy, uniqWith } from 'lodash';
+import { type Truthy, uniqWith } from 'lodash';
 import { createFilter } from './create_filters_from_value_click';
 import type { MultiValueClickContext } from '../multi_value_click_action';
 import { mapAndFlattenFilters } from '../../query';

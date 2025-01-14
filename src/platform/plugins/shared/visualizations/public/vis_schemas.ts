@@ -9,13 +9,13 @@
 
 import {
   BUCKET_TYPES,
-  IAggConfig,
+  type IAggConfig,
   METRIC_TYPES,
   SHARD_DELAY_AGG_NAME,
 } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import { Vis, VisToExpressionAstParams } from './types';
-import { SchemaConfig, VisParams } from '../common/types';
+import { type Vis, type VisToExpressionAstParams } from './types';
+import { type SchemaConfig, type VisParams } from '../common/types';
 import { convertToSchemaConfig } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;

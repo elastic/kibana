@@ -11,9 +11,9 @@ import { normalizeQuery } from './normalize_query';
 import { overwrite } from '../../helpers';
 
 import {
-  TableRequestProcessorsFunction,
-  TableRequestProcessorsParams,
-  TableSearchRequest,
+  type TableRequestProcessorsFunction,
+  type TableRequestProcessorsParams,
+  type TableSearchRequest,
 } from './types';
 
 describe('normalizeQuery', () => {

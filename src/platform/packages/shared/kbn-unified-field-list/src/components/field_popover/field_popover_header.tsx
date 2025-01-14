@@ -10,10 +10,10 @@
 import React from 'react';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
+  type EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverProps,
+  type EuiPopoverProps,
   EuiToolTip,
   EuiTitle,
   EuiSpacer,

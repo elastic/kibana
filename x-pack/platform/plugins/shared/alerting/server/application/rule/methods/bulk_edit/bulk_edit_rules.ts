@@ -8,18 +8,18 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { type KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateResponse,
+  type SavedObjectsBulkUpdateObject,
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsFindResult,
+  type SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
+import { type Rule, type RuleAction, type RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
-import { RuleTypeRegistry } from '../../../../types';
+import { type BulkActionSkipResult } from '../../../../../common/bulk_edit';
+import { type RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,
   getRuleNotifyWhenType,
@@ -54,32 +54,32 @@ import {
   createNewAPIKeySet,
 } from '../../../../rules_client/lib';
 import {
-  BulkOperationError,
-  RuleBulkOperationAggregation,
-  RulesClientContext,
-  NormalizedAlertActionWithGeneratedValues,
-  NormalizedAlertAction,
+  type BulkOperationError,
+  type RuleBulkOperationAggregation,
+  type RulesClientContext,
+  type NormalizedAlertActionWithGeneratedValues,
+  type NormalizedAlertAction,
 } from '../../../../rules_client/types';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import {
-  BulkEditFields,
-  BulkEditOperation,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-  ParamsModifier,
-  ShouldIncrementRevision,
+  type BulkEditFields,
+  type BulkEditOperation,
+  type BulkEditOptionsFilter,
+  type BulkEditOptionsIds,
+  type ParamsModifier,
+  type ShouldIncrementRevision,
 } from './types';
-import { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
+import { type RawRuleAction, type RawRule, type SanitizedRule } from '../../../../types';
 import { ruleNotifyWhen } from '../../constants';
 import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
-import { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
+import { type RuleParams, type RuleDomain, type RuleSnoozeSchedule } from '../../types';
 import { findRulesSo, bulkCreateRulesSo } from '../../../../data/rule';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit, type ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;

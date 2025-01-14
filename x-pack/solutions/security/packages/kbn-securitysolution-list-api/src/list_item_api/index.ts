@@ -6,18 +6,18 @@
  */
 
 import {
-  FindListItemSchema,
-  ListItemSchema,
+  type FindListItemSchema,
+  type ListItemSchema,
   deleteListItemSchema,
   patchListItemSchema,
   createListItemSchema,
   findListItemSchema,
   foundListItemSchema,
   listItemSchema,
-  FoundListItemSchema,
-  DeleteListItemSchema,
-  PatchListItemSchema,
-  CreateListItemSchema,
+  type FoundListItemSchema,
+  type DeleteListItemSchema,
+  type PatchListItemSchema,
+  type CreateListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
@@ -26,11 +26,11 @@ import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import {
-  ApiParams,
-  FindListItemsParams,
-  DeleteListItemParams,
-  PatchListItemParams,
-  CreateListItemParams,
+  type ApiParams,
+  type FindListItemsParams,
+  type DeleteListItemParams,
+  type PatchListItemParams,
+  type CreateListItemParams,
 } from '../types';
 import { toError, toPromise } from '../fp_utils';
 

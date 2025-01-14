@@ -8,11 +8,11 @@
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 import {
-  IScopedClusterClient,
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
+  type IScopedClusterClient,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type RequestHandler,
+  type RequestHandlerContext,
 } from '@kbn/core/server';
 import { versionService } from './version';
 

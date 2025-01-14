@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
-  AlertConsumers,
-  ALERT_CASE_IDS,
-  ALERT_STATUS,
-  ALERT_MAINTENANCE_WINDOW_IDS,
+  type AlertConsumers,
+  type ALERT_CASE_IDS,
+  type ALERT_STATUS,
+  type ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { Dispatch, ReducerAction, ReducerState } from 'react';
-import { Alert, AlertsTableProps } from '../../../types';
+import { type IHttpFetchError, type ResponseErrorBody } from '@kbn/core-http-browser';
+import { type Dispatch, type ReducerAction, type ReducerState } from 'react';
+import { type Alert, type AlertsTableProps } from '../../../types';
 import type { bulkActionsReducer } from './bulk_actions/reducer';
 
 export interface Consumer {

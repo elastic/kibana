@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { type FC, type PropsWithChildren, useContext } from 'react';
 import {
   NoDataViewsPromptProvider,
   NoDataViewsPromptKibanaProvider,
@@ -16,9 +16,9 @@ import {
 import { NoDataCardProvider, NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 
 import {
-  Services,
-  KibanaNoDataPageServices,
-  KibanaNoDataPageKibanaDependencies,
+  type Services,
+  type KibanaNoDataPageServices,
+  type KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 const KibanaNoDataPageContext = React.createContext<Services | null>(null);

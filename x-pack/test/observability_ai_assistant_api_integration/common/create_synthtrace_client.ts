@@ -6,11 +6,11 @@
  */
 import {
   ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
+  type ApmSynthtraceKibanaClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import { InheritedFtrProviderContext } from './ftr_provider_context';
+import { type InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(
   context: InheritedFtrProviderContext,

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject, css } from '@emotion/react';
+import { type CSSObject, css } from '@emotion/react';
 import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 import type { Teletype } from '../../../common';

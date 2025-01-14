@@ -6,9 +6,9 @@
  */
 
 import { apiService } from './utils';
-import { FetchNetworkEventsParams } from '../actions/network_events';
+import { type FetchNetworkEventsParams } from '../actions/network_events';
 import {
-  SyntheticsNetworkEventsApiResponse,
+  type SyntheticsNetworkEventsApiResponse,
   SyntheticsNetworkEventsApiResponseType,
 } from '../../../../common/runtime_types';
 import { API_URLS } from '../../../../common/constants';

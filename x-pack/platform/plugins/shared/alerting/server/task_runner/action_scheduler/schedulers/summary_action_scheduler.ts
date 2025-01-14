@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import { type AlertInstanceState, type AlertInstanceContext } from '@kbn/alerting-state-types';
+import { type RuleAction, type RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import { CombinedSummarizedAlerts } from '../../../types';
-import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
-import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import { type CombinedSummarizedAlerts } from '../../../types';
+import { type RuleTypeState, type RuleAlertData, parseDuration } from '../../../../common';
+import { type GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -23,10 +23,10 @@ import {
   shouldScheduleAction,
 } from '../lib';
 import {
-  ActionSchedulerOptions,
-  ActionsToSchedule,
-  GetActionsToScheduleOpts,
-  IActionScheduler,
+  type ActionSchedulerOptions,
+  type ActionsToSchedule,
+  type GetActionsToScheduleOpts,
+  type IActionScheduler,
 } from '../types';
 import { injectActionParams } from '../../inject_action_params';
 import { transformSummaryActionParams } from '../../transform_action_params';

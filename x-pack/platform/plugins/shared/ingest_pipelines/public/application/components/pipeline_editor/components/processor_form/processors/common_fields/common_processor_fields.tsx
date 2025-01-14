@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import {
-  FieldConfig,
+  type FieldConfig,
   UseField,
   FIELD_TYPES,
   Field,

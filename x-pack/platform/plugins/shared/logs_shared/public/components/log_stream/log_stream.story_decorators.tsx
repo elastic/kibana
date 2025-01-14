@@ -12,7 +12,7 @@ import { delay } from 'rxjs';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,
-  FieldSpec,
+  type FieldSpec,
 } from '@kbn/data-plugin/common';
 import type {
   IKibanaSearchResponse,
@@ -24,7 +24,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getLogViewResponsePayloadRT } from '../../../common/http_api';
 import { defaultLogViewAttributes } from '../../../common/log_views';
 import {
-  LogEntriesSearchResponsePayload,
+  type LogEntriesSearchResponsePayload,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entries';
 import { ENTRIES_EMPTY, generateFakeEntries } from '../../test_utils/entries';

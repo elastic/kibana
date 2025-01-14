@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
-import { API_PRIVILEGES, RulesSettingsFlapping } from '../../common';
+import { type IRouter } from '@kbn/core/server';
+import { type ILicenseState } from '../lib';
+import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { verifyAccessAndContext, type RewriteResponseCase } from './lib';
+import { API_PRIVILEGES, type RulesSettingsFlapping } from '../../common';
 
 const rewriteBodyRes: RewriteResponseCase<RulesSettingsFlapping> = ({
   lookBackWindow,

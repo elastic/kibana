@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { euiScrollBarStyles, UseEuiTheme } from '@elastic/eui';
+import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 
 export const phrasesValuesComboboxCss = (theme: UseEuiTheme) => css`
   .euiComboBox__inputWrap {

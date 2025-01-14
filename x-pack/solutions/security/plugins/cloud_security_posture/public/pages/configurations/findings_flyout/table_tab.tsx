@@ -9,7 +9,7 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
+  type EuiInMemoryTableProps,
   EuiText,
 } from '@elastic/eui';
 import React from 'react';

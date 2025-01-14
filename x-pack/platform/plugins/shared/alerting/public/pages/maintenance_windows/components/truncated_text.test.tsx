@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { TruncatedText } from './truncated_text';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { type AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
 describe('TruncatedText', () => {
   let appMockRenderer: AppMockRenderer;

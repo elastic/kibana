@@ -6,18 +6,18 @@
  */
 
 import {
-  ApplicationStart,
-  ChromeStart,
-  DocLinksStart,
-  HttpStart,
-  PluginInitializer,
-  PluginInitializerContext,
+  type ApplicationStart,
+  type ChromeStart,
+  type DocLinksStart,
+  type HttpStart,
+  type PluginInitializer,
+  type PluginInitializerContext,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { type SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ObservabilityOnboardingPlugin,
-  ObservabilityOnboardingPluginSetup,
-  ObservabilityOnboardingPluginStart,
+  type ObservabilityOnboardingPluginSetup,
+  type ObservabilityOnboardingPluginStart,
 } from './plugin';
 
 export interface ConfigSchema {

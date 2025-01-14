@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { getPackages, getPluginPackagesFilter, type Package } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ApiScope, PluginOrPackage } from './types';
+import { ApiScope, type PluginOrPackage } from './types';
 
 function toApiScope(pkg: Package): ApiScope {
   switch (pkg.manifest.type) {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import { type IRouter } from '@kbn/core/server';
+import { type ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
   deleteRuleRequestParamsSchemaV1,
-  DeleteRuleRequestParamsV1,
+  type DeleteRuleRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/delete';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { type AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const deleteRuleRoute = (

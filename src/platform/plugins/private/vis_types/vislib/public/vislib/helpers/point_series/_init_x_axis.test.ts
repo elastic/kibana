@@ -13,8 +13,8 @@ import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-p
 
 import { initXAxis } from './_init_x_axis';
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Aspects, Chart, DateHistogramOrdered, HistogramOrdered } from './point_series';
-import { Table, Column } from '../../types';
+import { type Aspects, type Chart, type DateHistogramOrdered, type HistogramOrdered } from './point_series';
+import { type Table, type Column } from '../../types';
 
 describe('initXAxis', function () {
   let chart: Chart;

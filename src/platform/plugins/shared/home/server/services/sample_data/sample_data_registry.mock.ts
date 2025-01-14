@@ -9,9 +9,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  SampleDataRegistrySetup,
-  SampleDataRegistryStart,
-  SampleDataRegistry,
+  type SampleDataRegistrySetup,
+  type SampleDataRegistryStart,
+  type SampleDataRegistry,
 } from './sample_data_registry';
 
 const createSetupMock = (): jest.Mocked<SampleDataRegistrySetup> => {

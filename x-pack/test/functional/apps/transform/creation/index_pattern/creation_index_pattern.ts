@@ -9,11 +9,11 @@ import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  GroupByEntry,
+  type GroupByEntry,
   isLatestTransformTestData,
   isPivotTransformTestData,
-  LatestTransformTestData,
-  PivotTransformTestData,
+  type LatestTransformTestData,
+  type PivotTransformTestData,
 } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

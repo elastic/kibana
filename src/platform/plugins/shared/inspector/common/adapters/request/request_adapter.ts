@@ -10,7 +10,7 @@
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus } from './types';
+import { type Request, type RequestParams, RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.

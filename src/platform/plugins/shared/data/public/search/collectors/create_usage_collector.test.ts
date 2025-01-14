@@ -8,11 +8,11 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { usageCollectionPluginMock, Setup } from '@kbn/usage-collection-plugin/public/mocks';
+import { usageCollectionPluginMock, type Setup } from '@kbn/usage-collection-plugin/public/mocks';
 import { createUsageCollector } from './create_usage_collector';
-import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
+import { SEARCH_EVENT_TYPE, type SearchUsageCollector } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { from } from 'rxjs';
 

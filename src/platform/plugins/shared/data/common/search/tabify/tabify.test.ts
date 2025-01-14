@@ -9,7 +9,7 @@
 
 import { tabifyAggResponse } from './tabify';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
+import { AggConfigs, type BucketAggParam, type IAggConfig, type IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';

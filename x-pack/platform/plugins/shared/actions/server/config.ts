@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/core/server';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,

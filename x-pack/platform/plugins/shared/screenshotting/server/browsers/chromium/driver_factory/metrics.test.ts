@@ -8,7 +8,7 @@
 jest.mock('os');
 
 import { cpus } from 'os';
-import { Metrics, getMetrics } from './metrics';
+import { type Metrics, getMetrics } from './metrics';
 
 describe('getMetrics', () => {
   const start = {

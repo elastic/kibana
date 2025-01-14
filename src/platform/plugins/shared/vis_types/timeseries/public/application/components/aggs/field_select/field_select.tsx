@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, ReactNode } from 'react';
+import React, { useCallback, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
+  type EuiComboBoxOptionOption,
+  type EuiComboBoxProps,
   EuiFormRow,
   htmlIdGenerator,
-  DragDropContextProps,
+  type DragDropContextProps,
 } from '@elastic/eui';
 
 import { FieldSelectItem } from './field_select_item';
-import { IndexPatternValue, SanitizedFieldType } from '../../../../../common/types';
-import { TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions';
+import { type IndexPatternValue, type SanitizedFieldType } from '../../../../../common/types';
+import { type TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions';
 import { getIndexPatternKey } from '../../../../../common/index_patterns_utils';
 import { MultiFieldSelect } from './multi_field_select';
 import {

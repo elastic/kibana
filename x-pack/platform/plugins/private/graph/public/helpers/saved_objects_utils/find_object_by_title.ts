@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { CONTENT_ID, GraphSearchIn, GraphSearchOut } from '../../../common/content_management';
+import { type ContentClient } from '@kbn/content-management-plugin/public';
+import { CONTENT_ID, type GraphSearchIn, type GraphSearchOut } from '../../../common/content_management';
 
 /** Returns an object matching a given title */
 export async function findObjectByTitle(contentClient: ContentClient, title: string) {

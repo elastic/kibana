@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import { type Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 
@@ -34,7 +34,7 @@ import type {
 } from './types';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import { isOk, promiseResult, type Result } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';

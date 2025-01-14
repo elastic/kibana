@@ -8,9 +8,9 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common';
+import { Operations, type PercentileParams } from '@kbn/visualizations-plugin/common';
 import { createSeries } from '../__mocks__';
-import { Metric } from '../../../../common/types';
+import { type Metric } from '../../../../common/types';
 import {
   convertToPercentileColumn,
   convertToPercentileColumns,
@@ -18,9 +18,9 @@ import {
   isPercentileColumnWithMeta,
 } from './percentile';
 import {
-  PercentileColumn,
-  PercentileColumnWithCommonMeta,
-  PercentileColumnWithExtendedMeta,
+  type PercentileColumn,
+  type PercentileColumnWithCommonMeta,
+  type PercentileColumnWithExtendedMeta,
 } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 

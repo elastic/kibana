@@ -9,17 +9,17 @@
 
 import React from 'react';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { type PresentationContainer } from '@kbn/presentation-containers';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasInPlaceLibraryTransforms,
-  HasLibraryTransforms,
-  HasParentApi,
-  HasType,
-  HasTypeDisplayName,
-  HasUniqueId,
-  PublishesPanelTitle,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasInPlaceLibraryTransforms,
+  type HasLibraryTransforms,
+  type HasParentApi,
+  type HasType,
+  type HasTypeDisplayName,
+  type HasUniqueId,
+  type PublishesPanelTitle,
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
@@ -30,12 +30,12 @@ import {
   getPanelTitle,
 } from '@kbn/presentation-publishing';
 import {
-  OnSaveProps,
-  SaveResult,
+  type OnSaveProps,
+  type SaveResult,
   SavedObjectSaveModal,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';

@@ -6,12 +6,12 @@
  */
 
 import { map, reduce } from 'rxjs';
-import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { type Plugin, type CoreSetup, type CoreStart, type AppMountParameters } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
 import {
-  GlobalSearchPluginSetup,
-  GlobalSearchPluginStart,
-  GlobalSearchResult,
+  type GlobalSearchPluginSetup,
+  type GlobalSearchPluginStart,
+  type GlobalSearchResult,
 } from '@kbn/global-search-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import supertest from 'supertest';
+import type supertest from 'supertest';
 import {
-  RepositorySupertestClient,
+  type RepositorySupertestClient,
   getApiClientFromSupertest,
 } from '../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
 

@@ -10,15 +10,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
 import {
-  UnmountCallback,
-  ScopedHistory,
-  ApplicationStart,
-  DocLinksStart,
-  ExecutionContextStart,
-  CoreStart,
+  type UnmountCallback,
+  type ScopedHistory,
+  type ApplicationStart,
+  type DocLinksStart,
+  type ExecutionContextStart,
+  type CoreStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
-import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
+import { init as initBreadcrumbs, type SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Matcher, screen } from '@testing-library/react';
+import { type Matcher, screen } from '@testing-library/react';
 
 export const expectIdsInDoc = ({
   be = [],

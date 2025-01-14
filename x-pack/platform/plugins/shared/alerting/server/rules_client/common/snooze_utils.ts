@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  Rule,
-  RuleDomain,
-  RuleParams,
-  RuleSnoozeSchedule as RuleDomainSnoozeSchedule,
+  type Rule,
+  type RuleDomain,
+  type RuleParams,
+  type RuleSnoozeSchedule as RuleDomainSnoozeSchedule,
 } from '../../application/rule/types';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import { RawRule } from '../../types';
+import { type RawRule } from '../../types';
 
 export function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleDomainSnoozeSchedule) {
   // If duration is -1, instead mute all

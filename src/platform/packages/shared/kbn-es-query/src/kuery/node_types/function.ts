@@ -11,13 +11,13 @@ import _ from 'lodash';
 
 import {
   functions,
-  KQL_FUNCTION_AND,
-  KQL_FUNCTION_EXISTS,
-  KQL_FUNCTION_NESTED,
-  KQL_FUNCTION_IS,
-  KQL_FUNCTION_NOT,
-  KQL_FUNCTION_OR,
-  KQL_FUNCTION_RANGE,
+  type KQL_FUNCTION_AND,
+  type KQL_FUNCTION_EXISTS,
+  type KQL_FUNCTION_NESTED,
+  type KQL_FUNCTION_IS,
+  type KQL_FUNCTION_NOT,
+  type KQL_FUNCTION_OR,
+  type KQL_FUNCTION_RANGE,
 } from '../functions';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';

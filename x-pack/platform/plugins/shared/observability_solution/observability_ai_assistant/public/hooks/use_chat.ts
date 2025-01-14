@@ -14,8 +14,8 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   MessageRole,
   type Message,
-  ConversationCreateEvent,
-  ConversationUpdateEvent,
+  type ConversationCreateEvent,
+  type ConversationUpdateEvent,
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';

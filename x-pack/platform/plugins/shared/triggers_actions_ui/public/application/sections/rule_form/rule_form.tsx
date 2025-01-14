@@ -48,7 +48,7 @@ import {
 } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '@kbn/features-plugin/public';
+import { type KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
@@ -56,28 +56,28 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
-  RuleActionParam,
+  type RuleActionParam,
   ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  RuleActionAlertsFilterProperty,
-  RuleActionKey,
-  Flapping,
+  type RuleActionAlertsFilterProperty,
+  type RuleActionKey,
+  type Flapping,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
-import { RuleReducerAction, InitialRule } from './rule_reducer';
+import { type RuleReducerAction, type InitialRule } from './rule_reducer';
 import {
-  RuleTypeModel,
-  Rule,
-  IErrorObject,
-  RuleType,
-  RuleTypeRegistryContract,
-  ActionTypeRegistryContract,
-  TriggersActionsUiConfig,
-  RuleCreationValidConsumer,
-  RuleUiAction,
+  type RuleTypeModel,
+  type Rule,
+  type IErrorObject,
+  type RuleType,
+  type RuleTypeRegistryContract,
+  type ActionTypeRegistryContract,
+  type TriggersActionsUiConfig,
+  type RuleCreationValidConsumer,
+  type RuleUiAction,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -86,7 +86,7 @@ import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
-import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
+import { type IsEnabledResult, type IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import {
   ruleTypeCompare,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiAvatarProps, EuiIcon, EuiIconProps } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiAvatar, type EuiAvatarProps, EuiIcon, type EuiIconProps } from '@elastic/eui';
+import { type EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 

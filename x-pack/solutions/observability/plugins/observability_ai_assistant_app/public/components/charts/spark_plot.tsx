@@ -11,7 +11,7 @@ import {
   CurveType,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
+  type PartialTheme,
   Position,
   ScaleType,
   Settings,

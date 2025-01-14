@@ -8,7 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { updateRule, UpdateRuleBody } from '.';
+import { updateRule, type UpdateRuleBody } from '.';
 
 const http = httpServiceMock.createStartContract();
 

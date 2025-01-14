@@ -8,7 +8,7 @@
  */
 
 import { of } from 'rxjs';
-import { App, AppDeepLink, AppStatus } from '@kbn/core-application-browser';
+import { type App, type AppDeepLink, AppStatus } from '@kbn/core-application-browser';
 import { getAppInfo } from './get_app_info';
 
 describe('getAppInfo', () => {

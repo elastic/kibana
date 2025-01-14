@@ -8,12 +8,12 @@
 import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { IRuleTypeAlerts } from '../types';
+import { type IRuleTypeAlerts } from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
-  InitializationPromise,
-  ResourceInstallationHelper,
+  type InitializationPromise,
+  type ResourceInstallationHelper,
   successResult,
   calculateDelay,
   getShouldRetry,

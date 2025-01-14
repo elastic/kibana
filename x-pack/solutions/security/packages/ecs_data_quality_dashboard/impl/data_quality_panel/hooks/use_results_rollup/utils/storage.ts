@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HttpFetchQuery, HttpHandler } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import { type HttpFetchQuery, type HttpHandler } from '@kbn/core-http-browser';
+import { type IToasts } from '@kbn/core-notifications-browser';
 
 import {
-  DataQualityCheckResult,
-  DataQualityIndexCheckedParams,
-  IncompatibleFieldMappingItem,
-  IncompatibleFieldValueItem,
-  PartitionedFieldMetadata,
-  SameFamilyFieldItem,
-  StorageResult,
+  type DataQualityCheckResult,
+  type DataQualityIndexCheckedParams,
+  type IncompatibleFieldMappingItem,
+  type IncompatibleFieldValueItem,
+  type PartitionedFieldMetadata,
+  type SameFamilyFieldItem,
+  type StorageResult,
 } from '../../../types';
 import { GET_INDEX_RESULTS_LATEST, POST_INDEX_RESULTS } from '../constants';
 import { INTERNAL_API_VERSION } from '../../../constants';

@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useLoadAlertingFrameworkHealth } from './use_load_alerting_framework_health';
 import { useLoadUiHealth } from './use_load_ui_health';
-import { healthCheckErrors, HealthCheckErrors } from '../apis';
+import { healthCheckErrors, type HealthCheckErrors } from '../apis';
 
 export interface UseHealthCheckProps {
   http: HttpStart;

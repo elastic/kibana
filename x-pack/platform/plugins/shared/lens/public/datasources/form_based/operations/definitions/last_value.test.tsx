@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow, type ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { type IUiSettingsClient, type HttpSetup } from '@kbn/core/public';
+import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { LastValueIndexPatternColumn } from './last_value';
+import { type LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from '.';
 import type { FormBasedLayer } from '../../types';
-import { TermsIndexPatternColumn } from './terms';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { type TermsIndexPatternColumn } from './terms';
+import { EuiSwitch, type EuiSwitchEvent } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { FormRow } from './shared_components';
 

@@ -10,10 +10,10 @@ import type { IndexPattern, IndexPatternField, OperationMetadata } from '../../.
 import {
   operationDefinitionMap,
   operationDefinitions,
-  GenericOperationDefinition,
-  OperationType,
+  type GenericOperationDefinition,
+  type OperationType,
   renameOperationsMapping,
-  BaseIndexPatternColumn,
+  type BaseIndexPatternColumn,
 } from './definitions';
 import { documentField } from '../document_field';
 import { hasField } from '../pure_utils';

@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Metric, MetricOptions } from '../classes';
+import { Metric, type MetricOptions } from '../classes';
 import { LARGE_FLOAT, SMALL_FLOAT, SMALL_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 

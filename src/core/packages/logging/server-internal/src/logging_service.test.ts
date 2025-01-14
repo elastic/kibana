@@ -12,10 +12,10 @@ import { of, Subject } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   LoggingService,
-  InternalLoggingServiceSetup,
-  InternalLoggingServicePreboot,
+  type InternalLoggingServiceSetup,
+  type InternalLoggingServicePreboot,
 } from './logging_service';
-import { LoggerContextConfigType } from './logging_config';
+import { type LoggerContextConfigType } from './logging_config';
 import type { ILoggingSystem } from './logging_system';
 
 const createLoggingSystemMock = () => {

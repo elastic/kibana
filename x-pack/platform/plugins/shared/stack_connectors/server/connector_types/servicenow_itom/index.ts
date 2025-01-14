@@ -24,16 +24,16 @@ import {
 } from '../lib/servicenow/schema';
 import * as i18n from '../lib/servicenow/translations';
 import {
-  ExecutorSubActionGetChoicesParams,
-  PushToServiceResponse,
-  ServiceNowExecutorResultData,
-  ServiceNowSecretConfigurationType,
-  ServiceFactory,
-  ExecutorParamsITOM,
-  ExecutorSubActionAddEventParams,
-  ExternalServiceApiITOM,
-  ExternalServiceITOM,
-  ServiceNowPublicConfigurationBaseType,
+  type ExecutorSubActionGetChoicesParams,
+  type PushToServiceResponse,
+  type ServiceNowExecutorResultData,
+  type ServiceNowSecretConfigurationType,
+  type ServiceFactory,
+  type ExecutorParamsITOM,
+  type ExecutorSubActionAddEventParams,
+  type ExternalServiceApiITOM,
+  type ExternalServiceITOM,
+  type ServiceNowPublicConfigurationBaseType,
 } from '../lib/servicenow/types';
 import { ServiceNowITOMConnectorTypeId, snExternalServiceConfig } from '../lib/servicenow/config';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';

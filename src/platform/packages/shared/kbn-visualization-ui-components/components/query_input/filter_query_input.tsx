@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIconTip,
-  EuiPopoverProps,
+  type EuiPopoverProps,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { QueryInput, validateQuery } from '.';

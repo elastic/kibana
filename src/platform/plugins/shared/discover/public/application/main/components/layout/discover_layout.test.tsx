@@ -23,9 +23,9 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
+  type DataDocuments$,
+  type DataMain$,
+  type DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';

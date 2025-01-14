@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
-import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
+import { type InternalRequestHeader, type RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**

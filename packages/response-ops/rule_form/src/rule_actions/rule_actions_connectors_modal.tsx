@@ -29,7 +29,7 @@ import {
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import { type ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRuleFormState } from '../hooks';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React, { type ChangeEvent } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

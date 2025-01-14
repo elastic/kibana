@@ -27,11 +27,11 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React from 'react';
 import {
-  StreamChild,
-  ReadStreamDefinition,
-  WiredStreamConfigDefinition,
+  type StreamChild,
+  type ReadStreamDefinition,
+  type WiredStreamConfigDefinition,
 } from '@kbn/streams-schema';
-import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { type AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';

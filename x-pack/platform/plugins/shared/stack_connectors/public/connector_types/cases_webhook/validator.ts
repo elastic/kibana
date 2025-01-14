@@ -6,10 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import { type ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import {
-  ValidationError,
-  ValidationFunc,
+  type ValidationError,
+  type ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { containsChars, isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { templateActionVariable } from '@kbn/triggers-actions-ui-plugin/public';

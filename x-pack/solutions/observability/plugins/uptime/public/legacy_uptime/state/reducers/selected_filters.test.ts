@@ -9,7 +9,7 @@ import { selectedFiltersReducer } from './selected_filters';
 import {
   getSelectedFilters,
   setSelectedFilters,
-  SelectedFilters,
+  type SelectedFilters,
 } from '../actions/selected_filters';
 import { createAction } from 'redux-actions';
 

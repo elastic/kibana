@@ -6,10 +6,10 @@
  */
 
 import {
-  SnapshotConfig,
-  SnapshotConfigEs,
-  SnapshotRetention,
-  SnapshotRetentionEs,
+  type SnapshotConfig,
+  type SnapshotConfigEs,
+  type SnapshotRetention,
+  type SnapshotRetentionEs,
 } from './snapshot';
 export interface SlmPolicyPayload {
   name: string;

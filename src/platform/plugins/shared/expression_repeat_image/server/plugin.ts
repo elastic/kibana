@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/server';
+import { type ExpressionsServerStart, type ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { repeatImageFunction } from '../common';
 
 interface SetupDeps {

@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
-  ObservabilityOnboardingLocatorParams,
+  type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
 

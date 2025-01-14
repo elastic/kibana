@@ -11,8 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
+  type EuiComboBoxOptionOption,
+  type EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';

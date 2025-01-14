@@ -21,14 +21,14 @@ import {
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { type EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
   IngestPipelinePanel,
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
+  type LanguageDefinition,
+  type LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';

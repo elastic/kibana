@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { type FC, type ReactNode } from 'react';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiLink,
-  Query,
+  type Query,
   EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TagsCapabilities } from '../../../common';
+import { type TagsCapabilities } from '../../../common';
 import type { TagWithRelations } from '../../../common/types';
 import { TagBadge } from '../../components';
-import { TagAction } from '../actions';
+import { type TagAction } from '../actions';
 
 interface TagTableProps {
   loading: boolean;

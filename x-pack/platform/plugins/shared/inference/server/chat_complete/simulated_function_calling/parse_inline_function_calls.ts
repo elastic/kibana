@@ -6,11 +6,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import { type Logger } from '@kbn/logging';
 import {
   createInferenceInternalError,
-  ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent,
+  type ChatCompletionChunkEvent,
+  type ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { type FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,7 +29,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { Pipeline } from '../../../../common/types';
+import { type Pipeline } from '../../../../common/types';
 
 import { deprecatedPipelineBadge } from './table';
 import { PipelineDetailsJsonBlock } from './details_json_block';

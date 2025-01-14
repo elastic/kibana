@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { type CoreSetup, type CoreStart, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
@@ -19,10 +19,10 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import type { ClientConfigType } from '../common/types';
 import { dataTiersUiSettingsConfig } from './ui_settings';
 import {
-  DataViewsServerPluginSetup,
-  DataViewsServerPluginStart,
-  DataViewsServerPluginSetupDependencies,
-  DataViewsServerPluginStartDependencies,
+  type DataViewsServerPluginSetup,
+  type DataViewsServerPluginStart,
+  type DataViewsServerPluginSetupDependencies,
+  type DataViewsServerPluginStartDependencies,
 } from './types';
 import { DataViewsStorage } from './content_management';
 import { cacheMaxAge } from './ui_settings';

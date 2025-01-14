@@ -11,7 +11,7 @@ import dedent from 'dedent';
 
 import {
   EuiAccordion,
-  EuiAccordionProps,
+  type EuiAccordionProps,
   EuiButton,
   EuiCode,
   EuiFlexGroup,
@@ -28,7 +28,7 @@ import { CodeBox } from '@kbn/search-api-panels';
 
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import { type ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { getConnectorTemplate } from '../../search_index/connector/constants';
 
 export interface RunFromSourceStepProps {

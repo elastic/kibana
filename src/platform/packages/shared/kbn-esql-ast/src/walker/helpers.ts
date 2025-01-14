@@ -8,21 +8,21 @@
  */
 
 import {
-  ESQLAstCommand,
-  ESQLAstQueryExpression,
-  ESQLColumn,
-  ESQLCommandMode,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLIdentifier,
-  ESQLInlineCast,
-  ESQLList,
-  ESQLLiteral,
-  ESQLOrderExpression,
-  ESQLProperNode,
-  ESQLSource,
-  ESQLTimeInterval,
-  ESQLUnknownItem,
+  type ESQLAstCommand,
+  type ESQLAstQueryExpression,
+  type ESQLColumn,
+  type ESQLCommandMode,
+  type ESQLCommandOption,
+  type ESQLFunction,
+  type ESQLIdentifier,
+  type ESQLInlineCast,
+  type ESQLList,
+  type ESQLLiteral,
+  type ESQLOrderExpression,
+  type ESQLProperNode,
+  type ESQLSource,
+  type ESQLTimeInterval,
+  type ESQLUnknownItem,
 } from '../types';
 
 export type NodeMatchKeys =

@@ -10,12 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
-  RowControlColumn,
-  RowControlComponent,
-  RowControlProps,
-  RowControlRowProps,
+  type RowControlColumn,
+  type RowControlComponent,
+  type RowControlProps,
+  type RowControlRowProps,
 } from './types';
-import { LogDocument } from '../../data_types';
+import { type LogDocument } from '../../data_types';
 import { getStacktraceFields } from '../../utils/get_stack_trace_fields';
 
 /**

@@ -6,10 +6,10 @@
  */
 import Ajv from 'ajv';
 import {
-  ToolCallsOf,
+  type ToolCallsOf,
   ToolChoiceType,
-  ToolOptions,
-  UnvalidatedToolCall,
+  type ToolOptions,
+  type UnvalidatedToolCall,
 } from '@kbn/inference-common';
 import { createToolNotFoundError, createToolValidationError } from '../chat_complete/errors';
 

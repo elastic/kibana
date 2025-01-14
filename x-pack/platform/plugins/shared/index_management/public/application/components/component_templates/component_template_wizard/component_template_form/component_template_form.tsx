@@ -13,8 +13,8 @@ import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import {
   serializers,
   Forms,
-  ComponentTemplateDeserialized,
-  CommonWizardSteps,
+  type ComponentTemplateDeserialized,
+  type CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,

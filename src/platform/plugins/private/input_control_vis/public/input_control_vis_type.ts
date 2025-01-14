@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VisGroups, type VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
-import { InputControlVisDependencies } from './plugin';
+import { type InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
-import { InputControlVisParams } from './types';
+import { type InputControlVisParams } from './types';
 
 export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';
 

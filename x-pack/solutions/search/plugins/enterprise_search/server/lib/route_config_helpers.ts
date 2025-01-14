@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  DestructiveRouteMethod,
-  RouteConfig,
-  RouteConfigOptions,
-  RouteMethod,
-  RouteValidatorFullConfigRequest,
+  type DestructiveRouteMethod,
+  type RouteConfig,
+  type RouteConfigOptions,
+  type RouteMethod,
+  type RouteValidatorFullConfigRequest,
 } from '@kbn/core/server';
 
 type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknown, unknown, Method>;

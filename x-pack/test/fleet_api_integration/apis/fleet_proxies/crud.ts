@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import pRetry from 'p-retry';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { type FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {

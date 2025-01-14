@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import {
   APMEmbeddableRoot,
-  APMTransactionDurationSLOResponse,
-  APMErrorRateSLOResponse,
+  type APMTransactionDurationSLOResponse,
+  type APMErrorRateSLOResponse,
 } from './embeddable_root';
 import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
 

@@ -9,7 +9,7 @@ import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import moment from 'moment';
 import {
-  Observable,
+  type Observable,
   catchError,
   concatMap,
   first,
@@ -30,27 +30,27 @@ import { Semaphore } from '@kbn/std';
 
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { durationToNumber } from '@kbn/screenshotting-server';
-import { CaptureResult, ScreenshotOptions, ScreenshotResult } from '.';
+import { type CaptureResult, type ScreenshotOptions, type ScreenshotResult } from '.';
 import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
   errors,
 } from '../../common';
-import { HeadlessChromiumDriverFactory } from '../browsers';
+import { type HeadlessChromiumDriverFactory } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
 import {
-  PdfScreenshotOptions,
-  PdfScreenshotResult,
-  PngScreenshotOptions,
-  PngScreenshotResult,
+  type PdfScreenshotOptions,
+  type PdfScreenshotResult,
+  type PngScreenshotOptions,
+  type PngScreenshotResult,
   toPdf,
   toPng,
 } from '../formats';
-import { Layout, createLayout } from '../layouts';
+import { type Layout, createLayout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions } from './observable';
-import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
+import { ScreenshotObservableHandler, type UrlOrUrlWithContext } from './observable';
 
 const DEFAULT_SETUP_RESULT = {
   elementsPositionAndAttributes: null,

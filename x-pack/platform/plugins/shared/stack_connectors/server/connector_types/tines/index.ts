@@ -6,14 +6,14 @@
  */
 
 import {
-  SubActionConnectorType,
+  type SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
 import { TinesConfigSchema, TinesSecretsSchema } from '../../../common/tines/schema';
-import { TinesConfig, TinesSecrets } from '../../../common/tines/types';
+import { type TinesConfig, type TinesSecrets } from '../../../common/tines/types';
 import { TinesConnector } from './tines';
 import { renderParameterTemplates } from './render';
 

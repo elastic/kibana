@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiDragDropContext,
   EuiDroppable,
-  DragDropContextProps,
+  type DragDropContextProps,
   EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
 } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 
 const DROPPABLE_ID = 'onDragEnd';
 

@@ -13,11 +13,11 @@ import 'react-grid-layout/css/styles.css';
 import { pick } from 'lodash';
 import classNames from 'classnames';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
+import { type Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { DashboardPanelState } from '../../../../common';
+import { type DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';

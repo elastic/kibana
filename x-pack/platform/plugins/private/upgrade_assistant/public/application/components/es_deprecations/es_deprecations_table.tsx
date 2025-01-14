@@ -23,9 +23,9 @@ import {
   EuiCallOut,
   EuiTableRowCell,
   Pager,
-  Query,
+  type Query,
 } from '@elastic/eui';
-import { EnrichedDeprecationInfo } from '../../../../common/types';
+import { type EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
 import {
   MlSnapshotsTableRow,
@@ -35,7 +35,7 @@ import {
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
 } from './deprecation_types';
-import { DeprecationTableColumns } from '../types';
+import { type DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { TaskClaim } from '../task_events';
+import { type Observable, Subject } from 'rxjs';
+import { type TaskClaim } from '../task_events';
 
-import { TaskClaiming } from './task_claiming';
+import { type TaskClaiming } from './task_claiming';
 
 interface TaskClaimingOptions {
   maxAttempts?: number;

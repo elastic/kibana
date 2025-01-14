@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../lib';
+import { type IRouter } from '@kbn/core/server';
+import { type ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { ActionsRequestHandlerContext } from '../../../types';
+import { type ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import {
-  UpdateConnectorBodyV1,
-  UpdateConnectorParamsV1,
+  type UpdateConnectorBodyV1,
+  type UpdateConnectorParamsV1,
   updateConnectorBodySchemaV1,
   updateConnectorParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/update';

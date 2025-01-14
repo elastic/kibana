@@ -10,11 +10,11 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
-import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
+import { type ThemeTag, type ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import { Bundle, WorkerConfig, CacheableWorkerConfig, omit } from '../common';
+import { Bundle, type WorkerConfig, type CacheableWorkerConfig, omit } from '../common';
 
-import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
+import { toKibanaPlatformPlugin, type KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';

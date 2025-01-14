@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { ShallowWrapper } from 'enzyme';
+import { type ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { Inspect, InspectProps } from './inspect';
-import { SavedObjectWithMetadata } from '../../../../common';
+import { Inspect, type InspectProps } from './inspect';
+import { type SavedObjectWithMetadata } from '../../../../common';
 
 describe('Inspect component', () => {
   let defaultProps: { object: SavedObjectWithMetadata };

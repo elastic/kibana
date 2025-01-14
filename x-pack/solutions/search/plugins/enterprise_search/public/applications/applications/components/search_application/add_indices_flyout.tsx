@@ -30,7 +30,7 @@ import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle
 
 import {
   IndicesSelectComboBox,
-  IndicesSelectComboBoxOption,
+  type IndicesSelectComboBoxOption,
   indexToOption,
 } from '../search_applications/components/indices_select_combobox';
 

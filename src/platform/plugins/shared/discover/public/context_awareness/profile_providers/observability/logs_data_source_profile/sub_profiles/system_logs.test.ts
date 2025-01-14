@@ -9,11 +9,11 @@
 
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
-import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
+import { DataSourceCategory, type RootContext, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createSystemLogsDataSourceProfileProvider } from './system_logs';
-import { ContextWithProfileId } from '../../../../profile_service';
+import { type ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {

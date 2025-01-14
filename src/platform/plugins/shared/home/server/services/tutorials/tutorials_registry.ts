@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext, IStaticAssets } from '@kbn/core/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import { type CoreSetup, type CoreStart, type PluginInitializerContext, type IStaticAssets } from '@kbn/core/server';
+import { type CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { type IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import {
-  TutorialProvider,
-  TutorialContextFactory,
-  ScopedTutorialContextFactory,
-  TutorialContext,
+  type TutorialProvider,
+  type TutorialContextFactory,
+  type ScopedTutorialContextFactory,
+  type TutorialContext,
 } from './lib/tutorials_registry_types';
-import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
+import { type TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 

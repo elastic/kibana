@@ -7,12 +7,12 @@
 
 import {
   formatBuckets,
-  GetMonitorAvailabilityResult,
-  AvailabilityKey,
+  type GetMonitorAvailabilityResult,
+  type AvailabilityKey,
   getMonitorAvailability,
 } from './get_monitor_availability';
 import { getUptimeESMockClient, setupMockEsCompositeQuery } from './test_helpers';
-import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
+import { type GetMonitorAvailabilityParams, makePing, type Ping } from '../../../../common/runtime_types';
 
 interface AvailabilityTopHit {
   _source: Ping;

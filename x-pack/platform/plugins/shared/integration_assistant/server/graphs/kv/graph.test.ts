@@ -6,12 +6,12 @@
  */
 
 import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
+  type ActionsClientChatOpenAI,
+  type ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getKVGraph } from './graph';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
   response: 'Some new response',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;

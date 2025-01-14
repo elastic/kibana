@@ -7,13 +7,13 @@
 
 import { useMemo } from 'react';
 import {
-  AllSeries,
+  type AllSeries,
   allSeriesKey,
   convertAllShortSeries,
   useSeriesStorage,
 } from './use_series_storage';
 
-import { ReportViewType, SeriesUrl } from '../types';
+import { type ReportViewType, type SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
 import { parseRelativeDate } from '../components/date_range_picker';
 

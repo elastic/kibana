@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  PaletteContinuity,
+  type PaletteContinuity,
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  DataBounds,
+  type DataBounds,
   roundValue,
   getDataMinMax,
-  CustomPaletteParams,
+  type CustomPaletteParams,
 } from '../../../../palettes';
 import { InfinityIcon } from '../../assets/infinity';
 import { ValueMaxIcon } from '../../assets/value_max';

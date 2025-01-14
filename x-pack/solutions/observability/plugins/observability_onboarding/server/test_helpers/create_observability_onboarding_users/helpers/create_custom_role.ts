@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Elasticsearch, Kibana } from '..';
+import { type Elasticsearch, type Kibana } from '..';
 import { callKibana } from './call_kibana';
-import { customRoles, ObservabilityOnboardingCustomRolename } from '../authentication';
+import { customRoles, type ObservabilityOnboardingCustomRolename } from '../authentication';
 
 export async function createCustomRole({
   elasticsearch,

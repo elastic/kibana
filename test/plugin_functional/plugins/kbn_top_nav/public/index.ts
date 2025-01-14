@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { TopNavTestPlugin, TopNavTestPluginSetup, TopNavTestPluginStart } from './plugin';
+import { type PluginInitializer } from '@kbn/core/public';
+import { TopNavTestPlugin, type TopNavTestPluginSetup, type TopNavTestPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<TopNavTestPluginSetup, TopNavTestPluginStart> = () =>
   new TopNavTestPlugin();

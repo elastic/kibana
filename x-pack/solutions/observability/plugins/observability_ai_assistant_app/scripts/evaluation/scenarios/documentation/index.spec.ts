@@ -9,9 +9,9 @@
 
 import expect from '@kbn/expect';
 import {
-  InstallationStatusResponse,
-  PerformInstallResponse,
-  UninstallResponse,
+  type InstallationStatusResponse,
+  type PerformInstallResponse,
+  type UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { RETRIEVE_DOCUMENTATION_NAME } from '../../../../server/functions/documentation';
 import { chatClient, kibanaClient, logger } from '../../services';

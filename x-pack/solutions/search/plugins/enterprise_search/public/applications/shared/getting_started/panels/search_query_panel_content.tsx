@@ -11,11 +11,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CodeBox,
   getLanguageDefinitionCodeSnippet,
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
+  type LanguageDefinition,
+  type LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
-import { KibanaDeps } from '../../../../../common/types';
+import { type KibanaDeps } from '../../../../../common/types';
 
 import { consoleDefinition } from '../languages/console';
 import { languageDefinitions } from '../languages/languages';

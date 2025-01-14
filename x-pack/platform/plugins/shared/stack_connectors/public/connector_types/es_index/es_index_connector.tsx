@@ -11,13 +11,13 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiComboBox,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiTitle,
   EuiIconTip,
   EuiLink,
 } from '@elastic/eui';
 import {
-  FieldConfig,
+  type FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
   useFormContext,
@@ -30,7 +30,7 @@ import {
   SelectField,
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { DocLinksStart } from '@kbn/core/public';
+import { type DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';

@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import {
-  SnapshotNodeResponse,
-  SnapshotMetricInput,
-  SnapshotRequest,
+  type SnapshotNodeResponse,
+  type SnapshotMetricInput,
+  type SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
 import type { SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

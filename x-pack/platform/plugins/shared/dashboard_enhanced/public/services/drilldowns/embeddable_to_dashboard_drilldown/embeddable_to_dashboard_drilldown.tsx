@@ -9,20 +9,20 @@ import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-pub
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import {
   cleanEmptyKeys,
-  DashboardLocatorParams,
+  type DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { type ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
-  AbstractDashboardDrilldownParams,
+  type AbstractDashboardDrilldownParams,
 } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
-import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import { type AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;

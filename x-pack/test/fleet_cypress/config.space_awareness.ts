@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import { type FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

@@ -6,39 +6,39 @@
  */
 
 import { cloneDeep, flow } from 'lodash';
-import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
+import { fromExpression, toExpression, type Ast, type AstFunction } from '@kbn/interpreter';
 import {
-  SavedObjectMigrationMap,
-  SavedObjectMigrationFn,
-  SavedObjectReference,
-  SavedObjectUnsanitizedDoc,
+  type SavedObjectMigrationMap,
+  type SavedObjectMigrationFn,
+  type SavedObjectReference,
+  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '../../common/types';
+import { type MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { type DataViewSpec } from '@kbn/data-views-plugin/common';
+import { type PersistableFilter } from '../../common/types';
 import {
-  LensDocShapePost712,
-  LensDocShapePre712,
-  LensDocShape713,
-  LensDocShape714,
-  LensDocShape715,
-  VisStatePost715,
-  VisStatePre715,
-  VisState716,
-  CustomVisualizationMigrations,
-  LensDocShape810,
-  LensDocShape830,
-  XYVisualizationStatePre830,
-  XYVisualizationState830,
-  VisState810,
-  VisState820,
-  XYVisStatePre850,
-  LensDocShape850,
-  LensDocShape840,
-  VisState850,
-  LensDocShape860,
+  type LensDocShapePost712,
+  type LensDocShapePre712,
+  type LensDocShape713,
+  type LensDocShape714,
+  type LensDocShape715,
+  type VisStatePost715,
+  type VisStatePre715,
+  type VisState716,
+  type CustomVisualizationMigrations,
+  type LensDocShape810,
+  type LensDocShape830,
+  type XYVisualizationStatePre830,
+  type XYVisualizationState830,
+  type VisState810,
+  type VisState820,
+  type XYVisStatePre850,
+  type LensDocShape850,
+  type LensDocShape840,
+  type VisState850,
+  type LensDocShape860,
 } from './types';
 import {
   commonRenameOperationsForFormula,

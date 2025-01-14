@@ -11,15 +11,15 @@ import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
-  BrowserFields,
+  type BrowserFields,
   ConfigKey,
-  CommonFields,
-  MonitorTypeEnum,
-  Locations,
-  ProjectMonitor,
+  type CommonFields,
+  type MonitorTypeEnum,
+  type Locations,
+  type ProjectMonitor,
   ScheduleUnit,
   SourceType,
-  MonitorFields,
+  type MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';

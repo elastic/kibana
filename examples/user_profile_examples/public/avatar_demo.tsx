@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { EuiTitle, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';

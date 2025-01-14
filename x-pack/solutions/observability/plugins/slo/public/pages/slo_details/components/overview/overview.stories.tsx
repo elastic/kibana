@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { type ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
-import { Overview as Component, Props } from './overview';
+import { Overview as Component, type Props } from './overview';
 
 export default {
   component: Component,

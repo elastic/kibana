@@ -11,7 +11,7 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

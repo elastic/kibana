@@ -9,23 +9,23 @@ import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import deepmerge from 'deepmerge';
-import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
+import { type ElasticsearchClient, type StartServicesAccessor } from '@kbn/core/server';
 import {
-  DataViewsServerPluginStart,
+  type DataViewsServerPluginStart,
   IndexPatternsFetcher,
-  ISearchStrategy,
-  SearchStrategyDependencies,
+  type ISearchStrategy,
+  type SearchStrategyDependencies,
 } from '@kbn/data-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
-  BeatFields,
-  IndexField,
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
+  type BeatFields,
+  type IndexField,
+  type IndexFieldsStrategyRequest,
+  type IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
-import { StartPlugins } from '../../types';
+import { type StartPlugins } from '../../types';
 import { parseOptions } from './parse_options';
 
 const apmIndexPattern = 'apm-*-transaction*';

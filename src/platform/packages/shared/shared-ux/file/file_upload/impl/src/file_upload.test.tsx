@@ -14,7 +14,7 @@ import { EuiFilePicker } from '@elastic/eui';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { FileUpload, Props } from './file_upload';
+import { FileUpload, type Props } from './file_upload';
 
 describe('FileUpload', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));

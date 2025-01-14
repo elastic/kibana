@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { type EntityDefinition } from '@kbn/entities-schema';
 import {
-  ClusterPutComponentTemplateRequest,
-  IndicesPutIndexTemplateRequest,
+  type ClusterPutComponentTemplateRequest,
+  type IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
 import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';

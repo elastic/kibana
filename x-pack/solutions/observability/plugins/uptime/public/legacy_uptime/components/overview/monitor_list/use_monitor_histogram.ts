@@ -10,15 +10,15 @@ import { useSelector } from 'react-redux';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import {
-  Histogram,
-  HistogramPoint,
-  MonitorSummary,
+  type Histogram,
+  type HistogramPoint,
+  type MonitorSummary,
 } from '../../../../../common/runtime_types/monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { selectDynamicSettings } from '../../../state/selectors';
 import { getHistogramInterval } from '../../../../../common/lib/get_histogram_interval';
-import { Ping } from '../../../../../common/runtime_types';
+import { type Ping } from '../../../../../common/runtime_types';
 
 export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();

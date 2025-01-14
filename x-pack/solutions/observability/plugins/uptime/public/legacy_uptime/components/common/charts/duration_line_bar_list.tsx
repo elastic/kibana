@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
+import { type AnnotationTooltipFormatter, RectAnnotation, type RectAnnotationDatum } from '@elastic/charts';
 
 // Individual deep imports to not consume the whole package bundle.
 import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';

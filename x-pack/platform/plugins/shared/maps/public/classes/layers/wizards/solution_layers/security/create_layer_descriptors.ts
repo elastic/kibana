@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { isAPMDataView } from '@kbn/apm-data-view';
 import {
-  LayerDescriptor,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
+  type LayerDescriptor,
+  type SizeDynamicOptions,
+  type VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
 import {
   AGG_TYPE,

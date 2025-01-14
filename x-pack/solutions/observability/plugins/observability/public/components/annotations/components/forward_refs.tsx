@@ -8,17 +8,17 @@
 import React from 'react';
 import {
   EuiComboBox,
-  EuiComboBoxProps,
+  type EuiComboBoxProps,
   EuiSwitch,
-  EuiSwitchProps,
+  type EuiSwitchProps,
   EuiTextArea,
-  EuiTextAreaProps,
-  EuiFieldTextProps,
+  type EuiTextAreaProps,
+  type EuiFieldTextProps,
   EuiFieldText,
   EuiFieldNumber,
-  EuiSelectProps,
+  type EuiSelectProps,
   EuiSelect,
-  EuiFieldNumberProps,
+  type EuiFieldNumberProps,
 } from '@elastic/eui';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>((props, ref) => (

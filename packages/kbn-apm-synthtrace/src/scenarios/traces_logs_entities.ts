@@ -11,13 +11,13 @@ import {
   apm,
   generateLongId,
   generateShortId,
-  Instance,
+  type Instance,
   log,
   entities,
-  EntityFields,
+  type EntityFields,
 } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { Scenario } from '../cli/scenario';
+import { type Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';

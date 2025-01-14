@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import { type ToolingLog } from '@kbn/tooling-log';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
-import { ApiScope, PluginOrPackage, TextWithLinks } from '../types';
+import { ApiScope, type PluginOrPackage, type TextWithLinks } from '../types';
 import { getRelativePath, pathsOutsideScopes } from './utils';
 
 /**

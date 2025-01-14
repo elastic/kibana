@@ -6,10 +6,10 @@
  */
 
 import type OpenAI from 'openai';
-import { filter, from, map, mergeMap, Observable, tap } from 'rxjs';
+import { filter, from, map, mergeMap, type Observable, tap } from 'rxjs';
 import {
-  ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent,
+  type ChatCompletionChunkEvent,
+  type ChatCompletionTokenCountEvent,
   createInferenceInternalError,
 } from '@kbn/inference-common';
 import { createTokenLimitReachedError } from '../../errors';

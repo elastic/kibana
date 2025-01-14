@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { KibanaContext } from '@kbn/data-plugin/common';
+import { type KibanaContext } from '@kbn/data-plugin/common';
 import {
-  AnyExpressionFunctionDefinition,
-  Datatable,
-  ExpressionValueFilter,
-  ExpressionImage,
-  PointSeries,
-  Render,
-  Style,
-  Range,
+  type AnyExpressionFunctionDefinition,
+  type Datatable,
+  type ExpressionValueFilter,
+  type ExpressionImage,
+  type PointSeries,
+  type Render,
+  type Style,
+  type Range,
 } from '@kbn/expressions-plugin/common';
 import type { Datasource, Model, Transform, View } from '../public/expression_types';
-import { AssetType } from './assets';
-import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
+import { type AssetType } from './assets';
+import { type CanvasWorkpad, type Sidebar, type Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',

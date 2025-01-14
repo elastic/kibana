@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
+import React, { type FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { type DataViewListItem } from '@kbn/data-views-plugin/common';
 
 export interface ESDataViewSelectProps {
   loading: boolean;

@@ -8,9 +8,9 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
-import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
+import { type CoreStart, type CoreSetup, type ApplicationStart } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common';
 import {
@@ -20,7 +20,7 @@ import {
   KibanaRenderContextProvider,
 } from '../shared_imports';
 
-import { AppContextProvider, AppDependencies } from './app_context';
+import { AppContextProvider, type AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
 import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';

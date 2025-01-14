@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetPanelPlacementSettings } from './types';
+import { type GetPanelPlacementSettings } from './types';
 import { panelPlacementStrings } from '../_dashboard_container_strings';
 
 const registry = new Map<string, GetPanelPlacementSettings<object>>();

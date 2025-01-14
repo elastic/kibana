@@ -15,7 +15,7 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
-  EuiThemeComputed,
+  type EuiThemeComputed,
   EuiToolTip,
   makeHighContrastColor,
   useEuiTheme,

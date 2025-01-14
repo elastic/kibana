@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { filter, OperatorFunction } from 'rxjs';
-import { OutputCompleteEvent, OutputEvent, OutputEventType, OutputUpdateEvent } from '.';
+import { filter, type OperatorFunction } from 'rxjs';
+import { type OutputCompleteEvent, type OutputEvent, OutputEventType, type OutputUpdateEvent } from '.';
 import type { InferenceTaskEvent } from '../inference_task';
 
 /**

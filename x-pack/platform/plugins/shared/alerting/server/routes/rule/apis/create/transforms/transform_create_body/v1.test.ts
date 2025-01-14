@@ -6,8 +6,8 @@
  */
 
 import {
-  CreateRuleAction,
-  CreateRuleRequestBodyV1,
+  type CreateRuleAction,
+  type CreateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/create';
 import { transformCreateBody } from './v1';
 

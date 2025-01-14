@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { type IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
@@ -19,20 +19,20 @@ import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
-  FieldOption,
+  type FieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
-import { Comparator } from '../../../../common/comparator_types';
+import { type Comparator } from '../../../../common/comparator_types';
 import {
-  CommonRuleParams,
-  EsQueryRuleMetaData,
-  EsQueryRuleParams,
-  SearchType,
-  SourceField,
+  type CommonRuleParams,
+  type EsQueryRuleMetaData,
+  type EsQueryRuleParams,
+  type SearchType,
+  type SourceField,
 } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';

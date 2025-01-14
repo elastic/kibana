@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GenericFtrProviderContext } from '@kbn/test';
+import { type GenericFtrProviderContext } from '@kbn/test';
 import {
-  Rule,
-  RuleTypeParams,
-  ActionGroupIdsOf,
-  AlertInstanceState as AlertState,
-  AlertInstanceContext as AlertContext,
+  type Rule,
+  type RuleTypeParams,
+  type ActionGroupIdsOf,
+  type AlertInstanceState as AlertState,
+  type AlertInstanceContext as AlertContext,
 } from '@kbn/alerting-plugin/common';
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
-import { services } from './services';
+import { type RuleTypeState } from '@kbn/alerting-plugin/server';
+import { type services } from './services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];
 

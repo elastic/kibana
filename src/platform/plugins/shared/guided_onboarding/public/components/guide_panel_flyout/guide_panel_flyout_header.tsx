@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { EuiButtonIcon, EuiHorizontalRule, EuiSpacer, EuiTitle, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '@kbn/guided-onboarding';
-import { getGuidePanelStyles } from '../guide_panel.styles';
+import { type getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutHeader = ({
   styles,

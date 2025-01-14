@@ -7,19 +7,19 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { type KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResult,
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsBulkUpdateObject,
+  type SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { type Logger } from '@kbn/core/server';
+import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { type TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { RawRule } from '../../../../types';
-import { RuleDomain, RuleParams } from '../../types';
+import { type RawRule } from '../../../../types';
+import { type RuleDomain, type RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -27,7 +27,7 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../../../../rules_client/common';
-import { getRuleCircuitBreakerErrorMessage, SanitizedRule } from '../../../../../common';
+import { getRuleCircuitBreakerErrorMessage, type SanitizedRule } from '../../../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
@@ -35,10 +35,10 @@ import {
   migrateLegacyActions,
   updateMetaAttributes,
 } from '../../../../rules_client/lib';
-import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
+import { type RulesClientContext, type BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
+import { type BulkEnableRulesParams, type BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { TinesStoryObjectSchema } from '../../../common/tines/schema';
 
 // Tines response base schema

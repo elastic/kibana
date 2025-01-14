@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './client_for_executors/client_interface';
-export * from './client_for_routes/client_interface';
+export type * from './client_for_executors/client_interface';
+export type * from './client_for_routes/client_interface';
 
 export { createRuleExecutionSummary } from './create_rule_execution_summary';

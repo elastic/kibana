@@ -9,11 +9,11 @@ import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { DEFAULT_LOG_VIEW, LogViewAttributes, LogViewReference } from '../../common/log_views';
+import { DEFAULT_LOG_VIEW, type LogViewAttributes, type LogViewReference } from '../../common/log_views';
 import {
-  InitializeFromUrl,
-  UpdateContextInUrl,
-  ListenForUrlChanges,
+  type InitializeFromUrl,
+  type UpdateContextInUrl,
+  type ListenForUrlChanges,
 } from '../observability_logs/log_view_state/src/url_state_storage_service';
 import {
   createLogViewNotificationChannel,

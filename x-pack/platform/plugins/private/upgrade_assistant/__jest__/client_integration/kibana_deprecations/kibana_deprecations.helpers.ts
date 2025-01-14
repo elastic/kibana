@@ -7,11 +7,11 @@
 import { act } from 'react-dom/test-utils';
 import {
   registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
+  type TestBed,
+  type AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

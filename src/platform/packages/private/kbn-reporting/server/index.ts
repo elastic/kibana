@@ -17,4 +17,4 @@ export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_
 export { ConfigSchema } from './config_schema';
 
 export * from './constants';
-export * from './types';
+export type * from './types';

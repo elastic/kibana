@@ -11,10 +11,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
-import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { SavedObjectSaveModal, showSaveModal, type OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { type SavedSearch, type SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { type DiscoverServices } from '../../../../build_services';
+import { type DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({

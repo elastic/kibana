@@ -10,20 +10,20 @@
 import React from 'react';
 
 import {
-  EmbeddableApiContext,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesSavedObjectId,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasType,
+  type HasUniqueId,
+  type PublishesSavedObjectId,
   apiHasParentApi,
   apiHasUniqueId,
   apiIsOfType,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { DashboardApi } from '../dashboard_api/types';
+import { type DashboardApi } from '../dashboard_api/types';
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';

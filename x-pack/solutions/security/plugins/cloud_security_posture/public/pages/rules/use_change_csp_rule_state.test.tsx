@@ -12,7 +12,7 @@ import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/sch
 import {
   useChangeCspRuleState,
   createRulesWithUpdatedState,
-  RuleStateUpdateRequest,
+  type RuleStateUpdateRequest,
 } from './use_change_csp_rule_state';
 import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';

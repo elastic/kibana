@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { type FtrProviderContext } from '../../ftr_provider_context';
 import {
   createLlmProxy,
-  LlmProxy,
+  type LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';

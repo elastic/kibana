@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { TimeFormat, useFormattedTime } from '../../formatted_time';
+import { type TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
 export interface LogEntryTimestampColumnProps {

@@ -7,8 +7,8 @@
 
 import { mockLogger } from '../test_utils';
 
-import { createBuffer, Entity, ErrorOutput, BulkOperation } from './bulk_operation_buffer';
-import { mapErr, asOk, asErr, Ok, Err } from './result_type';
+import { createBuffer, type Entity, type ErrorOutput, type BulkOperation } from './bulk_operation_buffer';
+import { mapErr, asOk, asErr, type Ok, type Err } from './result_type';
 
 interface TaskInstance extends Entity {
   attempts: number;

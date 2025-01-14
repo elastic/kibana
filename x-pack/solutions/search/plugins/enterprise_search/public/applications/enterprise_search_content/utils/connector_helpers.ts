@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector, FeatureName } from '@kbn/search-connectors';
+import { type Connector, FeatureName } from '@kbn/search-connectors';
 
 import { EXAMPLE_CONNECTOR_SERVICE_TYPES } from '../../../../common/constants';
 

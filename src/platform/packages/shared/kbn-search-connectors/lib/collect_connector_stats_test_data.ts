@@ -9,10 +9,10 @@
 
 // @ts-nocheck
 import {
-  Connector,
-  ConnectorStats,
+  type Connector,
+  type ConnectorStats,
   ConnectorStatus,
-  ConnectorSyncJob,
+  type ConnectorSyncJob,
   SyncJobType,
   SyncStatus,
   TriggerMethod,

@@ -23,8 +23,8 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
 import {
-  SecurityCreateApiKeyResponse,
-  SecurityUpdateApiKeyResponse,
+  type SecurityCreateApiKeyResponse,
+  type SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';

@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import {
   Aggregators,
-  CustomMetricExpressionParams,
-  SearchConfigurationType,
+  type CustomMetricExpressionParams,
+  type SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getSearchConfigurationBoolQuery } from '../../../../utils/get_parsed_filtered_query';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';

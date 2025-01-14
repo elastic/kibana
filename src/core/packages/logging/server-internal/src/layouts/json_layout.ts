@@ -10,8 +10,8 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, EcsVersion } from '@elastic/ecs';
-import { LogRecord, Layout } from '@kbn/logging';
+import { type Ecs, EcsVersion } from '@elastic/ecs';
+import { type LogRecord, type Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 

@@ -11,18 +11,18 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 import type { TaskRunMetrics } from '@kbn/reporting-common/types';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 import { ActionType } from '.';
-import { IReport } from '../store';
+import { type IReport } from '../store';
 import { EcsLogAdapter } from './adapter';
 import {
-  ClaimedTask,
-  CompletedExecution,
-  ErrorAction,
-  ExecuteError,
-  FailedReport,
-  SavedReport,
-  ScheduledRetry,
-  ScheduledTask,
-  StartedExecution,
+  type ClaimedTask,
+  type CompletedExecution,
+  type ErrorAction,
+  type ExecuteError,
+  type FailedReport,
+  type SavedReport,
+  type ScheduledRetry,
+  type ScheduledTask,
+  type StartedExecution,
 } from './types';
 
 export interface ExecutionClaimMetrics extends TaskRunMetrics {

@@ -9,17 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
-  EuiDataGridColumn,
-  EuiDataGridColumnCellActionProps,
-  EuiListGroupItemProps,
+  type EuiDataGridColumn,
+  type EuiDataGridColumnCellActionProps,
+  type EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { type EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
-import { LensCellValueAction } from '../../../types';
+import { type LensCellValueAction } from '../../../types';
 import { buildColumnsMetaLookup } from './helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
 

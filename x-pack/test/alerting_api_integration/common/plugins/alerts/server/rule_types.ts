@@ -6,19 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/logging';
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/logging';
+import { type CoreSetup, type ElasticsearchClient } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
 import {
-  RuleType,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleTypeState,
-  RuleTypeParams,
+  type RuleType,
+  type AlertInstanceState,
+  type AlertInstanceContext,
+  type RuleTypeState,
+  type RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import { type FixtureStartDeps, type FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',

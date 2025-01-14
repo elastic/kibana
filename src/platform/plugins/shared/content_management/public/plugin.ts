@@ -9,10 +9,10 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import {
-  ContentManagementPublicStart,
-  ContentManagementPublicSetup,
-  SetupDependencies,
-  StartDependencies,
+  type ContentManagementPublicStart,
+  type ContentManagementPublicSetup,
+  type SetupDependencies,
+  type StartDependencies,
 } from './types';
 import { ContentClient } from './content_client';
 import { ContentTypeRegistry } from './registry';

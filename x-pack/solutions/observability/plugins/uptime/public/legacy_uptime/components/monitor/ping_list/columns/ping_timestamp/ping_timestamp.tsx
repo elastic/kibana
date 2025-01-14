@@ -14,7 +14,7 @@ import { useInProgressImage } from './use_in_progress_image';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
-  ScreenshotRefImageData,
+  type ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../../../contexts';
 

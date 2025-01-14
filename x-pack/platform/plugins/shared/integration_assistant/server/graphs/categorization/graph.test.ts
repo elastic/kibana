@@ -28,8 +28,8 @@ import { handleInvalidCategorization } from './invalid';
 import { handleUpdateStableSamples } from './stable';
 import { testPipeline, combineProcessors } from '../../util';
 import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
+  type ActionsClientChatOpenAI,
+  type ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
 const model = new FakeLLM({

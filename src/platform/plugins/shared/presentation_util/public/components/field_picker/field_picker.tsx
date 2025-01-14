@@ -17,11 +17,11 @@ import { FieldIcon } from '@kbn/react-field';
 import {
   EuiFormRow,
   EuiSelectable,
-  EuiSelectableOption,
-  EuiSelectableProps,
+  type EuiSelectableOption,
+  type EuiSelectableProps,
   EuiSpacer,
 } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
 

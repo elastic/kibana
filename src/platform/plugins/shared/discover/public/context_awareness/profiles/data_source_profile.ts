@@ -11,9 +11,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverDataSource } from '../../../common/data_sources';
 import {
-  AsyncProfileProvider,
+  type AsyncProfileProvider,
   AsyncProfileService,
-  ContextWithProfileId,
+  type ContextWithProfileId,
 } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';

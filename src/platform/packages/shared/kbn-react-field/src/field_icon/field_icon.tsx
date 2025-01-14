@@ -9,7 +9,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiToken, EuiTokenProps } from '@elastic/eui';
+import { EuiToken, type EuiTokenProps } from '@elastic/eui';
 
 export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
   type:

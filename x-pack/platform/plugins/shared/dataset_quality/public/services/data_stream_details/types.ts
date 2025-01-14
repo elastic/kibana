@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import { type HttpStart } from '@kbn/core/public';
 import {
-  GetDataStreamSettingsParams,
-  DataStreamSettings,
-  GetDataStreamDetailsParams,
-  DataStreamDetails,
-  GetIntegrationDashboardsParams,
-  GetDataStreamDegradedFieldsParams,
-  DegradedFieldResponse,
-  GetDataStreamDegradedFieldValuesPathParams,
+  type GetDataStreamSettingsParams,
+  type DataStreamSettings,
+  type GetDataStreamDetailsParams,
+  type DataStreamDetails,
+  type GetIntegrationDashboardsParams,
+  type GetDataStreamDegradedFieldsParams,
+  type DegradedFieldResponse,
+  type GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
 import {
-  AnalyzeDegradedFieldsParams,
-  IntegrationType,
-  CheckAndLoadIntegrationParams,
-  UpdateFieldLimitParams,
+  type AnalyzeDegradedFieldsParams,
+  type IntegrationType,
+  type CheckAndLoadIntegrationParams,
+  type UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import {
-  Dashboard,
-  DataStreamRolloverResponse,
-  DegradedFieldAnalysis,
-  DegradedFieldValues,
-  UpdateFieldLimitResponse,
+  type Dashboard,
+  type DataStreamRolloverResponse,
+  type DegradedFieldAnalysis,
+  type DegradedFieldValues,
+  type UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;

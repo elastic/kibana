@@ -7,9 +7,9 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
-  FunctionDefinition,
+  type FunctionDefinition,
   MessageRole,
-  ObservabilityAIAssistantChatService,
+  type ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 

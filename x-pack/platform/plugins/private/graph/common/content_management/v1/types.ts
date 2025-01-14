@@ -6,20 +6,20 @@
  */
 
 import {
-  GetIn,
-  CreateIn,
-  SearchIn,
-  UpdateIn,
-  DeleteIn,
-  DeleteResult,
-  SearchResult,
-  GetResult,
-  CreateResult,
-  UpdateResult,
+  type GetIn,
+  type CreateIn,
+  type SearchIn,
+  type UpdateIn,
+  type DeleteIn,
+  type DeleteResult,
+  type SearchResult,
+  type GetResult,
+  type CreateResult,
+  type UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
-import { GraphContentType } from '../types';
+import { type GraphContentType } from '../types';
 
 export interface Reference {
   type: string;

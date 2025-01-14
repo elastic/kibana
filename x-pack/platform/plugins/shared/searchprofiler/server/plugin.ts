@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { type CoreSetup, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
 
-import { LicenseStatus, PLUGIN } from '../common';
-import { AppServerPluginDependencies } from './types';
+import { type LicenseStatus, PLUGIN } from '../common';
+import { type AppServerPluginDependencies } from './types';
 import * as profileRoute from './routes/profile';
 
 export class SearchProfilerServerPlugin implements Plugin {

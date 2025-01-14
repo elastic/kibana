@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import { type Readable } from 'stream';
 import {
-  SavedObjectsImportRetry,
-  SavedObjectsImportWarning,
-  SavedObjectsImportResponse,
+  type SavedObjectsImportRetry,
+  type SavedObjectsImportWarning,
+  type SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '..';
 

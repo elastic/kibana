@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import React, { type FunctionComponent, useEffect } from 'react';
+import { type EuiBreadcrumb } from '@elastic/eui';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
-import { Index } from '../../../../../../common';
-import { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
+import { type Index } from '../../../../../../common';
+import { type IndexDetailsTab, type IndexDetailsTabId } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DetailsPageOverview } from './details_page_overview';
 

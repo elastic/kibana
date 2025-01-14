@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
-import { CustomizablePalette, CustomizablePaletteProps } from '../palette_configuration';
+import { type ComponentStory } from '@storybook/react';
+import { CustomizablePalette, type CustomizablePaletteProps } from '../palette_configuration';
 import { getPaletteRegistry } from './palettes';
 
 export default {

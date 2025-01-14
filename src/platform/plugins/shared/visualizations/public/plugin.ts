@@ -12,10 +12,10 @@ import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {
-  AppMountParameters,
-  AppUpdater,
+  type AppMountParameters,
+  type AppUpdater,
   DEFAULT_APP_CATEGORIES,
-  ScopedHistory,
+  type ScopedHistory,
 } from '@kbn/core/public';
 
 import {
@@ -37,7 +37,7 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { type UiActionsStart, type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -49,8 +49,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
+  type EmbeddableSetup,
+  type EmbeddableStart,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -61,15 +61,15 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { type SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
-  ContentManagementPublicSetup,
-  ContentManagementPublicStart,
+  type ContentManagementPublicSetup,
+  type ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import { type EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
@@ -78,7 +78,7 @@ import {
   dashboardVisualizationPanelTrigger,
   visualizeEditorTrigger,
 } from './triggers';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import { createVisEditorsRegistry, type VisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
@@ -120,11 +120,11 @@ import {
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry } from './types';
+import { type ListingViewRegistry } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
-  VisualizationSavedObjectAttributes,
+  type VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 import type { VisualizeSerializedState } from './embeddable/types';

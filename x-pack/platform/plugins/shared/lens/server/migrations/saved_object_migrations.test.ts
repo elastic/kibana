@@ -7,30 +7,30 @@
 
 import { cloneDeep } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { getAllMigrations, LensDocShape } from './saved_object_migrations';
+import { getAllMigrations, type LensDocShape } from './saved_object_migrations';
 import {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
-  SavedObjectUnsanitizedDoc,
+  type SavedObjectMigrationContext,
+  type SavedObjectMigrationFn,
+  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  LensDocShape715,
-  LensDocShape810,
-  VisState716,
-  VisStatePost715,
-  VisStatePre715,
-  VisState810,
-  VisState820,
-  VisState830,
-  LensDocShape850,
-  XYVisStatePre850,
-  VisState850,
+  type LensDocShape715,
+  type LensDocShape810,
+  type VisState716,
+  type VisStatePost715,
+  type VisStatePre715,
+  type VisState810,
+  type VisState820,
+  type VisState830,
+  type LensDocShape850,
+  type XYVisStatePre850,
+  type VisState850,
 } from './types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import { LegacyMetricState } from '../../common/types';
-import { Filter } from '@kbn/es-query';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { type LegacyMetricState } from '../../common/types';
+import { type Filter } from '@kbn/es-query';
+import { type DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {}, {});

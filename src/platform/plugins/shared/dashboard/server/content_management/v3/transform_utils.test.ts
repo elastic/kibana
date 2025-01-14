@@ -26,9 +26,9 @@ import {
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  ControlLabelPosition,
-  ControlGroupChainingSystem,
-  ControlWidth,
+  type ControlLabelPosition,
+  type ControlGroupChainingSystem,
+  type ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 

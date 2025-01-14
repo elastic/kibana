@@ -10,8 +10,8 @@ import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlQuerySchema,
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
+  type SLODefinitionResponse,
+  type SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(

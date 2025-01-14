@@ -10,14 +10,14 @@
 import './index.scss';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { EventEmitter } from 'events';
+import { type EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  Vis,
-  VisualizeEmbeddableContract,
-  EditorRenderProps,
+  type Vis,
+  type VisualizeEmbeddableContract,
+  type EditorRenderProps,
 } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';

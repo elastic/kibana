@@ -12,8 +12,8 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import {
-  RuleTypeIndexWithDescriptions,
-  RuleTypeWithDescription,
+  type RuleTypeIndexWithDescriptions,
+  type RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';
 import { useQuery } from '@tanstack/react-query';
 import { keyBy } from 'lodash';

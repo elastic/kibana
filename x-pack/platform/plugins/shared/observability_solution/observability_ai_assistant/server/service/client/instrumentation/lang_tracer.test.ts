@@ -8,7 +8,7 @@ import {
   InMemorySpanExporter,
   BasicTracerProvider,
   SimpleSpanProcessor,
-  ReadableSpan,
+  type ReadableSpan,
 } from '@opentelemetry/sdk-trace-base';
 import { context } from '@opentelemetry/api';
 import { LangTracer } from './lang_tracer';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLayout, Layout } from '.';
+import { createLayout, type Layout } from '.';
 
 export function createMockLayout(): Layout {
   const layout = createLayout({

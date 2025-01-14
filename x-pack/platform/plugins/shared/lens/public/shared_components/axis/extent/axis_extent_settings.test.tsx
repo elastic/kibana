@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { AxisBoundsControl, DataBoundsObject, getBounds } from './axis_extent_settings';
-import { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
-import { UnifiedAxisExtentConfig } from './types';
+import React, { type ComponentProps } from 'react';
+import { AxisBoundsControl, type DataBoundsObject, getBounds } from './axis_extent_settings';
+import { type AxisExtentMode, type YScaleType, type XScaleType } from '@kbn/expression-xy-plugin/common';
+import { type UnifiedAxisExtentConfig } from './types';
 import { render, screen } from '@testing-library/react';
 
 type Props = ComponentProps<typeof AxisBoundsControl>;

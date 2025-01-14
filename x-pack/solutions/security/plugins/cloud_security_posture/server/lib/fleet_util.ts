@@ -20,7 +20,7 @@ import type {
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_old';
+import { type CloudSecurityPolicyTemplate, type PostureTypes } from '../../common/types_old';
 import {
   SUPPORTED_POLICY_TEMPLATES,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -28,7 +28,7 @@ import {
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  BenchmarksQueryParams,
+  type BenchmarksQueryParams,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../common/types/benchmarks/v1';
 

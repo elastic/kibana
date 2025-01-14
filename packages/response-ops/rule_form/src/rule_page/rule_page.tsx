@@ -17,7 +17,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
-  EuiStepsProps,
+  type EuiStepsProps,
   useEuiBackgroundColorCSS,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';

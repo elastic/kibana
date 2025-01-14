@@ -12,9 +12,9 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import { ConfigService, type Env, type RawConfigurationProvider } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { LoggingService, type ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
@@ -51,7 +51,7 @@ import type {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
+import { type DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';

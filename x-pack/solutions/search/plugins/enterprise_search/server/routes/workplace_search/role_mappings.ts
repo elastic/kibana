@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { type RouteDependencies } from '../../plugin';
 
 const roleMappingBaseSchema = {
   rules: schema.recordOf(schema.string(), schema.string()),

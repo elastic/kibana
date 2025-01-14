@@ -15,7 +15,7 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlexGroup, type EuiFlexGroupProps, type EuiFlyoutProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
 

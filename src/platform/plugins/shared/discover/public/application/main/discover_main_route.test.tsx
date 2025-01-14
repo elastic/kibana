@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
+import { DiscoverMainRoute, type MainRouteProps } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   createCustomizationService,
-  DiscoverCustomizationService,
+  type DiscoverCustomizationService,
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';

@@ -30,10 +30,10 @@ import {
   default as esql_parser,
   type MetricsCommandContext,
   IndexPatternContext,
-  InlinestatsCommandContext,
-  JoinCommandContext,
+  type InlinestatsCommandContext,
+  type JoinCommandContext,
 } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import { type default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,

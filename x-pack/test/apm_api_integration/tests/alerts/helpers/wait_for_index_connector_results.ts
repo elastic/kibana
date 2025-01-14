@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { type Client } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { APM_ACTION_VARIABLE_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 

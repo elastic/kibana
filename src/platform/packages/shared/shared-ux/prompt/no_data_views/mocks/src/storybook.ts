@@ -10,8 +10,8 @@
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import {
-  NoDataViewsPromptServices,
-  NoDataViewsPromptProps,
+  type NoDataViewsPromptServices,
+  type NoDataViewsPromptProps,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 type ServiceArguments = Pick<

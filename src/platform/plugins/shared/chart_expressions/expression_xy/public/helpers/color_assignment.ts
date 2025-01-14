@@ -8,21 +8,21 @@
  */
 
 import { mapValues } from 'lodash';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { type DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { isDataLayer } from './visualization';
-import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
+import { type CommonXYDataLayerConfig, type CommonXYLayerConfig } from '../../common';
 import {
-  LayerAccessorsTitles,
-  LayerFieldFormats,
-  LayersAccessorsTitles,
-  LayersFieldFormats,
+  type LayerAccessorsTitles,
+  type LayerFieldFormats,
+  type LayersAccessorsTitles,
+  type LayersFieldFormats,
 } from './layers';
 import {
-  DatatablesWithFormatInfo,
-  DatatableWithFormatInfo,
+  type DatatablesWithFormatInfo,
+  type DatatableWithFormatInfo,
   hasMultipleLayersWithSplits,
 } from './data_layers';
 

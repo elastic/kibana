@@ -7,10 +7,10 @@
 import { get, pick } from 'lodash';
 import {
   ConfigKey,
-  MonitorTypeEnum,
+  type MonitorTypeEnum,
   FormMonitorType,
-  MonitorFields,
-  SyntheticsMonitorSchedule,
+  type MonitorFields,
+  type SyntheticsMonitorSchedule,
 } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 

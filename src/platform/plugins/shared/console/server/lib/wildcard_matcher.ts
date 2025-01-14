@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Minimatch, IMinimatch } from 'minimatch';
+import { Minimatch, type IMinimatch } from 'minimatch';
 
 export class WildcardMatcher {
   pattern: string;

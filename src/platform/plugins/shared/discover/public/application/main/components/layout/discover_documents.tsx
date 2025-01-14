@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
+import { type DataView } from '@kbn/data-views-plugin/public';
+import { type SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
@@ -29,9 +29,9 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
-  DataGridDensity,
-  UnifiedDataTableProps,
-  UseColumnsProps,
+  type DataGridDensity,
+  type UnifiedDataTableProps,
+  type UseColumnsProps,
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
@@ -44,7 +44,7 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { type DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -53,7 +53,7 @@ import { useInternalStateSelector } from '../../state_management/discover_intern
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { type DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import {
   getMaxAllowedSampleSize,
@@ -69,7 +69,7 @@ import { useContextualGridCustomisations } from '../../hooks/grid_customisations
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import {
-  CellRenderersExtensionParams,
+  type CellRenderersExtensionParams,
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
   useProfileAccessor,

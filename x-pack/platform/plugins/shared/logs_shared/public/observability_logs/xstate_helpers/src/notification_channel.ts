@@ -6,7 +6,7 @@
  */
 
 import { ReplaySubject } from 'rxjs';
-import { ActionFunction, EventObject, Expr, Subscribable } from 'xstate';
+import { type ActionFunction, type EventObject, type Expr, type Subscribable } from 'xstate';
 
 export interface NotificationChannel<TContext, TEvent extends EventObject, TSentEvent> {
   createService: () => Subscribable<TSentEvent>;

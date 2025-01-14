@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
+import { type KnownTypeToMetadata, type SettingType } from '@kbn/management-settings-types';
 
 type Settings = {
   [key in Exclude<SettingType, 'json' | 'markdown'>]: KnownTypeToMetadata<key>;

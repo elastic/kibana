@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { DatasetQualityServerRouteRepository } from '.';
+import { type ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import { type KibanaRequest, type Logger } from '@kbn/core/server';
+import { type DatasetQualityServerRouteRepository } from '.';
 import {
-  DatasetQualityPluginSetupDependencies,
-  DatasetQualityPluginStartDependencies,
-  DatasetQualityRequestHandlerContext,
+  type DatasetQualityPluginSetupDependencies,
+  type DatasetQualityPluginStartDependencies,
+  type DatasetQualityRequestHandlerContext,
 } from '../types';
 
 export type { DatasetQualityServerRouteRepository };

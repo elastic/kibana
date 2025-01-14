@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
-  NoResultsSuggestionWhenFiltersProps,
+  type NoResultsSuggestionWhenFiltersProps,
 } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';

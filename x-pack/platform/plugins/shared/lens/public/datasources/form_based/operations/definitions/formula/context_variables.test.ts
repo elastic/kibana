@@ -14,9 +14,9 @@ import {
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../../mocks';
-import { DateHistogramIndexPatternColumn } from '../date_histogram';
+import { type DateHistogramIndexPatternColumn } from '../date_histogram';
 import {
-  ConstantsIndexPatternColumn,
+  type ConstantsIndexPatternColumn,
   nowOperation,
   intervalOperation,
   timeRangeOperation,

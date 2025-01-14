@@ -8,20 +8,20 @@
  */
 
 import {
-  HasSerializableState,
-  HasSnapshottableState,
-  SerializedPanelState,
+  type HasSerializableState,
+  type HasSnapshottableState,
+  type SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import { type DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
-  CanLockHoverActions,
-  HasType,
-  PublishesPhaseEvents,
-  PublishesUnsavedChanges,
-  StateComparators,
+  type CanLockHoverActions,
+  type HasType,
+  type PublishesPhaseEvents,
+  type PublishesUnsavedChanges,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
-import { MaybePromise } from '@kbn/utility-types';
-import React from 'react';
+import { type MaybePromise } from '@kbn/utility-types';
+import type React from 'react';
 
 /**
  * The default embeddable API that all Embeddables must implement.

@@ -8,8 +8,8 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  SubFeaturePrivilegeGroupConfig,
-  SubFeaturePrivilegeGroupType,
+  type SubFeaturePrivilegeGroupConfig,
+  type SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';

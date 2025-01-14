@@ -6,10 +6,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
+import { type MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import { type InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
@@ -18,7 +18,7 @@ import {
   fetchMlInferencePipelines,
   fetchMlInferencePipelineProcessors,
   fetchPipelineProcessorInferenceData,
-  InferencePipelineData,
+  type InferencePipelineData,
 } from './get_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {

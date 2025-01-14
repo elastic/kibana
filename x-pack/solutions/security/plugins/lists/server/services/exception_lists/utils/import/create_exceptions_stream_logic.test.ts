@@ -9,8 +9,8 @@ import { Readable } from 'stream';
 
 import { createPromiseFromStreams } from '@kbn/utils';
 import {
-  ImportExceptionListItemSchema,
-  ImportExceptionsListSchema,
+  type ImportExceptionListItemSchema,
+  type ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -19,7 +19,7 @@ import {
   getImportExceptionsListSchemaDecodedMock,
   getImportExceptionsListSchemaMock,
 } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
-import { PromiseStream } from '../../import_exception_list_and_items';
+import { type PromiseStream } from '../../import_exception_list_and_items';
 
 import {
   createExceptionsStreamFromNdjson,

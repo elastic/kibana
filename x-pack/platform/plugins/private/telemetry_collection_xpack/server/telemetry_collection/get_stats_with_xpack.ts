@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { StatsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
-import { TelemetryLocalStats, getLocalStats } from '@kbn/telemetry-plugin/server';
+import { type StatsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
+import { type TelemetryLocalStats, getLocalStats } from '@kbn/telemetry-plugin/server';
 import { getXPackUsage } from './get_xpack';
-import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
+import { type ESLicense, getLicenseFromLocalOrMaster } from './get_license';
 import { isClusterOptedIn } from './is_cluster_opted_in';
 
 export type TelemetryAggregatedStats = TelemetryLocalStats & {

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { Subject, type Observable, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
-import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
+import { hasConfigPathIntersection, type ChangedDeprecatedPaths } from '@kbn/config';
 
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -49,7 +49,7 @@ import {
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { type ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';

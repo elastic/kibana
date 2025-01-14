@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Context, IntersectionType, UnionType, ValidationError } from 'io-ts';
+import { type Context, IntersectionType, UnionType, type ValidationError } from 'io-ts';
 
 const getErrorPath = ([first, ...rest]: Context): string[] => {
   if (typeof first === 'undefined') {

@@ -11,12 +11,12 @@ import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
-  RulesSettings,
+  type RulesSettings,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../../common';
 import {
   RulesSettingsQueryDelayClient,
-  RulesSettingsQueryDelayClientConstructorOptions,
+  type RulesSettingsQueryDelayClientConstructorOptions,
 } from './rules_settings_query_delay_client';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';

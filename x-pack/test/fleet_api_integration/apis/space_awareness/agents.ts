@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import {
   AGENTS_INDEX,
-  CreateAgentPolicyResponse,
-  GetAgentsResponse,
+  type CreateAgentPolicyResponse,
+  type GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { type FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {

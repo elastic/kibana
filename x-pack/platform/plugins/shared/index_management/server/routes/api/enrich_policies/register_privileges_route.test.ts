@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, type RequestHandlerContext, type RequestHandler } from '@kbn/core/server';
 
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
 

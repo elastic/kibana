@@ -8,15 +8,15 @@
  */
 
 import {
-  ExpressionExecutionParams,
-  ExpressionsService,
-  ExpressionsServiceSetup,
-  ExpressionsServiceStart,
+  type ExpressionExecutionParams,
+  type ExpressionsService,
+  type ExpressionsServiceSetup,
+  type ExpressionsServiceStart,
 } from '.';
-import { ExpressionAstExpression } from '../ast';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { AnyExpressionTypeDefinition } from '../expression_types';
-import { AnyExpressionRenderDefinition } from '../expression_renderers';
+import { type ExpressionAstExpression } from '../ast';
+import { type AnyExpressionFunctionDefinition } from '../expression_functions';
+import { type AnyExpressionTypeDefinition } from '../expression_types';
+import { type AnyExpressionRenderDefinition } from '../expression_renderers';
 
 export interface ExpressionServiceFork {
   setup(): ExpressionsServiceSetup;

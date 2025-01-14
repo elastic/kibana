@@ -8,12 +8,12 @@
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ActionType, ExecutorType } from './types';
-import { ActionExecutionSourceType, ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
+import { ActionTypeRegistry, type ActionTypeRegistryOpts } from './action_type_registry';
+import { type ActionType, type ExecutorType } from './types';
+import { ActionExecutionSourceType, ActionExecutor, type ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
-import { ActionsConfigurationUtilities } from './actions_config';
+import { type ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 

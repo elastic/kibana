@@ -12,12 +12,12 @@ import moment from 'moment';
 
 import {
   REINDEX_OP_TYPE,
-  ReindexSavedObject,
+  type ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
 import { versionService } from '../version';
-import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
+import { LOCK_WINDOW, type ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();

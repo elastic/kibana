@@ -6,11 +6,11 @@
  */
 
 import {
-  INCOMPATIBLE_TAB_ID,
-  SAME_FAMILY_TAB_ID,
-  ALL_TAB_ID,
-  CUSTOM_TAB_ID,
-  ECS_COMPLIANT_TAB_ID,
+  type INCOMPATIBLE_TAB_ID,
+  type SAME_FAMILY_TAB_ID,
+  type ALL_TAB_ID,
+  type CUSTOM_TAB_ID,
+  type ECS_COMPLIANT_TAB_ID,
 } from '../constants';
 
 export interface CheckFieldsTabBase {

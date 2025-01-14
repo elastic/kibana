@@ -5,61 +5,61 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
+import React, { type Ref } from 'react';
 import { omit } from 'lodash';
-import { ControllerRenderProps } from 'react-hook-form';
+import { type ControllerRenderProps } from 'react-hook-form';
 import {
   EuiFieldText,
-  EuiFieldTextProps,
+  type EuiFieldTextProps,
   EuiSelect,
-  EuiSelectProps,
+  type EuiSelectProps,
   EuiFieldNumber,
-  EuiFieldNumberProps,
+  type EuiFieldNumberProps,
   EuiFieldPassword,
-  EuiFieldPasswordProps,
+  type EuiFieldPasswordProps,
   EuiCheckbox,
-  EuiCheckboxProps,
+  type EuiCheckboxProps,
   EuiSwitch,
-  EuiSwitchProps,
+  type EuiSwitchProps,
   EuiButtonGroup,
-  EuiButtonGroupProps,
+  type EuiButtonGroupProps,
   EuiComboBox,
-  EuiComboBoxProps,
+  type EuiComboBoxProps,
   EuiTextArea,
-  EuiTextAreaProps,
+  type EuiTextAreaProps,
 } from '@elastic/eui';
 import {
   ThrottlingConfigField,
-  ThrottlingConfigFieldProps,
+  type ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
-import { SourceField, SourceFieldProps } from '../fields/source_field';
+import { SourceField, type SourceFieldProps } from '../fields/source_field';
 import {
   FormattedComboBox as DefaultFormattedComboBox,
-  FormattedComboBoxProps as DefaultFormattedComboBoxProps,
+  type FormattedComboBoxProps as DefaultFormattedComboBoxProps,
 } from '../fields/combo_box';
 import {
   JSONEditor as DefaultJSONEditor,
-  CodeEditorProps as DefaultCodeEditorProps,
+  type CodeEditorProps as DefaultCodeEditorProps,
 } from '../fields/code_editor';
 import {
   MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
-  MonitorTypeRadioGroupProps,
+  type MonitorTypeRadioGroupProps,
 } from '../fields/monitor_type_radio_group';
 import {
   HeaderField as DefaultHeaderField,
-  HeaderFieldProps as DefaultHeaderFieldProps,
+  type HeaderFieldProps as DefaultHeaderFieldProps,
 } from '../fields/header_field';
 import {
   KeyValuePairsField as DefaultKeyValuePairsField,
-  KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
+  type KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
 } from '../fields/key_value_field';
 import {
   RequestBodyField as DefaultRequestBodyField,
-  RequestBodyFieldProps as DefaultRequestBodyFieldProps,
+  type RequestBodyFieldProps as DefaultRequestBodyFieldProps,
 } from '../fields/request_body_field';
 import {
   ResponseBodyIndexField as DefaultResponseBodyIndexField,
-  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
+  type ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
 } from '../fields/index_response_body_field';
 
 // these props are automatically passed through to our controlled components

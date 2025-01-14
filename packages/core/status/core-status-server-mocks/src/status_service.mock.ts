@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ServiceStatusLevels, ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import type { StatusService, InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { StatusServiceSetup, CoreStatus } from '@kbn/core-status-server';
 

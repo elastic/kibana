@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import {
-  UpdateTagAssignmentsOptions,
-  FindAssignableObjectsOptions,
-  AssignableObject,
+  type UpdateTagAssignmentsOptions,
+  type FindAssignableObjectsOptions,
+  type AssignableObject,
 } from '../../../common/assignments';
 import {
-  FindAssignableObjectResponse,
-  GetAssignableTypesResponse,
+  type FindAssignableObjectResponse,
+  type GetAssignableTypesResponse,
 } from '../../../common/http_api_types';
 
 export interface ITagAssignmentService {

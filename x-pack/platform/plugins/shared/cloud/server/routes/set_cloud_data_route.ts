@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { RouteOptions } from '.';
+import { type RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { CloudDataAttributes } from './types';
+import { type CloudDataAttributes } from './types';
 
 const createBodySchemaV1 = schema.object({
   onboardingData: schema.object({

@@ -7,15 +7,15 @@
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import { type PublicMethodsOf } from '@kbn/utility-types';
+import { type Filter, buildEsQuery, type EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
   ALERT_TIME_RANGE,
   ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
-  STATUS_VALUES,
+  type STATUS_VALUES,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
@@ -25,26 +25,26 @@ import {
 } from '@kbn/rule-data-utils';
 
 import {
-  AggregateName,
-  AggregationsAggregate,
-  MappingRuntimeFields,
-  QueryDslQueryContainer,
-  SortCombinations,
+  type AggregateName,
+  type AggregationsAggregate,
+  type MappingRuntimeFields,
+  type QueryDslQueryContainer,
+  type SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
-  AlertingAuthorization,
+  type AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { type Logger, type ElasticsearchClient, type EcsEvent } from '@kbn/core/server';
+import { type AuditLogger } from '@kbn/security-plugin/server';
+import { type FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
-import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { TypeOf } from 'io-ts';
-import { BrowserFields } from '../../common';
+import { type RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import { type TypeOf } from 'io-ts';
+import { type BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -52,11 +52,11 @@ import {
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { IRuleDataService } from '../rule_data_plugin_service';
+import { type ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { type IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
-import { alertsAggregationsSchema } from '../../common/types';
+import { type alertsAggregationsSchema } from '../../common/types';
 import {
   MAX_ALERTS_GROUPING_QUERY_SIZE,
   MAX_ALERTS_PAGES,

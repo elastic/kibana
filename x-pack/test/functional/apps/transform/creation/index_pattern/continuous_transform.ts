@@ -10,11 +10,11 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  GroupByEntry,
+  type GroupByEntry,
   isLatestTransformTestData,
   isPivotTransformTestData,
-  LatestTransformTestData,
-  PivotTransformTestData,
+  type LatestTransformTestData,
+  type PivotTransformTestData,
 } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

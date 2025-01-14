@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 import { LARGE_FLOAT } from '../../../../common/formatting';
-import { ClusterMetric, Metric, MetricOptions } from '../classes';
+import { ClusterMetric, Metric, type MetricOptions } from '../classes';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
   defaultMessage: 'ms',

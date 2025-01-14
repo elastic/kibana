@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { type PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
-  HasParentApi,
-  HasType,
-  HasUniqueId,
+  type HasParentApi,
+  type HasType,
+  type HasUniqueId,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,

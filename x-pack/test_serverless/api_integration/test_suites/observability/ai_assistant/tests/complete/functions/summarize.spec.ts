@@ -8,7 +8,7 @@
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import {
-  LlmProxy,
+  type LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
@@ -18,7 +18,7 @@ import {
   deleteKnowledgeBaseModel,
   TINY_ELSER,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../../common/ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
   createProxyActionConnector,

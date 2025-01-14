@@ -10,36 +10,36 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { type Logger } from '@kbn/core/server';
+import { type LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { type RunContext, type TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { TaskCost } from '@kbn/task-manager-plugin/server/task';
-import { TaskRunnerFactory } from './task_runner';
+import { type TaskRunnerFactory } from './task_runner';
 import {
-  RuleType,
-  RuleTypeParams,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  IRuleTypeAlerts,
+  type RuleType,
+  type RuleTypeParams,
+  type RuleTypeState,
+  type AlertInstanceState,
+  type AlertInstanceContext,
+  type IRuleTypeAlerts,
 } from './types';
 import {
   RecoveredActionGroup,
   getBuiltinActionGroups,
-  RecoveredActionGroupId,
-  ActionGroup,
+  type RecoveredActionGroupId,
+  type ActionGroup,
   validateDurationSchema,
   parseDuration,
-  RuleAlertData,
+  type RuleAlertData,
 } from '../common';
-import { ILicenseState } from './lib/license_state';
+import { type ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
-import { InMemoryMetrics } from './monitoring';
-import { AlertingRulesConfig } from '.';
-import { AlertsService } from './alerts_service/alerts_service';
+import { type InMemoryMetrics } from './monitoring';
+import { type AlertingRulesConfig } from '.';
+import { type AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
-import { AlertingConfig } from './config';
+import { type AlertingConfig } from './config';
 
 const RULE_TYPES_WITH_CUSTOM_COST: Record<string, TaskCost> = {
   'siem.indicatorRule': TaskCost.ExtraLarge,

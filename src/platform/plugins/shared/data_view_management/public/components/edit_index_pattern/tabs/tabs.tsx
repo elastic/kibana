@@ -9,7 +9,7 @@
 
 import { uniq } from 'lodash';
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { type RouteComponentProps } from 'react-router-dom';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -17,30 +17,30 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiTabbedContent,
-  EuiTabbedContentTab,
+  type EuiTabbedContentTab,
   EuiSpacer,
   EuiFieldSearch,
   EuiFilterSelectItem,
-  FilterChecked,
+  type FilterChecked,
   EuiToolTip,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
-  DataView,
-  DataViewField,
-  DataViewsPublicPluginStart,
+  type DataView,
+  type DataViewField,
+  type DataViewsPublicPluginStart,
   META_FIELDS,
-  RuntimeField,
+  type RuntimeField,
 } from '@kbn/data-views-plugin/public';
-import { AbstractDataView } from '@kbn/data-views-plugin/common';
+import { type AbstractDataView } from '@kbn/data-views-plugin/common';
 import {
-  SavedObjectRelation,
-  SavedObjectManagementTypeInfo,
+  type SavedObjectRelation,
+  type SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../types';
+import { type IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import {
   TAB_INDEXED_FIELDS,

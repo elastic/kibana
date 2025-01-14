@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
+import { Subject, type Observable, firstValueFrom, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';

@@ -8,12 +8,12 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
-import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
+import { EuiResizeObserver, type EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { createVegaVisualization } from '../vega_visualization';
-import { VegaVisualizationDependencies } from '../plugin';
-import { VegaParser } from '../data_model/vega_parser';
+import { type VegaVisualizationDependencies } from '../plugin';
+import { type VegaParser } from '../data_model/vega_parser';
 
 import { GlobalVegaVisStyles, wrapperStyles } from './vega_vis.styles';
 

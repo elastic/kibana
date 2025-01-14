@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
+import { type AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import {
@@ -31,7 +31,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import { type FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

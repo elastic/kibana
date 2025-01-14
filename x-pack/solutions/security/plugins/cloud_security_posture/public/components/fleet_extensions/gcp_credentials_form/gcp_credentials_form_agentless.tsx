@@ -29,7 +29,7 @@ import {
 } from '../../../../common/constants';
 import {
   GCPSetupInfoContent,
-  GcpFormProps,
+  type GcpFormProps,
   GcpInputVarFields,
   gcpField,
   getInputVarsFields,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  actionSchema,
-  actionRequestSchema,
-  systemActionSchema,
-  systemActionRequestSchema,
+  type actionSchema,
+  type actionRequestSchema,
+  type systemActionSchema,
+  type systemActionRequestSchema,
 } from '../schemas';
 
 export type ActionRequest = TypeOf<typeof actionRequestSchema>;

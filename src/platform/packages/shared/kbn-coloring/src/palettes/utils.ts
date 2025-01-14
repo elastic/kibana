@@ -8,12 +8,12 @@
  */
 
 import {
-  PaletteContinuity,
-  PaletteRegistry,
-  CustomPaletteParams,
-  DataBounds,
-  ColorStop,
-  PaletteOutput,
+  type PaletteContinuity,
+  type PaletteRegistry,
+  type CustomPaletteParams,
+  type DataBounds,
+  type ColorStop,
+  type PaletteOutput,
 } from './types';
 
 import {

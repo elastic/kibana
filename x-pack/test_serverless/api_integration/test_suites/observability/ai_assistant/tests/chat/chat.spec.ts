@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
 import {
-  LlmProxy,
+  type LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { type SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { type FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 

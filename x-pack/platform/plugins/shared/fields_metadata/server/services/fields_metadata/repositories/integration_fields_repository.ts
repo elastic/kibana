@@ -7,14 +7,14 @@
 
 import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
-import { FieldMetadata, IntegrationFieldName } from '../../../../common';
+import { FieldMetadata, type IntegrationFieldName } from '../../../../common';
 import {
-  ExtractedIntegration,
-  ExtractedIntegrationFields,
-  IntegrationFieldsExtractor,
-  IntegrationFieldsSearchParams,
-  IntegrationListExtractor,
-  IntegrationName,
+  type ExtractedIntegration,
+  type ExtractedIntegrationFields,
+  type IntegrationFieldsExtractor,
+  type IntegrationFieldsSearchParams,
+  type IntegrationListExtractor,
+  type IntegrationName,
 } from './types';
 import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {

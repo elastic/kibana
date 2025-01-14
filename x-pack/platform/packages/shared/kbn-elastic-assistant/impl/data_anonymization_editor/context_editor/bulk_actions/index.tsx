@@ -8,7 +8,7 @@
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -17,7 +17,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '../get_context_menu_panels';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow } from '../types';
+import { type BatchUpdateListItem, type ContextEditorRow } from '../types';
 
 export interface Props {
   appliesTo: 'multipleRows' | 'singleRow';

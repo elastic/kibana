@@ -6,16 +6,16 @@
  */
 
 import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-  AppMountParameters,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+  type AppMountParameters,
 } from '@kbn/core/public';
 import { BehaviorSubject, from } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { type SharePluginSetup, type SharePluginStart } from '@kbn/share-plugin/public';
+import { type DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -23,41 +23,41 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+  type TriggersAndActionsUIPublicPluginSetup,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { type DataPublicPluginSetup, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { FleetStart } from '@kbn/fleet-plugin/public';
+import { type FleetStart } from '@kbn/fleet-plugin/public';
 import {
   enableLegacyUptimeApp,
-  FetchDataParams,
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
+  type FetchDataParams,
+  type ObservabilityPublicSetup,
+  type ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { type Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { type CasesPublicStart } from '@kbn/cases-plugin/public';
+import { type CloudSetup, type CloudStart } from '@kbn/cloud-plugin/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
+import { AppStatus, type AppUpdater } from '@kbn/core-application-browser';
 import {
-  ObservabilityAIAssistantPublicStart,
-  ObservabilityAIAssistantPublicSetup,
+  type ObservabilityAIAssistantPublicStart,
+  type ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
-import { UptimeConfig } from '../common/config';
+import { type UptimeConfig } from '../common/config';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,

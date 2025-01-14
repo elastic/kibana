@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { config as ElasticsearchBaseConfig, ElasticsearchConfig } from '@kbn/core/server';
-import { MonitoringConfigSchema } from './types';
+import { type MonitoringConfigSchema } from './types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 

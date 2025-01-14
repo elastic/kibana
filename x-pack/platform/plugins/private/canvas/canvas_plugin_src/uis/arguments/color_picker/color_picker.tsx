@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiColorPicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSetColorMethod,
+  type EuiSetColorMethod,
   useColorPickerState,
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';

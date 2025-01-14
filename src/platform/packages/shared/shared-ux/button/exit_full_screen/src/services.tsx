@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext, PropsWithChildren, useCallback } from 'react';
+import React, { type FC, useContext, type PropsWithChildren, useCallback } from 'react';
 
 import type {
   Services,

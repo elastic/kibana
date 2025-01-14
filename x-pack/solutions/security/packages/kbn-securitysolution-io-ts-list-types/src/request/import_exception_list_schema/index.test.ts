@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { importExceptionsListSchema, ImportExceptionsListSchema } from '.';
+import { importExceptionsListSchema, type ImportExceptionsListSchema } from '.';
 import {
   getImportExceptionsListSchemaMock,
   getImportExceptionsListSchemaDecodedMock,

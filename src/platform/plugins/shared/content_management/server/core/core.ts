@@ -16,10 +16,10 @@ import type { MSearchIn, MSearchOut } from '../../common';
 import {
   getContentClientFactory,
   getMSearchClientFactory,
-  IContentClient,
+  type IContentClient,
 } from '../content_client';
-import { EventStreamService } from '../event_stream';
-import { ContentCrud } from './crud';
+import { type EventStreamService } from '../event_stream';
+import { type ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 import { MSearchService } from './msearch';

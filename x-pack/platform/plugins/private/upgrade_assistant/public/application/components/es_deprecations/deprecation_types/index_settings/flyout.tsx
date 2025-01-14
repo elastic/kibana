@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 
 import {
-  EnrichedDeprecationInfo,
-  IndexSettingAction,
-  ResponseError,
+  type EnrichedDeprecationInfo,
+  type IndexSettingAction,
+  type ResponseError,
 } from '../../../../../../common/types';
 import { uiMetricService, UIM_INDEX_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState, MouseEventHandler, MouseEvent } from 'react';
-import { AggregateQuery, Query, TimeRange, Filter, disableFilter } from '@kbn/es-query';
+import { useCallback, useEffect, useMemo, useState, type MouseEventHandler, type MouseEvent } from 'react';
+import { type AggregateQuery, type Query, type TimeRange, type Filter, disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, type FilterManager } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {

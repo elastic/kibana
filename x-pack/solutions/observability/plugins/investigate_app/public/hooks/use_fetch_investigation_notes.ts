@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GetInvestigationNotesResponse } from '@kbn/investigation-shared';
+import { type GetInvestigationNotesResponse } from '@kbn/investigation-shared';
 import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
+  type QueryObserverResult,
+  type RefetchOptions,
+  type RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
 import { investigationKeys } from './query_key_factory';

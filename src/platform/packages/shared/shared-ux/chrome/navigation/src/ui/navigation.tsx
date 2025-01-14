@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import React, { createContext, type FC, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type {
   ChromeProjectNavigationNode,

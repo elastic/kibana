@@ -8,15 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { apiHasInspectorAdapters, type HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
-  EmbeddableApiContext,
+  type EmbeddableApiContext,
   getPanelTitle,
-  PublishesPanelTitle,
-  HasParentApi,
+  type PublishesPanelTitle,
+  type HasParentApi,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';

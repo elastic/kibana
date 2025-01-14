@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
+import { type ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
-  DataUsagePublicSetup,
-  DataUsagePublicStart,
-  DataUsageStartDependencies,
-  DataUsageSetupDependencies,
-  DataUsagePublicConfigType,
+  type DataUsagePublicSetup,
+  type DataUsagePublicStart,
+  type DataUsageStartDependencies,
+  type DataUsageSetupDependencies,
+  type DataUsagePublicConfigType,
 } from './types';
 import { PLUGIN_ID } from '../common';
 import { PLUGIN_NAME } from './translations';
 import {
-  ExperimentalFeatures,
+  type ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 export class DataUsagePlugin

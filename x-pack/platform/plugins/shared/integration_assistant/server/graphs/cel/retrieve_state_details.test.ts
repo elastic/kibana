@@ -6,8 +6,8 @@
  */
 
 import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
+  type ActionsClientChatOpenAI,
+  type ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import {

@@ -7,16 +7,16 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode } from '@kbn/es-query';
+import { type KueryNode } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule } from '../../types';
-import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { BulkAction, RuleBulkOperationAggregation } from '../types';
+import { type RawRule } from '../../types';
+import { WriteOperations, type ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { type BulkAction, type RuleBulkOperationAggregation } from '../types';
 import {
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../common/constants';
-import { RulesClientContext } from '../types';
+import { type RulesClientContext } from '../types';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 

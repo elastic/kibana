@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  ConfigSchema,
-  DashboardActionParamsSchema,
-  DashboardActionResponseSchema,
-  SecretsSchema,
-  RunActionParamsSchema,
-  RunActionResponseSchema,
-  RunActionRawResponseSchema,
-  RunApiResponseSchema,
-  InvokeAIActionParamsSchema,
-  InvokeAIActionResponseSchema,
-  InvokeAIRawActionParamsSchema,
-  InvokeAIRawActionResponseSchema,
-  StreamingResponseSchema,
+  type ConfigSchema,
+  type DashboardActionParamsSchema,
+  type DashboardActionResponseSchema,
+  type SecretsSchema,
+  type RunActionParamsSchema,
+  type RunActionResponseSchema,
+  type RunActionRawResponseSchema,
+  type RunApiResponseSchema,
+  type InvokeAIActionParamsSchema,
+  type InvokeAIActionResponseSchema,
+  type InvokeAIRawActionParamsSchema,
+  type InvokeAIRawActionResponseSchema,
+  type StreamingResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;

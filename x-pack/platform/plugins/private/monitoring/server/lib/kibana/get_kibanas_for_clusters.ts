@@ -7,7 +7,7 @@
 
 import { chain, find } from 'lodash';
 import { Globals } from '../../static_globals';
-import { Bucket, Cluster, LegacyRequest } from '../../types';
+import { type Bucket, type Cluster, type LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';

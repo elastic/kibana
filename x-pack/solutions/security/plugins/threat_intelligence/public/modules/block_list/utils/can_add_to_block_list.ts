@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { type Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**

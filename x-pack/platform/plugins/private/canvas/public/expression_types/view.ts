@@ -6,8 +6,8 @@
  */
 
 import { merge } from 'lodash';
-import { FunctionForm, FunctionFormProps } from './function_form';
-import { Arg } from './types';
+import { FunctionForm, type FunctionFormProps } from './function_form';
+import { type Arg } from './types';
 
 interface ViewOwnProps {
   modelArgs: string[] | Arg[];

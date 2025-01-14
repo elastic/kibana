@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
-import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
+import { type Interpolation, type Theme } from '@emotion/react';
+import { type EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
+import { type EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
 import { changeUserCollapsedWidthAction, changeUserExpandedWidthAction } from '../store/actions';
 import {
   selectDefaultWidths,

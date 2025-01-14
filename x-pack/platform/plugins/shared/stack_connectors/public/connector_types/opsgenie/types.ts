@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RecursivePartial } from '@elastic/eui';
+import { type RecursivePartial } from '@elastic/eui';
 import {
-  ActionParamsProps,
-  UserConfiguredActionConnector,
+  type ActionParamsProps,
+  type UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   OpsgenieActionConfig,

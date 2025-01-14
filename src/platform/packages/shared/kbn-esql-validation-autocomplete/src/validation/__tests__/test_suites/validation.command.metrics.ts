@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as helpers from '../helpers';
+import type * as helpers from '../helpers';
 
 export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {

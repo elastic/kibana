@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ESSearchRequest, type InferSearchResponseOf } from '@kbn/es-types';
+import { type ElasticsearchClient } from '@kbn/core/server';
 import {
-  ClusterPutComponentTemplateRequest,
-  ClusterPutComponentTemplateResponse,
-  FieldCapsRequest,
-  FieldCapsResponse,
-  Indices,
-  IndicesGetIndexTemplateRequest,
-  IndicesGetIndexTemplateResponse,
-  IndicesGetMappingResponse,
-  IndicesGetSettingsResponse,
-  IndicesPutSettingsRequest,
-  IndicesPutSettingsResponse,
-  IndicesRolloverResponse,
+  type ClusterPutComponentTemplateRequest,
+  type ClusterPutComponentTemplateResponse,
+  type FieldCapsRequest,
+  type FieldCapsResponse,
+  type Indices,
+  type IndicesGetIndexTemplateRequest,
+  type IndicesGetIndexTemplateResponse,
+  type IndicesGetMappingResponse,
+  type IndicesGetSettingsResponse,
+  type IndicesPutSettingsRequest,
+  type IndicesPutSettingsResponse,
+  type IndicesRolloverResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {

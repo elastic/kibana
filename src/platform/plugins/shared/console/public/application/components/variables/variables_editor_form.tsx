@@ -27,10 +27,10 @@ import {
   Form,
   UseField,
   TextField,
-  FieldConfig,
+  type FieldConfig,
   fieldValidators,
-  FormConfig,
-  ValidationFuncArg,
+  type FormConfig,
+  type ValidationFuncArg,
 } from '../../../shared_imports';
 
 import { type DevToolsVariable } from './types';

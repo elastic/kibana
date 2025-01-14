@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryObj } from '@storybook/react';
+import { type Meta, type StoryObj } from '@storybook/react';
 import React from 'react';
 import { v4 } from 'uuid';
 import { GridItem as Component } from '.';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { Home } from '../home';
 import { setDocTitle } from '../../lib/doc_title';
 

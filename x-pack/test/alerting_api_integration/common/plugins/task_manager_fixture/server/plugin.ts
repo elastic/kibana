@@ -6,17 +6,17 @@
  */
 
 import {
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
+  type Plugin,
+  type CoreSetup,
+  type CoreStart,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type IKibanaResponse,
 } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export interface SampleTaskManagerFixtureStartDeps {
   taskManager: TaskManagerStartContract;

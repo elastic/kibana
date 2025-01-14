@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useMemo, useState } from 'react';
+import React, { type MouseEvent, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +20,8 @@ import {
   EuiText,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { type Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { type EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { css } from '@kbn/kibana-react-plugin/common';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
@@ -38,7 +38,7 @@ import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
-import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';

@@ -12,7 +12,7 @@ import {
 } from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
-import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
+import { RouterMock, routeDependencies, type RequestMock } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Repositories', () => {
   const managedRepositoryName = 'myManagedRepository';

@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import {
-  APIClientRequestParamsOf,
-  APIReturnType,
+  type APIClientRequestParamsOf,
+  type APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { type RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 

@@ -6,11 +6,11 @@
  */
 
 import {
-  FieldHook,
+  type FieldHook,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback } from 'react';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { type ActionVariable } from '@kbn/alerting-plugin/common';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 interface Props {

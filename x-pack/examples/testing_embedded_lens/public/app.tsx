@@ -44,9 +44,9 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import {
-  AllOverrides,
+  type AllOverrides,
   AttributesMenu,
-  LensAttributesByType,
+  type LensAttributesByType,
   OverridesMenu,
   PanelMenu,
 } from './controls';

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FC } from 'react';
+import { type FC } from 'react';
 import {
-  ApplicationStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  DocLinksStart,
-  HttpSetup,
-  OverlayStart,
+  type ApplicationStart,
+  type IUiSettingsClient,
+  type NotificationsStart,
+  type DocLinksStart,
+  type HttpSetup,
+  type OverlayStart,
 } from '@kbn/core/public';
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type {
   DataView,
@@ -26,7 +26,7 @@ import type {
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorService } from './data_view_editor_service';
-import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
+import { type DataPublicPluginStart, type IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
   uiSettings: IUiSettingsClient;

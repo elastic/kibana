@@ -13,10 +13,10 @@ import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
-  ExportListItemsToStreamOptions,
-  GetResponseOptions,
-  WriteNextResponseOptions,
-  WriteResponseHitsToStreamOptions,
+  type ExportListItemsToStreamOptions,
+  type GetResponseOptions,
+  type WriteNextResponseOptions,
+  type WriteResponseHitsToStreamOptions,
 } from '.';
 
 export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStreamOptions => ({

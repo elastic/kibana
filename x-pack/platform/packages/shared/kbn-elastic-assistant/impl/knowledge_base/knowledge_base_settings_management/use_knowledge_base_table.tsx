@@ -8,7 +8,7 @@
 import {
   EuiAvatar,
   EuiBadge,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
@@ -20,11 +20,11 @@ import { FormattedDate } from '@kbn/i18n-react';
 import {
   DocumentEntryType,
   IndexEntryType,
-  KnowledgeBaseEntryResponse,
+  type KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
 
 import useAsync from 'react-use/lib/useAsync';
-import { UserProfileAvatarData } from '@kbn/user-profile-components';
+import { type UserProfileAvatarData } from '@kbn/user-profile-components';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';

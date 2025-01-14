@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ProcedureDefinition, RpcService } from './rpc_service';
+import { type ProcedureDefinition, RpcService } from './rpc_service';
 
 describe('RpcService', () => {
   describe('register()', () => {

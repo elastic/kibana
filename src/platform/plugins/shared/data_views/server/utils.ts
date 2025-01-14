@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewAttributes, type SavedObject, type FieldSpec } from '../common';
 import type { QueryDslQueryContainer } from '../common/types';
 
 /**

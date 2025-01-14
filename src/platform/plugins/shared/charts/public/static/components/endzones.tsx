@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import moment, { unitOfTime } from 'moment';
+import React, { type FC } from 'react';
+import moment, { type unitOfTime } from 'moment';
 
 import {
-  TooltipValue,
+  type TooltipValue,
   RectAnnotation,
-  RectAnnotationDatum,
-  RectAnnotationStyle,
-  AnnotationTooltipFormatter,
+  type RectAnnotationDatum,
+  type RectAnnotationStyle,
+  type AnnotationTooltipFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import { type ConversationCreateProps, type ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
-  PerformPromptsBulkActionRequestBody,
-  PerformPromptsBulkActionResponse,
-  PromptCreateProps,
+  type PerformPromptsBulkActionRequestBody,
+  type PerformPromptsBulkActionResponse,
+  type PromptCreateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { deleteAllDocuments } from './elasticsearch';
 import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';

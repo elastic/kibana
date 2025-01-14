@@ -12,10 +12,10 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { DashboardContentType } from '../types';
+import { type DashboardContentType } from '../types';
 import {
-  ControlGroupAttributesV1,
-  DashboardAttributes as DashboardAttributesV1,
+  type ControlGroupAttributesV1,
+  type DashboardAttributes as DashboardAttributesV1,
 } from '../v1/types';
 
 export type ControlGroupAttributes = ControlGroupAttributesV1 & {

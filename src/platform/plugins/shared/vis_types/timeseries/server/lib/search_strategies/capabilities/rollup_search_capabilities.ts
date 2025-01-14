@@ -12,7 +12,7 @@ import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper'
 
 import {
   DefaultSearchCapabilities,
-  SearchCapabilitiesOptions,
+  type SearchCapabilitiesOptions,
 } from './default_search_capabilities';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {

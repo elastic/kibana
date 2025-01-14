@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
   EuiComboBox,
-  EuiSelectOption,
+  type EuiSelectOption,
   EuiHorizontalRule,
   EuiSelect,
   EuiFlexGroup,
@@ -27,7 +27,7 @@ import {
   useKibana,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { JiraActionParams } from './types';
+import { type JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';

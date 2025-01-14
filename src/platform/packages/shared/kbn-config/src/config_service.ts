@@ -8,26 +8,26 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
+import { SchemaTypeError, type Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, type Observable, identity } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
-import { Logger, LoggerFactory } from '@kbn/logging';
-import { getDocLinks, DocLinks } from '@kbn/doc-links';
+import { type Logger, type LoggerFactory } from '@kbn/logging';
+import { getDocLinks, type DocLinks } from '@kbn/doc-links';
 
 import { getFlattenedObject } from '@kbn/std';
-import { Config, ConfigPath, Env } from '..';
+import { type Config, type ConfigPath, type Env } from '..';
 import { hasConfigPathIntersection } from './config';
-import { RawConfigurationProvider } from './raw';
+import { type RawConfigurationProvider } from './raw';
 import {
   applyDeprecations,
-  ConfigDeprecationWithContext,
-  ConfigDeprecationContext,
-  ConfigDeprecationProvider,
+  type ConfigDeprecationWithContext,
+  type ConfigDeprecationContext,
+  type ConfigDeprecationProvider,
   configDeprecationFactory,
-  DeprecatedConfigDetails,
-  ChangedDeprecatedPaths,
+  type DeprecatedConfigDetails,
+  type ChangedDeprecatedPaths,
 } from './deprecation';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 

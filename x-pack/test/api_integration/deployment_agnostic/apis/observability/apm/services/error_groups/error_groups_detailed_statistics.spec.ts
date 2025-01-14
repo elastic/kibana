@@ -10,10 +10,10 @@ import { first, last, sumBy } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
-  APIClientRequestParamsOf,
-  APIReturnType,
+  type APIClientRequestParamsOf,
+  type APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { type RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';

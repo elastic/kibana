@@ -7,8 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core-http-browser';
 import {
-  IndicesGetMappingIndexMappingRecord,
-  MappingProperty,
+  type IndicesGetMappingIndexMappingRecord,
+  type MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 

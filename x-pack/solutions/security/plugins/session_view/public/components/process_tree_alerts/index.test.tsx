@@ -10,8 +10,8 @@ import {
   mockAlerts,
   mockAlertTypeCounts,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertsDeps, ProcessTreeAlerts } from '.';
+import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { type ProcessTreeAlertsDeps, ProcessTreeAlerts } from '.';
 
 describe('ProcessTreeAlerts component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

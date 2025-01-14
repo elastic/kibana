@@ -10,18 +10,18 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ExternalReferenceStorageType,
   AttachmentType,
-  Case,
-  ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload,
+  type Case,
+  type ExternalReferenceAttachmentPayload,
+  type PersistableStateAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
-import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import { type AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
   getCase,
 } from '../../../../cases_api_integration/common/lib/api';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { type FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
 

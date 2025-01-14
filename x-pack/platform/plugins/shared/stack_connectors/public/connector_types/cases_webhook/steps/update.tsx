@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { type FunctionComponent, useState, useMemo } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiSwitch } from '@elastic/eui';
 import {

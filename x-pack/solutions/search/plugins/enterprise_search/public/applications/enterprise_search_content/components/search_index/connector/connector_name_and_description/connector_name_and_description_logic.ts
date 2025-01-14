@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
+import { type Connector } from '@kbn/search-connectors';
 
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
 import {
   ConnectorNameAndDescriptionApiLogic,
-  PutConnectorNameAndDescriptionArgs,
-  PutConnectorNameAndDescriptionResponse,
+  type PutConnectorNameAndDescriptionArgs,
+  type PutConnectorNameAndDescriptionResponse,
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
 import {
   CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
+  type CachedFetchIndexApiLogicActions,
 } from '../../../../api/index/cached_fetch_index_api_logic';
-import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
+import { type FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex, isCrawlerIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;

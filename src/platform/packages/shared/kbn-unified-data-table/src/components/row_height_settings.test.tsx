@@ -10,7 +10,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
-import { RowHeightSettings, RowHeightSettingsProps } from '../..';
+import { RowHeightSettings, type RowHeightSettingsProps } from '../..';
 
 const renderRowHeightSettings = ({ maxRowHeight }: { maxRowHeight?: number } = {}) => {
   const Wrapper = () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
 import type { PieLayerState, PieVisualizationState } from '../../../common/types';

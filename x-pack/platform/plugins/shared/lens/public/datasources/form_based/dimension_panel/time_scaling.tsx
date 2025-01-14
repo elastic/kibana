@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
+  type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import type { TimeScaleUnit } from '../../../../common/expressions';

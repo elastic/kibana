@@ -9,11 +9,11 @@
 
 import { cloneDeep } from 'lodash';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { AggGroupNames, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type Vis } from '@kbn/visualizations-plugin/public';
+import { AggGroupNames, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
-import { EditorAction } from './actions';
+import { type EditorAction } from './actions';
 
 function initEditorState(vis: Vis) {
   return {

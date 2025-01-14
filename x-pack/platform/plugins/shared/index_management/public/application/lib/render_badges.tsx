@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode } from 'react';
+import React, { Fragment, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, Query } from '@elastic/eui';
 
 import { ROLLUP_DEPRECATION_BADGE_LABEL, RollupDeprecationTooltip } from '@kbn/rollup';
-import { ExtensionsService } from '../../services';
-import { Index } from '../..';
+import { type ExtensionsService } from '../../services';
+import { type Index } from '../..';
 
 export const renderBadges = (
   index: Index,

@@ -26,10 +26,10 @@ import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
 import {
   ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
-  MonitorFields,
-  Ping,
-  SyntheticsMonitorWithId,
+  type EncryptedSyntheticsSavedMonitor,
+  type MonitorFields,
+  type Ping,
+  type SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';

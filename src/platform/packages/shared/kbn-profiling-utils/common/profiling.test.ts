@@ -17,7 +17,7 @@ import {
   getFrameSymbolStatus,
   getLanguageType,
   normalizeFrameType,
-  StackFrameMetadata,
+  type StackFrameMetadata,
 } from './profiling';
 
 describe('Stack frame metadata operations', () => {

@@ -6,29 +6,29 @@
  */
 
 import { isPlainObject, isEmpty } from 'lodash';
-import { Type } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import { type Type } from '@kbn/config-schema';
+import { type Logger } from '@kbn/logging';
 import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  AxiosError,
-  AxiosRequestHeaders,
-  AxiosHeaders,
-  AxiosHeaderValue,
-  AxiosBasicCredentials,
+  type AxiosInstance,
+  type AxiosResponse,
+  type AxiosError,
+  type AxiosRequestHeaders,
+  type AxiosHeaders,
+  type AxiosHeaderValue,
+  type AxiosBasicCredentials,
 } from 'axios';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { finished } from 'stream/promises';
-import { IncomingMessage } from 'http';
+import { type IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
+import { type KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
-import { ConnectorUsageCollector } from '../usage';
+import { type ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { SubAction, SubActionRequestParams } from './types';
-import { ServiceParams } from './types';
+import { type ActionsConfigurationUtilities } from '../actions_config';
+import { type SubAction, type SubActionRequestParams } from './types';
+import { type ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
 import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';

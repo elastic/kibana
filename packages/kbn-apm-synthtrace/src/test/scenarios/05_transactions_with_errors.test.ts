@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, Instance } from '@kbn/apm-synthtrace-client';
+import { apm, type Instance } from '@kbn/apm-synthtrace-client';
 import { pick } from 'lodash';
 describe('transactions with errors', () => {
   let instance: Instance;

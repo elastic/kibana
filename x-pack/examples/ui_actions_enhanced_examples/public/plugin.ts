@@ -7,21 +7,21 @@
 
 import { createElement as h } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { type DataPublicPluginSetup, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  AdvancedUiActionsSetup,
-  AdvancedUiActionsStart,
+  type AdvancedUiActionsSetup,
+  type AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { type DiscoverSetup, type DiscoverStart } from '@kbn/discover-plugin/public';
+import { type DashboardSetup, type DashboardStart } from '@kbn/dashboard-plugin/public';
+import { type DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { type EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
@@ -31,7 +31,7 @@ import {
   sampleApp1ClickTrigger,
   sampleApp2ClickTrigger,
   SAMPLE_APP2_CLICK_TRIGGER,
-  SampleApp2ClickContext,
+  type SampleApp2ClickContext,
   sampleApp2ClickContext,
 } from './triggers';
 import { mount } from './mount';

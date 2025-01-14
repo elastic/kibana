@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../lib';
+import { type IRouter } from '@kbn/core/server';
+import { type ILicenseState } from '../../../lib';
 
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../../types';
+import { type ActionTypeExecutorResult, type ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { asHttpRequestExecutionSource } from '../../../lib/action_execution_source';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import {
   executeConnectorRequestBodySchemaV1,
-  ExecuteConnectorRequestBodyV1,
+  type ExecuteConnectorRequestBodyV1,
   executeConnectorRequestParamsSchemaV1,
-  ExecuteConnectorRequestParamsV1,
+  type ExecuteConnectorRequestParamsV1,
 } from '../../../../common/routes/connector/apis/execute';
 import { transformExecuteConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';

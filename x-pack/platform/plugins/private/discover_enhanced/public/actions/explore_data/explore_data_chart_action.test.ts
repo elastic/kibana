@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { type DiscoverAppLocator } from '@kbn/discover-plugin/common';
 import type { Filter, RangeFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { type ViewMode } from '@kbn/presentation-publishing';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { Params, PluginDeps } from './abstract_explore_data_action';
-import { ExploreDataChartAction, ExploreDataChartActionContext } from './explore_data_chart_action';
+import { type Params, type PluginDeps } from './abstract_explore_data_action';
+import { ExploreDataChartAction, type ExploreDataChartActionContext } from './explore_data_chart_action';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 

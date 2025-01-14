@@ -14,12 +14,12 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate, type KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
+import { type BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
 import './page_template.scss';

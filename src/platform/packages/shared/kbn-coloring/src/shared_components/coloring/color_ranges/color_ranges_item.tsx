@@ -12,11 +12,11 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import React, {
   useState,
   useCallback,
-  Dispatch,
-  FocusEvent,
+  type Dispatch,
+  type FocusEvent,
   useContext,
   useMemo,
-  ChangeEventHandler,
+  type ChangeEventHandler,
 } from 'react';
 import { css } from '@emotion/react';
 
@@ -28,16 +28,16 @@ import {
   EuiIcon,
   EuiColorPickerSwatch,
   EuiButtonIcon,
-  EuiFieldNumberProps,
+  type EuiFieldNumberProps,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { isValidColor } from '../../../color_manipulation';
 import {
-  PaletteContinuity,
+  type PaletteContinuity,
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  CustomPaletteParams,
+  type CustomPaletteParams,
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';

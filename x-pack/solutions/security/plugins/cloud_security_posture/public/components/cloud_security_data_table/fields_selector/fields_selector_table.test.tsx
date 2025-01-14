@@ -12,7 +12,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
 import {
   FieldsSelectorTable,
-  FieldsSelectorTableProps,
+  type FieldsSelectorTableProps,
   filterFieldsBySearch,
 } from './fields_selector_table';
 

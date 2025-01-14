@@ -9,11 +9,11 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { FormulaColumn, AggBasedColumn } from './types';
-import { SchemaConfig } from '../../..';
+import { type FormulaColumn, type AggBasedColumn } from './types';
+import { type SchemaConfig } from '../../..';
 import {
   convertToOtherParentPipelineAggColumns,
-  ParentPipelineAggColumn,
+  type ParentPipelineAggColumn,
   convertToCumulativeSumAggColumn,
 } from './parent_pipeline';
 

@@ -9,7 +9,7 @@
 
 import {
   BehaviorSubject,
-  Observable,
+  type Observable,
   combineLatest,
   debounceTime,
   map,

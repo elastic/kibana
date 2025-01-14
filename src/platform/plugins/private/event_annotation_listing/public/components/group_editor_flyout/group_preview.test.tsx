@@ -11,18 +11,18 @@ import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import React from 'react';
 import {
-  DataView,
-  DataViewField,
-  DataViewFieldMap,
-  IIndexPatternFieldList,
+  type DataView,
+  type DataViewField,
+  type DataViewFieldMap,
+  type IIndexPatternFieldList,
 } from '@kbn/data-views-plugin/common';
 import {
-  EmbeddableComponent,
-  FieldBasedIndexPatternColumn,
-  TypedLensByValueInput,
-  LensByValueInput,
+  type EmbeddableComponent,
+  type FieldBasedIndexPatternColumn,
+  type TypedLensByValueInput,
+  type LensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { type Datatable } from '@kbn/expressions-plugin/common';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';

@@ -7,15 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActionConnectorFieldsProps,
-  ConfigFieldSchema,
-  SecretsFieldSchema,
+  type ActionConnectorFieldsProps,
+  type ConfigFieldSchema,
+  type SecretsFieldSchema,
   SimpleConnectorForm,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiComboBoxOptionOption, EuiLink } from '@elastic/eui';
+import { type EuiComboBoxOptionOption, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import { type DocLinksStart } from '@kbn/core/public';
 
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { debounce, isEmpty, isEqual } from 'lodash';

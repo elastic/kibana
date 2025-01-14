@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect, type KeyboardEvent, type FC } from 'react';
 import {
   htmlIdGenerator,
   EuiToolTip,

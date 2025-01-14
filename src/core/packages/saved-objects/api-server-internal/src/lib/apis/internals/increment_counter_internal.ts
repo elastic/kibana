@@ -11,16 +11,16 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
-  SavedObjectsRawDocSource,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsIncrementCounterField,
+  type SavedObjectsIncrementCounterOptions,
+  type SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import { getCurrentTime, normalizeNamespace } from '../utils';
-import { ApiExecutionContext } from '../types';
+import { type ApiExecutionContext } from '../types';
 
 export interface PerformIncrementCounterInternalParams<T = unknown> {
   type: string;

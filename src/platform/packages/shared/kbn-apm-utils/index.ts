@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import agent, { Logger } from 'elastic-apm-node';
+import agent, { type Logger } from 'elastic-apm-node';
 import asyncHooks from 'async_hooks';
 
 export interface SpanOptions {

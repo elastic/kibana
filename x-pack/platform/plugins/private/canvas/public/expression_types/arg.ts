@@ -7,20 +7,20 @@
 
 import { merge } from 'lodash';
 import { createElement } from 'react';
-import { Ast } from '@kbn/interpreter';
+import { type Ast } from '@kbn/interpreter';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
 import type { Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
 import {
-  AssetType,
-  CanvasElement,
-  ExpressionAstExpression,
-  ExpressionValue,
-  ExpressionContext,
-  DatatableColumn,
+  type AssetType,
+  type CanvasElement,
+  type ExpressionAstExpression,
+  type ExpressionValue,
+  type ExpressionContext,
+  type DatatableColumn,
 } from '../../types';
-import { BaseFormProps } from './base_form';
+import { type BaseFormProps } from './base_form';
 
 interface ArtOwnProps {
   argType: ArgType;

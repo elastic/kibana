@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { type PluginInitializer, type PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import { StreamsPluginSetup, StreamsPluginStart } from './types';
+import { type StreamsPluginSetup, type StreamsPluginStart } from './types';
 
 export type { StreamsPluginSetup, StreamsPluginStart };
 

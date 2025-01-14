@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, type MouseEvent, useCallback, useMemo } from 'react';
 import { useStyles } from './styles';
 import type {
   ProcessEventAlertCategory,

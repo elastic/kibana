@@ -10,20 +10,20 @@
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-  ReduxLikeStateContainer,
+  type ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import {
-  AggregateQuery,
+  type AggregateQuery,
   COMPARE_ALL_OPTIONS,
   compareFilters,
-  Filter,
-  FilterCompareOptions,
+  type Filter,
+  type FilterCompareOptions,
   FilterStateStore,
-  Query,
+  type Query,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
+import { type SavedSearch, type VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { type IKbnUrlStateStorage, type ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -37,7 +37,7 @@ import {
   createDataViewDataSource,
   createEsqlDataSource,
   DataSourceType,
-  DiscoverDataSource,
+  type DiscoverDataSource,
   isDataSourceType,
 } from '../../../../common/data_sources';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';

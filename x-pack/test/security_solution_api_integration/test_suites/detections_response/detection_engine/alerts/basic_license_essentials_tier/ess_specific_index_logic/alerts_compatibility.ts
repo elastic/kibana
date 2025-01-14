@@ -12,13 +12,13 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ThreatEcs } from '@kbn/securitysolution-ecs';
+import { type ThreatEcs } from '@kbn/securitysolution-ecs';
 import {
-  EqlRuleCreateProps,
-  QueryRuleCreateProps,
-  SavedQueryRuleCreateProps,
-  ThreatMatchRuleCreateProps,
-  ThresholdRuleCreateProps,
+  type EqlRuleCreateProps,
+  type QueryRuleCreateProps,
+  type SavedQueryRuleCreateProps,
+  type ThreatMatchRuleCreateProps,
+  type ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   finalizeAlertsMigration,
@@ -40,7 +40,7 @@ import {
   waitForAlertsToBePresent,
   getRuleForAlertTesting,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { type FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

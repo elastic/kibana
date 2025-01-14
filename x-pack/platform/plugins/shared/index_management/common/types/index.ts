@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export * from './aliases';
+export type * from './aliases';
 
-export * from './indices';
+export type * from './indices';
 
-export * from './mappings';
+export type * from './mappings';
 
-export * from './templates';
+export type * from './templates';
 
 export type {
   EnhancedDataStreamFromEs,
@@ -22,6 +22,6 @@ export type {
   IndexMode,
 } from './data_streams';
 
-export * from './component_templates';
+export type * from './component_templates';
 
-export * from './enrich_policies';
+export type * from './enrich_policies';

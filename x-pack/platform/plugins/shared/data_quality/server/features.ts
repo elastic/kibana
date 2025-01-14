@@ -7,9 +7,9 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
-  KibanaFeatureConfig,
+  type KibanaFeatureConfig,
   KibanaFeatureScope,
-  ElasticsearchFeatureConfig,
+  type ElasticsearchFeatureConfig,
 } from '@kbn/features-plugin/common';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 

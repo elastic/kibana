@@ -11,11 +11,11 @@ import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {
   Legend,
-  PointSeries,
-  Render,
-  SeriesStyle,
-  Style,
-  ExpressionFunctionDefinition,
+  type PointSeries,
+  type Render,
+  type SeriesStyle,
+  type Style,
+  type ExpressionFunctionDefinition,
 } from '../../types';
 
 interface PieSeriesOptions {

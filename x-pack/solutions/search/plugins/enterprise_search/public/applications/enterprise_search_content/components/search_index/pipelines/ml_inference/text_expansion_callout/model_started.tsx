@@ -22,7 +22,7 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 import { TRAINED_MODELS_PATH } from '../utils';
 
 import {
-  TextExpansionCallOutState,
+  type TextExpansionCallOutState,
   TextExpansionDismissButton,
   FineTuneModelsButton,
 } from './text_expansion_callout';

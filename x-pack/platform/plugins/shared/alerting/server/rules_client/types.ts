@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import { type KueryNode } from '@kbn/es-query';
 import {
-  Logger,
-  SavedObjectsClientContract,
-  PluginInitializerContext,
-  ISavedObjectsRepository,
-  UiSettingsServiceStart,
+  type Logger,
+  type SavedObjectsClientContract,
+  type PluginInitializerContext,
+  type ISavedObjectsRepository,
+  type UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { type ActionsClient, type ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
-  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
-  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+  type GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
+  type InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { DistributiveOmit } from '@elastic/eui';
+import { type EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type IEventLogClient, type IEventLogger } from '@kbn/event-log-plugin/server';
+import { type AuditLogger } from '@kbn/security-plugin/server';
+import { type DistributiveOmit } from '@elastic/eui';
 import {
-  RuleTypeRegistry,
-  IntervalSchedule,
-  SanitizedRule,
-  RuleSnoozeSchedule,
-  RawRuleAlertsFilter,
-  RuleSystemAction,
-  RuleAction,
+  type RuleTypeRegistry,
+  type IntervalSchedule,
+  type SanitizedRule,
+  type RuleSnoozeSchedule,
+  type RawRuleAlertsFilter,
+  type RuleSystemAction,
+  type RuleAction,
 } from '../types';
-import { AlertingAuthorization } from '../authorization';
-import { AlertingRulesConfig } from '../config';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { GetAlertIndicesAlias } from '../lib';
-import { AlertsService } from '../alerts_service';
-import { BackfillClient } from '../backfill_client/backfill_client';
+import { type AlertingAuthorization } from '../authorization';
+import { type AlertingRulesConfig } from '../config';
+import { type ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { type GetAlertIndicesAlias } from '../lib';
+import { type AlertsService } from '../alerts_service';
+import { type BackfillClient } from '../backfill_client/backfill_client';
 
 export type {
   BulkEditOperation,

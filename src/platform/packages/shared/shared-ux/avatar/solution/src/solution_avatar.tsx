@@ -12,9 +12,9 @@ import './solution_avatar.scss';
 import React from 'react';
 import classNames from 'classnames';
 
-import { DistributiveOmit, EuiAvatar, EuiAvatarProps, IconType } from '@elastic/eui';
+import { type DistributiveOmit, EuiAvatar, type EuiAvatarProps, type IconType } from '@elastic/eui';
 
-import { SolutionNameType } from './types';
+import { type SolutionNameType } from './types';
 
 export type KnownSolutionProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
   /**

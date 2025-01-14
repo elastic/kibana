@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 

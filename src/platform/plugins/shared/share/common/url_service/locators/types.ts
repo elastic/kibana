@@ -8,12 +8,12 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DependencyList } from 'react';
+import { type DependencyList } from 'react';
 import {
-  MigrateFunction,
-  PersistableState,
-  PersistableStateService,
-  VersionedState,
+  type MigrateFunction,
+  type PersistableState,
+  type PersistableStateService,
+  type VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { GetRedirectUrlOptions } from './redirect';
 

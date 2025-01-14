@@ -11,8 +11,8 @@ import { get } from 'lodash';
 import {
   RESTRICTIONS_KEYS,
   DEFAULT_UI_RESTRICTION,
-  UIRestrictions,
-  TimeseriesUIRestrictions,
+  type UIRestrictions,
+  type TimeseriesUIRestrictions,
 } from './ui_restrictions';
 
 /**

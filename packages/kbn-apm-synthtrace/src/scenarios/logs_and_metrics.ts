@@ -8,14 +8,14 @@
  */
 
 import {
-  LogDocument,
+  type LogDocument,
   log,
   generateShortId,
   generateLongId,
   apm,
-  Instance,
+  type Instance,
 } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import { type Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';

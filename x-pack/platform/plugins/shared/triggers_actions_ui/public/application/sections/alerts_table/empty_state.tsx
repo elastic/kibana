@@ -13,10 +13,10 @@ import {
   EuiImage,
   EuiText,
   EuiTitle,
-  EuiDataGridToolBarAdditionalControlsOptions,
+  type EuiDataGridToolBarAdditionalControlsOptions,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
+import { type EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 import { InspectButton } from './toolbar/components/inspect';
 import { ALERTS_TABLE_TITLE } from './translations';

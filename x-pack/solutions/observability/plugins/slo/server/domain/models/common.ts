@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
 import {
-  dateRangeSchema,
-  groupBySchema,
-  groupingsSchema,
-  groupSummarySchema,
-  historicalSummarySchema,
-  metaSchema,
-  objectiveSchema,
-  sloSettingsSchema,
-  statusSchema,
-  summarySchema,
+  type dateRangeSchema,
+  type groupBySchema,
+  type groupingsSchema,
+  type groupSummarySchema,
+  type historicalSummarySchema,
+  type metaSchema,
+  type objectiveSchema,
+  type sloSettingsSchema,
+  type statusSchema,
+  type summarySchema,
 } from '@kbn/slo-schema';
 
 type Objective = t.TypeOf<typeof objectiveSchema>;

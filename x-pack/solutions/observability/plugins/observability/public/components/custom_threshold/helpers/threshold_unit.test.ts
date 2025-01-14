@@ -7,7 +7,7 @@
 
 import {
   Aggregators,
-  CustomThresholdExpressionMetric,
+  type CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 import { convertToApiThreshold } from './threshold_unit';
 

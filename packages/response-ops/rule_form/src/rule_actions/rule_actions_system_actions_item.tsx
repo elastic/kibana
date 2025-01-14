@@ -22,20 +22,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import { type RuleActionParam, type RuleSystemAction } from '@kbn/alerting-types';
 import {
   getAvailableActionVariables,
-  IsDisabledResult,
-  IsEnabledResult,
+  type IsDisabledResult,
+  type IsEnabledResult,
   checkActionFormActionTypeEnabled,
-  ActionConnector,
+  type ActionConnector,
 } from '@kbn/alerts-ui-shared';
-import { SavedObjectAttribute } from '@kbn/core/types';
+import { type SavedObjectAttribute } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { RuleFormParamsErrors } from '../common';
+import { type RuleFormParamsErrors } from '../common';
 import {
   ACTION_ERROR_TOOLTIP,
   ACTION_WARNING_TITLE,

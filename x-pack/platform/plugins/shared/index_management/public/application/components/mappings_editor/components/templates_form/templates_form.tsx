@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
-import { MappingsTemplates } from '../../types';
+import { useForm, Form, type SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
+import { type MappingsTemplates } from '../../types';
 import { useDispatch } from '../../mappings_state_context';
 import { templatesFormSchema } from './templates_form_schema';
 import { documentationService } from '../../../../services/documentation';

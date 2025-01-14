@@ -6,13 +6,13 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { type Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import { type CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { type FtrProviderContext } from '../../ftr_provider_context';
 
 export interface User {
   username: string;

@@ -6,7 +6,7 @@
  */
 
 import { ensureDirSync, createSync, copySync } from '../util';
-import { DataStream, Docs, InputType, Pipeline } from '../../common';
+import { type DataStream, type Docs, type InputType, type Pipeline } from '../../common';
 import { createDataStream } from './data_stream';
 import { render } from 'nunjucks';
 

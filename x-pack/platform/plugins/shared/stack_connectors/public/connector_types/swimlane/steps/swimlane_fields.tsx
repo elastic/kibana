@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, type EuiComboBoxOptionOption, type EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import {
-  FieldConfig,
+  type FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
   useFormData,
@@ -19,9 +19,9 @@ import { ComboBoxField, ButtonGroupField } from '@kbn/es-ui-shared-plugin/static
 
 import * as i18n from '../translations';
 import {
-  MappingConfigurationKeys,
+  type MappingConfigurationKeys,
   SwimlaneConnectorType,
-  SwimlaneFieldMappingConfig,
+  type SwimlaneFieldMappingConfig,
 } from '../types';
 import { isRequiredField, isValidFieldForConnector } from '../helpers';
 

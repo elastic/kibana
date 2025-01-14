@@ -6,7 +6,7 @@
  */
 
 import {
-  CreateDispatchableEvents,
+  type CreateDispatchableEvents,
   useCreateDispatchableEvents,
 } from './create/use_create_dispatchable_events';
 import { useCustomIntegrations } from './use_custom_integrations';

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { CodeBlock } from './code_block';
-import { Tree, TreeItem } from './tree';
+import { Tree, type TreeItem } from './tree';
 
 interface Props {
   fields: TreeItem[];

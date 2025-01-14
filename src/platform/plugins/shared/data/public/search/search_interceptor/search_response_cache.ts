@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { type Observable, Subscription } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { SearchAbortController } from './search_abort_controller';
+import { type SearchAbortController } from './search_abort_controller';
 
 interface ResponseCacheItem {
   response$: Observable<IKibanaSearchResponse>;

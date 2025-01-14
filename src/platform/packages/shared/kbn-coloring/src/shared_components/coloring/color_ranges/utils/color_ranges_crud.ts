@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataBounds, roundValue, getDataMinMax, CustomPaletteParams } from '../../../../palettes';
+import { type DataBounds, roundValue, getDataMinMax, type CustomPaletteParams } from '../../../../palettes';
 import type { ColorRange, ColorRangeAccessor } from '../types';
 
 /**

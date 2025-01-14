@@ -17,11 +17,11 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import {
-  SwimlaneExecutorResultData,
-  SwimlanePublicConfigurationType,
-  SwimlaneSecretConfigurationType,
-  ExecutorParams,
-  ExecutorSubActionPushParams,
+  type SwimlaneExecutorResultData,
+  type SwimlanePublicConfigurationType,
+  type SwimlaneSecretConfigurationType,
+  type ExecutorParams,
+  type ExecutorSubActionPushParams,
 } from './types';
 import { validate } from './validators';
 import {

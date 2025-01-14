@@ -7,10 +7,10 @@
 
 import {
   test as base,
-  PageObjects,
+  type PageObjects,
   createLazyPageObject,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
+  type ScoutTestFixtures,
+  type ScoutWorkerFixtures,
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 

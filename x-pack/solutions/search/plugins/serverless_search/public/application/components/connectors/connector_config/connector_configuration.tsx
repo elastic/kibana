@@ -6,15 +6,15 @@
  */
 import React, { useEffect, useState } from 'react';
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import { type Connector, ConnectorStatus } from '@kbn/search-connectors';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
+  type EuiStepsHorizontalProps,
   EuiTabbedContent,
-  EuiTabbedContentTab,
+  type EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {

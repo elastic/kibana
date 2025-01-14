@@ -16,14 +16,14 @@ import {
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
-  FtrConfigProviderContext,
+  type FtrConfigProviderContext,
   defineDockerServersConfig,
 } from '@kbn/test';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { dockerImage } from '../../../fleet_api_integration/config.base';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import { type DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];

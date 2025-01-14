@@ -12,15 +12,15 @@ import {
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import {
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
-  CaseUserActionStatsResponse,
-  GetCaseUsersResponse,
-  UserActionFindRequest,
-  UserActionFindResponse,
+  type CaseUserActionDeprecatedResponse,
+  type CaseUserActionsDeprecatedResponse,
+  type CaseUserActionStatsResponse,
+  type GetCaseUsersResponse,
+  type UserActionFindRequest,
+  type UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
-import { User } from '../authentication/types';
+import { type User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix } from './helpers';

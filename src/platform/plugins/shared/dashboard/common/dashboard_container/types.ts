@@ -8,14 +8,14 @@
  */
 
 import {
-  PanelState,
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
+  type PanelState,
+  type EmbeddableInput,
+  type SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { type RefreshInterval } from '@kbn/data-plugin/common';
+import { type KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardOptions, GridData } from '../../server/content_management';

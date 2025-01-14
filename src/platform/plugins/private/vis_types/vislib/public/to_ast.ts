@@ -10,10 +10,10 @@
 import moment from 'moment';
 
 import {
-  Vis,
-  VisToExpressionAstParams,
+  type Vis,
+  type VisToExpressionAstParams,
   getVisSchemas,
-  VisParams,
+  type VisParams,
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
@@ -21,8 +21,8 @@ import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-p
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
-import { BasicVislibParams, VislibChartType } from './types';
+import { vislibVisName, type VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
+import { type BasicVislibParams, type VislibChartType } from './types';
 
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,

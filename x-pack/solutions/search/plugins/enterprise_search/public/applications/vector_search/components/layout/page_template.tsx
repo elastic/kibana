@@ -11,7 +11,7 @@ import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetVectorSearchChrome } from '../../../shared/kibana_chrome';
 import {
   EnterpriseSearchPageTemplateWrapper,
-  PageTemplateProps,
+  type PageTemplateProps,
   useEnterpriseSearchNav,
 } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';

@@ -11,15 +11,15 @@ import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'reac
 import useDebounce from 'react-use/lib/useDebounce';
 import useAsync from 'react-use/lib/useAsync';
 import {
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
-  Pagination,
-  Direction,
+  type Pagination,
+  type Direction,
   EuiSpacer,
-  EuiTableActionsColumnType,
-  CriteriaWithPagination,
+  type EuiTableActionsColumnType,
+  type CriteriaWithPagination,
   Query,
   Ast,
 } from '@elastic/eui';

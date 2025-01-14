@@ -7,10 +7,10 @@
 
 import {
   FilterType,
-  ExpressionValueFilter,
-  CanvasTimeFilter,
-  CanvasLuceneFilter,
-  CanvasExactlyFilter,
+  type ExpressionValueFilter,
+  type CanvasTimeFilter,
+  type CanvasLuceneFilter,
+  type CanvasExactlyFilter,
 } from '../../../types';
 
 /*

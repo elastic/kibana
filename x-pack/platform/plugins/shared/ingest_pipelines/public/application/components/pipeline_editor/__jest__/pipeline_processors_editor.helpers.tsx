@@ -8,8 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { Props } from '..';
+import { registerTestBed, type TestBed } from '@kbn/test-jest-helpers';
+import { type Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 jest.mock('@elastic/eui', () => {

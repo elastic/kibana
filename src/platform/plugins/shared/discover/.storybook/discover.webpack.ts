@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig, StorybookConfig } from '@kbn/storybook';
+import { defaultConfig, type StorybookConfig } from '@kbn/storybook';
 
 export const discoverStorybookConfig: StorybookConfig = {
   ...defaultConfig,

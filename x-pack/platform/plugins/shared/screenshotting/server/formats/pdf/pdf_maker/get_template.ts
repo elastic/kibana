@@ -8,15 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import path from 'path';
 import {
-  ContentText,
-  DynamicContent,
-  StyleDictionary,
-  TDocumentDefinitions,
-  PredefinedPageSize,
+  type ContentText,
+  type DynamicContent,
+  type StyleDictionary,
+  type TDocumentDefinitions,
+  type PredefinedPageSize,
 } from 'pdfmake/interfaces';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import { TemplateLayout } from './types';
+import { type TemplateLayout } from './types';
 import {
   headingFontSize,
   headingMarginBottom,

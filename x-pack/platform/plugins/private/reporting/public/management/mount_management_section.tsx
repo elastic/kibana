@@ -18,8 +18,8 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   InternalApiClientProvider,
-  ReportingAPIClient,
-  KibanaContext,
+  type ReportingAPIClient,
+  type KibanaContext,
 } from '@kbn/reporting-public';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';

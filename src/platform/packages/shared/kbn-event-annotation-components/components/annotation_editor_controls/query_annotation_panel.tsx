@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import {
-  FieldOption,
-  FieldOptionValue,
+  type FieldOption,
+  type FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
   isFieldLensCompatible,

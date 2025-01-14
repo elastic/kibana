@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { Values } from '@kbn/utility-types';
+import { type Values } from '@kbn/utility-types';
 import {
   ALERT_INSTANCE_ID,
   ALERT_UUID,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  SPACE_IDS,
-  ALERT_RULE_TAGS,
-  TIMESTAMP,
-  ALERT_RULE_PARAMETERS,
+  type ALERT_RULE_CATEGORY,
+  type ALERT_RULE_CONSUMER,
+  type ALERT_RULE_EXECUTION_UUID,
+  type ALERT_RULE_NAME,
+  type ALERT_RULE_PRODUCER,
+  type ALERT_RULE_TYPE_ID,
+  type ALERT_RULE_UUID,
+  type SPACE_IDS,
+  type ALERT_RULE_TAGS,
+  type TIMESTAMP,
+  type ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
-import { AlertWithCommonFields800 } from '../8.0.0';
+import { type AlertWithCommonFields800 } from '../8.0.0';
 
-import { SuppressionFields860 } from '../8.6.0';
+import { type SuppressionFields860 } from '../8.6.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.7.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.7.0.

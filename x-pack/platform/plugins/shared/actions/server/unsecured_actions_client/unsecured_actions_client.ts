@@ -6,17 +6,17 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { type IClusterClient, type ISavedObjectsRepository, type Logger } from '@kbn/core/server';
 import {
-  BulkUnsecuredExecutionEnqueuer,
-  ExecuteOptions,
-  ExecutionResponse,
+  type BulkUnsecuredExecutionEnqueuer,
+  type ExecuteOptions,
+  type ExecutionResponse,
 } from '../create_unsecured_execute_function';
-import { ActionExecutorContract, asNotificationExecutionSource } from '../lib';
+import { type ActionExecutorContract, asNotificationExecutionSource } from '../lib';
 import type { RelatedSavedObjects } from '../lib';
-import { ActionTypeExecutorResult, InMemoryConnector } from '../types';
+import { type ActionTypeExecutorResult, type InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
-import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { type ConnectorWithExtraFindData } from '../application/connector/types';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 
 // requests from the notification service (for system notification)

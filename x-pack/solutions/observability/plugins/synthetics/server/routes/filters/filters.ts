@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { type SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
+import { ConfigKey, type MonitorFiltersResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 type Buckets = Array<{

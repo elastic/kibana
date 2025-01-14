@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { type MouseEvent } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiFontSize,
   logicalCSS,
 } from '@elastic/eui';

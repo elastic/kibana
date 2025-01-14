@@ -11,16 +11,16 @@ import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import SummaryColumn, {
-  AllSummaryColumnProps,
+  type AllSummaryColumnProps,
   SummaryCellPopover,
-  SummaryColumnFactoryDeps,
-  SummaryColumnProps,
+  type SummaryColumnFactoryDeps,
+  type SummaryColumnProps,
 } from './summary_column';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
 
 jest.mock('@elastic/eui', () => ({

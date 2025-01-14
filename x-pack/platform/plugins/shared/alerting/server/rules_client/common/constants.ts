@@ -7,7 +7,7 @@
 
 import {
   AlertingAuthorizationFilterType,
-  AlertingAuthorizationFilterOpts,
+  type AlertingAuthorizationFilterOpts,
 } from '../../authorization';
 
 export {

@@ -20,10 +20,10 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
-  ESQLIdentifier,
-  ESQLInlineCast,
-  ESQLParamLiteral,
-  ESQLProperNode,
+  type ESQLIdentifier,
+  type ESQLInlineCast,
+  type ESQLParamLiteral,
+  type ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
@@ -42,14 +42,14 @@ import {
   appendSeparatorOption,
 } from '../definitions/options';
 import {
-  CommandDefinition,
-  CommandOptionsDefinition,
-  FunctionParameter,
-  FunctionDefinition,
-  FunctionParameterType,
-  FunctionReturnType,
-  ArrayType,
-  SupportedDataType,
+  type CommandDefinition,
+  type CommandOptionsDefinition,
+  type FunctionParameter,
+  type FunctionDefinition,
+  type FunctionParameterType,
+  type FunctionReturnType,
+  type ArrayType,
+  type SupportedDataType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';

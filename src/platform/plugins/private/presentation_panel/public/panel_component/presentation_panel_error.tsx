@@ -10,7 +10,7 @@
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
+import { type ErrorLike } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
-import { DefaultPresentationPanelApi } from './types';
+import { type DefaultPresentationPanelApi } from './types';
 
 export const PresentationPanelError = ({
   api,

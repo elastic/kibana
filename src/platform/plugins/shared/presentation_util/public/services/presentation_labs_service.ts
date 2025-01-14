@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { type IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
-  EnvironmentName,
-  EnvironmentStatus,
+  type EnvironmentName,
+  type EnvironmentStatus,
   LABS_PROJECT_PREFIX,
-  Project,
-  ProjectConfig,
-  ProjectID,
-  SolutionName,
+  type Project,
+  type ProjectConfig,
+  type ProjectID,
+  type SolutionName,
   isProjectEnabledByStatus,
   projectIDs,
   projects,

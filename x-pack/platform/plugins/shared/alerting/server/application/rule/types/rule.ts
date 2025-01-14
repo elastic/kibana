@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { type TypeOf } from '@kbn/config-schema';
+import { type ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
-  ruleNotifyWhen,
-  ruleLastRunOutcomeValues,
-  ruleExecutionStatusValues,
-  ruleExecutionStatusErrorReason,
-  ruleExecutionStatusWarningReason,
+  type ruleNotifyWhen,
+  type ruleLastRunOutcomeValues,
+  type ruleExecutionStatusValues,
+  type ruleExecutionStatusErrorReason,
+  type ruleExecutionStatusWarningReason,
 } from '../constants';
 import {
-  snoozeScheduleSchema,
-  ruleExecutionStatusSchema,
-  ruleLastRunSchema,
-  monitoringSchema,
-  ruleSchema,
-  ruleDomainSchema,
+  type snoozeScheduleSchema,
+  type ruleExecutionStatusSchema,
+  type ruleLastRunSchema,
+  type monitoringSchema,
+  type ruleSchema,
+  type ruleDomainSchema,
 } from '../schemas';
 
 export type RuleNotifyWhen = (typeof ruleNotifyWhen)[keyof typeof ruleNotifyWhen];

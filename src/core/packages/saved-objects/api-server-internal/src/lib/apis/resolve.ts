@@ -8,10 +8,10 @@
  */
 
 import {
-  SavedObjectsResolveOptions,
-  SavedObjectsResolveResponse,
+  type SavedObjectsResolveOptions,
+  type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import { type ApiExecutionContext } from './types';
 import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
 import { incrementCounterInternal } from './internals/increment_counter_internal';
 

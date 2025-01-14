@@ -12,13 +12,13 @@ import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { TimeRange } from '@kbn/es-query';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { type TimeRange } from '@kbn/es-query';
+import { type PanelPackage } from '@kbn/presentation-containers';
 
 import {
-  MockSerializedDashboardState,
-  MockedDashboardPanelMap,
-  MockedDashboardRowMap,
+  type MockSerializedDashboardState,
+  type MockedDashboardPanelMap,
+  type MockedDashboardRowMap,
 } from './types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;

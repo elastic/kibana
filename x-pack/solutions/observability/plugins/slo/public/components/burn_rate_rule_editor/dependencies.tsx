@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTableActionsColumnType,
+  type EuiTableActionsColumnType,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { useFetchSLOsWithBurnRateRules } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { Dependency } from '../../../common/types';
+import { type Dependency } from '../../../common/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,

@@ -6,10 +6,10 @@
  */
 
 import {
-  CustomHttpResponseOptions,
-  HttpResponsePayload,
-  KibanaResponseFactory,
-  ResponseError,
+  type CustomHttpResponseOptions,
+  type HttpResponsePayload,
+  type KibanaResponseFactory,
+  type ResponseError,
 } from '@kbn/core/server';
 
 /**

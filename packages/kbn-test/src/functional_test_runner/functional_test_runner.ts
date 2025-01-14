@@ -9,19 +9,19 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import { type ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Suite, Test } from './fake_mocha_types';
+import { type Suite, type Test } from './fake_mocha_types';
 import {
   Lifecycle,
   ProviderCollection,
-  Providers,
+  type Providers,
   readProviderSpec,
   setupMocha,
   runTests,
   DockerServersService,
-  Config,
+  type Config,
   SuiteTracker,
   EsVersion,
   DedicatedTaskRunner,

@@ -15,17 +15,17 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import {
-  AnonymizationFieldResponse,
-  AnonymizationFieldsBulkActionSkipResult,
-  AnonymizationFieldsBulkCrudActionResponse,
-  AnonymizationFieldsBulkCrudActionResults,
-  BulkCrudActionSummary,
+  type AnonymizationFieldResponse,
+  type AnonymizationFieldsBulkActionSkipResult,
+  type AnonymizationFieldsBulkCrudActionResponse,
+  type AnonymizationFieldsBulkCrudActionResults,
+  type BulkCrudActionSummary,
   PerformAnonymizationFieldsBulkActionRequestBody,
-  PerformAnonymizationFieldsBulkActionResponse,
+  type PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
+import { type ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
@@ -35,8 +35,8 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import {
-  EsAnonymizationFieldsSchema,
-  UpdateAnonymizationFieldSchema,
+  type EsAnonymizationFieldsSchema,
+  type UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { performChecks } from '../helpers';
 

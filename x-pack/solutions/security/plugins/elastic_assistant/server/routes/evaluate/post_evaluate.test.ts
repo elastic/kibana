@@ -12,7 +12,7 @@ import { getPostEvaluateRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   defaultAssistantFeatures,
-  PostEvaluateRequestBodyInput,
+  type PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 

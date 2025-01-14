@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
-  EuiCodeBlockProps,
+  type EuiCodeBlockProps,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,

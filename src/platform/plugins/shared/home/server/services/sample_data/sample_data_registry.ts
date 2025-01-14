@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { type CoreSetup, type PluginInitializerContext } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { type CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {
-  SampleDatasetProvider,
-  SampleDatasetSchema,
-  SampleDatasetDashboardPanel,
-  AppLinkData,
-  SampleDatasetProviderContext,
+  type SampleDatasetProvider,
+  type SampleDatasetSchema,
+  type SampleDatasetDashboardPanel,
+  type AppLinkData,
+  type SampleDatasetProviderContext,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 

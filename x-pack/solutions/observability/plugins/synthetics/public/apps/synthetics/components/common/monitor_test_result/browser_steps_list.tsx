@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, {
-  CSSProperties,
-  ReactElement,
-  PropsWithChildren,
+  type CSSProperties,
+  type ReactElement,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useState,
@@ -17,24 +17,24 @@ import React, {
 } from 'react';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTextProps,
+  type EuiTextProps,
   EuiTitle,
   useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import { type EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { StepTabs } from '../../test_run_details/step_tabs';
 import { ResultDetails } from './result_details';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import { type JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import {
-  ScreenshotImageSize,
+  type ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
   THUMBNAIL_SCREENSHOT_SIZE_MOBILE,
 } from '../screenshot/screenshot_size';

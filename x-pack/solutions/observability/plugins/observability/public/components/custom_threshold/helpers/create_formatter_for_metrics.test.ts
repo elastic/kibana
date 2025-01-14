@@ -7,7 +7,7 @@
 
 import {
   Aggregators,
-  CustomThresholdExpressionMetric,
+  type CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 import { createFormatterForMetric } from './create_formatter_for_metric';
 

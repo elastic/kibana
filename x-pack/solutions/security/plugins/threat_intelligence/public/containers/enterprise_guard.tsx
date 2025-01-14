@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, type PropsWithChildren } from 'react';
 
 import { Paywall } from '../components/paywall';
 import { useSecurityContext } from '../hooks/use_security_context';

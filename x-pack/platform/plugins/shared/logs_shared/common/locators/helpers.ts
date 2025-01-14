@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { DurationInputObject } from 'moment';
+import moment, { type DurationInputObject } from 'moment';
 import type { LogsLocatorParams } from './logs_locator';
 
 export interface NodeLogsParams {

@@ -6,10 +6,10 @@
  */
 
 import {
-  ClusterPutComponentTemplateRequest,
-  IndicesGetIndexTemplateIndexTemplateItem,
+  type ClusterPutComponentTemplateRequest,
+  type IndicesGetIndexTemplateIndexTemplateItem,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { type Logger, type ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

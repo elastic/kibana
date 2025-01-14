@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { getNewAndUpdatedTypes } from '../core/compare_mappings';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type PluginInitializerContext } from '@kbn/core/server';
 
 import {
-  ExperimentalFeatures,
+  type ExperimentalFeatures,
   getExperimentalAllowedValues,
   isValidExperimentalValue,
   parseExperimentalConfigValue,

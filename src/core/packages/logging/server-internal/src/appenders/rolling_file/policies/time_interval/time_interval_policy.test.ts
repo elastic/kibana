@@ -9,7 +9,7 @@
 
 import { getNextRollingTimeMock } from './time_interval_policy.test.mocks';
 import moment from 'moment-timezone';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, type LogRecord } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import type { TimeIntervalTriggeringPolicyConfig } from '@kbn/core-logging-server';
 import { TimeIntervalTriggeringPolicy } from './time_interval_policy';

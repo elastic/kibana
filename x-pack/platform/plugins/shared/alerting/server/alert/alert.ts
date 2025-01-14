@@ -6,18 +6,18 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { type AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
-import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
+import { type MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertHit, CombinedSummarizedAlerts } from '../types';
+import { type AlertHit, type CombinedSummarizedAlerts } from '../types';
 import {
-  AlertInstanceMeta,
-  AlertInstanceState,
-  RawAlertInstance,
-  AlertInstanceContext,
-  DefaultActionGroupId,
-  LastScheduledActions,
+  type AlertInstanceMeta,
+  type AlertInstanceState,
+  type RawAlertInstance,
+  type AlertInstanceContext,
+  type DefaultActionGroupId,
+  type LastScheduledActions,
 } from '../../common';
 
 import { parseDuration } from '../lib';

@@ -12,10 +12,10 @@ import {
   TRANSFORM_HEALTH_DESCRIPTION,
 } from '@kbn/transform-plugin/common/constants';
 import {
-  TransformLatestConfig,
-  TransformPivotConfig,
+  type TransformLatestConfig,
+  type TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { type FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 
 interface TestDataPivot {

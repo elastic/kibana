@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { type TypeOf } from '@kbn/config-schema';
+import { type IRouter } from '@kbn/core/server';
 import {
   unsnoozeBodySchema,
   unsnoozeParamsSchema,
 } from '../../../../../common/routes/rule/apis/unsnooze';
-import { ILicenseState, RuleMutedError } from '../../../../lib';
+import { type ILicenseState, RuleMutedError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { type AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformUnsnoozeBodyV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

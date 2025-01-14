@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiText,
   EuiHighlight,
-  IconType,
+  type IconType,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';

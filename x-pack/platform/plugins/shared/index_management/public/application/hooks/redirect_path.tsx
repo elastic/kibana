@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { History, LocationDescriptor } from 'history';
+import { type History, type LocationDescriptor } from 'history';
 
 import { useKibana } from '..';
 

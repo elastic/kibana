@@ -17,7 +17,7 @@ import {
   EuiScreenReaderOnly,
   EuiTextAlign,
   EuiButtonEmpty,
-  UseEuiTheme,
+  type UseEuiTheme,
   logicalCSS,
 } from '@elastic/eui';
 
@@ -31,7 +31,7 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 import { AlertsBadge } from '../../alerts/badge';
 import type { AlertsByName } from '../../alerts/types';
-import { Series } from './types';
+import { type Series } from './types';
 
 const zoomStyle = ({ euiTheme }: UseEuiTheme) => css`
   visibility: hidden;

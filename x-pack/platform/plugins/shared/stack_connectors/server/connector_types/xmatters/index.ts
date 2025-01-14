@@ -7,12 +7,12 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import {
-  ActionType as ConnectorType,
-  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  ValidatorServices,
+  type ActionType as ConnectorType,
+  type ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+  type ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  type ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
 import {
   AlertingConnectorFeatureId,

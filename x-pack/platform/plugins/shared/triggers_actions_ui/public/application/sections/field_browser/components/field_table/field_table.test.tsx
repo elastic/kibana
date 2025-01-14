@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, RenderResult } from '@testing-library/react';
+import { render, type RenderResult } from '@testing-library/react';
 import { mockBrowserFields } from '../../mock';
 
-import { FieldTable, FieldTableProps } from './field_table';
+import { FieldTable, type FieldTableProps } from './field_table';
 
 const timestampFieldId = '@timestamp';
 

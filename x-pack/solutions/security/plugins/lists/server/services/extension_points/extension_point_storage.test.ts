@@ -6,8 +6,8 @@
  */
 
 import {
-  ExceptionsListPreCreateItemServerExtension,
-  ExtensionPointStorageInterface,
+  type ExceptionsListPreCreateItemServerExtension,
+  type ExtensionPointStorageInterface,
 } from './types';
 import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 import { ExtensionPointStorageClient } from './extension_point_storage_client';

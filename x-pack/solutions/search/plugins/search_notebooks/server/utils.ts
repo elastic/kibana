@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { NotebookDefinition } from '@kbn/ipynb';
+import { type NotebookDefinition } from '@kbn/ipynb';
 import {
-  NotebookCatalog,
-  NotebookCatalogResponse,
+  type NotebookCatalog,
+  type NotebookCatalogResponse,
   NotebookCatalogSchema,
-  NotebookInformation,
+  type NotebookInformation,
 } from '../common/types';
 import type {
   CachedNotebook,

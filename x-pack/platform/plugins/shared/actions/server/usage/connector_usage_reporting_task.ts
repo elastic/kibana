@@ -6,19 +6,19 @@
  */
 
 import fs from 'fs';
-import { Logger, CoreSetup, type ElasticsearchClient } from '@kbn/core/server';
+import { type Logger, type CoreSetup, type ElasticsearchClient } from '@kbn/core/server';
 import {
-  IntervalSchedule,
+  type IntervalSchedule,
   type ConcreteTaskInstance,
-  TaskManagerStartContract,
-  TaskManagerSetupContract,
+  type TaskManagerStartContract,
+  type TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { type AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import https from 'https';
-import { ActionsConfig } from '../config';
-import { ConnectorUsageReport } from './types';
-import { ActionsPluginsStart } from '../plugin';
+import { type ActionsConfig } from '../config';
+import { type ConnectorUsageReport } from './types';
+import { type ActionsPluginsStart } from '../plugin';
 
 export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';

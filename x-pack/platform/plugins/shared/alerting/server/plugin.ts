@@ -9,58 +9,58 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   BehaviorSubject,
   ReplaySubject,
-  Subject,
-  Observable,
+  type Subject,
+  type Observable,
   map,
   distinctUntilChanged,
 } from 'rxjs';
 import { pick } from 'lodash';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { type UsageCollectionSetup, type UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { type SecurityPluginSetup, type SecurityPluginStart } from '@kbn/security-plugin/server';
+import { type PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { type PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
+  type EncryptedSavedObjectsPluginSetup,
+  type EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { type SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  IContextProvider,
-  StatusServiceSetup,
-  ServiceStatus,
-  SavedObjectsBulkGetObject,
+  type KibanaRequest,
+  type Logger,
+  type PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type IContextProvider,
+  type StatusServiceSetup,
+  type ServiceStatus,
+  type SavedObjectsBulkGetObject,
   ServiceStatusLevels,
-  CoreStatus,
+  type CoreStatus,
 } from '@kbn/core/server';
 import {
   LICENSE_TYPE,
-  LicensingPluginSetup,
-  LicensingPluginStart,
+  type LicensingPluginSetup,
+  type LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
-  PluginSetupContract as ActionsPluginSetupContract,
-  PluginStartContract as ActionsPluginStartContract,
+  type PluginSetupContract as ActionsPluginSetupContract,
+  type PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
 import {
-  IEventLogger,
-  IEventLogService,
-  IEventLogClientService,
+  type IEventLogger,
+  type IEventLogService,
+  type IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
-import { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { type FeaturesPluginStart, type FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import { type PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { type MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { type SharePluginStart } from '@kbn/share-plugin/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -71,17 +71,17 @@ import {
   getRulesSettingsFeature,
 } from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
-import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
+import { type ILicenseState, LicenseState } from './lib/license_state';
+import { type AlertingRequestHandlerContext, ALERTING_FEATURE_ID, type RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertsHealth,
-  RuleType,
-  RuleTypeParams,
-  RuleTypeState,
-  RulesClientApi,
+  type AlertInstanceContext,
+  type AlertInstanceState,
+  type AlertsHealth,
+  type RuleType,
+  type RuleTypeParams,
+  type RuleTypeState,
+  type RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -95,11 +95,11 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import { AlertingConfig, AlertingRulesConfig } from './config';
+import { type AlertingConfig, type AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { AlertingAuthorization } from './authorization';
-import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { type AlertingAuthorization } from './authorization';
+import { getSecurityHealth, type SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
@@ -111,9 +111,9 @@ import {
 } from './alerts_service';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
-import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
-import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { type ConnectorAdapter, type ConnectorAdapterParams } from './connector_adapters/types';
+import { type DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+import { createGetAlertIndicesAliasFn, type GetAlertIndicesAlias } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 

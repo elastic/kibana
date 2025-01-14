@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
 import {
-  FieldBasedOperationErrorMessage,
-  GenericIndexPatternColumn,
+  type FieldBasedOperationErrorMessage,
+  type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
 import { defaultLabel } from '../filters';

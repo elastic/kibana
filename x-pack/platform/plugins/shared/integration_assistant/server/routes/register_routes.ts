@@ -14,7 +14,7 @@ import { registerPipelineRoutes } from './pipeline_routes';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
 import { registerCelInputRoutes } from './cel_routes';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import { type ExperimentalFeatures } from '../../common/experimental_features';
 
 export function registerRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>,

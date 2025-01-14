@@ -6,12 +6,12 @@
  */
 
 import {
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkResponse,
+  type SavedObjectsClientContract,
+  type SavedObjectsCreateOptions,
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsBulkResponse,
 } from '@kbn/core/server';
-import { RawRule } from '../../../types';
+import { type RawRule } from '../../../types';
 
 export interface BulkCreateRulesSoParams {
   savedObjectsClient: SavedObjectsClientContract;

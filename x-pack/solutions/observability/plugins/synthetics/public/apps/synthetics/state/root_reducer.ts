@@ -7,30 +7,30 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { certsListReducer, CertsListState } from './certs';
-import { certificatesReducer, CertificatesState } from './certificates/certificates';
-import { globalParamsReducer, GlobalParamsState } from './global_params';
-import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
+import { certsListReducer, type CertsListState } from './certs';
+import { certificatesReducer, type CertificatesState } from './certificates/certificates';
+import { globalParamsReducer, type GlobalParamsState } from './global_params';
+import { overviewStatusReducer, type OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
-import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
-import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
+import { defaultAlertingReducer, type DefaultAlertingState } from './alert_rules';
+import { manualTestRunsReducer, type ManualTestRunsState } from './manual_test_runs';
 import {
   dynamicSettingsReducer,
-  DynamicSettingsState,
+  type DynamicSettingsState,
   settingsReducer,
-  SettingsState,
+  type SettingsState,
 } from './settings';
-import { elasticsearchReducer, QueriesState } from './elasticsearch';
-import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
-import { networkEventsReducer, NetworkEventsState } from './network_events';
-import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
-import { uiReducer, UiState } from './ui';
-import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
-import { monitorListReducer, MonitorListState } from './monitor_list';
-import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
-import { monitorOverviewReducer, MonitorOverviewState } from './overview';
-import { BrowserJourneyState } from './browser_journey/models';
-import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heatmap';
+import { elasticsearchReducer, type QueriesState } from './elasticsearch';
+import { agentPoliciesReducer, type AgentPoliciesState } from './private_locations';
+import { networkEventsReducer, type NetworkEventsState } from './network_events';
+import { monitorDetailsReducer, type MonitorDetailsState } from './monitor_details';
+import { uiReducer, type UiState } from './ui';
+import { syntheticsEnablementReducer, type SyntheticsEnablementState } from './synthetics_enablement';
+import { monitorListReducer, type MonitorListState } from './monitor_list';
+import { serviceLocationsReducer, type ServiceLocationsState } from './service_locations';
+import { monitorOverviewReducer, type MonitorOverviewState } from './overview';
+import { type BrowserJourneyState } from './browser_journey/models';
+import { monitorStatusHeatmapReducer, type MonitorStatusHeatmap } from './status_heatmap';
 
 export interface SyntheticsAppState {
   ui: UiState;

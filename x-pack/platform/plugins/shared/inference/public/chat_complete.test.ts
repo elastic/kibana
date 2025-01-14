@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ChatCompleteAPI, MessageRole, ChatCompleteOptions } from '@kbn/inference-common';
+import { type ChatCompleteAPI, MessageRole, type ChatCompleteOptions } from '@kbn/inference-common';
 import { createChatCompleteApi } from './chat_complete';
 
 describe('createChatCompleteApi', () => {

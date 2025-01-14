@@ -27,12 +27,12 @@ import {
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
   QualifiedNamePatternContext,
-  FunctionContext,
-  IdentifierContext,
+  type FunctionContext,
+  type IdentifierContext,
   InputParamContext,
   InputNamedOrPositionalParamContext,
   IdentifierOrParameterContext,
-  StringContext,
+  type StringContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {

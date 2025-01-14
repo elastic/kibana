@@ -9,11 +9,11 @@ jest.mock('./send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   validateConfig,
   validateConnector,
@@ -24,14 +24,14 @@ import {
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import {
-  ActionParamsType,
+  type ActionParamsType,
   getConnectorType,
-  EmailConnectorType,
-  EmailConnectorTypeExecutorOptions,
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
+  type EmailConnectorType,
+  type EmailConnectorTypeExecutorOptions,
+  type ConnectorTypeConfigType,
+  type ConnectorTypeSecretsType,
 } from '.';
-import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { type ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 
 const sendEmailMock = sendEmail as jest.Mock;

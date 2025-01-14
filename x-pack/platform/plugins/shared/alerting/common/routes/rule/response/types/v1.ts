@@ -6,12 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1 } from '@kbn/response-ops-rule-params';
+import { type RuleParamsV1 } from '@kbn/response-ops-rule-params';
 import {
-  ruleResponseSchemaV1,
-  ruleSnoozeScheduleSchemaV1,
-  ruleLastRunSchemaV1,
-  monitoringSchemaV1,
+  type ruleResponseSchemaV1,
+  type ruleSnoozeScheduleSchemaV1,
+  type ruleLastRunSchemaV1,
+  type monitoringSchemaV1,
 } from '..';
 
 export type RuleSnoozeSchedule = TypeOf<typeof ruleSnoozeScheduleSchemaV1>;

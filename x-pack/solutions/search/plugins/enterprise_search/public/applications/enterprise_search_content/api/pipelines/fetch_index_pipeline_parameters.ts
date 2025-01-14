@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import { type IngestPipelineParams } from '@kbn/search-connectors';
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { type Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchIndexPipelineParametersArgs {

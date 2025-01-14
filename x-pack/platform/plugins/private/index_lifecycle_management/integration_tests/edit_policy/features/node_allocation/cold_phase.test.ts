@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../../helpers';
-import { NodeAllocationTestBed, setupColdPhaseNodeAllocation } from './cold_phase.helpers';
+import { type NodeAllocationTestBed, setupColdPhaseNodeAllocation } from './cold_phase.helpers';
 
 describe('<EditPolicy /> node allocation in the cold phase', () => {
   let testBed: NodeAllocationTestBed;

@@ -9,15 +9,15 @@ import { useCallback } from 'react';
 import { useInterpret, useSelector } from '@xstate/react';
 import { isAllDatasetSelection } from '../../../../common/data_source_selection';
 import {
-  ChangePanelHandler,
-  DatasetSelectionHandler,
-  DataSourceSelectorSearchHandler,
-  DataViewFilterHandler,
-  DataViewSelectionHandler,
-  PanelId,
+  type ChangePanelHandler,
+  type DatasetSelectionHandler,
+  type DataSourceSelectorSearchHandler,
+  type DataViewFilterHandler,
+  type DataViewSelectionHandler,
+  type PanelId,
 } from '../types';
 import { createDataSourceSelectorStateMachine } from './state_machine';
-import { DataSourceSelectorStateMachineDependencies } from './types';
+import { type DataSourceSelectorStateMachineDependencies } from './types';
 
 export const useDataSourceSelector = ({
   initialContext,

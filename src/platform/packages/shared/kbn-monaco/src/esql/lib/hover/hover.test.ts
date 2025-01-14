@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
+import { type monaco } from '../../../monaco_imports';
 import { getHoverItem } from './hover';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   ENRICH_MODES,
-  ESQLRealField,
+  type ESQLRealField,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { type FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 

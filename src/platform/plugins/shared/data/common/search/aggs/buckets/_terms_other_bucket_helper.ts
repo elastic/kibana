@@ -14,13 +14,13 @@ import {
   buildExistsFilter,
   buildPhrasesFilter,
   buildQueryFromFilters,
-  Filter,
+  type Filter,
 } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IAggType } from '../agg_type';
-import { IAggConfig } from '../agg_config';
+import { type IAggConfigs } from '../agg_configs';
+import { type IAggType } from '../agg_type';
+import { type IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
 const MISSING_KEY_STRING = '__missing__';

@@ -18,10 +18,10 @@ import {
   updateFieldProperties,
   selectField,
   deselectField,
-  GraphState,
-  GraphStore,
+  type GraphState,
+  type GraphStore,
 } from '../../state_management';
-import { WorkspaceField } from '../../types';
+import { type WorkspaceField } from '../../types';
 
 export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 

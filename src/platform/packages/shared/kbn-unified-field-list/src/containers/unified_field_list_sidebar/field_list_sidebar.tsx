@@ -14,12 +14,12 @@ import { css } from '@emotion/react';
 import classnames from 'classnames';
 import {
   EuiButton,
-  EuiButtonProps,
+  type EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
   EuiPageSidebar,
-  EuiPageSidebarProps,
+  type EuiPageSidebarProps,
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
@@ -31,7 +31,7 @@ import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
 import { FieldsGroupNames } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
-import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
+import { type GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {

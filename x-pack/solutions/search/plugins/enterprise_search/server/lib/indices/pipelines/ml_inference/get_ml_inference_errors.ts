@@ -6,13 +6,13 @@
  */
 
 import {
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
+  type AggregationsMultiBucketAggregateBase,
+  type AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceError } from '../../../../../common/types/pipelines';
+import { type MlInferenceError } from '../../../../../common/types/pipelines';
 
 export interface ErrorAggregationBucket extends AggregationsStringRareTermsBucketKeys {
   max_error_timestamp: {

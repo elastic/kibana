@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
 import {
-  AppMockRenderer,
+  type AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
   waitForComponentToUpdate,

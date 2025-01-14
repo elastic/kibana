@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { SchemaObject, SchemaValue } from '@elastic/ebt';
+import { type SchemaObject, type SchemaValue } from '@elastic/ebt';
 
 import {
-  DatasetEbtFilter,
-  DatasetEbtProps,
-  DatasetNavigatedEbtProps,
-  DatasetQualityTelemetryEvent,
+  type DatasetEbtFilter,
+  type DatasetEbtProps,
+  type DatasetNavigatedEbtProps,
+  type DatasetQualityTelemetryEvent,
   DatasetQualityTelemetryEventTypes,
 } from './types';
 

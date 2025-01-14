@@ -10,12 +10,12 @@ import _ from 'lodash';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import {
-  ElasticsearchResponse,
-  ElasticsearchIndexRecoveryShard,
-  ElasticsearchMetricbeatIndexRecoveryShard,
-  ElasticsearchResponseHit,
+  type ElasticsearchResponse,
+  type ElasticsearchIndexRecoveryShard,
+  type ElasticsearchMetricbeatIndexRecoveryShard,
+  type ElasticsearchResponseHit,
 } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import { type LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

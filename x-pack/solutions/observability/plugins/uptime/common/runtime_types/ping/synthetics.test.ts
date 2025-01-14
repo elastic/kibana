@@ -10,10 +10,10 @@ import {
   isFullScreenshot,
   isScreenshotRef,
   isScreenshotImageBlob,
-  RefResult,
-  FullScreenshot,
-  ScreenshotImageBlob,
-  ScreenshotRefImageData,
+  type RefResult,
+  type FullScreenshot,
+  type ScreenshotImageBlob,
+  type ScreenshotRefImageData,
 } from './synthetics';
 
 describe('synthetics runtime types', () => {

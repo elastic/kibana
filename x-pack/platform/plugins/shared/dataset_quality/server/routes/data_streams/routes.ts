@@ -7,18 +7,18 @@
 
 import * as t from 'io-ts';
 import {
-  DataStreamDetails,
-  DataStreamSettings,
-  DataStreamStat,
-  NonAggregatableDatasets,
-  DegradedFieldResponse,
-  DatasetUserPrivileges,
-  DegradedFieldValues,
-  DegradedFieldAnalysis,
-  DataStreamDocsStat,
-  UpdateFieldLimitResponse,
-  DataStreamRolloverResponse,
-  CheckAndLoadIntegrationResponse,
+  type DataStreamDetails,
+  type DataStreamSettings,
+  type DataStreamStat,
+  type NonAggregatableDatasets,
+  type DegradedFieldResponse,
+  type DatasetUserPrivileges,
+  type DegradedFieldValues,
+  type DegradedFieldAnalysis,
+  type DataStreamDocsStat,
+  type UpdateFieldLimitResponse,
+  type DataStreamRolloverResponse,
+  type CheckAndLoadIntegrationResponse,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';

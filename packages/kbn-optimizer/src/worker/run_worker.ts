@@ -15,7 +15,7 @@ import { take, mergeMap } from 'rxjs';
 import {
   parseBundles,
   parseWorkerConfig,
-  WorkerMsg,
+  type WorkerMsg,
   isWorkerMsg,
   WorkerMsgs,
   BundleRemotes,

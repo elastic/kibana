@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either, either } from 'fp-ts/lib/Either';
+import { type Either, either } from 'fp-ts/lib/Either';
 
 export type StringToPositiveNumberC = t.Type<number, string, unknown>;
 

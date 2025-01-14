@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ignoreElements, last, merge, Observable, shareReplay, tap } from 'rxjs';
-import { createFunctionNotFoundError, FunctionDefinition } from '../../../../common';
-import { ChatEvent } from '../../../../common/conversation_complete';
+import { ignoreElements, last, merge, type Observable, shareReplay, tap } from 'rxjs';
+import { createFunctionNotFoundError, type FunctionDefinition } from '../../../../common';
+import { type ChatEvent } from '../../../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 

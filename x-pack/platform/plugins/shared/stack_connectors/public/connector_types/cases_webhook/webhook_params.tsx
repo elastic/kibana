@@ -13,10 +13,10 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CaseStatuses } from '@kbn/cases-components';
-import { CaseSeverity, SeverityFilter } from './severity_filter';
+import { type CaseStatuses } from '@kbn/cases-components';
+import { type CaseSeverity, SeverityFilter } from './severity_filter';
 import { StatusFilter } from './status_filter';
-import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
+import { type CasesWebhookActionConnector, type CasesWebhookActionParams } from './types';
 
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentWarningTitle',

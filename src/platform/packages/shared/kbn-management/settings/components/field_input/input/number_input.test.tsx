@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { NumberInput, NumberInputProps } from './number_input';
+import { NumberInput, type NumberInputProps } from './number_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
 

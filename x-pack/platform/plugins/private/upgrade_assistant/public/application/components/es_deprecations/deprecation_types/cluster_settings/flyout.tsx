@@ -24,9 +24,9 @@ import {
 } from '@elastic/eui';
 
 import {
-  EnrichedDeprecationInfo,
-  ClusterSettingAction,
-  ResponseError,
+  type EnrichedDeprecationInfo,
+  type ClusterSettingAction,
+  type ResponseError,
 } from '../../../../../../common/types';
 import { uiMetricService, UIM_CLUSTER_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';

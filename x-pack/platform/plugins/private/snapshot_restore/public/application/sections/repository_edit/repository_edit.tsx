@@ -7,14 +7,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { type RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { Repository, EmptyRepository } from '../../../../common/types';
+import { type Repository, type EmptyRepository } from '../../../../common/types';
 
-import { PageError, SectionError, Error } from '../../../shared_imports';
+import { PageError, SectionError, type Error } from '../../../shared_imports';
 import { RepositoryForm, PageLoading } from '../../components';
-import { BASE_PATH, Section } from '../../constants';
+import { BASE_PATH, type Section } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';

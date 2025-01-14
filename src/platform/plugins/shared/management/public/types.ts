@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import {
-  ScopedHistory,
-  Capabilities,
-  ThemeServiceStart,
-  CoreStart,
-  ChromeBreadcrumb,
-  CoreTheme,
+  type ScopedHistory,
+  type Capabilities,
+  type ThemeServiceStart,
+  type CoreStart,
+  type ChromeBreadcrumb,
+  type CoreTheme,
 } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import { type ManagementSection, type RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {

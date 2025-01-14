@@ -9,7 +9,7 @@
 
 import { intersection } from 'lodash';
 import { animationFrameScheduler } from 'rxjs';
-import { useCallback, useEffect, RefObject } from 'react';
+import { useCallback, useEffect, type RefObject } from 'react';
 import { filter, debounceTime } from 'rxjs';
 
 import type { Chart, PointerUpdateListener } from '@elastic/charts';

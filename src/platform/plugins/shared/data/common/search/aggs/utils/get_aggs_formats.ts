@@ -12,17 +12,17 @@ import { i18n } from '@kbn/i18n';
 
 import {
   FieldFormat,
-  FieldFormatInstanceType,
-  FieldFormatsContentType,
-  IFieldFormat,
-  SerializedFieldFormat,
+  type FieldFormatInstanceType,
+  type FieldFormatsContentType,
+  type IFieldFormat,
+  type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { DateRange } from '../../expressions';
+import { type SerializableRecord } from '@kbn/utility-types';
+import { type DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
-import { convertIPPrefixToString, IpPrefixKey } from '../buckets/lib/ip_prefix';
-import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
-import { MultiFieldKey } from '../buckets/multi_field_key';
+import { convertIPPrefixToString, type IpPrefixKey } from '../buckets/lib/ip_prefix';
+import { convertIPRangeToString, type IpRangeKey } from '../buckets/lib/ip_range';
+import { type MultiFieldKey } from '../buckets/multi_field_key';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 

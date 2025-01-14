@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { FIELD_ORIGIN, MASK_OPERATOR } from '../../../../../../common/constants';
+import { FIELD_ORIGIN, type MASK_OPERATOR } from '../../../../../../common/constants';
 import type { IESAggField } from '../../../../fields/agg';
 import type { IESAggSource } from '../../../../sources/es_agg_source';
 import {

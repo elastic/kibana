@@ -6,16 +6,16 @@
  */
 
 import {
-  IRouter,
-  Logger,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
+  type IRouter,
+  type Logger,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type IKibanaResponse,
+  type KibanaResponseFactory,
 } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Observable, Subject } from 'rxjs';
-import { Metrics } from '../metrics';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type Observable, type Subject } from 'rxjs';
+import { type Metrics } from '../metrics';
 
 export interface NodeMetrics {
   process_uuid: string;

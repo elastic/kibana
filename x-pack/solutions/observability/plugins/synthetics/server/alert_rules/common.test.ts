@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IBasePath } from '@kbn/core/server';
+import { type IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import {
-  AlertOverviewStatus,
-  StaleDownConfig,
-  SyntheticsCommonState,
+  type AlertOverviewStatus,
+  type StaleDownConfig,
+  type SyntheticsCommonState,
 } from '../../common/runtime_types/alert_rules/common';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';

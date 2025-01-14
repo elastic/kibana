@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
+import React, { type FunctionComponent, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,11 +16,11 @@ import {
   UseField,
   useFormContext,
   Field,
-  FieldHook,
-  FieldConfig,
-  SerializerFunc,
+  type FieldHook,
+  type FieldConfig,
+  type SerializerFunc,
 } from '../../../../../../shared_imports';
-import { FieldsConfig, from, to } from './shared';
+import { type FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 

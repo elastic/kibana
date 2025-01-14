@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import { type Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
-  BehaviorSubject,
+  type BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
   filter,
@@ -36,13 +36,13 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import {
-  DataMain$,
-  DataMsg,
-  SavedSearchData,
+  type DataMain$,
+  type DataMsg,
+  type SavedSearchData,
 } from '../state_management/discover_data_state_container';
-import { DiscoverServices } from '../../../build_services';
+import { type DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import { InternalState } from '../state_management/discover_internal_state_container';
+import { type InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {
   abortController: AbortController;

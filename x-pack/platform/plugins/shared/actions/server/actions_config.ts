@@ -12,18 +12,18 @@ import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
-  ActionsConfig,
+  type ActionsConfig,
   AllowedHosts,
   EnabledActionTypes,
-  CustomHostSettings,
+  type CustomHostSettings,
   DEFAULT_QUEUED_MAX,
 } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { type ProxySettings, type ResponseSettings, type SSLSettings } from './types';
 import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
 import {
-  ValidateEmailAddressesOptions,
+  type ValidateEmailAddressesOptions,
   validateEmailAddresses,
   invalidEmailsAsMessage,
 } from '../common';

@@ -15,15 +15,15 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  FC,
-  PropsWithChildren,
+  type FC,
+  type PropsWithChildren,
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import { type RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';

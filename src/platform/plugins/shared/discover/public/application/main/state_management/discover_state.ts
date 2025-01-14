@@ -8,24 +8,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import { type History } from 'history';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-  StateContainer,
+  type IKbnUrlStateStorage,
+  type StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
-  DataPublicPluginStart,
+  type DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
-  SearchSessionInfoProvider,
+  type SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, type DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, isOfAggregateQueryType, type Query, type TimeRange } from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -33,28 +33,28 @@ import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
-import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { type DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../common';
 import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
+  type DiscoverAppState,
+  type DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
 } from './discover_app_state_container';
 import {
-  DiscoverInternalStateContainer,
+  type DiscoverInternalStateContainer,
   getInternalStateContainer,
 } from './discover_internal_state_container';
-import { DiscoverServices } from '../../../build_services';
+import { type DiscoverServices } from '../../../build_services';
 import {
   getDefaultAppState,
   getSavedSearchContainer,
-  DiscoverSavedSearchContainer,
+  type DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import {
   getDiscoverGlobalStateContainer,
-  DiscoverGlobalStateContainer,
+  type DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {

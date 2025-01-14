@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { journey, step, expect, Page } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import { journey, step, expect, type Page } from '@elastic/synthetics';
+import { type RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { byTestId, assertText } from '../../helpers/utils';

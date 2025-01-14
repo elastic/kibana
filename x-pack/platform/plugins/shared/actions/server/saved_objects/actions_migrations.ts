@@ -6,15 +6,15 @@
  */
 
 import {
-  LogMeta,
-  SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationContext,
+  type LogMeta,
+  type SavedObjectMigrationMap,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObjectMigrationFn,
+  type SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { type EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawAction } from '../types';
+import { type RawAction } from '../types';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };

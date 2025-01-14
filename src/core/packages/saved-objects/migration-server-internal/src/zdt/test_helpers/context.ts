@@ -9,7 +9,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import {
-  ElasticsearchClientMock,
+  type ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

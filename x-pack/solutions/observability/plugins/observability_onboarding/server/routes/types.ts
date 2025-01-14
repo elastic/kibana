@@ -5,21 +5,21 @@
  * 2.0.
  */
 import {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
+  type CoreSetup,
+  type CoreStart,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type Logger,
 } from '@kbn/core/server';
 import * as t from 'io-ts';
-import { ObservabilityOnboardingServerRouteRepository } from '.';
-import { EsLegacyConfigService } from '../services/es_legacy_config_service';
+import { type ObservabilityOnboardingServerRouteRepository } from '.';
+import { type EsLegacyConfigService } from '../services/es_legacy_config_service';
 import {
-  ObservabilityOnboardingPluginSetupDependencies,
-  ObservabilityOnboardingPluginStartDependencies,
-  ObservabilityOnboardingRequestHandlerContext,
+  type ObservabilityOnboardingPluginSetupDependencies,
+  type ObservabilityOnboardingPluginStartDependencies,
+  type ObservabilityOnboardingRequestHandlerContext,
 } from '../types';
-import { ObservabilityOnboardingConfig } from '../config';
+import { type ObservabilityOnboardingConfig } from '../config';
 
 export type { ObservabilityOnboardingServerRouteRepository };
 

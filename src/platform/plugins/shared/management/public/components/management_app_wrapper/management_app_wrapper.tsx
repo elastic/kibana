@@ -10,16 +10,16 @@
 import React, { createRef, Component } from 'react';
 
 import {
-  ChromeBreadcrumb,
-  AppMountParameters,
-  ScopedHistory,
-  ThemeServiceStart,
+  type ChromeBreadcrumb,
+  type AppMountParameters,
+  type ScopedHistory,
+  type ThemeServiceStart,
 } from '@kbn/core/public';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
-import { ManagementApp } from '../../utils';
-import { Unmount } from '../../types';
+import { type ManagementApp } from '../../utils';
+import { type Unmount } from '../../types';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon, IconType } from '@elastic/eui';
-import { ProcessorStatus } from '../types';
+import { EuiToolTip, EuiIcon, type IconType } from '@elastic/eui';
+import { type ProcessorStatus } from '../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 
 interface ProcessorStatusIcon {

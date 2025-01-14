@@ -8,9 +8,9 @@
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { type AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
-import { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
+import { MaintenanceWindowStatus, type MaintenanceWindow } from '../../../../common';
 
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-05').toISOString();

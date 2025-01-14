@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-  MetricsSourceConfigurationResponse,
-  PartialMetricsSourceConfigurationProperties,
+  type MetricsSourceConfigurationResponse,
+  type PartialMetricsSourceConfigurationProperties,
   metricsSourceConfigurationResponseRT,
 } from '@kbn/infra-plugin/common/metrics_sources';
 import type { SupertestWithRoleScopeType } from '../../../services';

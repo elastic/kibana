@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Filter } from '@kbn/es-query';
-import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
+import { type Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { type Filter } from '@kbn/es-query';
+import { type DataViewField, type DataView, type ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { type RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
 import { hasESAggSourceMethod } from '../es_agg_source/types';
-import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
+import { AbstractVectorSource, type BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -31,16 +31,16 @@ import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import {
-  AbstractESSourceDescriptor,
-  AbstractSourceDescriptor,
-  DynamicStylePropertyOptions,
-  MapExtent,
-  VectorSourceRequestMeta,
+  type AbstractESSourceDescriptor,
+  type AbstractSourceDescriptor,
+  type DynamicStylePropertyOptions,
+  type MapExtent,
+  type VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { IVectorStyle } from '../../styles/vector/vector_style';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { IField } from '../../fields/field';
-import { FieldFormatter } from '../../../../common/constants';
+import { type IVectorStyle } from '../../styles/vector/vector_style';
+import { type IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { type IField } from '../../fields/field';
+import { type FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { mergeExecutionContext } from '../execution_context_utils';
 import type { IESSource } from './types';

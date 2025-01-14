@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiIconProps, EuiThemeComputed } from '@elastic/eui';
+import { type EuiIconProps, type EuiThemeComputed } from '@elastic/eui';
 
 import { AssistantIcon } from './icon';
 import { useStyles } from './beacon.styles';

@@ -10,19 +10,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
-  EuiSelectableOption,
-  EuiSelectableProps,
+  type EuiSelectableOption,
+  type EuiSelectableProps,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import {
-  ProviderSolution,
+  type ProviderSolution,
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
 } from './render_service_provider/service_provider';
-import { ServiceProviderKeys } from '../../constants';
-import { InferenceProvider } from '../../types/types';
+import { type ServiceProviderKeys } from '../../constants';
+import { type InferenceProvider } from '../../types/types';
 import * as i18n from '../../translations';
 
 interface SelectableProviderProps {

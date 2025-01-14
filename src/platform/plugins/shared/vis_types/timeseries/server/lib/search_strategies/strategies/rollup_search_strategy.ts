@@ -10,7 +10,7 @@
 import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
-import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
+import { AbstractSearchStrategy, type EsSearchRequest } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';

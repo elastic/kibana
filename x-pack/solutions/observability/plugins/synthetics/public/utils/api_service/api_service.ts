@@ -7,8 +7,8 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
-import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
+import { type HttpFetchOptions, type HttpFetchQuery, type HttpSetup } from '@kbn/core/public';
+import { FETCH_STATUS, type AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { kibanaService } from '../kibana_service';

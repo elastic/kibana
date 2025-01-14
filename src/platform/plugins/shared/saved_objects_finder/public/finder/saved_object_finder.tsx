@@ -9,7 +9,7 @@
 
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { ReactElement, ReactNode } from 'react';
+import React, { type ReactElement, type ReactNode } from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -19,14 +19,14 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiSearchBarProps,
-  EuiTableFieldDataColumnType,
+  type EuiSearchBarProps,
+  type EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
   EuiIconTip,
-  IconType,
+  type IconType,
   Query,
-  SearchFilterConfig,
+  type SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +36,7 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
 
-import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
+import { type FinderAttributes, type SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 

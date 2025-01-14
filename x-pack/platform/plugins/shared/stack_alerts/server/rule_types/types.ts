@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { CoreSetup, Logger } from '@kbn/core/server';
-import { AlertingServerSetup, StackAlertsStartDeps } from '../types';
+import { type StackAlert } from '@kbn/alerts-as-data-utils';
+import { type CoreSetup, type Logger } from '@kbn/core/server';
+import { type AlertingServerSetup, type StackAlertsStartDeps } from '../types';
 
 export interface RegisterRuleTypesParams {
   logger: Logger;

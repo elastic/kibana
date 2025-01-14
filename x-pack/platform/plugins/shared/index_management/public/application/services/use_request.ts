@@ -6,12 +6,12 @@
  */
 
 import {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
+  type SendRequestConfig,
+  type SendRequestResponse,
+  type UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-  Error,
+  type Error,
 } from '../../shared_imports';
 
 import { httpService } from './http';

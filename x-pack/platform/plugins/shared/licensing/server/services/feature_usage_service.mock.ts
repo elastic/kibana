@@ -8,9 +8,9 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
-  FeatureUsageService,
-  FeatureUsageServiceSetup,
-  FeatureUsageServiceStart,
+  type FeatureUsageService,
+  type FeatureUsageServiceSetup,
+  type FeatureUsageServiceStart,
 } from './feature_usage_service';
 
 const createSetupMock = (): jest.Mocked<FeatureUsageServiceSetup> => {

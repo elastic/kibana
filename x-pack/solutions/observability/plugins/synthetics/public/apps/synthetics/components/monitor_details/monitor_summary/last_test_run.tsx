@@ -30,9 +30,9 @@ import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
   ConfigKey,
   MonitorTypeEnum,
-  EncryptedSyntheticsSavedMonitor,
-  Ping,
-  SyntheticsJourneyApiResponse,
+  type EncryptedSyntheticsSavedMonitor,
+  type Ping,
+  type SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';

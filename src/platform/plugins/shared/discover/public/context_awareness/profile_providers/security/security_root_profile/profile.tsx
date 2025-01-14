@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, PropsWithChildren } from 'react';
-import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { RootProfileProvider, SolutionType } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
-import { SecurityProfileProviderFactory } from '../types';
+import React, { type FunctionComponent, type PropsWithChildren } from 'react';
+import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { type RootProfileProvider, SolutionType } from '../../../profiles';
+import { type ProfileProviderServices } from '../../profile_provider_services';
+import { type SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 

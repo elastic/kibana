@@ -10,18 +10,18 @@
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
 import {
-  FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
-  FieldFormatInstanceType,
-  FieldFormatConvert,
-  FieldFormatConvertFunction,
-  HtmlContextTypeOptions,
-  TextContextTypeOptions,
-  FieldFormatMetaParams,
-  FieldFormatParams,
+  type FieldFormatsGetConfigFn,
+  type FieldFormatsContentType,
+  type FieldFormatInstanceType,
+  type FieldFormatConvert,
+  type FieldFormatConvertFunction,
+  type HtmlContextTypeOptions,
+  type TextContextTypeOptions,
+  type FieldFormatMetaParams,
+  type FieldFormatParams,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import { type HtmlContextTypeConvert, type TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 

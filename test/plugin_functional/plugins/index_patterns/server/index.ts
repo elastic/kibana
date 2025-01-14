@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/server';
+import { type PluginInitializer } from '@kbn/core/server';
 import {
   IndexPatternsTestPlugin,
-  IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart,
+  type IndexPatternsTestPluginSetup,
+  type IndexPatternsTestPluginStart,
 } from './plugin';
 
 export const plugin: PluginInitializer<

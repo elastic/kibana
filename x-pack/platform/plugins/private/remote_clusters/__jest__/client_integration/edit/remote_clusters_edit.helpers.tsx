@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { registerTestBed, type TestBedConfig } from '@kbn/test-jest-helpers';
+import { type HttpSetup } from '@kbn/core/public';
 
-import { Cluster } from '../../../public';
+import { type Cluster } from '../../../public';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import { AppRouter, registerRouter } from '../../../public/application/services';
+import { type AppRouter, registerRouter } from '../../../public/application/services';
 import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';

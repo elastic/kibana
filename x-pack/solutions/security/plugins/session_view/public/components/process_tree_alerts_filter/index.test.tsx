@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { mockAlertTypeCounts } from '../../../common/mocks/constants/session_view_process.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertsFilter, ProcessTreeAlertsFilterDeps } from '.';
+import { type AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessTreeAlertsFilter, type ProcessTreeAlertsFilterDeps } from '.';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 

@@ -8,14 +8,14 @@
  */
 
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   readLog,
   clearLog,
   currentVersion,
   defaultKibanaIndex,
   startElasticsearch,
-  KibanaMigratorTestKit,
+  type KibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 
 import {

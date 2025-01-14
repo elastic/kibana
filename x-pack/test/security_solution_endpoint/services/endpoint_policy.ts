@@ -7,25 +7,25 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  CreatePackagePolicyRequest,
-  CreatePackagePolicyResponse,
+  type CreateAgentPolicyRequest,
+  type CreateAgentPolicyResponse,
+  type CreatePackagePolicyRequest,
+  type CreatePackagePolicyResponse,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  DeleteAgentPolicyRequest,
-  DeletePackagePoliciesRequest,
+  type DeleteAgentPolicyRequest,
+  type DeletePackagePoliciesRequest,
   epmRouteService,
-  GetPackagePoliciesResponse,
-  GetFullAgentPolicyResponse,
+  type GetPackagePoliciesResponse,
+  type GetFullAgentPolicyResponse,
   type GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { type Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import { type FtrProviderContext } from '../configs/ftr_provider_context';
 
 const FLEET_API_ROOT = '/api/fleet';
 const FLEET_API_AGENT_POLICIES = `${FLEET_API_ROOT}/agent_policies`;

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount as enzymeMount } from 'enzyme';
+import { type ReactWrapper, mount as enzymeMount } from 'enzyme';
 import { keys } from '@elastic/eui';
 
 import {

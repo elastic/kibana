@@ -12,7 +12,7 @@ import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSpacer,
   EuiTabs,

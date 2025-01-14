@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
-  IScopedClusterClient,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type IKibanaResponse,
+  type IRouter,
+  type IScopedClusterClient,
 } from '@kbn/core/server';
-import { EventEmitter } from 'events';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type EventEmitter } from 'events';
+import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '@kbn/task-manager-plugin/server/saved_objects';
 
 const scope = 'testing';

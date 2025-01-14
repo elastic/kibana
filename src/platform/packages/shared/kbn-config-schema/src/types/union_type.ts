@@ -10,7 +10,7 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, type TypeOptions, type TypeMeta, ExtendsDeepOptions } from './type';
+import { Type, type TypeOptions, type TypeMeta, type ExtendsDeepOptions } from './type';
 
 export type UnionTypeOptions<T> = TypeOptions<T> & {
   meta?: Omit<TypeMeta, 'id'>;

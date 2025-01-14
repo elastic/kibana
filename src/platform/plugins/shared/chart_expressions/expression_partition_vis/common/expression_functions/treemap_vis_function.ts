@@ -15,7 +15,7 @@ import {
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes, type TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,

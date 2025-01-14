@@ -10,7 +10,7 @@
 import React from 'react';
 import {
   EuiButtonIcon,
-  EuiDataGridControlColumn,
+  type EuiDataGridControlColumn,
   EuiScreenReaderOnly,
   EuiToolTip,
   useEuiTheme,

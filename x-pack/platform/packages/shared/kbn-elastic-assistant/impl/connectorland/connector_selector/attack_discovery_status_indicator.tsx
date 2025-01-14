@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { AttackDiscoveryStatus } from '@kbn/elastic-assistant-common';
+import React, { type FunctionComponent } from 'react';
+import { type AttackDiscoveryStatus } from '@kbn/elastic-assistant-common';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,

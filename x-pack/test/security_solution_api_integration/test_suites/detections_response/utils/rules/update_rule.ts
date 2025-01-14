@@ -9,8 +9,8 @@ import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  RuleUpdateProps,
-  RuleResponse,
+  type RuleUpdateProps,
+  type RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**

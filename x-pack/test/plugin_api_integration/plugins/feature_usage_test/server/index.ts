@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/server';
+import { type PluginInitializer } from '@kbn/core/server';
 import {
   FeatureUsageTestPlugin,
-  FeatureUsageTestPluginSetup,
-  FeatureUsageTestPluginStart,
+  type FeatureUsageTestPluginSetup,
+  type FeatureUsageTestPluginStart,
 } from './plugin';
 
 export const plugin: PluginInitializer<

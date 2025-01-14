@@ -11,20 +11,20 @@ import { find } from 'lodash';
 
 import {
   API_VERSIONS,
-  DocumentEntry,
+  type DocumentEntry,
   DocumentEntryType,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
-  FindKnowledgeBaseEntriesResponse,
+  type FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { estypes } from '@elastic/elasticsearch';
-import { ElasticAssistantPluginRouter } from '../../../types';
+import { type estypes } from '@elastic/elasticsearch';
+import { type ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
 import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import { type EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
 import { SECURITY_LABS_RESOURCE } from '../constants';
 

@@ -8,9 +8,9 @@
  */
 
 import {
-  SecurityServiceSetup,
-  SecurityServiceStart,
-  SecurityRequestHandlerContext,
+  type SecurityServiceSetup,
+  type SecurityServiceStart,
+  type SecurityRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type {
   InternalSecurityServiceSetup,
@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core-security-server-internal';
 import { apiKeysMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
-import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import { mockAuthenticatedUser, type MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  DefaultItemAction,
+  type DefaultItemAction,
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiIcon,
   EuiText,
@@ -16,9 +16,9 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import { RulesParams } from '@kbn/observability-plugin/public';
+import { type RulesParams } from '@kbn/observability-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';

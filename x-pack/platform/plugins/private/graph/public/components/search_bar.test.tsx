@@ -6,34 +6,34 @@
  */
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
-import React, { Component } from 'react';
+import { SearchBar, type SearchBarProps, SearchBarComponent, type SearchBarStateProps } from './search_bar';
+import React, { type Component } from 'react';
 import {
-  DocLinksStart,
-  HttpStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  OverlayStart,
-  SavedObjectsStart,
+  type DocLinksStart,
+  type HttpStart,
+  type IUiSettingsClient,
+  type NotificationsStart,
+  type OverlayStart,
+  type SavedObjectsStart,
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
+import { I18nProvider, type InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
-import { GraphStore, setDatasource, submitSearchSaga } from '../state_management';
-import { ReactWrapper } from 'enzyme';
+import { type GraphStore, setDatasource, submitSearchSaga } from '../state_management';
+import { type ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { type SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));

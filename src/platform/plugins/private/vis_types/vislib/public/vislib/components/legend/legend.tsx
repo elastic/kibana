@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import React, { type BaseSyntheticEvent, type KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
-import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
+import { type EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { type PersistedState } from '@kbn/visualizations-plugin/public';
+import { type IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { getDataActions } from '../../../services';
-import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
+import { CUSTOM_LEGEND_VIS_TYPES, type LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
-import { BasicVislibParams } from '../../../types';
+import { type BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;

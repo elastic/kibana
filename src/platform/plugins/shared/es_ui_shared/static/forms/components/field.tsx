@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
-import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
+import React, { type ComponentType } from 'react';
+import { type FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {
   field: FieldHook;

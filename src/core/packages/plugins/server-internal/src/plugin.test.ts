@@ -27,7 +27,7 @@ import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
-  InstanceInfo,
+  type InstanceInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

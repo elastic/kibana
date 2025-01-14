@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import React, { type ChangeEvent, Component, Fragment } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import _ from 'lodash';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import { type MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 function makeOption({

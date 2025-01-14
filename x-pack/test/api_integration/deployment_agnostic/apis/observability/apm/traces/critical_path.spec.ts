@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { getAggregatedCriticalPathRootNodes } from '@kbn/apm-plugin/common';
-import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, type ApmFields, type SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { Assign } from '@kbn/utility-types';
+import { type Assign } from '@kbn/utility-types';
 import { compact, invert, sortBy, uniq } from 'lodash';
 import { Readable } from 'stream';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';

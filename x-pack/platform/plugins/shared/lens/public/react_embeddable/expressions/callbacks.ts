@@ -9,11 +9,11 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiHasDisableTriggers } from '@kbn/presentation-publishing';
 import {
-  GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
-  LensInternalApi,
-  LensPublicCallbacks,
+  type GetStateType,
+  type LensApi,
+  type LensEmbeddableStartServices,
+  type LensInternalApi,
+  type LensPublicCallbacks,
 } from '../types';
 import { prepareOnRender } from './on_render';
 import { prepareEventHandler } from './on_event';

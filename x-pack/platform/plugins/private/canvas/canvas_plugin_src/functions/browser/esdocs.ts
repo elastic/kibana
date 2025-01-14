@@ -7,15 +7,15 @@
 
 import { zipObject } from 'lodash';
 import {
-  Datatable,
-  ExpressionFunctionDefinition,
-  ExpressionValueFilter,
+  type Datatable,
+  type ExpressionFunctionDefinition,
+  type ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
-import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import { type Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
 import {
-  SqlRequestParams,
-  SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse,
+  type SqlRequestParams,
+  type SqlSearchStrategyRequest,
+  type SqlSearchStrategyResponse,
   SQL_SEARCH_STRATEGY,
 } from '@kbn/data-plugin/common';
 

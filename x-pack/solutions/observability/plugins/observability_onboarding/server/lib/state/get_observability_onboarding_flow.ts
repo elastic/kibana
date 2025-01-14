@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  ObservabilityOnboardingFlow,
+  type ObservabilityOnboardingFlow,
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  SavedObservabilityOnboardingFlow,
+  type SavedObservabilityOnboardingFlow,
 } from '../../saved_objects/observability_onboarding_status';
 
 export async function getObservabilityOnboardingFlow({

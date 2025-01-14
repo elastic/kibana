@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { Alert, PublicAlert } from './alert';
+import { type AlertInstanceContext, type AlertInstanceState } from '../types';
+import { Alert, type PublicAlert } from './alert';
 import { processAlerts } from '../lib';
 import { DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 

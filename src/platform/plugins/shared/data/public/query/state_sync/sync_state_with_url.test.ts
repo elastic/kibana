@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import { createBrowserHistory, History } from 'history';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '../filter_manager';
+import { type Subscription } from 'rxjs';
+import { createBrowserHistory, type History } from 'history';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { type FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
+  type IKbnUrlStateStorage,
   Storage,
 } from '@kbn/kibana-utils-plugin/public';
-import { QueryService, QueryStart } from '../query_service';
+import { QueryService, type QueryStart } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { TimefilterContract } from '../timefilter';
+import { type TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
-import { GlobalQueryStateFromUrl } from './types';
+import { type GlobalQueryStateFromUrl } from './types';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const minRefreshIntervalDefault = 1000;

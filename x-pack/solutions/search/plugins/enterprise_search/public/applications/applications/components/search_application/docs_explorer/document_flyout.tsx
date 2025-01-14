@@ -10,7 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
@@ -27,9 +27,9 @@ import { FieldIcon } from '../field_icon';
 
 import {
   addTypeToResults,
-  ConvertedResultWithType,
+  type ConvertedResultWithType,
   convertResultToFieldsAndIndex,
-  FieldValue,
+  type FieldValue,
 } from './convert_results';
 import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';

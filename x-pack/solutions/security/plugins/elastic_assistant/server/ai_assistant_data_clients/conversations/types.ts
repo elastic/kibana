@@ -6,11 +6,11 @@
  */
 
 import {
-  ConversationCategory,
-  ConversationConfidence,
-  MessageRole,
-  Provider,
-  Reader,
+  type ConversationCategory,
+  type ConversationConfidence,
+  type MessageRole,
+  type Provider,
+  type Reader,
 } from '@kbn/elastic-assistant-common';
 
 export interface EsReplacementSchema {

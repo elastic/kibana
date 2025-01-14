@@ -22,11 +22,11 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isRootStream, isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import { isRootStream, isWiredReadStream, type ReadStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatus } from './field_status';
-import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
-import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
+import { type FieldEntry, type SchemaEditorEditingState } from './hooks/use_editing_state';
+import { type SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
 
 interface FieldsTableContainerProps {

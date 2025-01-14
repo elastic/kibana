@@ -12,19 +12,19 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
-  DecoratedError,
-  AuthorizeCreateObject,
-  SavedObjectsRawDoc,
+  type DecoratedError,
+  type AuthorizeCreateObject,
+  type SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  SavedObjectsCreateOptions,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkResponse,
+  type SavedObjectsCreateOptions,
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsBulkResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
-  Either,
+  type Either,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
@@ -37,8 +37,8 @@ import {
   errorContent,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
-import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
-import { ApiExecutionContext } from './types';
+import { type PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
+import { type ApiExecutionContext } from './types';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;

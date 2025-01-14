@@ -14,7 +14,7 @@ import {
   EuiHealth,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
+import { type RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 import { getExecutionStatusHealthColor } from '../../../../common/lib';
 

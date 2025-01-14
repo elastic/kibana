@@ -8,15 +8,15 @@
  */
 
 import {
-  History,
-  Path,
-  LocationDescriptorObject,
-  TransitionPromptHook,
-  UnregisterCallback,
-  LocationListener,
-  Location,
-  Href,
-  Action,
+  type History,
+  type Path,
+  type LocationDescriptorObject,
+  type TransitionPromptHook,
+  type UnregisterCallback,
+  type LocationListener,
+  type Location,
+  type Href,
+  type Action,
 } from 'history';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 

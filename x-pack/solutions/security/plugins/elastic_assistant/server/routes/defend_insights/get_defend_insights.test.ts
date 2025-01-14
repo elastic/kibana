@@ -17,7 +17,7 @@ import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clien
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightsRequest } from '../../__mocks__/request';
 import {
-  ElasticAssistantRequestHandlerContextMock,
+  type ElasticAssistantRequestHandlerContextMock,
   requestContextMock,
 } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';

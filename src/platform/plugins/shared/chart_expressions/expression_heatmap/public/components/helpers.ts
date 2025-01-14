@@ -8,12 +8,12 @@
  */
 
 import {
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
+  type PaletteOutput,
+  type PaletteRegistry,
+  type CustomPaletteParams,
   getPaletteStops,
   reversePalette,
-  ColorStop,
+  type ColorStop,
   CUSTOM_PALETTE,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
@@ -21,7 +21,7 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { type FormatFactory, type IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { defaultPaletteParams } from '../constants';
 
 export function getDataMinMax(

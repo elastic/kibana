@@ -9,17 +9,17 @@
 
 import './solution_nav.scss';
 
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import React, { type FC, useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import {
-  EuiAvatarProps,
+  type EuiAvatarProps,
   EuiCollapsibleNavGroup,
   EuiFlyout,
-  EuiFlyoutProps,
+  type EuiFlyoutProps,
   EuiPanel,
   EuiSideNav,
-  EuiSideNavItemType,
-  EuiSideNavProps,
+  type EuiSideNavItemType,
+  type EuiSideNavProps,
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from '../filters';
+import { type Query } from '../filters';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
   nodeTypes,
-  KueryNode,
-  KueryQueryOptions,
+  type KueryNode,
+  type KueryQueryOptions,
 } from '../kuery';
-import { BoolQuery, DataViewBase } from './types';
+import { type BoolQuery, type DataViewBase } from './types';
 
 /** @internal */
 export function buildQueryFromKuery(

@@ -6,21 +6,21 @@
  */
 
 import {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  Plugin,
-  PluginConfigDescriptor,
-  PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type KibanaRequest,
+  type Logger,
+  type Plugin,
+  type PluginConfigDescriptor,
+  type PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { type StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { streamsRouteRepository } from './routes';
 import {
-  StreamsPluginSetupDependencies,
-  StreamsPluginStartDependencies,
-  StreamsServer,
+  type StreamsPluginSetupDependencies,
+  type StreamsPluginStartDependencies,
+  type StreamsServer,
 } from './types';
 import { AssetService } from './lib/streams/assets/asset_service';
 

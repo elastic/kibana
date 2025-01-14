@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsFieldSelector } from './field_selector';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import { DROPDOWN_TEST_ID } from './test_ids';
 
 const mockIndexPattern: DataView = {

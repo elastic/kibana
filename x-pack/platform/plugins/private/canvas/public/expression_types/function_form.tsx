@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { Ast, fromExpression } from '@kbn/interpreter';
-import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
+import { type Ast, fromExpression } from '@kbn/interpreter';
+import { ArgAddPopover, type ArgOptions } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 // @ts-expect-error unconverted components
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
-import { BaseForm, BaseFormProps } from './base_form';
-import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
-import { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
+import { BaseForm, type BaseFormProps } from './base_form';
+import { Arg, type ArgUiConfig, type ResolvedArgProps } from './arg';
+import { type ArgDisplayType, type Args, type ArgType, type ArgTypeDef, type ArgValue, type ExpressionType } from './types';
 import { Model, Transform, View } from '.';
 import {
-  AssetType,
-  CanvasElement,
-  ExpressionAstExpression,
-  ExpressionContext,
-  ExpressionValue,
+  type AssetType,
+  type CanvasElement,
+  type ExpressionAstExpression,
+  type ExpressionContext,
+  type ExpressionValue,
 } from '../../types';
 import { buildDefaultArgExpr, getArgTypeDef } from '../lib/args';
 

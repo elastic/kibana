@@ -35,8 +35,8 @@ import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
-import { TimeseriesVisParams } from '../../../types';
+import { type PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { type TimeseriesVisParams } from '../../../types';
 
 export class TopNPanelConfig extends Component<
   PanelConfigProps,

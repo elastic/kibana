@@ -7,23 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { schema, TypeOf } from '@kbn/config-schema';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '@kbn/core/server';
-import { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
+import { type Logger } from '@kbn/core/server';
+import { type ActionType, type ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  ActionTypeExecutorResult,
+  type ActionTypeExecutorResult,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { promiseResult, isOk, Result } from '../lib/result_type';
+import { promiseResult, isOk, type Result } from '../lib/result_type';
 
 export type TorqActionType = ActionType<
   ActionTypeConfigType,

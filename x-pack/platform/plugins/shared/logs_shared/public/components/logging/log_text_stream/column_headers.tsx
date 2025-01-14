@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   LogEntryColumn,
   LogEntryColumnContent,
-  LogEntryColumnWidth,
-  LogEntryColumnWidths,
+  type LogEntryColumnWidth,
+  type LogEntryColumnWidths,
 } from './log_entry_column';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
 import {
-  LogColumnRenderConfiguration,
+  type LogColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,

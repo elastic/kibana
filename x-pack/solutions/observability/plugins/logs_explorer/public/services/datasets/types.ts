@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import { type HttpStart } from '@kbn/core/public';
 import {
-  FindDatasetsRequestQuery,
-  FindDatasetValue,
-  FindIntegrationsRequestQuery,
-  FindIntegrationsValue,
+  type FindDatasetsRequestQuery,
+  type FindDatasetValue,
+  type FindIntegrationsRequestQuery,
+  type FindIntegrationsValue,
 } from '../../../common/latest';
 
 export type DatasetsServiceSetup = void;

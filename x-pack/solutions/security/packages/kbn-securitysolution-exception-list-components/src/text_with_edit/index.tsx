@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Interpolation, Theme } from '@emotion/react';
+import { type Interpolation, type Theme } from '@emotion/react';
 import { textWithEditContainerCss, editIconCss } from './text_with_edit.styles';
 interface TextWithEditProps {
   isReadonly: boolean;

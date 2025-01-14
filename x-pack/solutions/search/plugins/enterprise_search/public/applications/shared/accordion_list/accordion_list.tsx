@@ -16,7 +16,7 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiTitle,
-  IconType,
+  type IconType,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 

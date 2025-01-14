@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore, PhrasesFilter } from '..';
+import { FilterStateStore, type PhrasesFilter } from '..';
 
 export const phrasesFilter: PhrasesFilter = {
   meta: {

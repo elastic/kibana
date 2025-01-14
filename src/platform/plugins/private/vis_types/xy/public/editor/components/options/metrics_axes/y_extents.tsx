@@ -11,10 +11,10 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption, NumberInputOptionProps } from '@kbn/vis-default-editor-plugin/public';
+import { NumberInputOption, type NumberInputOptionProps } from '@kbn/vis-default-editor-plugin/public';
 
-import { Scale, ScaleType } from '../../../../types';
-import { SetScale } from './value_axis_options';
+import { type Scale, ScaleType } from '../../../../types';
+import { type SetScale } from './value_axis_options';
 
 const rangeError = i18n.translate('visTypeXy.controls.pointSeries.valueAxes.minErrorMessage', {
   defaultMessage: 'Min should be less than Max.',

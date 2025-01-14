@@ -9,16 +9,16 @@
 
 import pMap from 'p-map';
 import {
-  AuthorizeUpdateObject,
+  type AuthorizeUpdateObject,
   SavedObjectsErrorHelpers,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkDeleteResponse,
+  type SavedObjectsBulkDeleteObject,
+  type SavedObjectsBulkDeleteOptions,
+  type SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {

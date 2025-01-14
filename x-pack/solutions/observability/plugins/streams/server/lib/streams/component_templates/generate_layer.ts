@@ -6,11 +6,11 @@
  */
 
 import {
-  ClusterPutComponentTemplateRequest,
-  MappingDateProperty,
-  MappingProperty,
+  type ClusterPutComponentTemplateRequest,
+  type MappingDateProperty,
+  type MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { type WiredStreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';

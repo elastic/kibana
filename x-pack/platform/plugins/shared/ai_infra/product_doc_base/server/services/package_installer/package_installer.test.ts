@@ -20,7 +20,7 @@ import {
   getArtifactName,
   getProductDocIndexName,
   DocumentationProduct,
-  ProductName,
+  type ProductName,
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';

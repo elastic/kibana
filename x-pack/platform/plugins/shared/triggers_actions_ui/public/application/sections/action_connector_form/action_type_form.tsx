@@ -33,10 +33,10 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import {
-  ActionVariable,
-  RuleActionAlertsFilterProperty,
-  RuleActionFrequency,
-  RuleActionParam,
+  type ActionVariable,
+  type RuleActionAlertsFilterProperty,
+  type RuleActionFrequency,
+  type RuleActionParam,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
@@ -50,21 +50,21 @@ import {
   RuleActionsAlertsFilterTimeframe,
 } from '@kbn/response-ops-rule-form';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { type ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import {
-  IErrorObject,
-  RuleAction,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
+  type IErrorObject,
+  type RuleAction,
+  type ActionTypeIndex,
+  type ActionConnector,
+  type ActionVariables,
+  type ActionTypeRegistryContract,
   ActionConnectorMode,
-  NotifyWhenSelectOptions,
+  type NotifyWhenSelectOptions,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
+import { type ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';

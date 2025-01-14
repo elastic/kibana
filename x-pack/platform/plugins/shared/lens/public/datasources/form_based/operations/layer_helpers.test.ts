@@ -19,27 +19,27 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '.';
-import { TermsIndexPatternColumn } from './definitions/terms';
-import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
-import { AvgIndexPatternColumn } from './definitions/metrics';
+import { operationDefinitionMap, type OperationType } from '.';
+import { type TermsIndexPatternColumn } from './definitions/terms';
+import { type DateHistogramIndexPatternColumn } from './definitions/date_histogram';
+import { type AvgIndexPatternColumn } from './definitions/metrics';
 import type { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import {
-  CounterRateIndexPatternColumn,
-  FiltersIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  GenericIndexPatternColumn,
-  MathIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MovingAverageIndexPatternColumn,
-  OperationDefinition,
+  type CounterRateIndexPatternColumn,
+  type FiltersIndexPatternColumn,
+  type FormulaIndexPatternColumn,
+  type GenericIndexPatternColumn,
+  type MathIndexPatternColumn,
+  type MaxIndexPatternColumn,
+  type MovingAverageIndexPatternColumn,
+  type OperationDefinition,
 } from './definitions';
-import { TinymathAST } from '@kbn/tinymath';
-import { IndexPattern } from '../../../types';
+import { type TinymathAST } from '@kbn/tinymath';
+import { type IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 

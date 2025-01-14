@@ -13,16 +13,16 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { type CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import {
   APP_WRAPPER_CLASS,
-  App,
-  AppMountParameters,
-  AppUpdater,
+  type App,
+  type AppMountParameters,
+  type AppUpdater,
   DEFAULT_APP_CATEGORIES,
-  Plugin,
-  PluginInitializerContext,
-  ScopedHistory,
+  type Plugin,
+  type PluginInitializerContext,
+  type ScopedHistory,
   type CoreSetup,
   type CoreStart,
 } from '@kbn/core/public';
@@ -30,7 +30,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import { type FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -66,7 +66,7 @@ import {
   DashboardAppLocatorDefinition,
   type DashboardAppLocator,
 } from './dashboard_app/locator/locator';
-import { DashboardMountContextProps } from './dashboard_app/types';
+import { type DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
@@ -74,7 +74,7 @@ import {
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import {
-  GetPanelPlacementSettings,
+  type GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';

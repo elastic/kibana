@@ -13,10 +13,10 @@ import {
   type StreamingChatResponseEvent,
   ChatCompletionErrorCode,
   ChatCompletionError,
-  MessageAddEvent,
+  type MessageAddEvent,
   createInternalServerError,
   createConversationNotFoundError,
-  StreamingChatResponseEventWithoutError,
+  type StreamingChatResponseEventWithoutError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { complete } from './complete';

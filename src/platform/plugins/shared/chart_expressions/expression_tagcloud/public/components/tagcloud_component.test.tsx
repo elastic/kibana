@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { Wordcloud, Settings, WordcloudSpec, Chart } from '@elastic/charts';
+import { Wordcloud, Settings, type WordcloudSpec, Chart } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';
-import { TagCloudRendererParams } from '../../common/types';
+import TagCloudChart, { type TagCloudChartProps } from './tagcloud_component';
+import { type TagCloudRendererParams } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
 jest.mock('../format_service', () => ({

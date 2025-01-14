@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiIconTip,
   EuiSpacer,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiCallOut,
 } from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
@@ -22,7 +22,7 @@ import {
   useForm,
   Form,
   fieldValidators,
-  FormSchema,
+  type FormSchema,
   UseField,
   FIELD_TYPES,
   ComboBoxField,
@@ -30,7 +30,7 @@ import {
 
 import type { IndexWithFields, FieldItem } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import { useCreatePolicyContext, type DraftPolicy } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

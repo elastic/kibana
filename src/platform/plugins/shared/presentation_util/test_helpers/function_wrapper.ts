@@ -9,9 +9,9 @@
 
 import { mapValues } from 'lodash';
 import {
-  ExpressionValueBoxed,
-  typeSpecs,
-  ExpressionFunctionDefinition,
+  type ExpressionValueBoxed,
+  type typeSpecs,
+  type ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 
 type DefaultFnResultType = (typeof typeSpecs)[number] &

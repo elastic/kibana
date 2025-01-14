@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import { type RuleTypeState } from '@kbn/alerting-plugin/server';
 import {
-  ActionGroupIdsOf,
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
+  type ActionGroupIdsOf,
+  type AlertInstanceContext as AlertContext,
+  type AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import {
-  ALERT_ACTION,
-  HIGH_PRIORITY_ACTION,
-  MEDIUM_PRIORITY_ACTION,
-  LOW_PRIORITY_ACTION,
-  SUPPRESSED_PRIORITY_ACTION,
+  type ALERT_ACTION,
+  type HIGH_PRIORITY_ACTION,
+  type MEDIUM_PRIORITY_ACTION,
+  type LOW_PRIORITY_ACTION,
+  type SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 
 export enum AlertStates {

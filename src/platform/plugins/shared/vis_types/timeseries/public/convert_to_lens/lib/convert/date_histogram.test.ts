@@ -9,8 +9,8 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
-  DateHistogramColumn,
-  DateHistogramParams,
+  type DateHistogramColumn,
+  type DateHistogramParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Panel, Series } from '../../../../common/types';
 import { createPanel, createSeries } from '../__mocks__';

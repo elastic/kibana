@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { XDomain } from '../x_domain';
+import React, { type FC } from 'react';
+import { type XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import { isEndzoneBucket } from './utils';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Dispatch, Middleware } from 'redux';
+import { type Dispatch, type Middleware } from 'redux';
 import {
   loadingIndicator as defaultLoadingIndicator,
-  LoadingIndicatorInterface,
+  type LoadingIndicatorInterface,
 } from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';
 
@@ -18,7 +18,7 @@ interface InFlightMiddlewareOptions {
 }
 
 import {
-  Action as AnyAction,
+  type Action as AnyAction,
   inFlightActive,
   inFlightActiveActionType,
   inFlightComplete,

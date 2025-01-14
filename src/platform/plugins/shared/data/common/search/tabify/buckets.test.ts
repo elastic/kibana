@@ -8,7 +8,7 @@
  */
 
 import { TabifyBuckets } from './buckets';
-import { AggGroupNames, IAggConfig } from '../aggs';
+import { AggGroupNames, type IAggConfig } from '../aggs';
 import moment from 'moment';
 
 interface Bucket {

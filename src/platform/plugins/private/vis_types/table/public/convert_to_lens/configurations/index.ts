@@ -8,12 +8,12 @@
  */
 
 import {
-  CollapseFunction,
-  Column,
-  PagingState,
-  TableVisConfiguration,
+  type CollapseFunction,
+  type Column,
+  type PagingState,
+  type TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { TableVisParams } from '../../../common';
+import { type TableVisParams } from '../../../common';
 
 enum RowHeightMode {
   auto = 'auto',

@@ -6,19 +6,19 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import SemVer from 'semver/classes/semver';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type SemVer from 'semver/classes/semver';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
-  ApplicationStart,
-  I18nStart,
-  ThemeServiceStart,
-  FatalErrorsStart,
-  ScopedHistory,
-  DocLinksStart,
-  ExecutionContextStart,
-  HttpSetup,
-  IUiSettingsClient,
-  OverlayStart,
+  type ApplicationStart,
+  type I18nStart,
+  type ThemeServiceStart,
+  type FatalErrorsStart,
+  type ScopedHistory,
+  type DocLinksStart,
+  type ExecutionContextStart,
+  type HttpSetup,
+  type IUiSettingsClient,
+  type OverlayStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -26,11 +26,11 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
-import { EuiBreadcrumb } from '@elastic/eui';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ExtensionsService } from '../services';
-import { HttpService, NotificationService, UiMetricService } from './services';
-import { IndexManagementBreadcrumb } from './services/breadcrumbs';
+import { type EuiBreadcrumb } from '@elastic/eui';
+import { type LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { type ExtensionsService } from '../services';
+import { type HttpService, type NotificationService, type UiMetricService } from './services';
+import { type IndexManagementBreadcrumb } from './services/breadcrumbs';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 

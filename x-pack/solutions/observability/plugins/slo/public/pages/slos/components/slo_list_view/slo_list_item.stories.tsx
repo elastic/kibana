@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { type ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import {
@@ -14,7 +14,7 @@ import {
   historicalSummaryData,
 } from '../../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../../data/slo/slo';
-import { SloListItem as Component, SloListItemProps } from './slo_list_item';
+import { SloListItem as Component, type SloListItemProps } from './slo_list_item';
 
 export default {
   component: Component,

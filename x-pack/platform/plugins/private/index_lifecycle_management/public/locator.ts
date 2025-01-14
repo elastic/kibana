@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/public';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { type ManagementAppLocator } from '@kbn/management-plugin/common';
+import { type LocatorDefinition } from '@kbn/share-plugin/public';
+import { ILM_LOCATOR_ID, type IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
   getPoliciesListPath,
   getPolicyCreatePath,

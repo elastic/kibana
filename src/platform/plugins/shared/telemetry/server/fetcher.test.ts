@@ -12,7 +12,7 @@ import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   telemetryCollectionManagerPluginMock,
-  Setup,
+  type Setup,
 } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 jest.mock('rxjs', () => {

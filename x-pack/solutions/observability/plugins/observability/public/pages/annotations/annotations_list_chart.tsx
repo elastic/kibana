@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   Axis,
-  BrushEndListener,
+  type BrushEndListener,
   Chart,
   Position,
   ScaleType,
@@ -16,20 +16,20 @@ import {
   TooltipHeader,
   TooltipContainer,
   TooltipTable,
-  XYChartElementEvent,
+  type XYChartElementEvent,
   BarSeries,
 } from '@elastic/charts';
 import { EuiButton, EuiHorizontalRule, EuiToolTip, formatDate } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
-import { TooltipValue } from '@elastic/charts/dist/specs';
+import { type TooltipValue } from '@elastic/charts/dist/specs';
 import moment from 'moment';
 import { useChartThemes } from '../../hooks/use_chart_themes';
-import { AnnotationsPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
+import { type AnnotationsPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
 import { createAnnotationPortal } from './create_annotation_btn';
 import { useAnnotations } from '../../components/annotations/use_annotations';
-import { Annotation } from '../../../common/annotations';
+import { type Annotation } from '../../../common/annotations';
 
 export function AnnotationsListChart({
   data,

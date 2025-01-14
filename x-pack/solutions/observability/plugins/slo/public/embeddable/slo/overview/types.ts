@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { type Filter } from '@kbn/es-query';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
-  HasEditCapabilities,
-  PublishesPanelTitle,
-  PublishesWritablePanelTitle,
-  SerializedTitles,
+  type HasEditCapabilities,
+  type PublishesPanelTitle,
+  type PublishesWritablePanelTitle,
+  type SerializedTitles,
 } from '@kbn/presentation-publishing';
 
 export type OverviewMode = 'single' | 'groups';

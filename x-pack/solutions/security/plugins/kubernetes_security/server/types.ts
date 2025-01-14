@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
-  RuleRegistryPluginStartContract as RuleRegistryPluginStart,
+  type RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
+  type RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 
 export interface KubernetesSecuritySetupPlugins {

@@ -10,7 +10,7 @@ import {
   combineStats,
   rollUpTotals,
   ensureTimeSpan,
-  KibanaUsageStats,
+  type KibanaUsageStats,
 } from './get_kibana_stats';
 
 describe('Get Kibana Stats', () => {

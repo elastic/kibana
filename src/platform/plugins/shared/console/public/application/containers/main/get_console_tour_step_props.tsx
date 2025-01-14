@@ -10,13 +10,13 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiTourStepProps,
-  EuiTourActions,
-  EuiTourState,
+  type EuiTourStepProps,
+  type EuiTourActions,
+  type EuiTourState,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ConsoleTourStepProps } from '../../components';
+import { type ConsoleTourStepProps } from '../../components';
 
 export const getConsoleTourStepProps = (
   stateTourStepProps: EuiTourStepProps[],

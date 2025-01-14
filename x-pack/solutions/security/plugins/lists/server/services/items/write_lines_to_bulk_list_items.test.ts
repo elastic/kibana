@@ -9,7 +9,7 @@ import { getListItemResponseMock } from '../../../common/schemas/response/list_i
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 
 import {
-  LinesResult,
+  type LinesResult,
   importListItemsToStream,
   writeBufferToItems,
 } from './write_lines_to_bulk_list_items';

@@ -11,16 +11,16 @@
 
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper, mount } from 'enzyme';
+import { type ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import {
-  ValidationResult,
-  Rule,
-  GenericValidationResult,
-  RuleTypeModel,
+  type ValidationResult,
+  type Rule,
+  type GenericValidationResult,
+  type RuleTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
 import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';

@@ -14,7 +14,7 @@ import {
 } from '..';
 import {
   createInternalServerError,
-  FunctionDefinition,
+  type FunctionDefinition,
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';

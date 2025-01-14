@@ -8,13 +8,13 @@
  */
 
 import { each } from 'lodash';
-import { DataViewBase, DataViewFieldBase } from '../../es_query';
+import { type DataViewBase, type DataViewFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
 import {
   buildRangeFilter,
   getRangeFilterField,
-  RangeFilter,
-  ScriptedRangeFilter,
+  type RangeFilter,
+  type ScriptedRangeFilter,
 } from './range_filter';
 
 describe('Range filter builder', () => {

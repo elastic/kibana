@@ -9,14 +9,14 @@
 
 import { get, identity } from 'lodash';
 import {
-  ScriptedRangeFilter,
-  RangeFilter,
+  type ScriptedRangeFilter,
+  type RangeFilter,
   isScriptedRangeFilter,
   isRangeFilter,
-  Filter,
+  type Filter,
   FILTERS,
 } from '@kbn/es-query';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { type FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export function getRangeDisplayValue(
   { meta: { params } }: RangeFilter | ScriptedRangeFilter,

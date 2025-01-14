@@ -8,10 +8,10 @@
  */
 
 import {
-  BehaviorSubject,
+  type BehaviorSubject,
   combineLatest,
   debounceTime,
-  Observable,
+  type Observable,
   of,
   startWith,
   switchMap,
@@ -19,15 +19,15 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { type PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
+import { type OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlStateManager } from '../../types';
+import { type OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import { type ControlFetchContext } from '../../../control_group/control_fetch';
+import { type ControlStateManager } from '../../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
+import { type OptionsListComponentApi, type OptionsListComponentState, type OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,

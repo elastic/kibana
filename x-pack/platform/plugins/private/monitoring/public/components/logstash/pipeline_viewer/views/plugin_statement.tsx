@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  UseEuiTheme,
+  type UseEuiTheme,
   logicalCSS,
 } from '@elastic/eui';
 
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
-import { Vertex } from './types';
+import { type Vertex } from './types';
 
 const pluginStyle = ({ euiTheme }: UseEuiTheme) => css`
   ${logicalCSS('margin-left', euiTheme.size.xs)}

@@ -10,7 +10,7 @@
 /* eslint-disable dot-notation */
 jest.mock('node-fetch');
 jest.mock('fs/promises');
-import { AWSCloudService, AWSResponse } from './aws';
+import { AWSCloudService, type AWSResponse } from './aws';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const fetchMock = require('node-fetch') as jest.Mock;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexStorageSettings, types } from '@kbn/observability-utils-server/es/storage';
+import { type IndexStorageSettings, types } from '@kbn/observability-utils-server/es/storage';
 import { ASSET_ASSET_ID, ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
 import { ASSET_TYPES } from '../../../../common/assets';
 

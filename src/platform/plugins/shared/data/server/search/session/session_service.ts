@@ -10,14 +10,14 @@
 import { notFound } from '@hapi/boom';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  ElasticsearchClient,
+  type CoreSetup,
+  type CoreStart,
+  type KibanaRequest,
+  type Logger,
+  type SavedObject,
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+  type ElasticsearchClient,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
@@ -26,14 +26,14 @@ import { debounce } from 'lodash';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
-  SearchSessionRequestInfo,
-  SearchSessionSavedObjectAttributes,
-  SearchSessionsFindResponse,
-  SearchSessionStatusResponse,
+  type SearchSessionRequestInfo,
+  type SearchSessionSavedObjectAttributes,
+  type SearchSessionsFindResponse,
+  type SearchSessionStatusResponse,
 } from '../../../common';
-import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
+import { type ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
+import { type ConfigSchema, type SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {

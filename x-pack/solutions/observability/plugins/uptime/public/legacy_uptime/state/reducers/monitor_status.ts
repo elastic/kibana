@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
+import { handleActions, type Action } from 'redux-actions';
 import {
   getMonitorStatusAction,
   getMonitorStatusActionSuccess,
   getMonitorStatusActionFail,
 } from '../actions';
-import { Ping } from '../../../../common/runtime_types';
-import { QueryParams } from '../actions/types';
+import { type Ping } from '../../../../common/runtime_types';
+import { type QueryParams } from '../actions/types';
 
 export interface MonitorStatusState {
   status: Ping | null;

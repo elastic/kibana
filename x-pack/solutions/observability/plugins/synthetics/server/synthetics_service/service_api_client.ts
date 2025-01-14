@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { concat, forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
+import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import { concat, forkJoin, from as rxjsFrom, type Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
-import { Logger } from '@kbn/core/server';
-import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsServerSetup } from '../types';
+import { type Logger } from '@kbn/core/server';
+import { type LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import { type SyntheticsServerSetup } from '../types';
 import {
   convertToDataStreamFormat,
-  DataStreamConfig,
+  type DataStreamConfig,
 } from './formatters/public_formatters/convert_to_data_stream';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import {
-  MonitorFields,
-  PublicLocations,
-  ServiceLocation,
-  ServiceLocationErrors,
+  type MonitorFields,
+  type PublicLocations,
+  type ServiceLocation,
+  type ServiceLocationErrors,
 } from '../../common/runtime_types';
-import { ServiceConfig } from '../config';
+import { type ServiceConfig } from '../config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 

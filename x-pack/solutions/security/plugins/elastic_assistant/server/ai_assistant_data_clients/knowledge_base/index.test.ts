@@ -10,7 +10,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
-import { AIAssistantKnowledgeBaseDataClient, KnowledgeBaseDataClientParams } from '.';
+import { AIAssistantKnowledgeBaseDataClient, type KnowledgeBaseDataClientParams } from '.';
 import {
   getCreateKnowledgeBaseEntrySchemaMock,
   getKnowledgeBaseEntryMock,

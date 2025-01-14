@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Node, ReferenceFindableNode } from 'ts-morph';
-import { ToolingLog } from '@kbn/tooling-log';
+import { Node, type ReferenceFindableNode } from 'ts-morph';
+import { type ToolingLog } from '@kbn/tooling-log';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
-import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
+import { type ApiDeclaration, type ApiReference, type PluginOrPackage } from '../types';
 import { isNamedNode } from '../tsmorph_utils';
 
 interface Opts {

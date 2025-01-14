@@ -11,11 +11,11 @@ import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  SavedObjectsRawDocSource,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import { type SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
 import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
-import { ApiExecutionContext } from './types';
+import { type ApiExecutionContext } from './types';
 
 export interface PerformGetParams {
   type: string;

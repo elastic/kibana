@@ -8,9 +8,9 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   ScheduleUnit,
-  MonitorFields,
-  Validator,
-  Validation,
+  type MonitorFields,
+  type Validator,
+  type Validation,
 } from '../types';
 
 export const DIGITS_ONLY = /^[0-9]*$/g;

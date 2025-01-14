@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  AuthConfiguration,
-  authTypeSchema,
-  hasAuthSchema,
-  SecretConfigurationSchema,
+  type AuthConfiguration,
+  type authTypeSchema,
+  type hasAuthSchema,
+  type SecretConfigurationSchema,
 } from './schema';
 
 export type HasAuth = TypeOf<typeof hasAuthSchema>;

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/server';
-import { DataSearchTestPlugin, TestPluginSetup, TestPluginStart } from './plugin';
+import { type PluginInitializer } from '@kbn/core/server';
+import { DataSearchTestPlugin, type TestPluginSetup, type TestPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = async () =>
   new DataSearchTestPlugin();

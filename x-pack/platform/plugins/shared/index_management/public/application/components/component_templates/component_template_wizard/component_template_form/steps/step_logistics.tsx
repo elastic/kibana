@@ -23,12 +23,12 @@ import {
   getUseField,
   getFormRow,
   Field,
-  Forms,
+  type Forms,
   NumericField,
   JsonEditorField,
   useFormData,
 } from '../../../shared_imports';
-import { DataRetention } from '../../../../../../../common';
+import { type DataRetention } from '../../../../../../../common';
 import { UnitField, timeUnits } from '../../../../shared';
 import { useComponentTemplatesContext } from '../../../component_templates_context';
 import { logisticsFormSchema } from './step_logistics_schema';

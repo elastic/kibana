@@ -6,14 +6,14 @@
  */
 
 import {
-  ExceptionListItemSchema,
-  ImportExceptionListItemSchemaDecoded,
-  NamespaceType,
+  type ExceptionListItemSchema,
+  type ImportExceptionListItemSchemaDecoded,
+  type NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import { type SavedObjectsClientContract, type SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
+import { type ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 import { getExceptionListsItemFilter } from '../get_exception_lists_item_filter';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 import { transformSavedObjectsToFoundExceptionListItem } from '..';

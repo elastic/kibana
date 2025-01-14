@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { AxiosError, Method } from 'axios';
-import { IncomingMessage } from 'http';
+import { type AxiosError, type Method } from 'axios';
+import { type IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -26,19 +26,19 @@ import {
   BedrockClientSendParamsSchema,
 } from '../../../common/bedrock/schema';
 import {
-  Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse,
-  InvokeAIActionParams,
-  InvokeAIActionResponse,
-  InvokeAIRawActionParams,
-  InvokeAIRawActionResponse,
-  RunApiLatestResponse,
-  BedrockMessage,
-  BedrockToolChoice,
-  ConverseActionParams,
-  ConverseActionResponse,
+  type Config,
+  type Secrets,
+  type RunActionParams,
+  type RunActionResponse,
+  type InvokeAIActionParams,
+  type InvokeAIActionResponse,
+  type InvokeAIRawActionParams,
+  type InvokeAIRawActionResponse,
+  type RunApiLatestResponse,
+  type BedrockMessage,
+  type BedrockToolChoice,
+  type ConverseActionParams,
+  type ConverseActionResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -46,9 +46,9 @@ import {
   DEFAULT_TIMEOUT_MS,
 } from '../../../common/bedrock/constants';
 import {
-  DashboardActionParams,
-  DashboardActionResponse,
-  StreamingResponse,
+  type DashboardActionParams,
+  type DashboardActionResponse,
+  type StreamingResponse,
 } from '../../../common/bedrock/types';
 import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 

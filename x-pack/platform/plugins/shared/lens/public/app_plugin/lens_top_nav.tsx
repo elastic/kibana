@@ -8,26 +8,26 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { type TopNavMenuData, type TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { type DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import { type LensAppServices, type LensTopNavActions, type LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
+  type LensAppState,
   switchAndCleanDatasource,
   selectIsManaged,
 } from '../state_management';

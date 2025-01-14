@@ -6,16 +6,16 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { UpsertMonitorError, UpsertMonitorRequest } from '..';
+import { type UpsertMonitorError, type UpsertMonitorRequest } from '..';
 import {
-  MonitorManagementListResult,
-  MonitorFiltersResult,
-  EncryptedSyntheticsSavedMonitor,
-  SyntheticsMonitorWithId,
+  type MonitorManagementListResult,
+  type MonitorFiltersResult,
+  type EncryptedSyntheticsSavedMonitor,
+  type SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
-import { MonitorListPageState } from './models';
+import { type MonitorListPageState } from './models';
 
 export const fetchMonitorListAction = createAsyncAction<
   MonitorListPageState,

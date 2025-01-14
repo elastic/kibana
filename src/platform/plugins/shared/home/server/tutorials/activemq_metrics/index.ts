@@ -14,9 +14,9 @@ import {
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
-  TutorialContext,
+  type TutorialContext,
   TutorialsCategory,
-  TutorialSchema,
+  type TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function activemqMetricsSpecProvider(context: TutorialContext): TutorialSchema {

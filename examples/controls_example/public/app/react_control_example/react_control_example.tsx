@@ -22,21 +22,21 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiToolTip,
-  OnTimeChangeProps,
+  type OnTimeChangeProps,
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type ControlGroupApi } from '@kbn/controls-plugin/public';
+import { type CoreStart } from '@kbn/core/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
-  HasUniqueId,
-  PublishesDataLoading,
+  type HasUniqueId,
+  type PublishesDataLoading,
   useBatchedPublishingSubjects,
-  ViewMode as ViewModeType,
+  type ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

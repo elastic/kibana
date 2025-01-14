@@ -13,7 +13,7 @@ import {
   DEFAULT_MIN_STOP,
   DEFAULT_MAX_STOP,
   DEFAULT_COLOR_STEPS,
-  RequiredPaletteParamTypes,
+  type RequiredPaletteParamTypes,
 } from '@kbn/coloring';
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {

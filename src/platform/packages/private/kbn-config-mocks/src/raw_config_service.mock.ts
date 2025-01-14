@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RawConfigService } from '@kbn/config';
 

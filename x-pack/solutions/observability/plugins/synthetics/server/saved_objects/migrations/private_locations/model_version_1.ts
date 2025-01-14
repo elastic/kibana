@@ -6,10 +6,10 @@
  */
 import * as t from 'io-ts';
 import {
-  SavedObjectModelTransformationFn,
-  SavedObjectsModelVersion,
+  type SavedObjectModelTransformationFn,
+  type SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { type SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 
 export const PrivateLocationAttributesCodecLegacy = t.intersection([
   t.interface({

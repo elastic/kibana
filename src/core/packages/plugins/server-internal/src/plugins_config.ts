@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { Env } from '@kbn/config';
+import { type Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from './constants';

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { type FC, type PropsWithChildren, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
+  type RedirectAppLinksServices,
+  type RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
 const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | null>(null);

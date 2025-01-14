@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react';
+import React, { useEffect, useState, useRef, type KeyboardEvent, useMemo } from 'react';
 import {
   EuiTreeView,
   EuiText,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { type FunctionComponent, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,15 +23,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
-import { ProcessorInternal } from '../../types';
+import { Form, FormDataProvider, type FormHook } from '../../../../../shared_imports';
+import { type ProcessorInternal } from '../../types';
 import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
 
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
 import { ProcessorOutput } from './processor_output';
-import { Fields } from './processor_form.container';
+import { type Fields } from './processor_form.container';
 
 export interface Props {
   isOnFailure: boolean;

@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 
 import {
   createExceptionListSchema,
-  CreateExceptionListSchemaDecoded,
+  type CreateExceptionListSchemaDecoded,
 } from '../../create_exception_list_schema';
 
 export const internalCreateExceptionListSchema = t.intersection([

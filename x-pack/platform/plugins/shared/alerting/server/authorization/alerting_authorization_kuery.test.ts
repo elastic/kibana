@@ -11,7 +11,7 @@ import {
   ensureFieldIsSafeForQuery,
   asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
-import { KueryNode, toKqlExpression } from '@kbn/es-query';
+import { type KueryNode, toKqlExpression } from '@kbn/es-query';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {

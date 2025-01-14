@@ -24,7 +24,7 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
-import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import { type LayerSettingsFeatures, type OperationDefinition, type ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -33,9 +33,9 @@ import {
   isColumnOfType,
 } from './helpers';
 import {
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-  ValueFormatConfig,
+  type FieldBasedIndexPatternColumn,
+  type BaseIndexPatternColumn,
+  type ValueFormatConfig,
 } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { type FC, type PropsWithChildren, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Loader } from './loader';
 

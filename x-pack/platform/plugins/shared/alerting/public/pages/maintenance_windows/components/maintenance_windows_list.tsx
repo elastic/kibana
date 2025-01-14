@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   formatDate,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -24,12 +24,12 @@ import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigati
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import {
-  MaintenanceWindowStatus,
+  type MaintenanceWindowStatus,
   MAINTENANCE_WINDOW_DATE_FORMAT,
-  MaintenanceWindow,
+  type MaintenanceWindow,
 } from '../../../../common';
 import { StatusFilter } from './status_filter';
-import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_popover';
+import { TableActionsPopover, type TableActionsPopoverProps } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';

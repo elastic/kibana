@@ -12,13 +12,13 @@ import {
 } from '@kbn/maps-ems-plugin/common';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../constants';
 import {
-  EMSTMSSourceDescriptor,
-  EMSFileSourceDescriptor,
-  ESGeoGridSourceDescriptor,
-  ESSearchSourceDescriptor,
-  LayerDescriptor,
-  JoinDescriptor,
-  VectorLayerDescriptor,
+  type EMSTMSSourceDescriptor,
+  type EMSFileSourceDescriptor,
+  type ESGeoGridSourceDescriptor,
+  type ESSearchSourceDescriptor,
+  type LayerDescriptor,
+  type JoinDescriptor,
+  type VectorLayerDescriptor,
 } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';

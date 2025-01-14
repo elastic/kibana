@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import { type HttpSetup } from '@kbn/core-http-browser';
+import { type ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { SUB_ACTION } from '../../../../common/openai/constants';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { type ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 
 export async function getDashboard({
   http,

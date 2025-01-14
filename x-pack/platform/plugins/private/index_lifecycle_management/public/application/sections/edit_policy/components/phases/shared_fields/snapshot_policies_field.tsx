@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiCallOut,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
   EuiLink,
   EuiSpacer,

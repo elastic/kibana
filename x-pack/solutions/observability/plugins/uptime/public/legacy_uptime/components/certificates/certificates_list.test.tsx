@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CertificateList, CertSort } from './certificates_list';
+import { CertificateList, type CertSort } from './certificates_list';
 import { render } from '../../lib/helper/rtl_helpers';
 
 describe('CertificateList', () => {

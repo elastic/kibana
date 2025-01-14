@@ -10,7 +10,7 @@ import {
   getNormalizeCommonFields,
   getUrlsField,
   isValidURL,
-  NormalizedProjectProps,
+  type NormalizedProjectProps,
 } from './common_fields';
 
 describe('isValidUrl', () => {

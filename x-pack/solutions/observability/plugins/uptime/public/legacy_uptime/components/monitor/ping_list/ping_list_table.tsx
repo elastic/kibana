@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
+import React, { type MouseEvent, useCallback, useEffect, useState } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import * as I18LABELS from './translations';
-import { FailedStepsApiResponse, Ping } from '../../../../../common/runtime_types';
+import { type FailedStepsApiResponse, type Ping } from '../../../../../common/runtime_types';
 import { PingStatusColumn } from './columns/ping_status';
 import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL, TIMESTAMP_LABEL } from './translations';
 import { LocationName } from './location_name';
@@ -26,7 +26,7 @@ import { ExpandRowColumn } from './columns/expand_row';
 import { formatDuration, SpanWithMargin } from './ping_list';
 import { clearPings } from '../../../state/actions';
 import { pruneJourneyState } from '../../../state/actions/journey';
-import { Pagination } from '../../overview';
+import { type Pagination } from '../../overview';
 
 interface Props {
   loading?: boolean;

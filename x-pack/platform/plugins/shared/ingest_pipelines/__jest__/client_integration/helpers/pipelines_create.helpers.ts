@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { registerTestBed, type AsyncTestBedConfig, type TestBed } from '@kbn/test-jest-helpers';
+import { type HttpSetup } from '@kbn/core/public';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
-import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
+import { getFormActions, type PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
 import { getCreatePath, ROUTES } from '../../../public/application/services/navigation';
 

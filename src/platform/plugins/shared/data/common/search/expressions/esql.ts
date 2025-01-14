@@ -19,7 +19,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getIndexPatternFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
-import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import { catchError, defer, map, type Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
@@ -30,7 +30,7 @@ import {
   isRunningResponse,
   type KibanaContext,
 } from '..';
-import { UiSettingsCommon } from '../..';
+import { type UiSettingsCommon } from '../..';
 
 declare global {
   interface Window {

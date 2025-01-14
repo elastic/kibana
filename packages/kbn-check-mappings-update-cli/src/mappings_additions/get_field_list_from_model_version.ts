@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { FieldListMap, getVersionAddedFields } from '@kbn/core-saved-objects-base-server-internal';
+import { type SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type FieldListMap, getVersionAddedFields } from '@kbn/core-saved-objects-base-server-internal';
 
 const getModelVersionAddedFieldsForType = (typeDef: SavedObjectsType): string[] => {
   const addedFieldSet = new Set<string>();

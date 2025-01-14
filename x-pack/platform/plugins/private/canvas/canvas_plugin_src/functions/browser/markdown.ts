@@ -7,10 +7,10 @@
 
 import { compileFnName } from '@kbn/handlebars';
 import {
-  Datatable,
-  Render,
-  Style,
-  ExpressionFunctionDefinition,
+  type Datatable,
+  type Render,
+  type Style,
+  type ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 

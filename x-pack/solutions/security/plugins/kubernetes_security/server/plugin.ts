@@ -6,14 +6,14 @@
  */
 
 import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  IRouter,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type Logger,
+  type PluginInitializerContext,
+  type IRouter,
 } from '@kbn/core/server';
-import { KubernetesSecuritySetupPlugins, KubernetesSecurityStartPlugins } from './types';
+import { type KubernetesSecuritySetupPlugins, type KubernetesSecurityStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
 export class KubernetesSecurityPlugin implements Plugin {

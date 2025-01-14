@@ -5,70 +5,70 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { type IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import { type IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
-import { HttpError } from '../../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { type HttpError } from '../../../../../../common/types/api';
+import { type ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { type InferencePipeline } from '../../../../../../common/types/pipelines';
+import { type Actions } from '../../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../../shared/flash_messages';
 
 import {
   FetchDefaultPipelineApiLogic,
-  FetchDefaultPipelineResponse,
+  type FetchDefaultPipelineResponse,
 } from '../../../api/connector/get_default_pipeline_api_logic';
 import {
-  PostPipelineArgs,
-  PostPipelineResponse,
+  type PostPipelineArgs,
+  type PostPipelineResponse,
   UpdatePipelineApiLogic,
 } from '../../../api/connector/update_pipeline_api_logic';
 import {
   CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicValues,
-  CachedFetchIndexApiLogicActions,
+  type CachedFetchIndexApiLogicValues,
+  type CachedFetchIndexApiLogicActions,
 } from '../../../api/index/cached_fetch_index_api_logic';
 import {
   CreateCustomPipelineApiLogic,
-  CreateCustomPipelineApiLogicArgs,
-  CreateCustomPipelineApiLogicResponse,
+  type CreateCustomPipelineApiLogicArgs,
+  type CreateCustomPipelineApiLogicResponse,
 } from '../../../api/index/create_custom_pipeline_api_logic';
 import {
-  FetchCustomPipelineApiLogicArgs,
-  FetchCustomPipelineApiLogicResponse,
+  type FetchCustomPipelineApiLogicArgs,
+  type FetchCustomPipelineApiLogicResponse,
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import {
   AttachMlInferencePipelineApiLogic,
-  AttachMlInferencePipelineApiLogicArgs,
-  AttachMlInferencePipelineResponse,
+  type AttachMlInferencePipelineApiLogicArgs,
+  type AttachMlInferencePipelineResponse,
 } from '../../../api/pipelines/attach_ml_inference_pipeline';
 import {
   CreateMlInferencePipelineApiLogic,
-  CreateMlInferencePipelineApiLogicArgs,
-  CreateMlInferencePipelineResponse,
+  type CreateMlInferencePipelineApiLogicArgs,
+  type CreateMlInferencePipelineResponse,
 } from '../../../api/pipelines/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,
-  DeleteMlInferencePipelineApiLogicArgs,
-  DeleteMlInferencePipelineResponse,
+  type DeleteMlInferencePipelineApiLogicArgs,
+  type DeleteMlInferencePipelineResponse,
 } from '../../../api/pipelines/delete_ml_inference_pipeline';
 import {
   DetachMlInferencePipelineApiLogic,
-  DetachMlInferencePipelineApiLogicArgs,
-  DetachMlInferencePipelineResponse,
+  type DetachMlInferencePipelineApiLogicArgs,
+  type DetachMlInferencePipelineResponse,
 } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import {
-  RevertConnectorPipelineActions,
+  type RevertConnectorPipelineActions,
   RevertConnectorPipelineApilogic,
 } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';

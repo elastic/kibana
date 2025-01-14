@@ -12,7 +12,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
+  type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';

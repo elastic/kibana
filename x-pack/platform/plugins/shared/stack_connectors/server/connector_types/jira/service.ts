@@ -8,30 +8,30 @@
 import axios from 'axios';
 import { isEmpty } from 'lodash';
 
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import {
   request,
   getErrorMessage,
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
-  CreateCommentParams,
-  CreateIncidentParams,
-  ExternalService,
-  ExternalServiceCommentResponse,
-  ExternalServiceCredentials,
-  ExternalServiceIncidentResponse,
-  Fields,
-  FieldSchema,
-  GetCommonFieldsResponse,
-  Incident,
-  JiraPublicConfigurationType,
-  JiraSecretConfigurationType,
-  ResponseError,
-  UpdateIncidentParams,
+  type CreateCommentParams,
+  type CreateIncidentParams,
+  type ExternalService,
+  type ExternalServiceCommentResponse,
+  type ExternalServiceCredentials,
+  type ExternalServiceIncidentResponse,
+  type Fields,
+  type FieldSchema,
+  type GetCommonFieldsResponse,
+  type Incident,
+  type JiraPublicConfigurationType,
+  type JiraSecretConfigurationType,
+  type ResponseError,
+  type UpdateIncidentParams,
 } from './types';
 import { escapeJqlSpecialCharacters } from './utils';
 

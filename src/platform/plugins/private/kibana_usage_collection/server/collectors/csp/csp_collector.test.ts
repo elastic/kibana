@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CspConfig, ICspConfig } from '@kbn/core/server';
+import { CspConfig, type ICspConfig } from '@kbn/core/server';
 import { createCspCollector } from './csp_collector';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {

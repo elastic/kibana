@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import { Query } from '@kbn/es-query';
-import { TextBasedLayerColumn } from '../../../text_based/types';
+import { type Query } from '@kbn/es-query';
+import { type TextBasedLayerColumn } from '../../../text_based/types';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -18,9 +18,9 @@ import {
   operationDefinitionMap,
 } from '.';
 import {
-  FieldBasedIndexPatternColumn,
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
+  type FieldBasedIndexPatternColumn,
+  type FormattedIndexPatternColumn,
+  type ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';

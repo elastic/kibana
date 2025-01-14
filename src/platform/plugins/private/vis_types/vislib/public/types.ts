@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { Position } from '@elastic/charts';
+import { type $Values } from '@kbn/utility-types';
+import { type Position } from '@elastic/charts';
 
-import { Labels } from '@kbn/charts-plugin/public';
+import { type Labels } from '@kbn/charts-plugin/public';
 import {
-  CategoryAxis,
-  Dimensions,
-  Grid,
-  SeriesParam,
-  ThresholdLine,
-  ValueAxis,
+  type CategoryAxis,
+  type Dimensions,
+  type Grid,
+  type SeriesParam,
+  type ThresholdLine,
+  type ValueAxis,
 } from '@kbn/vis-type-xy-plugin/public';
-import { TimeMarker } from './vislib/visualizations/time_marker';
+import { type TimeMarker } from './vislib/visualizations/time_marker';
 
 /**
  * Gauge title alignment

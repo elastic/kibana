@@ -27,11 +27,11 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  AppMenuActionCustom,
-  AppMenuActionPrimary,
-  AppMenuActionSecondary,
-  AppMenuActionSubmenuCustom,
-  AppMenuActionSubmenuSecondary,
+  type AppMenuActionCustom,
+  type AppMenuActionPrimary,
+  type AppMenuActionSecondary,
+  type AppMenuActionSubmenuCustom,
+  type AppMenuActionSubmenuSecondary,
   AppMenuActionType,
 } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';

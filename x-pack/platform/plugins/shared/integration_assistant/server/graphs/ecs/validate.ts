@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EcsFields, ECS_FULL } from '../../../common/ecs';
+import { type EcsFields, ECS_FULL } from '../../../common/ecs';
 import { mergeSamples } from '../../util/samples';
 import { ECS_RESERVED } from './constants';
 import type { EcsBaseNodeParams } from './types';

@@ -11,10 +11,10 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
 import { ContentEditorProvider } from '@kbn/content-management-content-editor';
-import { UserProfilesProvider, UserProfilesServices } from '@kbn/content-management-user-profiles';
+import { UserProfilesProvider, type UserProfilesServices } from '@kbn/content-management-user-profiles';
 
 import { TagList } from '../mocks';
-import { TableListViewProvider, Services } from '../services';
+import { TableListViewProvider, type Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services & UserProfilesServices>) => {
   const services: Services & UserProfilesServices = {

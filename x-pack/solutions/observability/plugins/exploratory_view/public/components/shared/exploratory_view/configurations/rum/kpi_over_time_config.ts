@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, SeriesConfig } from '../../types';
+import { type ConfigProps, type SeriesConfig } from '../../types';
 import {
   FieldLabels,
   LABEL_FIELDS_BREAKDOWN,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { createStartServicesGetter, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import { createStartServicesGetter, type StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   partitionLabelsFunction,
   pieVisFunction,
@@ -18,10 +18,10 @@ import {
 } from '../common';
 import { getPartitionVisRenderer } from './expression_renderers';
 import {
-  ExpressionPartitionVisPluginSetup,
-  ExpressionPartitionVisPluginStart,
-  SetupDeps,
-  StartDeps,
+  type ExpressionPartitionVisPluginSetup,
+  type ExpressionPartitionVisPluginStart,
+  type SetupDeps,
+  type StartDeps,
 } from './types';
 
 /** @internal */

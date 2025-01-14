@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
 import {
-  DataViewsPublicPluginSetup,
-  DataViewsPublicPluginStart,
-  DataViewsPublicSetupDependencies,
-  DataViewsPublicStartDependencies,
+  type DataViewsPublicPluginSetup,
+  type DataViewsPublicPluginStart,
+  type DataViewsPublicSetupDependencies,
+  type DataViewsPublicStartDependencies,
 } from './types';
 
 import { DataViewsApiClient } from '.';

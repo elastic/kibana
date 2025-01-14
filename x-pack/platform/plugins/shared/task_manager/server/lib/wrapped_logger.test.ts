@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, type LogRecord } from '@kbn/logging';
 import { createWrappedLogger } from './wrapped_logger';
 
 describe('createWrappedLogger', () => {

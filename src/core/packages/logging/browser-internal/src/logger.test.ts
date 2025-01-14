@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, Appender } from '@kbn/logging';
+import { LogLevel, type Appender } from '@kbn/logging';
 import { getLoggerContext } from '@kbn/core-logging-common-internal';
 import { BaseLogger, BROWSER_PID } from './logger';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DatasetTableSortField } from '../../hooks';
+import { type DatasetTableSortField } from '../../hooks';
 import {
-  DatasetQualityControllerContext,
+  type DatasetQualityControllerContext,
   DEFAULT_CONTEXT,
 } from '../../state_machines/dataset_quality_controller';
-import { DatasetQualityPublicState, DatasetQualityPublicStateUpdate } from './types';
+import { type DatasetQualityPublicState, type DatasetQualityPublicStateUpdate } from './types';
 
 export const getPublicStateFromContext = (
   context: DatasetQualityControllerContext

@@ -40,14 +40,14 @@ import {
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
-  Rule,
-  RuleType,
-  ActionType,
-  ActionConnector,
-  TriggersActionsUiConfig,
+  type Rule,
+  type RuleType,
+  type ActionType,
+  type ActionConnector,
+  type TriggersActionsUiConfig,
 } from '../../../../types';
 import {
-  ComponentOpts as BulkOperationsComponentOpts,
+  type ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
@@ -69,7 +69,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { RefreshToken } from './types';
+import { type RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 

@@ -6,8 +6,8 @@
  */
 
 import { keys } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
+import { type Alert } from '../alert';
+import { type AlertInstanceState, type AlertInstanceContext, type RawAlertInstance } from '../types';
 
 // determines which alerts to return in the state
 export function determineAlertsToReturn<

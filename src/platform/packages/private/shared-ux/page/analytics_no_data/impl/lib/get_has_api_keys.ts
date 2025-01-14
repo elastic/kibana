@@ -8,7 +8,7 @@
  */
 
 import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
-import { of, Observable, catchError, from, map, startWith } from 'rxjs';
+import { of, type Observable, catchError, from, map, startWith } from 'rxjs';
 
 export interface HasApiKeysEndpointResponseData {
   hasApiKeys: boolean;

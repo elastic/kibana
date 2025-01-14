@@ -6,7 +6,7 @@
  */
 
 import classNames from 'classnames';
-import React, { Fragment, ReactNode } from 'react';
+import React, { Fragment, type ReactNode } from 'react';
 
 import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';

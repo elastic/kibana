@@ -11,8 +11,8 @@ import {
   EuiSuperDatePicker,
   EuiTitle,
   EuiToolTip,
-  OnRefreshProps,
-  OnTimeChangeProps,
+  type OnRefreshProps,
+  type OnTimeChangeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';

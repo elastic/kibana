@@ -6,13 +6,13 @@
  */
 
 import {
-  RequestHandler,
-  KibanaRequest,
-  RouteMethod,
-  KibanaResponseFactory,
+  type RequestHandler,
+  type KibanaRequest,
+  type RouteMethod,
+  type KibanaResponseFactory,
 } from '@kbn/core/server';
 
-import { ILicense } from '../common/types';
+import { type ILicense } from '../common/types';
 import type { LicensingRequestHandlerContext } from './types';
 
 export type CheckLicense = (

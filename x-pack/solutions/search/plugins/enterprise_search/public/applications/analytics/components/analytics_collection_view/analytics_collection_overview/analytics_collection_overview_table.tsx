@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiTab,
@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 
 import {
-  EuiTableFieldDataColumnType,
-  EuiTableSortingType,
+  type EuiTableFieldDataColumnType,
+  type EuiTableSortingType,
 } from '@elastic/eui/src/components/basic_table/table_types';
-import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+import { type UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,13 +39,13 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
-  ExploreTableItem,
+  type ExploreTableItem,
   ExploreTables,
-  SearchTermsTable,
-  ClickedTable,
-  ReferrersTable,
-  WorsePerformersTable,
-  LocationsTable,
+  type SearchTermsTable,
+  type ClickedTable,
+  type ReferrersTable,
+  type WorsePerformersTable,
+  type LocationsTable,
 } from '../analytics_collection_explore_table_types';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 

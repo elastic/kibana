@@ -15,12 +15,12 @@ import type {
 import { type UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
 import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
-import { LinksContentType } from '../../types';
+import { type LinksContentType } from '../../types';
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
+  type DASHBOARD_LINK_TYPE,
+  type EXTERNAL_LINK_TYPE,
+  type LINKS_HORIZONTAL_LAYOUT,
+  type LINKS_VERTICAL_LAYOUT,
 } from './constants';
 
 export type LinksCrudTypes = ContentManagementCrudTypes<

@@ -8,24 +8,24 @@
  */
 
 import {
-  HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
-  HasType,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
-  PublishesSavedObjectId,
-  PublishesUnifiedSearch,
-  SerializedTitles,
+  type HasEditCapabilities,
+  type HasInPlaceLibraryTransforms,
+  type HasType,
+  type PublishesPanelDescription,
+  type PublishesPanelTitle,
+  type PublishesSavedObjectId,
+  type PublishesUnifiedSearch,
+  type SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
+import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { type DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { type HasSerializedChildState, type PresentationContainer } from '@kbn/presentation-containers';
+import { type LocatorPublic } from '@kbn/share-plugin/common';
+import { type DashboardLocatorParams, type DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
-import { CONTENT_ID } from '../common';
-import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
+import { type CONTENT_ID } from '../common';
+import { type Link, type LinksAttributes, type LinksLayoutType } from '../common/content_management';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_CONTAINER_TYPE> &

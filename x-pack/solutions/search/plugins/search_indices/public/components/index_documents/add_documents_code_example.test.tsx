@@ -13,7 +13,7 @@ import {
   exampleTextsWithCustomMapping,
 } from './add_documents_code_example';
 import { generateSampleDocument } from '../../utils/document_generation';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { type MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../utils/language', () => ({
   getDefaultCodingLanguage: jest.fn().mockReturnValue('python'),

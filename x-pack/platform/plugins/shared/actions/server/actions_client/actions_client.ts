@@ -7,21 +7,21 @@
 
 import Boom from '@hapi/boom';
 import url from 'url';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  Logger,
+  type IScopedClusterClient,
+  type SavedObjectsClientContract,
+  type KibanaRequest,
+  type Logger,
 } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { KueryNode } from '@kbn/es-query';
-import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
-import { ConnectorType } from '../application/connector/types';
+import { type AuditLogger } from '@kbn/security-plugin/server';
+import { type IEventLogClient } from '@kbn/event-log-plugin/server';
+import { type KueryNode } from '@kbn/es-query';
+import { type Connector, type ConnectorWithExtraFindData } from '../application/connector/types';
+import { type ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { update } from '../application/connector/methods/update';
@@ -29,43 +29,43 @@ import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
 import {
-  GetGlobalExecutionKPIParams,
-  GetGlobalExecutionLogParams,
-  IExecutionLogResult,
+  type GetGlobalExecutionKPIParams,
+  type GetGlobalExecutionLogParams,
+  type IExecutionLogResult,
 } from '../../common';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { ActionExecutorContract, parseDate } from '../lib';
+import { type ActionTypeRegistry } from '../action_type_registry';
+import { type ActionExecutorContract, parseDate } from '../lib';
 import {
-  ActionResult,
-  RawAction,
-  InMemoryConnector,
-  ActionTypeExecutorResult,
-  ConnectorTokenClientContract,
-  HookServices,
+  type ActionResult,
+  type RawAction,
+  type InMemoryConnector,
+  type ActionTypeExecutorResult,
+  type ConnectorTokenClientContract,
+  type HookServices,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
-  ExecuteOptions as EnqueueExecutionOptions,
-  BulkExecutionEnqueuer,
-  ExecutionResponse,
+  type ExecuteOptions as EnqueueExecutionOptions,
+  type BulkExecutionEnqueuer,
+  type ExecutionResponse,
 } from '../create_execute_function';
-import { ActionsAuthorization } from '../authorization/actions_authorization';
+import { type ActionsAuthorization } from '../authorization/actions_authorization';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { type ActionsConfigurationUtilities } from '../actions_config';
 import {
-  OAuthClientCredentialsParams,
-  OAuthJwtParams,
-  OAuthParams,
+  type OAuthClientCredentialsParams,
+  type OAuthJwtParams,
+  type OAuthParams,
 } from '../routes/get_oauth_access_token';
 import {
   getOAuthJwtAccessToken,
-  GetOAuthJwtConfig,
-  GetOAuthJwtSecrets,
+  type GetOAuthJwtConfig,
+  type GetOAuthJwtSecrets,
 } from '../lib/get_oauth_jwt_access_token';
 import {
   getOAuthClientCredentialsAccessToken,
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
+  type GetOAuthClientCredentialsConfig,
+  type GetOAuthClientCredentialsSecrets,
 } from '../lib/get_oauth_client_credentials_access_token';
 import {
   ACTION_FILTER,
@@ -75,12 +75,12 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
-import { ListTypesParams } from '../application/connector/methods/list_types/types';
-import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
-import { ConnectorCreateParams } from '../application/connector/methods/create/types';
+import { type ListTypesParams } from '../application/connector/methods/list_types/types';
+import { type ConnectorUpdateParams } from '../application/connector/methods/update/types';
+import { type ConnectorCreateParams } from '../application/connector/methods/create/types';
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
-import { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
+import { type ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 
 export interface ConstructorOptions {
   logger: Logger;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { unitOfTime } from 'moment';
+import moment, { type unitOfTime } from 'moment';
 
 export const intervals = ['year', 'month', 'week', 'day', 'hour', 'minute'];
 

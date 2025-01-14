@@ -9,14 +9,14 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ObservedSize } from 'use-resize-observer/polyfilled';
+import { type ObservedSize } from 'use-resize-observer/polyfilled';
 import {
-  ActivePanel,
-  GridAccessMode,
-  GridLayoutData,
-  GridLayoutStateManager,
-  PanelInteractionEvent,
-  RuntimeGridSettings,
+  type ActivePanel,
+  type GridAccessMode,
+  type GridLayoutData,
+  type GridLayoutStateManager,
+  type PanelInteractionEvent,
+  type RuntimeGridSettings,
 } from '../types';
 import { getSampleLayout } from './sample_layout';
 

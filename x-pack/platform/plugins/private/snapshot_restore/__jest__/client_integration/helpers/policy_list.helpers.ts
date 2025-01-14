@@ -8,11 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import {
   registerTestBed,
-  AsyncTestBedConfig,
-  TestBed,
+  type AsyncTestBedConfig,
+  type TestBed,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import { PolicyList } from '../../../public/application/sections/home/policy_list';
 import { WithAppDependencies } from './setup_environment';
 

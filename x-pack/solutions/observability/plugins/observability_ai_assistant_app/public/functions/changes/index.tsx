@@ -19,7 +19,7 @@ import type {
 } from '../../../common/functions/changes';
 import {
   ChangeList,
-  ChangeListItem,
+  type ChangeListItem,
   ChangeListItemImpact,
 } from '../../components/changes/change_list';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';

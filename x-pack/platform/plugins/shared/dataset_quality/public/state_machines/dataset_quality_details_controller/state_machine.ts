@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
+import { assign, createMachine, type DoneInvokeEvent, type InterpreterFrom, raise } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import {
-  DatasetQualityDetailsControllerContext,
-  DatasetQualityDetailsControllerEvent,
-  DatasetQualityDetailsControllerTypeState,
+  type DatasetQualityDetailsControllerContext,
+  type DatasetQualityDetailsControllerEvent,
+  type DatasetQualityDetailsControllerTypeState,
 } from './types';
-import { DatasetQualityStartDeps } from '../../types';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import { type DatasetQualityStartDeps } from '../../types';
+import { type IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import { type IDataStreamDetailsClient } from '../../services/data_stream_details';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import {
-  Dashboard,
-  DataStreamDetails,
-  DataStreamSettings,
-  DegradedFieldAnalysis,
-  DegradedFieldResponse,
-  DegradedFieldValues,
-  NonAggregatableDatasets,
-  UpdateFieldLimitResponse,
+  type Dashboard,
+  type DataStreamDetails,
+  type DataStreamSettings,
+  type DegradedFieldAnalysis,
+  type DegradedFieldResponse,
+  type DegradedFieldValues,
+  type NonAggregatableDatasets,
+  type UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 
-import { IntegrationType } from '../../../common/data_stream_details';
+import { type IntegrationType } from '../../../common/data_stream_details';
 import {
   fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,

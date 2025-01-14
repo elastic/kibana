@@ -7,14 +7,14 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type ExceptionListItemSchema,
+  type FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
 
 import { buildExceptionFilter } from '../../services/exception_lists/build_exception_filter';
-import { ListsPluginRouter } from '../../types';
+import { type ListsPluginRouter } from '../../types';
 import { getExceptionFilterRequest } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
 

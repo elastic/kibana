@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute } from '@kbn/core/public';
+import { type SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual, isUndefined, omitBy } from 'lodash';
-import { Reducer } from 'react';
+import { type Reducer } from 'react';
 import {
-  RuleActionParam,
-  IntervalSchedule,
-  RuleActionAlertsFilterProperty,
-  AlertsFilter,
-  AlertDelay,
-  SanitizedRuleAction,
+  type RuleActionParam,
+  type IntervalSchedule,
+  type RuleActionAlertsFilterProperty,
+  type AlertsFilter,
+  type AlertDelay,
+  type SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import { ActionTypeRegistryContract, Rule, RuleUiAction } from '../../../types';
+import { type ActionTypeRegistryContract, type Rule, type RuleUiAction } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &

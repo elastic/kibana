@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useRef, useLayoutEffect, useState } from 'react';
-import { Observable } from 'rxjs';
+import React, { type FC, useRef, useLayoutEffect, useState } from 'react';
+import { type Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 interface HeaderActionMenuProps {

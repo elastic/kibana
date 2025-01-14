@@ -12,7 +12,7 @@ import {
   EuiModalBody,
   EuiModalHeaderTitle,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
 } from '@elastic/eui';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';

@@ -8,18 +8,18 @@
  */
 
 import { generateFilters } from './generate_filters';
-import { FilterManager } from '../filter_manager';
+import { type FilterManager } from '../filter_manager';
 
 import {
-  Filter,
-  DataViewFieldBase,
-  DataViewBase,
+  type Filter,
+  type DataViewFieldBase,
+  type DataViewBase,
   isExistsFilter,
   buildExistsFilter,
   isPhraseFilter,
   isRangeFilter,
-  RangeFilter,
-  PhraseFilter,
+  type RangeFilter,
+  type PhraseFilter,
 } from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';

@@ -11,7 +11,7 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { act } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
+import { type AppMockRenderer, createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;

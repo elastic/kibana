@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { MlInferenceError } from '../../../../../../common/types/pipelines';
+import { type MlInferenceError } from '../../../../../../common/types/pipelines';
 import {
-  FetchMlInferenceErrorsApiLogicResponse,
+  type FetchMlInferenceErrorsApiLogicResponse,
   FetchMlInferenceErrorsApiLogic,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
 import { IndexNameLogic } from '../index_name_logic';

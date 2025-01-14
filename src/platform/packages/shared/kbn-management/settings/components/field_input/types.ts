@@ -8,14 +8,14 @@
  */
 
 import {
-  FieldDefinition,
-  OnInputChangeFn,
-  SettingType,
-  UnsavedFieldChange,
+  type FieldDefinition,
+  type OnInputChangeFn,
+  type SettingType,
+  type UnsavedFieldChange,
 } from '@kbn/management-settings-types';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { type ToastsStart } from '@kbn/core-notifications-browser';
+import { type IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { type ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 
 /**
  * Contextual services used by a {@link FieldInput} component.

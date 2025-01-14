@@ -14,12 +14,12 @@ import {
   validateConnector,
 } from './validate_with_schema';
 import {
-  ActionType,
-  ActionTypeConfig,
-  ActionTypeParams,
-  ActionTypeSecrets,
-  ExecutorType,
-  ValidatorServices,
+  type ActionType,
+  type ActionTypeConfig,
+  type ActionTypeParams,
+  type ActionTypeSecrets,
+  type ExecutorType,
+  type ValidatorServices,
 } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 

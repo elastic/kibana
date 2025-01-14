@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { type Readable } from 'stream';
 
 import {
-  BulkErrorSchema,
-  ImportExceptionListItemSchema,
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
-  ImportExceptionsListSchema,
-  ImportExceptionsResponseSchema,
+  type BulkErrorSchema,
+  type ImportExceptionListItemSchema,
+  type ImportExceptionListItemSchemaDecoded,
+  type ImportExceptionListSchemaDecoded,
+  type ImportExceptionsListSchema,
+  type ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 

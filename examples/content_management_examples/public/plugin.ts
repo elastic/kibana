@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { StartDeps, SetupDeps } from './types';
+import { type AppMountParameters, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { type StartDeps, type SetupDeps } from './types';
 
 export class ContentManagementExamplesPlugin
   implements Plugin<unknown, unknown, SetupDeps, StartDeps>

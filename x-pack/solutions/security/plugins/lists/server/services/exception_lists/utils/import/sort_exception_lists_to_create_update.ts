@@ -6,16 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { type SavedObjectsBulkCreateObject, type SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
-  BulkErrorSchema,
-  ExceptionListSchema,
-  ImportExceptionListSchemaDecoded,
-  NamespaceType,
+  type BulkErrorSchema,
+  type ExceptionListSchema,
+  type ImportExceptionListSchemaDecoded,
+  type NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
+import { type ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 
 export const sortExceptionListsToUpdateOrCreate = ({
   lists,

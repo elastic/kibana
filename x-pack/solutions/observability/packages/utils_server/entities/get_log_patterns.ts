@@ -6,20 +6,20 @@
  */
 
 import {
-  AggregationsCategorizeTextAggregation,
-  AggregationsDateHistogramAggregation,
-  AggregationsMaxAggregation,
-  AggregationsMinAggregation,
-  AggregationsTopHitsAggregation,
-  QueryDslQueryContainer,
+  type AggregationsCategorizeTextAggregation,
+  type AggregationsDateHistogramAggregation,
+  type AggregationsMaxAggregation,
+  type AggregationsMinAggregation,
+  type AggregationsTopHitsAggregation,
+  type QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
-import { ChangePointType } from '@kbn/es-types/src';
+import { type ChangePointType } from '@kbn/es-types/src';
 import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import { type ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
 

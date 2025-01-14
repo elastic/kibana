@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { type InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { withEuiTheme, type WithEuiThemeProps } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
+import { GenericComboBox, type GenericComboBoxProps } from './generic_combo_box';
+import { PhraseSuggestorUI, type PhraseSuggestorProps } from './phrase_suggestor';
 import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
 import { MIDDLE_TRUNCATION_PROPS } from './lib/helpers';
 

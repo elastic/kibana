@@ -11,7 +11,7 @@ import { DynamicStyleProperty } from '../dynamic_style_property';
 import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
 import { makeMbClampedNumberExpression } from '../../style_util';
 import {
-  FieldFormatter,
+  type FieldFormatter,
   HALF_MAKI_ICON_SIZE,
   MB_LOOKUP_FUNCTION,
   VECTOR_STYLES,

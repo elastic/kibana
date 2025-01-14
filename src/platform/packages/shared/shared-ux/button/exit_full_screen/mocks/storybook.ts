@@ -8,7 +8,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import { AbstractStorybookMock, type ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { of } from 'rxjs';
 import type { ExitFullScreenButtonProps as Props, ExitFullScreenButtonServices } from '../types';
 

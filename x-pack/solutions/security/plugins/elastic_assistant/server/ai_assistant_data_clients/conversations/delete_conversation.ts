@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
 
 export interface DeleteConversationParams {
   esClient: ElasticsearchClient;

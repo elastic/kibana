@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
+import React, { type FC, useState, useMemo, useCallback } from 'react';
 import {
-  OriginSaveModalProps,
+  type OriginSaveModalProps,
   SavedObjectSaveModalOrigin,
-  OnSaveProps,
-  SaveModalState,
+  type OnSaveProps,
+  type SaveModalState,
 } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
 

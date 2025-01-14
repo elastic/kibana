@@ -9,25 +9,25 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import {
-  AggFunctionsMapping,
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
+  type AggFunctionsMapping,
+  type EsaggsExpressionFunctionDefinition,
+  type IndexPatternLoadExpressionFunctionDefinition,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
-  ExpressionAstExpression,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunction,
+  type ExpressionAstExpression,
+  type ExpressionAstExpressionBuilder,
+  type ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
-import { GenericIndexPatternColumn } from './form_based';
+import { type GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { FormBasedPrivateState, FormBasedLayer } from './types';
-import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
+import { type FormBasedPrivateState, type FormBasedLayer } from './types';
+import { type DateHistogramIndexPatternColumn, type RangeIndexPatternColumn } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';

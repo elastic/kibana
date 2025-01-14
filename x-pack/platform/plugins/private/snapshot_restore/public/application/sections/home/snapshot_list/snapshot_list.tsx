@@ -8,13 +8,13 @@
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { type RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import {
   PageLoading,
   PageError,
-  Error,
+  type Error,
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
@@ -22,7 +22,7 @@ import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
-import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
+import { useDecodedParams, type SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
 
 import { SnapshotDetails } from './snapshot_details';
 import {

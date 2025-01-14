@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { DateRange, Duration, toMomentUnitOfTime } from '../../domain/models';
+import { type DateRange, type Duration, toMomentUnitOfTime } from '../../domain/models';
 
 export function getSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
   const dateRangeDurationInUnit = moment(dateRange.to).diff(

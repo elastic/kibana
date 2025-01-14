@@ -9,7 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, type TypeOptions } from './type';
 
 export class BufferType extends Type<Buffer> {
   constructor(options?: TypeOptions<Buffer>) {

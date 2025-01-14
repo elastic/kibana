@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Meta } from '@storybook/react';
-import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
+import React, { type ComponentProps } from 'react';
+import { type Meta } from '@storybook/react';
+import { RuleEventLogList, type RuleEventLogListProps } from './rule_event_log_list';
 import { mockRule, mockRuleType } from './test_helpers';
 
 type Args = ComponentProps<typeof RuleEventLogList>;

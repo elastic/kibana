@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { type SyntheticsRestApiRouteFactory } from '../types';
 import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
-  MonitorFiltersResult,
-  EncryptedSyntheticsMonitorAttributes,
+  type MonitorFiltersResult,
+  type EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { QuerySchema, getMonitorFilters, SEARCH_FIELDS } from '../common';

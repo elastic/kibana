@@ -12,13 +12,13 @@ import _ from 'lodash';
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
-  Filter,
+  type Filter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isPhraseFilter,
-  PhraseFilter,
+  type PhraseFilter,
 } from '@kbn/es-query';
-import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import { type DataViewsContract, type FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import { FilterManager } from './filter_manager';
 
 export class PhraseFilterManager extends FilterManager {

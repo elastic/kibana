@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BeatsMetric, BeatsMetricFields } from '../metrics';
+import { BeatsMetric, type BeatsMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 import { getBeatDataset } from '../../../common/get_index_patterns';
 

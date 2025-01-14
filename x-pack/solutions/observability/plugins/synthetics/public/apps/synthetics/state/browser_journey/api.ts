@@ -7,14 +7,14 @@
 
 import { apiService } from '../../../../utils/api_service';
 import {
-  FailedStepsApiResponse,
+  type FailedStepsApiResponse,
   FailedStepsApiResponseType,
-  ScreenshotBlockDoc,
-  ScreenshotImageBlob,
-  ScreenshotRefImageData,
-  SyntheticsJourneyApiResponse,
+  type ScreenshotBlockDoc,
+  type ScreenshotImageBlob,
+  type ScreenshotRefImageData,
+  type SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
-  Ping,
+  type Ping,
   PingType,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';

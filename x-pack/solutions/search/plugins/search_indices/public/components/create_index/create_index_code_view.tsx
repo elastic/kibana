@@ -10,7 +10,7 @@ import React from 'react';
 import type { IndicesStatusResponse } from '../../../common';
 import {
   CreateIndexCodeView as SharedCreateIndexCodeView,
-  CreateIndexCodeViewProps as SharedCreateIndexCodeViewProps,
+  type CreateIndexCodeViewProps as SharedCreateIndexCodeViewProps,
 } from '../shared/create_index_code_view';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';

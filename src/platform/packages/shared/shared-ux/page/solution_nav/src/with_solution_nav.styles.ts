@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { euiCanAnimate, EuiThemeComputed } from '@elastic/eui';
+import { euiCanAnimate, type EuiThemeComputed } from '@elastic/eui';
 
 export const WithSolutionNavStyles = (euiTheme: EuiThemeComputed<{}>) => {
   return css`

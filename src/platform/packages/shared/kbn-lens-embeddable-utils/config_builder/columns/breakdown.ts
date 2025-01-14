@@ -10,11 +10,11 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import {
-  LensBreakdownConfig,
-  LensBreakdownDateHistogramConfig,
-  LensBreakdownFiltersConfig,
-  LensBreakdownIntervalsConfig,
-  LensBreakdownTopValuesConfig,
+  type LensBreakdownConfig,
+  type LensBreakdownDateHistogramConfig,
+  type LensBreakdownFiltersConfig,
+  type LensBreakdownIntervalsConfig,
+  type LensBreakdownTopValuesConfig,
 } from '../types';
 import { getHistogramColumn } from './date_histogram';
 import { getTopValuesColumn } from './top_values';

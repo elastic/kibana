@@ -6,15 +6,15 @@
  */
 
 import axios from 'axios';
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
+  type ConnectorTypeConfigType,
+  type ConnectorTypeSecretsType,
   getConnectorType,
-  XmattersConnectorType,
+  type XmattersConnectorType,
 } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, type Services } from '@kbn/actions-plugin/server/types';
 import {
   validateConfig,
   validateConnector,
@@ -22,7 +22,7 @@ import {
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 

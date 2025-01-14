@@ -9,7 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/
 import React from 'react';
 import {
   ELASTIC_MODEL_DEFINITIONS,
-  InferenceAPIConfigResponse,
+  type InferenceAPIConfigResponse,
 } from '@kbn/ml-trained-models-utils';
 import elasticIcon from '../../../../assets/images/providers/elastic.svg';
 import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';

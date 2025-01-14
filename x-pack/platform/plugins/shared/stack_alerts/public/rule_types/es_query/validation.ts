@@ -8,7 +8,7 @@
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  ValidationResult,
+  type ValidationResult,
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
@@ -21,7 +21,7 @@ import {
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   MAX_HITS_FOR_GROUP_BY,
 } from '../../../common/constants';
-import { EsQueryRuleParams, SearchType } from './types';
+import { type EsQueryRuleParams, type SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,

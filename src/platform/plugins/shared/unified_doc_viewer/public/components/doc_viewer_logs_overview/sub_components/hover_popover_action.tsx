@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
-  PopoverAnchorPosition,
+  type PopoverAnchorPosition,
   type EuiPopoverProps,
 } from '@elastic/eui';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';

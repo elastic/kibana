@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+import { type CustomIntegrationsSetup, type CustomIntegrationsStart } from './types';
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/stub';
 

@@ -12,12 +12,12 @@ import {
   timelineSavedObjectType,
 } from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
 import {
-  BareNoteWithoutExternalRefs,
-  BarePinnedEventWithoutExternalRefs,
-  TimelineWithoutExternalRefs,
+  type BareNoteWithoutExternalRefs,
+  type BarePinnedEventWithoutExternalRefs,
+  type TimelineWithoutExternalRefs,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { getSavedObjectFromES } from '../../../utils';
 

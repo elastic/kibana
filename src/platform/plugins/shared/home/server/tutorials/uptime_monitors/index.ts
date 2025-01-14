@@ -15,8 +15,8 @@ import {
   onPremCloudInstructions,
 } from '../instructions/heartbeat_instructions';
 import {
-  TutorialContext,
-  TutorialSchema,
+  type TutorialContext,
+  type TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSchema {

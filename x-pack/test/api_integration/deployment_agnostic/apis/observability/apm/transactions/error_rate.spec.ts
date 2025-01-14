@@ -10,10 +10,10 @@ import { buildQueryFromFilters } from '@kbn/es-query';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import {
-  APIClientRequestParamsOf,
-  APIReturnType,
+  type APIClientRequestParamsOf,
+  type APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { type RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';

@@ -13,10 +13,10 @@ import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 
 import {
-  SyntheticsMonitorFilterItem,
+  type SyntheticsMonitorFilterItem,
   getSyntheticsFilterDisplayValues,
-  SyntheticsMonitorFilterChangeHandler,
-  LabelWithCountValue,
+  type SyntheticsMonitorFilterChangeHandler,
+  type LabelWithCountValue,
 } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';

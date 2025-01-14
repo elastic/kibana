@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
+import React, { type FC, type PropsWithChildren, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EventTracker } from './analytics';
 
-import { NavigationKibanaDependencies, NavigationServices } from './types';
+import { type NavigationKibanaDependencies, type NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
 

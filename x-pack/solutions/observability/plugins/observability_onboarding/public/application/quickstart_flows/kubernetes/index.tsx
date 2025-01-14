@@ -12,7 +12,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiSteps,
-  EuiStepStatus,
+  type EuiStepStatus,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

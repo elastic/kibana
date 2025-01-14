@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable, OperatorFunction, from, lastValueFrom, mergeMap, reduce } from 'rxjs';
+import { Observable, type OperatorFunction, from, lastValueFrom, mergeMap, reduce } from 'rxjs';
 import deepmerge from 'deepmerge';
 
 type CallbackFn<TResult> = (chunk: string[], id: number) => Promise<TResult>;

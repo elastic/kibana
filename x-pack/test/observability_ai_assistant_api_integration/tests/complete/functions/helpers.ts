@@ -6,14 +6,14 @@
  */
 
 import {
-  Message,
-  MessageAddEvent,
+  type Message,
+  type MessageAddEvent,
   MessageRole,
-  StreamingChatResponseEvent,
+  type StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { Readable } from 'stream';
+import { type Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { CreateTest } from '../../../common/config';
+import { type CreateTest } from '../../../common/config';
 
 function decodeEvents(body: Readable | string) {
   return String(body)

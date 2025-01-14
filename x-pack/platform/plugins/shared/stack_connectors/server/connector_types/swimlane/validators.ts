@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExternalServiceValidation,
-  SwimlanePublicConfigurationType,
-  SwimlaneSecretConfigurationType,
+  type ExternalServiceValidation,
+  type SwimlanePublicConfigurationType,
+  type SwimlaneSecretConfigurationType,
 } from './types';
 import * as i18n from './translations';
 

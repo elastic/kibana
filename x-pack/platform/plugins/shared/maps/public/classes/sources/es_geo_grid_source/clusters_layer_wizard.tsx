@@ -10,12 +10,12 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { type LayerWizard, type RenderWizardArguments } from '../../layers';
 import { GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import {
-  ESGeoGridSourceDescriptor,
-  ColorDynamicOptions,
-  SizeDynamicOptions,
+  type ESGeoGridSourceDescriptor,
+  type ColorDynamicOptions,
+  type SizeDynamicOptions,
 } from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { VectorStyle } from '../../styles/vector/vector_style';

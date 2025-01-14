@@ -8,10 +8,10 @@
  */
 
 import type { RefObject } from 'react';
-import { renderHook, act, RenderHookResult } from '@testing-library/react';
+import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
+import { type ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
 
 describe('useExpressionRenderer', () => {

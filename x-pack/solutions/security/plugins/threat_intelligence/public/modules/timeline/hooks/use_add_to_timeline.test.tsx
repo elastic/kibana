@@ -6,14 +6,14 @@
  */
 
 import { EMPTY_VALUE } from '../../../constants/common';
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import { renderHook, type RenderHookResult } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
-  Indicator,
+  type Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { useAddToTimeline, UseAddToTimelineValue } from './use_add_to_timeline';
+import { useAddToTimeline, type UseAddToTimelineValue } from './use_add_to_timeline';
 
 describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<UseAddToTimelineValue, unknown>;

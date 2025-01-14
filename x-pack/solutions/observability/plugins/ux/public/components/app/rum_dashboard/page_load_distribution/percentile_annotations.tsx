@@ -9,8 +9,8 @@ import * as React from 'react';
 import {
   AnnotationDomainType,
   LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
+  type LineAnnotationDatum,
+  type LineAnnotationStyle,
   Position,
 } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';

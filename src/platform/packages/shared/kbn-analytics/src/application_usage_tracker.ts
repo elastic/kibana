@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reporter } from './reporter';
-import { createApplicationUsageMetric, ApplicationUsageMetric } from './metrics';
+import { type Reporter } from './reporter';
+import { createApplicationUsageMetric, type ApplicationUsageMetric } from './metrics';
 
 type TrackedApplication = Record<string, ApplicationUsageMetric>;
 interface ApplicationKey {

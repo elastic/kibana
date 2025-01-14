@@ -10,22 +10,22 @@ import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import {
-  DatasourceLayers,
-  FramePublicAPI,
-  OperationMetadata,
-  UserMessage,
-  VisualizationType,
+  type DatasourceLayers,
+  type FramePublicAPI,
+  type OperationMetadata,
+  type UserMessage,
+  type VisualizationType,
 } from '../../types';
 import {
-  State,
-  XYState,
-  XYAnnotationLayerConfig,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  SeriesType,
-  XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig,
+  type State,
+  type XYState,
+  type XYAnnotationLayerConfig,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type XYReferenceLineLayerConfig,
+  type SeriesType,
+  type XYByReferenceAnnotationLayerConfig,
+  type XYByValueAnnotationLayerConfig,
   visualizationTypes,
   visualizationSubtypes,
 } from './types';

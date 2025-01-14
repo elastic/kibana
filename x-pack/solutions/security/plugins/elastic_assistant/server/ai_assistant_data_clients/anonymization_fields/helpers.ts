@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import { type estypes } from '@elastic/elasticsearch';
 import {
-  AnonymizationFieldCreateProps,
-  AnonymizationFieldResponse,
-  AnonymizationFieldUpdateProps,
+  type AnonymizationFieldCreateProps,
+  type AnonymizationFieldResponse,
+  type AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import { type AuthenticatedUser } from '@kbn/core-security-common';
 import {
-  CreateAnonymizationFieldSchema,
-  EsAnonymizationFieldsSchema,
-  UpdateAnonymizationFieldSchema,
+  type CreateAnonymizationFieldSchema,
+  type EsAnonymizationFieldsSchema,
+  type UpdateAnonymizationFieldSchema,
 } from './types';
 
 export const transformESToAnonymizationFields = (

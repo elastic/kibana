@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import { type IRouter } from '@kbn/core/server';
+import { type ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
-  AlertingRequestHandlerContext,
+  type AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import { type MaintenanceWindow } from '../../../../application/maintenance_window/types';
 import {
   getParamsSchemaV1,
-  GetMaintenanceWindowRequestParamsV1,
-  GetMaintenanceWindowResponseV1,
+  type GetMaintenanceWindowRequestParamsV1,
+  type GetMaintenanceWindowResponseV1,
 } from '../../../../../common/routes/maintenance_window/apis/get';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 

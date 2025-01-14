@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getAcknowledgeSchemaResponseMock } from './index.mock';
-import { AcknowledgeSchema, acknowledgeSchema } from '.';
+import { type AcknowledgeSchema, acknowledgeSchema } from '.';
 
 describe('acknowledge_schema', () => {
   test('it should validate a typical response', () => {

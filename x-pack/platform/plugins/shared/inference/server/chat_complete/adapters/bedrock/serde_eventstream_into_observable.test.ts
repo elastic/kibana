@@ -6,10 +6,10 @@
  */
 
 import { Readable } from 'stream';
-import { Observable, toArray, firstValueFrom, map, filter } from 'rxjs';
+import { type Observable, toArray, firstValueFrom, map, filter } from 'rxjs';
 import {
-  BedrockChunkMember,
-  BedrockStreamMember,
+  type BedrockChunkMember,
+  type BedrockStreamMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
 import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';

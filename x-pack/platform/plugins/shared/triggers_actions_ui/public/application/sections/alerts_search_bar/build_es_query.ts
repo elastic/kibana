@@ -7,11 +7,11 @@
 
 import {
   buildEsQuery as kbnBuildEsQuery,
-  EsQueryConfig,
-  Filter,
+  type EsQueryConfig,
+  type Filter,
   FILTERS,
-  Query,
-  TimeRange,
+  type Query,
+  type TimeRange,
 } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';

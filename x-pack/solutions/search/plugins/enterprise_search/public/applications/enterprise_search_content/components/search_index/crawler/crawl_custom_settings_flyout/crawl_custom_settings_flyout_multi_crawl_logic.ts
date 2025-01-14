@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { ConnectorScheduling } from '@kbn/search-connectors';
+import { type ConnectorScheduling } from '@kbn/search-connectors';
 
-import { CrawlerCustomSchedulesServer } from '../../../../../../../common/types/crawler';
+import { type CrawlerCustomSchedulesServer } from '../../../../../../../common/types/crawler';
 
-import { CrawlerIndex } from '../../../../../../../common/types/indices';
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { type CrawlerIndex } from '../../../../../../../common/types/indices';
+import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { DomainConfig, CrawlerCustomSchedule } from '../../../../api/crawler/types';
+import { type DomainConfig, type CrawlerCustomSchedule } from '../../../../api/crawler/types';
 import {
   crawlerCustomSchedulingServerToClient,
   crawlerCustomSchedulingClientToServer,
@@ -32,7 +32,7 @@ import {
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
 import {
   PostCustomSchedulingApiLogic,
-  PostCustomSchedulingArgs,
+  type PostCustomSchedulingArgs,
 } from './crawl_custom_settings_flyout_schedule_api_logic';
 
 export interface CrawlCustomSettingsFlyoutMultiCrawlLogicValues {

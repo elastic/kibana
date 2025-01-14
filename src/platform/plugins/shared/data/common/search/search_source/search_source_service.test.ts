@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { SearchSourceService, SearchSourceDependencies } from '.';
+import { type DataViewsContract } from '@kbn/data-views-plugin/common';
+import { SearchSourceService, type SearchSourceDependencies } from '.';
 
 describe('SearchSource service', () => {
   let dependencies: jest.Mocked<SearchSourceDependencies>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BenchmarkBucket, getBenchmarksFromAggs } from './get_benchmarks';
+import { type BenchmarkBucket, getBenchmarksFromAggs } from './get_benchmarks';
 
 const mockBenchmarkBuckets: BenchmarkBucket[] = [
   {

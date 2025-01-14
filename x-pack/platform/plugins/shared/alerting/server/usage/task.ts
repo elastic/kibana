@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '@kbn/core/server';
+import { type Logger, type CoreSetup } from '@kbn/core/server';
 import {
-  RunContext,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-  IntervalSchedule,
+  type RunContext,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
+  type IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import {

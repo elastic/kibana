@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { Visualization, Suggestion } from '../../types';
+import { type Visualization, type Suggestion } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
   createExpressionRendererMock,
-  DatasourceMock,
+  type DatasourceMock,
   createMockFramePublicAPI,
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
+import { type ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { SuggestionPanel, type SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -25,11 +25,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import {
   applyChanges,
-  LensAppState,
-  PreviewState,
+  type LensAppState,
+  type PreviewState,
   setState,
   setToggleFullscreen,
-  VisualizationState,
+  type VisualizationState,
 } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 

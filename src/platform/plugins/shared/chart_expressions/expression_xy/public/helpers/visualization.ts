@@ -14,14 +14,14 @@ import {
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../../common/constants';
 import {
-  CommonXYLayerConfig,
-  CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
-  CommonXYAnnotationLayerConfig,
-  ReferenceLineLayerConfig,
-  ReferenceLineConfig,
-  ReferenceLineDecorationConfigResult,
-  ExtendedReferenceLineDecorationConfig,
+  type CommonXYLayerConfig,
+  type CommonXYDataLayerConfig,
+  type CommonXYReferenceLineLayerConfig,
+  type CommonXYAnnotationLayerConfig,
+  type ReferenceLineLayerConfig,
+  type ReferenceLineConfig,
+  type ReferenceLineDecorationConfigResult,
+  type ExtendedReferenceLineDecorationConfig,
 } from '../../common/types';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>

@@ -7,52 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
-import { Stream } from 'stream';
+import { type Duration } from 'moment';
+import { type Stream } from 'stream';
 
-import { ByteSizeValue } from './src/byte_size_value';
-import { ContextReference, Reference, SiblingReference } from './src/references';
+import { type ByteSizeValue } from './src/byte_size_value';
+import { ContextReference, type Reference, SiblingReference } from './src/references';
 import {
   AnyType,
-  ArrayOptions,
+  type ArrayOptions,
   ArrayType,
   BooleanType,
   BufferType,
-  ByteSizeOptions,
+  type ByteSizeOptions,
   ByteSizeType,
   ConditionalType,
-  ConditionalTypeValue,
-  DurationOptions,
+  type ConditionalTypeValue,
+  type DurationOptions,
   DurationType,
   IntersectionType,
-  IntersectionTypeOptions,
-  IpOptions,
+  type IntersectionTypeOptions,
+  type IpOptions,
   IpType,
   LiteralType,
-  MapOfOptions,
+  type MapOfOptions,
   MapOfType,
   MaybeType,
   NeverType,
-  NumberOptions,
+  type NumberOptions,
   NumberType,
   ObjectType,
-  ObjectTypeOptions,
-  ObjectResultType,
-  Props,
-  NullableProps,
-  RecordOfOptions,
+  type ObjectTypeOptions,
+  type ObjectResultType,
+  type Props,
+  type NullableProps,
+  type RecordOfOptions,
   RecordOfType,
-  SchemaStructureEntry,
-  StringOptions,
+  type SchemaStructureEntry,
+  type StringOptions,
   StringType,
   Type,
-  TypeOf,
-  TypeOptions,
+  type TypeOf,
+  type TypeOptions,
   UnionType,
-  URIOptions,
+  type URIOptions,
   URIType,
   StreamType,
-  UnionTypeOptions,
+  type UnionTypeOptions,
   Lazy,
 } from './src/types';
 

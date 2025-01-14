@@ -21,15 +21,15 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { percentileFields, RulesList } from './rules_list';
 import {
-  ActionTypeRegistryContract,
+  type ActionTypeRegistryContract,
   Percentiles,
-  RuleTypeModel,
-  RuleTypeRegistryContract,
+  type RuleTypeModel,
+  type RuleTypeRegistryContract,
 } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { IToasts } from '@kbn/core/public';
+import { type IToasts } from '@kbn/core/public';
 import { CreateRuleButton } from './create_rule_button';
 import { RulesListDocLink } from './rules_list_doc_link';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';

@@ -8,15 +8,15 @@
  */
 
 import { useRefetch } from './use_refetch';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { renderHook } from '@testing-library/react';
 import {
-  UnifiedHistogramBreakdownContext,
-  UnifiedHistogramChartContext,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramInput$,
-  UnifiedHistogramRequestContext,
+  type UnifiedHistogramBreakdownContext,
+  type UnifiedHistogramChartContext,
+  type UnifiedHistogramHitsContext,
+  type UnifiedHistogramInput$,
+  type UnifiedHistogramRequestContext,
 } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { Subject } from 'rxjs';

@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { type PromptResponse } from '@kbn/elastic-assistant-common';
 import {
-  Conversation,
+  type Conversation,
   mergeBaseWithPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
 } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
-import { AIConnector } from '../../../../connectorland/connector_selector';
-import { FetchConversationsResponse, useFetchPrompts } from '../../../api';
+import { type AIConnector } from '../../../../connectorland/connector_selector';
+import { type FetchConversationsResponse, useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import {

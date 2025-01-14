@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
+import { type ExpressionValueFilter, type ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {

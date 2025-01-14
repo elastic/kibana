@@ -9,7 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { Type, type TypeOptions, type ExtendsDeepOptions } from './type';
 
 export type ArrayOptions<T> = TypeOptions<T[]> & {
   minSize?: number;

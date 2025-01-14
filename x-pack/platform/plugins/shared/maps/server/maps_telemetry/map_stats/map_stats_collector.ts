@@ -7,16 +7,16 @@
 
 import type { MapAttributes } from '../../../common/content_management';
 import {
-  EMS_BASEMAP_KEYS,
-  JOIN_KEYS,
-  LAYER_KEYS,
-  RESOLUTION_KEYS,
-  SCALING_KEYS,
+  type EMS_BASEMAP_KEYS,
+  type JOIN_KEYS,
+  type LAYER_KEYS,
+  type RESOLUTION_KEYS,
+  type SCALING_KEYS,
 } from '../../../common/telemetry/types';
 import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
 import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 
-import { ClusterCountStats, MapStats } from './types';
+import { type ClusterCountStats, type MapStats } from './types';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.

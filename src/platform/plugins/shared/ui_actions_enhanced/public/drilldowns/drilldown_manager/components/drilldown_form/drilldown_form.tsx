@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TriggerPicker, TriggerPickerProps } from '../trigger_picker';
+import { TriggerPicker, type TriggerPickerProps } from '../trigger_picker';
 
 const txtNameOfDrilldown = i18n.translate(
   'uiActionsEnhanced.components.DrilldownForm.nameOfDrilldown',

@@ -24,7 +24,7 @@ import { createObservabilityLogDocumentProfileProvider } from './observability/l
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import {
   createProfileProviderServices,
-  ProfileProviderServices,
+  type ProfileProviderServices,
 } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 
 import {
-  CrawlRequestWithDetails,
-  CrawlRequestWithDetailsFromServer,
+  type CrawlRequestWithDetails,
+  type CrawlRequestWithDetailsFromServer,
 } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';

@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
+  type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import type { FormBasedLayer } from '../types';

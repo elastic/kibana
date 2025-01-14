@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, type EuiSuperSelectProps } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

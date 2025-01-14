@@ -9,8 +9,8 @@ import { capitalize } from 'lodash';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
 import {
-  AlertSuppression,
-  Threshold,
+  type AlertSuppression,
+  type Threshold,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import type { Filter } from '@kbn/es-query';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';

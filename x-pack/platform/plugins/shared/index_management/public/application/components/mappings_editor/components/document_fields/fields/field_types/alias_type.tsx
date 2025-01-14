@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { PathParameter } from '../../field_parameters';
-import { NormalizedField, NormalizedFields } from '../../../../types';
+import { type NormalizedField, type NormalizedFields } from '../../../../types';
 import { BasicParametersSection } from '../edit_field';
 
 interface Props {

@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { type ComponentMeta, type ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+import { type FileKindBrowser, type BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import { FileUpload, Props } from './file_upload';
+import { FileUpload, type Props } from './file_upload';
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 

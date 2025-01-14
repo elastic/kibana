@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
+import { type Connector, type ConnectorDefinition } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   AddConnectorApiLogic,
-  AddConnectorApiLogicActions,
-  AddConnectorApiLogicArgs,
-  AddConnectorApiLogicResponse,
+  type AddConnectorApiLogicActions,
+  type AddConnectorApiLogicArgs,
+  type AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
 
 import {
-  GenerateConfigApiActions,
+  type GenerateConfigApiActions,
   GenerateConfigApiLogic,
 } from '../../../api/connector/generate_connector_config_api_logic';
 import {
   GenerateConnectorNamesApiLogic,
-  GenerateConnectorNamesApiLogicActions,
-  GenerateConnectorNamesApiResponse,
+  type GenerateConnectorNamesApiLogicActions,
+  type GenerateConnectorNamesApiResponse,
 } from '../../../api/connector/generate_connector_names_api_logic';
-import { APIKeyResponse } from '../../../api/generate_api_key/generate_api_key_logic';
+import { type APIKeyResponse } from '../../../api/generate_api_key/generate_api_key_logic';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import {
-  ConnectorViewActions,
+  type ConnectorViewActions,
   ConnectorViewLogic,
 } from '../../connector_detail/connector_view_logic';
-import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
+import { type ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
 import { SearchIndexTabId } from '../../search_index/search_index';
 
 export interface NewConnectorValues {

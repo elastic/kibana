@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css, SerializedStyles } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { statusColors } from '@kbn/cloud-security-posture';

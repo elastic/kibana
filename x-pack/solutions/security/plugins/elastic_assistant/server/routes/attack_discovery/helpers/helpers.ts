@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
+import { type AnalyticsServiceSetup, type AuthenticatedUser, type Logger } from '@kbn/core/server';
 import {
-  ApiConfig,
-  AttackDiscovery,
-  AttackDiscoveryResponse,
-  AttackDiscoveryStat,
-  AttackDiscoveryStatus,
-  GenerationInterval,
-  Replacements,
+  type ApiConfig,
+  type AttackDiscovery,
+  type AttackDiscoveryResponse,
+  type AttackDiscoveryStat,
+  type AttackDiscoveryStatus,
+  type GenerationInterval,
+  type Replacements,
 } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
@@ -25,7 +25,7 @@ import {
   ATTACK_DISCOVERY_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
 } from '../../../lib/telemetry/event_based_telemetry';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import { type AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
   canceled: 'canceled',

@@ -8,16 +8,16 @@
  */
 
 import {
-  ESQLAstComment,
-  ESQLAstCommentMultiLine,
-  ESQLColumn,
-  ESQLIdentifier,
-  ESQLLiteral,
-  ESQLParamLiteral,
-  ESQLProperNode,
-  ESQLSource,
-  ESQLStringLiteral,
-  ESQLTimeInterval,
+  type ESQLAstComment,
+  type ESQLAstCommentMultiLine,
+  type ESQLColumn,
+  type ESQLIdentifier,
+  type ESQLLiteral,
+  type ESQLParamLiteral,
+  type ESQLProperNode,
+  type ESQLSource,
+  type ESQLStringLiteral,
+  type ESQLTimeInterval,
 } from '../types';
 
 const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;

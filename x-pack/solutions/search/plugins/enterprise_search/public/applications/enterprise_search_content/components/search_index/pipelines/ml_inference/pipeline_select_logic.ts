@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { parseMlInferenceParametersFromPipeline } from '../../../../../../../common/ml_inference_pipeline';
 
@@ -13,8 +13,8 @@ import { getMLType } from '../../../shared/ml_inference/utils';
 
 import {
   MLInferenceLogic,
-  MLInferenceProcessorsActions,
-  MLInferenceProcessorsValues,
+  type MLInferenceProcessorsActions,
+  type MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS } from './utils';
 

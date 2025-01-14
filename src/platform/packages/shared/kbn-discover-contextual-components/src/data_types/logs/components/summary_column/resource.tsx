@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import { type CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { ResourceFieldDescriptor } from './utils';
+import { type ResourceFieldDescriptor } from './utils';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
 

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
 
@@ -19,14 +19,14 @@ import { fetchAlertingFrameworkHealth as fetchAlertingFrameworkHealth } from '@k
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
-  Rule,
-  RuleAddProps,
+  type Rule,
+  type RuleAddProps,
   RuleFlyoutCloseReason,
-  GenericValidationResult,
-  ValidationResult,
-  RuleCreationValidConsumer,
-  RuleType,
-  RuleTypeModel,
+  type GenericValidationResult,
+  type ValidationResult,
+  type RuleCreationValidConsumer,
+  type RuleType,
+  type RuleTypeModel,
 } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';

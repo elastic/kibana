@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import React, { type FC, type ReactNode } from 'react';
+import { renderHook, type RenderHookResult } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../../hooks/use_kibana';
 import { useCaseDisabled } from './use_case_permission';

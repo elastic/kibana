@@ -30,18 +30,18 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  BrowserFields,
-  DeprecatedCellValueElementProps,
-  ColumnHeaderOptions,
-  DeprecatedRowRenderer,
-  TimelineItem,
+  type BrowserFields,
+  type DeprecatedCellValueElementProps,
+  type ColumnHeaderOptions,
+  type DeprecatedRowRenderer,
+  type TimelineItem,
 } from '@kbn/timelines-plugin/common';
 import {
   useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
+  type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataTableModel, DataTableState } from '../../store/data_table/types';
+import { type FieldSpec } from '@kbn/data-views-plugin/common';
+import { type DataTableModel, type DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import { addBuildingBlockStyle, mapSortDirectionToDirection, mapSortingColumns } from './helpers';

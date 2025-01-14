@@ -6,8 +6,8 @@
  */
 
 import {
-  AlertDetailsContextualInsightsHandlerQuery,
-  AlertDetailsContextualInsightsRequestContext,
+  type AlertDetailsContextualInsightsHandlerQuery,
+  type AlertDetailsContextualInsightsRequestContext,
   AlertDetailsContextualInsightsService,
 } from '.';
 

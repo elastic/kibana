@@ -10,8 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ChartOptions, ChartOptionsParams } from './chart_options';
-import { SeriesParam, ChartMode } from '../../../../types';
+import { ChartOptions, type ChartOptionsParams } from './chart_options';
+import { type SeriesParam, ChartMode } from '../../../../types';
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
 import { valueAxis, seriesParam } from './mocks';

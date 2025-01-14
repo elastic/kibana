@@ -7,14 +7,14 @@
 
 import { FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
 import {
-  Category,
-  DynamicStylePropertyOptions,
-  RangeFieldMeta,
-  StyleMetaDescriptor,
-  TileMetaFeature,
+  type Category,
+  type DynamicStylePropertyOptions,
+  type RangeFieldMeta,
+  type StyleMetaDescriptor,
+  type TileMetaFeature,
 } from '../../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
-import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { type PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { type IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 
 export async function pluckStyleMeta(
   metaFeatures: TileMetaFeature[],

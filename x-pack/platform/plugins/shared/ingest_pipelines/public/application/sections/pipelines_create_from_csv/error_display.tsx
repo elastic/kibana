@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 interface Props {

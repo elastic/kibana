@@ -15,7 +15,7 @@ jest.mock('../react_router_helpers', () => ({
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
-  Breadcrumb,
+  type Breadcrumb,
   useGenerateBreadcrumbs,
   useEuiBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,

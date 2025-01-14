@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiListGroupItem, EuiListGroupItemProps } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiListGroupItem, type EuiListGroupItemProps } from '@elastic/eui';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';

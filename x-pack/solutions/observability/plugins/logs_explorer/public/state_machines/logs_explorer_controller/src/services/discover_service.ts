@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ActionFunction, actions, InvokeCallback } from 'xstate';
-import { LogsExplorerCustomizations } from '../../../../controller';
+import { type ActionFunction, actions, type InvokeCallback } from 'xstate';
+import { type LogsExplorerCustomizations } from '../../../../controller';
 import { isDataViewSelection } from '../../../../../common/data_source_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
@@ -16,7 +16,7 @@ import {
   getGridRowsDisplayOptionsFromDiscoverAppState,
   getQueryStateFromDiscoverAppState,
 } from '../../../../utils/convert_discover_app_state';
-import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
+import { type LogsExplorerControllerContext, type LogsExplorerControllerEvent } from '../types';
 
 export const subscribeToDiscoverState =
   () =>

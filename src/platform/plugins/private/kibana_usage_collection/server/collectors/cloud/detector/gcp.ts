@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch, { Response } from 'node-fetch';
+import fetch, { type Response } from 'node-fetch';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 

@@ -12,7 +12,7 @@ import type {
   DataView,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
-import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { type RuntimeField } from '@kbn/data-views-plugin/public';
 import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import { getDataHandler } from '../../data_handler';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
@@ -21,9 +21,9 @@ import { getApmDataViewTitle } from '../../components/shared/exploratory_view/ut
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
 import {
-  AppDataType,
-  FieldFormat,
-  FieldFormatParams,
+  type AppDataType,
+  type FieldFormat,
+  type FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';

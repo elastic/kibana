@@ -9,14 +9,14 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import {
   Aggregators,
-  CountMetricExpressionParams,
-  CustomMetricExpressionParams,
-  MetricExpressionParams,
-  NonCountMetricExpressionParams,
+  type CountMetricExpressionParams,
+  type CustomMetricExpressionParams,
+  type MetricExpressionParams,
+  type NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
-import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
+import { type InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
 import {
-  EvaluatedRuleParams,
+  type EvaluatedRuleParams,
   evaluateRule,
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { COMPARATORS } from '@kbn/alerting-comparators';

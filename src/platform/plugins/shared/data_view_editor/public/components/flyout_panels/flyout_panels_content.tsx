@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, FC, PropsWithChildren } from 'react';
+import React, { useEffect, type FC, type PropsWithChildren } from 'react';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 

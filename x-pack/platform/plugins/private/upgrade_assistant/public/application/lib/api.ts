@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 
 import {
-  ESUpgradeStatus,
-  CloudBackupStatus,
-  ClusterUpgradeState,
-  ResponseError,
-  SystemIndicesMigrationStatus,
-  ReindexStatusResponse,
+  type ESUpgradeStatus,
+  type CloudBackupStatus,
+  type ClusterUpgradeState,
+  type ResponseError,
+  type SystemIndicesMigrationStatus,
+  type ReindexStatusResponse,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -22,9 +22,9 @@ import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
-  UseRequestConfig,
-  SendRequestConfig,
-  SendRequestResponse,
+  type UseRequestConfig,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';

@@ -11,9 +11,9 @@ import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import {
-  AIAssistantAppService,
+  type AIAssistantAppService,
   useAIAssistantAppService,
   ChatFlyout,
   FlyoutPositionMode,
@@ -23,7 +23,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
+import { type ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 

@@ -8,9 +8,9 @@
  */
 
 import { map, uniq } from 'lodash';
-import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
+import { type DataView, type DataViewField, type IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
 import {
-  FieldFormatsGetConfigFn,
+  type FieldFormatsGetConfigFn,
   NumberFormat,
   StringFormat,
 } from '@kbn/field-formats-plugin/common';

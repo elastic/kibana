@@ -6,11 +6,11 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
+import { Duration, type SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
 import { getSlicesFromDateRange } from '../../../../services/utils/get_slices_from_date_range';
-import { BurnRateRuleParams, WindowSchema } from '../types';
+import { type BurnRateRuleParams, type WindowSchema } from '../types';
 
 type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;

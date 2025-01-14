@@ -12,7 +12,7 @@ import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createAgentInput } from './agent';
 import { createPipeline } from './pipeline';
-import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
+import { type DataStream, type Docs, type InputType, type Pipeline, type Integration } from '../../common';
 import yaml from 'js-yaml';
 import { createReadme } from './readme_files';
 

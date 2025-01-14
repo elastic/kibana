@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType, lazy, LazyExoticComponent } from 'react';
-import { Props as LazyOptInExampleFlyoutProps } from './opt_in_example_flyout';
+import { type ComponentType, lazy, type LazyExoticComponent } from 'react';
+import { type Props as LazyOptInExampleFlyoutProps } from './opt_in_example_flyout';
 
 export type { LazyOptInExampleFlyoutProps };
 /**

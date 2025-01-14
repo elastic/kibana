@@ -5,10 +5,10 @@
  * 2.0.
  */
 import {
-  MlTrainedModelDeploymentStats,
-  MlTrainedModelStats,
+  type MlTrainedModelDeploymentStats,
+  type MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import { type TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 export const nerModel: TrainedModelConfigResponse = {
   inference_config: {

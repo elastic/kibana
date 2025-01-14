@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WelcomeService, WelcomeServiceSetup } from './welcome_service';
+import { WelcomeService, type WelcomeServiceSetup } from './welcome_service';
 
 describe('WelcomeService', () => {
   let welcomeService: WelcomeService;

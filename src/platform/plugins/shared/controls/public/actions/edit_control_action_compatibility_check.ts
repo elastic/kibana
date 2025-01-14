@@ -20,7 +20,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../common';
-import { DataControlApi } from '../controls/data_controls/types';
+import { type DataControlApi } from '../controls/data_controls/types';
 
 export const compatibilityCheck = (api: unknown): api is DataControlApi => {
   return Boolean(

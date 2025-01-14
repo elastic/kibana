@@ -8,14 +8,14 @@
 import {
   metricCustomBasicMetric,
   metricCustomDocCountMetric,
-  MetricCustomIndicator,
+  type MetricCustomIndicator,
   timesliceMetricBasicMetricWithField,
-  TimesliceMetricIndicator,
+  type TimesliceMetricIndicator,
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
-import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import { type FormState, type UseFormGetFieldState, type UseFormGetValues, type UseFormWatch } from 'react-hook-form';
 import { isObject } from 'lodash';
-import { CreateSLOForm } from '../types';
+import { type CreateSLOForm } from '../types';
 
 interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOForm>;

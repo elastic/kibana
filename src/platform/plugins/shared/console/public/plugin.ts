@@ -8,18 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { type Plugin, type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { EmbeddableConsole } from './application/containers/embeddable';
 import {
-  AppSetupUIPluginDependencies,
-  AppStartUIPluginDependencies,
-  ClientConfigType,
-  ConsolePluginSetup,
-  ConsolePluginStart,
-  ConsoleUILocatorParams,
-  EmbeddedConsoleView,
+  type AppSetupUIPluginDependencies,
+  type AppStartUIPluginDependencies,
+  type ClientConfigType,
+  type ConsolePluginSetup,
+  type ConsolePluginStart,
+  type ConsoleUILocatorParams,
+  type EmbeddedConsoleView,
 } from './types';
 import {
   AutocompleteInfo,

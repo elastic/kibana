@@ -6,8 +6,8 @@
  */
 
 import {
-  PromptResponse,
-  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  type PromptResponse,
+  type PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
 import { useAssistantContext } from '../../../../..';

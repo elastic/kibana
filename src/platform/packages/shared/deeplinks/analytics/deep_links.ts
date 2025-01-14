@@ -8,13 +8,13 @@
  */
 
 import {
-  DASHBOARD_APP_ID,
-  DISCOVER_APP_ID,
-  DISCOVER_ESQL_LOCATOR,
-  VISUALIZE_APP_ID,
-  MAPS_APP_ID,
-  CANVAS_APP_ID,
-  GRAPH_APP_ID,
+  type DASHBOARD_APP_ID,
+  type DISCOVER_APP_ID,
+  type DISCOVER_ESQL_LOCATOR,
+  type VISUALIZE_APP_ID,
+  type MAPS_APP_ID,
+  type CANVAS_APP_ID,
+  type GRAPH_APP_ID,
 } from './constants';
 
 export type AppId =

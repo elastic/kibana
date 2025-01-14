@@ -8,11 +8,11 @@
 import { getSuggestions } from './xy_suggestions';
 import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
 import {
-  State,
-  XYState,
+  type State,
+  type XYState,
   visualizationSubtypes,
-  XYAnnotationLayerConfig,
-  XYDataLayerConfig,
+  type XYAnnotationLayerConfig,
+  type XYDataLayerConfig,
 } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';

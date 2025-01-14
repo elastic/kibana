@@ -8,22 +8,22 @@
  */
 
 import {
-  GetIn,
-  CreateIn,
-  SearchIn,
-  UpdateIn,
-  DeleteIn,
-  DeleteResult,
-  SearchResult,
-  GetResult,
-  CreateResult,
-  UpdateResult,
+  type GetIn,
+  type CreateIn,
+  type SearchIn,
+  type UpdateIn,
+  type DeleteIn,
+  type DeleteResult,
+  type SearchResult,
+  type GetResult,
+  type CreateResult,
+  type UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { EventAnnotationGroupContentType } from '../types';
+import { type EventAnnotationGroupContentType } from '../types';
 
 export interface Reference {
   type: string;

@@ -9,13 +9,13 @@
 
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import {
-  SavedDashboardPanel730ToLatest,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel630,
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
-  SavedDashboardPanelTo60,
+  type SavedDashboardPanel730ToLatest,
+  type RawSavedDashboardPanel640To720,
+  type RawSavedDashboardPanelTo60,
+  type RawSavedDashboardPanel630,
+  type RawSavedDashboardPanel610,
+  type RawSavedDashboardPanel620,
+  type SavedDashboardPanelTo60,
 } from './types';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {

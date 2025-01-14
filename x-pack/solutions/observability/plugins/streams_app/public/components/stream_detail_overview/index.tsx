@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import { type ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';

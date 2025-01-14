@@ -8,9 +8,9 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { type ESQLFunction } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter, type BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
   const { root } = parse(src);

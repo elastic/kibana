@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  CreateRuleBody,
+  type CreateRuleBody,
   createRule,
   fetchUiConfig as triggersActionsUiConfig,
 } from '@kbn/response-ops-rule-form';
@@ -20,16 +20,16 @@ import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  IErrorObject,
-  Rule,
-  RuleAddProps,
-  RuleCreationValidConsumer,
+  type IErrorObject,
+  type Rule,
+  type RuleAddProps,
+  type RuleCreationValidConsumer,
   RuleFlyoutCloseReason,
-  RuleTypeIndex,
-  RuleTypeMetaData,
-  RuleTypeParams,
-  RuleUpdates,
-  TriggersActionsUiConfig,
+  type RuleTypeIndex,
+  type RuleTypeMetaData,
+  type RuleTypeParams,
+  type RuleUpdates,
+  type TriggersActionsUiConfig,
 } from '../../../types';
 import { HealthCheck } from '../../components/health_check';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
@@ -45,7 +45,7 @@ import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import RuleAddFooter from './rule_add_footer';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { RuleForm } from './rule_form';
-import { InitialRule, getRuleReducer } from './rule_reducer';
+import { type InitialRule, getRuleReducer } from './rule_reducer';
 import { ShowRequestModal } from './show_request_modal';
 
 const defaultCreateRuleErrorMessage = i18n.translate(

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import { type IScopedClusterClient } from '@kbn/core/server';
+import { type RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {

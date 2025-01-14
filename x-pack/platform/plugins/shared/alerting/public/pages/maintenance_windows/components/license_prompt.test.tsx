@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { type AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { LicensePrompt } from './license_prompt';
 
 describe('LicensePrompt', () => {

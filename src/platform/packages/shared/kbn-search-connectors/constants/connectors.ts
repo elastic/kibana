@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ConnectorClientSideDefinition,
-  ConnectorServerSideDefinition,
+  type ConnectorClientSideDefinition,
+  type ConnectorServerSideDefinition,
 } from '../types/connector_definition';
 
 import { docLinks } from './doc_links';

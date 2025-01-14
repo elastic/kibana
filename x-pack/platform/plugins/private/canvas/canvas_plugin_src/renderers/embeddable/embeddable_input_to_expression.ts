@@ -6,7 +6,7 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
+import { EmbeddableTypes, type EmbeddableInput } from '../../expression_types';
 import { toExpression as mapToExpression } from './input_type_to_expression/map';
 import { toExpression as visualizationToExpression } from './input_type_to_expression/visualization';
 import { toExpression as lensToExpression } from './input_type_to_expression/lens';

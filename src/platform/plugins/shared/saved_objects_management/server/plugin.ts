@@ -8,8 +8,8 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
+import { type CoreSetup, type CoreStart, type Logger, type Plugin, type PluginInitializerContext } from '@kbn/core/server';
+import { type SavedObjectsManagementPluginSetup, type SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 import { capabilitiesProvider } from './capabilities_provider';

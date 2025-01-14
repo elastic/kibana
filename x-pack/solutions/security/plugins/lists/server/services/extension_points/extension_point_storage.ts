@@ -8,10 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 
 import {
-  ExtensionPoint,
-  ExtensionPointStorageClientInterface,
-  ExtensionPointStorageInterface,
-  NarrowExtensionPointToType,
+  type ExtensionPoint,
+  type ExtensionPointStorageClientInterface,
+  type ExtensionPointStorageInterface,
+  type NarrowExtensionPointToType,
 } from './types';
 import { ExtensionPointStorageClient } from './extension_point_storage_client';
 

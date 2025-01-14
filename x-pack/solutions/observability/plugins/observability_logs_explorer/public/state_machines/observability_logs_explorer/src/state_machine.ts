@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
-import { actions, createMachine, InterpreterFrom } from 'xstate';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { type IToasts } from '@kbn/core-notifications-browser';
+import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { type CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
+import { actions, createMachine, type InterpreterFrom } from 'xstate';
+import { type TimefilterContract } from '@kbn/data-plugin/public';
+import { type AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { type LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
-  ObservabilityLogsExplorerContext,
-  ObservabilityLogsExplorerEvent,
-  ObservabilityLogsExplorerTypeState,
+  type ObservabilityLogsExplorerContext,
+  type ObservabilityLogsExplorerEvent,
+  type ObservabilityLogsExplorerTypeState,
 } from './types';
 import { initializeFromUrl, updateUrlFromLogsExplorerState } from './url_state_storage_service';
 import {

@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import {
   parse,
-  TinymathLocation,
-  TinymathAST,
-  TinymathFunction,
-  TinymathVariable,
-  TinymathNamedArgument,
+  type TinymathLocation,
+  type TinymathAST,
+  type TinymathFunction,
+  type TinymathVariable,
+  type TinymathNamedArgument,
 } from '@kbn/tinymath';
 import type {
   UnifiedSearchPublicPluginStart,
@@ -24,9 +24,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import moment from 'moment';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import { type TimefilterContract } from '@kbn/data-plugin/public';
 import { getAbsoluteDateRange, nonNullable } from '../../../../../../utils';
-import { DateRange } from '../../../../../../../common/types';
+import { type DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { groupArgsByType, unquotedStringRegex } from '../util';

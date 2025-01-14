@@ -16,9 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../common/types';
+import { type SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
-import { PolicyValidation, validatePolicy } from '../../services/validation';
+import { type PolicyValidation, validatePolicy } from '../../services/validation';
 import {
   PolicyStepLogistics,
   PolicyStepSettings,

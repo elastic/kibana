@@ -2,13 +2,13 @@
 // Generated from ./src/painless/antlr/painless_lexer.g4 by ANTLR 4.13.1
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 import {
-	ATN,
+	type ATN,
 	ATNDeserializer,
-	CharStream,
-	DecisionState, DFA,
+	type CharStream,
+	type DecisionState, DFA,
 	Lexer,
 	LexerATNSimulator,
-	RuleContext,
+	type RuleContext,
 	PredictionContextCache,
 	Token
 } from "antlr4";

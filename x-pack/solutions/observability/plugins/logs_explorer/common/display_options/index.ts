@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';

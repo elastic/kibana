@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable, DatatableRow, getBucketIdentifier } from '@kbn/expressions-plugin/common';
+import { type Datatable, type DatatableRow, getBucketIdentifier } from '@kbn/expressions-plugin/common';
 import type { CollapseExpressionFunction } from './types';
 
 function getValueAsNumberArray(value: unknown) {

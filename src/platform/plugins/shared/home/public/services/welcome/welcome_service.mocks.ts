@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { WelcomeService, WelcomeServiceSetup } from './welcome_service';
+import { type PublicMethodsOf } from '@kbn/utility-types';
+import { WelcomeService, type WelcomeServiceSetup } from './welcome_service';
 
 const createSetupMock = (): jest.Mocked<WelcomeServiceSetup> => {
   const welcomeService = new WelcomeService();

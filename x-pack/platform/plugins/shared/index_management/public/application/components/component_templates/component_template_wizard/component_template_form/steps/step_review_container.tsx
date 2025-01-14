@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
-import { WizardContent } from '../component_template_form';
+import { Forms, type ComponentTemplateDeserialized } from '../../../shared_imports';
+import { type WizardContent } from '../component_template_form';
 import { StepReview } from './step_review';
 
 interface Props {

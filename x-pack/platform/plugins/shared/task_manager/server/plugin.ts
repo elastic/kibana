@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
+import { combineLatest, type Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
@@ -14,13 +14,13 @@ import type {
   UsageCounter,
 } from '@kbn/usage-collection-plugin/server';
 import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  Logger,
-  CoreStart,
+  type PluginInitializerContext,
+  type Plugin,
+  type CoreSetup,
+  type Logger,
+  type CoreStart,
   ServiceStatusLevels,
-  CoreStatus,
+  type CoreStatus,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
@@ -29,22 +29,22 @@ import {
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { TaskManagerConfig } from './config';
-import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import { type TaskManagerConfig } from './config';
+import { createInitialMiddleware, addMiddlewareToChain, type Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
-import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
+import { type TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { type AggregationOpts, type FetchResult, type SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
-import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance } from './task';
+import { createMonitoringStats, type MonitoringStats } from './monitoring';
+import { type ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
-import { metricsStream, Metrics } from './metrics';
+import { metricsStream, type Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';

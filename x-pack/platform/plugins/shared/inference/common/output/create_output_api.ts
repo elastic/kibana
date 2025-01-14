@@ -6,14 +6,14 @@
  */
 
 import {
-  ChatCompleteAPI,
+  type ChatCompleteAPI,
   ChatCompletionEventType,
   MessageRole,
-  OutputAPI,
-  OutputCompositeResponse,
+  type OutputAPI,
+  type OutputCompositeResponse,
   OutputEventType,
-  OutputOptions,
-  ToolSchema,
+  type OutputOptions,
+  type ToolSchema,
   isToolValidationError,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';

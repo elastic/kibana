@@ -11,10 +11,10 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
-  DataViewAttributes,
-  SavedObject,
-  PersistenceAPI,
-  SavedObjectsClientCommonFindArgs,
+  type DataViewAttributes,
+  type SavedObject,
+  type PersistenceAPI,
+  type SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
 import type { DataViewCrudTypes } from '../common/content_management';

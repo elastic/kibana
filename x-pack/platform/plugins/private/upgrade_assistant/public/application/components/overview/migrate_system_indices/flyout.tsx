@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 
 import {
-  SystemIndicesMigrationStatus,
-  SystemIndicesMigrationFeature,
-  MIGRATION_STATUS,
+  type SystemIndicesMigrationStatus,
+  type SystemIndicesMigrationFeature,
+  type MIGRATION_STATUS,
 } from '../../../../../common/types';
 
 export interface SystemIndicesFlyoutProps {

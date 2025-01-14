@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { handleActions, Action } from 'redux-actions';
+import { handleActions, type Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnector } from '../../../../common/rules/types';
+import { type ActionConnector } from '../../../../common/rules/types';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
 import type { AppState } from '..';
-import { AsyncInitState } from '../reducers/types';
+import { type AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
   createAlert,
@@ -21,11 +21,11 @@ import {
   fetchAnomalyAlertRecords,
   fetchConnectors,
   fetchMonitorAlertRecords,
-  NewAlertParams,
+  type NewAlertParams,
 } from '../api/alerts';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
-import { AlertsResult, MonitorIdParam } from '../actions/types';
+import { type AlertsResult, type MonitorIdParam } from '../actions/types';
 import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
 
 /**

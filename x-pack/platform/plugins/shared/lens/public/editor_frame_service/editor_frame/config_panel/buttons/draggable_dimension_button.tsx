@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, ReactElement } from 'react';
+import React, { useMemo, useCallback, type ReactElement } from 'react';
 import {
-  DragDropIdentifier,
+  type DragDropIdentifier,
   useDragDropContext,
-  DropType,
+  type DropType,
   DropTargetSwapDuplicateCombine,
   Draggable,
   Droppable,
-  DroppableProps,
+  type DroppableProps,
 } from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import {
-  Datasource,
-  VisualizationDimensionGroupConfig,
+  type Datasource,
+  type VisualizationDimensionGroupConfig,
   isOperation,
-  DatasourceLayers,
-  IndexPatternMap,
-  DragDropOperation,
-  Visualization,
+  type DatasourceLayers,
+  type IndexPatternMap,
+  type DragDropOperation,
+  type Visualization,
 } from '../../../../types';
 
 export function DraggableDimensionButton({

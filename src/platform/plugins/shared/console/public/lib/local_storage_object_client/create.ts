@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
-import { TextObject, textObjectTypeName } from '../../../common/text_object';
+import { type Storage } from '../../services';
+import { type ObjectStorageClient } from '../../../common/types';
+import { type TextObject, textObjectTypeName } from '../../../common/text_object';
 import { LocalObjectStorage } from './local_storage_object_client';
 
 export const create = (storage: Storage): ObjectStorageClient => {

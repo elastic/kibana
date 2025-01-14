@@ -6,10 +6,10 @@
  */
 
 import {
-  CustomFieldMetadata,
-  EcsCompliantFieldMetadata,
-  IncompatibleFieldMetadata,
-  SameFamilyFieldMetadata,
+  type CustomFieldMetadata,
+  type EcsCompliantFieldMetadata,
+  type IncompatibleFieldMetadata,
+  type SameFamilyFieldMetadata,
 } from '../../types';
 
 export const timestamp: EcsCompliantFieldMetadata = {

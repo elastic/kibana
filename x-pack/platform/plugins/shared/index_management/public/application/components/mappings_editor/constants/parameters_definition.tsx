@@ -14,17 +14,17 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
-  ValidationFunc,
-  ValidationFuncArg,
+  type ValidationFunc,
+  type ValidationFuncArg,
   fieldFormatters,
-  FieldConfig,
+  type FieldConfig,
 } from '../shared_imports';
 import {
-  AliasOption,
-  DataType,
-  ComboBoxOption,
-  ParameterName,
-  ParameterDefinition,
+  type AliasOption,
+  type DataType,
+  type ComboBoxOption,
+  type ParameterName,
+  type ParameterDefinition,
 } from '../types';
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';

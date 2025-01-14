@@ -8,10 +8,10 @@
  */
 
 import {
-  SendRequestConfig,
-  SendRequestResponse,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as _sendRequest,
-  Error,
+  type Error,
 } from '../shared_imports';
 
 import { httpService } from './http';

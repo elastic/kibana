@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import { type AppMountParameters, type CoreSetup, type CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { type RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
+import { type History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -20,7 +20,7 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
-import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD, type VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -29,28 +29,28 @@ import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { App } from './app';
-import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
+import { type EditorFrameStart, type LensTopNavMenuEntryGenerator, type VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { LensPluginStartDependencies } from '../plugin';
+import { type LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import { LensAttributesService } from '../lens_attribute_service';
-import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
+import { type LensAttributesService } from '../lens_attribute_service';
+import { type LensAppServices, type RedirectToOriginProps, type HistoryLocationState } from './types';
 import {
   makeConfigureStore,
   navigateAway,
-  LensRootStore,
+  type LensRootStore,
   loadInitial,
   setState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import {
-  LensAppLocator,
+  type LensAppLocator,
   LENS_SHARE_STATE_ACTION,
-  MainHistoryLocationState,
+  type MainHistoryLocationState,
 } from '../../common/locator/locator';
 import { SavedObjectIndexStore } from '../persistence';
-import { LensSerializedState } from '../react_embeddable/types';
+import { type LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as

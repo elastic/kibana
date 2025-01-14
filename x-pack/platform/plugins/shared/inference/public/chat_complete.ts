@@ -7,10 +7,10 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import {
-  ChatCompleteAPI,
-  ChatCompleteCompositeResponse,
-  ChatCompleteOptions,
-  ToolOptions,
+  type ChatCompleteAPI,
+  type ChatCompleteCompositeResponse,
+  type ChatCompleteOptions,
+  type ToolOptions,
 } from '@kbn/inference-common';
 import { from } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../common/http_apis';

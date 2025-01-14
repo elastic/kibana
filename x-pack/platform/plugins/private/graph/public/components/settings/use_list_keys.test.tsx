@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, type ReactWrapper } from 'enzyme';
 import { useListKeys } from './use_list_keys';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({

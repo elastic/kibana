@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import { type MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {

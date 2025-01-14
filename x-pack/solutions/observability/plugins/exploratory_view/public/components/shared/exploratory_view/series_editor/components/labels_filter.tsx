@@ -12,13 +12,13 @@ import {
   EuiPopover,
   EuiIcon,
   EuiButtonEmpty,
-  EuiSelectableOption,
+  type EuiSelectableOption,
 } from '@elastic/eui';
 
 import { EuiSelectable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FilterProps } from '../columns/filter_expanded';
+import { type FilterProps } from '../columns/filter_expanded';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterValuesList } from './filter_values_list';
 import { useFilterValues } from '../use_filter_values';

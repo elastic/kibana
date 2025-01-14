@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { type SavedObject } from '@kbn/core/server';
+import { type ActionsConfigurationUtilities } from '../actions_config';
 import { validateSecrets } from '../lib';
-import { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
+import { type RawAction, type ActionType, type ActionTypeRegistryContract } from '../types';
 
 export function transformConnectorsForExport(
   connectors: SavedObject[],

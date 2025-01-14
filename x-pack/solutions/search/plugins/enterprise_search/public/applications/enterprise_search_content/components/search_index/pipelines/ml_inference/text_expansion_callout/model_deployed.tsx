@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import {
-  TextExpansionCallOutState,
+  type TextExpansionCallOutState,
   TextExpansionDismissButton,
   FineTuneModelsButton,
 } from './text_expansion_callout';

@@ -15,7 +15,7 @@ import { mult } from './mult';
 import { sleep } from './sleep';
 import { sum } from './sum';
 import {
-  AnyExpressionFunctionDefinition,
+  type AnyExpressionFunctionDefinition,
   clog,
   font,
   variableSet,

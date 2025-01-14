@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EditorError, ESQLMessage, getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { ESQLCallbacks } from '../../shared/types';
+import { type EditorError, type ESQLMessage, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { type ESQLCallbacks } from '../../shared/types';
 import { getCallbackMocks } from '../../__tests__/helpers';
-import { ValidationOptions } from '../types';
+import { type ValidationOptions } from '../types';
 import { validateQuery } from '../validation';
 
 /** Validation test API factory, can be called at the start of each unit test. */

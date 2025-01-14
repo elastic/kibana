@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import {
-  budgetingMethodSchema,
-  groupSummarySchema,
-  objectiveSchema,
-  timeWindowTypeSchema,
+  type budgetingMethodSchema,
+  type groupSummarySchema,
+  type objectiveSchema,
+  type timeWindowTypeSchema,
 } from '../schema';
 
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;

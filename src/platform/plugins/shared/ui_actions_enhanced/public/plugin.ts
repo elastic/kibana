@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
+import { type PluginInitializerContext, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { type EmbeddableSetup, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { type ILicense, type LicensingPluginSetup, type LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsServiceEnhancements } from './services';
-import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
+import { createPublicDrilldownManager, type PublicDrilldownManagerComponent } from './drilldowns';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {

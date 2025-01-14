@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import { type HttpStart } from '@kbn/core/public';
 import {
-  FindFieldsMetadataRequestQuery,
-  FindFieldsMetadataResponsePayload,
+  type FindFieldsMetadataRequestQuery,
+  type FindFieldsMetadataResponsePayload,
 } from '../../../common/latest';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

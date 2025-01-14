@@ -7,22 +7,22 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiIcon,
   EuiSpacer,
   EuiToolTip,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { type DataViewBase, type DataViewFieldBase } from '@kbn/es-query';
 
-import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
+import { type FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import * as i18n from '../translations';
 import {
-  ComboBoxFields,
-  DataViewField,
-  FieldBaseProps,
-  GetFieldComboBoxPropsReturn,
+  type ComboBoxFields,
+  type DataViewField,
+  type FieldBaseProps,
+  type GetFieldComboBoxPropsReturn,
 } from './types';
 import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
 

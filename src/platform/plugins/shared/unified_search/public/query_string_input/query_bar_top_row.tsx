@@ -10,7 +10,7 @@
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -28,10 +28,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiFieldText,
+  type EuiFieldText,
   usePrettyDuration,
-  EuiIconProps,
-  OnRefreshProps,
+  type EuiIconProps,
+  type OnRefreshProps,
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
   EuiToolTip,
@@ -40,7 +40,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import { type TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -50,7 +50,7 @@ import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { DataViewPicker, type DataViewPickerProps } from '../dataview_picker';
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';

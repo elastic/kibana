@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
-import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
+import { type EnrichedDeprecationInfo, type ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { DeprecationTableColumns, Status } from '../../../types';
+import { type DeprecationTableColumns, type Status } from '../../../types';
 import { ClusterSettingsResolutionCell } from './resolution_table_cell';
-import { RemoveClusterSettingsFlyout, RemoveClusterSettingsFlyoutProps } from './flyout';
+import { RemoveClusterSettingsFlyout, type RemoveClusterSettingsFlyoutProps } from './flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
 

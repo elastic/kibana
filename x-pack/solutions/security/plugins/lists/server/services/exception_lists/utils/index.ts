@@ -7,30 +7,30 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsUpdateResponse,
+  type SavedObject,
+  type SavedObjectsFindResponse,
+  type SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import {
-  CommentsArray,
-  CreateComment,
-  CreateCommentsArray,
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
-  UpdateCommentsArrayOrUndefined,
-  UpdateExceptionListItemSchema,
+  type CommentsArray,
+  type CreateComment,
+  type CreateCommentsArray,
+  type CreateExceptionListItemSchema,
+  type ExceptionListItemSchema,
+  type ExceptionListSchema,
+  type FoundExceptionListItemSchema,
+  type FoundExceptionListSchema,
+  type UpdateCommentsArrayOrUndefined,
+  type UpdateExceptionListItemSchema,
   exceptionListItemType,
   exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
+import { type ExceptionListSoSchema } from '../../../schemas/saved_objects';
 import {
-  CreateExceptionListItemOptions,
-  UpdateExceptionListItemOptions,
+  type CreateExceptionListItemOptions,
+  type UpdateExceptionListItemOptions,
 } from '../exception_list_client_types';
 
 export { validateData } from './validate_data';

@@ -9,7 +9,7 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RuleFormData } from '../types';
+import { type RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
   NAME_REQUIRED_TEXT,
@@ -20,12 +20,12 @@ import {
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
 } from '../translations';
 import {
-  MinimumScheduleInterval,
-  RuleFormActionsErrors,
-  RuleFormBaseErrors,
-  RuleFormParamsErrors,
-  RuleTypeModel,
-  RuleUiAction,
+  type MinimumScheduleInterval,
+  type RuleFormActionsErrors,
+  type RuleFormBaseErrors,
+  type RuleFormParamsErrors,
+  type RuleTypeModel,
+  type RuleUiAction,
 } from '../common';
 
 export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormActionsErrors => {

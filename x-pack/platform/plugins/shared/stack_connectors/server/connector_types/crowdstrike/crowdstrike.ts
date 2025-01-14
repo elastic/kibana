@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { isAggregateError, NodeSystemError } from './types';
+import { type ExperimentalFeatures } from '../../../common/experimental_features';
+import { isAggregateError, type NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -33,7 +33,7 @@ import {
   CrowdstrikeExecuteRTRResponseSchema,
   CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
-  CrowdstrikeGetTokenResponseSchema,
+  type CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';

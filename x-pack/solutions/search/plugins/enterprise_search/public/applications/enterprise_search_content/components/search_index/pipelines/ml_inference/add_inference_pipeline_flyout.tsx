@@ -20,10 +20,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
+  type EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiStepStatus,
+  type EuiStepStatus,
   EuiTitle,
 } from '@elastic/eui';
 

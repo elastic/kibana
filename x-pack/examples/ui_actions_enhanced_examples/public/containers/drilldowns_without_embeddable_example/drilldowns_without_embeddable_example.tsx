@@ -15,10 +15,10 @@ import {
   EuiFlyout,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import { SAMPLE_APP1_CLICK_TRIGGER, SampleMlJob, SampleApp1ClickContext } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER, type SampleMlJob, type SampleApp1ClickContext } from '../../triggers';
 
 export const job: SampleMlJob = {
   job_id: '123',

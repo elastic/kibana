@@ -19,10 +19,10 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import {
-  ActionType,
-  TriggersAndActionsUIPublicPluginStart,
+  type ActionType,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CoreStart, HttpSetup } from '@kbn/core/public';
+import { type CoreStart, type HttpSetup } from '@kbn/core/public';
 import {
   ConnectorAddModal,
   loadActionTypes,

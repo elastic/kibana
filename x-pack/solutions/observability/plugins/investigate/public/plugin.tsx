@@ -6,9 +6,9 @@
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import {
-  ItemDefinition,
-  ItemDefinitionData,
-  ItemDefinitionParams,
+  type ItemDefinition,
+  type ItemDefinitionData,
+  type ItemDefinitionParams,
   ItemDefinitionRegistry,
 } from './investigation/item_definition_registry';
 import type {

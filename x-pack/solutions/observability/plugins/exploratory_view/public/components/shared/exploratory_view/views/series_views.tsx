@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { RefObject } from 'react';
+import React, { type RefObject } from 'react';
 
 import { SeriesEditor } from '../series_editor/series_editor';
 import { AddSeriesButton } from './add_series_button';
-import { PanelId } from '../exploratory_view';
+import { type PanelId } from '../exploratory_view';
 
 export function SeriesViews({
   seriesBuilderRef,

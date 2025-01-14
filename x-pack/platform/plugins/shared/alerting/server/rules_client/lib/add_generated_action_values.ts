@@ -6,14 +6,14 @@
  */
 
 import { v4 } from 'uuid';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import {
-  NormalizedAlertAction,
-  NormalizedAlertDefaultActionWithGeneratedValues,
-  NormalizedAlertSystemActionWithGeneratedValues,
-  NormalizedSystemAction,
-  RulesClientContext,
+  type NormalizedAlertAction,
+  type NormalizedAlertDefaultActionWithGeneratedValues,
+  type NormalizedAlertSystemActionWithGeneratedValues,
+  type NormalizedSystemAction,
+  type RulesClientContext,
 } from '..';
 import { getEsQueryConfig } from '../../lib/get_es_query_config';
 

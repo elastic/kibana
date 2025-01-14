@@ -9,7 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import { AbstractStorybookMock, type ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import type {
   KibanaNoDataPageServices,
   KibanaNoDataPageProps,
@@ -18,12 +18,12 @@ import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import {
   NoDataViewsPromptStorybookMock,
-  NoDataViewsPromptStorybookParams,
+  type NoDataViewsPromptStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import {
   NoDataCardStorybookMock,
-  NoDataCardStorybookParams,
+  type NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
 
 type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;

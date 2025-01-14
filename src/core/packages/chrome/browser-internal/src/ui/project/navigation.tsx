@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';

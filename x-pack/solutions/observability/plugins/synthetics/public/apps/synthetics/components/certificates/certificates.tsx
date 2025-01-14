@@ -12,7 +12,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
 import { CertificateSearch } from './cert_search';
 import { useCertSearch } from './use_cert_search';
-import { CertificateList, CertSort } from './certificates_list';
+import { CertificateList, type CertSort } from './certificates_list';
 import { useBreadcrumbs } from '../../hooks';
 
 const DEFAULT_PAGE_SIZE = 10;

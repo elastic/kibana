@@ -8,9 +8,9 @@
 import { convertTimestamp } from '../lib/convert_timestamp';
 import { api as commonApi } from '../lib/servicenow/api';
 import {
-  ExecutorSubActionAddEventParams,
-  AddEventApiHandlerArgs,
-  ExternalServiceApiITOM,
+  type ExecutorSubActionAddEventParams,
+  type AddEventApiHandlerArgs,
+  type ExternalServiceApiITOM,
 } from '../lib/servicenow/types';
 
 const isValidDate = (d: Date) => !isNaN(d.valueOf());

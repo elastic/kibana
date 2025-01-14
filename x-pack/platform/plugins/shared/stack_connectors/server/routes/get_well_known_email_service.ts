@@ -7,14 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
+  type IRouter,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type IKibanaResponse,
+  type KibanaResponseFactory,
 } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { AdditionalEmailServices, INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { ELASTIC_CLOUD_SERVICE } from '../connector_types/email';
 

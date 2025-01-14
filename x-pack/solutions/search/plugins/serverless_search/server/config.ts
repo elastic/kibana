@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type PluginConfigDescriptor } from '@kbn/core/server';
 
-export * from './types';
+export type * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),

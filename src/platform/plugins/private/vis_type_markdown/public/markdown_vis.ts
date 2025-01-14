@@ -10,11 +10,11 @@
 import { i18n } from '@kbn/i18n';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VisGroups, type VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
 import { toExpressionAst } from './to_ast';
-import { MarkdownVisParams } from './types';
+import { type MarkdownVisParams } from './types';
 
 export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   name: 'markdown',

@@ -15,7 +15,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiIcon,
-  EuiKeyPadMenuItemProps,
+  type EuiKeyPadMenuItemProps,
 } from '@elastic/eui';
 
 export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {

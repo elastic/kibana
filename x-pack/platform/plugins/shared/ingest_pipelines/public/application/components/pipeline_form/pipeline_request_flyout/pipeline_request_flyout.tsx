@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FunctionComponent } from 'react';
+import React, { useState, useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Pipeline } from '../../../../../common/types';
+import { type Pipeline } from '../../../../../common/types';
 import { useFormContext, ViewApiRequestFlyout, useKibana } from '../../../../shared_imports';
 
-import { ReadProcessorsFunction } from '../types';
+import { type ReadProcessorsFunction } from '../types';
 
 interface Props {
   closeFlyout: () => void;

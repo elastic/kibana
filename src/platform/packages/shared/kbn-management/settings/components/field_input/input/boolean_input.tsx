@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiSwitchProps } from '@elastic/eui';
+import { EuiSwitch, type EuiSwitchProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';

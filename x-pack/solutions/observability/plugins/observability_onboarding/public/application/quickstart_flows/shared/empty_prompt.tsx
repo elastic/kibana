@@ -12,9 +12,9 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
+  type OnboardingFlowEventContext,
 } from '../../../../common/telemetry_events';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import { type ObservabilityOnboardingAppServices } from '../../..';
 
 interface EmptyPromptProps {
   onboardingFlowType: string;

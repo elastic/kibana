@@ -11,7 +11,7 @@ import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  SLOWithSummaryResponse,
+  type SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';

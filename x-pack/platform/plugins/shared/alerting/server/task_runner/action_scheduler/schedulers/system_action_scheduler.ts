@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import { RuleSystemAction, RuleTypeParams } from '@kbn/alerting-types';
-import { CombinedSummarizedAlerts } from '../../../types';
-import { RuleTypeState, RuleAlertData } from '../../../../common';
-import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import { type AlertInstanceState, type AlertInstanceContext } from '@kbn/alerting-state-types';
+import { type RuleSystemAction, type RuleTypeParams } from '@kbn/alerting-types';
+import { type CombinedSummarizedAlerts } from '../../../types';
+import { type RuleTypeState, type RuleAlertData } from '../../../../common';
+import { type GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -17,10 +17,10 @@ import {
   shouldScheduleAction,
 } from '../lib';
 import {
-  ActionSchedulerOptions,
-  ActionsToSchedule,
-  GetActionsToScheduleOpts,
-  IActionScheduler,
+  type ActionSchedulerOptions,
+  type ActionsToSchedule,
+  type GetActionsToScheduleOpts,
+  type IActionScheduler,
 } from '../types';
 
 export class SystemActionScheduler<

@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import {
-  PromptResponse,
-  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  type PromptResponse,
+  type PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import * as i18n from './translations';
 import { QuickPromptSettingsEditor } from './quick_prompt_editor';

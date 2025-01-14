@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip, RenderCellValue } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type RenderCellValue } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { LogCategory } from '../../types';
+import { type LogCategory } from '../../types';
 import { getCellContext } from './log_categories_grid_cell';
 
 interface CreateLogCategoriesGridExpandButtonProps {

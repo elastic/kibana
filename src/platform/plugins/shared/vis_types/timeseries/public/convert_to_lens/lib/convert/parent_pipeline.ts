@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { type METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
-  AvgColumn,
-  CardinalityColumn,
-  CommonColumnConverterArgs,
-  CommonColumnsConverterArgs,
-  CountColumn,
-  CounterRateColumn,
-  CumulativeSumColumn,
-  DerivativeColumn,
-  LastValueColumn,
-  MaxColumn,
-  MinColumn,
-  MovingAverageColumn,
-  PercentileColumn,
-  PercentileRanksColumn,
-  SumColumn,
-  FormulaColumn,
+  type AvgColumn,
+  type CardinalityColumn,
+  type CommonColumnConverterArgs,
+  type CommonColumnsConverterArgs,
+  type CountColumn,
+  type CounterRateColumn,
+  type CumulativeSumColumn,
+  type DerivativeColumn,
+  type LastValueColumn,
+  type MaxColumn,
+  type MinColumn,
+  type MovingAverageColumn,
+  type PercentileColumn,
+  type PercentileRanksColumn,
+  type SumColumn,
+  type FormulaColumn,
 } from './types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import { type TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { type Metric } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
-  SupportedMetric,
+  type SupportedMetric,
   SUPPORTED_METRICS,
   getPipelineSeriesFormula,
 } from '../metrics';

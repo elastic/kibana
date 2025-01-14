@@ -13,7 +13,7 @@ import type {
   LayerSpecification,
   VectorTileSource,
 } from '@kbn/mapbox-gl';
-import { Feature } from 'geojson';
+import { type Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
@@ -24,21 +24,21 @@ import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/c
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   AbstractVectorLayer,
-  VectorLayerArguments,
+  type VectorLayerArguments,
 } from '../vector_layer';
-import { IMvtVectorSource } from '../../../sources/vector_source';
-import { DataRequestContext } from '../../../../actions';
+import { type IMvtVectorSource } from '../../../sources/vector_source';
+import { type DataRequestContext } from '../../../../actions';
 import {
-  DataRequestMeta,
-  StyleMetaDescriptor,
-  VectorLayerDescriptor,
+  type DataRequestMeta,
+  type StyleMetaDescriptor,
+  type VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { ESSearchSource } from '../../../sources/es_search_source';
+import { type ESSearchSource } from '../../../sources/es_search_source';
 import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
-import { InnerJoin } from '../../../joins/inner_join';
-import { LayerIcon } from '../../layer';
-import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { type InnerJoin } from '../../../joins/inner_join';
+import { type LayerIcon } from '../../layer';
+import { type MvtSourceData, syncMvtSourceData } from './mvt_source_data';
+import { type PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { pluckStyleMeta } from './pluck_style_meta';
 import {
   ES_MVT_HITS_TOTAL_RELATION,

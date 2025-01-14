@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  IconType,
+  type IconType,
   EuiSpacer,
   EuiBetaBadge,
 } from '@elastic/eui';

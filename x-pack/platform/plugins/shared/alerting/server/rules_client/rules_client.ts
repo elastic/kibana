@@ -5,55 +5,55 @@
  * 2.0.
  */
 
-import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
-import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
-import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import { SanitizedRule, RuleTypeParams } from '../types';
+import { type UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
+import { getRuleTags, type RuleTagsParams } from '../application/rule/methods/tags';
+import { type MuteAlertParams } from '../application/rule/methods/mute_alert/types';
+import { type SanitizedRule, type RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext } from './types';
-import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
-import { createRule, CreateRuleParams } from '../application/rule/methods/create';
-import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
-import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
-import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
-import { getRule, GetRuleParams } from '../application/rule/methods/get';
-import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
-import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
-import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
+import { type RulesClientContext } from './types';
+import { cloneRule, type CloneRuleParams } from '../application/rule/methods/clone';
+import { createRule, type CreateRuleParams } from '../application/rule/methods/create';
+import { updateRule, type UpdateRuleParams } from '../application/rule/methods/update';
+import { snoozeRule, type SnoozeRuleOptions } from '../application/rule/methods/snooze';
+import { unsnoozeRule, type UnsnoozeParams } from '../application/rule/methods/unsnooze';
+import { getRule, type GetRuleParams } from '../application/rule/methods/get';
+import { resolveRule, type ResolveParams } from '../application/rule/methods/resolve';
+import { getAlertState, type GetAlertStateParams } from './methods/get_alert_state';
+import { getAlertSummary, type GetAlertSummaryParams } from './methods/get_alert_summary';
 import {
-  GetExecutionLogByIdParams,
+  type GetExecutionLogByIdParams,
   getExecutionLogForRule,
-  GetGlobalExecutionLogParams,
+  type GetGlobalExecutionLogParams,
   getGlobalExecutionLogWithAuth,
 } from './methods/get_execution_log';
 import {
   getActionErrorLog,
-  GetActionErrorLogByIdParams,
+  type GetActionErrorLogByIdParams,
   getActionErrorLogWithAuth,
 } from './methods/get_action_error_log';
 import {
-  GetGlobalExecutionKPIParams,
+  type GetGlobalExecutionKPIParams,
   getGlobalExecutionKpiWithAuth,
   getRuleExecutionKPI,
-  GetRuleExecutionKPIParams,
+  type GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
-import { findRules, FindRulesParams } from '../application/rule/methods/find';
-import { AggregateParams } from '../application/rule/methods/aggregate/types';
+import { findRules, type FindRulesParams } from '../application/rule/methods/find';
+import { type AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
-import { deleteRule, DeleteRuleParams } from '../application/rule/methods/delete';
+import { deleteRule, type DeleteRuleParams } from '../application/rule/methods/delete';
 import {
   bulkDeleteRules,
-  BulkDeleteRulesRequestBody,
+  type BulkDeleteRulesRequestBody,
 } from '../application/rule/methods/bulk_delete';
 import {
   bulkDisableRules,
-  BulkDisableRulesRequestBody,
+  type BulkDisableRulesRequestBody,
 } from '../application/rule/methods/bulk_disable';
 import {
   bulkEditRules,
-  BulkEditOptions,
+  type BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
-import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
+import { bulkEnableRules, type BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -66,16 +66,16 @@ import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import {
   bulkUntrackAlerts,
-  BulkUntrackBody,
+  type BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
-import { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
+import { type ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
 import { scheduleBackfill } from '../application/backfill/methods/schedule';
 import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
-import { FindBackfillParams } from '../application/backfill/methods/find/types';
-import { DisableRuleParams } from '../application/rule/methods/disable';
-import { EnableRuleParams } from '../application/rule/methods/enable_rule';
+import { type FindBackfillParams } from '../application/backfill/methods/find/types';
+import { type DisableRuleParams } from '../application/rule/methods/disable';
+import { type EnableRuleParams } from '../application/rule/methods/enable_rule';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,

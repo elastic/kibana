@@ -6,12 +6,12 @@
  */
 
 import {
-  AIMessage,
-  Message,
+  type AIMessage,
+  type Message,
   MessageRole,
-  UseChatHelpers,
-  AnnotationDoc,
-  AnnotationTokens,
+  type UseChatHelpers,
+  type AnnotationDoc,
+  type AnnotationTokens,
 } from '../types';
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 

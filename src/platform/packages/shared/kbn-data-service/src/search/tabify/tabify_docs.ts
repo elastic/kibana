@@ -10,10 +10,10 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
 import {
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
+  type Datatable,
+  type DatatableColumn,
+  type DatatableRow,
+  type DatatableColumnType,
 } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 

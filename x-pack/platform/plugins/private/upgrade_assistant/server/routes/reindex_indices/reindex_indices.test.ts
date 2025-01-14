@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
+import { createMockRouter, type MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '../../shared_imports';
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -36,7 +36,7 @@ jest.mock('../../lib/reindexing', () => {
   };
 });
 
-import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { type ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 

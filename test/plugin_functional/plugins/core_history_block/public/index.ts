@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { CoreAppLinkPlugin, CoreAppLinkPluginSetup, CoreAppLinkPluginStart } from './plugin';
+import { type PluginInitializer } from '@kbn/core/public';
+import { CoreAppLinkPlugin, type CoreAppLinkPluginSetup, type CoreAppLinkPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> = () =>
   new CoreAppLinkPlugin();

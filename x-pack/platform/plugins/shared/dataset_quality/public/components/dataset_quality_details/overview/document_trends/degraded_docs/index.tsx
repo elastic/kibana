@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  OnTimeChangeProps,
+  type OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';

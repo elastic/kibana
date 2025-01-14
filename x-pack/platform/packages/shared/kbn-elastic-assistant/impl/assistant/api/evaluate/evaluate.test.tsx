@@ -6,8 +6,8 @@
  */
 
 import { postEvaluation } from './evaluate';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { API_VERSIONS, PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
+import { type HttpSetup } from '@kbn/core-http-browser';
+import { API_VERSIONS, type PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 
 jest.mock('@kbn/core-http-browser');
 

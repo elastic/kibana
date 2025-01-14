@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core-http-server';
-import { ALL_VALUE, BudgetingMethod, Objective, timeWindowSchema } from '@kbn/slo-schema';
-import * as t from 'io-ts';
-import { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
+import { type IBasePath } from '@kbn/core-http-server';
+import { ALL_VALUE, type BudgetingMethod, type Objective, type timeWindowSchema } from '@kbn/slo-schema';
+import type * as t from 'io-ts';
+import { type Indicator, type IndicatorTypes, type SLODefinition, type Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
   // apm specific fields

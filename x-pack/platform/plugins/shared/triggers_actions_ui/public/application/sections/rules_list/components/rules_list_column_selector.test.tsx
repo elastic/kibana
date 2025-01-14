@@ -8,8 +8,8 @@
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import {
-  RulesListColumns,
-  RulesListVisibleColumns,
+  type RulesListColumns,
+  type RulesListVisibleColumns,
   useRulesListColumnSelector,
 } from './rules_list_column_selector';
 

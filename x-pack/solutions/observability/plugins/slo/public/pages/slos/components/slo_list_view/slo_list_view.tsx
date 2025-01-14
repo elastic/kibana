@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';

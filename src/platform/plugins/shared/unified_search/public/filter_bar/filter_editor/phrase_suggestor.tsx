@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana, type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import { debounce } from 'lodash';
 
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
-import { IUnifiedSearchPluginServices } from '../../types';
+import { buildQueryFromFilters, type Filter } from '@kbn/es-query';
+import { type SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import { type IUnifiedSearchPluginServices } from '../../types';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;

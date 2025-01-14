@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ObjectToConfigAdapter, IConfigService } from '@kbn/config';
+import { ObjectToConfigAdapter, type IConfigService } from '@kbn/config';
 
 export type IConfigServiceMock = jest.Mocked<IConfigService>;
 

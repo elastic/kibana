@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { act, render, RenderResult, screen } from '@testing-library/react';
+import { act, render, type RenderResult, screen } from '@testing-library/react';
 import { FormTestProvider } from './test_utils';
 import {
-  ConfigFieldSchema,
-  SecretsFieldSchema,
+  type ConfigFieldSchema,
+  type SecretsFieldSchema,
   SimpleConnectorForm,
 } from './simple_connector_form';
 import userEvent from '@testing-library/user-event';

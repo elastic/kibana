@@ -6,13 +6,13 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
-import { IKibanaSearchRequest } from '@kbn/search-types';
+import { type DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import { type IKibanaSearchRequest } from '@kbn/search-types';
 import {
-  FetchDataParams,
-  HasDataParams,
-  UxFetchDataResponse,
-  UXHasDataResponse,
+  type FetchDataParams,
+  type HasDataParams,
+  type UxFetchDataResponse,
+  type UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';

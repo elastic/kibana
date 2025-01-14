@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { IndicesList, IndicesListProps, PER_PAGE_STORAGE_KEY } from './indices_list';
+import { IndicesList, type IndicesListProps, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { shallow } from 'enzyme';
-import { MatchedItem } from '@kbn/data-views-plugin/public';
+import { type MatchedItem } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const indices = [

@@ -14,14 +14,14 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiBadge,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiText,
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { type Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 

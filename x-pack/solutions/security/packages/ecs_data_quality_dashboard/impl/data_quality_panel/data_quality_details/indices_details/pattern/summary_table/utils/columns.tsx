@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiText,
   EuiProgress,
   EuiToolTip,
@@ -18,7 +18,7 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 
 import { getDocsCountPercent } from '../../../../../utils/stats';
-import { IndexSummaryTableItem } from '../../../../../types';
+import { type IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';

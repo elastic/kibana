@@ -6,11 +6,11 @@
  */
 
 import {
-  EsQueryRuleActionContext,
+  type EsQueryRuleActionContext,
   addMessages,
   getContextConditionsDescription,
 } from './action_context';
-import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
+import { type EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('addMessages', () => {

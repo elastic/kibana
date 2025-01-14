@@ -7,22 +7,22 @@
 
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract,
+  type Logger,
+  type SavedObject,
+  type SavedObjectsClientContract,
   SavedObjectsUtils,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { type LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import {
   defaultLogViewAttributes,
   defaultLogViewId,
-  LogView,
-  LogViewAttributes,
-  LogViewReference,
-  LogViewsStaticConfig,
+  type LogView,
+  type LogViewAttributes,
+  type LogViewReference,
+  type LogViewsStaticConfig,
   persistedLogViewReferenceRT,
-  ResolvedLogView,
+  type ResolvedLogView,
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -33,7 +33,7 @@ import {
 } from '../../saved_objects/log_view';
 import { logViewSavedObjectRT } from '../../saved_objects/log_view/types';
 import { LogViewFallbackUnregisteredError, NotFoundError } from './errors';
-import { ILogViewsClient, LogViewFallbackHandler } from './types';
+import { type ILogViewsClient, type LogViewFallbackHandler } from './types';
 
 type DataViewsService = ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>;
 

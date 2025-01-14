@@ -8,8 +8,8 @@
  */
 
 import classNames from 'classnames';
-import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
-import { CommonProps } from '@elastic/eui';
+import React, { type ReactNode, type HTMLAttributes, type ButtonHTMLAttributes } from 'react';
+import { type CommonProps } from '@elastic/eui';
 import './field_button.scss';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {

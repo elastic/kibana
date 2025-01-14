@@ -12,8 +12,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  ChatActionClickPayload,
-  ChatState,
+  type ChatActionClickPayload,
+  type ChatState,
   type Feedback,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,

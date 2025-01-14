@@ -13,11 +13,11 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
 import {
-  TextContextTypeConvert,
-  HtmlContextTypeConvert,
-  FieldFormatMetaParams,
+  type TextContextTypeConvert,
+  type HtmlContextTypeConvert,
+  type FieldFormatMetaParams,
   FIELD_FORMAT_IDS,
-  FieldFormatParams,
+  type FieldFormatParams,
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;

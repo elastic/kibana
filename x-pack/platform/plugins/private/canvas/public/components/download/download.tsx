@@ -8,7 +8,7 @@
 import { toByteArray } from 'base64-js';
 import fileSaver from 'file-saver';
 import PropTypes from 'prop-types';
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { parseDataUrl } from '@kbn/presentation-util-plugin/common';
 
 interface Props {

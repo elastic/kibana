@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
+import { EuiStepsHorizontal, type EuiStepsHorizontalProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface DecorativeHorizontalStepperProps {

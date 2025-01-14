@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RecoveredActionGroupId,
+  type AlertInstanceContext,
+  type AlertInstanceState,
+  type RecoveredActionGroupId,
 } from '@kbn/alerting-plugin/common';
-import { RuleType } from '@kbn/alerting-plugin/server';
-import { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { UMServerLibs } from '../lib';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
+import { type RuleType } from '@kbn/alerting-plugin/server';
+import { type DefaultAlert, type ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { type UMServerLibs } from '../lib';
+import { type UptimeCorePluginsSetup, type UptimeServerSetup } from '../adapters';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,

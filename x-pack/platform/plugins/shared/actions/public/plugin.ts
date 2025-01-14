@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin as CorePlugin, PluginInitializerContext } from '@kbn/core/public';
+import { type Plugin as CorePlugin, type PluginInitializerContext } from '@kbn/core/public';
 import {
-  ValidatedEmail,
+  type ValidatedEmail,
   validateEmailAddresses as validateEmails,
-  ValidateEmailAddressesOptions,
+  type ValidateEmailAddressesOptions,
 } from '../common';
 
 export interface ActionsPublicPluginSetup {

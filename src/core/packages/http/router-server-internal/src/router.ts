@@ -14,7 +14,7 @@ import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
-  UnauthorizedError as EsNotAuthorizedError,
+  type UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
 import type {
   KibanaRequest,
@@ -40,11 +40,11 @@ import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
-import { Method } from './versioned_router/types';
+import { type Method } from './versioned_router/types';
 import { getVersionHeader, injectVersionHeader, prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
-import { InternalRouteConfig } from './route';
+import { type InternalRouteConfig } from './route';
 
 export type ContextEnhancer<
   P,

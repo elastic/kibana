@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
+import { type CoreSetup, type Plugin, type CoreStart } from '@kbn/core/public';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 
 import { notebooksConsoleView } from './console_view';
 import {
-  SearchNotebooksPluginSetup,
-  SearchNotebooksPluginStart,
-  SearchNotebooksPluginStartDependencies,
-  NotebookListValue,
-  AppMetricsTracker,
+  type SearchNotebooksPluginSetup,
+  type SearchNotebooksPluginStart,
+  type SearchNotebooksPluginStartDependencies,
+  type NotebookListValue,
+  type AppMetricsTracker,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { createUsageTracker } from './utils/usage_tracker';

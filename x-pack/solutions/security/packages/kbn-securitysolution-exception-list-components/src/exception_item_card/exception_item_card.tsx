@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ElementType } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCommentProps } from '@elastic/eui';
+import React, { type FC, type ElementType } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, type EuiCommentProps } from '@elastic/eui';
 import type {
   CommentsArray,
   ExceptionListItemSchema,

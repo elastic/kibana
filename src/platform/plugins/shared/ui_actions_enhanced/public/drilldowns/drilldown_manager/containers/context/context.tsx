@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
-import { DrilldownManagerState, DrilldownManagerStateDeps } from '../../state';
+import React, { type PropsWithChildren } from 'react';
+import { DrilldownManagerState, type DrilldownManagerStateDeps } from '../../state';
 
 const context = React.createContext<DrilldownManagerState | null>(null);
 

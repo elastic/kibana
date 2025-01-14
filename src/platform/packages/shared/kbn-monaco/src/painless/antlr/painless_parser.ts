@@ -4,15 +4,15 @@
 
 import {
 	ATN,
-	ATNDeserializer, DecisionState, DFA, FailedPredicateException,
+	ATNDeserializer, type DecisionState, DFA, FailedPredicateException,
 	RecognitionException, NoViableAltException, BailErrorStrategy,
 	Parser, ParserATNSimulator,
-	RuleContext, ParserRuleContext, PredictionMode, PredictionContextCache,
-	TerminalNode, RuleNode,
-	Token, TokenStream,
+	type RuleContext, ParserRuleContext, PredictionMode, PredictionContextCache,
+	type TerminalNode, RuleNode,
+	Token, type TokenStream,
 	Interval, IntervalSet
 } from 'antlr4';
-import painless_parserListener from "./painless_parserListener.js";
+import type painless_parserListener from "./painless_parserListener.js";
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
 type int = number;

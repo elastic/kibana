@@ -6,44 +6,44 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { type UsageCollectionSetup, type UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  IContextProvider,
-  ElasticsearchServiceStart,
-  SavedObjectsClientContract,
-  SavedObjectsBulkGetObject,
-  ISavedObjectsRepository,
+  type PluginInitializerContext,
+  type Plugin,
+  type CoreSetup,
+  type CoreStart,
+  type KibanaRequest,
+  type Logger,
+  type IContextProvider,
+  type ElasticsearchServiceStart,
+  type SavedObjectsClientContract,
+  type SavedObjectsBulkGetObject,
+  type ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
-  EncryptedSavedObjectsClient,
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
+  type EncryptedSavedObjectsClient,
+  type EncryptedSavedObjectsPluginSetup,
+  type EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { type LicensingPluginSetup, type LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { type SpacesPluginStart, type SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { type SecurityPluginSetup, type SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  IEventLogClientService,
-  IEventLogger,
-  IEventLogService,
+  type IEventLogClientService,
+  type IEventLogger,
+  type IEventLogService,
 } from '@kbn/event-log-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { type MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import { type ServerlessPluginSetup, type ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
+import { type ActionsConfig, AllowedHosts, type EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
@@ -54,21 +54,21 @@ import {
   ActionExecutor,
   TaskRunnerFactory,
   LicenseState,
-  ILicenseState,
+  type ILicenseState,
   spaceIdToNamespace,
 } from './lib';
 import {
-  Services,
-  ActionType,
-  InMemoryConnector,
-  ActionTypeConfig,
-  ActionTypeSecrets,
-  ActionTypeParams,
-  ActionsRequestHandlerContext,
-  UnsecuredServices,
+  type Services,
+  type ActionType,
+  type InMemoryConnector,
+  type ActionTypeConfig,
+  type ActionTypeSecrets,
+  type ActionTypeParams,
+  type ActionsRequestHandlerContext,
+  type UnsecuredServices,
 } from './types';
 
-import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
+import { type ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -81,7 +81,7 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import { ActionExecutionSource } from './lib/action_execution_source';
+import { type ActionExecutionSource } from './lib/action_execution_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -92,13 +92,13 @@ import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
-  ConnectorWithOptionalDeprecation,
+  type ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import {
-  ICaseServiceAbstract,
-  IServiceAbstract,
-  SubActionConnectorType,
+  type ICaseServiceAbstract,
+  type IServiceAbstract,
+  type SubActionConnectorType,
 } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';

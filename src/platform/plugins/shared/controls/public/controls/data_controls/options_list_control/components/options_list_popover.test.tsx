@@ -10,13 +10,13 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { act, render, RenderResult, within } from '@testing-library/react';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { act, render, type RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { type ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 

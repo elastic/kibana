@@ -12,7 +12,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiFlyoutProps,
+  type EuiFlyoutProps,
   EuiTitle,
   EuiLink,
   EuiFlyoutFooter,
@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
-import { NewsfeedItem } from '../types';
+import { type NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 

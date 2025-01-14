@@ -8,7 +8,7 @@
  */
 
 import type { Rule } from 'eslint';
-import { AST_NODE_TYPES, TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, type TSESTree, type TSNode } from '@typescript-eslint/typescript-estree';
 
 import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';

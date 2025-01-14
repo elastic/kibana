@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { type RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
-  EncryptedSyntheticsSavedMonitor,
-  HTTPFields,
-  MonitorFields,
-  PrivateLocation,
+  type EncryptedSyntheticsSavedMonitor,
+  type HTTPFields,
+  type MonitorFields,
+  type PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { type DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';

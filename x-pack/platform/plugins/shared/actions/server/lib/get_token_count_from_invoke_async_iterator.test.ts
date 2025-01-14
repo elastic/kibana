@@ -6,11 +6,11 @@
  */
 import {
   getTokenCountFromInvokeAsyncIterator,
-  InvokeAsyncIteratorBody,
+  type InvokeAsyncIteratorBody,
 } from './get_token_count_from_invoke_async_iterator';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Stream } from 'openai/streaming';
-import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { type Stream } from 'openai/streaming';
+import { type ChatCompletionChunk } from 'openai/resources/chat/completions';
 
 const body: InvokeAsyncIteratorBody = {
   messages: [

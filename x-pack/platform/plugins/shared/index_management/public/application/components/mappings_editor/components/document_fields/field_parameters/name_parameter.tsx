@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { TextField, UseField, FieldConfig } from '../../../shared_imports';
+import { TextField, UseField, type FieldConfig } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
 import { useMappingsState } from '../../../mappings_state_context';

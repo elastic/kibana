@@ -8,9 +8,9 @@
  */
 
 import { isSupportedEsServerMock } from './find.isolated.test.mocks';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObject, AuthorizationTypeMap } from '@kbn/core-saved-objects-server';
-import { apiContextMock, ApiExecutionContextMock } from '../../mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type SavedObject, type AuthorizationTypeMap } from '@kbn/core-saved-objects-server';
+import { apiContextMock, type ApiExecutionContextMock } from '../../mocks';
 import { performFind } from './find';
 
 interface ObjectInfo {

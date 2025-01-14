@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { type Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
-import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
+import { createMockDatasource, createMockFramePublicAPI, type DatasourceMock } from '../../mocks';
+import { type DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
-  Operation,
-  DataType,
-  FramePublicAPI,
-  TableSuggestionColumn,
-  VisualizationDimensionGroupConfig,
-  VisualizationConfigProps,
+  type Operation,
+  type DataType,
+  type FramePublicAPI,
+  type TableSuggestionColumn,
+  type VisualizationDimensionGroupConfig,
+  type VisualizationConfigProps,
 } from '../../types';
 import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { ColorMapping, CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { type ColorMapping, CUSTOM_PALETTE, type CustomPaletteParams, type PaletteOutput } from '@kbn/coloring';
 import {
-  ColumnState,
-  DatatableColumnFn,
-  DatatableExpressionFunction,
+  type ColumnState,
+  type DatatableColumnFn,
+  type DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';

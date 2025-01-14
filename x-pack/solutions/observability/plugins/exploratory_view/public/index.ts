@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { type PluginInitializer, type PluginInitializerContext } from '@kbn/core/public';
 import {
   Plugin,
-  ExploratoryViewPublicPluginsStart,
-  ExploratoryViewPublicPluginsSetup,
-  ExploratoryViewPublicStart,
-  ExploratoryViewPublicSetup,
+  type ExploratoryViewPublicPluginsStart,
+  type ExploratoryViewPublicPluginsSetup,
+  type ExploratoryViewPublicStart,
+  type ExploratoryViewPublicSetup,
 } from './plugin';
 export type {
   ExploratoryViewPublicSetup,

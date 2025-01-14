@@ -11,7 +11,7 @@ import React from 'react';
 import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import { type ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';

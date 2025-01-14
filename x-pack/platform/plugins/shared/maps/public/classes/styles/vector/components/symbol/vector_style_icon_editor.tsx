@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { Props, StylePropEditor } from '../style_prop_editor';
+import { type Props, StylePropEditor } from '../style_prop_editor';
 import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';
 import {
-  CustomIcon,
-  IconDynamicOptions,
-  IconStaticOptions,
+  type CustomIcon,
+  type IconDynamicOptions,
+  type IconStaticOptions,
 } from '../../../../../../common/descriptor_types';
-import { DynamicIconProperty } from '../../properties/dynamic_icon_property';
-import { StaticIconProperty } from '../../properties/static_icon_property';
+import { type DynamicIconProperty } from '../../properties/dynamic_icon_property';
+import { type StaticIconProperty } from '../../properties/static_icon_property';
 
 type IconEditorProps = Omit<Props<IconStaticOptions, IconDynamicOptions>, 'children'>;
 

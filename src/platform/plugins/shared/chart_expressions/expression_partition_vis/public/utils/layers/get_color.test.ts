@@ -9,7 +9,7 @@
 
 import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
+import { byDataColorPaletteMap, type SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

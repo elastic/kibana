@@ -10,7 +10,7 @@
 import Fs from 'fs';
 
 import dedent from 'dedent';
-import { schema, Props, TypeOf } from '@kbn/config-schema';
+import { schema, type Props, type TypeOf } from '@kbn/config-schema';
 
 const partialObject = <P extends Props>(props: P) => {
   return schema.object(props, {

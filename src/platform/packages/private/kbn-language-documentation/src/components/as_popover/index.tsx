@@ -13,7 +13,7 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiButtonIcon,
-  EuiButtonIconProps,
+  type EuiButtonIconProps,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { LanguageDocumentationPopoverContent } from './popover_content';

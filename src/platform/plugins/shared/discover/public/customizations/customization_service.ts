@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, map, Observable, startWith, Subject } from 'rxjs';
+import { filter, map, type Observable, startWith, Subject } from 'rxjs';
 import {
-  DataTableCustomization,
-  FlyoutCustomization,
-  SearchBarCustomization,
-  TopNavCustomization,
-  UnifiedHistogramCustomization,
-  FieldListCustomization,
+  type DataTableCustomization,
+  type FlyoutCustomization,
+  type SearchBarCustomization,
+  type TopNavCustomization,
+  type UnifiedHistogramCustomization,
+  type FieldListCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =

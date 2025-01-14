@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { InvokeCreator } from 'xstate';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type InvokeCreator } from 'xstate';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createComparatorByField } from '../../../../utils/comparator_by_field';
 import { DataViewDescriptor } from '../../../../../common/data_views/models/data_view_descriptor';
 import {
-  DataViewsContext,
-  DataViewsEvent,
-  DataViewsFilterParams,
-  DataViewsSearchParams,
+  type DataViewsContext,
+  type DataViewsEvent,
+  type DataViewsFilterParams,
+  type DataViewsSearchParams,
 } from '../types';
 import { getSearchCacheKey } from '../state_machine';
 

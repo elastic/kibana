@@ -14,23 +14,23 @@ import {
   EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
-  EuiDataGridSorting,
+  type EuiDataGridSorting,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
+  type OnTimeChangeProps,
   EuiSwitch,
-  EuiDataGridColumn,
+  type EuiDataGridColumn,
 } from '@elastic/eui';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { IExecutionLog } from '@kbn/actions-plugin/common';
+import { type SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { type IExecutionLog } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
+import { type LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import {
-  ComponentOpts as ConnectorApis,
+  type ComponentOpts as ConnectorApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';

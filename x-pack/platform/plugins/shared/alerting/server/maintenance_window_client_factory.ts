@@ -6,12 +6,12 @@
  */
 
 import {
-  KibanaRequest,
-  Logger,
-  SavedObjectsServiceStart,
+  type KibanaRequest,
+  type Logger,
+  type SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
-  SecurityServiceStart,
-  UiSettingsServiceStart,
+  type SecurityServiceStart,
+  type UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';

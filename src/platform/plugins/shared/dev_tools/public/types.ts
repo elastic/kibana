@@ -8,10 +8,10 @@
  */
 
 import {
-  AnalyticsServiceStart,
-  I18nStart,
-  ThemeServiceStart,
-  UserProfileService,
+  type AnalyticsServiceStart,
+  type I18nStart,
+  type ThemeServiceStart,
+  type UserProfileService,
 } from '@kbn/core/public';
 
 export interface ConfigSchema {

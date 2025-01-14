@@ -22,25 +22,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 import {
-  RuleActionAlertsFilterProperty,
-  RuleActionFrequency,
-  RuleActionParam,
-  RuleSystemAction,
+  type RuleActionAlertsFilterProperty,
+  type RuleActionFrequency,
+  type RuleActionParam,
+  type RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { type ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
-  ActionTypeModel,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
-  NotifyWhenSelectOptions,
-  RuleUiAction,
-  RuleAction,
+  type ActionTypeModel,
+  type ActionTypeIndex,
+  type ActionConnector,
+  type ActionVariables,
+  type ActionTypeRegistryContract,
+  type NotifyWhenSelectOptions,
+  type RuleUiAction,
+  type RuleAction,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';

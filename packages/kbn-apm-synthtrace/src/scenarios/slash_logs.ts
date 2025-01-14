@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, generateShortId, log } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import { type LogDocument, generateShortId, log } from '@kbn/apm-synthtrace-client';
+import { type Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
   getAgentName,

@@ -8,17 +8,17 @@
  */
 
 import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, of, switchMap } from 'rxjs';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { type DataView } from '@kbn/data-views-plugin/common';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
-  PublishesDataViews,
-  PublishingSubject,
+  type PublishesDataViews,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { type ControlGroupApi } from '@kbn/controls-plugin/public';
 import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(

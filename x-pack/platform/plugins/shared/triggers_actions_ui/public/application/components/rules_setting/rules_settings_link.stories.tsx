@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Meta, Story } from '@storybook/react';
+import React, { type ComponentProps } from 'react';
+import { type Meta, type Story } from '@storybook/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { RulesSettingsLink } from './rules_settings_link';
 import { StorybookContextDecorator } from '../../../../.storybook/decorator';

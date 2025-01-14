@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import {
   EuiDataGrid,
   EuiPanel,
-  EuiDataGridColumn,
+  type EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,

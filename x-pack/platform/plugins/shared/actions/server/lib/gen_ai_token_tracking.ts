@@ -6,23 +6,23 @@
  */
 
 import { PassThrough, Readable } from 'stream';
-import { Logger } from '@kbn/logging';
-import { Stream } from 'openai/streaming';
-import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { type Logger } from '@kbn/logging';
+import { type Stream } from 'openai/streaming';
+import { type ChatCompletionChunk } from 'openai/resources/chat/completions';
 import {
   getTokensFromBedrockConverseStream,
-  SmithyStream,
+  type SmithyStream,
 } from './get_token_count_from_bedrock_converse';
 import {
-  InvokeAsyncIteratorBody,
+  type InvokeAsyncIteratorBody,
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
-import { ActionTypeExecutorRawResult } from '../../common';
+import { type ActionTypeExecutorRawResult } from '../../common';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import {
   getTokenCountFromInvokeStream,
-  InvokeBody,
+  type InvokeBody,
   parseGeminiStreamForUsageMetadata,
 } from './get_token_count_from_invoke_stream';
 

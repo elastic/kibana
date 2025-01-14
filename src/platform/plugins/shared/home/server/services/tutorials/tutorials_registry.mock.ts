@@ -9,9 +9,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  TutorialsRegistrySetup,
-  TutorialsRegistryStart,
-  TutorialsRegistry,
+  type TutorialsRegistrySetup,
+  type TutorialsRegistryStart,
+  type TutorialsRegistry,
 } from './tutorials_registry';
 
 const createSetupMock = (): jest.Mocked<TutorialsRegistrySetup> => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ActionType } from '@kbn/actions-plugin/server';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import { type CoreSetup } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type ActionType } from '@kbn/actions-plugin/server';
+import { type FixtureStartDeps, type FixtureSetupDeps } from './plugin';
 import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,

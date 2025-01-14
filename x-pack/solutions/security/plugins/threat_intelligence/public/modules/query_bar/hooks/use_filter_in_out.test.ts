@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import { renderHook, type RenderHookResult } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
-  Indicator,
+  type Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
+import { useFilterInOut, type UseFilterInValue } from './use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
 

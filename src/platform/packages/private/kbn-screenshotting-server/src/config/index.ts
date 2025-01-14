@@ -8,7 +8,7 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { ConfigSchema, ConfigType } from './schema';
+import { ConfigSchema, type ConfigType } from './schema';
 
 /**
  * Helper function

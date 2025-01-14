@@ -19,8 +19,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css, SerializedStyles } from '@emotion/react';
-import { UserMessage } from '../../../types';
+import { css, type SerializedStyles } from '@emotion/react';
+import { type UserMessage } from '../../../types';
 
 export const MessageList = ({
   messages,

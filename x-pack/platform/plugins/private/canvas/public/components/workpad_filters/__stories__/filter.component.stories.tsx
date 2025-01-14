@@ -7,8 +7,8 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../../../types';
+import React, { type FC } from 'react';
+import { type FormattedFilterViewInstance } from '../../../../types';
 import { Filter } from '../filter.component';
 
 const filter: FormattedFilterViewInstance = {

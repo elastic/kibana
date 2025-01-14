@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
+import { apiCanExpandPanels, type CanExpandPanels } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   apiHasUniqueId,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { skip } from 'rxjs';
 import { DASHBOARD_ACTION_GROUP } from '.';
 

@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
-import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { EuiFormRow, type EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
+import { type DataViewBase, type DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
@@ -22,7 +22,7 @@ import * as i18n from '../translations';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import {
   getGenericComboBoxProps,
-  GetGenericComboBoxPropsReturn,
+  type GetGenericComboBoxPropsReturn,
 } from '../get_generic_combo_box_props';
 import { paramIsValid } from '../param_is_valid';
 import { paramContainsSpace } from '../param_contains_space';

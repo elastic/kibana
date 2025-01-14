@@ -6,15 +6,15 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { type ILicense } from '@kbn/licensing-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  KibanaFeatureConfig,
+  type KibanaFeatureConfig,
   KibanaFeature,
-  FeatureKibanaPrivileges,
-  ElasticsearchFeatureConfig,
+  type FeatureKibanaPrivileges,
+  type ElasticsearchFeatureConfig,
   ElasticsearchFeature,
-  SubFeaturePrivilegeConfig,
+  type SubFeaturePrivilegeConfig,
   KibanaFeatureScope,
 } from '../common';
 import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';

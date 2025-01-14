@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
+import React, { type FunctionComponent, useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -16,9 +16,9 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 
-import { Document } from '../../../types';
+import { type Document } from '../../../types';
 
-import { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
+import { type TestPipelineFlyoutTab } from '../test_pipeline_tabs';
 
 import './documents_dropdown.scss';
 

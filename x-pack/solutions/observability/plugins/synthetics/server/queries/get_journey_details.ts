@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { createEsParams, SyntheticsEsClient } from '../lib';
-import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createEsParams, type SyntheticsEsClient } from '../lib';
+import { type JourneyStep, type Ping, type SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
   checkGroup: string;

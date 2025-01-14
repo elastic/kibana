@@ -9,24 +9,24 @@
 
 import uniqBy from 'lodash/uniqBy';
 import {
-  AstProviderFn,
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstMetricsCommand,
-  ESQLColumn,
-  ESQLCommand,
-  ESQLCommandMode,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLMessage,
-  ESQLSource,
+  type AstProviderFn,
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLAstMetricsCommand,
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLCommandMode,
+  type ESQLCommandOption,
+  type ESQLFunction,
+  type ESQLMessage,
+  type ESQLSource,
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstField, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import {
-  CommandModeDefinition,
-  CommandOptionsDefinition,
-  FunctionParameter,
+  type CommandModeDefinition,
+  type CommandOptionsDefinition,
+  type FunctionParameter,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,

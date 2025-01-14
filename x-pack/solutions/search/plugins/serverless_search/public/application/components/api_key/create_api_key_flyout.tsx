@@ -8,10 +8,10 @@ import React from 'react';
 
 import { ApiKeyFlyout } from '@kbn/security-api-key-management';
 import {
-  SecurityCreateApiKeyResponse,
-  SecurityUpdateApiKeyResponse,
+  type SecurityCreateApiKeyResponse,
+  type SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core/public';
+import { type AuthenticatedUser } from '@kbn/core/public';
 
 const DEFAULT_ROLE_DESCRIPTORS = `{
   "serverless_search": {

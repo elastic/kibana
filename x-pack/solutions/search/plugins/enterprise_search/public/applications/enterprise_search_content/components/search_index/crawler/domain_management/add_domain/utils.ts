@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../../../../shared/http';
 import {
-  CrawlerDomainValidationResultFromServer,
-  CrawlerDomainValidationResultChange,
-  CrawlerDomainValidationStepName,
-  CrawlerDomainValidationStepState,
+  type CrawlerDomainValidationResultFromServer,
+  type CrawlerDomainValidationResultChange,
+  type CrawlerDomainValidationStepName,
+  type CrawlerDomainValidationStepState,
 } from '../../../../../api/crawler/types';
 
 export const extractDomainAndEntryPointFromUrl = (

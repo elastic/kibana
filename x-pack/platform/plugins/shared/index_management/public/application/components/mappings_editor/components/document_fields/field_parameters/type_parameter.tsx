@@ -16,7 +16,7 @@ import {
   filterTypesForNonRootFields,
 } from '../../../lib';
 import { UseField } from '../../../shared_imports';
-import { ComboBoxOption, DataType } from '../../../types';
+import { type ComboBoxOption, type DataType } from '../../../types';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {

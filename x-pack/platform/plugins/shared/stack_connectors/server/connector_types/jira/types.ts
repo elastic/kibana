@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { type TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/core/server';
+import { type ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionGetCapabilitiesParamsSchema,
-  ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-  ExecutorSubActionGetIssuesParamsSchema,
-  ExecutorSubActionGetIssueParamsSchema,
-  ExecutorSubActionCommonFieldsParamsSchema,
+  type ExternalIncidentServiceConfigurationSchema,
+  type ExternalIncidentServiceSecretConfigurationSchema,
+  type ExecutorParamsSchema,
+  type ExecutorSubActionPushParamsSchema,
+  type ExecutorSubActionGetIncidentParamsSchema,
+  type ExecutorSubActionHandshakeParamsSchema,
+  type ExecutorSubActionGetCapabilitiesParamsSchema,
+  type ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+  type ExecutorSubActionGetIssuesParamsSchema,
+  type ExecutorSubActionGetIssueParamsSchema,
+  type ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;

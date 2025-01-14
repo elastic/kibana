@@ -8,10 +8,10 @@
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import {
-  FieldDefinitionConfig,
+  type FieldDefinitionConfig,
   isWiredReadStream,
-  ReadStreamDefinition,
-  WiredReadStreamDefinition,
+  type ReadStreamDefinition,
+  type WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';

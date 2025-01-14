@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, type UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
@@ -25,7 +25,7 @@ import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
-import { GroupingBucket, OnGroupToggle } from './types';
+import { type GroupingBucket, type OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {

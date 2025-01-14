@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
+import React, { type FC, type PropsWithChildren, useContext, useMemo } from 'react';
 
-import { KibanaErrorBoundaryProviderDeps, KibanaErrorBoundaryServices } from '../../types';
+import { type KibanaErrorBoundaryProviderDeps, type KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorService } from './error_service';
 
 const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);

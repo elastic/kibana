@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { AxiosError, Method } from 'axios';
+import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { type AxiosError, type Method } from 'axios';
 import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { type IncomingMessage } from 'http';
+import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import {
-  ConnectorUsageCollector,
-  ConnectorTokenClientContract,
+  type ConnectorUsageCollector,
+  type ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
 
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
@@ -27,19 +27,19 @@ import {
 } from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
-  Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse,
-  RunActionRawResponse,
-  RunApiResponse,
-  DashboardActionParams,
-  DashboardActionResponse,
-  StreamingResponse,
-  InvokeAIActionParams,
-  InvokeAIActionResponse,
-  InvokeAIRawActionParams,
-  InvokeAIRawActionResponse,
+  type Config,
+  type Secrets,
+  type RunActionParams,
+  type RunActionResponse,
+  type RunActionRawResponse,
+  type RunApiResponse,
+  type DashboardActionParams,
+  type DashboardActionResponse,
+  type StreamingResponse,
+  type InvokeAIActionParams,
+  type InvokeAIActionResponse,
+  type InvokeAIRawActionParams,
+  type InvokeAIRawActionResponse,
 } from '../../../common/gemini/types';
 import {
   SUB_ACTION,

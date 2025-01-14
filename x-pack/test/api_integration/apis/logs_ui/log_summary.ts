@@ -21,7 +21,7 @@ import {
   logEntriesSummaryResponseRT,
 } from '@kbn/logs-shared-plugin/common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { type FtrProviderContext } from '../../ftr_provider_context';
 
 const EARLIEST_TIME_WITH_DATA = new Date('2018-10-17T19:42:22.000Z').valueOf();
 const LATEST_TIME_WITH_DATA = new Date('2018-10-17T19:57:21.611Z').valueOf();

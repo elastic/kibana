@@ -6,11 +6,11 @@
  */
 
 import * as t from 'io-ts';
-import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { type SavedObjectSanitizedDoc, type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
-  EntriesArray,
-  NonEmptyNestedEntriesArray,
-  OsTypeArray,
+  type EntriesArray,
+  type NonEmptyNestedEntriesArray,
+  type OsTypeArray,
   entriesNested,
   entry,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -19,7 +19,7 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListSoSchema } from '../schemas/saved_objects';
+import { type ExceptionListSoSchema } from '../schemas/saved_objects';
 
 const entryType = t.union([entry, entriesNested]);
 type EntryType = t.TypeOf<typeof entryType>;

@@ -9,12 +9,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  LayerDescriptor,
-  SizeDynamicOptions,
-  StylePropertyField,
-  VectorStylePropertiesDescriptor,
+  type AggDescriptor,
+  type ColorDynamicOptions,
+  type LayerDescriptor,
+  type SizeDynamicOptions,
+  type StylePropertyField,
+  type VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
 import {
   AGG_TYPE,

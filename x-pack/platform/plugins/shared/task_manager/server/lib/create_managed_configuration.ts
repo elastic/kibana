@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { interval, merge, of, Observable } from 'rxjs';
+import { interval, merge, of, type Observable } from 'rxjs';
 import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
-import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, type TaskManagerConfig } from '../config';
 import { TaskCost } from '../task';
 import { getMsearchStatusCode } from './msearch_error';
 import { getBulkUpdateStatusCode, isClusterBlockException } from './bulk_update_error';

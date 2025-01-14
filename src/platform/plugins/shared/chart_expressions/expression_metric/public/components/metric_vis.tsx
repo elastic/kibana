@@ -13,37 +13,37 @@ import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Metric,
-  MetricSpec,
-  MetricWProgress,
+  type MetricSpec,
+  type MetricWProgress,
   isMetricElementEvent,
-  RenderChangeListener,
+  type RenderChangeListener,
   Settings,
-  MetricWTrend,
-  MetricWNumber,
-  SettingsProps,
-  MetricWText,
+  type MetricWTrend,
+  type MetricWNumber,
+  type SettingsProps,
+  type MetricWText,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { type CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
-  FieldFormatConvertFunction,
-  SerializedFieldFormat,
+  type FieldFormatConvertFunction,
+  type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { CUSTOM_PALETTE, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, type PaletteOutput } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { type AllowedChartOverrides, type AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import { type VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 

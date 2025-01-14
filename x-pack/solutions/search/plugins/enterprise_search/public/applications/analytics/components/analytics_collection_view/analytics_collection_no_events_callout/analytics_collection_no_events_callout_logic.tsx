@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   AnalyticsEventsExistAPILogic,
-  AnalyticsEventsExistApiLogicResponse,
+  type AnalyticsEventsExistApiLogicResponse,
 } from '../../../api/check_analytics_events/check_analytics_events_exist_api_logic';
 
 export interface AnalyticsCollectionNoEventsCalloutActions {

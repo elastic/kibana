@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewBase, DataViewFieldBase } from '../../es_query';
-import { buildQueryFilter, buildRangeFilter, Filter, FilterStateStore } from '../build_filters';
+import { type DataViewBase, type DataViewFieldBase } from '../../es_query';
+import { buildQueryFilter, buildRangeFilter, type Filter, FilterStateStore } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {

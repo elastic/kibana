@@ -11,8 +11,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import {
   type MetricsServiceSetup,
-  RequestHandlerContext,
-  ServiceStatus,
+  type RequestHandlerContext,
+  type ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import {

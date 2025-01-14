@@ -24,7 +24,7 @@ import {
   CRAWL_RULE,
 } from './_mocks_/crawler_domains.mock';
 
-import { CrawlerDomainValidationStep, CrawlerDomainValidationResultFromServer } from './types';
+import { type CrawlerDomainValidationStep, type CrawlerDomainValidationResultFromServer } from './types';
 
 import {
   crawlerDomainServerToClient,

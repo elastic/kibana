@@ -7,9 +7,9 @@
 
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+import { type APP_SEARCH_PLUGIN, type WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 
-import { ADD, UPDATE } from './constants/operations';
+import { type ADD, type UPDATE } from './constants/operations';
 
 export type TOperation = typeof ADD | typeof UPDATE;
 

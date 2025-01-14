@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, type Observable, of } from 'rxjs';
 import { PassThrough } from 'stream';
 import type { Logger } from '@kbn/logging';
 import {
   InferenceTaskEventType,
   InferenceTaskErrorCode,
-  InferenceTaskErrorEvent,
+  type InferenceTaskErrorEvent,
   isInferenceError,
 } from '@kbn/inference-common';
 

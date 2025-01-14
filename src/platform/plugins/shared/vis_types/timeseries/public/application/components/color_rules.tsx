@@ -15,17 +15,17 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   withEuiTheme,
-  WithEuiThemeProps,
+  type WithEuiThemeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
-import { ColorPicker, ColorPickerProps } from './color_picker';
-import { TimeseriesVisParams } from '../../types';
+import { ColorPicker, type ColorPickerProps } from './color_picker';
+import { type TimeseriesVisParams } from '../../types';
 import { Operator } from '../../../common/operators_utils';
 import { tsvbEditorRowStyles } from '../styles/common.styles';
 

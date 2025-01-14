@@ -12,42 +12,42 @@ import murmurhash from 'murmurhash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { type SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {
-  SavedObject,
-  ISavedObjectsSerializer,
-  SavedObjectsRawDoc,
-  ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
-  ElasticsearchClient,
+  type SavedObject,
+  type ISavedObjectsSerializer,
+  type SavedObjectsRawDoc,
+  type ISavedObjectsRepository,
+  type SavedObjectsUpdateResponse,
+  type ElasticsearchClient,
 } from '@kbn/core/server';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { RequestTimeoutsConfig } from './config';
-import { asOk, asErr, Result } from './lib/result_type';
+import { type RequestTimeoutsConfig } from './config';
+import { asOk, asErr, type Result } from './lib/result_type';
 
 import {
-  ConcreteTaskInstance,
-  ConcreteTaskInstanceVersion,
-  TaskInstance,
+  type ConcreteTaskInstance,
+  type ConcreteTaskInstanceVersion,
+  type TaskInstance,
   TaskStatus,
-  TaskLifecycle,
+  type TaskLifecycle,
   TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
-  PartialConcreteTaskInstance,
-  PartialSerializedConcreteTaskInstance,
+  type SerializedConcreteTaskInstance,
+  type PartialConcreteTaskInstance,
+  type PartialSerializedConcreteTaskInstance,
 } from './task';
 
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { type TaskTypeDictionary } from './task_type_dictionary';
+import { type AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import { type ErrorOutput } from './lib/bulk_operation_buffer';
 import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 

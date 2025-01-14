@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   filteringPolicyToText,
   filteringRuleToText,
-  FilteringRule,
-  FilteringPolicy,
-  FilteringRuleRule,
+  type FilteringRule,
+  type FilteringPolicy,
+  type FilteringRuleRule,
 } from '@kbn/search-connectors';
 
 interface FilteringRulesTableProps {

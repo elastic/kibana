@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
+import { type Ast, type AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
 import { flowRight, get, groupBy } from 'lodash';
 import {
-  Filter as FilterType,
-  FilterField,
-  FilterViewInstance,
-  FlattenFilterViewInstance,
-  FormattedFilterViewInstance,
+  type Filter as FilterType,
+  type FilterField,
+  type FilterViewInstance,
+  type FlattenFilterViewInstance,
+  type FormattedFilterViewInstance,
 } from '../../types/filters';
 
 const SELECT_FILTER = 'selectFilter';

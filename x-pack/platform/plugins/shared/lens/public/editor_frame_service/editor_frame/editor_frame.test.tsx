@@ -9,13 +9,13 @@ import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { EditorFrame, EditorFrameProps } from './editor_frame';
-import { DatasourceMap, DatasourcePublicAPI, Visualization, VisualizationMap } from '../../types';
+import { EditorFrame, type EditorFrameProps } from './editor_frame';
+import { type DatasourceMap, type DatasourcePublicAPI, type Visualization, type VisualizationMap } from '../../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
   createMockDatasource,
-  DatasourceMock,
+  type DatasourceMock,
   createExpressionRendererMock,
   mockStoreDeps,
   renderWithReduxStore,
@@ -25,11 +25,11 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin } from '../../mocks';
-import { LensAppState, setState } from '../../state_management';
+import { type LensAppState, setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { type EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();

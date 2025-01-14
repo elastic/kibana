@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BoundOutputOptions, OutputAPI, UnboundOutputOptions } from '@kbn/inference-common';
+import { type BoundOutputOptions, type OutputAPI, type UnboundOutputOptions } from '@kbn/inference-common';
 import { bindOutput } from './bind_output';
 
 describe('createScopedOutputAPI', () => {

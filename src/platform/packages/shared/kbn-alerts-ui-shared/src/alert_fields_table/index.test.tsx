@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { AlertFieldsTable, AlertFieldsTableProps } from '.';
-import { mount, ReactWrapper } from 'enzyme';
+import { AlertFieldsTable, type AlertFieldsTableProps } from '.';
+import { mount, type ReactWrapper } from 'enzyme';
 
 describe('AlertFieldsTable', () => {
   const defaultProps = {

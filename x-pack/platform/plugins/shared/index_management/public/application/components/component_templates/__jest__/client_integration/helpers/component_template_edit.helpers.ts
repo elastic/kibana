@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, type TestBed, type AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { BASE_PATH } from '../../../../../../../common';
@@ -14,7 +14,7 @@ import { ComponentTemplateEdit } from '../../../component_template_wizard';
 import { WithAppDependencies } from './setup_environment';
 import {
   getFormActions,
-  ComponentTemplateFormTestSubjects,
+  type ComponentTemplateFormTestSubjects,
 } from './component_template_form.helpers';
 
 export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubjects> & {

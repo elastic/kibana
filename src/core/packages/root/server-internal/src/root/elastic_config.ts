@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { apmConfigSchema } from '@kbn/apm-config-loader';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 

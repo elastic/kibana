@@ -6,12 +6,12 @@
  */
 
 import {
-  RuleResponseV1,
-  RuleParamsV1,
-  RuleLastRunV1,
-  MonitoringV1,
+  type RuleResponseV1,
+  type RuleParamsV1,
+  type RuleLastRunV1,
+  type MonitoringV1,
 } from '../../../../../common/routes/rule/response';
-import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
+import { type Rule, type RuleLastRun, type RuleParams, type Monitoring } from '../../../../application/rule/types';
 
 export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {

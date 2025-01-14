@@ -8,7 +8,7 @@
  */
 
 import type { IShortUrlClientFactory } from '../../../common/url_service';
-import { BrowserShortUrlClient, BrowserShortUrlClientDependencies } from './short_url_client';
+import { BrowserShortUrlClient, type BrowserShortUrlClientDependencies } from './short_url_client';
 
 export type BrowserShortUrlClientFactoryDependencies = BrowserShortUrlClientDependencies;
 

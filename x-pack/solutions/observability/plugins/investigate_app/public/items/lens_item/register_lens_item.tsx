@@ -12,17 +12,17 @@ import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
-  LensAttributes,
-  XYLayerOptions,
+  type LensAttributes,
+  type XYLayerOptions,
   XYDataLayer,
-  XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
+  type XYReferenceLinesLayer,
+  type XYByValueAnnotationsLayer,
   LensAttributesBuilder,
   XYChart,
 } from '@kbn/lens-embeddable-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { Query, Filter } from '@kbn/es-query';
+import { type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { type Query, type Filter } from '@kbn/es-query';
 import type { Options } from '../register_items';
 import { useKibana } from '../../hooks/use_kibana';
 

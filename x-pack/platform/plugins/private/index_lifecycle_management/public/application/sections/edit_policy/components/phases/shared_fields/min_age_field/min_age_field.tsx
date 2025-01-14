@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { type FunctionComponent, useEffect } from 'react';
 import { get } from 'lodash';
 
 import {
   EuiFieldNumber,
-  EuiFieldNumberProps,
+  type EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,7 +19,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { PhaseWithTiming } from '../../../../../../../../common/types';
+import { type PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';

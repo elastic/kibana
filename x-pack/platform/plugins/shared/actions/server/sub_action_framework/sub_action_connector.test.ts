@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { type AxiosError, AxiosHeaders, type AxiosInstance, type AxiosResponse } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import { type MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestSubActionConnector } from './mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { type ActionsConfigurationUtilities } from '../actions_config';
 import * as utils from '../lib/axios_utils';
 import { ConnectorUsageCollector } from '../usage';
 

@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Payload } from '@hapi/boom';
+import { type Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  DecoratedError,
-  AuthorizeUpdateObject,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectSanitizedDoc,
+  type DecoratedError,
+  type AuthorizeUpdateObject,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkUpdateResponse,
+  type SavedObjectsBulkUpdateObject,
+  type SavedObjectsBulkUpdateOptions,
+  type SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
@@ -41,7 +41,7 @@ import {
   getSavedObjectFromSource,
   mergeForUpdate,
 } from './utils';
-import { ApiExecutionContext } from './types';
+import { type ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;

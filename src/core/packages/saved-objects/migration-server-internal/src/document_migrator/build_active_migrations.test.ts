@@ -17,11 +17,11 @@ import {
   validateTypeMigrationsMock,
 } from './build_active_migrations.test.mocks';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { buildActiveMigrations } from './build_active_migrations';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import { Transform, TransformType } from './types';
+import { type Transform, TransformType } from './types';
 
 const kibanaVersion = '3.2.3';
 

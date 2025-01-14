@@ -7,9 +7,9 @@
 
 import {
   map,
-  Observable,
-  Subject,
-  Subscription,
+  type Observable,
+  type Subject,
+  type Subscription,
   switchMap,
   takeUntil,
   filter,
@@ -22,11 +22,11 @@ import {
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
 import {
-  CoreSetup,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  IClusterClient,
+  type CoreSetup,
+  type Logger,
+  type Plugin,
+  type PluginInitializerContext,
+  type IClusterClient,
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';

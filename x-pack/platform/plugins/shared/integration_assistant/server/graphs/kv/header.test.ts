@@ -6,14 +6,14 @@
  */
 
 import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
+  type ActionsClientChatOpenAI,
+  type ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { kvState } from '../../../__jest__/fixtures/kv';
 import type { KVState } from '../../types';
 import { handleHeader } from './header';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const exampleAnswer = {
   rfc: 'RFC2454',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { SectionLoading } from '../../../../../../shared_imports';
-import { ProcessorResult, Document } from '../../../types';
+import { type ProcessorResult, type Document } from '../../../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from '../../shared';
 
 import './processor_output.scss';

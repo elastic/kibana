@@ -8,15 +8,15 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ClusterClientAdapter,
-  IClusterClientAdapter,
+  type IClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
   getQueryBody,
-  FindEventsOptionsBySavedObjectFilter,
-  AggregateEventsOptionsBySavedObjectFilter,
-  AggregateEventsWithAuthFilter,
+  type FindEventsOptionsBySavedObjectFilter,
+  type AggregateEventsOptionsBySavedObjectFilter,
+  type AggregateEventsWithAuthFilter,
   getQueryBodyWithAuthFilter,
 } from './cluster_client_adapter';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import { type AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';

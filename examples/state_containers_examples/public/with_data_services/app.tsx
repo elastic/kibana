@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { History } from 'history';
+import { type History } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 
 import {
@@ -19,25 +19,25 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
+import { type CoreStart } from '@kbn/core/public';
+import { type NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   connectToQueryState,
-  DataPublicPluginStart,
-  QueryState,
+  type DataPublicPluginStart,
+  type QueryState,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  BaseStateContainer,
+  type BaseStateContainer,
   createStateContainer,
-  IKbnUrlStateStorage,
+  type IKbnUrlStateStorage,
   syncState,
   useContainerState,
 } from '@kbn/kibana-utils-plugin/public';
-import { ExampleLink, StateContainersExamplesPage } from '../common/example_page';
+import { type ExampleLink, StateContainersExamplesPage } from '../common/example_page';
 
 interface StateDemoAppDeps {
   navigateToApp: CoreStart['application']['navigateToApp'];

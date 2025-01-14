@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type FindSLOResponse, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {

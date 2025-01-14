@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import { type CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
@@ -15,10 +15,10 @@ import type {
   LensEditEvent,
 } from '../../../types';
 import {
-  LENS_EDIT_SORT_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
-  LENS_TOGGLE_ACTION,
-  LENS_EDIT_PAGESIZE_ACTION,
+  type LENS_EDIT_SORT_ACTION,
+  type LENS_EDIT_RESIZE_ACTION,
+  type LENS_TOGGLE_ACTION,
+  type LENS_EDIT_PAGESIZE_ACTION,
 } from './constants';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';

@@ -12,7 +12,7 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IAggConfig, AggGroupNames, IAggType } from '@kbn/data-plugin/public';
+import { type IAggConfig, AggGroupNames, type IAggType } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { Schema } from '@kbn/visualizations-plugin/public';
@@ -31,10 +31,10 @@ import {
   AGG_PARAMS_ACTION_KEYS,
   initAggParamsState,
 } from './agg_params_state';
-import { DefaultEditorCommonProps } from './agg_common_props';
-import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
+import { type DefaultEditorCommonProps } from './agg_common_props';
+import { type EditorParamConfig, type TimeIntervalParam, type FixedParam, getEditorConfig } from './utils';
 import { getSchemaByName } from '../schemas';
-import { VisDefaultEditorKibanaServices } from '../types';
+import { type VisDefaultEditorKibanaServices } from '../types';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';

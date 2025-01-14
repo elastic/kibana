@@ -9,37 +9,37 @@
 
 import type { Observable } from 'rxjs';
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { type Filter } from '@kbn/es-query';
 import {
-  HasSaveNotification,
-  HasSerializedChildState,
-  PresentationContainer,
+  type HasSaveNotification,
+  type HasSerializedChildState,
+  type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
-  HasEditCapabilities,
-  HasParentApi,
-  PublishesDisabledActionIds,
-  PublishesFilters,
-  PublishesTimeslice,
-  PublishesUnifiedSearch,
-  PublishesUnsavedChanges,
-  PublishingSubject,
+  type HasEditCapabilities,
+  type HasParentApi,
+  type PublishesDisabledActionIds,
+  type PublishesFilters,
+  type PublishesTimeslice,
+  type PublishesUnifiedSearch,
+  type PublishesUnsavedChanges,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { type PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { type PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
 import {
-  ControlGroupChainingSystem,
-  ControlGroupEditorConfig,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlLabelPosition,
-  ControlPanelState,
-  DefaultControlState,
-  ParentIgnoreSettings,
+  type ControlGroupChainingSystem,
+  type ControlGroupEditorConfig,
+  type ControlGroupRuntimeState,
+  type ControlGroupSerializedState,
+  type ControlLabelPosition,
+  type ControlPanelState,
+  type DefaultControlState,
+  type ParentIgnoreSettings,
 } from '../../common';
-import { ControlFetchContext } from './control_fetch/control_fetch';
+import { type ControlFetchContext } from './control_fetch/control_fetch';
 
 /**
  * ----------------------------------------------------------------

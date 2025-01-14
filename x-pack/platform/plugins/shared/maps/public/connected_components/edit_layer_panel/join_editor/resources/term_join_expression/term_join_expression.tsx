@@ -10,8 +10,8 @@ import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import {
-  ESTermSourceDescriptor,
-  JoinSourceDescriptor,
+  type ESTermSourceDescriptor,
+  type JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import type { JoinField } from '../../join_editor';
 import { TermJoinPopoverContent } from './term_join_popover_content';

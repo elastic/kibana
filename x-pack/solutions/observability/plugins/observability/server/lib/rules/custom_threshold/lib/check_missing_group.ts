@@ -11,8 +11,8 @@ import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
 import {
-  CustomMetricExpressionParams,
-  SearchConfigurationType,
+  type CustomMetricExpressionParams,
+  type SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
 import { calculateCurrentTimeFrame, createBoolQuery } from './metric_query';

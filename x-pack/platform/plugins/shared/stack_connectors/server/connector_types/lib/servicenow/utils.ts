@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
+import axios, { AxiosError, AxiosHeaders, type AxiosInstance, type AxiosResponse } from 'axios';
+import { type Logger } from '@kbn/core/server';
 import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
-  ExternalServiceCredentials,
-  Incident,
-  PartialIncident,
-  ResponseError,
-  ServiceNowError,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
+  type ExternalServiceCredentials,
+  type Incident,
+  type PartialIncident,
+  type ResponseError,
+  type ServiceNowError,
+  type ServiceNowPublicConfigurationType,
+  type ServiceNowSecretConfigurationType,
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';

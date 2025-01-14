@@ -6,11 +6,11 @@
  */
 
 import {
-  HasEditCapabilities,
-  HasSupportedTriggers,
-  PublishesDisabledActionIds,
-  PublishesViewMode,
-  ViewMode,
+  type HasEditCapabilities,
+  type HasSupportedTriggers,
+  type PublishesDisabledActionIds,
+  type PublishesViewMode,
+  type ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
@@ -21,11 +21,11 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
-  GetStateType,
-  LensEmbeddableStartServices,
-  LensInspectorAdapters,
-  LensInternalApi,
-  LensRuntimeState,
+  type GetStateType,
+  type LensEmbeddableStartServices,
+  type LensInspectorAdapters,
+  type LensInternalApi,
+  type LensRuntimeState,
 } from '../types';
 import {
   buildObservableVariable,
@@ -35,9 +35,9 @@ import {
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
-import { StateManagementConfig } from './initialize_state_management';
+import { type StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
-import { SearchContextConfig } from './initialize_search_context';
+import { type SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
   getState: GetStateType,

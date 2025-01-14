@@ -15,7 +15,7 @@ import {
   getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
 } from './factories';
-import { CommandDefinition } from '../definitions/types';
+import { type CommandDefinition } from '../definitions/types';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;

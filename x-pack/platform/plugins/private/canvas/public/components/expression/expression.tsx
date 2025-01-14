@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useRef } from 'react';
+import React, { type FC, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -24,13 +24,13 @@ import { monaco } from '@kbn/monaco';
 import { Shortcuts } from 'react-shortcuts';
 
 import {
-  ExpressionInputEditorRef,
-  OnExpressionInputEditorDidMount,
+  type ExpressionInputEditorRef,
+  type OnExpressionInputEditorDidMount,
 } from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
-import { ExpressionFunction } from '../../../types';
-import { FormState } from '.';
+import { type ExpressionFunction } from '../../../types';
+import { type FormState } from '.';
 
 const strings = {
   getCancelButtonLabel: () =>

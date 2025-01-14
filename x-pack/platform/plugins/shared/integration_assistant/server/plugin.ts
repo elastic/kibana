@@ -22,7 +22,7 @@ import type {
   IntegrationAssistantPluginSetupDependencies,
 } from './types';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { IntegrationAssistantConfigType } from './config';
+import { type IntegrationAssistantConfigType } from './config';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {

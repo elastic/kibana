@@ -6,11 +6,11 @@
  */
 
 import {
-  ActionTypeModel,
-  GenericValidationResult,
+  type ActionTypeModel,
+  type GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { lazy } from 'react';
-import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
+import { type TorqActionParams, type TorqConfig, type TorqSecrets } from '../types';
 import * as i18n from './translations';
 
 const torqDefaultBody = `{

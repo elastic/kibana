@@ -9,13 +9,13 @@
 
 import {
   AggConfigs,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
-  AggsCommonStart,
+  type AggTypesRegistrySetup,
+  type AggTypesRegistryStart,
+  type AggsCommonStart,
   getCalculateAutoTimeExpression,
 } from '../../../common';
 
-import { AggsSetup, AggsStart } from './types';
+import { type AggsSetup, type AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
 

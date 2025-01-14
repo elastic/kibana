@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { type FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { FieldOption, NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { estypes } from '@elastic/elasticsearch';
-import { EsQueryRuleParams, SearchType } from './types';
+import { type FieldOption, NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { type estypes } from '@elastic/elasticsearch';
+import { type EsQueryRuleParams, type SearchType } from './types';
 
 export const isSearchSourceRule = (
   ruleParams: EsQueryRuleParams

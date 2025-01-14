@@ -8,7 +8,7 @@
  */
 
 import { Builder } from '../builder';
-import { Walker, WalkerAstNode } from '../walker/walker';
+import { Walker, type WalkerAstNode } from '../walker/walker';
 import { BasicPrettyPrinter } from '../pretty_print';
 import type { ESQLProperNode } from '../types';
 import type { SynthGenerator, SynthMethod, SynthTaggedTemplateWithOpts } from './types';

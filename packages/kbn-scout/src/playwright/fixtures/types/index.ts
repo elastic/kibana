@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_scope';
-export * from './worker_scope';
+export type * from './test_scope';
+export type * from './worker_scope';

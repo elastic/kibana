@@ -5,12 +5,12 @@
  * 2.0.
  */
 import {
-  RuleLastRunOutcomes,
-  RuleExecutionStatuses,
+  type RuleLastRunOutcomes,
+  type RuleExecutionStatuses,
   RuleExecutionStatusErrorReasons,
 } from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
-import { Rule } from '../../types';
+import { type Rule } from '../../types';
 
 export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
   switch (status) {

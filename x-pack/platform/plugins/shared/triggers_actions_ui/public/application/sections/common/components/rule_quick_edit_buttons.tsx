@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KueryNode } from '@kbn/es-query';
+import { type KueryNode } from '@kbn/es-query';
 import React, { useMemo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { RuleTableItem, BulkEditActions, UpdateRulesToBulkEditProps } from '../../../../types';
+import { type RuleTableItem, type BulkEditActions, type UpdateRulesToBulkEditProps } from '../../../../types';
 import {
   withBulkRuleOperations,
-  ComponentOpts as BulkOperationsComponentOpts,
+  type ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_rule_api_operations';
 import './rule_quick_edit_buttons.scss';
 import { useKibana } from '../../../../common/lib/kibana';

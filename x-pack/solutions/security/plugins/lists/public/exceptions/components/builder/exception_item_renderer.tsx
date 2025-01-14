@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { ElementType, useCallback, useMemo } from 'react';
+import React, { type ElementType, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import { HttpStart } from '@kbn/core/public';
-import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import { type HttpStart } from '@kbn/core/public';
+import { type ExceptionListType, type OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  BuilderEntry,
-  DataViewField,
-  ExceptionsBuilderExceptionItem,
-  FormattedBuilderEntry,
-  OperatorOption,
+  type BuilderEntry,
+  type DataViewField,
+  type ExceptionsBuilderExceptionItem,
+  type FormattedBuilderEntry,
+  type OperatorOption,
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase } from '@kbn/es-query';
+import { type DataViewBase } from '@kbn/es-query';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
-import { EntryFieldError } from './reducer';
+import { type EntryFieldError } from './reducer';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { type HttpStart } from '@kbn/core/public';
+import { type ISearchStart } from '@kbn/data-plugin/public';
+import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import { type LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import {
-  LogView,
-  LogViewAttributes,
-  LogViewReference,
-  LogViewsStaticConfig,
-  LogViewStatus,
-  ResolvedLogView,
+  type LogView,
+  type LogViewAttributes,
+  type LogViewReference,
+  type LogViewsStaticConfig,
+  type LogViewStatus,
+  type ResolvedLogView,
 } from '../../../common/log_views';
 
 export interface LogViewsServiceSetup {

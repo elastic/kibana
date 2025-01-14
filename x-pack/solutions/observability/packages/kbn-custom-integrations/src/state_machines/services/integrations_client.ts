@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
 import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
@@ -18,8 +18,8 @@ import {
   IntegrationNotInstalledError,
   NamingCollisionError,
   UnknownError,
-  IntegrationName,
-  Dataset,
+  type IntegrationName,
+  type Dataset,
 } from '../../types';
 
 const GENERIC_CREATE_ERROR_MESSAGE = i18n.translate(

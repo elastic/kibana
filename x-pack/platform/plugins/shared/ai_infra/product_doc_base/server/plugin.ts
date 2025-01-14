@@ -13,11 +13,11 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
 import {
-  ProductDocBaseSetupContract,
-  ProductDocBaseStartContract,
-  ProductDocBaseSetupDependencies,
-  ProductDocBaseStartDependencies,
-  InternalServices,
+  type ProductDocBaseSetupContract,
+  type ProductDocBaseStartContract,
+  type ProductDocBaseSetupDependencies,
+  type ProductDocBaseStartDependencies,
+  type InternalServices,
 } from './types';
 import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';

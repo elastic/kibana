@@ -13,7 +13,7 @@ import type {
   HeatmapVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensHeatmapConfig } from '../types';
+import { type BuildDependencies, DEFAULT_LAYER_ID, type LensAttributes, type LensHeatmapConfig } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,

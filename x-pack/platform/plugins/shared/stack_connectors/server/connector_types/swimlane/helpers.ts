@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateRecordParams, Incident, SwimlaneRecordPayload, MappingConfigType } from './types';
+import { type CreateRecordParams, type Incident, type SwimlaneRecordPayload, type MappingConfigType } from './types';
 
 type ConfigMapping = Omit<MappingConfigType, 'commentsConfig'>;
 

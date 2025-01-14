@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import {
   generateMockIndicator,
-  Indicator,
+  type Indicator,
   RawIndicatorFieldId,
 } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable } from './table_tab';

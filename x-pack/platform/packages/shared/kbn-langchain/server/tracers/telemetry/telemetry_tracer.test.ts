@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import { TelemetryTracer, TelemetryParams } from './telemetry_tracer';
-import { Run } from 'langsmith/schemas';
+import { type AnalyticsServiceSetup, type Logger } from '@kbn/core/server';
+import { TelemetryTracer, type TelemetryParams } from './telemetry_tracer';
+import { type Run } from 'langsmith/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 
 const mockRun = {

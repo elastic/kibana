@@ -10,10 +10,10 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiDataGridControlColumn,
+  type EuiDataGridControlColumn,
   useEuiTheme,
-  EuiThemeComputed,
-  EuiDataGridCellValueElementProps,
+  type EuiThemeComputed,
+  type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';

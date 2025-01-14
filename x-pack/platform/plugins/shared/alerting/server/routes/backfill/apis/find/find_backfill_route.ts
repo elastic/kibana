@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
+import { type IRouter } from '@kbn/core/server';
 import {
   findQuerySchemaV1,
-  FindBackfillRequestQueryV1,
-  FindBackfillResponseV1,
+  type FindBackfillRequestQueryV1,
+  type FindBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/find';
-import { ILicenseState } from '../../../../lib';
+import { type ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
-  AlertingRequestHandlerContext,
+  type AlertingRequestHandlerContext,
   INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';

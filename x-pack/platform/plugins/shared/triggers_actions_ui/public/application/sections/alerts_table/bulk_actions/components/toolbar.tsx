@@ -17,10 +17,10 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import {
-  Alerts,
-  BulkActionsPanelConfig,
+  type Alerts,
+  type BulkActionsPanelConfig,
   BulkActionsVerbs,
-  RowSelection,
+  type RowSelection,
 } from '../../../../../types';
 import * as i18n from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';

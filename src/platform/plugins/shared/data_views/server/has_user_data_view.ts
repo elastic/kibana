@@ -8,11 +8,11 @@
  */
 
 import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+  type SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { DataViewSavedObjectAttrs } from '../common/data_views';
+import { type DataViewSavedObjectAttrs } from '../common/data_views';
 
 interface Deps {
   esClient: ElasticsearchClient;

@@ -7,13 +7,13 @@
 
 import {
   MessageRole,
-  AssistantMessage,
-  Message,
-  ToolMessage,
-  UserMessage,
-  ToolChoice,
+  type AssistantMessage,
+  type Message,
+  type ToolMessage,
+  type UserMessage,
+  type ToolChoice,
   ToolChoiceType,
-  ToolDefinition,
+  type ToolDefinition,
 } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 import { getSystemMessageInstructions } from './get_system_instructions';

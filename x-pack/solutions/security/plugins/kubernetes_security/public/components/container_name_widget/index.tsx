@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
-import { EuiBasicTable, EuiTableSortingType, EuiProgress, EuiBasicTableColumn } from '@elastic/eui';
+import React, { type ReactNode, useMemo, useState, useRef, useCallback } from 'react';
+import { EuiBasicTable, type EuiTableSortingType, EuiProgress, type EuiBasicTableColumn } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';

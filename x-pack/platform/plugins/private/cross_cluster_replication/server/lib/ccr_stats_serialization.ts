@@ -6,12 +6,12 @@
  */
 
 import {
-  RecentAutoFollowError,
-  RecentAutoFollowErrorFromEs,
-  AutoFollowedCluster,
-  AutoFollowedClusterFromEs,
-  AutoFollowStats,
-  AutoFollowStatsFromEs,
+  type RecentAutoFollowError,
+  type RecentAutoFollowErrorFromEs,
+  type AutoFollowedCluster,
+  type AutoFollowedClusterFromEs,
+  type AutoFollowStats,
+  type AutoFollowStatsFromEs,
 } from '../../common/types';
 /* eslint-disable @typescript-eslint/naming-convention */
 export const deserializeRecentAutoFollowErrors = ({

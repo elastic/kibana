@@ -13,7 +13,7 @@ import {
   putBlocksAction,
   putCacheSize,
   syntheticsReducer,
-  SyntheticsReducerState,
+  type SyntheticsReducerState,
   updateHitCountsAction,
 } from './synthetics';
 

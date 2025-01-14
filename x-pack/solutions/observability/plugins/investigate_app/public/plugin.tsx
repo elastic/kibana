@@ -5,13 +5,13 @@
  * 2.0.
  */
 import {
-  AppMountParameters,
+  type AppMountParameters,
   AppStatus,
-  CoreSetup,
-  CoreStart,
+  type CoreSetup,
+  type CoreStart,
   DEFAULT_APP_CATEGORIES,
-  Plugin,
-  PluginInitializerContext,
+  type Plugin,
+  type PluginInitializerContext,
 } from '@kbn/core/public';
 import { INVESTIGATE_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
-import { createInvestigateAppRepositoryClient, InvestigateAppRepositoryClient } from './api';
+import { createInvestigateAppRepositoryClient, type InvestigateAppRepositoryClient } from './api';
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 

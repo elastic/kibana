@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import {
-  TriggersAndActionsUIPublicPluginStart,
-  RuleStatusFilterProps,
+  type TriggersAndActionsUIPublicPluginStart,
+  type RuleStatusFilterProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface SandboxProps {

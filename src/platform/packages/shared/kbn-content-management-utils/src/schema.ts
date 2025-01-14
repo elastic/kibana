@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, ObjectType } from '@kbn/config-schema';
+import { schema, type ObjectType } from '@kbn/config-schema';
 
 export const apiError = schema.object({
   error: schema.string(),

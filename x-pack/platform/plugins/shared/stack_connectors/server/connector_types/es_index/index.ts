@@ -7,8 +7,8 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { type Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -26,8 +26,8 @@ import {
   buildAlertHistoryDocument,
 } from '@kbn/actions-plugin/common';
 import {
-  BulkOperationType,
-  BulkResponseItem,
+  type BulkOperationType,
+  type BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ESIndexConnectorType = ConnectorType<

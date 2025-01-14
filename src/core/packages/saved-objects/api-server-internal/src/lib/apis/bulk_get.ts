@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom, { Payload } from '@hapi/boom';
+import Boom, { type Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  DecoratedError,
-  SavedObjectsRawDocSource,
-  AuthorizeBulkGetObject,
+  type DecoratedError,
+  type SavedObjectsRawDocSource,
+  type AuthorizeBulkGetObject,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-  SavedObjectsGetOptions,
+  type SavedObjectsBulkGetObject,
+  type SavedObjectsBulkResponse,
+  type SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { includedFields } from '../utils';
 import {
-  Either,
+  type Either,
   errorContent,
   getSavedObjectFromSource,
   isLeft,
@@ -33,7 +33,7 @@ import {
   right,
   rawDocExistsInNamespaces,
 } from './utils';
-import { ApiExecutionContext } from './types';
+import { type ApiExecutionContext } from './types';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];

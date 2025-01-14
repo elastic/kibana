@@ -8,11 +8,11 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  EntriesArray,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
+  type EntriesArray,
+  type ExceptionListItemSchema,
+  type ExceptionListSchema,
+  type FoundExceptionListItemSchema,
+  type FoundExceptionListSchema,
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';

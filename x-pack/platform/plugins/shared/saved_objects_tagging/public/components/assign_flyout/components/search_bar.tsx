@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { EuiSearchBar, SearchFilterConfig } from '@elastic/eui';
+import React, { type FC, useMemo } from 'react';
+import { EuiSearchBar, type SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface AssignFlyoutSearchBarProps {

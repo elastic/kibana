@@ -19,12 +19,12 @@ import type {
 } from '../../types';
 import { getColorMappingDefaults } from '../../utils';
 import {
-  State,
-  XYState,
+  type State,
+  type XYState,
   visualizationSubtypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type SeriesType,
   defaultSeriesType,
 } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';

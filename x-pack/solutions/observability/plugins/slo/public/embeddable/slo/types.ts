@@ -6,14 +6,14 @@
  */
 
 import {
-  ApplicationStart,
-  CoreStart,
-  IUiSettingsClient,
-  NotificationsStart,
+  type ApplicationStart,
+  type CoreStart,
+  type IUiSettingsClient,
+  type NotificationsStart,
 } from '@kbn/core/public';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { type ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import { type ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SLORepositoryClient } from '../../types';
 
 export interface SLOEmbeddableDeps {

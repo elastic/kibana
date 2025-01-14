@@ -13,7 +13,7 @@ import {
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../common/ftr_provider_context';
 import { KNOWLEDGE_BASE_SETUP_API_URL } from './knowledge_base_setup.spec';
 
 const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';

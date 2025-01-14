@@ -15,11 +15,11 @@ import {
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
-  DataSourceSelectorContext,
-  DataSourceSelectorEvent,
-  DataSourceSelectorStateMachineDependencies,
-  DataSourceSelectorTypestate,
-  DefaultDataSourceSelectorContext,
+  type DataSourceSelectorContext,
+  type DataSourceSelectorEvent,
+  type DataSourceSelectorStateMachineDependencies,
+  type DataSourceSelectorTypestate,
+  type DefaultDataSourceSelectorContext,
 } from './types';
 
 export const createPureDataSourceSelectorStateMachine = (

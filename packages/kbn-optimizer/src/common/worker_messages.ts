@@ -8,10 +8,10 @@
  */
 
 import {
-  CompilerRunningMsg,
-  CompilerIssueMsg,
-  CompilerSuccessMsg,
-  CompilerErrorMsg,
+  type CompilerRunningMsg,
+  type CompilerIssueMsg,
+  type CompilerSuccessMsg,
+  type CompilerErrorMsg,
 } from './compiler_messages';
 
 export type WorkerMsg =

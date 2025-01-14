@@ -11,9 +11,9 @@ import {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-  ThreatArray,
+  type ThreatArray,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { type FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

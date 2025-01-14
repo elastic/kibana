@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState, type FunctionComponent } from 'react';
+import { type RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -14,11 +14,11 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import {
   IndexDetailsSection,
-  IndexDetailsTabId,
+  type IndexDetailsTabId,
   Section,
 } from '../../../../../../common/constants';
-import { Index } from '../../../../../../common';
-import { Error } from '../../../../../shared_imports';
+import { type Index } from '../../../../../../common';
+import { type Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
 import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';

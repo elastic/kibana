@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { type CoreSetup, type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { configSchema, TagcloudConfig } from './config';
+import { configSchema, type TagcloudConfig } from './config';
 
 export const config: PluginConfigDescriptor<TagcloudConfig> = {
   exposeToBrowser: {

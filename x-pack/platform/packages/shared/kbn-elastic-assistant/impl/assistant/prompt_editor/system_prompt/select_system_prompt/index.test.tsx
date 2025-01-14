@@ -9,13 +9,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { Props, SelectSystemPrompt } from '.';
+import { type Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import { useFetchPrompts } from '../../../api';
 import { mockSystemPrompts } from '../../../../mock/system_prompt';
-import { DefinedUseQueryResult } from '@tanstack/react-query';
+import { type DefinedUseQueryResult } from '@tanstack/react-query';
 
 jest.mock('../../../api/prompts/use_fetch_prompts');
 const http = {

@@ -8,9 +8,9 @@
 import {
   ConfigKey,
   MonitorTypeEnum,
-  HTTPFields,
-  BrowserFields,
-  MonitorFields,
+  type HTTPFields,
+  type BrowserFields,
+  type MonitorFields,
   ScheduleUnit,
 } from '../types';
 import { validate } from './validation';

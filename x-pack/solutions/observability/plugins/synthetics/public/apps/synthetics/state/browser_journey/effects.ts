@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import { type Action } from 'redux-actions';
 import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
 import { serializeHttpFetchError } from '../utils/http_error';
-import { FetchNetworkEventsParams } from '../network_events/actions';
+import { type FetchNetworkEventsParams } from '../network_events/actions';
 import {
-  ScreenshotBlockDoc,
-  ScreenshotBlockCache,
-  SyntheticsJourneyApiResponse,
+  type ScreenshotBlockDoc,
+  type ScreenshotBlockCache,
+  type SyntheticsJourneyApiResponse,
 } from '../../../../../common/runtime_types';
 import { fetchBrowserJourney, fetchScreenshotBlockSet } from './api';
 

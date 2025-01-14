@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reducer, State } from './processors_reducer';
+import { reducer, type State } from './processors_reducer';
 import { DropSpecialLocations } from '../constants';
 import { PARENT_CHILD_NEST_ERROR } from './utils';
 

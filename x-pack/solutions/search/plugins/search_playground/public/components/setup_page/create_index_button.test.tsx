@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

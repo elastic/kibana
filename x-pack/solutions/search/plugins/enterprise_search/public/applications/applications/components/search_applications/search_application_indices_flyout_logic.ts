@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 import {
-  SearchApplicationViewActions,
+  type SearchApplicationViewActions,
   SearchApplicationViewLogic,
-  SearchApplicationViewValues,
+  type SearchApplicationViewValues,
 } from '../search_application/search_application_view_logic';
 
 export interface SearchApplicationIndicesFlyoutValues {

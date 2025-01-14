@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { StartServicesAccessor } from '@kbn/core/server';
-import { SavedObjectsClient, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { type StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsClient, type SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataViewAttributes,
-  FieldSpec,
-  RuntimeField,
+  type DataViewAttributes,
+  type FieldSpec,
+  type RuntimeField,
 } from '../common';
-import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
+import { type DataViewsServerPluginStartDependencies, type DataViewsServerPluginStart } from './types';
 
 interface CountSummary {
   min?: number;

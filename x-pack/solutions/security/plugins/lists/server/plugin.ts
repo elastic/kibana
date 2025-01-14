@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { ConfigType } from './config';
+import { type ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/list_client';
 import type {
@@ -31,8 +31,8 @@ import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 import {
   ExtensionPointStorage,
-  ExtensionPointStorageClientInterface,
-  ExtensionPointStorageInterface,
+  type ExtensionPointStorageClientInterface,
+  type ExtensionPointStorageInterface,
 } from './services/extension_points';
 
 export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {

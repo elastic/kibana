@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiButtonEmptyProps } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 

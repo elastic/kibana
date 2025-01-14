@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   FailureReason,
   LoadingStatus,
-  LoadingStatusEntry,
+  type LoadingStatusEntry,
 } from '../../services/context_query_state';
 
 export interface ContextErrorMessageProps {

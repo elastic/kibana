@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, merge, of } from 'rxjs';
+import { type Observable, merge, of } from 'rxjs';
 import { map } from 'rxjs';
-import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import { ElasticsearchStatusMeta } from './types';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { type ElasticsearchStatusMeta } from './types';
+import { type NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 export const calculateStatus$ = (
   esNodesCompatibility$: Observable<NodesVersionCompatibility>

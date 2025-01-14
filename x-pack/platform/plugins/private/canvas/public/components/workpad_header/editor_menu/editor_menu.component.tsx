@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { type FC, useCallback } from 'react';
 
-import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenu, type EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { type Action, type ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { type BaseVisType, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { addCanvasElementTrigger } from '../../../state/triggers/add_canvas_element_trigger';
 import { useCanvasApi } from '../../hooks/use_canvas_api';

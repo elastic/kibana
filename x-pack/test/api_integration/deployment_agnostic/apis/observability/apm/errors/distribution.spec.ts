@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
 import {
-  APIClientRequestParamsOf,
-  APIReturnType,
+  type APIClientRequestParamsOf,
+  type APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';

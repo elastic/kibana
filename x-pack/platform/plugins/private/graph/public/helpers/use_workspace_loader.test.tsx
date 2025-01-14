@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useWorkspaceLoader, UseWorkspaceLoaderProps } from './use_workspace_loader';
+import { useWorkspaceLoader, type UseWorkspaceLoaderProps } from './use_workspace_loader';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
-import { Workspace } from '../types';
+import { type Workspace } from '../types';
 import { renderHook, waitFor } from '@testing-library/react';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import { type ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({

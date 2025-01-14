@@ -8,12 +8,12 @@
  */
 
 import {
-  ActorRefLike,
-  AnyActorRef,
-  InspectedActorEvent,
-  InspectedEventEvent,
-  InspectedSnapshotEvent,
-  InspectionEvent,
+  type ActorRefLike,
+  type AnyActorRef,
+  type InspectedActorEvent,
+  type InspectedEventEvent,
+  type InspectedSnapshotEvent,
+  type InspectionEvent,
 } from 'xstate5';
 import { isDevMode } from './dev_tools';
 

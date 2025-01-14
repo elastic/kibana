@@ -6,4 +6,4 @@
  */
 
 export * from './data_stream_details_service';
-export * from './types';
+export type * from './types';

@@ -11,14 +11,14 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get, mergeWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
+import { type FormHook, type FieldHook, type FormData, type FieldsMap, type FormConfig } from '../types';
 import {
   mapFormFields,
   unflattenObject,
   flattenObject,
   stripOutUndefinedValues,
   Subject,
-  Subscription,
+  type Subscription,
 } from '../lib';
 import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
 

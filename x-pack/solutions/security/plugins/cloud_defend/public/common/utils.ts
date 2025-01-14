@@ -14,7 +14,7 @@ import {
   DefaultProcessResponse,
   SelectorConditionsMap,
 } from '../types';
-import { Selector, Response, SelectorType, SelectorCondition } from '../../common';
+import { type Selector, type Response, type SelectorType, type SelectorCondition } from '../../common';
 import {
   MAX_CONDITION_VALUE_LENGTH_BYTES,
   MAX_SELECTORS_AND_RESPONSES_PER_TYPE,

@@ -8,7 +8,7 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
   loadGlobalConnectorExecutionLogAggregations,
-  SortField,
+  type SortField,
 } from './load_execution_log_aggregations';
 
 const http = httpServiceMock.createStartContract();

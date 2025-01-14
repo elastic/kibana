@@ -11,7 +11,7 @@ import ts from 'typescript';
 import { createFailError } from '@kbn/dev-cli-errors';
 import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';
-import { getDescriptor, Descriptor } from './serializer';
+import { getDescriptor, type Descriptor } from './serializer';
 
 export function* traverseNodes(maybeNodes: ts.Node | ts.Node[]): Generator<ts.Node> {
   const nodes: ts.Node[] = Array.isArray(maybeNodes) ? maybeNodes : [maybeNodes];

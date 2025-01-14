@@ -10,16 +10,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  TimefilterContract,
-  SerializedSearchSourceFields,
-  DataPublicPluginStart,
+  type TimefilterContract,
+  type SerializedSearchSourceFields,
+  type DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
-import { ControlParams } from '../editor_utils';
-import { InputControlSettings, InputControlVisDependencies } from '../plugin';
+import { type ControlParams } from '../editor_utils';
+import { type InputControlSettings, type InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators

@@ -6,32 +6,32 @@
  */
 
 import {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
+  type ObservabilityPublicSetup,
+  type ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
+  type ObservabilitySharedPluginSetup,
+  type ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
+  type AppMountParameters,
+  type CoreSetup,
+  type CoreStart,
   DEFAULT_APP_CATEGORIES,
-  Plugin,
-  PluginInitializerContext,
+  type Plugin,
+  type PluginInitializerContext,
 } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { type DataPublicPluginSetup, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type SharePluginSetup, type SharePluginStart } from '@kbn/share-plugin/public';
+import { type DiscoverSetup, type DiscoverStart } from '@kbn/discover-plugin/public';
+import { type FleetSetup, type FleetStart } from '@kbn/fleet-plugin/public';
+import { type CloudSetup, type CloudStart } from '@kbn/cloud-plugin/public';
+import { type UsageCollectionSetup, type UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
-import { ObservabilityOnboardingPluginLocators } from './locators';
-import { ConfigSchema } from '.';
+import { type ObservabilityOnboardingPluginLocators } from './locators';
+import { type ConfigSchema } from '.';
 import {
   OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,

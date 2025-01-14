@@ -13,12 +13,12 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
-  RouteValidationError,
-  RouteValidationFunction,
-  RouteValidationResultFactory,
+  type RouteValidationError,
+  type RouteValidationFunction,
+  type RouteValidationResultFactory,
 } from '@kbn/core/server';
 
 type RequestValidationResult<T> =

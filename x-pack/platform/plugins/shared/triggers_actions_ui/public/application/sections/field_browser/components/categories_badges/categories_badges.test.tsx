@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { CategoriesBadges, CategoriesBadgesProps } from './categories_badges';
+import { CategoriesBadges, type CategoriesBadgesProps } from './categories_badges';
 
 const mockSetSelectedCategoryIds = jest.fn();
 const defaultProps = {

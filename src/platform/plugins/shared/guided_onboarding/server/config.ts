@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
+import { type PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
   enabled: offeringBasedSchema({

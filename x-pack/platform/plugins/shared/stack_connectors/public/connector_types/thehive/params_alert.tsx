@@ -9,10 +9,10 @@ import React, { useState, useMemo } from 'react';
 import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
-  ActionParamsProps,
+  type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
-import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import { type ExecutorParams, type ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
 

@@ -10,7 +10,7 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
-import { injectI18n, WrappedComponentProps } from '@kbn/i18n-react';
+import { injectI18n, type WrappedComponentProps } from '@kbn/i18n-react';
 import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';

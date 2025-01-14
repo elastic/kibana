@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ClusterMetric, ClusterMetricOptions, Metric, MetricOptions } from '../classes';
+import { ClusterMetric, type ClusterMetricOptions, Metric, type MetricOptions } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 

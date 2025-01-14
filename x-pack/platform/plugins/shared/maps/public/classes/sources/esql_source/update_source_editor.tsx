@@ -12,7 +12,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

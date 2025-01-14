@@ -9,10 +9,10 @@ import React, { Fragment } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
 import {
-  AlertMessage,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
-  AlertMessageDocLinkToken,
+  type AlertMessage,
+  type AlertMessageTimeToken,
+  type AlertMessageLinkToken,
+  type AlertMessageDocLinkToken,
 } from '../../../common/types/alerts';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';

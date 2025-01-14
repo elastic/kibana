@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import { type KibanaRequest } from '@kbn/core-http-server';
 import type { DefendInsightsPostRequestBody, Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, type BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
-  AttackDiscoveryPostRequestBody,
-  ExecuteConnectorRequestBody,
+  type AttackDiscoveryPostRequestBody,
+  type ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 
 export const getLangChainMessage = (

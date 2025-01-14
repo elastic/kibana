@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
+import { FilterStateStore, type PhraseFilter } from '@kbn/es-query';
 import {
   stubIndexPattern,
   phraseFilter,

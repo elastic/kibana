@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
-import { Serializable } from '@kbn/utility-types';
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { type Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import { type Serializable } from '@kbn/utility-types';
+import { type SavedObjectMigrationFn, type SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { flowRight, mapValues } from 'lodash';
-import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { type MigrateFunction, type MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import {
-  CanvasElement,
-  CanvasTemplateElement,
-  CanvasTemplate,
-  CustomElement,
-  CustomElementContent,
-  CustomElementNode,
+  type CanvasElement,
+  type CanvasTemplateElement,
+  type CanvasTemplate,
+  type CustomElement,
+  type CustomElementContent,
+  type CustomElementNode,
 } from '../../../types';
-import { WorkpadAttributes } from '../../routes/workpad/workpad_attributes';
-import { CanvasSavedObjectTypeMigrationsDeps } from './types';
+import { type WorkpadAttributes } from '../../routes/workpad/workpad_attributes';
+import { type CanvasSavedObjectTypeMigrationsDeps } from './types';
 
 type ToSerializable<Type> = {
   [K in keyof Type]: Type[K] extends unknown[]

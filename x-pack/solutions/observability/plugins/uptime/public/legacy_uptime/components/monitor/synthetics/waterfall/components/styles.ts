@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
-import { StyledComponent } from 'styled-components';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
+import { type FunctionComponent } from 'react';
+import { type StyledComponent } from 'styled-components';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, type EuiPanelProps } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { euiStyled, type EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {

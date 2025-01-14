@@ -14,8 +14,8 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  Pagination,
-  EuiTableSortingType,
+  type Pagination,
+  type EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

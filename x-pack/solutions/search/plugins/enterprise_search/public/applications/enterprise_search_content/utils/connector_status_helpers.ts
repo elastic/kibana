@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { Connector, ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
+import { type Connector, ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 
 export const isLastSeenOld = (connector: Connector): boolean =>
   connector.last_seen

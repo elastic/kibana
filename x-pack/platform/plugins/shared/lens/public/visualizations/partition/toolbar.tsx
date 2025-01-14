@@ -16,17 +16,17 @@ import {
   EuiFieldNumber,
   EuiButtonGroup,
   EuiFlexItem,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { LegendValue, Position } from '@elastic/charts';
+import { LegendValue, type Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { EmptySizeRatios, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { EmptySizeRatios, type PieVisualizationState, type SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay, NumberDisplay } from '../../../common/constants';
-import { VisualizationToolbarProps } from '../../types';
+import { type VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getLegendStats } from './render_helpers';

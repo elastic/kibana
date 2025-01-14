@@ -6,17 +6,17 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { FunctionComponent, useState } from 'react';
+import React, { type FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, type EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
 import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
-import { ElementSpec } from '../../../../types';
+import { type ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
-import { ClosePopoverFn } from '../../popover';
+import { type ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
 
 interface CategorizedElementLists {

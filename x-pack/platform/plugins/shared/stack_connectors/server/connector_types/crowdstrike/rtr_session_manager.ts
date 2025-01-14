@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdstrikeInitRTRResponseSchema } from '../../../common/crowdstrike/schema';
 import {
-  CrowdstrikeInitRTRParams,
-  RelaxedCrowdstrikeBaseApiResponse,
+  type CrowdstrikeInitRTRParams,
+  type RelaxedCrowdstrikeBaseApiResponse,
 } from '../../../common/crowdstrike/types';
 
 export class CrowdStrikeSessionManager {

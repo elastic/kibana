@@ -12,8 +12,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
-  XYBrushEvent,
+  type TickFormatter,
+  type XYBrushEvent,
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -33,7 +33,7 @@ import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
-import { Series } from '../../../../../typings';
+import { type Series } from '../../../../../typings';
 import { ChartContainer } from '../../chart_container/chart_container';
 import { StyledStat } from '../../styled_stat/styled_stat';
 import { onBrushEnd } from '../../../helpers/on_brush_end';

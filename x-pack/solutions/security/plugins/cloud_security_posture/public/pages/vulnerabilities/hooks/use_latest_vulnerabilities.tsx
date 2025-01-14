@@ -9,19 +9,19 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { number } from 'io-ts';
 import {
-  SearchRequest,
-  SearchResponse,
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
+  type SearchRequest,
+  type SearchResponse,
+  type AggregationsMultiBucketAggregateBase,
+  type AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
+import { type EsHitRecord } from '@kbn/discover-utils/types';
 import {
   MAX_FINDINGS_TO_LOAD,
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import { type FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import {

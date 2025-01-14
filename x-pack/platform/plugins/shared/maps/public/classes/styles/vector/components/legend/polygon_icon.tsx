@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
+import React, { type CSSProperties } from 'react';
 
 export const PolygonIcon = ({ style }: { style: CSSProperties }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" style={style}>

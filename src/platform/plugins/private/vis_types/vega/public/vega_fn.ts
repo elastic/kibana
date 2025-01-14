@@ -10,15 +10,15 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-  Render,
+  type ExecutionContext,
+  type ExpressionFunctionDefinition,
+  type Render,
 } from '@kbn/expressions-plugin/public';
-import { TimeRange, Query } from '@kbn/es-query';
-import { KibanaContext } from '@kbn/data-plugin/public';
-import { VegaVisualizationDependencies } from './plugin';
-import { VegaInspectorAdapters } from './vega_inspector';
-import { VegaParser } from './data_model/vega_parser';
+import { type TimeRange, type Query } from '@kbn/es-query';
+import { type KibanaContext } from '@kbn/data-plugin/public';
+import { type VegaVisualizationDependencies } from './plugin';
+import { type VegaInspectorAdapters } from './vega_inspector';
+import { type VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;

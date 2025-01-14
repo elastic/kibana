@@ -9,39 +9,39 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
 import {
-  AvgIndexPatternColumn,
-  CardinalityIndexPatternColumn,
-  CountIndexPatternColumn,
-  DataType,
-  DateHistogramIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  FiltersIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  FormulaPublicApi,
-  LastValueIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MedianIndexPatternColumn,
-  MinIndexPatternColumn,
-  OperationMetadata,
-  OperationType,
-  PercentileIndexPatternColumn,
-  PersistedIndexPatternLayer,
-  RangeIndexPatternColumn,
-  SeriesType,
-  SumIndexPatternColumn,
-  TermsIndexPatternColumn,
-  TypedLensByValueInput,
-  XYCurveType,
-  XYState,
-  YAxisMode,
-  HeatmapVisualizationState,
-  MetricState,
+  type AvgIndexPatternColumn,
+  type CardinalityIndexPatternColumn,
+  type CountIndexPatternColumn,
+  type DataType,
+  type DateHistogramIndexPatternColumn,
+  type FieldBasedIndexPatternColumn,
+  type FiltersIndexPatternColumn,
+  type FormulaIndexPatternColumn,
+  type FormulaPublicApi,
+  type LastValueIndexPatternColumn,
+  type MaxIndexPatternColumn,
+  type MedianIndexPatternColumn,
+  type MinIndexPatternColumn,
+  type OperationMetadata,
+  type OperationType,
+  type PercentileIndexPatternColumn,
+  type PersistedIndexPatternLayer,
+  type RangeIndexPatternColumn,
+  type SeriesType,
+  type SumIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type TypedLensByValueInput,
+  type XYCurveType,
+  type XYState,
+  type YAxisMode,
+  type HeatmapVisualizationState,
+  type MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { type PersistableFilter } from '@kbn/lens-plugin/common';
+import { type DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -57,14 +57,14 @@ import {
   USE_BREAK_DOWN_COLUMN,
 } from './constants';
 import {
-  ColumnFilter,
-  MetricOption,
-  ParamFilter,
-  SeriesConfig,
-  SupportedOperations,
-  TermColumnParamsOrderBy,
-  UrlFilter,
-  URLReportDefinition,
+  type ColumnFilter,
+  type MetricOption,
+  type ParamFilter,
+  type SeriesConfig,
+  type SupportedOperations,
+  type TermColumnParamsOrderBy,
+  type UrlFilter,
+  type URLReportDefinition,
 } from '../types';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';

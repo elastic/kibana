@@ -8,8 +8,8 @@
  */
 
 import { extractTimeFilter } from './extract_time_filter';
-import { Filter, buildQueryFilter, buildRangeFilter, buildPhraseFilter } from '../build_filters';
-import { DataViewBase, DataViewFieldBase } from '../../es_query';
+import { type Filter, buildQueryFilter, buildRangeFilter, buildPhraseFilter } from '../build_filters';
+import { type DataViewBase, type DataViewFieldBase } from '../../es_query';
 
 describe('filter manager utilities', () => {
   let indexPattern: DataViewBase;

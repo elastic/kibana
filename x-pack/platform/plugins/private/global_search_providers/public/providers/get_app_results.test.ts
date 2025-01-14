@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AppStatus, PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { AppStatus, type PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import {
-  AppLink,
+  type AppLink,
   appToResult,
   getAppResults,
   scoreApp,

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import {
-  ObservabilityOnboardingLocatorParams,
+  type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';

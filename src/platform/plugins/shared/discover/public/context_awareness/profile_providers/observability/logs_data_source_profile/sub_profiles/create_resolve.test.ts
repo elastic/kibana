@@ -11,8 +11,8 @@ import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import {
   DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
+  type DataSourceProfileProviderParams,
+  type RootContext,
   SolutionType,
 } from '../../../../profiles';
 import { createResolve } from './create_resolve';

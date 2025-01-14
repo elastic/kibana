@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Ref } from 'react';
-import { ShapeDrawer, ShapeRef, ShapeDrawerComponentProps } from '../reusable';
+import React, { type Ref } from 'react';
+import { ShapeDrawer, type ShapeRef, type ShapeDrawerComponentProps } from '../reusable';
 import { getShape } from './shapes';
 
 export const ProgressDrawerComponent = React.forwardRef(

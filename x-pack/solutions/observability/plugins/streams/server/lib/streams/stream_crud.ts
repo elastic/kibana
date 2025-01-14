@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { type Logger } from '@kbn/logging';
+import { type IngestPipeline, type IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import { type IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import {
-  IngestStreamDefinition,
-  WiredStreamDefinition,
-  StreamDefinition,
-  ListStreamsResponse,
+  type IngestStreamDefinition,
+  type WiredStreamDefinition,
+  type StreamDefinition,
+  type ListStreamsResponse,
   isWiredStream,
-  FieldDefinition,
-  StreamLifecycle,
-  ReadStreamDefinition,
-  IngestReadStreamDefinition,
+  type FieldDefinition,
+  type StreamLifecycle,
+  type ReadStreamDefinition,
+  type IngestReadStreamDefinition,
   isWiredReadStream,
-  WiredReadStreamDefinition,
+  type WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_INDEX } from '../../../common/constants';
@@ -49,7 +49,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
-import { AssetClient } from './assets/asset_client';
+import { type AssetClient } from './assets/asset_client';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;

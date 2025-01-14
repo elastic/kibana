@@ -6,7 +6,7 @@
  */
 
 import { setupEnvironment } from '../../helpers';
-import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { type OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 const DEPLOYMENT_URL = 'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63';
 

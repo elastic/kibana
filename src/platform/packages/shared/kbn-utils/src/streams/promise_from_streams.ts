@@ -24,7 +24,7 @@
  *  @return {Promise<any>}
  */
 
-import { pipeline, Writable, Readable } from 'stream';
+import { pipeline, Writable, type Readable } from 'stream';
 
 function isReadable(stream: Readable | Writable): stream is Readable {
   return 'read' in stream && typeof stream.read === 'function';

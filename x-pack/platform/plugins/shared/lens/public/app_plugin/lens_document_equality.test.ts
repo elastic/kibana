@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
-import { LensDocument } from '../persistence/saved_object_store';
+import { type LensDocument } from '../persistence/saved_object_store';
 import {
-  AnnotationGroups,
-  Datasource,
-  DatasourceMap,
-  Visualization,
-  VisualizationMap,
+  type AnnotationGroups,
+  type Datasource,
+  type DatasourceMap,
+  type Visualization,
+  type VisualizationMap,
 } from '../types';
 
 const visualizationType = 'lnsSomeVis';

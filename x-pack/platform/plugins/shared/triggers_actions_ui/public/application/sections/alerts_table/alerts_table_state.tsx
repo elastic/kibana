@@ -8,16 +8,16 @@
 import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect, memo } from 'react';
 import { isEmpty } from 'lodash';
 import {
-  EuiDataGridColumn,
+  type EuiDataGridColumn,
   EuiProgress,
-  EuiDataGridSorting,
+  type EuiDataGridSorting,
   EuiEmptyPrompt,
-  EuiDataGridProps,
-  EuiDataGridToolBarVisibilityOptions,
+  type EuiDataGridProps,
+  type EuiDataGridToolBarVisibilityOptions,
   EuiButton,
   EuiCode,
   EuiCopy,
-  EuiDataGridControlColumn,
+  type EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
@@ -38,13 +38,13 @@ import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
 import {
-  Alert,
-  Alerts,
-  AlertsTableConfigurationRegistry,
-  AlertsTableConfigurationRegistryContract,
-  AlertsTableProps,
-  RowSelectionState,
-  TableUpdateHandlerArgs,
+  type Alert,
+  type Alerts,
+  type AlertsTableConfigurationRegistry,
+  type AlertsTableConfigurationRegistryContract,
+  type AlertsTableProps,
+  type RowSelectionState,
+  type TableUpdateHandlerArgs,
 } from '../../../types';
 import {
   ALERTS_TABLE_CONF_ERROR_MESSAGE,
@@ -59,9 +59,9 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
-import { CasesService } from './types';
+import { type CasesService } from './types';
 import { AlertsTableContext } from './contexts/alerts_table_context';
-import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
+import { ErrorBoundary, type FallbackComponent } from '../common/components/error_boundary';
 
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;

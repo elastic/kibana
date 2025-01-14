@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 
 export const createInferenceConnectorMock = (
   parts: Partial<InferenceConnector> = {}

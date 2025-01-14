@@ -22,7 +22,7 @@ import {
 import React from 'react';
 import { pick } from 'lodash';
 import { Query } from '@elastic/eui';
-import { ShallowWrapper } from 'enzyme';
+import { type ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
   httpServiceMock,
@@ -37,11 +37,11 @@ import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
   SavedObjectsTable,
-  SavedObjectsTableProps,
-  SavedObjectsTableState,
+  type SavedObjectsTableProps,
+  type SavedObjectsTableState,
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
-import { SavedObjectWithMetadata } from '../../types';
+import { type SavedObjectWithMetadata } from '../../types';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 const convertType = (type: string): SavedObjectManagementTypeInfo => ({

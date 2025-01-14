@@ -9,23 +9,23 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, type Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  IUnifiedSearchPluginServices,
-  UnifiedSearchPublicPluginStart,
+  type IUnifiedSearchPluginServices,
+  type UnifiedSearchPublicPluginStart,
 } from '@kbn/unified-search-plugin/public/types';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { type ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
-import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
+import { type IndexPatternSavedObject, type IndexPatternProvider, type WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
-  GraphState,
+  type GraphState,
   datasourceSelector,
   requestDatasource,
-  IndexpatternDatasource,
+  type IndexpatternDatasource,
   submitSearch,
   selectedFieldsSelector,
 } from '../state_management';

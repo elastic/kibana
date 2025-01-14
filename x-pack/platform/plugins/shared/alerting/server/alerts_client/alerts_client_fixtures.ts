@@ -6,13 +6,13 @@
  */
 
 import {
-  GetSummarizedAlertsParams,
-  GetMaintenanceWindowScopedQueryAlertsParams,
-  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
+  type GetSummarizedAlertsParams,
+  type GetMaintenanceWindowScopedQueryAlertsParams,
+  type UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { AlertRuleData } from '.';
-import { AlertsFilter } from '../types';
+import { type AlertRuleData } from '.';
+import { type AlertsFilter } from '../types';
 
 export const alertRuleData: AlertRuleData = {
   consumer: 'bar',

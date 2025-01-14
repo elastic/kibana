@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { type RouteDependencies } from '../../plugin';
 
 const querySchema = {
   start: schema.maybe(schema.string()), // Date string, expected format 'YYYY-MM-DD'

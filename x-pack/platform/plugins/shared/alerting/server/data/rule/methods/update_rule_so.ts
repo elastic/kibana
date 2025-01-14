@@ -6,12 +6,12 @@
  */
 
 import {
-  SavedObjectsClientContract,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
+  type SavedObjectsClientContract,
+  type SavedObjectsUpdateOptions,
+  type SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RawRule } from '../../../types';
+import { type RawRule } from '../../../types';
 
 export interface UpdateRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;

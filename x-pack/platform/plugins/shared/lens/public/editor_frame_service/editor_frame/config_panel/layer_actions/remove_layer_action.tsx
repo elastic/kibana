@@ -10,7 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiCheckboxProps,
+  type EuiCheckboxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModalBody,

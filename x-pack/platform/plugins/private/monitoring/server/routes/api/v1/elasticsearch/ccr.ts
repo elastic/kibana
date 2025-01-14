@@ -13,23 +13,23 @@ import {
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
-  PostElasticsearchCcrResponsePayload,
+  type PostElasticsearchCcrResponsePayload,
   postElasticsearchCcrResponsePayloadRT,
-  CcrBucket,
-  CcrFullStats,
-  CcrShard,
-  CcrShardBucket,
+  type CcrBucket,
+  type CcrFullStats,
+  type CcrShard,
+  type CcrShardBucket,
 } from '../../../../../common/http_api/elasticsearch';
-import { TimeRange } from '../../../../../common/http_api/shared';
+import { type TimeRange } from '../../../../../common/http_api/shared';
 import {
-  ElasticsearchLegacySource,
-  ElasticsearchMetricbeatSource,
-  ElasticsearchResponse,
+  type ElasticsearchLegacySource,
+  type ElasticsearchMetricbeatSource,
+  type ElasticsearchResponse,
 } from '../../../../../common/types/es';
-import { MonitoringConfig } from '../../../../config';
+import { type MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { MonitoringCore } from '../../../../types';
+import { type MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {

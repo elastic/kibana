@@ -21,7 +21,7 @@ import {
   generateSchemasTask,
   checkCompatibleTypesTask,
   writeToFileTask,
-  TaskContext,
+  type TaskContext,
 } from '../tools/tasks';
 
 export function runTelemetryCheck() {

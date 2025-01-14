@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiLink,
   EuiButton,
-  EuiButtonProps,
-  EuiButtonEmptyProps,
-  EuiLinkAnchorProps,
+  type EuiButtonProps,
+  type EuiButtonEmptyProps,
+  type EuiLinkAnchorProps,
   EuiButtonEmpty,
 } from '@elastic/eui';
 

@@ -8,9 +8,9 @@
  */
 
 import {
-  AppMenuActionPrimary,
-  AppMenuActionSecondary,
-  AppMenuActionSubmenuCustom,
+  type AppMenuActionPrimary,
+  type AppMenuActionSecondary,
+  type AppMenuActionSubmenuCustom,
   AppMenuActionType,
 } from '@kbn/discover-utils';
 import { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';

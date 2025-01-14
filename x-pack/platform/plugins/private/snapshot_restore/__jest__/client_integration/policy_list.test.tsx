@@ -7,7 +7,7 @@
 
 import { setupEnvironment } from './helpers';
 import { getPolicy } from '../../test/fixtures';
-import { setupPoliciesListPage, PoliciesListTestBed } from './helpers/policy_list.helpers';
+import { setupPoliciesListPage, type PoliciesListTestBed } from './helpers/policy_list.helpers';
 
 const POLICY_WITH_GLOBAL_STATE_AND_FEATURES = getPolicy({
   name: 'with_state',

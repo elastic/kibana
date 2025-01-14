@@ -7,10 +7,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
+import { EuiStepsHorizontal, type EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
 import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';
-import { ClusterPayload } from '../../../../common/lib/cluster_serialization';
+import { type ClusterPayload } from '../../../../common/lib/cluster_serialization';
 
 const CONFIGURE_CONNECTION = 1;
 const SETUP_TRUST = 2;

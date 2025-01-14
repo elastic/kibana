@@ -7,15 +7,15 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Query, TimeRange, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { type Query, type TimeRange, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { memo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { CreateSLOForm } from '../../types';
+import { type CreateSLOForm } from '../../types';
 import { OptionalText } from './optional_text';
-import { SearchBarProps } from './query_builder';
+import { type SearchBarProps } from './query_builder';
 
 export const QuerySearchBar = memo(
   ({

@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
-  EuiButtonIconProps,
-  EuiRangeProps,
+  type EuiButtonIconProps,
+  type EuiRangeProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
 import type { ProcessStartMarker, ProcessEvent } from '../../../common';

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import {
-  FilteringConfig,
-  FilteringRule,
-  FilteringValidation,
+  type FilteringConfig,
+  type FilteringRule,
+  type FilteringValidation,
   FilteringValidationState,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';
 
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import {
   ConnectorFilteringApiLogic,
-  PutConnectorFilteringArgs,
-  PutConnectorFilteringResponse,
+  type PutConnectorFilteringArgs,
+  type PutConnectorFilteringResponse,
 } from '../../../../api/connector/update_connector_filtering_api_logic';
 import {
   ConnectorFilteringDraftApiLogic,
-  PutConnectorFilteringDraftArgs,
-  PutConnectorFilteringDraftResponse,
+  type PutConnectorFilteringDraftArgs,
+  type PutConnectorFilteringDraftResponse,
 } from '../../../../api/connector/update_connector_filtering_draft_api_logic';
 import {
   FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
+  type FetchIndexApiParams,
+  type FetchIndexApiResponse,
 } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 

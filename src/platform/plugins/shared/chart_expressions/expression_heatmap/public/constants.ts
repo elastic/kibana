@@ -8,7 +8,7 @@
  */
 
 import {
-  RequiredPaletteParamTypes,
+  type RequiredPaletteParamTypes,
   FIXED_PROGRESSION,
   DEFAULT_CONTINUITY,
   DEFAULT_MIN_STOP,

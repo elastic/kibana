@@ -8,14 +8,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { DataPluginRouter } from '../types';
+import { type DataPluginRouter } from '../types';
 import {
-  SearchSessionRestResponse,
-  SearchSessionStatusRestResponse,
-  SearchSessionsFindRestResponse,
-  SearchSessionsUpdateRestResponse,
+  type SearchSessionRestResponse,
+  type SearchSessionStatusRestResponse,
+  type SearchSessionsFindRestResponse,
+  type SearchSessionsUpdateRestResponse,
 } from './response_types';
 import {
   searchSessionSchema,

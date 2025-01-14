@@ -25,26 +25,26 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
-import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
+import { useDragDropContext, type DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { type ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
-  FramePublicAPI,
+  type FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensEditEvent,
-  VisualizationMap,
-  DatasourceMap,
-  Suggestion,
-  DatasourceLayers,
-  UserMessage,
-  UserMessagesGetter,
-  AddUserMessages,
-  VisualizationDisplayOptions,
+  type VisualizationMap,
+  type DatasourceMap,
+  type Suggestion,
+  type DatasourceLayers,
+  type UserMessage,
+  type UserMessagesGetter,
+  type AddUserMessages,
+  type VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -68,9 +68,9 @@ import {
   selectDatasourceLayers,
   applyChanges,
   selectChangesApplied,
-  VisualizationState,
-  DatasourceStates,
-  DataViewsState,
+  type VisualizationState,
+  type DatasourceStates,
+  type DataViewsState,
   selectExecutionContextSearch,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';

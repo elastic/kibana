@@ -6,7 +6,7 @@
  */
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
+  type EuiButtonIconProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiIcon,
@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { type Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { BurnRateRuleParams } from '../../../typings';
+import { type BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 
 interface Props {

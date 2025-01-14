@@ -9,7 +9,7 @@
 
 import {
   createSessionStorageStateStorage,
-  ISessionStorageStateStorage,
+  type ISessionStorageStateStorage,
 } from './create_session_storage_state_storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 

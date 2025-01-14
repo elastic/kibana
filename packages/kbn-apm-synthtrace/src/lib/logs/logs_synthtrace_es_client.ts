@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
-import { pipeline, Readable } from 'stream';
-import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
-import { IngestProcessorContainer, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { ValuesType } from 'utility-types';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { type Client, type estypes } from '@elastic/elasticsearch';
+import { pipeline, type Readable } from 'stream';
+import { type LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
+import { type IngestProcessorContainer, type MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { type ValuesType } from 'utility-types';
+import { SynthtraceEsClient, type SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { Logger } from '../utils/create_logger';
-import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
+import { type Logger } from '../utils/create_logger';
+import { indexTemplates, type IndexTemplateName } from './custom_logsdb_index_templates';
 import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
 
 export const LogsIndex = 'logs';

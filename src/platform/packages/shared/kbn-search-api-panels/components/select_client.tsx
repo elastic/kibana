@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanelProps,
+  type EuiPanelProps,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

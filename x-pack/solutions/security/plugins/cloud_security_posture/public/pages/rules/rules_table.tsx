@@ -6,17 +6,17 @@
  */
 import React, { useEffect, useState } from 'react';
 import {
-  Criteria,
+  type Criteria,
   EuiButtonEmpty,
-  EuiTableFieldDataColumnType,
+  type EuiTableFieldDataColumnType,
   EuiBasicTable,
-  EuiBasicTableProps,
+  type EuiBasicTableProps,
   useEuiTheme,
   EuiSwitch,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTableSortingType,
+  type EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';

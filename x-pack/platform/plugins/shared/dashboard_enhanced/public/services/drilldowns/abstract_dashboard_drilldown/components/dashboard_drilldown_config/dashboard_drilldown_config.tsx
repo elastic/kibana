@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   withSuspense,
   DashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
 import { txtChooseDestinationDashboard } from './i18n';
-import { Config as DrilldownConfig } from '../../types';
+import { type Config as DrilldownConfig } from '../../types';
 
 const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 

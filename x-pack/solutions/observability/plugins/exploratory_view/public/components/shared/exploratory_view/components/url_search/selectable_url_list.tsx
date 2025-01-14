@@ -6,12 +6,12 @@
  */
 
 import React, {
-  SetStateAction,
+  type SetStateAction,
   useRef,
   useState,
-  KeyboardEvent,
-  ReactNode,
-  FormEventHandler,
+  type KeyboardEvent,
+  type ReactNode,
+  type FormEventHandler,
 } from 'react';
 import {
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import {
   EuiPopoverFooter,
   EuiButton,
   EuiButtonIcon,
-  EuiSelectableOption,
+  type EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useEvent from 'react-use/lib/useEvent';

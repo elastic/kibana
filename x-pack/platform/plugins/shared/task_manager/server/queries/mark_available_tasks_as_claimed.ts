@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
+import { type TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskStatus, TaskPriority, type ConcreteTaskInstance } from '../task';
 import {
-  ScriptBasedSortClause,
-  ScriptClause,
+  type ScriptBasedSortClause,
+  type ScriptClause,
   mustBeAllOf,
-  MustCondition,
-  MustNotCondition,
+  type MustCondition,
+  type MustNotCondition,
 } from './query_clauses';
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {

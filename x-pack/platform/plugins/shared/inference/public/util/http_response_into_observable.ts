@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { catchError, map, OperatorFunction, pipe, switchMap, tap, throwError } from 'rxjs';
+import { catchError, map, type OperatorFunction, pipe, switchMap, tap, throwError } from 'rxjs';
 import {
   createInferenceInternalError,
   InferenceTaskError,
-  InferenceTaskErrorEvent,
-  InferenceTaskEvent,
+  type InferenceTaskErrorEvent,
+  type InferenceTaskEvent,
   InferenceTaskEventType,
 } from '@kbn/inference-common';
 import {
   createObservableFromHttpResponse,
-  StreamedHttpResponse,
+  type StreamedHttpResponse,
 } from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<

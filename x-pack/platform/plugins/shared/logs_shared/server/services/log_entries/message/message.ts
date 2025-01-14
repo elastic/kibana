@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { JsonArray, JsonValue } from '@kbn/utility-types';
-import { LogMessagePart } from '../../../../common/log_entry';
+import { type JsonArray, type JsonValue } from '@kbn/utility-types';
+import { type LogMessagePart } from '../../../../common/log_entry';
 import {
-  LogMessageFormattingCondition,
-  LogMessageFormattingFieldValueConditionValue,
-  LogMessageFormattingInstruction,
-  LogMessageFormattingRule,
+  type LogMessageFormattingCondition,
+  type LogMessageFormattingFieldValueConditionValue,
+  type LogMessageFormattingInstruction,
+  type LogMessageFormattingRule,
 } from './rule_types';
 
 export function compileFormattingRules(

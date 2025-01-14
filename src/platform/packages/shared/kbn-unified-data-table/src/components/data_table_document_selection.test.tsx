@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
-  DataTableCompareToolbarBtn,
+  type DataTableCompareToolbarBtn,
   DataTableDocumentToolbarBtn,
   SelectButton,
   getSelectAllButton,

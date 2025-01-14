@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 
 import { Embeddable } from './embeddable';
-import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+import { type EmbeddableInput, type EmbeddableOutput } from './i_embeddable';
 
 import './error_embeddable.scss';
 

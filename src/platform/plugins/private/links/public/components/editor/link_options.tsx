@@ -11,24 +11,24 @@ import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 import {
-  DashboardDrilldownOptions,
+  type DashboardDrilldownOptions,
   DashboardDrilldownOptionsComponent,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
 import {
-  UrlDrilldownOptions,
+  type UrlDrilldownOptions,
   UrlDrilldownOptionsComponent,
   DEFAULT_URL_DRILLDOWN_OPTIONS,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import {
-  LinkType,
+  type LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinkOptions,
+  type LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import { UnorderedLink } from '../../editor/open_link_editor_flyout';
+import { type UnorderedLink } from '../../editor/open_link_editor_flyout';
 
 export const LinkOptionsComponent = ({
   link,

@@ -8,7 +8,7 @@
  */
 
 import webpack from 'webpack';
-import { parseBundles, BundleRemotes, WorkerConfig } from '@kbn/optimizer/src/common';
+import { parseBundles, BundleRemotes, type WorkerConfig } from '@kbn/optimizer/src/common';
 import { getWebpackConfig } from '@kbn/optimizer/src/worker/webpack.config';
 
 const send = process.send;

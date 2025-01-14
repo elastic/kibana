@@ -10,13 +10,13 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
-  GroupingProps,
-  GroupOption,
-  GroupPanelRenderer,
-  GetGroupStats,
-  NamedAggregation,
+  type GroupingProps,
+  type GroupOption,
+  type GroupPanelRenderer,
+  type GetGroupStats,
+  type NamedAggregation,
 } from '@kbn/grouping/src';
-import { ReactElement } from 'react';
+import { type ReactElement } from 'react';
 
 export interface GroupModel {
   activeGroups: string[];

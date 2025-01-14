@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent } from 'react';
+import React, { type MouseEvent } from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
-import { ShallowWrapper } from 'enzyme';
+import { type ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { DataViewListItemEnhanced, DataViewsList, DataViewsListProps } from './dataview_list';
+import { type DataViewListItemEnhanced, DataViewsList, type DataViewsListProps } from './dataview_list';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 function getDataViewPickerList(instance: ShallowWrapper) {

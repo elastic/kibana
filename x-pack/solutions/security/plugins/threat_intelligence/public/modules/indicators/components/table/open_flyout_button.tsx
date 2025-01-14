@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { type VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { Indicator } from '../../../../../common/types/indicator';
+import { type Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 

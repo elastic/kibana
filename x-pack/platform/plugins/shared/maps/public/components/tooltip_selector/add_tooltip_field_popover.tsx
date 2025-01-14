@@ -14,7 +14,7 @@ import {
   EuiPopoverTitle,
   EuiButtonEmpty,
   EuiSelectable,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiButton,
   EuiSpacer,
   EuiTextAlign,

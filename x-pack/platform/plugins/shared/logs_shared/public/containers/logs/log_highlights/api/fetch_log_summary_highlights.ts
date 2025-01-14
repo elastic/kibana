@@ -10,7 +10,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
-  LogEntriesSummaryHighlightsRequest,
+  type LogEntriesSummaryHighlightsRequest,
   logEntriesSummaryHighlightsRequestRT,
   logEntriesSummaryHighlightsResponseRT,
 } from '../../../../../common/http_api';

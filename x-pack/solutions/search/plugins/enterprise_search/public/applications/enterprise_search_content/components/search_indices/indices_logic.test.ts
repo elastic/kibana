@@ -19,7 +19,7 @@ import {
 } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { type HttpError, Status } from '../../../../../common/types/api';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 

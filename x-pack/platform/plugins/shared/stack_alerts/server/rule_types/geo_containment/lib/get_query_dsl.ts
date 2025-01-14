@@ -9,8 +9,8 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-  DataViewBase,
-  Query,
+  type DataViewBase,
+  type Query,
 } from '@kbn/es-query';
 
 export const getQueryDsl = (query: Query, indexPattern?: DataViewBase) => {

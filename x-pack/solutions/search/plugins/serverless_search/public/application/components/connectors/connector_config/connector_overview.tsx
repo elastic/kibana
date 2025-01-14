@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer, Pagination } from '@elastic/eui';
+import { EuiButton, EuiSpacer, type Pagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  Connector,
+  type Connector,
   ConnectorStatus,
   pageToPagination,
   SyncJobsTable,

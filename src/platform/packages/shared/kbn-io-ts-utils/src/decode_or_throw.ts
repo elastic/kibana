@@ -10,7 +10,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
+import { type Context, type Errors, IntersectionType, type Type, UnionType, type ValidationError } from 'io-ts';
 
 type ErrorFactory = (message: string) => Error;
 

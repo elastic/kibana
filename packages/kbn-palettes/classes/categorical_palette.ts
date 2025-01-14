@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Optional } from 'utility-types';
-import { KbnBasePalette, KbnBasePaletteConfig } from './palette';
-import { IKbnPalette } from './types';
+import { type Optional } from 'utility-types';
+import { KbnBasePalette, type KbnBasePaletteConfig } from './palette';
+import { type IKbnPalette } from './types';
 
 export interface KbnCategoricalPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   colors: string[];

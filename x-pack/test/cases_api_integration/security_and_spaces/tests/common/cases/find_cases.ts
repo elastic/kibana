@@ -17,13 +17,13 @@ import {
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  Case,
+  type Case,
   CaseSeverity,
   CaseStatuses,
   AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { type FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,

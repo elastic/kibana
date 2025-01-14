@@ -13,12 +13,12 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import {
-  ActionExecutionContext,
-  UiActionsStart,
-  VisualizeFieldContext,
+  type ActionExecutionContext,
+  type UiActionsStart,
+  type VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import { type FormBasedPersistedState, type FormBasedPrivateState, type FormBasedLayer } from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';

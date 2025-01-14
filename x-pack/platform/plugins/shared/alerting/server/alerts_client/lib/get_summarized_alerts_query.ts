@@ -6,12 +6,12 @@
  */
 
 import {
-  QueryDslQueryContainer,
-  SearchRequest,
-  SearchTotalHits,
-  AggregationsAggregationContainer,
+  type QueryDslQueryContainer,
+  type SearchRequest,
+  type SearchTotalHits,
+  type AggregationsAggregationContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
+import { type BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -23,21 +23,21 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AlertsFilter, ISO_WEEKDAYS, RuleAlertData } from '../../../common';
+import { type Alert } from '@kbn/alerts-as-data-utils';
+import { type AlertsFilter, ISO_WEEKDAYS, type RuleAlertData } from '../../../common';
 import {
-  GetLifecycleAlertsQueryByExecutionUuidParams,
-  GetLifecycleAlertsQueryByTimeRangeParams,
-  GetAlertsQueryParams,
-  GetQueryByExecutionUuidParams,
-  GetQueryByTimeRangeParams,
-  GetQueryByScopedQueriesParams,
-  GetMaintenanceWindowAlertsQueryParams,
-  ScopedQueryAggregationResult,
-  SearchResult,
+  type GetLifecycleAlertsQueryByExecutionUuidParams,
+  type GetLifecycleAlertsQueryByTimeRangeParams,
+  type GetAlertsQueryParams,
+  type GetQueryByExecutionUuidParams,
+  type GetQueryByTimeRangeParams,
+  type GetQueryByScopedQueriesParams,
+  type GetMaintenanceWindowAlertsQueryParams,
+  type ScopedQueryAggregationResult,
+  type SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
+import { type SummarizedAlertsChunk, type ScopedQueryAlerts } from '../..';
+import { type FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 

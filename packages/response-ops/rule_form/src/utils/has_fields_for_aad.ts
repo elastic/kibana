@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../common/types';
+import { AlertConsumers, type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { type RuleTypeWithDescription } from '../common/types';
 import { DEFAULT_VALID_CONSUMERS, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 
 export const hasFieldsForAad = ({

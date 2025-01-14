@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+import { type SavedObjectTaggingOssPluginSetup, type SavedObjectTaggingOssPluginStart } from './types';
 
 const createSetupMock = (): jest.Mocked<SavedObjectTaggingOssPluginSetup> => {
   const mock = {

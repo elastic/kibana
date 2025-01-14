@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Case } from '../../../types';
+import { type Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
+import { type ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { type Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

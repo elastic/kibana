@@ -8,7 +8,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { type PropsWithChildren, type ReactElement, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -20,7 +20,7 @@ import type {
   LensEmbeddableOutput,
   LensSuggestionsApi,
 } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -28,17 +28,17 @@ import {
 } from '@kbn/resizable-layout';
 import { Chart, checkChartAvailability } from '../chart';
 import {
-  UnifiedHistogramVisContext,
-  UnifiedHistogramBreakdownContext,
-  UnifiedHistogramChartContext,
-  UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramInput$,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramServices,
-  UnifiedHistogramSuggestionContext,
-  UnifiedHistogramExternalVisContextStatus,
+  type UnifiedHistogramVisContext,
+  type UnifiedHistogramBreakdownContext,
+  type UnifiedHistogramChartContext,
+  type UnifiedHistogramChartLoadEvent,
+  type UnifiedHistogramFetchStatus,
+  type UnifiedHistogramHitsContext,
+  type UnifiedHistogramInput$,
+  type UnifiedHistogramRequestContext,
+  type UnifiedHistogramServices,
+  type UnifiedHistogramSuggestionContext,
+  type UnifiedHistogramExternalVisContextStatus,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { LensVisService } from '../services/lens_vis_service';

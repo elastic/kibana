@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import { type MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
@@ -16,9 +16,9 @@ import {
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
 import {
-  AutoCompleteContext,
+  type AutoCompleteContext,
   type DataAutoCompleteRulesOneOf,
-  ResultTerm,
+  type ResultTerm,
 } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';

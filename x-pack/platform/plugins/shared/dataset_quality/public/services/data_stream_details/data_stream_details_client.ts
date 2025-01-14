@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import { type HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  CheckAndLoadIntegrationResponse,
+  type CheckAndLoadIntegrationResponse,
   checkAndLoadIntegrationResponseRt,
-  DataStreamRolloverResponse,
+  type DataStreamRolloverResponse,
   dataStreamRolloverResponseRt,
-  DegradedFieldAnalysis,
+  type DegradedFieldAnalysis,
   degradedFieldAnalysisRt,
-  DegradedFieldValues,
+  type DegradedFieldValues,
   degradedFieldValuesRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
-  IntegrationDashboardsResponse,
+  type IntegrationDashboardsResponse,
   integrationDashboardsRT,
-  UpdateFieldLimitResponse,
+  type UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
 } from '../../../common/api_types';
 import {
-  DataStreamDetails,
-  DataStreamSettings,
-  DegradedFieldResponse,
-  GetDataStreamDegradedFieldsParams,
-  GetDataStreamDegradedFieldValuesPathParams,
-  GetDataStreamDetailsParams,
-  GetDataStreamDetailsResponse,
-  GetDataStreamSettingsParams,
-  GetDataStreamSettingsResponse,
-  GetIntegrationDashboardsParams,
+  type DataStreamDetails,
+  type DataStreamSettings,
+  type DegradedFieldResponse,
+  type GetDataStreamDegradedFieldsParams,
+  type GetDataStreamDegradedFieldValuesPathParams,
+  type GetDataStreamDetailsParams,
+  type GetDataStreamDetailsResponse,
+  type GetDataStreamSettingsParams,
+  type GetDataStreamSettingsResponse,
+  type GetIntegrationDashboardsParams,
 } from '../../../common/data_streams_stats';
-import { IDataStreamDetailsClient } from './types';
+import { type IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import {
-  AnalyzeDegradedFieldsParams,
-  CheckAndLoadIntegrationParams,
-  UpdateFieldLimitParams,
+  type AnalyzeDegradedFieldsParams,
+  type CheckAndLoadIntegrationParams,
+  type UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
 

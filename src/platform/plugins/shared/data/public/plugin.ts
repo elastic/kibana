@@ -9,10 +9,10 @@
 
 import './index.scss';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { type PluginInitializerContext, type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
 import {
   Storage,
-  IStorageWrapper,
+  type IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
 import type { ConfigSchema } from '../server/config';
@@ -41,7 +41,7 @@ import {
 } from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
+import { NowProvider, type NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
 
 export class DataPublicPlugin

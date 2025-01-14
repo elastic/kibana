@@ -9,9 +9,9 @@
 
 import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
-import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import { type Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 
-import { ToolbarButtonProps, ToolbarButton } from '../buttons';
+import { type ToolbarButtonProps, ToolbarButton } from '../buttons';
 
 type AllowedButtonProps = Omit<
   ToolbarButtonProps<'standard'>,

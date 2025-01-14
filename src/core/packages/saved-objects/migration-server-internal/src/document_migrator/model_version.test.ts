@@ -8,7 +8,7 @@
  */
 
 import { convertModelVersionBackwardConversionSchemaMock } from './model_version.test.mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsType,
   SavedObjectsModelVersion,
@@ -16,7 +16,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { Transform, TransformType } from './types';
+import { type Transform, TransformType } from './types';
 import {
   getModelVersionTransforms,
   convertModelVersionTransformFn,

@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFilePicker } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { type FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

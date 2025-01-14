@@ -29,14 +29,14 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
-import { ParamEditorProps } from '../..';
+import { type ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
-import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
+import { type ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  LensMathSuggestions,
+  type LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -51,7 +51,7 @@ import {
 import { LANGUAGE_ID } from './math_tokenization';
 
 import './formula.scss';
-import { FormulaIndexPatternColumn } from '../formula';
+import { type FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';

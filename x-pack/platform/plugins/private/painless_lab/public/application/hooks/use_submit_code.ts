@@ -6,11 +6,11 @@
  */
 
 import { useRef, useCallback, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import { type HttpSetup } from '@kbn/core/public';
 import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { Response, PayloadFormat, Payload } from '../types';
+import { type Response, PayloadFormat, type Payload } from '../types';
 import { formatRequestPayload } from '../lib/format';
 
 const DEBOUNCE_MS = 800;

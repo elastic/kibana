@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import {
   UseField,
   JsonEditorField,
-  ValidationFuncArg,
+  type ValidationFuncArg,
   fieldValidators,
-  FieldConfig,
+  type FieldConfig,
 } from '../../../shared_imports';
 
 const { isJsonField } = fieldValidators;

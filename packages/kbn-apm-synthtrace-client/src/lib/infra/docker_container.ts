@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { Entity, Fields } from '../entity';
+import { Entity, type Fields } from '../entity';
 import { Serializable } from '../serializable';
 
 interface DockerContainerDocument extends Fields {

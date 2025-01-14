@@ -6,16 +6,16 @@
  */
 
 import {
-  AggFunctionsMapping,
-  ExpressionFunctionKql,
-  ExpressionFunctionLucene,
+  type AggFunctionsMapping,
+  type ExpressionFunctionKql,
+  type ExpressionFunctionLucene,
 } from '@kbn/data-plugin/public';
 import {
-  AnyExpressionFunctionDefinition,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunctionBuilder,
+  type AnyExpressionFunctionDefinition,
+  type ExpressionAstExpressionBuilder,
+  type ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/common';
-import { Primitive } from 'utility-types';
+import { type Primitive } from 'utility-types';
 
 export function groupByKey<T>(
   items: T[],

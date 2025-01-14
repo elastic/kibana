@@ -6,7 +6,7 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { type Datatable, type DatatableColumn, type ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

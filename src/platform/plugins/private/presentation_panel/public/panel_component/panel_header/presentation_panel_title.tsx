@@ -24,10 +24,10 @@ import {
   repeatWhen,
 } from 'rxjs';
 
-import { ViewMode } from '@kbn/presentation-publishing';
+import { type ViewMode } from '@kbn/presentation-publishing';
 import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
 import {
-  CustomizePanelActionApi,
+  type CustomizePanelActionApi,
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createCustomizationService, DiscoverCustomization } from './customization_service';
+import { createCustomizationService, type DiscoverCustomization } from './customization_service';
 
 describe('createCustomizatonService', () => {
   it('should return a service', () => {

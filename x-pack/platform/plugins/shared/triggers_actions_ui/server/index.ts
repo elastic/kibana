@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from './config';
+import { type PluginConfigDescriptor, type PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, type ConfigSchema } from './config';
 
 export type { PluginStartContract } from './plugin';
 export type { TimeSeriesQuery, CoreQueryParams } from './data';

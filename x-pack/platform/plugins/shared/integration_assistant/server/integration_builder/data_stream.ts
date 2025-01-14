@@ -11,7 +11,7 @@ import { load } from 'js-yaml';
 import type { DataStream } from '../../common';
 import { DEFAULT_CEL_PROGRAM } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
-import { Field } from '../util/samples';
+import { type Field } from '../util/samples';
 
 export function createDataStream(
   packageName: string,

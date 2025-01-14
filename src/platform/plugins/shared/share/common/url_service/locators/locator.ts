@@ -9,7 +9,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DependencyList } from 'react';
+import { type DependencyList } from 'react';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { useLocatorUrl } from './use_locator_url';
 import type {
@@ -21,9 +21,9 @@ import type {
 } from './types';
 import {
   formatSearchParams,
-  FormatSearchParamsOptions,
-  RedirectOptions,
-  GetRedirectUrlOptions,
+  type FormatSearchParamsOptions,
+  type RedirectOptions,
+  type GetRedirectUrlOptions,
   addSpaceIdToPath,
 } from './redirect';
 

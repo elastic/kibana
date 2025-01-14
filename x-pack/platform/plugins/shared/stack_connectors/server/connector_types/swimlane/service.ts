@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import { type Logger } from '@kbn/logging';
 import axios from 'axios';
 
 import {
@@ -13,21 +13,21 @@ import {
   request,
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { getBodyForEventAction } from './helpers';
 import {
-  CreateCommentParams,
-  CreateRecordParams,
-  ExternalService,
-  ExternalServiceCredentials,
-  ExternalServiceIncidentResponse,
-  MappingConfigType,
-  ResponseError,
-  SwimlanePublicConfigurationType,
-  SwimlaneRecordPayload,
-  SwimlaneSecretConfigurationType,
-  UpdateRecordParams,
+  type CreateCommentParams,
+  type CreateRecordParams,
+  type ExternalService,
+  type ExternalServiceCredentials,
+  type ExternalServiceIncidentResponse,
+  type MappingConfigType,
+  type ResponseError,
+  type SwimlanePublicConfigurationType,
+  type SwimlaneRecordPayload,
+  type SwimlaneSecretConfigurationType,
+  type UpdateRecordParams,
 } from './types';
 import * as i18n from './translations';
 

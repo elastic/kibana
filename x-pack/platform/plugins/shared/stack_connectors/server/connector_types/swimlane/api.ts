@@ -6,11 +6,11 @@
  */
 
 import {
-  ExternalServiceIncidentResponse,
-  ExternalServiceApi,
-  Incident,
-  PushToServiceApiHandlerArgs,
-  PushToServiceResponse,
+  type ExternalServiceIncidentResponse,
+  type ExternalServiceApi,
+  type Incident,
+  type PushToServiceApiHandlerArgs,
+  type PushToServiceResponse,
 } from './types';
 
 const pushToServiceHandler = async ({

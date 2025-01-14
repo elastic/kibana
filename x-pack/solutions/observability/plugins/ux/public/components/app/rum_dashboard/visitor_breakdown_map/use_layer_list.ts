@@ -9,18 +9,18 @@ import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
-  EMSFileSourceDescriptor,
-  ESTermSourceDescriptor,
+  type EMSFileSourceDescriptor,
+  type ESTermSourceDescriptor,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
-  LayerDescriptor as BaseLayerDescriptor,
+  type LayerDescriptor as BaseLayerDescriptor,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-  VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  VectorStyleDescriptor,
+  type VectorLayerDescriptor as BaseVectorLayerDescriptor,
+  type VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
 
 import { useMemo } from 'react';

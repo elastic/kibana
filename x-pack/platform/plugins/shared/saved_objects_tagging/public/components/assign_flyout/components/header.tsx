@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { type FC, useMemo } from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ITagsCache } from '../../../services/tags';
+import { type ITagsCache } from '../../../services/tags';
 import { TagList } from '../../base';
 
 export interface AssignFlyoutHeaderProps {

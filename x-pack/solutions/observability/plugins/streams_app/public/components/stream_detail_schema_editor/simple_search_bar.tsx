@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSearchBar, EuiSearchBarProps } from '@elastic/eui';
+import { EuiSearchBar, type EuiSearchBarProps } from '@elastic/eui';
 import React from 'react';
 
 /* Simple search bar that doesn't attempt to integrate with unified search */

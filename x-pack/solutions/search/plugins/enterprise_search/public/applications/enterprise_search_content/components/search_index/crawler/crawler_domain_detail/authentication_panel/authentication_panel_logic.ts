@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { CrawlerAuth } from '../../../../../api/crawler/types';
+import { type CrawlerAuth } from '../../../../../api/crawler/types';
 import { isRawCrawlerAuth, isBasicCrawlerAuth } from '../../../../../api/crawler/utils';
 import {
-  CrawlerDomainDetailActions,
+  type CrawlerDomainDetailActions,
   CrawlerDomainDetailLogic,
 } from '../crawler_domain_detail_logic';
 

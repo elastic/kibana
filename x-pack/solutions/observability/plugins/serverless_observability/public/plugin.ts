@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
 import { createNavigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
-  ServerlessObservabilityPublicSetup,
-  ServerlessObservabilityPublicStart,
-  ServerlessObservabilityPublicSetupDependencies,
-  ServerlessObservabilityPublicStartDependencies,
+  type ServerlessObservabilityPublicSetup,
+  type ServerlessObservabilityPublicStart,
+  type ServerlessObservabilityPublicSetupDependencies,
+  type ServerlessObservabilityPublicStartDependencies,
 } from './types';
 
 export class ServerlessObservabilityPlugin

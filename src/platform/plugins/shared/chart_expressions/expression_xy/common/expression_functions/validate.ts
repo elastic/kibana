@@ -9,18 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { isValidInterval } from '@kbn/data-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { AxisExtentModes, ValueLabelModes, SeriesTypes } from '../constants';
 import {
-  SeriesType,
-  AxisExtentConfigResult,
-  DataLayerConfigResult,
-  CommonXYDataLayerConfigResult,
-  ValueLabelMode,
-  CommonXYDataLayerConfig,
-  YAxisConfigResult,
-  ExtendedDataLayerConfigResult,
-  XAxisConfigResult,
+  type SeriesType,
+  type AxisExtentConfigResult,
+  type DataLayerConfigResult,
+  type CommonXYDataLayerConfigResult,
+  type ValueLabelMode,
+  type CommonXYDataLayerConfig,
+  type YAxisConfigResult,
+  type ExtendedDataLayerConfigResult,
+  type XAxisConfigResult,
 } from '../types';
 import { isTimeChart } from '../helpers';
 

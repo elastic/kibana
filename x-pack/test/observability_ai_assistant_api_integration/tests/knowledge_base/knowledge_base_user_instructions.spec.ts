@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
-import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { type FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   TINY_ELSER,
   clearConversations,
@@ -20,9 +20,9 @@ import {
   deleteKnowledgeBaseModel,
 } from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
-import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
+import { type LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import { User } from '../../common/users/users';
+import { type User } from '../../common/users/users';
 import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

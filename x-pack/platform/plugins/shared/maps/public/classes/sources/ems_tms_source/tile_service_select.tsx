@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
-import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
+import React, { type ChangeEvent, Component } from 'react';
+import { EuiSelect, type EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { type EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 

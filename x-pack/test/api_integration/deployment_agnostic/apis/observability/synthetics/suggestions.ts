@@ -6,16 +6,16 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { type RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
-  MonitorFields,
-  EncryptedSyntheticsSavedMonitor,
-  ProjectMonitorsRequest,
-  PrivateLocation,
+  type MonitorFields,
+  type EncryptedSyntheticsSavedMonitor,
+  type ProjectMonitorsRequest,
+  type PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { type DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 

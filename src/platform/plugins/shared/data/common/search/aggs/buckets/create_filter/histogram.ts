@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
-import { AggTypesDependencies } from '../../agg_types';
-import { IBucketAggConfig } from '../bucket_agg_type';
+import { buildRangeFilter, type RangeFilterParams } from '@kbn/es-query';
+import { type AggTypesDependencies } from '../../agg_types';
+import { type IBucketAggConfig } from '../bucket_agg_type';
 
 /** @internal */
 export const createFilterHistogram = (

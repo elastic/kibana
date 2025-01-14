@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, useMemo } from 'react';
+import React, { type ChangeEvent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import {
   UseField,
-  ValidationConfig,
-  FieldConfig,
+  type ValidationConfig,
+  type FieldConfig,
   getFieldValidityAndErrorMessage,
 } from '../../shared_imports';
-import { IndexPatternConfig } from '../../types';
+import { type IndexPatternConfig } from '../../types';
 import { schema } from '../form_schema';
 
 interface NameFieldProps {

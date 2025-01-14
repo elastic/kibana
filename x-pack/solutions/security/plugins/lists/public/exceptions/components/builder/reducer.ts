@@ -6,11 +6,11 @@
  */
 
 import {
-  ExceptionListItemSchema,
+  type ExceptionListItemSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionsBuilderExceptionItem,
+  type ExceptionsBuilderExceptionItem,
   getDefaultEmptyEntry,
 } from '@kbn/securitysolution-list-utils';
 

@@ -6,20 +6,20 @@
  */
 
 import { uniq, difference } from 'lodash';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { type PublicMethodsOf } from '@kbn/utility-types';
 import {
-  SavedObjectsClientContract,
-  ISavedObjectTypeRegistry,
-  KibanaRequest,
-  SavedObjectsBulkGetObject,
+  type SavedObjectsClientContract,
+  type ISavedObjectTypeRegistry,
+  type KibanaRequest,
+  type SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { type SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
-  AssignableObject,
-  UpdateTagAssignmentsOptions,
-  FindAssignableObjectsOptions,
+  type AssignableObject,
+  type UpdateTagAssignmentsOptions,
+  type FindAssignableObjectsOptions,
   getKey,
-  ObjectReference,
+  type ObjectReference,
 } from '../../../common/assignments';
 import { updateTagReferences } from '../../../common/references';
 import { taggableTypes } from '../../../common/constants';

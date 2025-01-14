@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React, { type MouseEventHandler } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem, logicalCSS, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem, logicalCSS, type UseEuiTheme } from '@elastic/eui';
 
 import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
-import { Vertex } from './types';
+import { type Vertex } from './types';
 
 const spaceContainerStyle = ({ euiTheme }: UseEuiTheme) => css`
   background-color: ${euiTheme.colors.backgroundBasePlain};

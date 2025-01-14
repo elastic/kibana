@@ -8,7 +8,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { PercentageModeConfig } from '../../..';
+import { type PercentageModeConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToOtherParentPipelineAggColumns,
@@ -18,9 +18,9 @@ import {
   convertToStdDeviationFormulaColumns,
   convertToLastValueColumn,
   convertToCumulativeSumAggColumn,
-  AggBasedColumn,
+  type AggBasedColumn,
   convertToColumnInPercentageMode,
-  ExtendedColumnConverterArgs,
+  type ExtendedColumnConverterArgs,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { getValidColumns } from '../utils';

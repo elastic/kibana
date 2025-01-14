@@ -13,10 +13,10 @@ import {
   getMultiFieldLabel,
   createCachedFieldValueFormatter,
 } from './fields_utils';
-import { FieldSpec, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { type FieldSpec, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { type DataView } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { FieldFormatsRegistry, StringFormat } from '@kbn/field-formats-plugin/common';
+import { type FieldFormatsRegistry, StringFormat } from '@kbn/field-formats-plugin/common';
 
 describe('fields_utils', () => {
   describe('toSanitizedFieldType', () => {

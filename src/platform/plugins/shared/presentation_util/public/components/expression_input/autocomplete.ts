@@ -12,8 +12,8 @@ import type { AstWithMeta, AstArgumentWithMeta } from '@kbn/interpreter';
 import { isAstWithMeta } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
 import {
-  ExpressionFunction,
-  ExpressionFunctionParameter,
+  type ExpressionFunction,
+  type ExpressionFunctionParameter,
   getByAlias,
 } from '@kbn/expressions-plugin/common';
 

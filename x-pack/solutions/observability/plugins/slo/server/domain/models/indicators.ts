@@ -6,14 +6,14 @@
  */
 
 import {
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
-  indicatorSchema,
-  indicatorTypesSchema,
-  kqlCustomIndicatorSchema,
-  metricCustomIndicatorSchema,
+  type apmTransactionDurationIndicatorSchema,
+  type apmTransactionErrorRateIndicatorSchema,
+  type indicatorSchema,
+  type indicatorTypesSchema,
+  type kqlCustomIndicatorSchema,
+  type metricCustomIndicatorSchema,
 } from '@kbn/slo-schema';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;

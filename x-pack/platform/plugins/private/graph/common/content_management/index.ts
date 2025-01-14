@@ -29,4 +29,4 @@ export type {
   GraphCrudTypes,
 } from './latest';
 
-export * as GraphV1 from './v1';
+export type * as GraphV1 from './v1';

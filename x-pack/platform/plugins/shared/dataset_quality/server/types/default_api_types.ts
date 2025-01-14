@@ -7,7 +7,7 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { DataStreamType, dataStreamTypesRt } from '../../common/types';
+import { type DataStreamType, dataStreamTypesRt } from '../../common/types';
 
 export const typeRt = t.type({
   type: dataStreamTypesRt,

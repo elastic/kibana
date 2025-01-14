@@ -7,21 +7,21 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiThemeComputed,
+  type EuiThemeComputed,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { ChangePointType } from '@kbn/es-types/src';
+import { type ChangePointType } from '@kbn/es-types/src';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import momentTz from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { type IUiSettingsClient } from '@kbn/core/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { useTheme } from '../../hooks/use_theme';
 import { SparkPlot } from '../charts/spark_plot';

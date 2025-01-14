@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import {
-  Filter,
+  type Filter,
   isExistsFilter,
   isPhraseFilter,
   getPhraseFilterValue,
@@ -20,14 +20,14 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
-  DataViewFieldBase,
-  DataViewBase,
-  RangeFilterParams,
+  type DataViewFieldBase,
+  type DataViewBase,
+  type RangeFilterParams,
 } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
 
-import { FilterManager } from '../filter_manager';
+import { type FilterManager } from '../filter_manager';
 
 function getExistingFilter(
   appFilters: Filter[],

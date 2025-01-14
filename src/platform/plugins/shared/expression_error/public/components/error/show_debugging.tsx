@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState } from 'react';
+import React, { type FC, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import Debug from '../debug';
-import { Props } from './error';
+import { type Props } from './error';
 
 export const ShowDebugging: FC<Props> = ({ payload }) => {
   const [expanded, setExpanded] = useState(false);

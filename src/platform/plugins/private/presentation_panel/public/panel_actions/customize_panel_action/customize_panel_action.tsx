@@ -8,23 +8,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TracksOverlays } from '@kbn/presentation-containers';
+import { type TracksOverlays } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
   apiPublishesUnifiedSearch,
   apiPublishesPanelTitle,
-  CanAccessViewMode,
-  EmbeddableApiContext,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
   getInheritedViewMode,
-  HasParentApi,
-  PublishesDataViews,
-  PublishesWritableUnifiedSearch,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
-  PublishesUnifiedSearch,
+  type HasParentApi,
+  type PublishesDataViews,
+  type PublishesWritableUnifiedSearch,
+  type PublishesWritablePanelDescription,
+  type PublishesWritablePanelTitle,
+  type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';

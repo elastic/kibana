@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
+import { handleActions, type Action } from 'redux-actions';
 import {
-  PopoverState,
+  type PopoverState,
   toggleIntegrationsPopover,
   setBasePath,
   setEsKueryString,
-  UiPayload,
+  type UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
   setSearchTextAction,

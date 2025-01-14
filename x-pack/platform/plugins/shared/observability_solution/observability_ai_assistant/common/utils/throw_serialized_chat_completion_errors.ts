@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { filter, OperatorFunction, tap } from 'rxjs';
+import { filter, type OperatorFunction, tap } from 'rxjs';
 import {
   ChatCompletionError,
   ChatCompletionErrorCode,
   type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
   type ChatCompletionErrorEvent,
-  BufferFlushEvent,
+  type BufferFlushEvent,
 } from '../conversation_complete';
 
 export function throwSerializedChatCompletionErrors<

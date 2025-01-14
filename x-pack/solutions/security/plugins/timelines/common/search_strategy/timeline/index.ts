@@ -6,18 +6,18 @@
  */
 
 import {
-  TimelineEventsAllStrategyResponse,
-  TimelineEventsDetailsStrategyResponse,
-  TimelineEventsLastEventTimeStrategyResponse,
-  TimelineKpiStrategyResponse,
+  type TimelineEventsAllStrategyResponse,
+  type TimelineEventsDetailsStrategyResponse,
+  type TimelineEventsLastEventTimeStrategyResponse,
+  type TimelineKpiStrategyResponse,
 } from './events';
-import { SortField } from '../common';
+import { type SortField } from '../common';
 import {
-  TimelineEventsAllOptionsInput,
-  TimelineEventsDetailsRequestOptionsInput,
-  TimelineEventsLastEventTimeRequestOptionsInput,
-  TimelineEventsQueries,
-  TimelineKpiRequestOptionsInput,
+  type TimelineEventsAllOptionsInput,
+  type TimelineEventsDetailsRequestOptionsInput,
+  type TimelineEventsLastEventTimeRequestOptionsInput,
+  type TimelineEventsQueries,
+  type TimelineKpiRequestOptionsInput,
 } from '../../api/search_strategy';
 
 export * from './events';

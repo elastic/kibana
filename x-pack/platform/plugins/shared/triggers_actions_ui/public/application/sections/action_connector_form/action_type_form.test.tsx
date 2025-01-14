@@ -9,19 +9,19 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
-  ActionConnector,
-  ActionType,
-  GenericValidationResult,
+  type ActionConnector,
+  type ActionType,
+  type GenericValidationResult,
   ActionConnectorMode,
-  ActionVariables,
-  NotifyWhenSelectOptions,
+  type ActionVariables,
+  type NotifyWhenSelectOptions,
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, type SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 

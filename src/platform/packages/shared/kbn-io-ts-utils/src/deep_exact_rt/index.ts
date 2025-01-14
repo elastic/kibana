@@ -10,7 +10,7 @@
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
 import { mergeRt } from '../merge_rt';
-import { isParsableType, ParseableType } from '../parseable_types';
+import { isParsableType, type ParseableType } from '../parseable_types';
 
 export function deepExactRt<T extends t.Type<any> | ParseableType>(type: T): T;
 

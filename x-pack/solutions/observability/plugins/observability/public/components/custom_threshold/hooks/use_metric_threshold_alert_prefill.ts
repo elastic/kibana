@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useState } from 'react';
 import {
   Aggregators,
-  CustomThresholdExpressionMetric,
+  type CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 
 export interface CustomThresholdPrefillOptions {

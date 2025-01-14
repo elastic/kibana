@@ -13,7 +13,7 @@ import {
   getFieldNamesByType,
   createCustomCallbackMocks,
   getLiteralsByType,
-  PartialSuggestionWithText,
+  type PartialSuggestionWithText,
   getDateLiteralsByFieldType,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
@@ -26,15 +26,15 @@ import {
 } from '../helper';
 import { uniq } from 'lodash';
 import {
-  FunctionParameter,
-  FunctionReturnType,
-  SupportedDataType,
+  type FunctionParameter,
+  type FunctionReturnType,
+  type SupportedDataType,
   isFieldType,
   isReturnType,
   isSupportedDataType,
 } from '../../definitions/types';
 import { fieldNameFromType } from '../../validation/validation.test';
-import { ESQLAstItem } from '@kbn/esql-ast';
+import { type ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
 
 const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>

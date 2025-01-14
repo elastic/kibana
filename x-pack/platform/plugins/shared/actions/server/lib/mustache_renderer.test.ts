@@ -10,7 +10,7 @@ import {
   renderMustacheString,
   renderMustacheStringNoEscape,
   renderMustacheObject,
-  Escape,
+  type Escape,
 } from './mustache_renderer';
 
 const logger = loggingSystemMock.create().get();

@@ -11,21 +11,21 @@ import type { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {
-  State,
-  CanvasWorkpad,
-  CanvasPage,
-  CanvasElement,
-  CanvasVariable,
-  ResolvedArgType,
+  type State,
+  type CanvasWorkpad,
+  type CanvasPage,
+  type CanvasElement,
+  type CanvasVariable,
+  type ResolvedArgType,
 } from '../../../types';
 import {
-  ExpressionContext,
-  CanvasGroup,
-  PositionedElement,
-  CanvasWorkpadBoundingBox,
-  ExpressionAstArgument,
-  ExpressionAstFunction,
-  ExpressionAstExpression,
+  type ExpressionContext,
+  type CanvasGroup,
+  type PositionedElement,
+  type CanvasWorkpadBoundingBox,
+  type ExpressionAstArgument,
+  type ExpressionAstFunction,
+  type ExpressionAstExpression,
 } from '../../../types';
 import { isExpressionWithFilters } from '../../lib/filter';
 

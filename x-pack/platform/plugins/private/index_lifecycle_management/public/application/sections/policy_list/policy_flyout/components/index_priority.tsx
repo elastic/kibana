@@ -7,9 +7,9 @@
 
 import React from 'react';
 import {
-  SerializedHotPhase,
-  SerializedWarmPhase,
-  SerializedColdPhase,
+  type SerializedHotPhase,
+  type SerializedWarmPhase,
+  type SerializedColdPhase,
 } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';

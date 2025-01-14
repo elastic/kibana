@@ -9,10 +9,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   BehaviorSubject,
   Observable,
-  OperatorFunction,
-  PartialObserver,
+  type OperatorFunction,
+  type PartialObserver,
   ReplaySubject,
-  Subscription,
+  type Subscription,
 } from 'rxjs';
 import { switchMap } from 'rxjs';
 

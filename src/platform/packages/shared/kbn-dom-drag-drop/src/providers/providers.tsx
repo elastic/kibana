@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Reducer, useReducer } from 'react';
+import React, { type Reducer, useReducer } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  DropIdentifier,
-  DragDropIdentifier,
-  RegisteredDropTargets,
-  DragContextValue,
-  DragContextState,
-  CustomMiddleware,
-  DraggingIdentifier,
+  type DropIdentifier,
+  type DragDropIdentifier,
+  type RegisteredDropTargets,
+  type DragContextValue,
+  type DragContextState,
+  type CustomMiddleware,
+  type DraggingIdentifier,
 } from './types';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 import { announce } from './announcements';

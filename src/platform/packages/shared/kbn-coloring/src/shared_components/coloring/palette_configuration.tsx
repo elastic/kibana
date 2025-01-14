@@ -14,12 +14,12 @@ import { css } from '@emotion/react';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { PalettePicker } from './palette_picker';
 import {
-  PaletteOutput,
-  PaletteRegistry,
-  DataBounds,
+  type PaletteOutput,
+  type PaletteRegistry,
+  type DataBounds,
   getFallbackDataBounds,
-  CustomPaletteParams,
-  RequiredPaletteParamTypes,
+  type CustomPaletteParams,
+  type RequiredPaletteParamTypes,
 } from '../../palettes';
 
 import { toColorRanges } from './utils';

@@ -12,10 +12,10 @@ import { ThrottlingExceededCallout } from './throttling_exceeded_callout';
 import {
   BandwidthLimitKey,
   DEFAULT_BANDWIDTH_LIMIT,
-  ThrottlingConfig,
-  ThrottlingConfigValue,
+  type ThrottlingConfig,
+  type ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
-import { Validation } from '../../types';
+import { type Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingDownloadField } from './throttling_download_field';
 import { ThrottlingLatencyField } from './throttling_latency_field';

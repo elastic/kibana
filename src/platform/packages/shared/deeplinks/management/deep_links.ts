@@ -8,11 +8,11 @@
  */
 
 import {
-  MONITORING_APP_ID,
-  INTEGRATIONS_APP_ID,
-  FLEET_APP_ID,
-  OSQUERY_APP_ID,
-  MANAGEMENT_APP_ID,
+  type MONITORING_APP_ID,
+  type INTEGRATIONS_APP_ID,
+  type FLEET_APP_ID,
+  type OSQUERY_APP_ID,
+  type MANAGEMENT_APP_ID,
 } from './constants';
 
 // Monitoring

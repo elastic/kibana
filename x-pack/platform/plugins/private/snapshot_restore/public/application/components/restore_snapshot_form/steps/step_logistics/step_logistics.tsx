@@ -19,24 +19,24 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
   EuiTitle,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui';
+import { type EuiSelectableOption } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
-import { RestoreSettings } from '../../../../../../common/types';
+import { type RestoreSettings } from '../../../../../../common/types';
 
 import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
 
-import { StepProps } from '..';
+import { type StepProps } from '..';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
 

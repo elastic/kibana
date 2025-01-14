@@ -6,7 +6,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { LogLevelId, LogMessageSource, LogRecord } from '@kbn/logging';
+import { type LogLevelId, type LogMessageSource, type LogRecord } from '@kbn/logging';
 
 interface WrappedLoggerOpts {
   logger: Logger;

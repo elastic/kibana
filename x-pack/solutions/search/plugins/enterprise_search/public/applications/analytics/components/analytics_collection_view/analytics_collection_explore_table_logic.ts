@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
-import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
+import { type DataView, isRunningResponse, type TimeRange } from '@kbn/data-plugin/common';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
   AnalyticsCollectionDataViewLogic,
-  AnalyticsCollectionDataViewLogicActions,
-  AnalyticsCollectionDataViewLogicValues,
+  type AnalyticsCollectionDataViewLogicActions,
+  type AnalyticsCollectionDataViewLogicValues,
 } from './analytics_collection_data_view_logic';
 
 import {
@@ -26,17 +26,17 @@ import {
 } from './analytics_collection_explore_table_formulas';
 import {
   ExploreTableColumns,
-  ExploreTableItem,
+  type ExploreTableItem,
   ExploreTables,
-  SearchTermsTable,
-  ClickedTable,
-  ReferrersTable,
-  WorsePerformersTable,
-  LocationsTable,
+  type SearchTermsTable,
+  type ClickedTable,
+  type ReferrersTable,
+  type WorsePerformersTable,
+  type LocationsTable,
 } from './analytics_collection_explore_table_types';
 import {
   AnalyticsCollectionToolbarLogic,
-  AnalyticsCollectionToolbarLogicValues,
+  type AnalyticsCollectionToolbarLogicValues,
 } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;

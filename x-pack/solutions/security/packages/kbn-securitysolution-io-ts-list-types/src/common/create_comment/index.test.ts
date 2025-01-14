@@ -9,11 +9,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getCreateCommentsArrayMock, getCreateCommentsMock } from './index.mock';
 import {
-  CreateComment,
+  type CreateComment,
   createComment,
-  CreateCommentsArray,
+  type CreateCommentsArray,
   createCommentsArray,
-  CreateCommentsArrayOrUndefined,
+  type CreateCommentsArrayOrUndefined,
   createCommentsArrayOrUndefined,
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';

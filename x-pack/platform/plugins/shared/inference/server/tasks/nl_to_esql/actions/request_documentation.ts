@@ -8,12 +8,12 @@
 import { isEmpty } from 'lodash';
 import {
   ToolChoiceType,
-  ToolOptions,
-  Message,
+  type ToolOptions,
+  type Message,
   withoutOutputUpdateEvents,
-  FunctionCallingMode,
+  type FunctionCallingMode,
 } from '@kbn/inference-common';
-import { InferenceClient } from '../../..';
+import { type InferenceClient } from '../../..';
 import { requestDocumentationSchema } from './shared';
 
 export const requestDocumentation = ({

@@ -6,7 +6,7 @@
  */
 
 import React, {
-  ReactNode,
+  type ReactNode,
   useState,
   useCallback,
   useEffect,
@@ -21,14 +21,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTourStep,
-  EuiTourStepProps,
+  type EuiTourStepProps,
   EuiImage,
   EuiSpacer,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { ApplicationStart } from '@kbn/core/public';
+import { type ApplicationStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';

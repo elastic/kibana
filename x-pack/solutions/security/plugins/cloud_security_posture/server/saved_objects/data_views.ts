@@ -5,15 +5,15 @@
  * 2.0.
  */
 import {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  SavedObject,
+  type ElasticsearchClient,
+  type ISavedObjectsRepository,
+  type SavedObject,
   type KibanaRequest,
   type Logger,
 } from '@kbn/core/server';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { type DataViewAttributes } from '@kbn/data-views-plugin/common';
+import { type SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { type DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,

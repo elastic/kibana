@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import { type Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
+import { generateMockFileIndicator, type Indicator } from '../../../../../common/types/indicator';
 import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 

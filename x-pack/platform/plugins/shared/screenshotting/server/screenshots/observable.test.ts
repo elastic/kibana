@@ -11,7 +11,7 @@ import { interval, lastValueFrom, map, of, throwError } from 'rxjs';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
-import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';
+import { ScreenshotObservableHandler, type ScreenshotObservableOptions } from './observable';
 
 describe('ScreenshotObservableHandler', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;

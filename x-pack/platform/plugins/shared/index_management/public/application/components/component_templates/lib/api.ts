@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, type UiCounterMetricType } from '@kbn/analytics';
 import {
-  ComponentTemplateListItem,
-  ComponentTemplateDeserialized,
-  ComponentTemplateSerialized,
-  ComponentTemplateDatastreams,
-  ComponentTemplateMeta,
+  type ComponentTemplateListItem,
+  type ComponentTemplateDeserialized,
+  type ComponentTemplateSerialized,
+  type ComponentTemplateDatastreams,
+  type ComponentTemplateMeta,
 } from '../shared_imports';
 import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
@@ -19,7 +19,7 @@ import {
   UIM_COMPONENT_TEMPLATE_CREATE,
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
-import { UseRequestHook, SendRequestHook } from './request';
+import { type UseRequestHook, type SendRequestHook } from './request';
 
 export const getApi = (
   useRequest: UseRequestHook,

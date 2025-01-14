@@ -12,19 +12,19 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   AppMenuActionId,
-  AppMenuActionSubmenuSecondary,
+  type AppMenuActionSubmenuSecondary,
   AppMenuActionType,
 } from '@kbn/discover-utils';
 import {
   AlertConsumers,
   ES_QUERY_ID,
-  RuleCreationValidConsumer,
+  type RuleCreationValidConsumer,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { DiscoverStateContainer } from '../../../state_management/discover_state';
-import { AppMenuDiscoverParams } from './types';
-import { DiscoverServices } from '../../../../../build_services';
+import { type RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { type DiscoverStateContainer } from '../../../state_management/discover_state';
+import { type AppMenuDiscoverParams } from './types';
+import { type DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,

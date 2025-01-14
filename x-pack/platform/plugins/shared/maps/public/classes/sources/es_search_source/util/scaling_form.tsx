@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import React, { Component, Fragment, type ReactNode } from 'react';
 import {
   EuiConfirmModal,
   EuiFormRow,
   EuiRadio,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -25,7 +25,7 @@ import {
   SCALING_TYPES,
 } from '../../../../../common/constants';
 import { loadIndexSettings } from './load_index_settings';
-import { OnSourceChangeArgs } from '../../source';
+import { type OnSourceChangeArgs } from '../../source';
 import { ScalingDocumenationPopover } from './scaling_documenation_popover';
 
 interface Props {

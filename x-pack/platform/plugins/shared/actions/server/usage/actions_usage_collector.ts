@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
-  ActionsUsage,
+  type ActionsUsage,
   byGenAiProviderTypeSchema,
   byServiceProviderTypeSchema,
   byTypeSchema,
 } from './types';
-import { ActionsConfig } from '../config';
+import { type ActionsConfig } from '../config';
 
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,

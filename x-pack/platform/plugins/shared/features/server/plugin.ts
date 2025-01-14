@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
+import { type RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsServiceStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  Capabilities as UICapabilities,
+  type CoreSetup,
+  type CoreStart,
+  type SavedObjectsServiceStart,
+  type Logger,
+  type Plugin,
+  type PluginInitializerContext,
+  type Capabilities as UICapabilities,
 } from '@kbn/core/server';
-import { ConfigType } from './config';
+import { type ConfigType } from './config';
 import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
 import {
-  ElasticsearchFeatureConfig,
-  ElasticsearchFeature,
-  KibanaFeature,
-  KibanaFeatureConfig,
+  type ElasticsearchFeatureConfig,
+  type ElasticsearchFeature,
+  type KibanaFeature,
+  type KibanaFeatureConfig,
 } from '../common';
 import type {
   FeaturePrivilegeIterator,

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-  GetInfraMetricsRequestBodyPayloadClient,
-  GetInfraMetricsResponsePayload,
+  type GetInfraMetricsRequestBodyPayloadClient,
+  type GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
 import type { SupertestWithRoleScopeType } from '../../../services';
 import { DATES } from './utils/constants';

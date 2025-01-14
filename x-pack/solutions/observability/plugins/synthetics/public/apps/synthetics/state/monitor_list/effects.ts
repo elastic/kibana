@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import { type PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
 import {
   ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
-  SyntheticsMonitorWithId,
+  type EncryptedSyntheticsSavedMonitor,
+  type SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { MonitorOverviewPageState, selectOverviewPageState } from '../overview';
+import { type MonitorOverviewPageState, selectOverviewPageState } from '../overview';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
 import { serializeHttpFetchError } from '../utils/http_error';
@@ -32,7 +32,7 @@ import {
 import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
 
 import { toastTitle } from './toast_title';
-import { UpsertMonitorRequest } from './models';
+import { type UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
   yield debounce(

@@ -17,9 +17,9 @@ import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
-  LogEntrySearchRequestParams,
+  type LogEntrySearchRequestParams,
   logEntrySearchRequestParamsRT,
-  LogEntrySearchResponsePayload,
+  type LogEntrySearchResponsePayload,
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import {
@@ -27,8 +27,8 @@ import {
   createErrorFromShardFailure,
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
-import { LogViewsServiceStart } from '../log_views/types';
-import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
+import { type LogViewsServiceStart } from '../log_views/types';
+import { createGetLogEntryQuery, getLogEntryResponseRT, type LogEntryHit } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;

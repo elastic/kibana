@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { type ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
-  SecuritySolutionPluginContext,
-  Services,
-  SetupPlugins,
-  ThreatIntelligencePluginSetup,
-  ThreatIntelligencePluginStart,
-  ThreatIntelligencePluginStartDeps,
+  type SecuritySolutionPluginContext,
+  type Services,
+  type SetupPlugins,
+  type ThreatIntelligencePluginSetup,
+  type ThreatIntelligencePluginStart,
+  type ThreatIntelligencePluginStartDeps,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';

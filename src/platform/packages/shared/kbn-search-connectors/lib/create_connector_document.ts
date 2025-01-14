@@ -8,12 +8,12 @@
  */
 
 import {
-  Connector,
-  ConnectorConfiguration,
-  ConnectorDocument,
+  type Connector,
+  type ConnectorConfiguration,
+  type ConnectorDocument,
   ConnectorStatus,
   FilteringValidationState,
-  IngestPipelineParams,
+  type IngestPipelineParams,
 } from '../types/connectors';
 
 export function createConnectorDocument({

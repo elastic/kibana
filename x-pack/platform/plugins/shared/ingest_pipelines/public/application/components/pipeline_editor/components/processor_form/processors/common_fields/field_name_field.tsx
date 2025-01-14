@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   FIELD_TYPES,
   UseField,
   Field,
   fieldValidators,
-  ValidationConfig,
+  type ValidationConfig,
 } from '../../../../../../../shared_imports';
 
-import { FieldsConfig } from '../shared';
+import { type FieldsConfig } from '../shared';
 
 const { emptyField } = fieldValidators;
 

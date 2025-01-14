@@ -9,7 +9,7 @@
 
 import { EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { ActivityView, ViewsStats } from '@kbn/content-management-content-insights-public';
 

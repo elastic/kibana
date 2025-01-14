@@ -7,15 +7,15 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { CoreStart } from '@kbn/core/server';
+import { type CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import axios, { AxiosResponse } from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import times from 'lodash/times';
-import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { LocationStatus, type HeartbeatConfig } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
-import { SyntheticsServerSetup } from '../types';
+import { type SyntheticsServerSetup } from '../types';
 
 jest.mock('axios', () => jest.fn());
 

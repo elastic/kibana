@@ -13,8 +13,8 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import React, { Suspense, ComponentType } from 'react';
-import { IndexSettingWithContextProps } from './index_settings_with_context_types';
+import React, { Suspense, type ComponentType } from 'react';
+import { type IndexSettingWithContextProps } from './index_settings_with_context_types';
 
 const IndexSettingsWithContext = dynamic<ComponentType<IndexSettingWithContextProps>>(() =>
   import('./index_settings_with_context').then((mod) => ({ default: mod.IndexSettingsWithContext }))

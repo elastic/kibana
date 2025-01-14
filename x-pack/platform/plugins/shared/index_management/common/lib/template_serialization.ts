@@ -6,12 +6,12 @@
  */
 
 import {
-  TemplateDeserialized,
-  LegacyTemplateSerialized,
-  TemplateSerialized,
-  TemplateListItem,
-  TemplateType,
-  IndexMode,
+  type TemplateDeserialized,
+  type LegacyTemplateSerialized,
+  type TemplateSerialized,
+  type TemplateListItem,
+  type TemplateType,
+  type IndexMode,
 } from '../types';
 import { deserializeESLifecycle } from './data_stream_utils';
 import {

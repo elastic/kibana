@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import { type Connector, ConnectorStatus } from '@kbn/search-connectors';
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_scheduling';
 

@@ -20,9 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
+  type OnboardingFlowEventContext,
 } from '../../../../common/telemetry_events';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
   onboardingFlowType,

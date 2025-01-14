@@ -11,7 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiExpression,
   EuiFieldNumber,
   EuiFieldText,
@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_UNITS } from '../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import { ErrableFormRow, SectionError, type Error as ServerError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';

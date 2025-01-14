@@ -8,11 +8,11 @@
 import type { SerializerOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  EsDataTypeGeoPoint,
-  EsDataTypeGeoShape,
-  EsDataTypeRangeTerm,
-  EsDataTypeSingle,
-  EsDataTypeUnion,
+  type EsDataTypeGeoPoint,
+  type EsDataTypeGeoShape,
+  type EsDataTypeRangeTerm,
+  type EsDataTypeSingle,
+  type EsDataTypeUnion,
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,

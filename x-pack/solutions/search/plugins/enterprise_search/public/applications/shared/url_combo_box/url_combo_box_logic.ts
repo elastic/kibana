@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 export interface UrlComboBoxValues {
   isInvalid: boolean;

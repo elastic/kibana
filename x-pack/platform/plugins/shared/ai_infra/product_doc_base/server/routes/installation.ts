@@ -10,9 +10,9 @@ import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
-  InstallationStatusResponse,
-  PerformInstallResponse,
-  UninstallResponse,
+  type InstallationStatusResponse,
+  type PerformInstallResponse,
+  type UninstallResponse,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
 

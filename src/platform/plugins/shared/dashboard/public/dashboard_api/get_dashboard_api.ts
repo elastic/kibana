@@ -11,8 +11,8 @@ import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { type ControlGroupApi, type ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { type EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -21,14 +21,14 @@ import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { type LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
 import {
   DASHBOARD_API_TYPE,
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardInternalApi,
-  DashboardState,
+  type DashboardApi,
+  type DashboardCreationOptions,
+  type DashboardInternalApi,
+  type DashboardState,
 } from './types';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
@@ -39,7 +39,7 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { openSaveModal } from './open_save_modal';
 import { initializeSearchSessionManager } from './search_session_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { UnsavedPanelState } from '../dashboard_container/types';
+import { type UnsavedPanelState } from '../dashboard_container/types';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { getSerializedState } from './get_serialized_state';
 

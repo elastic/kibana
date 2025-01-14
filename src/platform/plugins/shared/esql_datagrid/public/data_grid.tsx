@@ -14,7 +14,7 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
+  type UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';

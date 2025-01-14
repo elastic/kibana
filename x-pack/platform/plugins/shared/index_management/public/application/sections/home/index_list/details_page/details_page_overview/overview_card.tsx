@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { type FunctionComponent, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment, { Moment } from 'moment-timezone';
+import moment, { type Moment } from 'moment-timezone';
 import { METRIC_TYPE } from '.';
 
 export interface ApplicationUsageMetric {

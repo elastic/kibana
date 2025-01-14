@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
-import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { type GeoJsonProperties, type Geometry, type Position } from 'geojson';
+import { AbstractSource, type ImmutableSourceProperty, type SourceEditorArgs } from '../source';
 import {
-  BoundsRequestMeta,
-  GetFeatureActionsArgs,
-  GeoJsonWithMeta,
-  IMvtVectorSource,
+  type BoundsRequestMeta,
+  type GetFeatureActionsArgs,
+  type GeoJsonWithMeta,
+  type IMvtVectorSource,
 } from '../vector_source';
 import {
   FIELD_ORIGIN,
@@ -25,14 +25,14 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
-  MapExtent,
-  MVTFieldDescriptor,
-  TiledSingleLayerVectorSourceDescriptor,
-  TooltipFeatureAction,
+  type MapExtent,
+  type MVTFieldDescriptor,
+  type TiledSingleLayerVectorSourceDescriptor,
+  type TooltipFeatureAction,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { type ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',

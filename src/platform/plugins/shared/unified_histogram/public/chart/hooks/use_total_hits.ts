@@ -8,17 +8,17 @@
  */
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { MutableRefObject, useEffect, useRef } from 'react';
-import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
+import { type MutableRefObject, useEffect, useRef } from 'react';
+import { catchError, filter, lastValueFrom, map, type Observable, of } from 'rxjs';
 import {
   UnifiedHistogramFetchStatus,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramServices,
+  type UnifiedHistogramHitsContext,
+  type UnifiedHistogramInputMessage,
+  type UnifiedHistogramRequestContext,
+  type UnifiedHistogramServices,
 } from '../../types';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 

@@ -11,14 +11,14 @@ import {
   FieldType,
   FilteringValidationState,
   SyncStatus,
-  ConnectorViewIndex,
+  type ConnectorViewIndex,
   IngestionStatus,
   IngestionMethod,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-import { ApiViewIndex, CrawlerViewIndex } from '../types';
+import { type ApiViewIndex, type CrawlerViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,

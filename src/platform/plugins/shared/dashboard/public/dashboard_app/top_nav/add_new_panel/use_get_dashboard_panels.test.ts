@@ -13,8 +13,8 @@ import type { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   VisGroups,
-  VisTypeAlias,
-  VisualizationsStart,
+  type VisTypeAlias,
+  type VisualizationsStart,
   type BaseVisType,
 } from '@kbn/visualizations-plugin/public';
 import { renderHook } from '@testing-library/react';

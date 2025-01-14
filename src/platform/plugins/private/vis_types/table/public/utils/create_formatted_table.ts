@@ -8,9 +8,9 @@
  */
 
 import { chain } from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { type Datatable } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
+import { type FormattedColumn, type FormattedColumns, type TableVisConfig, type TableContext } from '../types';
 import { AggTypes } from '../../common';
 
 export const createFormattedTable = (

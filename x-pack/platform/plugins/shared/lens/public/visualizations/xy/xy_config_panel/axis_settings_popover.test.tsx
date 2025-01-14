@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import React, { type ComponentProps } from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';

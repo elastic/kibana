@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription, timer } from 'rxjs';
+import { type Subscription, timer } from 'rxjs';
 
 export enum AbortReason {
   Timeout = 'timeout',

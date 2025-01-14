@@ -8,7 +8,7 @@
  */
 
 import './index.scss';
-import { PluginInitializerContext } from '@kbn/core/public';
+import { type PluginInitializerContext } from '@kbn/core/public';
 
 import { ConsoleUIPlugin } from './plugin';
 

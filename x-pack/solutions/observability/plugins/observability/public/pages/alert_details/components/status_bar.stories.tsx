@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { type ComponentStory } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { StatusBar as Component, StatusBarProps } from './status_bar';
+import { StatusBar as Component, type StatusBarProps } from './status_bar';
 import { alert } from '../mock/alert';
 
 export default {

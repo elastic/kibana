@@ -9,12 +9,12 @@ import { map } from 'rxjs';
 import { FilterStateStore } from '@kbn/es-query';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import {
-  IKbnUrlStateStorage,
+  type IKbnUrlStateStorage,
   syncState,
-  BaseStateContainer,
+  type BaseStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
 import { getData } from '../../../kibana_services';
-import { AppStateManager } from './app_state_manager';
+import { type AppStateManager } from './app_state_manager';
 
 export function startAppStateSyncing(
   appStateManager: AppStateManager,

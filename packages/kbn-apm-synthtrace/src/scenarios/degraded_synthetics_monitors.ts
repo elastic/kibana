@@ -9,10 +9,10 @@
 
 import {
   generateShortId,
-  SyntheticsMonitorDocument,
+  type SyntheticsMonitorDocument,
   syntheticsMonitor,
 } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import { type Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { MORE_THAN_1024_CHARS, getIpAddress } from './helpers/logs_mock_data';
 import { getAtIndexOrRandom } from './helpers/get_at_index_or_random';

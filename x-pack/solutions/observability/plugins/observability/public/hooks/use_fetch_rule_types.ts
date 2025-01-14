@@ -6,9 +6,9 @@
  */
 
 import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
+  type QueryObserverResult,
+  type RefetchOptions,
+  type RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
 import { camelCase, mapKeys } from 'lodash';

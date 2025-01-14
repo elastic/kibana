@@ -6,23 +6,23 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Subject, Observable } from 'rxjs';
+import { Subject, type Observable } from 'rxjs';
 import { take, bufferCount, skip, map } from 'rxjs';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { type ConcreteTaskInstance, TaskStatus } from '../task';
 import {
   asTaskRunEvent,
-  TaskTiming,
+  type TaskTiming,
   TaskPersistence,
   asTaskManagerStatEvent,
-  TaskManagerStats,
+  type TaskManagerStats,
 } from '../task_events';
 import { asOk } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { type TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { type AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import {
-  BackgroundTaskUtilizationStat,
+  type BackgroundTaskUtilizationStat,
   createBackgroundTaskUtilizationAggregator,
   summarizeUtilizationStats,
 } from './background_task_utilization_statistics';

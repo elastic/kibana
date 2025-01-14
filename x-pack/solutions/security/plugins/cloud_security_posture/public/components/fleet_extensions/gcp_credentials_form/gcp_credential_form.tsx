@@ -23,18 +23,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { LazyPackagePolicyInputVarField, type NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { type NewPackagePolicyInput, type PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { GcpCredentialsType } from '../../../../common/types_old';
+import { type GcpCredentialsType } from '../../../../common/types_old';
 import { CLOUDBEAT_GCP } from '../../../../common/constants';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { type CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
   findVariableDef,
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
-  NewPackagePolicyPostureInput,
+  type NewPackagePolicyPostureInput,
 } from '../utils';
 import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';

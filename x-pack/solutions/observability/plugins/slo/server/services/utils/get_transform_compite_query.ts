@@ -6,8 +6,8 @@
  */
 
 import {
-  AggregationsCompositeAggregationSource,
-  TransformPutTransformRequest,
+  type AggregationsCompositeAggregationSource,
+  type TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createEsParams } from '../../utils/queries';
 

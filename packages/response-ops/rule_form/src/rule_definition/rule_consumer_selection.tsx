@@ -8,8 +8,8 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
-import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { AlertConsumers, type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   CONSUMER_SELECT_TITLE,
   FEATURE_NAME_MAP,

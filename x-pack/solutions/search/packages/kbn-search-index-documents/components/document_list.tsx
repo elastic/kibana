@@ -21,7 +21,7 @@ import {
   EuiPopover,
   EuiText,
   EuiSpacer,
-  Pagination,
+  type Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

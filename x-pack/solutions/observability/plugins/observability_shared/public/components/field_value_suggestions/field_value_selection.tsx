@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { type FormEvent, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiButton,
@@ -16,14 +16,14 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual, map } from 'lodash';
 import styled from '@emotion/styled';
-import { FieldValueSelectionProps, ListItem } from './types';
+import { type FieldValueSelectionProps, type ListItem } from './types';
 const Counter = styled.div`
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
   background: ${({ theme }) => theme.euiTheme.colors.lightShade};

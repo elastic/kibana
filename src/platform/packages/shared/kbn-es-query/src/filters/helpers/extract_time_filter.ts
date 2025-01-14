@@ -8,8 +8,8 @@
  */
 
 import { keys, partition } from 'lodash';
-import { Filter, isRangeFilter, RangeFilter } from '../build_filters';
-import { TimeRange } from './types';
+import { type Filter, isRangeFilter, type RangeFilter } from '../build_filters';
+import { type TimeRange } from './types';
 import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {

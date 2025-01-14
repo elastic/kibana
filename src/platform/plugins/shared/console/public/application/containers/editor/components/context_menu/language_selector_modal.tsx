@@ -18,7 +18,7 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiSelectable,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiLink,
   EuiTextColor,
 } from '@elastic/eui';

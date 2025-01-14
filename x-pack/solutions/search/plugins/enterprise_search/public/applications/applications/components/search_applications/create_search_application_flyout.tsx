@@ -24,7 +24,7 @@ import {
   EuiSteps,
   EuiText,
   EuiTitle,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { type ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { CANCEL_BUTTON_LABEL, ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';

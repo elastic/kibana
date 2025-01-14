@@ -8,19 +8,19 @@
 import React, {
   createContext,
   useContext,
-  Context,
-  Dispatch,
-  SetStateAction,
-  PropsWithChildren,
+  type Context,
+  type Dispatch,
+  type SetStateAction,
+  type PropsWithChildren,
 } from 'react';
-import { JourneyStep } from '../../../../../../../../common/runtime_types';
+import { type JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
-  WaterfallData,
-  WaterfallDataEntry,
-  WaterfallMetadata,
+  type WaterfallData,
+  type WaterfallDataEntry,
+  type WaterfallMetadata,
 } from '../../../common/network_data/types';
-import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
-import { WaterfallNetworkItem } from '../../../common/network_data/types';
+import { type OnSidebarClick, type OnElementClick, type OnProjectionClick } from '../waterfall_flyout/use_flyout';
+import { type WaterfallNetworkItem } from '../../../common/network_data/types';
 
 export type MarkerItems = Array<{
   id:

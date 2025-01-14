@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { parseJson, stringifyJson } from '../../lib/utils';
-import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
+import { type FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
 const { emptyField, isJsonField, containsCharsField } = fieldValidators;
 const { toInt } = fieldFormatters;

@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
-  IconType,
+  type IconType,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

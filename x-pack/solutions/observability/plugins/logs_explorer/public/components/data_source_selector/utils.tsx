@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { RefCallback } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import React, { type RefCallback } from 'react';
+import { type EuiContextMenuPanelDescriptor, type EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { AllDatasetSelection } from '../../../common';
-import { Integration } from '../../../common/datasets';
+import { type AllDatasetSelection } from '../../../common';
+import { type Integration } from '../../../common/datasets';
 import {
   DATA_SOURCE_SELECTOR_WIDTH,
   noDatasetsDescriptionLabel,
@@ -19,8 +19,8 @@ import {
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from './constants';
-import { DatasetSelectionHandler } from './types';
-import ListStatus, { ListStatusProps } from './sub_components/list_status';
+import { type DatasetSelectionHandler } from './types';
+import ListStatus, { type ListStatusProps } from './sub_components/list_status';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,

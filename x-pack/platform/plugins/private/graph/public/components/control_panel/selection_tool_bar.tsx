@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { ControlType, Workspace } from '../../types';
+import { type ControlType, type Workspace } from '../../types';
 
 interface SelectionToolBarProps {
   workspace: Workspace;

@@ -24,7 +24,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
 } from '@elastic/eui';

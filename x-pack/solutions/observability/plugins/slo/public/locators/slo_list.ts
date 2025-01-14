@@ -12,7 +12,7 @@ import deepmerge from 'deepmerge';
 import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import {
   DEFAULT_STATE,
-  SearchState,
+  type SearchState,
   SLO_LIST_SEARCH_URL_STORAGE_KEY,
 } from '../pages/slos/hooks/use_url_search_state';
 

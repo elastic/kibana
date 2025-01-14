@@ -14,7 +14,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
-  ApmAlertFields,
+  type ApmAlertFields,
 } from '../alerts/helpers/alerting_helper';
 
 export default function ServiceAlerts({ getService }: DeploymentAgnosticFtrProviderContext) {

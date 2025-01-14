@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { type IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
-  CustomMetricExpressionParams,
-  CustomThresholdExpressionMetric,
+  type CustomMetricExpressionParams,
+  type CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 import { EQUATION_REGEX, validateCustomThreshold } from './validation';
 

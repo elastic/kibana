@@ -6,12 +6,12 @@
  */
 
 import { EuiAccordion } from '@elastic/eui';
-import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../../types';
+import React, { type FC } from 'react';
+import { type FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
 import { Filter } from './filter.component';
 import { filterViews } from './filter_views';
-import { FiltersGroup as FiltersGroupType } from './types';
+import { type FiltersGroup as FiltersGroupType } from './types';
 
 interface Props {
   filtersGroup: FiltersGroupType;

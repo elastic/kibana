@@ -13,7 +13,7 @@ import type {
 import pRetry from 'p-retry';
 import {
   APM_ALERTS_INDEX,
-  ApmAlertFields,
+  type ApmAlertFields,
 } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {

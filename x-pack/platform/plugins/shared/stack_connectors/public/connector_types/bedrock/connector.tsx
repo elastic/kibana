@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  ActionConnectorFieldsProps,
+  type ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';

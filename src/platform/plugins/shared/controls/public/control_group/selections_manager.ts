@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { Filter } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesFilters,
   apiPublishesTimeslice,
-  PublishesFilters,
-  PublishesTimeslice,
+  type PublishesFilters,
+  type PublishesTimeslice,
 } from '@kbn/presentation-publishing';
-import { ControlGroupApi } from './types';
+import { type ControlGroupApi } from './types';
 
 export function initSelectionsManager(
   controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>

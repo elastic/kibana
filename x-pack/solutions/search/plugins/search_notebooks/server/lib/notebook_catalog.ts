@@ -10,12 +10,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { NotebookDefinition } from '@kbn/ipynb';
+import { type NotebookDefinition } from '@kbn/ipynb';
 
 import {
-  NotebookCatalog,
-  NotebookCatalogResponse,
-  NotebookInformation,
+  type NotebookCatalog,
+  type NotebookCatalogResponse,
+  type NotebookInformation,
   NotebookSchema,
 } from '../../common/types';
 

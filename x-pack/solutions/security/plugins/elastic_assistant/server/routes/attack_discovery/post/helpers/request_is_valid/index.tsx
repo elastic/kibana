@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { type KibanaRequest } from '@kbn/core/server';
 import {
-  AttackDiscoveryPostRequestBody,
-  ExecuteConnectorRequestBody,
+  type AttackDiscoveryPostRequestBody,
+  type ExecuteConnectorRequestBody,
   sizeIsOutOfRange,
 } from '@kbn/elastic-assistant-common';
 

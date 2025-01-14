@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
-import { Store } from 'redux';
+import { type Store } from 'redux';
 
 import { of } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
@@ -25,8 +25,8 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
-import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
+import { type ClientConfigType, type InitialAppData, type ProductAccess } from '../../common/types';
+import { type PluginsStart, type ClientData, type ESConfig, type UpdateSideNavDefinitionFn } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';

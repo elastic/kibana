@@ -6,15 +6,15 @@
  */
 
 import {
-  AggregationsAggregationContainer,
-  MappingRuntimeFields,
-  Sort,
-  SearchResponse,
+  type AggregationsAggregationContainer,
+  type MappingRuntimeFields,
+  type Sort,
+  type SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
 
-import { estypes } from '@elastic/elasticsearch';
-import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import { type estypes } from '@elastic/elasticsearch';
+import { type EsQueryConfig, type Query, buildEsQuery } from '@kbn/es-query';
 
 interface FindOptions {
   filter?: string;

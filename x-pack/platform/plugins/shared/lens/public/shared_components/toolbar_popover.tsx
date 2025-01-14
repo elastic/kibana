@@ -6,9 +6,9 @@
  */
 
 import './toolbar_popover.scss';
-import React, { PropsWithChildren, useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import React, { type PropsWithChildren, useState } from 'react';
+import { EuiFlexItem, EuiPopover, type EuiPopoverProps, EuiPopoverTitle, type IconType } from '@elastic/eui';
+import { ToolbarButton, type ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable, combineLatest, defer } from 'rxjs';
+import { type Observable, combineLatest, defer } from 'rxjs';
 import { map } from 'rxjs';
-import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { type Datatable, type ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

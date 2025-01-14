@@ -8,11 +8,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import { type SomeDevLog } from '@kbn/some-dev-log';
 
-import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
-import { Writer } from './writer';
-import { Message, MessageTypes } from './message';
+import { ToolingLogTextWriter, type ToolingLogTextWriterConfig } from './tooling_log_text_writer';
+import { type Writer } from './writer';
+import { type Message, type MessageTypes } from './message';
 
 export interface ToolingLogOptions {
   /**

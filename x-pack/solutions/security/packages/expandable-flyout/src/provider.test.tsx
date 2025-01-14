@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
 import { UrlSynchronizer } from './provider';
 import * as actions from './store/actions';
-import { initialUiState, State } from './store/state';
+import { initialUiState, type State } from './store/state';
 import { of } from 'rxjs';
 
 const mockGet = jest.fn();

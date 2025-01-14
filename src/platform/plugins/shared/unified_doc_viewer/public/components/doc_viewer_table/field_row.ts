@@ -12,7 +12,7 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import {
   formatFieldValue,
   getIgnoredReason,
-  IgnoredReason,
+  type IgnoredReason,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

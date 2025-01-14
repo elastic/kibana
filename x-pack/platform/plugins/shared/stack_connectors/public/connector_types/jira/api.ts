@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../lib/rewrite_response_body';
-import { Fields, Issue, IssueTypes } from './types';
+import { type HttpSetup } from '@kbn/core/public';
+import { type ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import { type ConnectorExecutorResult, rewriteResponseToCamelCase } from '../lib/rewrite_response_body';
+import { type Fields, type Issue, type IssueTypes } from './types';
 
 export async function getIssueTypes({
   http,

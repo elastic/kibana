@@ -11,16 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 import {
   hasEditCapabilities,
-  HasEditCapabilities,
-  EmbeddableApiContext,
-  CanAccessViewMode,
+  type HasEditCapabilities,
+  type EmbeddableApiContext,
+  type CanAccessViewMode,
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import {
-  Action,
-  FrequentCompatibilityChangeAction,
+  type Action,
+  type FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 

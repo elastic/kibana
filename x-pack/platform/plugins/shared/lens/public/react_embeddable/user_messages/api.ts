@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import { type SpacesApi } from '@kbn/spaces-plugin/public';
+import { type Adapters } from '@kbn/inspector-plugin/common';
+import { type BehaviorSubject } from 'rxjs';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
@@ -15,10 +15,10 @@ import {
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
 import {
-  UserMessagesGetter,
-  UserMessage,
-  FramePublicAPI,
-  SharingSavedObjectProps,
+  type UserMessagesGetter,
+  type UserMessage,
+  type FramePublicAPI,
+  type SharingSavedObjectProps,
 } from '../../types';
 import {
   getActiveDatasourceIdFromDoc,
@@ -26,11 +26,11 @@ import {
   getInitialDataViewsObject,
 } from '../../utils';
 import {
-  LensPublicCallbacks,
-  LensEmbeddableStartServices,
-  VisualizationContextHelper,
-  LensApi,
-  LensInternalApi,
+  type LensPublicCallbacks,
+  type LensEmbeddableStartServices,
+  type VisualizationContextHelper,
+  type LensApi,
+  type LensInternalApi,
 } from '../types';
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 import { getSearchWarningMessages } from '../../utils';

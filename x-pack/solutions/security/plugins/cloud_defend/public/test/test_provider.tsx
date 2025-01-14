@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { useMemo, FC, PropsWithChildren } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

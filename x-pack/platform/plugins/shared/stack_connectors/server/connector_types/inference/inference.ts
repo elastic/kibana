@@ -6,19 +6,19 @@
  */
 
 import { text as streamToString } from 'node:stream/consumers';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
-import { Readable } from 'stream';
+import { type Readable } from 'stream';
 
-import { AxiosError } from 'axios';
+import { type AxiosError } from 'axios';
 import {
-  InferenceInferenceRequest,
-  InferenceInferenceResponse,
+  type InferenceInferenceRequest,
+  type InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { filter, from, identity, map, mergeMap, Observable, tap } from 'rxjs';
-import OpenAI from 'openai';
-import { ChatCompletionChunk } from 'openai/resources';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { filter, from, identity, map, mergeMap, type Observable, tap } from 'rxjs';
+import type OpenAI from 'openai';
+import { type ChatCompletionChunk } from 'openai/resources';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -27,20 +27,20 @@ import {
   UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
 import {
-  Config,
-  Secrets,
-  RerankParams,
-  RerankResponse,
-  SparseEmbeddingParams,
-  SparseEmbeddingResponse,
-  TextEmbeddingParams,
-  TextEmbeddingResponse,
-  UnifiedChatCompleteParams,
-  UnifiedChatCompleteResponse,
-  DashboardActionParams,
-  DashboardActionResponse,
-  ChatCompleteParams,
-  ChatCompleteResponse,
+  type Config,
+  type Secrets,
+  type RerankParams,
+  type RerankResponse,
+  type SparseEmbeddingParams,
+  type SparseEmbeddingResponse,
+  type TextEmbeddingParams,
+  type TextEmbeddingResponse,
+  type UnifiedChatCompleteParams,
+  type UnifiedChatCompleteResponse,
+  type DashboardActionParams,
+  type DashboardActionResponse,
+  type ChatCompleteParams,
+  type ChatCompleteResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';

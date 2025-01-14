@@ -14,7 +14,7 @@ import {
   IconChartGaugeArc,
   IconChartGaugeCircle,
 } from '@kbn/chart-icons';
-import { GaugeShape, GaugeShapes } from '../../../common';
+import { type GaugeShape, GaugeShapes } from '../../../common';
 
 export const getGaugeIconByType = (type: GaugeShape) =>
   ({

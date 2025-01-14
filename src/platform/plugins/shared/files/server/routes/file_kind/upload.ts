@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import { ReplaySubject } from 'rxjs';
-import { Readable } from 'stream';
+import { type Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
@@ -18,7 +18,7 @@ import { FILES_API_ROUTES } from '../api_routes';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
 import type { FileKindRouter } from './types';
-import { CreateHandler } from './types';
+import { type CreateHandler } from './types';
 
 export const method = 'put' as const;
 

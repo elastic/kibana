@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { useState, type VFC } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
-import { Indicator } from '../../../../../common/types/indicator';
+import { type Indicator } from '../../../../../common/types/indicator';
 import { FilterInButtonIcon } from '../../../query_bar/components/filter_in';
 import { FilterOutButtonIcon } from '../../../query_bar/components/filter_out';
 import {

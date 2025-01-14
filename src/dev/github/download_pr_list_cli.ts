@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run, Flags } from '@kbn/dev-cli-runner';
+import { run, type Flags } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import fs from 'fs';
 import Path from 'path';

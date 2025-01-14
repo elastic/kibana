@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStateContainer, PureTransition } from '../../common/state_containers';
+import { createStateContainer, type PureTransition } from '../../common/state_containers';
 
 export interface TodoItem {
   text: string;

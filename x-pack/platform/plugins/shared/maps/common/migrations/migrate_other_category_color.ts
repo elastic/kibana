@@ -8,9 +8,9 @@
 import _ from 'lodash';
 import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
 import {
-  ColorStylePropertyDescriptor,
-  LayerDescriptor,
-  VectorStyleDescriptor,
+  type ColorStylePropertyDescriptor,
+  type LayerDescriptor,
+  type VectorStyleDescriptor,
 } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 

@@ -9,10 +9,10 @@
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 
-import { FormHook, FieldConfig } from '../types';
+import { type FormHook, type FieldConfig } from '../types';
 import { getFieldValidityAndErrorMessage } from '../helpers';
 import { useFormContext } from '../form_context';
-import { useField, InternalFieldConfig } from '../hooks';
+import { useField, type InternalFieldConfig } from '../hooks';
 
 export interface Props {
   path: string;

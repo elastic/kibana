@@ -6,8 +6,8 @@
  */
 
 import {
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
+  type ImportExceptionListItemSchemaDecoded,
+  type ImportExceptionListSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 /**

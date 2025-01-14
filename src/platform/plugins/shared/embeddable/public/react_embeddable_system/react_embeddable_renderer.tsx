@@ -10,21 +10,21 @@
 import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
-  HasSerializedChildState,
-  HasSnapshottableState,
+  type HasSerializedChildState,
+  type HasSnapshottableState,
   initializeUnsavedChanges,
-  SerializedPanelState,
+  type SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
+import { PresentationPanel, type PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { type ComparatorDefinition, type StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import {
-  BuildReactEmbeddableApiRegistration,
-  DefaultEmbeddableApi,
-  SetReactEmbeddableApiRegistration,
+  type BuildReactEmbeddableApiRegistration,
+  type DefaultEmbeddableApi,
+  type SetReactEmbeddableApiRegistration,
 } from './types';
 import { PhaseTracker } from './phase_tracker';
 

@@ -15,10 +15,10 @@ import {
   EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
-  CustomItemAction,
+  type CustomItemAction,
   EuiCopy,
   EuiToolTip,
   euiScrollBarStyles,
@@ -30,7 +30,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
-import { css, Interpolation, Theme } from '@emotion/react';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
@@ -40,7 +40,7 @@ import {
 } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
-import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
+import { EsqlStarredQueriesService, type StarredQueryItem } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
 
 export function QueryHistoryAction({

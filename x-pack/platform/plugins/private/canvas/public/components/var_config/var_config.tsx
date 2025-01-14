@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState, type FC } from 'react';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -13,14 +13,14 @@ import {
   EuiToolTip,
   EuiText,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
+  type EuiBasicTableColumn,
+  type EuiTableActionsColumnType,
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CanvasVariable } from '../../../types';
+import { type CanvasVariable } from '../../../types';
 
 import { EditVar } from './edit_var';
 import { DeleteVar } from './delete_var';

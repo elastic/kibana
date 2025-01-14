@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
+import { type PluginInitializer } from '@kbn/core/public';
 import {
   GlobalSearchTestPlugin,
-  GlobalSearchTestPluginSetup,
-  GlobalSearchTestPluginStart,
-  GlobalSearchTestPluginSetupDeps,
-  GlobalSearchTestPluginStartDeps,
+  type GlobalSearchTestPluginSetup,
+  type GlobalSearchTestPluginStart,
+  type GlobalSearchTestPluginSetupDeps,
+  type GlobalSearchTestPluginStartDeps,
 } from './plugin';
 
 export const plugin: PluginInitializer<

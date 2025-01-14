@@ -8,13 +8,13 @@
  */
 
 import {
-  Action,
+  type Action,
   ActionType,
   defaultGroup,
   EMPTY_GROUP_BY_ID,
-  GroupMap,
-  GroupsById,
-  Storage,
+  type GroupMap,
+  type GroupsById,
+  type Storage,
 } from '../types';
 import { addGroupsToStorage, getAllGroupsInStorage } from '../..';
 

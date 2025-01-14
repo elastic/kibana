@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../../common/types/api';
 import {
-  ExtractionRule,
-  ExtractionRuleBase,
-  ExtractionRuleFieldRule,
+  type ExtractionRule,
+  type ExtractionRuleBase,
+  type ExtractionRuleFieldRule,
 } from '../../../../../../../../common/types/extraction_rules';
 import {
-  AddExtractionRuleActions,
+  type AddExtractionRuleActions,
   AddExtractionRuleApiLogic,
 } from '../../../../../api/crawler/extraction_rules/add_extraction_rule_api_logic';
 import {
-  DeleteExtractionRuleActions,
+  type DeleteExtractionRuleActions,
   DeleteExtractionRuleApiLogic,
 } from '../../../../../api/crawler/extraction_rules/delete_extraction_rule_api_logic';
 import {
-  FetchExtractionRulesActions,
+  type FetchExtractionRulesActions,
   FetchExtractionRulesApiLogic,
 } from '../../../../../api/crawler/extraction_rules/fetch_extraction_rules_api_logic';
 import {
-  UpdateExtractionRuleActions,
+  type UpdateExtractionRuleActions,
   UpdateExtractionRuleApiLogic,
 } from '../../../../../api/crawler/extraction_rules/update_extraction_rule_api_logic';
 import { IndexNameLogic } from '../../../index_name_logic';
 
 import {
-  CrawlerDomainDetailActions,
+  type CrawlerDomainDetailActions,
   CrawlerDomainDetailLogic,
-  CrawlerDomainDetailValues,
+  type CrawlerDomainDetailValues,
 } from '../crawler_domain_detail_logic';
 
 export type ExtractionRuleView = ExtractionRule & { isExpanded: boolean };

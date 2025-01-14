@@ -8,14 +8,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { BoolQuery } from '@kbn/es-query';
 import {
-  colorSchema,
-  edgeDataSchema,
-  entityNodeDataSchema,
-  graphRequestSchema,
-  graphResponseSchema,
-  groupNodeDataSchema,
-  labelNodeDataSchema,
-  nodeShapeSchema,
+  type colorSchema,
+  type edgeDataSchema,
+  type entityNodeDataSchema,
+  type graphRequestSchema,
+  type graphResponseSchema,
+  type groupNodeDataSchema,
+  type labelNodeDataSchema,
+  type nodeShapeSchema,
 } from '../../schema/graph/v1';
 
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {

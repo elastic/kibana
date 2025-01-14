@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import {
-  UpgradePackagePolicyDryRunResponse,
-  UpgradePackagePolicyResponse,
+  type UpgradePackagePolicyDryRunResponse,
+  type UpgradePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { type FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
 

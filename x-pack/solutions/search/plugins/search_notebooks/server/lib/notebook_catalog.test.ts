@@ -24,12 +24,12 @@ import {
   getNotebookCatalog,
   DEFAULT_NOTEBOOKS,
   NOTEBOOKS_MAP,
-  NotebookCatalogFetchOptions,
+  type NotebookCatalogFetchOptions,
   getNotebookMetadata,
 } from './notebook_catalog';
 import { createNotebooksCache } from '../utils';
-import { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
-import { NotebookDefinition } from '@kbn/ipynb';
+import { type RemoteNotebookCatalog, type SearchNotebooksConfig } from '../config';
+import { type NotebookDefinition } from '@kbn/ipynb';
 
 const emptyNotebookCache = createNotebooksCache();
 const baseConfig: SearchNotebooksConfig = { enabled: true };

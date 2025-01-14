@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { SyntheticEvent } from 'react';
+import React, { type SyntheticEvent } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext, HasUniqueId } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
-  FrequentCompatibilityChangeAction,
+  type FrequentCompatibilityChangeAction,
   type Action,
 } from '@kbn/ui-actions-plugin/public';
 import { isClearableControl } from '../types';

@@ -17,15 +17,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { BulkRequestPanel } from './bulk_request_panel';
-import { CollapsiblePanel, CollapsiblePanelRenderProps } from './collapsible_panel';
-import { Processor } from '../../../../common/types';
+import { CollapsiblePanel, type CollapsiblePanelRenderProps } from './collapsible_panel';
+import { type Processor } from '../../../../common/types';
 
 import { getFormRow, getUseField, Field, JsonEditorField } from '../../../shared_imports';
 
 import {
   ProcessorsEditorContextProvider,
-  OnUpdateHandler,
-  OnDoneLoadJsonHandler,
+  type OnUpdateHandler,
+  type OnDoneLoadJsonHandler,
   PipelineEditor,
 } from '../pipeline_editor';
 

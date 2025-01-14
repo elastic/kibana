@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
+import { type PluginConfigDescriptor } from '@kbn/core/server';
+import { ConfigSchema, type ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: {

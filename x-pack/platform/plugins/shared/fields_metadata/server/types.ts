@@ -8,8 +8,8 @@
 import type { CoreSetup } from '@kbn/core/server';
 
 import {
-  FieldsMetadataServiceSetup,
-  FieldsMetadataServiceStart,
+  type FieldsMetadataServiceSetup,
+  type FieldsMetadataServiceStart,
 } from './services/fields_metadata/types';
 
 export type FieldsMetadataPluginCoreSetup = CoreSetup<

@@ -6,9 +6,9 @@
  */
 
 import {
-  PromptResponse,
+  type PromptResponse,
   PromptTypeEnum,
-  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  type PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
 import { getRandomEuiColor } from './helpers';

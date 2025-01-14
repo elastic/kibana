@@ -9,13 +9,13 @@ import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import {
-  CommonAlertStatus,
-  CommonAlertState,
-  CommonAlert,
-  AlertState,
+  type CommonAlertStatus,
+  type CommonAlertState,
+  type CommonAlert,
+  type AlertState,
 } from '../../../common/types/alerts';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
-import { PanelItem } from '../types';
+import { type PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
 

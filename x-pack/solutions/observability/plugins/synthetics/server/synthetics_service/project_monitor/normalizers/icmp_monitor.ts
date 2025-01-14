@@ -10,11 +10,11 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  ICMPFields,
+  type ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
 import {
-  NormalizerResult,
-  NormalizedProjectProps,
+  type NormalizerResult,
+  type NormalizedProjectProps,
   normalizeYamlConfig,
   getNormalizeCommonFields,
   getValueInSeconds,

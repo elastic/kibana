@@ -8,9 +8,9 @@
 import { lastValueFrom, of } from 'rxjs';
 import {
   ToolChoiceType,
-  ChatCompletionChunkEvent,
+  type ChatCompletionChunkEvent,
   ChatCompletionEventType,
-  ChatCompletionTokenCountEvent,
+  type ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { chunksIntoMessage } from './chunks_into_message';
 import type { Logger } from '@kbn/logging';

@@ -11,9 +11,9 @@ import {
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/constants';
 import {
-  IThreatIntelligencePlugin,
-  ThreatIntelligencePluginCoreSetupDependencies,
-  ThreatIntelligencePluginSetupDependencies,
+  type IThreatIntelligencePlugin,
+  type ThreatIntelligencePluginCoreSetupDependencies,
+  type ThreatIntelligencePluginSetupDependencies,
 } from './types';
 import { threatIntelligenceSearchStrategyProvider } from './search_strategy';
 

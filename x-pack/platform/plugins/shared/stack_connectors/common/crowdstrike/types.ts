@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { type TypeOf } from '@kbn/config-schema';
 import {
-  CrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeConfigSchema,
-  CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetAgentOnlineStatusResponseSchema,
-  CrowdstrikeHostActionsParamsSchema,
-  CrowdstrikeSecretsSchema,
-  CrowdstrikeActionParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
-  CrowdstrikeGetAgentsResponseSchema,
-  RelaxedCrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeInitRTRParamsSchema,
-  CrowdstrikeExecuteRTRResponseSchema,
+  type CrowdstrikeBaseApiResponseSchema,
+  type CrowdstrikeConfigSchema,
+  type CrowdstrikeGetAgentsParamsSchema,
+  type CrowdstrikeGetAgentOnlineStatusResponseSchema,
+  type CrowdstrikeHostActionsParamsSchema,
+  type CrowdstrikeSecretsSchema,
+  type CrowdstrikeActionParamsSchema,
+  type CrowdstrikeGetTokenResponseSchema,
+  type CrowdstrikeGetAgentsResponseSchema,
+  type RelaxedCrowdstrikeBaseApiResponseSchema,
+  type CrowdstrikeInitRTRParamsSchema,
+  type CrowdstrikeExecuteRTRResponseSchema,
 } from './schema';
 
 export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import Papa from 'papaparse';
 
-import { FieldCopyAction, Pipeline, Processor } from '../../common/types';
+import { type FieldCopyAction, type Pipeline, type Processor } from '../../common/types';
 
 const REQUIRED_CSV_HEADERS = ['source_field', 'destination_field'];
 

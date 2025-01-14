@@ -8,14 +8,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { type ReactWrapper } from 'enzyme';
+import { registerTestBed, type TestBed } from '@kbn/test-jest-helpers';
 
 import { FIELD_PREVIEW_PATH } from '../../common/constants';
-import { Context } from '../../public/components/field_editor_context';
+import { type Context } from '../../public/components/field_editor_context';
 import {
   FieldEditorFlyoutContent,
-  Props,
+  type Props,
 } from '../../public/components/field_editor_flyout_content';
 import {
   WithFieldEditorDependencies,
@@ -23,7 +23,7 @@ import {
   spyIndexPatternGetByName,
   spySearchQuery,
   spySearchQueryResponse,
-  TestDoc,
+  type TestDoc,
 } from './helpers';
 
 const defaultProps: Props = {

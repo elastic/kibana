@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import { type CustomRequestHandlerContext } from '@kbn/core/server';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleTypeParams,
-  RuleTypeState,
+  type AlertInstanceContext,
+  type AlertInstanceState,
+  type RuleTypeParams,
+  type RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
-import { AlertsClient } from './alert_data_client/alerts_client';
+import { type RuleExecutorOptions, type RuleExecutorServices, type RuleType } from '@kbn/alerting-plugin/server';
+import { type AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
   TState extends RuleTypeState,

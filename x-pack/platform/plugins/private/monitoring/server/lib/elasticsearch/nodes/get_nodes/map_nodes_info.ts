@@ -9,9 +9,9 @@ import { isUndefined } from 'lodash';
 import { calculateNodeType } from '../calculate_node_type';
 import { getNodeTypeClassLabel } from '../get_node_type_class_label';
 import {
-  ElasticsearchResponseHit,
-  ElasticsearchModifiedSource,
-  ElasticsearchMetricbeatNode,
+  type ElasticsearchResponseHit,
+  type ElasticsearchModifiedSource,
+  type ElasticsearchMetricbeatNode,
 } from '../../../../../common/types/es';
 
 /**

@@ -13,8 +13,8 @@ import {
 } from '../../lib/generate_maintenance_window_events';
 import { getMaintenanceWindowDateAndStatus } from '../../lib/get_maintenance_window_date_and_status';
 import {
-  DateRange,
-  MaintenanceWindowClientContext,
+  type DateRange,
+  type MaintenanceWindowClientContext,
   MaintenanceWindowStatus,
 } from '../../../../../common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';

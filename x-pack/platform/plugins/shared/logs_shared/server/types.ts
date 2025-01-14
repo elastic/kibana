@@ -7,15 +7,15 @@
 
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
+  type PluginSetup as DataPluginSetup,
+  type PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { type PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
-import { LogsSharedDomainLibs } from './lib/logs_shared_types';
-import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+import { type LogsSharedDomainLibs } from './lib/logs_shared_types';
+import { type LogViewsServiceSetup, type LogViewsServiceStart } from './services/log_views/types';
 
 export type LogsSharedPluginCoreSetup = CoreSetup<
   LogsSharedServerPluginStartDeps,

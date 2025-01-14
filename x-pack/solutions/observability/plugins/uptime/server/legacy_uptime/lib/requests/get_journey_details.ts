@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type UMElasticsearchQueryFn } from '../adapters/framework';
 import {
-  JourneyStep,
-  SyntheticsJourneyApiResponse,
+  type JourneyStep,
+  type SyntheticsJourneyApiResponse,
 } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyDetails {

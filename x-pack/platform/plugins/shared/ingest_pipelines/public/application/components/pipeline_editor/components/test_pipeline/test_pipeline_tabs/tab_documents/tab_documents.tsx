@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
+import React, { type FunctionComponent, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,13 +17,13 @@ import {
   Field,
   JsonEditorField,
   useKibana,
-  FieldConfig,
+  type FieldConfig,
   fieldValidators,
-  ValidationFuncArg,
-  FormHook,
+  type ValidationFuncArg,
+  type FormHook,
   Form,
 } from '../../../../../../../shared_imports';
-import { Document } from '../../../../types';
+import { type Document } from '../../../../types';
 import { AddDocumentsAccordion } from './add_docs_accordion';
 import { ResetDocumentsModal } from './reset_documents_modal';
 

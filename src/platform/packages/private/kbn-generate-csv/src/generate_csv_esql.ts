@@ -19,8 +19,8 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import {
   AuthenticationExpiredError,
-  CancellationToken,
-  ReportingError,
+  type CancellationToken,
+  type ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';

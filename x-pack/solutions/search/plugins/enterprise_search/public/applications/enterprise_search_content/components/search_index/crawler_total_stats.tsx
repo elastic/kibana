@@ -10,7 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiStatProps,
+  type EuiStatProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,

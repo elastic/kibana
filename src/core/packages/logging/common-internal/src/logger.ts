@@ -8,14 +8,14 @@
  */
 
 import {
-  Appender,
+  type Appender,
   LogLevel,
-  LogRecord,
-  LoggerFactory,
-  LogMeta,
-  Logger,
-  LogMessageSource,
-  LogLevelId,
+  type LogRecord,
+  type LoggerFactory,
+  type LogMeta,
+  type Logger,
+  type LogMessageSource,
+  type LogLevelId,
 } from '@kbn/logging';
 
 /**

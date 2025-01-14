@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Geometry, Position } from 'geojson';
+import { type Geometry, type Position } from 'geojson';
 import { set } from '@kbn/safer-lodash-set';
 import {
   CHECK_IS_DRAWING_INDEX,

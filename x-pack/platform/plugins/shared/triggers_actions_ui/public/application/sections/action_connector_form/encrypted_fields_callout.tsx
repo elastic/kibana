@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  FieldsMap,
+  type FieldsMap,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';

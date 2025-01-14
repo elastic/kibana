@@ -8,7 +8,7 @@
  */
 
 import type { RangeFilterParams } from '../../filters';
-import { KueryNode, nodeTypes } from '../types';
+import { type KueryNode, nodeTypes } from '../types';
 
 export const nodeBuilder = {
   is: (fieldName: string, value: string | KueryNode): KueryNode => {

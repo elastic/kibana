@@ -22,23 +22,23 @@ import {
   EuiBetaBadge,
   EuiSplitPanel,
   EuiCallOut,
-  IconType,
+  type IconType,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { type ActionVariable, type RuleActionParam } from '@kbn/alerting-plugin/common';
+import { type ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import {
-  IErrorObject,
-  RuleSystemAction,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
+  type IErrorObject,
+  type RuleSystemAction,
+  type ActionTypeIndex,
+  type ActionConnector,
+  type ActionVariables,
+  type ActionTypeRegistryContract,
   ActionConnectorMode,
 } from '../../../types';
-import { ActionAccordionFormProps } from './action_form';
+import { type ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';

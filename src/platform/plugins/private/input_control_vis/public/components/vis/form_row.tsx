@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 
 import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 

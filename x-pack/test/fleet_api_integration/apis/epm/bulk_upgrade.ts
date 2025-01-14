@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import {
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
+  type BulkInstallPackageInfo,
+  type BulkInstallPackagesResponse,
+  type IBulkInstallPackageHTTPError,
 } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { type FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 

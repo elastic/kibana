@@ -11,15 +11,15 @@ import React, { Component } from 'react';
 import { debounce, matches } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
+import { EuiSpacer, Query, type CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import { type HttpStart, type OverlayStart, type NotificationsStart, type ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { Subscription } from 'rxjs';
+import { type SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { type Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import {
   parseQuery,
@@ -31,14 +31,14 @@ import {
   bulkDeleteObjects,
   bulkGetObjects,
   extractExportDetails,
-  SavedObjectsExportResultDetails,
+  type SavedObjectsExportResultDetails,
   getTagFindReferences,
 } from '../../lib';
 
-import { SavedObjectWithMetadata } from '../../types';
+import { type SavedObjectWithMetadata } from '../../types';
 import {
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementColumnServiceStart,
+  type SavedObjectsManagementActionServiceStart,
+  type SavedObjectsManagementColumnServiceStart,
 } from '../../services';
 import {
   Header,

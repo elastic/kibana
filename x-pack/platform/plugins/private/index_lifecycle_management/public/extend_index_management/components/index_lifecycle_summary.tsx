@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,16 +19,16 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiBadgeProps,
+  type EuiBadgeProps,
   EuiBadge,
   EuiCode,
   useEuiTheme,
 } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
-import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
-import { Phase } from '../../../common/types';
+import { type ApplicationStart } from '@kbn/core/public';
+import { type Index, type IndexDetailsTab } from '@kbn/index-management-shared-types';
+import { type IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import { type Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 interface Props {
   index: Index;

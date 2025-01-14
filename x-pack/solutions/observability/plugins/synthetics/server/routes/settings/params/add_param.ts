@@ -8,12 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { type SavedObject, type SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { type SyntheticsRestApiRouteFactory } from '../../types';
 import {
-  SyntheticsParamRequest,
-  SyntheticsParams,
-  SyntheticsParamSOAttributes,
+  type SyntheticsParamRequest,
+  type SyntheticsParams,
+  type SyntheticsParamSOAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';

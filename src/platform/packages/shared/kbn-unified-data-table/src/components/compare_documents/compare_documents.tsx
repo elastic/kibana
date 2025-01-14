@@ -9,19 +9,19 @@
 
 import {
   EuiDataGrid,
-  EuiDataGridColumnVisibility,
-  EuiDataGridInMemory,
-  EuiDataGridProps,
-  EuiDataGridRowHeightsOptions,
-  EuiDataGridSchemaDetector,
-  EuiDataGridStyle,
-  EuiDataGridToolBarVisibilityOptions,
+  type EuiDataGridColumnVisibility,
+  type EuiDataGridInMemory,
+  type EuiDataGridProps,
+  type EuiDataGridRowHeightsOptions,
+  type EuiDataGridSchemaDetector,
+  type EuiDataGridStyle,
+  type EuiDataGridToolBarVisibilityOptions,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { type AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

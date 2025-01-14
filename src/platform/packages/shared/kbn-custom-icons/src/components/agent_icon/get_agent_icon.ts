@@ -13,7 +13,7 @@ import {
   isJavaAgentName,
   isRumAgentName,
   hasOpenTelemetryPrefix,
-  OpenTelemetryAgentName,
+  type OpenTelemetryAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils';
 import defaultIcon from '../../../assets/default.svg';

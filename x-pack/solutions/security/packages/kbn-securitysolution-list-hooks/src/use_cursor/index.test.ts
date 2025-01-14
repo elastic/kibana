@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import { UseCursorProps, useCursor } from '.';
+import { type UseCursorProps, useCursor } from '.';
 
 describe('useCursor', () => {
   it('returns undefined cursor if no values have been set', () => {

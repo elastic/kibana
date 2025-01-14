@@ -6,36 +6,36 @@
  */
 
 import {
-  KibanaRequest,
-  Logger,
-  SavedObjectsServiceStart,
-  PluginInitializerContext,
-  ISavedObjectsRepository,
-  CoreStart,
+  type KibanaRequest,
+  type Logger,
+  type SavedObjectsServiceStart,
+  type PluginInitializerContext,
+  type ISavedObjectsRepository,
+  type CoreStart,
 } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { type PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   HTTPAuthorizationHeader,
-  SecurityPluginSetup,
-  SecurityPluginStart,
+  type SecurityPluginSetup,
+  type SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { type EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type IEventLogClientService, type IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { type RuleTypeRegistry, type SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { AlertingRulesConfig } from './config';
-import { GetAlertIndicesAlias } from './lib';
-import { AlertsService } from './alerts_service/alerts_service';
-import { BackfillClient } from './backfill_client/backfill_client';
+import { type AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { type AlertingRulesConfig } from './config';
+import { type GetAlertIndicesAlias } from './lib';
+import { type AlertsService } from './alerts_service/alerts_service';
+import { type BackfillClient } from './backfill_client/backfill_client';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
-import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { type ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;

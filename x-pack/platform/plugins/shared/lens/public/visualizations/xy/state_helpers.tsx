@@ -7,24 +7,24 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { type EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { type EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
-import { DataViewsState } from '../../state_management';
-import { FramePublicAPI, DatasourcePublicAPI, UserMessage } from '../../types';
+import { type DataViewsState } from '../../state_management';
+import { type FramePublicAPI, type DatasourcePublicAPI, type UserMessage } from '../../types';
 import {
   visualizationSubtypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  SeriesType,
-  YConfig,
-  XYAnnotationLayerConfig,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type XYReferenceLineLayerConfig,
+  type SeriesType,
+  type YConfig,
+  type XYAnnotationLayerConfig,
 } from './types';
 import {
   getDataLayers,

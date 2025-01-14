@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
-import { CustomIntegrationIcon, IntegrationCategory, PLUGIN_ID } from '../../common';
+import { type CoreSetup } from '@kbn/core/server';
+import { type CustomIntegrationRegistry } from '../custom_integration_registry';
+import { type CustomIntegrationIcon, type IntegrationCategory, PLUGIN_ID } from '../../common';
 
 interface ExternalIntegration {
   id: string;

@@ -22,8 +22,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
 import {
-  DataView,
-  DataViewSpec,
+  type DataView,
+  type DataViewSpec,
   Form,
   useForm,
   useFormData,
@@ -38,10 +38,10 @@ import { removeSpaces } from '../lib';
 import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
 import {
-  DataViewEditorContext,
-  RollupIndicesCapsResponse,
-  IndexPatternConfig,
-  FormInternal,
+  type DataViewEditorContext,
+  type RollupIndicesCapsResponse,
+  type IndexPatternConfig,
+  type FormInternal,
 } from '../types';
 
 import {
@@ -57,7 +57,7 @@ import {
   RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorService } from '../data_view_editor_service';
+import { type DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**

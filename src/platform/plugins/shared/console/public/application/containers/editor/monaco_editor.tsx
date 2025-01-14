@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { type CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, type monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { useSetInputEditor } from '../../hooks';
 import { ContextMenu } from './components';

@@ -8,10 +8,10 @@
  */
 
 import { LegendValue } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import { type Datatable } from '@kbn/expressions-plugin/public';
 import {
-  BucketColumns,
-  PartitionVisParams,
+  type BucketColumns,
+  type PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,

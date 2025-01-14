@@ -7,21 +7,21 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { type DragDropIdentifier, type DropType } from '@kbn/dom-drag-drop';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
-  Visualization,
-  FramePublicAPI,
-  DatasourceDimensionEditorProps,
-  DatasourceMap,
-  VisualizationMap,
-  UserMessagesGetter,
-  AddLayerFunction,
-  RegisterLibraryAnnotationGroupFunction,
-  StateSetter,
-  DragDropOperation,
-  VisualizationDimensionGroupConfig,
+  type Visualization,
+  type FramePublicAPI,
+  type DatasourceDimensionEditorProps,
+  type DatasourceMap,
+  type VisualizationMap,
+  type UserMessagesGetter,
+  type AddLayerFunction,
+  type RegisterLibraryAnnotationGroupFunction,
+  type StateSetter,
+  type DragDropOperation,
+  type VisualizationDimensionGroupConfig,
 } from '../../../types';
 
 export interface ConfigPanelWrapperProps {

@@ -10,11 +10,11 @@ import {
   EuiComboBox,
   EuiHealth,
   EuiHighlight,
-  EuiComboBoxOptionOption,
+  type EuiComboBoxOptionOption,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxProps,
+  type EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Tag } from '../../../common/types';

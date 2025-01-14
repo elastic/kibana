@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEvent, ReactNode } from 'react';
+import React, { type ChangeEvent, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -14,23 +14,23 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  type EuiSwitchEvent,
 } from '@elastic/eui';
 import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { OtherCategoryColorPicker } from './other_category_color_picker';
 import {
-  CategoryColorStop,
-  ColorDynamicOptions,
-  OrdinalColorStop,
+  type CategoryColorStop,
+  type ColorDynamicOptions,
+  type OrdinalColorStop,
 } from '../../../../../../common/descriptor_types';
 import {
   CATEGORICAL_DATA_TYPES,
   COLOR_MAP_TYPE,
-  VECTOR_STYLES,
+  type VECTOR_STYLES,
 } from '../../../../../../common/constants';
-import { StyleField } from '../../style_fields_helper';
-import { DynamicColorProperty } from '../../properties/dynamic_color_property';
+import { type StyleField } from '../../style_fields_helper';
+import { type DynamicColorProperty } from '../../properties/dynamic_color_property';
 
 interface Props {
   fields: StyleField[];

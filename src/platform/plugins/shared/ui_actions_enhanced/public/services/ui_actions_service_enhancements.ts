@@ -8,22 +8,22 @@
  */
 
 import { createElement } from 'react';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { DrilldownDefinition } from '../drilldowns';
+import { type SerializableRecord } from '@kbn/utility-types';
+import { type ILicense } from '@kbn/licensing-plugin/common/types';
+import { type LicensingPluginSetup, type LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { type SavedObjectReference } from '@kbn/core/types';
+import { type PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { type DrilldownDefinition } from '../drilldowns';
 import {
   ActionFactory,
-  ActionFactoryDefinition,
-  BaseActionConfig,
-  BaseActionFactoryContext,
-  SerializedEvent,
+  type ActionFactoryDefinition,
+  type BaseActionConfig,
+  type BaseActionFactoryContext,
+  type SerializedEvent,
 } from '../dynamic_actions';
-import { ActionFactoryRegistry } from '../types';
+import { type ActionFactoryRegistry } from '../types';
 
-import { DynamicActionsState } from '../../common/types';
+import { type DynamicActionsState } from '../../common/types';
 
 export type { DynamicActionsState };
 

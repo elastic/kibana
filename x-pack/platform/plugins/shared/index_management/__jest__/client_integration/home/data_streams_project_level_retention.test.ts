@@ -16,7 +16,7 @@ import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
 import {
-  DataStreamsTabTestBed,
+  type DataStreamsTabTestBed,
   setup,
   createDataStreamPayload,
   createDataStreamBackingIndex,

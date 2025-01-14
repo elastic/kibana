@@ -12,13 +12,13 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import {
-  CrawlRequestWithDetailsFromServer,
+  type CrawlRequestWithDetailsFromServer,
   CrawlerStatus,
   CrawlType,
 } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
 
-import { CrawlDetailLogic, CrawlDetailValues } from './crawl_detail_logic';
+import { CrawlDetailLogic, type CrawlDetailValues } from './crawl_detail_logic';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,

@@ -18,7 +18,7 @@ import {
   EuiPanel,
   EuiScreenReaderLive,
   EuiSelectable,
-  EuiSelectableOption,
+  type EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -28,7 +28,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { type MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { LicenseBadge } from './license_badge';
 import { ModelSelectLogic } from './model_select_logic';

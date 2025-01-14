@@ -6,21 +6,21 @@
  */
 
 import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
+  type PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type Logger,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { sendMessageEvent } from './analytics/events';
 import {
-  SearchPlaygroundPluginSetup,
-  SearchPlaygroundPluginSetupDependencies,
-  SearchPlaygroundPluginStart,
-  SearchPlaygroundPluginStartDependencies,
+  type SearchPlaygroundPluginSetup,
+  type SearchPlaygroundPluginSetupDependencies,
+  type SearchPlaygroundPluginStart,
+  type SearchPlaygroundPluginStartDependencies,
 } from './types';
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';

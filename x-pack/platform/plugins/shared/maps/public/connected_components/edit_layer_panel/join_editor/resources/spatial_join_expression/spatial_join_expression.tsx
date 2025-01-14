@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  ESDistanceSourceDescriptor,
-  JoinSourceDescriptor,
+  type ESDistanceSourceDescriptor,
+  type JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { SpatialJoinPopoverContent } from './spatial_join_popover_content';
 

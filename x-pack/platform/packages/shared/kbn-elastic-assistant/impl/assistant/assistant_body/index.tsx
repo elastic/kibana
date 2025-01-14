@@ -6,22 +6,22 @@
  */
 
 import React, {
-  Dispatch,
-  FunctionComponent,
-  SetStateAction,
+  type Dispatch,
+  type FunctionComponent,
+  type SetStateAction,
   useEffect,
   useMemo,
   useRef,
 } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core-http-browser';
+import { type HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { type PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
-import { Conversation } from '../../..';
+import { type Conversation } from '../../..';
 import { UpgradeLicenseCallToAction } from '../upgrade_license_cta';
 import * as i18n from '../translations';
 interface Props {

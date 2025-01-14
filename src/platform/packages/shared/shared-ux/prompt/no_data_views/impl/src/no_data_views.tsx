@@ -10,8 +10,8 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import {
-  NoDataViewsPromptServices,
-  NoDataViewsPromptProps,
+  type NoDataViewsPromptServices,
+  type NoDataViewsPromptProps,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';

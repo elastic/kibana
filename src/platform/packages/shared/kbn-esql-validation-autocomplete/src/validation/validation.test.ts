@@ -13,9 +13,9 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
+  type FieldType,
+  type FunctionDefinition,
+  type SupportedDataType,
   dataTypes,
   fieldTypes as _fieldTypes,
 } from '../definitions/types';
@@ -34,7 +34,7 @@ import {
   unsupported_field,
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
-import { Setup, setup } from './__tests__/helpers';
+import { type Setup, setup } from './__tests__/helpers';
 
 const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 

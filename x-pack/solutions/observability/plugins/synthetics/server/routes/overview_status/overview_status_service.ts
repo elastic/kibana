@@ -6,21 +6,21 @@
  */
 
 import moment from 'moment/moment';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { getMonitorFilters, OverviewStatusQuery } from '../common';
+import { getMonitorFilters, type OverviewStatusQuery } from '../common';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { ConfigKey } from '../../../common/constants/monitor_management';
-import { RouteContext } from '../types';
+import { type RouteContext } from '../types';
 import {
-  EncryptedSyntheticsMonitorAttributes,
-  OverviewStatusMetaData,
+  type EncryptedSyntheticsMonitorAttributes,
+  type OverviewStatusMetaData,
 } from '../../../common/runtime_types';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {

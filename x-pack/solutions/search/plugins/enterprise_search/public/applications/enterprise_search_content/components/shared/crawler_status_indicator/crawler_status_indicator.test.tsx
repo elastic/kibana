@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { CrawlerDomain, CrawlerStatus } from '../../../api/crawler/types';
+import { type CrawlerDomain, CrawlerStatus } from '../../../api/crawler/types';
 
 import { CrawlerStatusIndicator } from './crawler_status_indicator';
 import { StartCrawlContextMenu } from './start_crawl_context_menu';

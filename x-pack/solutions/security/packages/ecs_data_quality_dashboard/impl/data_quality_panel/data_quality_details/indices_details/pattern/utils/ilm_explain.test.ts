@@ -6,9 +6,9 @@
  */
 
 import {
-  IlmExplainLifecycleLifecycleExplain,
-  IlmExplainLifecycleLifecycleExplainManaged,
-  IlmExplainLifecycleLifecycleExplainUnmanaged,
+  type IlmExplainLifecycleLifecycleExplain,
+  type IlmExplainLifecycleLifecycleExplainManaged,
+  type IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { getIlmExplainPhaseCounts, getPhaseCount, isManaged } from './ilm_explain';

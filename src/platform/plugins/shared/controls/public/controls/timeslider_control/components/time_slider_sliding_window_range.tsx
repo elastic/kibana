@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
-import { Timeslice } from '../types';
+import { EuiDualRange, type EuiRangeTick } from '@elastic/eui';
+import { type Timeslice } from '../types';
 
 interface Props {
   value: Timeslice;

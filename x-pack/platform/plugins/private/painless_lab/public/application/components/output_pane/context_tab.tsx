@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PainlessContext } from '@kbn/monaco';
+import { type PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { painlessContextOptions } from '../../constants';

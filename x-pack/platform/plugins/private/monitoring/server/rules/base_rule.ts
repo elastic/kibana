@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { type Logger, type ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import {
-  RuleType,
+  type RuleType,
   RuleNotifyWhen,
-  RuleExecutorOptions,
-  RulesClient,
-  RuleExecutorServices,
+  type RuleExecutorOptions,
+  type RulesClient,
+  type RuleExecutorServices,
   DEFAULT_AAD_CONFIG,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import {
-  Rule,
-  RuleTypeParams,
-  RawAlertInstance,
-  SanitizedRule,
-  AlertInstanceContext,
+  type Rule,
+  type RuleTypeParams,
+  type RawAlertInstance,
+  type SanitizedRule,
+  type AlertInstanceContext,
 } from '@kbn/alerting-plugin/common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import { type ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
-  AlertState,
-  AlertNodeState,
-  AlertCluster,
-  AlertMessage,
-  AlertData,
-  AlertInstanceState,
-  AlertEnableAction,
-  CommonAlertFilter,
-  CommonAlertParams,
+  type AlertState,
+  type AlertNodeState,
+  type AlertCluster,
+  type AlertMessage,
+  type AlertData,
+  type AlertInstanceState,
+  type AlertEnableAction,
+  type CommonAlertFilter,
+  type CommonAlertParams,
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { AlertSeverity } from '../../common/enums';

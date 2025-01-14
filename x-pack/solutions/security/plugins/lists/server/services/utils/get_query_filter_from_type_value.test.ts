@@ -6,7 +6,7 @@
  */
 
 import {
-  QueryFilterType,
+  type QueryFilterType,
   getEmptyQuery,
   getQueryFilterFromTypeValue,
   getShouldQuery,

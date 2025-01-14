@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogRecord, Logger, LogMeta, LogLevelId } from '@kbn/logging';
-import { GlobalContext, mergeGlobalContext } from './global_context';
+import { type LogRecord, type Logger, type LogMeta, type LogLevelId } from '@kbn/logging';
+import { type GlobalContext, mergeGlobalContext } from './global_context';
 
 /** @internal */
 export class LoggerAdapter implements Logger {

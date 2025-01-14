@@ -11,9 +11,9 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import {
   DrilldownTemplateTable,
-  DrilldownTemplateTableItem,
+  type DrilldownTemplateTableItem,
 } from '../../components/drilldown_template_table';
-import { DrilldownTemplate } from '../../types';
+import { type DrilldownTemplate } from '../../types';
 import { useDrilldownManager } from '../context';
 import { txtLabel } from './i18n';
 

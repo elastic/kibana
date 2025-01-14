@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
-import { Duration } from 'moment';
+import { type ByteSizeValue, schema, type TypeOf } from '@kbn/config-schema';
+import { type ICorsConfig, type IHttpConfig, type ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
+import { type Duration } from 'moment';
 
 export const httpConfigSchema = schema.object(
   {

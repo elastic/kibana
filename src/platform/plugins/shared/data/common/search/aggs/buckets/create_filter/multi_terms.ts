@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
-import { IBucketAggConfig } from '../bucket_agg_type';
-import { MultiFieldKey } from '../multi_field_key';
+import { buildPhraseFilter, type Filter } from '@kbn/es-query';
+import { type IBucketAggConfig } from '../bucket_agg_type';
+import { type MultiFieldKey } from '../multi_field_key';
 
 export const createFilterMultiTerms = (
   aggConfig: IBucketAggConfig,

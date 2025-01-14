@@ -10,10 +10,10 @@ import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
 import { createAsyncAction } from './utils';
 import {
-  CreateMLJobSuccess,
-  DeleteJobResults,
-  MonitorIdParam,
-  HeartbeatIndicesParam,
+  type CreateMLJobSuccess,
+  type DeleteJobResults,
+  type MonitorIdParam,
+  type HeartbeatIndicesParam,
 } from './types';
 
 export const resetMLState = createAction('RESET_ML_STATE');

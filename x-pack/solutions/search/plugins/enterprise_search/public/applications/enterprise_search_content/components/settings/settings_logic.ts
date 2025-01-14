@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, type MakeLogicType } from 'kea';
 
 import { isDeepEqual } from 'react-use/lib/util';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import { type IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { type Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   FetchDefaultPipelineApiLogic,
-  FetchDefaultPipelineResponse,
+  type FetchDefaultPipelineResponse,
 } from '../../api/connector/get_default_pipeline_api_logic';
 import {
-  PostDefaultPipelineArgs,
-  PostDefaultPipelineResponse,
+  type PostDefaultPipelineArgs,
+  type PostDefaultPipelineResponse,
   UpdateDefaultPipelineApiLogic,
 } from '../../api/connector/update_default_pipeline_api_logic';
 

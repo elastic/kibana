@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, isOfAggregateQueryType, type Query } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';

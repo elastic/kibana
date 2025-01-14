@@ -6,9 +6,9 @@
  */
 
 import {
-  CalendarAlignedTimeWindow,
-  RollingTimeWindow,
-  TimeWindow,
+  type CalendarAlignedTimeWindow,
+  type RollingTimeWindow,
+  type TimeWindow,
 } from '../../domain/models/time_window';
 import { ninetyDays, oneMonth, oneWeek, sevenDays, thirtyDays } from './duration';
 

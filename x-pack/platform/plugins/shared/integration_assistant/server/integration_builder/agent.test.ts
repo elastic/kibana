@@ -7,7 +7,7 @@
 
 import { ensureDirSync, createSync } from '../util';
 import { createAgentInput } from './agent';
-import { InputType } from '../../common';
+import { type InputType } from '../../common';
 
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),

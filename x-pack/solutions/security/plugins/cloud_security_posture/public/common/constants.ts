@@ -16,8 +16,8 @@ import {
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
   VULN_MGMT_POLICY_TEMPLATE,
-  CLOUDBEAT_AKS,
-  CLOUDBEAT_GKE,
+  type CLOUDBEAT_AKS,
+  type CLOUDBEAT_GKE,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';

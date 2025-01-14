@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import { PassThrough } from 'stream';
 import {
-  BufferFlushEvent,
-  ChatCompletionErrorEvent,
+  type BufferFlushEvent,
+  type ChatCompletionErrorEvent,
   isChatCompletionError,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
+  type StreamingChatResponseEventWithoutError,
 } from '../../../common/conversation_complete';
 
 export function observableIntoStream(

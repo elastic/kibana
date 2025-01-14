@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
-import { Formatter, commonFormatters } from './common_formatters';
+import { type Formatter, commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
@@ -14,7 +14,7 @@ import {
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
-import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
+import { type BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 

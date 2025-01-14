@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import {
   EuiExpression,
   EuiPopover,
@@ -15,7 +15,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
+import { type IErrorObject } from '../../types';
 
 export interface ValueExpressionProps {
   description: string;

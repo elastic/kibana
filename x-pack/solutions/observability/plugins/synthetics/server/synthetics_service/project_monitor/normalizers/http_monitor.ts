@@ -11,12 +11,12 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  HTTPFields,
-  TLSVersion,
+  type HTTPFields,
+  type TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
-  NormalizedProjectProps,
-  NormalizerResult,
+  type NormalizedProjectProps,
+  type NormalizerResult,
   getNormalizeCommonFields,
   normalizeYamlConfig,
   getOptionalListField,

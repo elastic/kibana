@@ -14,7 +14,7 @@ import {
   type Schema,
   type SchemaLike,
   type WhenOptions,
-  CustomHelpers,
+  type CustomHelpers,
 } from 'joi';
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';

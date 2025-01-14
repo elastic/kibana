@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, PropsWithChildren } from 'react';
+import React, { type FC, useMemo, type PropsWithChildren } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import {
   IndicatorsFiltersContext,
-  IndicatorsFiltersContextValue,
+  type IndicatorsFiltersContextValue,
 } from '../hooks/use_filters_context';
 
 /**

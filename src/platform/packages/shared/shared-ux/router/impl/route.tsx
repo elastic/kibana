@@ -11,8 +11,8 @@ import React, { useMemo } from 'react';
 import {
   // eslint-disable-next-line no-restricted-imports
   Route as ReactRouterRoute,
-  RouteComponentProps,
-  RouteProps,
+  type RouteComponentProps,
+  type RouteProps,
   useRouteMatch,
 } from 'react-router-dom';
 import { useSharedUXRoutesContext } from './routes_context';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionId, CommitFn, State, Store, UpdaterFunction } from '.';
+import { type ActionId, type CommitFn, type State, type Store, type UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
 

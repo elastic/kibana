@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import type {
   AnalyticsServiceSetup,
@@ -27,19 +27,19 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { type PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DEFEND_INSIGHTS_TOOL_ID,
   DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
+  type DefendInsightType,
+  type DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 
-import { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
+import { type DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,

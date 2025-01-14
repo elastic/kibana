@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
   EuiTabbedContent,
-  EuiTabbedContentProps,
+  type EuiTabbedContentProps,
   useEuiOverflowScroll,
-  EuiBasicTableColumn,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { memo, useMemo } from 'react';
-import { Alert } from '@kbn/alerting-types';
+import { type Alert } from '@kbn/alerting-types';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 

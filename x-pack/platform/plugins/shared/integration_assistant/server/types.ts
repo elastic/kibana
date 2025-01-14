@@ -6,17 +6,17 @@
  */
 
 import {
-  ActionsClientBedrockChatModel,
-  ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
-  ActionsClientSimpleChatModel,
+  type ActionsClientBedrockChatModel,
+  type ActionsClientChatOpenAI,
+  type ActionsClientGeminiChatModel,
+  type ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server/plugin';
-import { ESProcessorItem, SamplesFormat } from '../common';
+import { type ESProcessorItem, type SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;

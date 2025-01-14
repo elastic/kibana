@@ -8,8 +8,8 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { ExpressionRendererEvent, ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { type ExpressionRendererEvent, type ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';

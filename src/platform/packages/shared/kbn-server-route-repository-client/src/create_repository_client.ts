@@ -9,13 +9,13 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import {
-  RouteRepositoryClient,
-  ServerRouteRepository,
+  type RouteRepositoryClient,
+  type ServerRouteRepository,
   formatRequest,
 } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
-import { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
+import { type HttpFetchQuery, type HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
 
 export function createRepositoryClient<

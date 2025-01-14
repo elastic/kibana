@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiColorPalettePicker, type EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import {
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
+  type PaletteOutput,
+  type PaletteRegistry,
+  type CustomPaletteParams,
   CUSTOM_PALETTE,
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,

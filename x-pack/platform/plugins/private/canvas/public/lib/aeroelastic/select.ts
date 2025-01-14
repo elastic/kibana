@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionId, Json, PlainFun, Resolve, Selector, State } from '.';
+import { type ActionId, type Json, type PlainFun, type Resolve, type Selector, type State } from '.';
 
 export const select =
   (fun: PlainFun): Selector =>

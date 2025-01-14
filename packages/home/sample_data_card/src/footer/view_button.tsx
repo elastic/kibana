@@ -12,7 +12,7 @@ import { sortBy } from 'lodash';
 import {
   EuiButton,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';

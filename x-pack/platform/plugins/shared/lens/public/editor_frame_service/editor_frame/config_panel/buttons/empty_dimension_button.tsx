@@ -9,12 +9,12 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
-  DragDropIdentifier,
+  type DragDropIdentifier,
   useDragDropContext,
-  DropType,
+  type DropType,
   DropTargetSwapDuplicateCombine,
   Droppable,
-  DroppableProps,
+  type DroppableProps,
 } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
@@ -23,13 +23,13 @@ import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
 import {
-  Datasource,
-  VisualizationDimensionGroupConfig,
-  DatasourceLayers,
+  type Datasource,
+  type VisualizationDimensionGroupConfig,
+  type DatasourceLayers,
   isOperation,
-  IndexPatternMap,
-  DragDropOperation,
-  Visualization,
+  type IndexPatternMap,
+  type DragDropOperation,
+  type Visualization,
 } from '../../../../types';
 
 interface EmptyButtonProps {

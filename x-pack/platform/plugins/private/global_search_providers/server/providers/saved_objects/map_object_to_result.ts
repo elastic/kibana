@@ -7,12 +7,12 @@
 
 import get from 'lodash/get';
 import {
-  SavedObjectsType,
-  ISavedObjectTypeRegistry,
-  SavedObjectsFindResult,
-  Capabilities,
+  type SavedObjectsType,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsFindResult,
+  type Capabilities,
 } from '@kbn/core/server';
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
+import { type GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
 
 export const mapToResults = (
   objects: Array<SavedObjectsFindResult<unknown>>,

@@ -10,7 +10,7 @@
 import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsParams, TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import { type UiSettingsParams, TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 
 export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
   const weekdays = moment.weekdays().slice();

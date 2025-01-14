@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { type CoreStart } from '@kbn/core/public';
+import { type IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { type AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -21,16 +21,16 @@ import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
 import {
-  DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
-  DatasourceLayerPanelProps,
-  PublicAPIProps,
-  DataType,
-  TableChangeType,
-  DatasourceDimensionTriggerProps,
-  DataSourceInfo,
-  UserMessage,
-  OperationMetadata,
+  type DatasourceDimensionEditorProps,
+  type DatasourceDataPanelProps,
+  type DatasourceLayerPanelProps,
+  type PublicAPIProps,
+  type DataType,
+  type TableChangeType,
+  type DatasourceDimensionTriggerProps,
+  type DataSourceInfo,
+  type UserMessage,
+  type OperationMetadata,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import type {

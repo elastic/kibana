@@ -13,11 +13,11 @@ import React from 'react';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { UserProfileService } from '@kbn/core/public';
+import { type UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantProvider, type AssistantProviderProps } from '../../assistant_context';
+import { type AssistantAvailability } from '../../assistant_context/types';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;

@@ -7,10 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
-import { UseNavigateBackToAppProps, useNavigateBackToApp } from './app_helpers';
+import { type UseNavigateBackToAppProps, useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
 import { cloneDeep } from 'lodash';
-import { LensDocument } from '../persistence';
+import { type LensDocument } from '../persistence';
 
 function getLensDocumentMock(someProps?: Partial<LensDocument>) {
   return cloneDeep({ ...defaultDoc, ...someProps });

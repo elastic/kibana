@@ -18,11 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 import {
-  ActionParamsProps,
+  type ActionParamsProps,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { PagerDutyActionParams } from '../types';
+import { type PagerDutyActionParams } from '../types';
 import { LinksList } from './links_list';
 import { OPTIONAL_LABEL } from './translations';
 

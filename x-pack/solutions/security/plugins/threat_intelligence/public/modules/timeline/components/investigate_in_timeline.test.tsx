@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
-  Indicator,
+  type Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { type InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeNavLinks,
   SideNavComponent,
@@ -40,10 +40,10 @@ import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
 
 import {
-  AppDeepLinkId,
-  ChromeNavLink,
-  CloudURLs,
-  NavigationTreeDefinitionUI,
+  type AppDeepLinkId,
+  type ChromeNavLink,
+  type CloudURLs,
+  type NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 

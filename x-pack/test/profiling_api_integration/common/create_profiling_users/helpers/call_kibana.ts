@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosError } from 'axios';
 import { once } from 'lodash';
-import { Elasticsearch, Kibana } from '..';
+import { type Elasticsearch, type Kibana } from '..';
 
 export async function callKibana<T>({
   elasticsearch,

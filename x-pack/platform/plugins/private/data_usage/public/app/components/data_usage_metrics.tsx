@@ -19,7 +19,7 @@ import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, transformToUTCtime } from '../../../common/utils';
 import { useDateRangePicker } from '../hooks/use_date_picker';
-import { ChartsFilters, ChartsFiltersProps } from './filters/charts_filters';
+import { ChartsFilters, type ChartsFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
 import { NoDataCallout } from './no_data_callout';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';

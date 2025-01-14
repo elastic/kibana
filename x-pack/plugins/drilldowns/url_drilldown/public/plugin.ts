@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { type CoreSetup, type CoreStart, type Plugin, type PluginInitializerContext } from '@kbn/core/public';
+import { type EmbeddableSetup, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
-  AdvancedUiActionsSetup,
-  AdvancedUiActionsStart,
+  type AdvancedUiActionsSetup,
+  type AdvancedUiActionsStart,
   urlDrilldownGlobalScopeProvider,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';

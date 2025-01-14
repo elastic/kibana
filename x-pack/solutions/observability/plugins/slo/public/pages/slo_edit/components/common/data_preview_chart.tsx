@@ -17,7 +17,7 @@ import {
   Settings,
   Tooltip,
   TooltipTable,
-  TooltipTableColumn,
+  type TooltipTableColumn,
 } from '@elastic/charts';
 import {
   EuiCallOut,
@@ -41,7 +41,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { GoodBadEventsChart } from '../../../../components/good_bad_events_chart/good_bad_events_chart';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
-import { CreateSLOForm } from '../../types';
+import { type CreateSLOForm } from '../../types';
 
 interface DataPreviewChartProps {
   formatPattern?: string;

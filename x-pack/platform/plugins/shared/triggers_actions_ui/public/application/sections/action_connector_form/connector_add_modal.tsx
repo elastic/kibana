@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiModal,
@@ -28,16 +28,16 @@ import './connector_add_modal.scss';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
-  ActionType,
-  ActionConnector,
-  ActionTypeRegistryContract,
-  ActionTypeModel,
-  ActionTypeIndex,
+  type ActionType,
+  type ActionConnector,
+  type ActionTypeRegistryContract,
+  type ActionTypeModel,
+  type ActionTypeIndex,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
-import { ConnectorForm, ConnectorFormState, ResetForm } from './connector_form';
-import { ConnectorFormSchema } from './types';
+import { ConnectorForm, type ConnectorFormState, type ResetForm } from './connector_form';
+import { type ConnectorFormSchema } from './types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { SectionLoading } from '../../components';
 

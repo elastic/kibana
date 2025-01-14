@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import React, { useMemo, useState, type VFC } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { TakeAction } from './take_action';
 import { DateFormatter } from '../../../../components/date_formatter';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { type Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutTable } from './table_tab';
 import { unwrapValue } from '../../utils/unwrap_value';

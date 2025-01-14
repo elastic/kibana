@@ -10,24 +10,24 @@
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import { type EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { type SerializedPanelState } from '@kbn/presentation-containers';
+import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  SavedSearch,
-  SavedSearchAttributes,
+  type SavedSearch,
+  type SavedSearchAttributes,
   toSavedSearchAttributes,
 } from '@kbn/saved-search-plugin/common';
-import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import { type SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
-import { DiscoverServices } from '../../build_services';
+import { type DiscoverServices } from '../../build_services';
 import {
   EDITABLE_PANEL_KEYS,
   EDITABLE_SAVED_SEARCH_KEYS,
   SEARCH_EMBEDDABLE_TYPE,
 } from '../constants';
-import { SearchEmbeddableRuntimeState, SearchEmbeddableSerializedState } from '../types';
+import { type SearchEmbeddableRuntimeState, type SearchEmbeddableSerializedState } from '../types';
 
 export const deserializeState = async ({
   serializedState,

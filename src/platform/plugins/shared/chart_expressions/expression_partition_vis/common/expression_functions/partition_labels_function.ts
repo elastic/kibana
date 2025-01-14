@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
+import { type ExpressionFunctionDefinition, type Datatable } from '@kbn/expressions-plugin/common';
 import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
 import {
-  ExpressionValuePartitionLabels,
+  type ExpressionValuePartitionLabels,
   LabelPositions,
-  PartitionLabelsArguments,
+  type PartitionLabelsArguments,
   ValueFormats,
 } from '../types';
 

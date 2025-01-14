@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConfigKey, ICMPFields } from '../../../../common/runtime_types';
+import { ConfigKey, type ICMPFields } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
-import { Formatter, commonFormatters } from './common';
+import { type Formatter, commonFormatters } from './common';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {

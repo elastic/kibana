@@ -17,7 +17,7 @@ import {
   useExistingFieldsReader,
   resetExistingFieldsCache,
   type ExistingFieldsFetcherParams,
-  ExistingFieldsReader,
+  type ExistingFieldsReader,
 } from './use_existing_fields';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';

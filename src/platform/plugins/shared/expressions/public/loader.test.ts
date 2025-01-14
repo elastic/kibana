@@ -14,13 +14,12 @@ import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
 import {
   parseExpression,
-  IInterpreterRenderHandlers,
-  RenderMode,
-  AnyExpressionFunctionDefinition,
-  ExpressionsService,
-  ExecutionContract,
+  type IInterpreterRenderHandlers,
+  type RenderMode,
+  type AnyExpressionFunctionDefinition,
+  type ExpressionsService,
+  type ExecutionContract,
 } from '../common';
-import { parseExpression } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __getLastExecution, __getLastRenderMode } = require('./services');

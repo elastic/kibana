@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  CrawlerCustomScheduleClient,
-  CrawlerCustomScheduleMappingClient,
+  type CrawlerCustomScheduleClient,
+  type CrawlerCustomScheduleMappingClient,
 } from '../../../../../../../common/types/crawler';
 import { createApiLogic } from '../../../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../../../shared/http';

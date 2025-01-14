@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { type ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { type SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { type ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -20,18 +20,18 @@ import {
   AgentDetailsParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
-  MicrosoftDefenderEndpointAgentDetailsParams,
-  MicrosoftDefenderEndpointIsolateHostParams,
-  MicrosoftDefenderEndpointBaseApiResponse,
-  MicrosoftDefenderEndpointConfig,
-  MicrosoftDefenderEndpointSecrets,
-  MicrosoftDefenderEndpointReleaseHostParams,
-  MicrosoftDefenderEndpointTestConnectorParams,
-  MicrosoftDefenderEndpointMachine,
-  MicrosoftDefenderEndpointMachineAction,
-  MicrosoftDefenderEndpointTestConnector,
-  MicrosoftDefenderEndpointGetActionsParams,
-  MicrosoftDefenderEndpointGetActionsResponse,
+  type MicrosoftDefenderEndpointAgentDetailsParams,
+  type MicrosoftDefenderEndpointIsolateHostParams,
+  type MicrosoftDefenderEndpointBaseApiResponse,
+  type MicrosoftDefenderEndpointConfig,
+  type MicrosoftDefenderEndpointSecrets,
+  type MicrosoftDefenderEndpointReleaseHostParams,
+  type MicrosoftDefenderEndpointTestConnectorParams,
+  type MicrosoftDefenderEndpointMachine,
+  type MicrosoftDefenderEndpointMachineAction,
+  type MicrosoftDefenderEndpointTestConnector,
+  type MicrosoftDefenderEndpointGetActionsParams,
+  type MicrosoftDefenderEndpointGetActionsResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<

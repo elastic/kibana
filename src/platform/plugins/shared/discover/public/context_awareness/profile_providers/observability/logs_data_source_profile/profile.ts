@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
+import { type ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
   getRowIndicatorProvider,

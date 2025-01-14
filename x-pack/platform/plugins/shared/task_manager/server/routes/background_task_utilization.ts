@@ -6,25 +6,25 @@
  */
 
 import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-  Logger,
+  type IRouter,
+  type RequestHandlerContext,
+  type KibanaRequest,
+  type IKibanaResponse,
+  type KibanaResponseFactory,
+  type Logger,
 } from '@kbn/core/server';
-import { IClusterClient } from '@kbn/core/server';
-import { Observable, Subject } from 'rxjs';
+import { type IClusterClient } from '@kbn/core/server';
+import { type Observable, Subject } from 'rxjs';
 import { throttleTime, tap, map } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { MonitoringStats } from '../monitoring';
-import { TaskManagerConfig } from '../config';
+import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { type MonitoringStats } from '../monitoring';
+import { type TaskManagerConfig } from '../config';
 import {
-  BackgroundTaskUtilizationStat,
-  PublicBackgroundTaskUtilizationStat,
+  type BackgroundTaskUtilizationStat,
+  type PublicBackgroundTaskUtilizationStat,
   summarizeUtilizationStats,
 } from '../monitoring/background_task_utilization_statistics';
-import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { type MonitoredStat } from '../monitoring/monitoring_stats_stream';
 
 export interface MonitoredUtilization {
   process_uuid: string;

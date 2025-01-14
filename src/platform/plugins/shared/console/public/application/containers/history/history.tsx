@@ -37,7 +37,7 @@ import { useEditorActionContext } from '../../contexts/editor_context';
 import { HistoryViewer } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { getFormattedRequest } from '../../lib';
-import { ESRequest, RestoreMethod } from '../../../types';
+import { type ESRequest, RestoreMethod } from '../../../types';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 

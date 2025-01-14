@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { type IUiSettingsClient, type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 
 import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
 import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
@@ -30,8 +30,8 @@ import type {
   BulkGetMaintenanceWindowsResult,
 } from '../application/maintenance_window/methods/bulk_get/types';
 import {
-  MaintenanceWindowModificationMetadata,
-  MaintenanceWindowClientContext,
+  type MaintenanceWindowModificationMetadata,
+  type MaintenanceWindowClientContext,
 } from '../../common';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 

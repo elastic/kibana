@@ -8,12 +8,12 @@
  */
 
 import { pipe, forEach } from 'lodash/fp';
-import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { type KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import { FileMetadata, FileStatus } from '../../../../common/types';
-import { FindFileArgs } from '../../../file_service';
+import { type FileMetadata, type FileStatus } from '../../../../common/types';
+import { type FindFileArgs } from '../../../file_service';
 
 const deletedStatus: FileStatus = 'DELETED';
 

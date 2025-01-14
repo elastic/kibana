@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
+import { type ObjectMigrationDefinition, type Version, type VersionableObject } from './types';
 import type {
   ServiceDefinitionVersioned,
   ServicesDefinition,

@@ -7,12 +7,12 @@
 
 import {
   getDefaultAssistantGraph,
-  GetDefaultAssistantGraphParams,
-  DefaultAssistantGraph,
+  type GetDefaultAssistantGraphParams,
+  type DefaultAssistantGraph,
 } from './default_assistant_graph/graph';
 import {
-  DefaultAttackDiscoveryGraph,
-  GetDefaultAttackDiscoveryGraphParams,
+  type DefaultAttackDiscoveryGraph,
+  type GetDefaultAttackDiscoveryGraphParams,
   getDefaultAttackDiscoveryGraph,
 } from '../../attack_discovery/graphs/default_attack_discovery_graph';
 

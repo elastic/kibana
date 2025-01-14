@@ -6,8 +6,8 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { AlertsClientFactory, type AlertsClientFactoryProps } from './alerts_client_factory';
+import { type ElasticsearchClient, type KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
