@@ -49,6 +49,7 @@ import {
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
+  TaskManagerUtilizationWindow,
 } from './lib/create_managed_configuration';
 
 const MAX_BUFFER_OPERATIONS = 100;
@@ -137,6 +138,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.currentPollInterval = pollInterval;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
+    const tmUtilizationWindow: TaskManagerUtilizationWindow[] = [];
     this.capacityConfiguration$ = errorCheck$.pipe(
       createCapacityScan(config, logger, startingCapacity),
       startWith(startingCapacity),
@@ -144,7 +146,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     );
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
-      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy),
+      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationWindow),
       startWith(this.currentPollInterval),
       distinctUntilChanged()
     );

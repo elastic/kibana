@@ -15,6 +15,7 @@ import {
   createCapacityScan,
   createPollIntervalScan,
   INTERVAL_AFTER_BLOCK_EXCEPTION,
+  TaskManagerUtilizationWindow,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import {
@@ -334,9 +335,10 @@ describe('createManagedConfiguration()', () => {
       const utilization$ = new BehaviorSubject<number>(100);
       const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
       const subscription = jest.fn();
+      const window: TaskManagerUtilizationWindow[] = [];
       const pollIntervalConfiguration$ = errorCheck$.pipe(
         withLatestFrom(utilization$),
-        createPollIntervalScan(logger, startingPollInterval, claimStrategy),
+        createPollIntervalScan(logger, startingPollInterval, claimStrategy, window),
         startWith(startingPollInterval),
         distinctUntilChanged()
       );
@@ -404,7 +406,7 @@ describe('createManagedConfiguration()', () => {
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
         );
       });
 
@@ -490,21 +492,21 @@ describe('createManagedConfiguration()', () => {
 
     describe('mget claim strategy', () => {
       test('should increase configuration at the next interval when an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         clock.tick(1);
         expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
       });
 
       test('should log a warning when the configuration changes from the starting value', async () => {
-        const { errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+        const { errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+          'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
         );
       });
 
@@ -556,12 +558,9 @@ describe('createManagedConfiguration()', () => {
 
       test('should change configuration based on TM utilization', async () => {
         const { subscription, utilization$ } = setupScenario(500, CLAIM_STRATEGY_MGET);
-        for (let i = 0; i < 5; i++) {
-          if (i % 2 === 0) {
-            utilization$.next(20);
-          } else {
-            utilization$.next(100);
-          }
+        const u = [15, 35, 5, 48, 0];
+        for (let i = 0; i < u.length; i++) {
+          utilization$.next(u[i]);
           clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         }
         expect(subscription).toHaveBeenNthCalledWith(2, 3000);
@@ -577,7 +576,7 @@ describe('createManagedConfiguration()', () => {
         utilization$.next(20);
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration is temporarily increased after a decrease in the task load.'
+          'Poll interval configuration changing from 100 to 3000 after a change in the average task load: 20.'
         );
       });
     });
