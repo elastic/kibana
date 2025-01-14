@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactElement, useMemo } from 'react';
+import React, { type ComponentType, useMemo } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
@@ -24,7 +24,7 @@ import { useKibana } from '../../../common/lib/kibana';
 interface CaseViewAlertsProps {
   caseData: CaseUI;
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
-  renderAlertsTable?: (props: CaseViewAlertsTableProps) => ReactElement;
+  renderAlertsTable?: ComponentType<CaseViewAlertsTableProps>;
 }
 
 export const CaseViewAlerts = ({

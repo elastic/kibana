@@ -139,7 +139,7 @@ const CaseContainerComponent: React.FC = () => {
           useFetchAlertData,
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
-          renderAlertsTable: AlertsTableComponent,
+          renderAlertsTable: (props) => <AlertsTableComponent {...props} />,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />
