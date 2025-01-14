@@ -327,14 +327,20 @@ const createNormalizedExternalConnectorClientMock = (
 const setConnectorActionsClientExecuteResponseMock = (
   connectorActionsClient: ActionsClientMock | NormalizedExternalConnectorClientMock,
   subAction: string,
+  /**
+   * The response to be returned. If this value is a function, it will be called with the
+   * arguments passed to `.execute()` and should then return the response
+   */
   response: any
 ): void => {
   const executeMockFn = (connectorActionsClient.execute as jest.Mock).getMockImplementation();
 
   (connectorActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
     if (options.params.subAction === subAction) {
+      const responseData = typeof response === 'function' ? response(options) : response;
+
       return responseActionsClientMock.createConnectorActionExecuteResponse({
-        data: response,
+        data: responseData,
       });
     }
 
