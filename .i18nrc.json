@@ -8,8 +8,8 @@
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
-    "bfetch": "src/plugins/bfetch",
-    "bfetchError": "packages/kbn-bfetch-error",
+    "bfetch": "src/platform/plugins/shared/bfetch",
+    "bfetchError": "src/platform/packages/shared/kbn-bfetch-error",
     "cases": ["src/platform/packages/shared/kbn-cases-components"],
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",
@@ -62,7 +62,7 @@
     "fieldFormats": "src/platform/plugins/shared/field_formats",
     "files": "src/platform/plugins/shared/files",
     "filesManagement": "src/platform/plugins/private/files_management",
-    "flot": "packages/kbn-flot-charts/lib",
+    "flot": "src/platform/packages/shared/kbn-flot-charts/lib",
     "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "src/platform/packages/shared/kbn-grouping/src",
     "alertsGrouping": "x-pack/solutions/observability/packages/kbn-alerts-grouping",
@@ -153,7 +153,7 @@
     "visTypePie": "src/platform/plugins/private/vis_types/pie",
     "visTypeTable": "src/platform/plugins/private/vis_types/table",
     "visTypeTagCloud": "src/platform/plugins/private/vis_types/tagcloud",
-    "visTypeTimeseries": "src/platform/plugins/shared/vis_types/timeseries",
+    "visTypeTimeseries": "src/platform/plugins/private/vis_types/timeseries",
     "visTypeVega": "src/platform/plugins/private/vis_types/vega",
     "visTypeVislib": "src/platform/plugins/private/vis_types/vislib",
     "visTypeXy": "src/platform/plugins/private/vis_types/xy",
@@ -168,7 +168,7 @@
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "src/platform/packages/private/kbn-managed-content-badge",
-    "responseOpsRuleForm": "packages/response-ops/rule_form"
+    "responseOpsRuleForm": "src/platform/packages/shared/response-ops/rule_form"
   },
   "translations": []
 }

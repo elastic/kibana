@@ -60,10 +60,10 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
-packages/kbn-bfetch-error @elastic/appex-sharedux
+src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
-src/plugins/bfetch @elastic/appex-sharedux
-packages/kbn-calculate-auto @elastic/obs-ux-management-team
+src/platform/plugins/shared/bfetch @elastic/appex-sharedux
+src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
@@ -75,7 +75,7 @@ src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-e
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/plugins/shared/charts @elastic/kibana-visualizations
-packages/kbn-charts-theme @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
@@ -341,9 +341,9 @@ src/core/packages/user-profile/common @elastic/kibana-core
 src/core/packages/user-profile/server @elastic/kibana-core
 src/core/packages/user-profile/server-internal @elastic/kibana-core
 src/core/packages/user-profile/server-mocks @elastic/kibana-core
-packages/core/user-settings/core-user-settings-server @elastic/kibana-security
-packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
-packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
+src/core/packages/user-settings/server @elastic/kibana-security
+src/core/packages/user-settings/server-internal @elastic/kibana-security
+src/core/packages/user-settings/server-mocks @elastic/kibana-security
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
@@ -414,10 +414,10 @@ src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
-x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
+x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
@@ -487,7 +487,7 @@ src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/shared/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/platform/plugins/shared/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-operations
+src/platform/packages/shared/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
@@ -610,11 +610,11 @@ src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-m
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mapbox-gl @elastic/kibana-gis
+src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
+x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/platform/packages/private/ml/agg_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
@@ -749,7 +749,7 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-packages/response-ops/rule_form @elastic/response-ops
+src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
@@ -777,7 +777,7 @@ src/platform/plugins/shared/saved_objects @elastic/kibana-core
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
-packages/kbn-saved-search-component @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-saved-search-component @elastic/obs-ux-logs-team
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
@@ -943,7 +943,7 @@ packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/packages/kbn-streams-schema @elastic/streams-program-team
+x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
@@ -1011,7 +1011,7 @@ x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
-packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
@@ -1030,7 +1030,7 @@ src/platform/plugins/private/vis_types/pie @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/table @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/tagcloud @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/timelion @elastic/kibana-visualizations
-src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
+src/platform/plugins/private/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/vega @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/vislib @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/xy @elastic/kibana-visualizations
