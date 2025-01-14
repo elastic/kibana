@@ -12,7 +12,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import type { QueryBarProvider } from '../services/query_bar_provider';
 
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
-const NODE_EXPAND_BUTTON_TEST_ID = 'nodeExpandButton';
+const NODE_EXPAND_BUTTON_TEST_ID = 'cloudSecurityGraphNodeExpandButton';
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation';
 const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphNodeExpandPopover`;
 const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ExploreRelatedEntities`;
