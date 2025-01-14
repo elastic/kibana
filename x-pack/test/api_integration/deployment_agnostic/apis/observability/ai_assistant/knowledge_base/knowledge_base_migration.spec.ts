@@ -31,13 +31,6 @@ interface InferenceData {
   };
 }
 
-interface LegacySemanticTextField {
-  semantic_text: {
-    text: string;
-    inference: InferenceData;
-  };
-}
-
 interface SemanticTextField {
   semantic_text: string;
   _inference_fields?: {
@@ -67,7 +60,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           match_all: {},
         },
       },
-    })) as SearchResponse<KnowledgeBaseEntry & (LegacySemanticTextField | SemanticTextField)>;
+    })) as SearchResponse<KnowledgeBaseEntry & SemanticTextField>;
 
     return res.hits.hits;
   }
@@ -124,23 +117,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(
             orderBy(hits, '_source.title').map(({ _source }) => {
-              let text: string | undefined;
-              let inference: InferenceData | undefined;
-
-              if (_source && '_inference_fields' in _source) {
-                const newSource = _source as SemanticTextField;
-                text = newSource.semantic_text;
-                inference = newSource._inference_fields?.semantic_text?.inference;
-              } else {
-                const oldSource = _source as LegacySemanticTextField;
-                text = oldSource.semantic_text.text;
-                inference = oldSource.semantic_text.inference;
-              }
+              const text = _source?.semantic_text;
+              const inference = _source?._inference_fields?.semantic_text?.inference;
 
               return {
                 text: text ?? '',
                 inferenceId: inference?.inference_id,
-                chunkCount: inference?.chunks?.semantic_text?.length ?? 0,
+                chunkCount: inference?.chunks?.semantic_text?.length,
               };
             })
           ).to.eql([
