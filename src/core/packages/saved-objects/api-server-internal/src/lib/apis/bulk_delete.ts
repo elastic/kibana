@@ -105,8 +105,6 @@ export const performBulkDelete = async <T>(
         const preflightResult =
           index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
-        console.log(multiNamespaceDocsResponse?.body);
-
         const name = preflightResult
           ? SavedObjectsUtils.getName(
               // @ts-expect-error MultiGetHit._source is optional

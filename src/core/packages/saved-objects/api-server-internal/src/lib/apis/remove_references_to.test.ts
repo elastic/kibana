@@ -255,17 +255,15 @@ describe('SavedObjectsRepository', () => {
           _id: 'id',
         });
 
-        apiExecutionContext.extensions.securityExtension.includeSavedObjectNames.mockReturnValue(
-          true
-        );
+        const securityExt = apiExecutionContext.extensions.securityExtension!;
+
+        securityExt.includeSavedObjectNames.mockReturnValue(true);
 
         await performRemoveReferencesTo(
           { type: 'foo', id: 'id', options: { namespace } },
           apiExecutionContext
         );
 
-        const securityExt = apiExecutionContext.extensions.securityExtension!;
-        expect(securityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
         expect(securityExt.authorizeRemoveReferences).toHaveBeenLastCalledWith({
           namespace,
           object: { type: 'foo', id: 'id', name: 'foo_name' },

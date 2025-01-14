@@ -38,15 +38,12 @@ export const performRemoveReferencesTo = async <T>(
 
     if (securityExtension.includeSavedObjectNames()) {
       const nameAttribute = registry.getNameAttribute(type);
-      const sourceIncludes = nameAttribute
-        ? [`${type}.${nameAttribute}`]
-        : [`${type}.name`, `${type}.title`];
 
       const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
         {
           index: commonHelper.getIndexForType(type),
           id: serializer.generateRawId(namespace, type, id),
-          _source_includes: sourceIncludes,
+          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
         },
         { ignore: [404], meta: true }
       );
