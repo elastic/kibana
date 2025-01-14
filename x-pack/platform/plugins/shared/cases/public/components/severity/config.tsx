@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useEuiTheme, EuiHealth, type EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme, EuiHealth } from '@elastic/eui';
 import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
