@@ -29,7 +29,10 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       for (const connectorId of request.body.ids) {
         await deleteConnectorById(client.asCurrentUser, connectorId);
       }
-      return response.ok({ body: { deleted: request.body.ids } });
+      return response.ok({
+        body: { deleted: request.body.ids },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 
@@ -48,7 +51,10 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       for (const connectorId of request.body.ids) {
         await putUpdateNative(client.asCurrentUser, connectorId, false);
       }
-      return response.ok({ body: { converted_to_client: request.body.ids } });
+      return response.ok({
+        body: { converted_to_client: request.body.ids },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }
