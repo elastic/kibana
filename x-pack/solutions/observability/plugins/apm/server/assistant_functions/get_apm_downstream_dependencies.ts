@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FunctionRegistrationParameters } from '.';
-import { RandomSampler } from '../lib/helpers/get_random_sampler';
+import type { RandomSampler } from '../lib/helpers/get_random_sampler';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 
 interface DownstreamDependenciesFunctionRegistrationParams extends FunctionRegistrationParameters {

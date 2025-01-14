@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   EMSFileSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  AGG_TYPE,
-  LAYER_TYPE,
-  SOURCE_TYPES,
 } from '@kbn/maps-plugin/common';
+import { AGG_TYPE, LAYER_TYPE, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +20,7 @@ import {
   SESSION_ID,
 } from '../../../../../../../common/es_fields/apm';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
-import { StyleColorParams } from './style_color_params';
+import type { StyleColorParams } from './style_color_params';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;

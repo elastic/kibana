@@ -52,14 +52,12 @@ export class Listing extends PureComponent {
             };
 
             setupModeStatus = (
-              <div className="monTableCell__setupModeStatus">
-                <SetupModeBadge
-                  setupMode={setupMode}
-                  status={status}
-                  instance={instance}
-                  productName={LOGSTASH_SYSTEM_ID}
-                />
-              </div>
+              <SetupModeBadge
+                setupMode={setupMode}
+                status={status}
+                instance={instance}
+                productName={LOGSTASH_SYSTEM_ID}
+              />
             );
           }
 
@@ -202,7 +200,7 @@ export class Listing extends PureComponent {
           {setupModeCallOut}
           <EuiPanel>
             <EuiMonitoringTable
-              className="logstashNodesTable"
+              data-test-subj="logstashNodesTable"
               rows={flattenedData}
               setupMode={setupMode}
               productName={LOGSTASH_SYSTEM_ID}

@@ -40,7 +40,7 @@
           " extends ",
           "BasePayload"
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +64,7 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; }"
             ],
-            "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,7 +78,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,7 +92,7 @@
             "signature": [
               "{ relativeUrl: string; }[]"
             ],
-            "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -118,7 +118,7 @@
           "BasePayload",
           ",BaseParamsPDFV2"
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,7 +142,7 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; }"
             ],
-            "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -155,7 +155,7 @@
             "description": [
               "\nThe value of forceNow is injected server-side every time a given report is generated."
             ],
-            "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -185,7 +185,9 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; }; locatorParams: ",
+          "> | undefined; zoom?: number | undefined; }; objectType: string; pagingStrategy?: ",
+          "CsvPagingStrategy",
+          " | undefined; locatorParams: ",
           "LocatorParams",
           "<",
           {
@@ -195,11 +197,9 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ">[]; objectType: string; pagingStrategy?: ",
-          "CsvPagingStrategy",
-          " | undefined; }"
+          ">[]; }"
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -217,21 +217,21 @@
           "BaseParamsPDF & ",
           "BaseParams"
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "@kbn/reporting-export-types-pdf",
-            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts"
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts"
           },
           {
             "plugin": "@kbn/reporting-export-types-pdf",
-            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts"
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts"
           },
           {
             "plugin": "@kbn/reporting-export-types-pdf",
-            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts"
+            "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts"
           }
         ],
         "initialIsOpen": false
@@ -247,7 +247,7 @@
           "BaseParamsPDFV2 & ",
           "BaseParams"
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -262,7 +262,7 @@
         "signature": [
           "\"printable_pdf\""
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -277,7 +277,7 @@
         "signature": [
           "\"printable_pdf_v2\""
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -292,7 +292,7 @@
         "signature": [
           "\"printablePdf\""
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,7 +307,7 @@
         "signature": [
           "\"printablePdfV2\""
         ],
-        "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -18,7 +18,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { AssistantAnimatedIcon } from '../assistant_animated_icon';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
@@ -102,7 +102,10 @@ export const AssistantBody: FunctionComponent<Props> = ({
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         {isLoading ? (
-          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={<AssistantAnimatedIcon />} />
+          <EuiEmptyPrompt
+            data-test-subj="animatedLogo"
+            icon={<AssistantBeacon backgroundColor="emptyShade" />}
+          />
         ) : isWelcomeSetup ? (
           <WelcomeSetup
             currentConversation={currentConversation}

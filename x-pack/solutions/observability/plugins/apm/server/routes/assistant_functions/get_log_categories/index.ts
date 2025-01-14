@@ -6,13 +6,14 @@
  */
 
 import datemath from '@elastic/datemath';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { flattenObject, KeyValuePair } from '../../../../common/utils/flatten_object';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { KeyValuePair } from '../../../../common/utils/flatten_object';
+import { flattenObject } from '../../../../common/utils/flatten_object';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';

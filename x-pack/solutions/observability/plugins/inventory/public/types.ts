@@ -8,7 +8,7 @@ import type {
   ObservabilitySharedPluginStart,
   ObservabilitySharedPluginSetup,
 } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   EntityManagerPublicPluginSetup,
   EntityManagerPublicPluginStart,
 } from '@kbn/entityManager-plugin/public';

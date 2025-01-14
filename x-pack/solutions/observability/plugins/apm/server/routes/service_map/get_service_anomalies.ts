@@ -16,7 +16,7 @@ import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { MlClient } from '../../lib/helpers/get_ml_client';
+import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 import {

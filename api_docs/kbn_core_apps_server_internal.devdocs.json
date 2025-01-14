@@ -20,21 +20,9 @@
         "description": [],
         "signature": [
           "(router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">, {\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }: { publicPath: string; routePath: string; bundlesPath: string; fileHashCache: ",
           "FileHashCache",
           "; isDist: boolean; }) => void"
@@ -51,21 +39,9 @@
             "label": "router",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               ">"
             ],
             "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",

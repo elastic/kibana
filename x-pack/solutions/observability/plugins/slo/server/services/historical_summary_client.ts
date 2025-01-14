@@ -33,7 +33,7 @@ import {
   toCalendarAlignedTimeWindowMomentUnit,
 } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
-import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 interface DailyAggBucket {
   key_as_string: string;
@@ -194,7 +194,7 @@ function handleResultForCalendarAlignedAndTimeslices(
   dateRange: { range: DateRange; queryRange: DateRange }
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
-  const totalSlices = computeTotalSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
+  const totalSlices = getSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
 
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;

@@ -18,7 +18,7 @@ export async function enableStreams(supertest: Agent) {
 }
 
 export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
-  const response = await esClient.index({ index, document });
+  const response = await esClient.index({ index, document, refresh: 'wait_for' });
   return response;
 }
 
@@ -37,14 +37,19 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
   return response.body;
 }
 
-export async function putStream(supertest: Agent, name: string, body: StreamConfigDefinition) {
-  const req = supertest.put(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
-  const response = await req.send(body).expect(200);
+export async function putStream(
+  supertest: Agent,
+  name: string,
+  body: StreamConfigDefinition,
+  expectStatusCode?: number
+) {
+  const req = supertest.put(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
+  const response = await req.send(body).expect(expectStatusCode ?? 200);
   return response.body;
 }
 
 export async function getStream(supertest: Agent, name: string) {
-  const req = supertest.get(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const req = supertest.get(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
   const response = await req.send().expect(200);
   return response.body;
 }
@@ -58,5 +63,17 @@ export async function listStreams(supertest: Agent) {
 export async function deleteStream(supertest: Agent, id: string) {
   const req = supertest.delete(`/api/streams/${id}`).set('kbn-xsrf', 'xxx');
   const response = await req.send().expect(200);
+  return response.body;
+}
+
+export async function getUnmappedFieldsForStream(supertest: Agent, id: string) {
+  const req = supertest.get(`/api/streams/${id}/schema/unmapped_fields`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
+  return response.body;
+}
+
+export async function simulateFieldsForStream(supertest: Agent, id: string, body: JsonObject) {
+  const req = supertest.post(`/api/streams/${id}/schema/fields_simulation`).set('kbn-xsrf', 'xxx');
+  const response = await req.send(body).expect(200);
   return response.body;
 }

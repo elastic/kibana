@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import * as i18n from './translations';
 import { Generate } from '../generate';
 
@@ -35,7 +35,7 @@ const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate 
         gutterSize="none"
       >
         <EuiFlexItem data-test-subj="emptyPromptAvatar" grow={false}>
-          <AssistantAvatar size="m" />
+          <AssistantIcon size="xl" />
           <EuiSpacer size="m" />
         </EuiFlexItem>
 

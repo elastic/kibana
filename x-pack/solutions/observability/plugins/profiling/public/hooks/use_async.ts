@@ -8,7 +8,8 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { AutoAbortedHttpService, useAutoAbortedHttpClient } from './use_auto_aborted_http_client';
+import type { AutoAbortedHttpService } from './use_auto_aborted_http_client';
+import { useAutoAbortedHttpClient } from './use_auto_aborted_http_client';
 
 export enum AsyncStatus {
   Loading = 'loading',

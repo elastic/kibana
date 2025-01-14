@@ -13,7 +13,7 @@
         "description": [
           "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+        "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "Promise<void>"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,7 +45,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -68,15 +68,9 @@
         ],
         "signature": [
           "(element: T) => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.UnmountCallback",
-            "text": "UnmountCallback"
-          }
+          "UnmountCallback"
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -95,7 +89,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -114,7 +108,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],

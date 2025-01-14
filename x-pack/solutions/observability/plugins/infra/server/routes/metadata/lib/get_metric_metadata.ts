@@ -6,15 +6,15 @@
  */
 import { get } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_client';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import {
+import type {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
-import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { InfraSourceConfiguration } from '../../../lib/sources';
+import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import type { InfraSourceConfiguration } from '../../../lib/sources';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { getHasDataFromSystemIntegration } from '../../infra/lib/host/get_filtered_hosts';
 

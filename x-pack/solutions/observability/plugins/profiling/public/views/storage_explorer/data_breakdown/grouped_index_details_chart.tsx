@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Chart, Datum, Partition, Position, Settings } from '@elastic/charts';
+import type { Datum } from '@elastic/charts';
+import { Chart, Partition, Position, Settings } from '@elastic/charts';
 import { euiPaletteColorBlind, EuiText, useEuiTheme } from '@elastic/eui';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
