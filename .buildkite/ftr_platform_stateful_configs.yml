@@ -282,6 +282,7 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
+  - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/functional_search/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
@@ -379,3 +380,4 @@ enabled:
   # stateful config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/test/api_integration/apis/cloud/config.ts
+  - x-pack/test/api_integration/apis/cloud/saml.config.ts
