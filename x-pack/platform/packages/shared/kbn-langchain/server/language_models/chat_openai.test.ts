@@ -79,105 +79,203 @@ describe('ActionsClientChatOpenAI', () => {
     });
   });
 
-  describe('completionWithRetry streaming: true', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockStreamExecute.mockImplementation(() => ({
-        data: {
-          consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
-          tokenCountStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
-        },
-        status: 'ok',
-      }));
+  describe('OpenAI', () => {
+    describe('completionWithRetry streaming: true', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockStreamExecute.mockImplementation(() => ({
+          data: {
+            consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
+            tokenCountStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
+          },
+          status: 'ok',
+        }));
+      });
+      const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
+        messages: [{ content: prompt, role: 'user' }],
+        stream: true,
+        model: 'gpt-4o',
+        n: 99,
+        stop: ['a stop sequence'],
+        tools: [{ function: jest.fn(), type: 'function' }],
+      };
+      it('returns the expected data', async () => {
+        actionsClient.execute.mockImplementation(mockStreamExecute);
+        const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
+          ...defaultArgs,
+          streaming: true,
+          actionsClient,
+        });
+
+        const result: AsyncIterable<OpenAI.ChatCompletionChunk> =
+          await actionsClientChatOpenAI.completionWithRetry(defaultStreamingArgs);
+        expect(mockStreamExecute).toHaveBeenCalledWith({
+          actionId: connectorId,
+          params: {
+            subActionParams: {
+              model: 'gpt-4o',
+              messages: [{ role: 'user', content: 'Do you know my name?' }],
+              signal,
+              timeout: 999999,
+              n: defaultStreamingArgs.n,
+              stop: defaultStreamingArgs.stop,
+              tools: defaultStreamingArgs.tools,
+              temperature: 0.2,
+            },
+            subAction: 'invokeAsyncIterator',
+          },
+          signal,
+        });
+        expect(result).toEqual(asyncGenerator());
+      });
     });
-    const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
-      messages: [{ content: prompt, role: 'user' }],
-      stream: true,
-      model: 'gpt-4o',
-      n: 99,
-      stop: ['a stop sequence'],
-      functions: [jest.fn()],
-    };
-    it('returns the expected data', async () => {
-      actionsClient.execute.mockImplementation(mockStreamExecute);
-      const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
-        ...defaultArgs,
-        streaming: true,
-        actionsClient,
+
+    describe('completionWithRetry streaming: false', () => {
+      const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
+        messages: [{ content: prompt, role: 'user' }],
+        stream: false,
+        model: 'gpt-4o',
+      };
+      it('returns the expected data', async () => {
+        const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
+
+        const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
+          defaultNonStreamingArgs
+        );
+        expect(mockExecute).toHaveBeenCalledWith({
+          actionId: connectorId,
+          params: {
+            subActionParams: {
+              body: '{"temperature":0.2,"model":"gpt-4o","messages":[{"role":"user","content":"Do you know my name?"}]}',
+              signal,
+              timeout: 999999,
+            },
+            subAction: 'run',
+          },
+          signal,
+        });
+        expect(result.choices[0].message.content).toEqual(mockActionResponse.message);
       });
 
-      const result: AsyncIterable<OpenAI.ChatCompletionChunk> =
-        await actionsClientChatOpenAI.completionWithRetry(defaultStreamingArgs);
-      expect(mockStreamExecute).toHaveBeenCalledWith({
-        actionId: connectorId,
-        params: {
-          subActionParams: {
-            model: 'gpt-4o',
-            messages: [{ role: 'user', content: 'Do you know my name?' }],
-            signal,
-            timeout: 999999,
-            n: defaultStreamingArgs.n,
-            stop: defaultStreamingArgs.stop,
-            functions: defaultStreamingArgs.functions,
-            temperature: 0.2,
-          },
-          subAction: 'invokeAsyncIterator',
-        },
-        signal,
+      it('rejects with the expected error when the action result status is error', async () => {
+        const hasErrorStatus = jest.fn().mockImplementation(() => ({
+          message: 'action-result-message',
+          serviceMessage: 'action-result-service-message',
+          status: 'error', // <-- error status
+        }));
+        actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
+
+        const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
+          ...defaultArgs,
+          actionsClient,
+        });
+
+        expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
+          .rejects.toThrowError(
+            'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
+          )
+          .catch(() => {
+            /* ...handle/report the error (or just suppress it, if that's appropriate
+              [which it sometimes, though rarely, is])...
+           */
+          });
       });
-      expect(result).toEqual(asyncGenerator());
     });
   });
 
-  describe('completionWithRetry streaming: false', () => {
-    const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
-      messages: [{ content: prompt, role: 'user' }],
-      stream: false,
-      model: 'gpt-4o',
-    };
-    it('returns the expected data', async () => {
-      const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
-
-      const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
-        defaultNonStreamingArgs
-      );
-      expect(mockExecute).toHaveBeenCalledWith({
-        actionId: connectorId,
-        params: {
-          subActionParams: {
-            body: '{"temperature":0.2,"model":"gpt-4o","messages":[{"role":"user","content":"Do you know my name?"}]}',
-            signal,
-            timeout: 999999,
+  describe('Inference', () => {
+    describe('completionWithRetry streaming: true', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockStreamExecute.mockImplementation(() => ({
+          data: {
+            consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
+            tokenCountStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
           },
-          subAction: 'run',
-        },
-        signal,
+          status: 'ok',
+        }));
       });
-      expect(result.choices[0].message.content).toEqual(mockActionResponse.message);
+      const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
+        messages: [{ content: prompt, role: 'user' }],
+        stream: true,
+        model: 'gpt-4o',
+        n: 99,
+        stop: ['a stop sequence'],
+        tools: [{ function: jest.fn(), type: 'function' }],
+      };
+      it('returns the expected data', async () => {
+        actionsClient.execute.mockImplementation(mockStreamExecute);
+        const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
+          ...defaultArgs,
+          llmType: 'inference',
+          streaming: true,
+          actionsClient,
+        });
+
+        const result: AsyncIterable<OpenAI.ChatCompletionChunk> =
+          await actionsClientChatOpenAI.completionWithRetry(defaultStreamingArgs);
+        expect(mockStreamExecute).toHaveBeenCalledWith({
+          actionId: connectorId,
+          params: {
+            subAction: 'unified_completion_async_iterator',
+            subActionParams: {
+              body: {
+                messages: [{ role: 'user', content: 'Do you know my name?' }],
+
+                n: defaultStreamingArgs.n,
+                stop: defaultStreamingArgs.stop,
+                tools: defaultStreamingArgs.tools,
+                temperature: 0.2,
+              },
+              signal,
+            },
+          },
+          signal,
+        });
+        expect(result).toEqual(asyncGenerator());
+      });
     });
 
-    it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => ({
-        message: 'action-result-message',
-        serviceMessage: 'action-result-service-message',
-        status: 'error', // <-- error status
-      }));
-      actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
-
-      const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
-        ...defaultArgs,
-        actionsClient,
-      });
-
-      expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
-        .rejects.toThrowError(
-          'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
-        )
-        .catch(() => {
-          /* ...handle/report the error (or just suppress it, if that's appropriate
-            [which it sometimes, though rarely, is])...
-         */
+    describe('completionWithRetry streaming: false', () => {
+      const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
+        messages: [{ content: prompt, role: 'user' }],
+        stream: false,
+        model: 'gpt-4o',
+        n: 99,
+        stop: ['a stop sequence'],
+        tools: [{ function: jest.fn(), type: 'function' }],
+      };
+      it('returns the expected data', async () => {
+        const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
+          ...defaultArgs,
+          llmType: 'inference',
         });
+
+        const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
+          defaultNonStreamingArgs
+        );
+
+        expect(JSON.stringify(mockExecute.mock.calls[0][0])).toEqual(
+          JSON.stringify({
+            actionId: connectorId,
+            params: {
+              subAction: 'unified_completion',
+              subActionParams: {
+                body: {
+                  temperature: 0.2,
+                  n: 99,
+                  stop: ['a stop sequence'],
+                  tools: [{ function: jest.fn(), type: 'function' }],
+                  messages: [{ role: 'user', content: 'Do you know my name?' }],
+                },
+                signal,
+              },
+            },
+            signal,
+          })
+        );
+        expect(result.choices[0].message.content).toEqual(mockActionResponse.message);
+      });
     });
   });
 });

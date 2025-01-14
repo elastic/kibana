@@ -56,7 +56,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
     const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
-    createAgentInput(specificDataStreamDir, dataStream.inputTypes);
+    createAgentInput(specificDataStreamDir, dataStream.inputTypes, dataStream.celInput);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
     const fields = createFieldMapping(
       integration.name,

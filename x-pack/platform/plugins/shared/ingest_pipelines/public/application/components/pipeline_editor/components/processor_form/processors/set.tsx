@@ -176,7 +176,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.enablingCopydHelpText"
-        defaultMessage="Define fields to copy into {field} insted of defining {value}."
+        defaultMessage="Specify fields to copy into {field} instead of setting a {value}."
         values={{
           field: <EuiCode>{'Field'}</EuiCode>,
           value: <EuiCode>{'Value'}</EuiCode>,

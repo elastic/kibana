@@ -13,7 +13,7 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "packages/core/theme/core-theme-browser-internal/src/system_theme.ts",
+        "path": "src/core/packages/theme/browser-internal/src/system_theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

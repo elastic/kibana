@@ -27,7 +27,7 @@ describe('EditOutputFlyout', () => {
     expect(comp.queryByLabelText('Name')).not.toBeNull();
     expect(comp.queryByLabelText('Host')).not.toBeNull();
     expect(comp.queryByPlaceholderText('Specify name')).not.toBeNull();
-    expect(comp.queryByPlaceholderText('Specify host')).not.toBeNull();
+    expect(comp.queryByPlaceholderText('https://artifacts.elastic.co/downloads')).not.toBeNull();
   });
 
   it('should render the flyout if the provided download source is valid', async () => {
