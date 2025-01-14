@@ -58,6 +58,7 @@ export class TrainedModelsService {
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
   private _activeOperations$ = new BehaviorSubject<ModelOperation[]>([]);
+  private cancelDeployment$ = new Subject<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -126,7 +127,14 @@ export class TrainedModelsService {
   ) {
     this.addActiveOperation({ modelId, type: 'deploying' });
 
+    const cancelation$ = this.cancelDeployment$.pipe(
+      filter((canceledModelId) => canceledModelId === modelId),
+      take(1),
+      shareReplay(1)
+    );
+
     return this.getModel$(modelId).pipe(
+      takeUntil(cancelation$),
       filter(
         (model) =>
           isBaseNLPModelItem(model) &&
@@ -141,13 +149,9 @@ export class TrainedModelsService {
         );
         this._modelItems$.next(updatedModels);
 
-        return from(
-          this.trainedModelsApiService.startModelAllocation(
-            modelId,
-            deploymentParams,
-            adaptiveAllocationsParams
-          )
-        );
+        return this.trainedModelsApiService
+          .startModelAllocation(modelId, deploymentParams, adaptiveAllocationsParams)
+          .pipe(takeUntil(cancelation$));
       }),
       finalize(() => {
         this.removeActiveOperation('deploying', modelId);
@@ -188,6 +192,7 @@ export class TrainedModelsService {
   public cleanupModelOperations(modelId: string) {
     this.markDownloadAborted(modelId);
     this.removeActiveOperation('deploying', modelId);
+    this.cancelDeployment$.next(modelId);
   }
 
   private markDownloadAborted(modelId: string) {

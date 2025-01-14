@@ -232,7 +232,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       queryParams?: CommonDeploymentParams,
       bodyParams?: AdaptiveAllocationsParams
     ) {
-      return httpService.http<{ acknowledge: boolean }>({
+      return httpService.http$<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
         query: queryParams,

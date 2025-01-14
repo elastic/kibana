@@ -569,7 +569,10 @@ export function useModelActions({
           }
         },
         enabled: (item) => {
-          return !isNLPModelItem(item) || item.state !== MODEL_STATE.STARTED;
+          return (
+            !isNLPModelItem(item) ||
+            (item.state !== MODEL_STATE.STARTED && item.state !== MODEL_STATE.STARTING)
+          );
         },
       },
     ],
