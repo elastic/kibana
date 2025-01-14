@@ -61,6 +61,7 @@ describe('measureInteraction', () => {
         meta: {
           queryRangeSecs: 900,
           queryOffsetSecs: 0,
+          isInitialLoad: true,
         },
       },
       end: 'end::pageReady',
@@ -88,6 +89,7 @@ describe('measureInteraction', () => {
         meta: {
           queryRangeSecs: 1800,
           queryOffsetSecs: 0,
+          isInitialLoad: true,
         },
       },
       end: 'end::pageReady',
@@ -115,6 +117,7 @@ describe('measureInteraction', () => {
         meta: {
           queryRangeSecs: 86400,
           queryOffsetSecs: -1800,
+          isInitialLoad: true,
         },
       },
       end: 'end::pageReady',
@@ -142,6 +145,7 @@ describe('measureInteraction', () => {
         meta: {
           queryRangeSecs: 86400,
           queryOffsetSecs: 1800,
+          isInitialLoad: true,
         },
       },
       end: 'end::pageReady',
@@ -149,13 +153,32 @@ describe('measureInteraction', () => {
     });
   });
 
-  it('should not measure the same route twice', () => {
+  it('should set isInitialLoad to false on subsequent pageReady calls', () => {
     const interaction = measureInteraction();
     const pathname = '/test-path';
+    jest.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
 
-    interaction.pageReady(pathname);
-    interaction.pageReady(pathname);
+    const eventData = {
+      meta: { rangeFrom: '2024-12-08T01:00:00Z', rangeTo: '2024-12-09T01:00:00Z' },
+    };
 
-    expect(performance.measure).toHaveBeenCalledTimes(1);
+    interaction.pageReady(pathname, eventData);
+    interaction.pageReady(pathname, eventData);
+
+    expect(performance.mark).toHaveBeenCalledWith(perfomanceMarkers.endPageReady);
+    expect(performance.measure).toHaveBeenCalledWith(pathname, {
+      detail: {
+        eventName: 'kibana:plugin_render_time',
+        type: 'kibana:performance',
+        customMetrics: undefined,
+        meta: {
+          queryRangeSecs: 86400,
+          queryOffsetSecs: 1800,
+          isInitialLoad: false,
+        },
+      },
+      end: 'end::pageReady',
+      start: 'start::pageChange',
+    });
   });
 });

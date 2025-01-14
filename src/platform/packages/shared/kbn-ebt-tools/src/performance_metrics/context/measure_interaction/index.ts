@@ -18,11 +18,13 @@ import { EventData } from '../performance_context';
 interface PerformanceMeta {
   queryRangeSecs: number;
   queryOffsetSecs: number;
+  isInitialLoad: boolean;
 }
 
 export function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
-  const trackedRoutes: string[] = [];
+  const trackedRoutes = new Set<string>();
+
   return {
     /**
      * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
@@ -46,22 +48,21 @@ export function measureInteraction() {
           queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
           queryOffsetSecs:
             rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
+          isInitialLoad: !trackedRoutes.has(pathname),
         };
       }
 
-      if (!trackedRoutes.includes(pathname)) {
-        performance.measure(pathname, {
-          detail: {
-            eventName: 'kibana:plugin_render_time',
-            type: 'kibana:performance',
-            customMetrics: eventData?.customMetrics,
-            meta: performanceMeta,
-          },
-          start: perfomanceMarkers.startPageChange,
-          end: perfomanceMarkers.endPageReady,
-        });
-        trackedRoutes.push(pathname);
-      }
+      performance.measure(pathname, {
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          customMetrics: eventData?.customMetrics,
+          meta: performanceMeta,
+        },
+        start: perfomanceMarkers.startPageChange,
+        end: perfomanceMarkers.endPageReady,
+      });
+      trackedRoutes.add(pathname);
     },
   };
 }
