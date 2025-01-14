@@ -1,0 +1,5 @@
+fileGroups:
+  sharedGlobals: []
+  default:
+  - '**/*'
+  production: []

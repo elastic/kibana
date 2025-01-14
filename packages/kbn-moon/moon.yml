@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/moon'
+sourceRoot: packages/kbn-moon
+type: library
+owners:
+  defaultOwner: '@'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/moon'
+  description: ''
+  channel: ''
+  owner: '@'
+  metadata: {}
+tags:
+  - common
+  - shared-common
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  lint: {}
+  typecheck:
+    args:
+      - '--noEmit'
+      - '--skipLibCheck'
+      - '--incremental'
+      - '--tsBuildInfoFile'
+      - $projectRoot/.moon/tsconfig.tsbuildinfo
+    inputs:
+      - '@group(src)'
+      - '@group(global:tsConfigs)'
+    outputs:
+      - target

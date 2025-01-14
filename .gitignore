@@ -164,3 +164,7 @@ x-pack/test/security_solution_playwright/.env
 
 .codeql
 .dependency-graph-log.json
+
+# moon
+.moon/cache
+.moon/docker

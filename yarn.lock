@@ -6422,6 +6422,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/moon@link:packages/kbn-moon":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""
@@ -9190,11 +9194,11 @@
     uri-js-replace "^1.0.1"
 
 "@redocly/cli@^1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.26.0.tgz#0f5707f55d833993ffc9644fed7d85fcafe37877"
-  integrity sha512-yUsrTmEPHaBDQf16jSFGi2n+AJabHacLpr7La92Dseo0tRkgLKsUWiaVEEyqm79POBytD87mVTi3THitqnSyZQ==
+  version "1.27.1"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.27.1.tgz#7ae671615c2f6e6d049fce1affe3aa19f308b5a6"
+  integrity sha512-IgFzIKgWDaGY8jOlWYVp7VyIwElIjqrVLvZWzdDS/vdQlJ0DdISQ1nRy/YSh0Rqw69hJOpgn5cXMH/SS/qO33Q==
   dependencies:
-    "@redocly/openapi-core" "1.26.0"
+    "@redocly/openapi-core" "1.27.1"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9219,10 +9223,26 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
   integrity sha512-CEmvaJuG7pm2ylQg53emPmtgm4nW2nxBgwXzbVEHpGas/lGnMyN8Zlkgiz6rPw0unASg6VW3wlz27SOL5XFHYQ==
 
-"@redocly/openapi-core@1.26.0", "@redocly/openapi-core@^1.4.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.26.0.tgz#ffd6c3d9f7e98c4b61584d5c0511cf953d1cfade"
-  integrity sha512-8Ofu6WpBp7eoLmf1qQ4+T0W4LRr8es+4Drw/RJG+acPXmaT2TmHk2B2v+3+1R9GqSIj6kx3N7JmQkxAPCnvDLw==
+"@redocly/openapi-core@1.27.1":
+  version "1.27.1"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.27.1.tgz#53b6b6be0ffecf696a1da5aee84fe989cdf6d764"
+  integrity sha512-zQ47/A+Drk2Y75/af69MD3Oad4H9LxkUDzcm7XBkyLNDKIWQrDKDnS5476oDq77+zciymNxgMVtxxVXlnGS8kw==
+  dependencies:
+    "@redocly/ajv" "^8.11.2"
+    "@redocly/config" "^0.17.0"
+    colorette "^1.2.0"
+    https-proxy-agent "^7.0.4"
+    js-levenshtein "^1.1.6"
+    js-yaml "^4.1.0"
+    minimatch "^5.0.1"
+    node-fetch "^2.6.1"
+    pluralize "^8.0.0"
+    yaml-ast-parser "0.0.43"
+
+"@redocly/openapi-core@^1.4.0":
+  version "1.25.15"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.15.tgz#61d82b054340e080998efc3f701ca55c20f7fdb8"
+  integrity sha512-/dpr5zpGj2t1Bf7EIXEboRZm1hsJZBQfv3Q1pkivtdAEg3if2khv+b9gY68aquC6cM/2aQY2kMLy8LlY2tn+Og==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.17.0"
@@ -19042,7 +19062,12 @@ fast-xml-parser@4.4.1:
   dependencies:
     strnum "^1.0.5"
 
-fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.16:
+fastest-levenshtein@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/fastest-levenshtein/-/fastest-levenshtein-1.0.12.tgz#9990f7d3a88cc5a9ffd1f1745745251700d497e2"
+  integrity sha512-On2N+BpYJ15xIC974QNVuYGMOlEVt4s0EOI3wwMqOmK1fdDY+FN/zltPV8vosq4ad4c/gJ1KHScUn/6AWIgiow==
+
+fastest-levenshtein@^1.0.16:
   version "1.0.16"
   resolved "https://registry.yarnpkg.com/fastest-levenshtein/-/fastest-levenshtein-1.0.16.tgz#210e61b6ff181de91ea9b3d1b84fdedd47e034e5"
   integrity sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==
@@ -24898,7 +24923,12 @@ nano-css@^5.2.1:
     stacktrace-js "^2.0.0"
     stylis "3.5.0"
 
-nanoid@^3.3.1, nanoid@^3.3.6, nanoid@^3.3.8:
+nanoid@^3.3.1, nanoid@^3.3.6:
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.7.tgz#d0c301a691bc8d54efa0a2226ccf3fe2fd656bd8"
+  integrity sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==
+
+nanoid@^3.3.8:
   version "3.3.8"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.8.tgz#b1be3030bee36aaff18bacb375e5cce521684baf"
   integrity sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==
@@ -29254,7 +29284,12 @@ screenfull@^5.0.0:
   resolved "https://registry.yarnpkg.com/screenfull/-/screenfull-5.0.0.tgz#5c2010c0e84fd4157bf852877698f90b8cbe96f6"
   integrity sha512-yShzhaIoE9OtOhWVyBBffA6V98CDCoyHTsp8228blmqYy1Z5bddzE/4FPiJKlr8DVR4VBiiUyfPzIQPIYDkeMA==
 
-secure-json-parse@^2.4.0, secure-json-parse@^2.7.0:
+secure-json-parse@^2.4.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.6.0.tgz#95d89f84adf32d76ff7800e68a673b129fe918b0"
+  integrity sha512-B9osKohb6L+EZ6Kve3wHKfsAClzOC/iISA2vSuCe5Jx5NAKiwitfxx8ZKYapHXr0sYRj7UZInT7pLb3rp2Yx6A==
+
+secure-json-parse@^2.7.0:
   version "2.7.0"
   resolved "https://registry.npmjs.org/secure-json-parse/-/secure-json-parse-2.7.0.tgz"
   integrity sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==
@@ -33835,7 +33870,12 @@ zip-stream@^6.0.1:
     compress-commons "^6.0.2"
     readable-stream "^4.0.0"
 
-zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0, zod-to-json-schema@^3.23.5:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0:
+  version "3.23.2"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.23.2.tgz#bc7e379c8050462538383e382964c03d8fe008f9"
+  integrity sha512-uSt90Gzc/tUfyNqxnjlfBs8W6WSGpNBv0rVsNxP/BVSMHMKGdthPYff4xtCHYloJGM0CFxFsb3NbC0eqPhfImw==
+
+zod-to-json-schema@^3.23.5:
   version "3.24.1"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.1.tgz#f08c6725091aadabffa820ba8d50c7ab527f227a"
   integrity sha512-3h08nf3Vw3Wl3PK+q3ow/lIil81IT2Oa7YpQyUUDsEWbXveMesdfK1xBd2RhCkynwZndAxixji/7SYJJowr62w==

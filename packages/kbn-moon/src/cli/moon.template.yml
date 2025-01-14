@@ -1,0 +1,24 @@
+$schema: https://moonrepo.dev/schemas/project.json
+type: unknown
+toolchain:
+  default: node
+language: typescript
+
+tasks:
+  jest:
+    args:
+      - --jestConfig
+      - $projectRoot/jest.config.js
+  lint: {}
+  typecheck:
+    args:
+      - --noEmit
+      - --skipLibCheck
+      - --incremental
+      - --tsBuildInfoFile
+      - target/types/tsconfig.type_check.tsbuildinfo
+    inputs:
+      - '@group(src)'
+      - '@group(global:tsConfigs)'
+    outputs:
+      - target

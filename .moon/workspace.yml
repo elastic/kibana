@@ -1,0 +1,15 @@
+# https://moonrepo.dev/docs/config/workspace
+$schema: https://moonrepo.dev/schemas/workspace.json
+
+projects:
+  globs:
+    - packages/**/moon.yml
+    - plugins/**/moon.yml
+    - src/**/moon.yml
+    - x-pack/**/moon.yml
+  sources:
+    kibana: moon.yml
+    kibana-buildkite: .buildkite/moon.yml
+vcs:
+  defaultBranch: main
+  manager: git

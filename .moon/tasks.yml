@@ -1,0 +1,19 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+implicitDeps:
+  - '^:build'
+
+fileGroups:
+  "globalIgnoreConfigs": [
+    "!.moon/**",
+    "!package.json",
+    "!yarn.lock"
+  ]
+  "globalTsConfigs": [
+    "tsconfig.base.json",
+    "tsconfig.base.type_check.json",
+    "!moon.yml",
+    "!.moon/**",
+    "!package.json",
+    "!yarn.lock"
+  ]
