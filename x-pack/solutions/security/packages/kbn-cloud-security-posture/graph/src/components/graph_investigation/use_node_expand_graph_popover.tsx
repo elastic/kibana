@@ -35,7 +35,7 @@ interface UseNodeExpandGraphPopoverArgs {
   ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
 }
 
-interface UseNodeExpandGraphPopoverReturn {
+export interface UseNodeExpandGraphPopoverReturn {
   /**
    * The ID of the popover.
    */
