@@ -28,12 +28,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'path.repo=/tmp/',
-        'xpack.security.authc.api_key.enabled=true',
-        // temp workaround for FTR error
-        'xpack.ml.enabled=false',
-      ],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
