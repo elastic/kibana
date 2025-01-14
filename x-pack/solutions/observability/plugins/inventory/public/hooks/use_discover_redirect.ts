@@ -6,7 +6,6 @@
  */
 import { useCallback } from 'react';
 import type { InventoryEntity } from '../../common/entities';
-// import { useAdHocDataView } from './use_adhoc_data_view';
 import { useKibana } from './use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search_context';
 
