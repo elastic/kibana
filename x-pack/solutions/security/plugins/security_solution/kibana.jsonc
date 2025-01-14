@@ -59,7 +59,8 @@
       "unifiedDocViewer",
       "charts",
       "entityManager",
-      "inference"
+      "inference",
+      "productDocBase"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

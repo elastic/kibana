@@ -21,7 +21,7 @@ snapshots.js
 
 # plugin overrides
 /src/core/lib/kbn_internal_native_observable
-/src/plugins/data/common/es_query/kuery/ast/_generated_/**
+/src/platform/plugins/shared/data/common/es_query/kuery/ast/_generated_/**
 /x-pack/platform/plugins/private/canvas/canvas_plugin
 /x-pack/platform/plugins/private/canvas/shareable_runtime/build
 /x-pack/platform/plugins/private/canvas/storybook/build
@@ -37,8 +37,8 @@ snapshots.js
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /packages/kbn-ui-framework/dist
-/packages/kbn-flot-charts/lib
-/packages/kbn-monaco/src/**/antlr
+/src/platform/packages/shared/kbn-flot-charts/lib
+/src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-esql-ast/src/**/antlr
 
 # Bazel

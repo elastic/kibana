@@ -81,7 +81,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
     loadTestFile(require.resolve('./share')); // 1m 20s
     // keep it last in the group
-    loadTestFile(require.resolve('./tsdb')); // 1m
-    loadTestFile(require.resolve('./logsdb')); // 1m
+    loadTestFile(require.resolve('./tsdb')); // 3m 56s
   });
 };
