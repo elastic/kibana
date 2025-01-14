@@ -19,7 +19,7 @@ import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
-import { useProcessorSimulationGate } from '../hooks/use_processor_simulation_gate';
+import { useProcessingSimulator } from '../hooks/use_processing_simulator';
 
 const ProcessorOutcomePreview = dynamic(() =>
   import(/* webpackChunkName: "management_processor_outcome" */ './processor_outcome_preview').then(
@@ -59,12 +59,18 @@ export function AddProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const simulate = useProcessorSimulationGate({ definition });
+  const { error, isLoading, refreshSamples, simulation, samples, simulate } =
+    useProcessingSimulator({
+      definition,
+      condition: { field: formFields.field, operator: 'exists' },
+    });
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    simulate(processingDefinition).then(() => {
+    simulate(processingDefinition).then((responseBody) => {
+      if (responseBody instanceof Error) return;
+
       onAddProcessor(processingDefinition, data.detected_fields);
       onClose();
     });
@@ -98,7 +104,16 @@ export function AddProcessorFlyout({
           {formFields.type === 'dissect' && <DissectProcessorForm />}
         </EuiForm>
         <EuiHorizontalRule />
-        <ProcessorOutcomePreview definition={definition} formFields={formFields} />
+        <ProcessorOutcomePreview
+          definition={definition}
+          formFields={formFields}
+          simulation={simulation}
+          samples={samples}
+          onSimulate={simulate}
+          onRefreshSamples={refreshSamples}
+          simulationError={error}
+          isLoading={isLoading}
+        />
       </FormProvider>
     </ProcessorFlyoutTemplate>
   );
@@ -125,12 +140,17 @@ export function EditProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const simulate = useProcessorSimulationGate({ definition });
+  const { simulate, error } = useProcessingSimulator({
+    definition,
+    condition: { field: formFields.field, operator: 'exists' },
+  });
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    simulate(processingDefinition).then(() => {
+    simulate(processingDefinition).then((responseBody) => {
+      if (responseBody instanceof Error) return;
+
       onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
       onClose();
     });
@@ -161,7 +181,7 @@ export function EditProcessorFlyout({
       confirmButton={
         <EuiButton
           onClick={methods.handleSubmit(handleSubmit)}
-          disabled={!hasChanges || !methods.formState.isValid}
+          disabled={!methods.formState.isValid}
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
@@ -170,6 +190,7 @@ export function EditProcessorFlyout({
         </EuiButton>
       }
     >
+      {error && <InvalidProcessorConfig message={error.body?.message} />}
       <FormProvider {...methods}>
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector disabled />
@@ -183,3 +204,21 @@ export function EditProcessorFlyout({
     </ProcessorFlyoutTemplate>
   );
 }
+
+const InvalidProcessorConfig = ({ message }: { message?: string }) => {
+  return (
+    <>
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.calloutEditError',
+          { defaultMessage: 'The processor configuration is invalid.' }
+        )}
+        iconType="alert"
+        color="danger"
+      >
+        {message}
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  );
+};
