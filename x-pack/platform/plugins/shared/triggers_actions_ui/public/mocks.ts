@@ -9,6 +9,7 @@ import { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { RuleFormProps } from '@kbn/response-ops-rule-form';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
@@ -88,10 +89,12 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleFormFlyout: (props) => {
       return getRuleFormFlyoutLazy({
         ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
-        connectorServices,
-      });
+        services: {
+          ...props.services,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+        },
+      } as RuleFormProps);
     },
     getAlertsStateTable: (props: AlertsTableStateProps) => {
       return getAlertsTableStateLazy(props);
