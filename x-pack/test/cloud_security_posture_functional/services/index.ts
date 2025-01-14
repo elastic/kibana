@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { QueryBarProvider } from './query_bar_provider';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemMigrations.rules.pageTitle', {
-  defaultMessage: 'Translated rules',
-});
+export const services = {
+  queryBarProvider: QueryBarProvider,
+};

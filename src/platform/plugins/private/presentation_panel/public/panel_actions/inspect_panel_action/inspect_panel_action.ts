@@ -17,11 +17,11 @@ import {
   HasParentApi,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ACTION_INSPECT_PANEL } from './constants';
 import { inspector } from '../../kibana_services';
 
-export const ACTION_INSPECT_PANEL = 'openInspector';
-
-export type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesTitle & HasParentApi>;
+export type InspectPanelActionApi = HasInspectorAdapters &
+  Partial<PublishesTitle & HasParentApi>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);
 };

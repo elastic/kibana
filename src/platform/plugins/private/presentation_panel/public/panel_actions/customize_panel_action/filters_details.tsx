@@ -16,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { editPanelAction } from '../panel_actions';
 import { CustomizePanelActionApi } from './customize_panel_action';
+import { executeEditPanelAction } from '../edit_panel_action/execute_edit_action';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -75,7 +75,7 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="customizePanelEditQueryButton"
-                onClick={() => editPanelAction.execute({ embeddable: api })}
+                onClick={() => executeEditPanelAction(api)}
                 aria-label={i18n.translate(
                   'presentationPanel.action.customizePanel.flyout.optionsMenuForm.editQueryButtonAriaLabel',
                   {
@@ -112,7 +112,7 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="customizePanelEditFiltersButton"
-                onClick={() => editPanelAction.execute({ embeddable: api })}
+                onClick={() => executeEditPanelAction(api)}
                 aria-label={i18n.translate(
                   'presentationPanel.action.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
                   {
