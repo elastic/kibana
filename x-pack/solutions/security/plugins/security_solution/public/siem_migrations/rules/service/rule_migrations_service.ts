@@ -16,7 +16,6 @@ import type { RelatedIntegration } from '../../../../common/api/detection_engine
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigrationResourceBase,
-  RuleMigrationRetryFilter,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
@@ -25,6 +24,7 @@ import type {
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
@@ -124,7 +124,7 @@ export class SiemRulesMigrationsService {
 
   public async startRuleMigration(
     migrationId: string,
-    retry?: RuleMigrationRetryFilter
+    retry?: SiemMigrationRetryFilter
   ): Promise<StartRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {

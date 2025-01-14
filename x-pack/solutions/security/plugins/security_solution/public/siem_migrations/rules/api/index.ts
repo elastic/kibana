@@ -7,13 +7,11 @@
 
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import type {
-  RuleMigrationRetryFilter,
-  UpdateRuleMigrationData,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { UpdateRuleMigrationData } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
   SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
@@ -142,7 +140,7 @@ export interface StartRuleMigrationParams {
   /** The connector id to use for the migration */
   connectorId: string;
   /** Optional indicator to retry the migration with specific filtering criteria */
-  retry?: RuleMigrationRetryFilter;
+  retry?: SiemMigrationRetryFilter;
   /** Optional LangSmithOptions to use for the for the migration */
   langSmithOptions?: LangSmithOptions;
   /** Optional AbortSignal for cancelling request */
@@ -182,6 +180,18 @@ export interface GetRuleMigrationParams {
   searchTerm?: string;
   /** Optional rules ids to filter documents */
   ids?: string[];
+  /** Optional attribute to retrieve prebuilt migration rules */
+  isPrebuilt?: boolean;
+  /** Optional attribute to retrieve installed migration rules */
+  isInstalled?: boolean;
+  /** Optional attribute to retrieve fully translated migration rules */
+  isFullyTranslated?: boolean;
+  /** Optional attribute to retrieve partially translated migration rules */
+  isPartiallyTranslated?: boolean;
+  /** Optional attribute to retrieve untranslated migration rules */
+  isUntranslatable?: boolean;
+  /** Optional attribute to retrieve failed migration rules */
+  isFailed?: boolean;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -194,6 +204,12 @@ export const getRuleMigrations = async ({
   sortDirection,
   searchTerm,
   ids,
+  isPrebuilt,
+  isInstalled,
+  isFullyTranslated,
+  isPartiallyTranslated,
+  isUntranslatable,
+  isFailed,
   signal,
 }: GetRuleMigrationParams): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationResponse>(
@@ -207,6 +223,12 @@ export const getRuleMigrations = async ({
         sort_direction: sortDirection,
         search_term: searchTerm,
         ids,
+        is_prebuilt: isPrebuilt,
+        is_installed: isInstalled,
+        is_fully_translated: isFullyTranslated,
+        is_partially_translated: isPartiallyTranslated,
+        is_untranslatable: isUntranslatable,
+        is_failed: isFailed,
       },
       signal,
     }

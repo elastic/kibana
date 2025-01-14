@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
+import { getRetryFilter } from './util/retry';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -57,7 +58,10 @@ export const registerSiemRuleMigrationsStartRoute = (
             const rulesClient = await ctx.alerting.getRulesClient();
 
             if (retry) {
-              const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, retry);
+              const { updated } = await ruleMigrationsClient.task.updateToRetry(
+                migrationId,
+                getRetryFilter(retry)
+              );
               if (!updated) {
                 return res.ok({ body: { started: false } });
               }

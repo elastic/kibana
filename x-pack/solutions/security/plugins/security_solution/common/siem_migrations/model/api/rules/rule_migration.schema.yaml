@@ -164,6 +164,36 @@ paths:
             items:
               description: The rule migration id
               $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_prebuilt
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
 
       responses:
         200:

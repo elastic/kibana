@@ -18,7 +18,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigrationResourceBase,
   type RuleMigrationTaskStats,
@@ -51,7 +54,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigration = useCallback(() => {
       if (migrationStats?.id) {
-        const retryFilter = isRetry ? 'notFullyTranslated' : undefined;
+        const retryFilter = isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined;
         startMigration(migrationStats.id, retryFilter);
       }
     }, [startMigration, migrationStats?.id, isRetry]);
