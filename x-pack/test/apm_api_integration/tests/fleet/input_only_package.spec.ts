@@ -34,6 +34,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const config = getService('config');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const retry = getService('retry');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -166,7 +167,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
         it('the events can be seen on the Service Inventory Page', async () => {
           // Retry logic added to handle delays in data ingestion and indexing (the test shows some flakiness without this)
-          const retry = getService('retry');
           await retry.try(async () => {
             const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
             expect(apmServices[0].serviceName).to.be('opbeans-java');
