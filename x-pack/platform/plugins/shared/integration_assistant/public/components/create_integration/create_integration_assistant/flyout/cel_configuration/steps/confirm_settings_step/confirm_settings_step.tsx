@@ -286,7 +286,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       setIsFlyoutGenerating,
       reportCelGenerationComplete,
       onCelInputGenerationComplete,
-      onShowValidation
+      onShowValidation,
     ]);
 
     const onCancel = useCallback(() => {
@@ -321,38 +321,32 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           <EuiSpacer size="m" />
           {successfulGeneration && isSelectedPathGenerated ? (
             <EuiCallOut title="Success" color="success" iconType="check" />
-            ) : (
-              error ? (
-                <GenerationError
-                  title={i18n.GENERATION_ERROR}
-                  error={error}
-                  retryAction={onGenerate}
-                />
-               ) : (
-                <EuiFlexGroup justifyContent="flexStart">
-                  <EuiButton
-                    fill
-                    fullWidth={false}
-                    isDisabled={isFlyoutGenerating}
-                    isLoading={isFlyoutGenerating}
-                    iconSide="right"
-                    color="primary"
-                    onClick={onGenerate}
-                    data-test-subj="generateCelInputButton"
-                  >
-                    {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
-                  </EuiButton>
-                  {isFlyoutGenerating && (
-                    <EuiButtonEmpty
-                      onClick={onCancel}
-                      flush="left"
-                      data-test-subj="buttonsFooter-cancelButton"
-                    >
-                      {i18n.CANCEL}
-                    </EuiButtonEmpty>
-                  )}
-                </EuiFlexGroup>
-              )
+          ) : error ? (
+            <GenerationError title={i18n.GENERATION_ERROR} error={error} retryAction={onGenerate} />
+          ) : (
+            <EuiFlexGroup justifyContent="flexStart">
+              <EuiButton
+                fill
+                fullWidth={false}
+                isDisabled={isFlyoutGenerating}
+                isLoading={isFlyoutGenerating}
+                iconSide="right"
+                color="primary"
+                onClick={onGenerate}
+                data-test-subj="generateCelInputButton"
+              >
+                {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
+              </EuiButton>
+              {isFlyoutGenerating && (
+                <EuiButtonEmpty
+                  onClick={onCancel}
+                  flush="left"
+                  data-test-subj="buttonsFooter-cancelButton"
+                >
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexGroup>
           )}
         </EuiPanel>
       </EuiFlexGroup>
