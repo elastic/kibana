@@ -13,10 +13,14 @@ import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
-import { getErrorLoadingPanel } from './presentation_panel_strings';
 import { usePanelErrorCss } from './use_panel_error_css';
+
+const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
+  defaultMessage: 'An error occurred while loading this panel.',
+});
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -94,9 +98,9 @@ export const PresentationPanel = <
         justifyContent="center"
       >
         {PanelError ? (
-          <PanelError error={new Error(value?.loadErrorReason ?? getErrorLoadingPanel())} />
+          <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
-          value?.loadErrorReason ?? getErrorLoadingPanel()
+          value?.loadErrorReason ?? errorLoadingPanel
         )}
       </EuiFlexGroup>
     );

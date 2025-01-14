@@ -17,6 +17,6 @@ export const usePanelErrorCss = () => {
     '& > *': {
       maxHeight: '100%',
       overflow: 'auto',
-    }
+    },
   });
-}
+};
