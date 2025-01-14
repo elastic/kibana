@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockDependencies, MockRouter } from '../__mocks__';
+import { mockDependencies, MockRouter } from '../../__mocks__';
 
-import { registerDeprecationRoutes } from './routes';
+import { registerDeprecationRoutes } from './deprecations';
 
 describe('deprecation routes', () => {
   describe('POST /internal/enterprise_search/deprecations/delete_crawler_connectors', () => {

@@ -74,7 +74,7 @@ import {
   registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
 } from './collectors/workplace_search/telemetry';
 import { getRegisteredDeprecations } from './deprecations';
-import { registerDeprecationRoutes } from './deprecations/routes';
+import { registerDeprecationRoutes } from './routes/enterprise_search/deprecations';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';

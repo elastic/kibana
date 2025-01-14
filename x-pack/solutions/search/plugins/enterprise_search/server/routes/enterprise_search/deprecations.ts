@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
-import { RouteDependencies } from '../plugin';
+import { RouteDependencies } from '../../plugin';
 
-import { elasticsearchErrorHandler } from '../utils/elasticsearch_error_handler';
+import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
   router.post(
