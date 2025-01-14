@@ -93,9 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    context('when some specified indices do not exist, but user can read all others', () => {
-      const index = ['non-existent-index-*', 'other-dne-index', 'auditbeat-*'];
-    });
+    context('when some specified indices do not exist, but user can read all others', () => {});
 
     describe('when no specified indices exist', () => {
       describe('for a query rule', () => {
