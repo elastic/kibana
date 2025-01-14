@@ -140,24 +140,15 @@ function panelsOut(
 ): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON) as SavedDashboardPanel[];
   return panels.map(
-    ({
-      embeddableConfig,
-      gridData,
-      id: savedObjectId,
-      panelIndex,
-      panelRefName,
-      title,
-      type,
-      version,
-    }) => {
+    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => {
       const panelReferences = getReferencesForPanelId(panelIndex, references);
       const { type: embeddableType, ...injectedAttributes } = embeddable.inject(
-        { type, savedObjectId, ...embeddableConfig },
+        { type, ...embeddableConfig },
         panelReferences
       );
       return {
         gridData,
-        id: savedObjectId,
+        id,
         panelConfig: injectedAttributes,
         panelIndex,
         panelRefName,
