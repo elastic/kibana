@@ -584,11 +584,12 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && dataViewIndexPattern && (
+        {(metadata && dataView && (
           <MetricsExplorerKueryBar
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={ruleParams.filterQueryText}
+            dataView={dataView}
           />
         )) || (
           <EuiFieldSearch

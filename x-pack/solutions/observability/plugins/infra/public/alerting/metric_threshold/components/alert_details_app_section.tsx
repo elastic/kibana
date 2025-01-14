@@ -101,19 +101,19 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   useEffect(() => {
     const initDataView = async () => {
       if (!rule.params.searchConfiguration || !rule.params.searchConfiguration.index) {
-        let logsDataView;
+        let metricsDataView;
 
         try {
-          logsDataView = await data.dataViews.get('infra_rules_data_view');
+          metricsDataView = await data.dataViews.get('infra_rules_data_view');
         } catch (error) {
           const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-          logsDataView = defaultDataViewExists
+          metricsDataView = defaultDataViewExists
             ? await data.dataViews.getDefaultDataView()
             : undefined;
         }
 
-        if (logsDataView) {
-          setDataView(logsDataView);
+        if (metricsDataView) {
+          setDataView(metricsDataView);
         }
       } else {
         const ruleSearchConfiguration = rule.params.searchConfiguration;

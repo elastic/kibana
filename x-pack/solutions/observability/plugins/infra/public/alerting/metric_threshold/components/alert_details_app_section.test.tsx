@@ -9,7 +9,7 @@ import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   buildMetricThresholdAlert,
@@ -18,6 +18,7 @@ import {
 import { AlertDetailsAppSection } from './alert_details_app_section';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 const mockedLensStartContract = lensPluginMock.createStartContract();
@@ -61,6 +62,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
       ...mockCoreMock.createStart(),
+      data: mockDataPlugin.createStartContract(),
       charts: mockedChartStartContract,
       lens: mockedLensStartContract,
     },
@@ -97,7 +99,7 @@ describe('AlertDetailsAppSection', () => {
     const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
     (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
     renderComponent();
-
+    await waitFor(() => expect(screen.queryByTestId('metricThresholdAppSection')).toBeTruthy());
     expect(mockedRuleConditionChart).toHaveBeenCalledTimes(3);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });

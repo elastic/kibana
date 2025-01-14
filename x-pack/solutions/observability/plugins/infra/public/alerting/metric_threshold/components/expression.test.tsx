@@ -18,6 +18,8 @@ import { indexPatternEditorPluginMock as mockDataViewEditorPlugin } from '@kbn/d
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { kibanaStartMock } from '@kbn/observability-plugin/public/utils/kibana_react.mock';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
@@ -43,6 +45,17 @@ const mockKibana = () => {
     ...kibanaStartMock.startContract(),
   });
 };
+
+jest.mock('../../../pages/metrics/metrics_explorer/components/kuery_bar');
+jest.mock('../../../pages/metrics/metrics_explorer/components/group_by');
+
+const mockedMetricsExplorerKueryBar = jest.fn(() => (
+  <div data-test-subj="MetricsExplorerKueryBar" />
+));
+(MetricsExplorerKueryBar as jest.Mock).mockImplementation(mockedMetricsExplorerKueryBar);
+
+const mockedMetricsExplorerGroupBy = jest.fn(() => <div data-test-subj="MetricsExplorerGroupBy" />);
+(MetricsExplorerGroupBy as jest.Mock).mockImplementation(mockedMetricsExplorerGroupBy);
 
 describe('Expression', () => {
   beforeEach(() => {
