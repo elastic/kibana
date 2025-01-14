@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
+import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
 import chalk from 'chalk';
 import { castArray, omit } from 'lodash';
