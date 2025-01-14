@@ -40,6 +40,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   hideEditButton = false,
   filteredRuleTypes = [],
   useNewRuleForm = false,
+  rulePath,
 }) => {
   const {
     application: { capabilities, navigateToApp },
@@ -111,13 +112,21 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const onEditRuleClick = () => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
+      rulePath
+        ? navigateToApp('observability', {
+            path: rulePath,
+            state: {
+              returnApp: 'observability',
+              returnPath: rulePath,
+            },
+          })
+        : navigateToApp('management', {
+            path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+            state: {
+              returnApp: 'management',
+              returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+            },
+          });
     } else {
       setEditFlyoutVisible(true);
     }

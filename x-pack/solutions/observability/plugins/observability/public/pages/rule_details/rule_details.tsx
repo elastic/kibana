@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
@@ -36,7 +36,7 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../../common/locators/paths';
+import { paths, relativePaths } from '../../../common/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
@@ -51,20 +51,19 @@ interface RuleDetailsPathParams {
 }
 export function RuleDetailsPage() {
   const {
-    application: { capabilities, navigateToUrl },
-    http: { basePath },
+    application,
+    http,
     share: {
       url: { locators },
     },
     triggersActionsUi: {
       actionTypeRegistry,
-      ruleTypeRegistry,
       getAlertSummaryWidget: AlertSummaryWidget,
-      getEditRuleFlyout: EditRuleFlyout,
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
     serverless,
+    ruleTypeRegistry,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -82,11 +81,11 @@ export function RuleDetailsPage() {
         text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
           defaultMessage: 'Alerts',
         }),
-        href: basePath.prepend(paths.observability.alerts),
+        href: http.basePath.prepend(paths.observability.alerts),
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        href: basePath.prepend(paths.observability.rules),
+        href: http.basePath.prepend(paths.observability.rules),
         text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
           defaultMessage: 'Rules',
         }),
@@ -112,8 +111,6 @@ export function RuleDetailsPage() {
   const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
     getDefaultAlertSummaryTimeRange
   );
-
-  const [isEditRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
 
   const [ruleToDelete, setRuleToDelete] = useState<string | undefined>(undefined);
   const [isRuleDeleting, setIsRuleDeleting] = useState(false);
@@ -160,16 +157,15 @@ export function RuleDetailsPage() {
   };
 
   const handleEditRule = () => {
-    setEditRuleFlyoutVisible(true);
-  };
-
-  const handleCloseRuleFlyout = () => {
-    setEditRuleFlyoutVisible(false);
+    // setEditRuleFlyoutVisible(true);
+    console.log('rule_details', { rule });
+    const editRuleLink = http.basePath.prepend(paths.observability.editRule(rule?.id ?? ''));
+    return application.navigateToUrl(editRuleLink);
   };
 
   const handleDeleteRule = () => {
     setRuleToDelete(rule?.id);
-    setEditRuleFlyoutVisible(false);
+    // setEditRuleFlyoutVisible(false);
   };
 
   const handleIsDeletingRule = () => {
@@ -179,11 +175,16 @@ export function RuleDetailsPage() {
   const handleIsRuleDeleted = () => {
     setRuleToDelete(undefined);
     setIsRuleDeleting(false);
-    navigateToUrl(basePath.prepend(paths.observability.rules));
+    application.navigateToUrl(http.basePath.prepend(paths.observability.rules));
   };
 
   const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
-  const isEditable = isRuleEditable({ capabilities, rule, ruleType, ruleTypeRegistry });
+  const isEditable = isRuleEditable({
+    capabilities: application.capabilities,
+    rule,
+    ruleType,
+    ruleTypeRegistry,
+  });
 
   const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
@@ -216,6 +217,7 @@ export function RuleDetailsPage() {
       }}
     >
       <HeaderMenu />
+
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel
@@ -245,6 +247,8 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
+          useNewRuleForm={true}
+          rulePath={relativePaths.observability.editRule(rule.id)}
           onEditRule={async () => {
             refetch();
           }}
@@ -266,7 +270,7 @@ export function RuleDetailsPage() {
         onSetTabId={handleSetTabId}
       />
 
-      {isEditRuleFlyoutVisible && (
+      {/* {isEditRuleFlyoutVisible && (
         <EditRuleFlyout
           initialRule={rule}
           onClose={handleCloseRuleFlyout}
@@ -274,7 +278,7 @@ export function RuleDetailsPage() {
             refetch();
           }}
         />
-      )}
+      )} */}
 
       {ruleToDelete ? (
         <DeleteConfirmationModal

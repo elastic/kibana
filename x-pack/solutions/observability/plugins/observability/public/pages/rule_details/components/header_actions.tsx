@@ -34,7 +34,6 @@ export function HeaderActions({
   const togglePopover = () => setIsRuleEditPopoverOpen(!isRuleEditPopoverOpen);
 
   const handleEditRule = () => {
-    setIsRuleEditPopoverOpen(false);
     onEditRule();
   };
 

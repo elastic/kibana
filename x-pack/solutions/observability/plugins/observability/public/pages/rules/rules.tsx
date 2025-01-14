@@ -184,7 +184,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           onSelectRuleType={(ruleTypeId) => {
             setRuleTypeModalVisibility(false);
             const createRuleLink = http.basePath.prepend(
-              paths.observability.ruleCreate(ruleTypeId)
+              paths.observability.createRule(ruleTypeId)
             );
             return application.navigateToUrl(createRuleLink);
           }}

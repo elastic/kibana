@@ -399,6 +399,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
   useNewRuleForm?: boolean;
+  rulePath?: string;
 }
 
 export enum Percentiles {
