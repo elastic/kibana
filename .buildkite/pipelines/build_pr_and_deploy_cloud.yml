@@ -22,7 +22,10 @@ steps:
               limit: 1
 
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "PR Cloud deployment started at: $BUILDKITE_BUILD_URL"
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "PR Cloud deployment started at: $BUILDKITE_BUILD_URL" \
+            --context "cloud-deploy-job" \
+            --clear-previous
         label: Comment with job URL
         agents:
           provider: gcp
@@ -66,7 +69,10 @@ steps:
       - wait: ~
 
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "Cloud deployment initiated, see credentials at: $BUILDKITE_BUILD_URL"
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Cloud deployment initiated, see credentials at: $BUILDKITE_BUILD_URL" \
+            --context "cloud-deploy-job" \
+            --clear-previous
         label: Comment with job URL
         agents:
           provider: gcp
