@@ -189,7 +189,7 @@ describe('react embeddable renderer', () => {
         type: 'test',
         uuid: '12345',
         parentApi: expect.any(Object),
-        unsavedChanges: expect.any(Object),
+        unsavedChanges$: expect.any(Object),
         serializeState: expect.any(Function),
         resetUnsavedChanges: expect.any(Function),
         snapshotRuntimeState: expect.any(Function),
