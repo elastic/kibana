@@ -41,7 +41,6 @@ export const dataViewSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       type: { type: 'keyword' },
-      nameAttribute: { type: 'keyword' },
       name: {
         type: 'text',
         fields: {
