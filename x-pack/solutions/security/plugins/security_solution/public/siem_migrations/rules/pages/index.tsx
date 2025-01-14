@@ -98,19 +98,18 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
-      if (migrationStats.status === SiemMigrationTaskStatus.FINISHED) {
-        return (
-          <MigrationRulesTable
-            migrationId={migrationId}
-            refetchData={refetchData}
-            integrations={integrations}
-            isIntegrationsLoading={isIntegrationsLoading}
-          />
-        );
-      }
       return (
         <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
+            {/* TODO: uncomment when retry API is ready <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" /> */}
+            {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+              <MigrationRulesTable
+                migrationId={migrationId}
+                refetchData={refetchData}
+                integrations={integrations}
+                isIntegrationsLoading={isIntegrationsLoading}
+              />
+            )}
             {migrationStats.status === SiemMigrationTaskStatus.READY && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
