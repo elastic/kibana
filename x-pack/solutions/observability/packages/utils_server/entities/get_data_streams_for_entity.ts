@@ -55,6 +55,10 @@ export async function getDataStreamsForEntity({
 
   const dataStreams = uniq(
     compact([
+      /* Check both data streams and indices.
+       * The response body shape differs depending on the request. Example:
+       * GET _resolve/index/.logs-*-default* will return data in the `dataStreams` key.
+       * GET _resolve/index/.ds-logs-*-default* will return data in the `indices` key */
       ...resolveIndexResponse.indices.flatMap((idx) => {
         const remoteCluster = idx.name.includes(':') ? idx.name.split(':')[0] : null;
         if (remoteCluster) {
