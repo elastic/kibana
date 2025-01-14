@@ -26,7 +26,15 @@ import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, abortSignal }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    abortSignal,
+  }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
     const subActionParams = {
@@ -34,7 +42,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       messages: messagesToBedrock(messages),
       tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
       toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
+      temperature,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
     };
