@@ -16,8 +16,10 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridProps,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { getFieldValue } from '@kbn/discover-utils';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -370,6 +372,23 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
+    const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = useCallback(
+      (row: DataTableRecord, euiTheme: EuiThemeComputed) => {
+        if (getFieldValue(row, 'event.kind') === 'signal') {
+          return {
+            color: euiTheme.colors.warning,
+            label: 'Alert',
+          };
+        } else {
+          return {
+            color: euiTheme.colors.lightShade,
+            label: 'Event',
+          };
+        }
+      },
+      []
+    );
+
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -423,6 +442,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             onUpdatePageIndex={onUpdatePageIndex}
+            getRowIndicator={getRowIndicator}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

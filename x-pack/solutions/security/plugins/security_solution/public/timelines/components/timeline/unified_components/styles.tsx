@@ -150,7 +150,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.nonRawEvent),
   .udtTimeline .euiDataGridRow.nonRawEvent {
-    .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
@@ -158,7 +157,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.rawEvent),
   .udtTimeline .euiDataGridRow.rawEvent {
-    .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
