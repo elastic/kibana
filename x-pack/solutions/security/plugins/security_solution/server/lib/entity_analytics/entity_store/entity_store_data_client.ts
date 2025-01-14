@@ -294,7 +294,7 @@ export class EntityStoreDataClient {
       filter = '',
       fieldHistoryLength = 10,
       lookbackPeriod = '24h',
-    }: InitEntityEngineRequestBody,
+    }: InitEntityEngineRequestBody & { lookbackPeriod?: string },
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
