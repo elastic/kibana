@@ -1,8 +1,8 @@
-import { ContentReference, ContentReferences } from "../schemas"
+import { ContentReference, ContentReferences, Message } from "../schemas"
 
 export type ContentReferenceId = string
 export type ContentReferenceTypes = ContentReference['type']
-export type ContentReferenceBlock = `!{reference(${string})}`
+export type ContentReferenceBlock = `{reference(${string})}`
 
 export type ContentReferencesStore = {
     /** 
@@ -13,8 +13,10 @@ export type ContentReferencesStore = {
      * @returns the new ContentReference
      */
     add: <T extends ContentReference>(generator: (params: { id: ContentReferenceId }) => T) => T
+    
+    addFromMessages: (messages: Message[]) => void
     /**
-     * Used to read the content store.
+     * Used to read the content reference store.
      * @returns a record that contains all of the ContentReference that have been added .
      */
     getStore: () => ContentReferences

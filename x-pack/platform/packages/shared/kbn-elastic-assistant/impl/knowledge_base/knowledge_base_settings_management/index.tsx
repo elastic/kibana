@@ -66,6 +66,7 @@ import {
   useKnowledgeBaseStatus,
 } from '../../assistant/api/knowledge_base/use_knowledge_base_status';
 import { CANCEL_BUTTON_TEXT } from '../../assistant/assistant_header/translations';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 
 interface Params {
   dataViews: DataViewsContract;
@@ -83,6 +84,11 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     enabled: isAssistantEnabled,
   });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
+  const [searchParams] = useSearchParams();
+  const initialSearchTerm = useMemo(
+    () => (searchParams.get('entry_search_term') as string) ?? undefined,
+    [searchParams]
+  );
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
   const [duplicateKBItem, setDuplicateKBItem] = useState<KnowledgeBaseEntryCreateProps | null>(
@@ -286,8 +292,9 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         placeholder: i18n.SEARCH_PLACEHOLDER,
       },
       filters: [],
+      defaultQuery: initialSearchTerm,
     }),
-    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked]
+    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked, initialSearchTerm]
   );
 
   const flyoutTitle = useMemo(() => {

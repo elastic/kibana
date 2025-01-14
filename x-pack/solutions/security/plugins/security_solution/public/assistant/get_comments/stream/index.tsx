@@ -13,10 +13,12 @@ import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
+import { ContentReferences } from '@kbn/elastic-assistant-common';
 
 interface Props {
   abortStream: () => void;
   content?: string;
+  contentReferences?: ContentReferences
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
@@ -31,6 +33,7 @@ interface Props {
 export const StreamComment = ({
   abortStream,
   content,
+  contentReferences,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -106,6 +109,7 @@ export const StreamComment = ({
         <MessageText
           data-test-subj={isError ? 'errorComment' : undefined}
           content={message}
+          contentReferences={contentReferences}
           index={index}
           loading={isAnythingLoading}
         />

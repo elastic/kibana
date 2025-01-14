@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 
 import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
@@ -37,6 +37,7 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   replacements: Replacements;
+  contentReferencesStore: ContentReferencesStore
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -50,6 +51,7 @@ export const getDefaultAssistantGraph = ({
   signal,
   tools,
   replacements,
+  contentReferencesStore
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -126,6 +128,7 @@ export const getDefaultAssistantGraph = ({
           ...nodeParams,
           state,
           conversationsDataClient: dataClients?.conversationsDataClient,
+          contentReferencesStore
         })
       )
       .addNode(NodeType.GENERATE_CHAT_TITLE, (state: AgentState) =>

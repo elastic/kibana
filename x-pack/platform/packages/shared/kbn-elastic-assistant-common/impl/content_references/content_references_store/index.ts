@@ -1,4 +1,4 @@
-import { ContentReference, ContentReferences } from "../../schemas"
+import { ContentReference, ContentReferences, Message } from "../../schemas"
 import { customAlphabet } from 'nanoid'
 import { ContentReferencesStore } from "../types"
 
@@ -17,6 +17,16 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
         return entry
     }
 
+    const addFromMessages = (messages: Message[]) => {
+        for (const message of messages) {
+            const contentReferences = message.metadata?.contentReferences
+            if (!contentReferences) continue
+            for (const [key, value] of Object.entries(contentReferences)) {
+                store.set(key, value)
+            }
+        }
+    }
+
     const getStore: ContentReferencesStore['getStore'] = () => {
         return Object.fromEntries(store)
     }
@@ -31,7 +41,8 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
 
     return {
         add,
-        getStore
+        getStore,
+        addFromMessages
     }
 }
 
@@ -44,12 +55,12 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
 export const prunedContentReferences = (content: string, contentReferencesStore: ContentReferencesStore): ContentReferences | undefined => {
     const fullStore = contentReferencesStore.getStore()
     const prunedStore: Record<string, ContentReference> = {}
-    const matches = content.matchAll(/\!\{reference\([0-9a-zA-Z]+\)\}/g)
+    const matches = content.matchAll(/\{reference\([0-9a-zA-Z]+\)\}/g)
     let isPrunedStoreEmpty = true
 
     for (const match of matches) {
         const referenceElement = match[0]
-        const referenceId = referenceElement.replace("!{reference(", "").replace(")}", "")
+        const referenceId = referenceElement.replace("{reference(", "").replace(")}", "")
         if (referenceId in prunedStore) {
             continue
         }

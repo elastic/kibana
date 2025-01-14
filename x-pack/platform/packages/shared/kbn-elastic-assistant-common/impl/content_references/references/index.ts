@@ -1,4 +1,4 @@
-import { SecurityAlertContentReference, SecurityAlertsPageContentReference, ContentReference, KnowledgeBaseEntryContentReference } from "../../schemas";
+import { SecurityAlertContentReference, SecurityAlertsPageContentReference, ContentReference, KnowledgeBaseEntryContentReference, ProductDocumentationContentReference } from "../../schemas";
 import { ContentReferenceBlock } from "../types";
 
 /**
@@ -8,7 +8,7 @@ import { ContentReferenceBlock } from "../types";
  * @returns ContentReferenceBlock
  */
 export const contentReferenceBlock = (contentReference: ContentReference): ContentReferenceBlock => {
-    return `!{reference(${contentReference.id})}`
+    return `{reference(${contentReference.id})}`
 }
 
 /**
@@ -18,6 +18,15 @@ export const contentReferenceBlock = (contentReference: ContentReference): Conte
  */
 export const contentReferenceString = (contentReference: ContentReference) => {
     return `Reference: ${contentReferenceBlock(contentReference)}` as const
+}
+
+/**
+ * Removed content references from conent.
+ * @param content content to remove content references from
+ * @returns content with content references replaced with ''
+ */
+export const removeContentReferences = (content: String) => {
+    return content.replaceAll(/\{reference\(.*?\)\}/g, '');
 }
 
 /**
@@ -59,5 +68,19 @@ export const knowledgeBaseReferenceFactory = (id: string, knowledgeBaseEntryName
         id,
         knowledgeBaseEntryName,
         knowledgeBaseEntryId,
+    }
+}
+
+/**
+ * Generates a contentReference for the alerts count tool.
+ * @param id id of the contentReference
+ * @returns AlertsCountReference
+ */
+export const productDocumentationReferenceFactory = (id: string, title: string, url: string): ProductDocumentationContentReference => {
+    return {
+        type: "ProductDocumentation",
+        id,
+        title,
+        url
     }
 }

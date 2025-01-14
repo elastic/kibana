@@ -9,16 +9,19 @@ import { AgentState, NodeParamsBase } from '../types';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
 import { NodeType } from '../constants';
+import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 
 export interface GetPersistedConversationParams extends NodeParamsBase {
   conversationsDataClient?: AIAssistantConversationsDataClient;
   state: AgentState;
+  contentReferencesStore: ContentReferencesStore
 }
 
 export async function getPersistedConversation({
   logger,
   state,
   conversationsDataClient,
+  contentReferencesStore
 }: GetPersistedConversationParams): Promise<Partial<AgentState>> {
   logger.debug(
     () => `${NodeType.GET_PERSISTED_CONVERSATION}: Node state:\n${JSON.stringify(state, null, 2)}`
@@ -38,6 +41,8 @@ export async function getPersistedConversation({
   logger.debug(`conversationId: ${state.conversationId}`);
 
   const messages = getLangChainMessages(conversation.messages ?? []);
+  
+  contentReferencesStore.addFromMessages(conversation.messages ?? [])
 
   if (!state.input) {
     const lastMessage = messages?.splice(-1)[0];

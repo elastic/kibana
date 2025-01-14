@@ -73,7 +73,7 @@ function enrichDocument(contentReferencesStore: ContentReferencesStore){
       ...document,
       metadata: {
         ...document.metadata,
-        referenceElement: contentReferenceBlock(knowledgeBaseReference),
+        citation: contentReferenceBlock(knowledgeBaseReference),
       },
     });
   }

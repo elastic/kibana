@@ -174,6 +174,7 @@ export const getComments: GetAssistantMessages = ({
           children: (
             <StreamComment
               abortStream={abortStream}
+              contentReferences={message.metadata?.contentReferences}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
@@ -197,6 +198,7 @@ export const getComments: GetAssistantMessages = ({
           <StreamComment
             abortStream={abortStream}
             content={transformedMessage.content}
+            contentReferences={message.metadata?.contentReferences}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isError={message.isError}

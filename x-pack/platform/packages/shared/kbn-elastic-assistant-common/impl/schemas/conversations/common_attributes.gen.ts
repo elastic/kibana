@@ -112,6 +112,25 @@ export const KnowledgeBaseEntryContentReference = BaseContentReference.extend({
 /**
  * Alerts count referenced by the message content
  */
+export type ProductDocumentationContentReference = z.infer<typeof ProductDocumentationContentReference>;
+export const ProductDocumentationContentReference = BaseContentReference.extend({
+  /**
+   * Specifies this is a ProductDocumentationContentReference
+   */
+  type: z.literal("ProductDocumentation"),
+  /**
+   * Title of the documentation
+   */
+  title: z.string(),
+  /**
+   * Url to the documentation
+   */
+  url: z.string()
+});
+
+/**
+ * Alerts count referenced by the message content
+ */
 export type SecurityAlertsPageContentReference = z.infer<typeof SecurityAlertsPageContentReference>;
 export const SecurityAlertsPageContentReference = BaseContentReference.extend({
   /**
@@ -135,7 +154,7 @@ export const SecurityAlertContentReference = BaseContentReference.extend({
   alertId: z.string()
 });
 
-export const ContentReference = z.union([KnowledgeBaseEntryContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference])
+export const ContentReference = z.union([KnowledgeBaseEntryContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference, ProductDocumentationContentReference])
 export type ContentReference = z.infer<typeof ContentReference>
 export const ContentReferences = z.record(z.string(), ContentReference)
 export type ContentReferences = z.infer<typeof ContentReferences>

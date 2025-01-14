@@ -10,16 +10,12 @@ const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT =
 const IF_YOU_DONT_KNOW_THE_ANSWER = 'Do not answer questions unrelated to Elastic Security.';
 export const KNOWLEDGE_HISTORY =
   'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
-export const INCLUDE_CITATIONS = `When a reference is provided, include it in the response. References are indicated in the text using the reference component at the end of the respective scentence, after the full stop. For example:
-  Template:  
-  \`\`\`
-  <referenced sentence>.<referenceElement>
-  \`\`\`
-  Example: 
-  \`\`\`
-  This vulnerability emerged due to issues in Log4j version 2.15.0.!{{reference(HMCxq)}} This vulnerability impacted various companies running Java services.!{{reference(prSit)}}
-  \`\`\`
-  `;
+export const INCLUDE_CITATIONS = `In your response, cite sources using this citation format: \`{{reference(<reference id>)}}\`. Citations appear after the period. Please only use the citations provided by the tools.  
+Example citation: 
+\`\`\`
+This vulnerability emerged due to issues in Log4j.{{reference(HMCxq)}} This vulnerability impacted various companies running Java services.{{reference(prSit)}}
+\`\`\``;
+
 export const DEFAULT_SYSTEM_PROMPT = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER} ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS}`;
 // system prompt from @afirstenberg
 const BASE_GEMINI_PROMPT =

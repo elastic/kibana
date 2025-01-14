@@ -25,9 +25,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { ContentReferenceParser } from '../content_reference/content_reference_parser';
+import { contentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
+import { ContentReferences } from '@kbn/elastic-assistant-common';
 
 interface Props {
   content: string;
+  contentReferences?: ContentReferences
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -99,7 +103,11 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+type GetPluginDependencies = {
+  contentReferences?: ContentReferences
+}
+
+const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -108,6 +116,7 @@ const getPluginDependencies = () => {
 
   processingPlugins[1][1].components = {
     ...components,
+    contentReference: contentReferenceComponentFactory({ contentReferences }),
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
@@ -139,17 +148,17 @@ const getPluginDependencies = () => {
   };
 
   return {
-    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
+    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins, ContentReferenceParser],
     processingPluginList: processingPlugins,
   };
 };
 
-export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
+export function MessageText({ loading, content, contentReferences, index, 'data-test-subj': dataTestSubj }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = getPluginDependencies({contentReferences});
 
   return (
     <EuiText className={containerClassName} data-test-subj={dataTestSubj}>

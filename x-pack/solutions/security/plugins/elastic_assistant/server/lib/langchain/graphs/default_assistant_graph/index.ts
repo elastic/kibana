@@ -176,6 +176,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
+    contentReferencesStore,
     logger,
     tools,
     replacements,
