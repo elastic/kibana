@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -18,7 +18,7 @@ import {
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
@@ -33,7 +33,6 @@ import { getGroupFilters } from '@kbn/observability-plugin/public';
 import type { GenericAggType, TopAlert } from '@kbn/observability-plugin/public';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { Threshold } from '../../common/components/threshold';
-import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import type { AlertParams } from '../types';
@@ -61,8 +60,11 @@ interface AppSectionProps {
 export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const { charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
+  const { data } = useKibanaContextForPlugin().services;
+  const [dataView, setDataView] = useState<DataView>();
+  const [, setDataViewError] = useState<Error>();
+
   const groups = alert.fields[ALERT_GROUP];
-  const { metricsView } = useMetricsDataViewContext();
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -95,6 +97,40 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
 
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
+
+  useEffect(() => {
+    const initDataView = async () => {
+      if (!rule.params.searchConfiguration || !rule.params.searchConfiguration.index) {
+        let logsDataView;
+
+        try {
+          logsDataView = await data.dataViews.get('infra_rules_data_view');
+        } catch (error) {
+          const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
+          logsDataView = defaultDataViewExists
+            ? await data.dataViews.getDefaultDataView()
+            : undefined;
+        }
+
+        if (logsDataView) {
+          setDataView(logsDataView);
+        }
+      } else {
+        const ruleSearchConfiguration = rule.params.searchConfiguration;
+        try {
+          const createdSearchSource = await data.search.searchSource.create(
+            ruleSearchConfiguration
+          );
+          setDataView(createdSearchSource.getField('index'));
+        } catch (error) {
+          setDataViewError(error);
+        }
+      }
+    };
+
+    initDataView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search.searchSource]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
@@ -159,7 +195,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>
-                  {metricsView && (
+                  {dataView && (
                     <RuleConditionChart
                       additionalFilters={getGroupFilters(groups)}
                       metricExpression={{
@@ -178,7 +214,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
                       }}
                       searchConfiguration={{ query: { query: '', language: '' } }}
                       timeRange={timeRange}
-                      dataView={metricsView.dataViewReference}
+                      dataView={dataView}
                       groupBy={rule.params.groupBy}
                       annotations={annotations}
                     />
@@ -194,4 +230,4 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<AppSectionProps>(AlertDetailsAppSection)('default');
+export default AlertDetailsAppSection;

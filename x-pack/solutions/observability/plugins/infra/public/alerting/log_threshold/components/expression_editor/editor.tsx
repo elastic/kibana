@@ -55,6 +55,7 @@ export interface ExpressionCriteria {
 
 interface LogsContextMeta {
   isInternal?: boolean;
+  adHocDataViewList: DataView[];
 }
 
 const DEFAULT_BASE_EXPRESSION = {
@@ -104,7 +105,7 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     services: { data, dataViews, dataViewEditor },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
-  const { setRuleParams, ruleParams } = props;
+  const { setRuleParams, ruleParams, onChangeMetaData } = props;
 
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
@@ -137,7 +138,6 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
 
         if (logsDataView) {
           newSearchSource.setField('index', logsDataView);
-          setDataView(logsDataView);
         }
 
         initialSearchConfiguration = getSearchConfiguration(
@@ -254,7 +254,9 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
         onSelectDataView={onSelectDataView}
-        onChangeMetaData={() => {}}
+        onChangeMetaData={({ adHocDataViewList }) => {
+          onChangeMetaData({ adHocDataViewList });
+        }}
       />
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="metricRuleDataViewErrorNoTimestamp">

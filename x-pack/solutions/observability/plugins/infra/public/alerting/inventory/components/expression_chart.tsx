@@ -36,7 +36,7 @@ interface Props {
   expression: InventoryMetricConditions;
   filterQuery?: string | symbol;
   nodeType: InventoryItemType;
-  sourceId: string;
+  sourceId?: string;
   accountId?: string;
   region?: string;
   indexPattern: string;
@@ -46,7 +46,7 @@ export const ExpressionChart: React.FC<Props> = ({
   expression,
   filterQuery,
   nodeType,
-  sourceId,
+  sourceId = '',
   accountId = '',
   region = '',
   indexPattern,

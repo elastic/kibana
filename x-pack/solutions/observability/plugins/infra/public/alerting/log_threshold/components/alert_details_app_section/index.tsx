@@ -61,12 +61,31 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   useEffect(() => {
     const initDataView = async () => {
-      const ruleSearchConfiguration = rule.params.searchConfiguration;
-      try {
-        const createdSearchSource = await data.search.searchSource.create(ruleSearchConfiguration);
-        setDataView(createdSearchSource.getField('index'));
-      } catch (error) {
-        setDataViewError(error);
+      if (!rule.params.searchConfiguration || !rule.params.searchConfiguration.index) {
+        let logsDataView;
+
+        try {
+          logsDataView = await data.dataViews.get('log_rules_data_view');
+        } catch (error) {
+          const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
+          logsDataView = defaultDataViewExists
+            ? await data.dataViews.getDefaultDataView()
+            : undefined;
+        }
+
+        if (logsDataView) {
+          setDataView(logsDataView);
+        }
+      } else {
+        const ruleSearchConfiguration = rule.params.searchConfiguration;
+        try {
+          const createdSearchSource = await data.search.searchSource.create(
+            ruleSearchConfiguration
+          );
+          setDataView(createdSearchSource.getField('index'));
+        } catch (error) {
+          setDataViewError(error);
+        }
       }
     };
 

@@ -122,7 +122,6 @@ export const Expressions: React.FC<Props> = (props) => {
 
           if (metricsDataView) {
             newSearchSource.setField('index', metricsDataView);
-            setDataView(metricsDataView);
           }
 
           initialSearchConfiguration = getSearchConfiguration(

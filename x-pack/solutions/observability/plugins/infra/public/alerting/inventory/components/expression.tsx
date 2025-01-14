@@ -161,7 +161,6 @@ export const Expressions: React.FC<Props> = (props) => {
 
           if (metricsDataView) {
             newSearchSource.setField('index', metricsDataView);
-            setDataView(metricsDataView);
           }
 
           initialSearchConfiguration = getSearchConfiguration(
@@ -474,7 +473,6 @@ export const Expressions: React.FC<Props> = (props) => {
                 expression={e}
                 filterQuery={ruleParams.filterQuery}
                 nodeType={ruleParams.nodeType}
-                sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
                 indexPattern={dataView?.getIndexPattern() || 'unknown-index'}

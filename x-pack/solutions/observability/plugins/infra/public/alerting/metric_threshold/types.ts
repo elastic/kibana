@@ -70,7 +70,7 @@ export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
   filterQuery?: FilterQuery;
-  sourceId: string;
+  sourceId?: string;
   filterQueryText?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;

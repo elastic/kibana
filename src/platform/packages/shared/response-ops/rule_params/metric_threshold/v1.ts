@@ -9,11 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { dataViewSpecSchema } from '../common/data_view_spec_schema';
 
 import {
   LEGACY_COMPARATORS,
   oneOfLiterals,
   validateIsStringElasticsearchJSONFilter,
+  validateKQLStringFilter,
 } from '../common/utils';
 
 const METRIC_EXPLORER_AGGREGATIONS = [
@@ -82,6 +84,16 @@ const customCriterion = schema.object({
   label: schema.maybe(schema.string()),
 });
 
+export const searchConfigurationSchema = schema.object({
+  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
+  query: schema.object({
+    language: schema.string(),
+    query: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+  }),
+});
+
 export const metricThresholdRuleParamsSchema = schema.object(
   {
     criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion, customCriterion])),
@@ -91,9 +103,10 @@ export const metricThresholdRuleParamsSchema = schema.object(
         validate: validateIsStringElasticsearchJSONFilter,
       })
     ),
-    sourceId: schema.string(),
+    sourceId: schema.maybe(schema.string()),
     alertOnNoData: schema.maybe(schema.boolean()),
     alertOnGroupDisappear: schema.maybe(schema.boolean()),
+    searchConfiguration: schema.maybe(searchConfigurationSchema),
   },
   { unknowns: 'allow' }
 );

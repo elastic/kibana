@@ -9,12 +9,14 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { dataViewSpecSchema } from '../common/data_view_spec_schema';
 
 import {
   LEGACY_COMPARATORS,
   TimeUnitChar,
   oneOfLiterals,
   validateIsStringElasticsearchJSONFilter,
+  validateKQLStringFilter,
 } from '../common/utils';
 
 const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
@@ -58,6 +60,16 @@ type SnapshotMetricTypeKeys = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 
+export const searchConfigurationSchema = schema.object({
+  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
+  query: schema.object({
+    language: schema.string(),
+    query: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+  }),
+});
+
 export const metricInventoryThresholdRuleParamsSchema = schema.object(
   {
     criteria: schema.arrayOf(
@@ -84,8 +96,9 @@ export const metricInventoryThresholdRuleParamsSchema = schema.object(
     ),
     nodeType: schema.string(),
     filterQuery: schema.maybe(schema.string({ validate: validateIsStringElasticsearchJSONFilter })),
-    sourceId: schema.string(),
+    sourceId: schema.maybe(schema.string()),
     alertOnNoData: schema.maybe(schema.boolean()),
+    searchConfiguration: schema.maybe(searchConfigurationSchema),
   },
   { unknowns: 'allow' }
 );
