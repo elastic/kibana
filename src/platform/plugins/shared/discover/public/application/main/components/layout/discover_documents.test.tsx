@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -45,6 +46,17 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeRelative: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    timeRangeAbsolute: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
+
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
@@ -59,7 +71,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     <KibanaContextProvider services={services}>
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
-          <DiscoverDocuments {...props} />
+          <EuiProvider>
+            <DiscoverDocuments {...props} />
+          </EuiProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>
     </KibanaContextProvider>

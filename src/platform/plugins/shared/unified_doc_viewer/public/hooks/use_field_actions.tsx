@@ -21,7 +21,9 @@ interface WithValueParam {
   value: unknown;
 }
 
-interface TFieldActionParams extends WithFieldParam, WithValueParam {}
+interface TFieldActionParams extends WithFieldParam, WithValueParam {
+  formattedValue?: string;
+}
 
 export interface TFieldAction {
   id: string;
@@ -66,7 +68,11 @@ export const [FieldActionsProvider, useFieldActionsContext] = createContainer(us
 /**
  * This is a preset of the UI elements and related actions that can be used to build an action bar anywhere in a DocView
  */
-export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldAction[] => {
+export const useUIFieldActions = ({
+  field,
+  value,
+  formattedValue,
+}: TFieldActionParams): TFieldAction[] => {
   const actions = useFieldActionsContext();
 
   return useMemo(
@@ -99,10 +105,10 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
         id: 'copyToClipboardAction',
         iconType: 'copyClipboard',
         label: copyToClipboardLabel,
-        onClick: () => actions.copyToClipboard(value as string),
+        onClick: () => actions.copyToClipboard(formattedValue ?? (value as string)),
       },
     ],
-    [actions, field, value]
+    [actions, field, formattedValue, value]
   );
 };
 

@@ -10,7 +10,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { CREATE_STANDALONE_AGENT_API_KEY_ROUTE } from '../../constants';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { PostStandaloneAgentAPIKeyRequestSchema } from '../../types';
 
 import { createStandaloneAgentApiKeyHandler } from './handler';
@@ -20,8 +20,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: CREATE_STANDALONE_AGENT_API_KEY_ROUTE,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { addAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
     })
     .addVersion(

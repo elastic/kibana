@@ -61,13 +61,7 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayStart",
-                "text": "OverlayStart"
-              },
+              "OverlayStart",
               ">"
             ],
             "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",

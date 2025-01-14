@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isError } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { isError } from 'lodash';
 import type { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ObservabilityConfig } from '@kbn/observability-plugin/server';
@@ -51,30 +50,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.BOOLEAN,
 ];
-
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: (value) =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
-
-export const validateIsStringElasticsearchJSONFilter = (value: string) => {
-  if (value === '') {
-    // Allow clearing the filter.
-    return;
-  }
-
-  const errorMessage = 'filterQuery must be a valid Elasticsearch filter expressed in JSON';
-  try {
-    const parsedValue = JSON.parse(value);
-    if (!isEmpty(parsedValue.bool)) {
-      return undefined;
-    }
-    return errorMessage;
-  } catch (e) {
-    return errorMessage;
-  }
-};
 
 export const UNGROUPED_FACTORY_KEY = '*';
 

@@ -10,10 +10,10 @@ import type { GetLensAttributes } from '../../common/components/visualization_ac
 
 const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
 
-export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
+export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
   stackByField = 'host',
-  extraOptions = { spaceId: 'default' }
-) => {
+  extraOptions = { spaceId: 'default' },
+}) => {
   const layerIds = [uuidv4(), uuidv4()];
   const layer2ColumnId = uuidv4();
   const internalReferenceId = internalReferenceIdMapping[stackByField];
@@ -180,14 +180,14 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          title: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          name: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
         },
       },
     },
