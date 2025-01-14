@@ -99,7 +99,7 @@ export function ControlType({
       <TooltipWrapper
         tooltipContent={i18n.translate('esql.flyout.controlTypeOptionsOptions.disabledTooltip', {
           defaultMessage:
-            'There is no way to get fields or functions values from an ES|QL query at the moment.',
+            'Currently, only the [Static values] type is available to replace functions or field names.',
         })}
         condition={isDisabled}
         anchorProps={{
@@ -180,9 +180,7 @@ export function VariableName({
       }
     >
       <EuiToolTip
-        content={
-          isControlInEditMode ? `${genericContent} ${isDisabledTooltipText}` : genericContent
-        }
+        content={isControlInEditMode ? isDisabledTooltipText : genericContent}
         css={css`
           width: 100%;
         `}
