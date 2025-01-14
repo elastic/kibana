@@ -14,7 +14,7 @@ export const PLUGIN_ID = 'filesExample';
 export const PLUGIN_NAME = 'Files example';
 
 const httpTags = {
-  tags: [`access:${PLUGIN_ID}`],
+  requiredPrivileges: [PLUGIN_ID],
 };
 
 export const exampleFileKind: FileKind = {
