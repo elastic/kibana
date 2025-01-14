@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  const INDEX_TEMPLATE_NAME = `test-index-template-name`;
+  const INDEX_TEMPLATE_NAME = 'index-template-test-name';
 
   describe('Index template tab', function () {
     before(async () => {
@@ -33,71 +33,126 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await testSubjects.click('reloadButton');
     });
+    describe('index creation', () => {
+      beforeEach(async () => {
+        // Click create template button
+        await testSubjects.click('createTemplateButton');
+        // Complete required fields from step 1
+        await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
+        await testSubjects.setValue('indexPatternsField', 'test-1');
+      });
 
-    it('can create an index template with data retention', async () => {
-      // Click create template button
-      await testSubjects.click('createTemplateButton');
-      // Complete required fields from step 1
-      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
-      await testSubjects.setValue('indexPatternsField', 'test-1');
-      // Enable data retention
-      await testSubjects.click('dataRetentionToggle > input');
-      // Set the retention to 7 hours
-      await testSubjects.setValue('valueDataRetentionField', '7');
-      await testSubjects.click('show-filters-button');
-      await testSubjects.click('filter-option-h');
-      // Navigate to the last step of the wizard
-      await testSubjects.click('formWizardStep-5');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      afterEach(async () => {
+        // Click Create template
+        await pageObjects.indexManagement.clickNextButton();
+        // Close detail tab
+        await testSubjects.click('closeDetailsButton');
+      });
 
-      expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
+      it('can create an index template with data retention', async () => {
+        // Enable data retention
+        await testSubjects.click('dataRetentionToggle > input');
+        // Set the retention to 7 hours
+        await testSubjects.setValue('valueDataRetentionField', '7');
+        await testSubjects.click('show-filters-button');
+        await testSubjects.click('filter-option-h');
+        // Navigate to the last step of the wizard
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-      // Click Create template
-      await pageObjects.indexManagement.clickNextButton();
-      // Close detail tab
-      await testSubjects.click('closeDetailsButton');
+        expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
+      });
+
+      it('can create an index template with logsdb index mode', async () => {
+        // Modify index mode
+        await testSubjects.click('indexModeField');
+        await testSubjects.click('index_mode_logsdb');
+
+        // Navigate to the last step of the wizard
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+      });
     });
 
-    it('can create an index template with logsdb index mode', async () => {
-      await testSubjects.click('createTemplateButton');
-      // Fill out required fields
-      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
-      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
+    describe('index modification', () => {
+      before(async () => {
+        await es.indices.putIndexTemplate({
+          name: INDEX_TEMPLATE_NAME,
+          index_patterns: ['logsdb-test-index-pattern'],
+          data_stream: {},
+          template: {
+            settings: {
+              mode: 'logsdb',
+            },
+          },
+        });
 
-      await testSubjects.click('indexModeField');
-      await testSubjects.click('index_mode_logsdb');
+        await testSubjects.click('reloadButton');
+      });
 
-      // Navigate to the last step of the wizard
-      await testSubjects.click('formWizardStep-5');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      it('can modify ignore_above, ignore_malformed, ignore_dynamic_beyond_limit, subobjects and timestamp format in an index template with logsdb index mode', async () => {
+        await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        await testSubjects.click('manageTemplateButton');
+        await testSubjects.click('editIndexTemplateButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        // Navigate to Index Settings
+        await testSubjects.click('formWizardStep-2');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
-      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+        // Modify Index settings
+        await testSubjects.setValue(
+          'kibanaCodeEditor',
+          JSON.stringify({
+            index: {
+              mapping: {
+                ignore_above: '20',
+                total_fields: {
+                  ignore_dynamic_beyond_limit: 'true',
+                },
+                ignore_malformed: 'true',
+              },
+            },
+          }),
+          {
+            clearWithKeyboard: true,
+          }
+        );
 
-      // Click Create template
-      await pageObjects.indexManagement.clickNextButton();
-      // Close detail tab
-      await testSubjects.click('closeDetailsButton');
-    });
+        // Navigate to Mappings
+        await testSubjects.click('formWizardStep-3');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const mappingTabs = await testSubjects.findAll('formTab');
+        await mappingTabs[3].click();
 
-    it('can modify ignore_above, ignore_malformed, ignore_dynamic_beyond_limit, subobjects and timestamp format in an index template with logsdb index mode', async () => {
-      await testSubjects.click('createTemplateButton');
-      // Fill out required fields
-      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
-      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
+        // Modify timestamp format
+        await testSubjects.click('comboBoxClearButton');
+        await testSubjects.setValue('comboBoxInput', 'basic_date');
+        await testSubjects.pressEnter('comboBoxInput');
 
-      await testSubjects.click('indexModeField');
-      await testSubjects.click('index_mode_logsdb');
+        // Modify subobjects
+        await testSubjects.click('subobjectsToggle');
 
-      // Navigate to Index Settings
-      await testSubjects.click('formWizardStep-2');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+        // Navigate to the last step of the wizard
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-      // Modify Index settings
-      await testSubjects.setValue(
-        'kibanaCodeEditor',
-        JSON.stringify({
+        // Click Create template
+        await pageObjects.indexManagement.clickNextButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const flyoutTabs = await testSubjects.findAll('tab');
+
+        // Verify Index Settings
+        await flyoutTabs[1].click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.exists('settingsTabContent')).to.be(true);
+        const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
+        expect(JSON.parse(settingsTabContent)).to.eql({
           index: {
+            mode: 'logsdb',
             mapping: {
               ignore_above: '20',
               total_fields: {
@@ -106,69 +161,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               ignore_malformed: 'true',
             },
           },
-        }),
-        {
-          clearWithKeyboard: true,
-        }
-      );
+        });
 
-      // Navigate to Mappings
-      await testSubjects.click('formWizardStep-3');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const mappingTabs = await testSubjects.findAll('formTab');
-      await mappingTabs[3].click();
-
-      // Modify timestamp format
-      await testSubjects.click('comboBoxClearButton');
-      await testSubjects.setValue('comboBoxInput', 'basic_date');
-      await testSubjects.pressEnter('comboBoxInput');
-
-      // Modify subobjects
-      await testSubjects.click('subobjectsToggle');
-
-      // Navigate to the last step of the wizard
-      await testSubjects.click('formWizardStep-5');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      // Click Create template
-      await pageObjects.indexManagement.clickNextButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      const flyoutTabs = await testSubjects.findAll('tab');
-
-      // Verify Index Settings
-      await flyoutTabs[1].click();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('settingsTabContent')).to.be(true);
-      const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
-      expect(JSON.parse(settingsTabContent)).to.eql({
-        index: {
-          mode: 'logsdb',
-          mapping: {
-            ignore_above: '20',
-            total_fields: {
-              ignore_dynamic_beyond_limit: 'true',
-            },
-            ignore_malformed: 'true',
+        // Verify Mappings
+        await flyoutTabs[2].click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
+        const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
+        expect(JSON.parse(mappingsTabContent)).to.eql({
+          dynamic_date_formats: ['basic_date'],
+          _source: {
+            mode: 'synthetic',
           },
-        },
-      });
+          subobjects: false,
+        });
 
-      // Verify Mappings
-      await flyoutTabs[2].click();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
-      const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
-      expect(JSON.parse(mappingsTabContent)).to.eql({
-        dynamic_date_formats: ['basic_date'],
-        _source: {
-          mode: 'synthetic',
-        },
-        subobjects: false,
+        // Close detail tab
+        await testSubjects.click('closeDetailsButton');
       });
-
-      // Close detail tab
-      await testSubjects.click('closeDetailsButton');
     });
   });
 };

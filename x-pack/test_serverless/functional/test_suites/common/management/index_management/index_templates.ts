@@ -86,16 +86,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Create index template', () => {
       const TEST_TEMPLATE_NAME = `test_template_${Date.now()}`;
 
+      beforeEach(async () => {
+        await testSubjects.click('createTemplateButton');
+
+        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
+        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
+      });
+
       afterEach(async () => {
         await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });
       });
 
       it('Creates index template', async () => {
-        await testSubjects.click('createTemplateButton');
-
-        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
-
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5');
         await testSubjects.click('nextButton');
@@ -107,11 +109,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can create an index template with logsdb index mode', async () => {
-        await testSubjects.click('createTemplateButton');
-        // Fill out required fields
-        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
-
         await testSubjects.click('indexModeField');
         await testSubjects.click('index_mode_logsdb');
 
@@ -128,15 +125,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
         await testSubjects.click('closeDetailsButton');
       });
+    });
+
+    describe('Modify index template', () => {
+      const INDEX_TEMPLATE_NAME = 'index-template-test-name';
+
+      before(async () => {
+        await es.indices.putIndexTemplate({
+          name: INDEX_TEMPLATE_NAME,
+          index_patterns: ['logsdb-test-index-pattern'],
+          data_stream: {},
+          template: {
+            settings: {
+              mode: 'logsdb',
+            },
+          },
+        });
+
+        await testSubjects.click('reloadButton');
+      });
+
+      after(async () => {
+        await es.indices.deleteIndexTemplate({ name: INDEX_TEMPLATE_NAME }, { ignore: [404] });
+      });
 
       it('can modify ignore_above, ignore_malformed, ignore_dynamic_beyond_limit, subobjects and timestamp format in an index template with logsdb index mode', async () => {
-        await testSubjects.click('createTemplateButton');
-        // Fill out required fields
-        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
-
-        await testSubjects.click('indexModeField');
-        await testSubjects.click('index_mode_logsdb');
+        await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        await testSubjects.click('manageTemplateButton');
+        await testSubjects.click('editIndexTemplateButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Navigate to Index Settings
         await testSubjects.click('formWizardStep-2');
