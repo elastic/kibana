@@ -1060,7 +1060,7 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'import/no-duplicates': 'error',
+        'import/no-duplicates': ['error', { 'prefer-inline': false }],
         'no-restricted-imports': [
           'error',
           {
@@ -1102,7 +1102,7 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'import/no-duplicates': ['error'],
+        'import/no-duplicates': ['error', { 'prefer-inline': false }],
         'no-restricted-imports': [
           'error',
           {
@@ -1287,7 +1287,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
+        'import/no-duplicates': ['error', { 'prefer-inline': false }],
       },
     },
     {
@@ -1438,7 +1438,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'import/no-duplicates': 'error',
+        'import/no-duplicates': ['error', { 'prefer-inline': false }],
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1854,7 +1854,7 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
-        'import/no-duplicates': ['error'],
+        'import/no-duplicates': ['error', { 'prefer-inline': false }],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
