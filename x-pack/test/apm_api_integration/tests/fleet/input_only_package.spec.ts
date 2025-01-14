@@ -22,7 +22,6 @@ import {
   setupFleet,
 } from './helpers';
 import { ApmApiClient } from '../../common/config';
-import { retry } from '../../common/utils/retry';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;
@@ -167,7 +166,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
         it('the events can be seen on the Service Inventory Page', async () => {
           // Retry logic added to handle delays in data ingestion and indexing (the test shows some flakiness without this)
-          await retry(async () => {
+          const retry = getService('retry');
+          await retry.try(async () => {
             const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
             expect(apmServices[0].serviceName).to.be('opbeans-java');
             expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
