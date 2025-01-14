@@ -31,7 +31,7 @@ export const RulesCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
 
-  const [selectedAlertId, setSelectedAlertId] = useStoredSelectedCardItemId(
+  const [selectedRuleId, setSelectedRuleId] = useStoredSelectedCardItemId(
     'rules',
     spaceId,
     DEFAULT_RULES_CARD_ITEM_SELECTED.id
