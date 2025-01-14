@@ -18,8 +18,8 @@ export const storybookAliases = {
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   ci_composite: '.ci/.storybook',
-  cloud_security_posture_packages:
-    'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
+  cloud_security_posture_graph:
+    'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover:
