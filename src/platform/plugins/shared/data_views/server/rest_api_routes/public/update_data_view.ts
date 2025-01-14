@@ -19,7 +19,7 @@ import {
   runtimeFieldSchema,
   serializedFieldFormatSchema,
 } from '../../../common/schema/schemas';
-import { dataViewSpecSchema } from '../schema';
+import { dataViewSpecSchema } from '../../../common/schema/data_view_spec_schema';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
