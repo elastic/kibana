@@ -43,7 +43,7 @@ ${HORIZONTAL_LINE}
     {
       description: `Loads data into a environment for testing/development`,
       flags: {
-        string: ['kibanaUrl', 'username', 'password'],
+        string: ['kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticsearchUrl: 'http://127.0.0.1:9200',
