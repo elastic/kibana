@@ -584,7 +584,7 @@ export const ModelsList: FC<Props> = ({
   const isElserCalloutVisible =
     !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
 
-  const euiMaxBreakpointL = useEuiMaxBreakpoint('l');
+  const euiMaxBreakpointXL = useEuiMaxBreakpoint('xl');
 
   const tableItems = useMemo(() => {
     if (pageState.showAll) {
@@ -653,7 +653,7 @@ export const ModelsList: FC<Props> = ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
             // This is a workaround for https://github.com/elastic/eui/issues/8259
             css: css`
-              ${euiMaxBreakpointL} {
+              ${euiMaxBreakpointXL} {
                 min-block-size: 10.875rem;
               }
             `,
