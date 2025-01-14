@@ -504,7 +504,7 @@ describe('Agent policy', () => {
     });
   });
 
-  describe('getByIDs', () => {
+  describe('getByIds', () => {
     it('should call audit logger', async () => {
       const soClient = savedObjectsClientMock.create();
 
@@ -525,7 +525,7 @@ describe('Agent policy', () => {
         ],
       });
 
-      await agentPolicyService.getByIDs(soClient, ['test-agent-policy-1', 'test-agent-policy-2']);
+      await agentPolicyService.getByIds(soClient, ['test-agent-policy-1', 'test-agent-policy-2']);
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
