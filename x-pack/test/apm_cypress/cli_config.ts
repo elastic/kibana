@@ -7,8 +7,6 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { cypressTestRunner } from './runner';
 
 async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
@@ -21,11 +19,6 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    services: {
-      ...commonFunctionalServices,
-      ...commonFunctionalUIServices,
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
