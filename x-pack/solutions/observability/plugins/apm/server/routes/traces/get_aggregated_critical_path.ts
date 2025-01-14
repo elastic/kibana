@@ -141,15 +141,14 @@ export async function getAggregatedCriticalPath({
         entryIds,
       });
 
-      return { entryIds, eventTrees, metadataByOperationId };
+      return { eventTrees, metadataByOperationId };
     })
   );
 
   const now = performance.now();
 
-  const { entryIds, eventTrees, metadataByOperationId } = mergeChunks(groupEventsChunked);
+  const { eventTrees, metadataByOperationId } = mergeChunks(groupEventsChunked);
   const { timeByNodeId, nodes, rootNodes, operationIdByNodeId } = buildCriticalPath({
-    entryIds,
     eventTrees,
     metadataByOperationId,
   });
@@ -214,7 +213,6 @@ const fetchCriticalPath = async ({
               event.name = MAX(event.name),
               event.type = MAX(event.type),
               event.duration = MAX(event.duration) BY event.id
-          | SORT timestamp.us ASC
           | EVAL event.duration = SPLIT(event.duration, "|"),
               event.name = SPLIT(event.name, "|"),
               event.type = SPLIT(event.type, "|"),
@@ -284,16 +282,10 @@ function getEventTrees({
 
   const childrenByParentId = new Map<string, Event[]>();
   for (const event of events) {
-    if (!event.parentId) {
-      continue;
-    }
-
-    const currentChildren = childrenByParentId.get(event.parentId) || [];
-    if (currentChildren) {
+    if (event.parentId) {
+      const currentChildren = childrenByParentId.get(event.parentId) || [];
       currentChildren.push(event);
       childrenByParentId.set(event.parentId, currentChildren);
-    } else {
-      childrenByParentId.set(event.parentId, [event]);
     }
   }
 
@@ -307,11 +299,6 @@ function getEventTrees({
 
     while (stack.length > 0) {
       const node = stack.pop()!;
-
-      if (visited.has(node.id)) {
-        continue;
-      }
-
       visited.add(node.id);
 
       const children = childrenByParentId.get(node.id) || [];
@@ -329,11 +316,9 @@ function getEventTrees({
 }
 
 function buildCriticalPath({
-  entryIds,
   eventTrees,
   metadataByOperationId,
 }: {
-  entryIds: Set<string>;
   eventTrees: Map<string, Event>;
   metadataByOperationId: Map<OperationId, OperationMetadata>;
 }) {
@@ -342,13 +327,7 @@ function buildCriticalPath({
   const rootNodes = new Set<NodeId>();
   const operationIdByNodeId = new Map<NodeId, OperationId>();
 
-  for (const entryId of entryIds) {
-    const treeRoot = eventTrees.get(entryId);
-
-    if (!treeRoot) {
-      continue;
-    }
-
+  for (const treeRoot of eventTrees.values()) {
     calculateOffsetsAndSkews({
       event: treeRoot,
       metadataByOperationId,
@@ -381,19 +360,12 @@ function buildCriticalPath({
 
 const mergeChunks = (
   groupedEventsChunks: Array<{
-    entryIds: Set<string>;
     eventTrees: Map<string, Event>;
     metadataByOperationId: Map<OperationId, OperationMetadata>;
   }>
 ) =>
   groupedEventsChunks.reduce(
     (acc, curr) => {
-      for (const key of curr.entryIds) {
-        if (!acc.entryIds.has(key)) {
-          acc.entryIds.add(key);
-        }
-      }
-
       for (const [key, value] of curr.eventTrees) {
         if (!acc.eventTrees.has(key)) {
           acc.eventTrees.set(key, value);
@@ -409,7 +381,6 @@ const mergeChunks = (
       return acc;
     },
     {
-      entryIds: new Set<string>(),
       eventTrees: new Map<string, Event>(),
       metadataByOperationId: new Map<OperationId, OperationMetadata>(),
     }
@@ -514,10 +485,6 @@ function calculateOffsetsAndSkews({
   while (stack.length > 0) {
     const { currentEvent, parent } = stack.pop()!;
 
-    if (visited.has(currentEvent.id)) {
-      continue;
-    }
-
     visited.add(currentEvent.id);
 
     currentEvent.skew = calculateClockSkew({ metadataByOperationId, event: currentEvent, parent });
@@ -525,7 +492,9 @@ function calculateOffsetsAndSkews({
     currentEvent.end = currentEvent.offset + currentEvent.skew + currentEvent.duration;
 
     for (const child of currentEvent.children) {
-      stack.push({ currentEvent: child, parent: currentEvent });
+      if (!visited.has(child.id)) {
+        stack.push({ currentEvent: child, parent: currentEvent });
+      }
     }
   }
 }
@@ -642,14 +611,14 @@ function buildPathToRoot({ treeRoot }: { treeRoot: Event }): string[] {
 
   while (stack.length > 0) {
     const node = stack.pop()!;
-    if (!node || visited.has(node.id)) {
-      continue;
-    }
-
     visited.add(node.id);
 
     path.push(node.operationId);
-    stack.push(...node.children);
+    for (const child of node.children) {
+      if (!visited.has(child.id)) {
+        stack.push(child);
+      }
+    }
   }
 
   return path;

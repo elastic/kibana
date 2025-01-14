@@ -35,6 +35,7 @@ type QueryResult = {
 
 type Node = {
   id: string;
+  parentId?: string;
   children: Node[];
 } & ConnectionNode;
 
@@ -112,7 +113,7 @@ export async function fetchServicePathsFromTraceIds({
   const entryIds = getEntryIds({ eventsById });
   const eventTrees = getEventTrees({ eventsById, entryIds });
 
-  const { paths, discoveredServices } = buildMapPaths({ entryIds, eventTrees });
+  const { paths, discoveredServices } = buildMapPaths({ eventTrees });
 
   return {
     paths,
@@ -148,8 +149,7 @@ const getExternalConnectionNode = (event: Node): ExternalConnectionNode => {
 };
 
 const generatePathKey = (edges: ConnectionNode[]): string => {
-  const res = edges.map((edge) => getConnectionNodeId(edge)).join('|');
-  return res;
+  return edges.map((edge) => getConnectionNodeId(edge)).join('|');
 };
 
 function getEventTrees({
@@ -166,16 +166,10 @@ function getEventTrees({
 
   const childrenByParentId = new Map<string, Node[]>();
   for (const event of events) {
-    if (!event.parent) {
-      continue;
-    }
-
-    const currentChildren = childrenByParentId.get(event.parent) || [];
-    if (currentChildren) {
+    if (event.parentId) {
+      const currentChildren = childrenByParentId.get(event.parentId) || [];
       currentChildren.push(event);
-      childrenByParentId.set(event.parent, currentChildren);
-    } else {
-      childrenByParentId.set(event.parent, [event]);
+      childrenByParentId.set(event.parentId, currentChildren);
     }
   }
 
@@ -189,11 +183,6 @@ function getEventTrees({
 
     while (stack.length > 0) {
       const node = stack.pop()!;
-
-      if (visited.has(node.id)) {
-        continue;
-      }
-
       visited.add(node.id);
 
       const children = childrenByParentId.get(node.id) || [];
@@ -211,32 +200,18 @@ function getEventTrees({
   return eventTrees;
 }
 
-const buildMapPaths = ({
-  entryIds,
-  eventTrees,
-}: {
-  entryIds: Set<string>;
-  eventTrees: Map<string, Node>;
-}) => {
+const buildMapPaths = ({ eventTrees }: { eventTrees: Map<string, Node> }) => {
   const allPaths = new Map<string, ConnectionNode[]>();
   const allDiscoveredServices = new Map<string, DiscoveredService>();
   const visited = new Set<string>();
 
   const stack: Array<{ currentNode: Node; parentPath: ConnectionNode[]; parentNode?: Node }> = [];
 
-  for (const entryId of entryIds) {
-    const treeRoot = eventTrees.get(entryId);
-    if (treeRoot) {
-      stack.push({ currentNode: treeRoot, parentPath: [] });
-    }
+  for (const treeRoot of eventTrees.values()) {
+    stack.push({ currentNode: treeRoot, parentPath: [] });
 
     while (stack.length > 0) {
       const { currentNode, parentPath, parentNode } = stack.pop()!;
-
-      if (!currentNode || visited.has(currentNode.id)) {
-        continue;
-      }
-
       visited.add(currentNode.id);
 
       if (
@@ -254,7 +229,7 @@ const buildMapPaths = ({
         }
       }
 
-      const currentPath = [...parentPath];
+      const currentPath = parentPath.slice();
       const lastEdge = currentPath.length > 0 ? currentPath[currentPath.length - 1] : undefined;
 
       if (
@@ -278,7 +253,9 @@ const buildMapPaths = ({
       }
 
       for (const child of currentNode.children) {
-        stack.push({ currentNode: child, parentPath: currentPath, parentNode: currentNode });
+        if (!visited.has(child.id)) {
+          stack.push({ currentNode: child, parentPath: currentPath, parentNode: currentNode });
+        }
       }
     }
   }
@@ -292,11 +269,11 @@ const buildMapPaths = ({
 function getEventsById({ response }: { response: QueryResult[] }) {
   return response.reduce((acc, hit) => {
     const eventId = hit['event.id'];
+
     if (!acc.has(eventId)) {
       acc.set(eventId, {
-        ...hit,
         id: eventId,
-        parent: hit[PARENT_ID],
+        parentId: hit[PARENT_ID],
         [AGENT_NAME]: hit[AGENT_NAME],
         [SERVICE_NAME]: hit[SERVICE_NAME],
         [SERVICE_ENVIRONMENT]: hit[SERVICE_ENVIRONMENT],
@@ -314,7 +291,7 @@ function getEntryIds({ eventsById }: { eventsById: Map<string, Node> }) {
   const entryIds = new Set<string>();
 
   for (const [eventId, event] of eventsById) {
-    if (!event.parent) {
+    if (!event.parentId) {
       entryIds.add(eventId);
     }
   }
