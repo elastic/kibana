@@ -249,18 +249,7 @@ export const getSavedObjectTypes = (
           global_data_tags: { type: 'flattened', index: false },
           agentless: {
             dynamic: false,
-            properties: {
-              resources: {
-                properties: {
-                  requests: {
-                    properties: {
-                      memory: { type: 'keyword' },
-                      cpu: { type: 'keyword' },
-                    },
-                  },
-                },
-              },
-            },
+            properties: {},
           },
           monitoring_pprof_enabled: { type: 'boolean', index: false },
           monitoring_http: { type: 'flattened', index: false },
@@ -336,18 +325,7 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 agentless: {
                   dynamic: false,
-                  properties: {
-                    resources: {
-                      properties: {
-                        requests: {
-                          properties: {
-                            memory: { type: 'keyword' },
-                            cpu: { type: 'keyword' },
-                          },
-                        },
-                      },
-                    },
-                  },
+                  properties: {},
                 },
               },
             },
@@ -399,18 +377,7 @@ export const getSavedObjectTypes = (
           global_data_tags: { type: 'flattened', index: false },
           agentless: {
             dynamic: false,
-            properties: {
-              resources: {
-                properties: {
-                  requests: {
-                    properties: {
-                      memory: { type: 'keyword' },
-                      cpu: { type: 'keyword' },
-                    },
-                  },
-                },
-              },
-            },
+            properties: {},
           },
         },
       },
