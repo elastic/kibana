@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 
 import type { RouteDefinitionParams } from '..';
 import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
@@ -15,87 +14,51 @@ import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  getAuthenticationService,
-  basePath,
-  logger,
-  buildFlavor,
-  docLinks,
-}: RouteDefinitionParams) {
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  // For a serverless build, do not register deprecated versioned routes
-  for (const path of [
-    '/api/security/saml/callback',
-    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/saml'] : []),
-  ]) {
-    const isDeprecated = path === '/api/security/v1/saml';
-    router.post(
-      {
-        path,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route must remain accessible to 3rd-party SAML providers',
-          },
+export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefinitionParams) {
+  router.post(
+    {
+      path: '/api/security/saml/callback',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
         },
-        validate: {
-          body: schema.object(
-            { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
-            { unknowns: 'ignore' }
-          ),
-        },
-        options: {
-          access: 'public',
-          excludeFromOAS: true,
-          authRequired: false,
-          xsrfRequired: false,
-          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
-          ...(isDeprecated && {
-            deprecated: {
-              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
-              severity: 'warning',
-              message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
-                defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/saml/callback" instead.',
-                values: { path },
-              }),
-              reason: {
-                type: 'migrate',
-                newApiMethod: 'POST',
-                newApiPath: '/api/security/saml/callback',
-              },
-            },
-          }),
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
         },
       },
-      async (context, request, response) => {
-        if (isDeprecated) {
-          const serverBasePath = basePath.serverBasePath;
-          logger.warn(
-            // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Use "${serverBasePath}/api/security/saml/callback" URL instead.`
-          );
-        }
+      validate: {
+        body: schema.object(
+          { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
+          { unknowns: 'ignore' }
+        ),
+      },
+      options: {
+        access: 'public',
+        excludeFromOAS: true,
+        xsrfRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
+    },
+    async (context, request, response) => {
+      // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
+      const authenticationResult = await getAuthenticationService().login(request, {
+        provider: { type: SAMLAuthenticationProvider.type },
+        value: {
+          type: SAMLLogin.LoginWithSAMLResponse,
+          samlResponse: request.body.SAMLResponse,
+          relayState: request.body.RelayState,
+        },
+      });
 
-        // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
-        const authenticationResult = await getAuthenticationService().login(request, {
-          provider: { type: SAMLAuthenticationProvider.type },
-          value: {
-            type: SAMLLogin.LoginWithSAMLResponse,
-            samlResponse: request.body.SAMLResponse,
-            relayState: request.body.RelayState,
-          },
+      if (authenticationResult.redirected()) {
+        return response.redirected({
+          headers: { location: authenticationResult.redirectURL! },
         });
-
-        if (authenticationResult.redirected()) {
-          return response.redirected({
-            headers: { location: authenticationResult.redirectURL! },
-          });
-        }
-
-        return response.unauthorized({ body: authenticationResult.error });
       }
-    );
-  }
+
+      return response.unauthorized({ body: authenticationResult.error });
+    }
+  );
 }

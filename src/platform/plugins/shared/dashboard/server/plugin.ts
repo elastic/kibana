@@ -46,7 +46,7 @@ interface StartDeps {
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
 
@@ -54,7 +54,7 @@ export class DashboardPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(
@@ -105,7 +105,7 @@ export class DashboardPlugin
         {
           domainId: 'dashboard',
           // makes sure that only users with read/all access to dashboard app can access the routes
-          routeTags: ['access:dashboardUsageStats'],
+          routePrivileges: ['dashboardUsageStats'],
         }
       );
     }

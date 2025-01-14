@@ -13,6 +13,7 @@ import { fetchRuleVersionsTriad } from '../../../../detection_engine/prebuilt_ru
 import { createPrebuiltRuleAssetsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../../detection_engine/rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
 
 export const getUniquePrebuiltRuleIds = (migrationRules: RuleMigration[]): string[] => {
   const rulesIds = new Set<string>();
@@ -79,6 +80,40 @@ export const getPrebuiltRules = async (
       };
     }
   });
+
+  return prebuiltRules;
+};
+
+/**
+ * Gets Elastic prebuilt rules
+ * @param migrationId The `id` of the migration to get related prebuilt rules for
+ * @param ruleMigrationsClient The rules migration client to migration rules data
+ * @param rulesClient The rules client to fetch prebuilt rules
+ * @param savedObjectsClient The saved objects client
+ * @returns
+ */
+export const getPrebuiltRulesForMigration = async (
+  migrationId: string,
+  ruleMigrationsClient: SiemRuleMigrationsClient,
+  rulesClient: RulesClient,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<Record<string, PrebuiltRulesResults>> => {
+  const options = { filters: { prebuilt: true } };
+  const batches = ruleMigrationsClient.data.rules.searchBatches(migrationId, options);
+
+  const rulesIds = new Set<string>();
+  let results = await batches.next();
+  while (results.length) {
+    results.forEach((rule) => {
+      if (rule.elastic_rule?.prebuilt_rule_id) {
+        rulesIds.add(rule.elastic_rule.prebuilt_rule_id);
+      }
+    });
+    results = await batches.next();
+  }
+  const prebuiltRulesIds = Array.from(rulesIds);
+
+  const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
 
   return prebuiltRules;
 };
