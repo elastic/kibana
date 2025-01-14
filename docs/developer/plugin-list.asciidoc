@@ -32,7 +32,7 @@ as uiSettings within the code.
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
-|{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
 
@@ -420,7 +420,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the timelion visualization and the timelion backend.
 
 
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/vis_types/timeseries[visTypeTimeseries]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timeseries[visTypeTimeseries]
 |WARNING: Missing README.
 
 
@@ -572,7 +572,7 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/entities_data_access/README.md[entitiesDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entities_data_access/README.md[entitiesDataAccess]
 |Exposes services to access entities data.
 
 
@@ -580,7 +580,7 @@ security and spaces filtering.
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entity_manager_app/README.md[entityManagerApp]
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
