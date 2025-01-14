@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('cloud data', function () {
-    loadTestFile(require.resolve('./set_cloud_data_route'));
-  });
-}
+export { persistTokenCloudData } from './persist_token';

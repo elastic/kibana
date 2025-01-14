@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemMigrations.rules.pageTitle', {
-  defaultMessage: 'Translated rules',
-});
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('cloud data', function () {
+    loadTestFile(require.resolve('./relay_state'));
+  });
+}
