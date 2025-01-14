@@ -44,7 +44,6 @@ export const DataStreamActionsMenu = ({ dataStreamActions, selectedDataStreamsCo
       panelPaddingSize="none"
       anchorPosition="rightUp"
       repositionOnScroll={true}
-      data-test-subj=""
     >
       <EuiContextMenu
         data-test-subj="dataStreamActionsContextMenu"
