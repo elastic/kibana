@@ -30,6 +30,11 @@
   "vulnerabilityAlerts": {
     "enabled": false
   },
+  "postUpgradeTasks": {
+    "commands": ["node scripts/yarn_deduplicate"],
+    "fileFilters": [],
+    "executionMode": "update"
+  },
   "lockFileMaintenance": {
     "enabled": false
   },
@@ -3786,29 +3791,11 @@
     {
       "groupName": "@smithy",
       "matchDepNames": [
+        "@aws-sdk/client-bedrock-runtime",
         "@smithy/eventstream-codec",
         "@smithy/middleware-stack",
         "@smithy/node-http-handler",
         "@smithy/util-utf8"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@aws-sdk/client-bedrock-runtime",
-      "matchDepNames": [
-        "@aws-sdk/client-bedrock-runtime"
       ],
       "reviewers": [
         "team:security-generative-ai"
