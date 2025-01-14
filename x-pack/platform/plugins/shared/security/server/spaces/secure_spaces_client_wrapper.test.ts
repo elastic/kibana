@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { title } from 'process';
+
 import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import type {
@@ -68,16 +70,25 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
             namespaces: ['*'],
             type: 'dashboard',
             id: '1',
+            attributes: {
+              name: 'Dashboard 1',
+            },
           },
           {
             namespaces: ['existing_space'],
             type: 'dashboard',
             id: '2',
+            attributes: {
+              title: 'Dashboard 2',
+            },
           },
           {
             namespaces: ['default', 'existing_space'],
             type: 'dashboard',
             id: '3',
+            attributes: {
+              name: 'Dashboard 3',
+            },
           },
         ],
       } as SavedObjectsFindResponse<unknown, unknown>;
@@ -111,7 +122,8 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     authorization,
     auditLogger,
     errors,
-    securityExtension
+    securityExtension,
+    () => savedObjectsServiceMock.createTypeRegistryMock()
   );
   return {
     authorization,
@@ -698,9 +710,27 @@ describe('SecureSpacesClientWrapper', () => {
 
       expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledTimes(1);
       expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledWith(space.id, [
-        { id: '1', namespaces: ['*'], type: 'dashboard' },
-        { id: '2', namespaces: ['existing_space'], type: 'dashboard' },
-        { id: '3', namespaces: ['default', 'existing_space'], type: 'dashboard' },
+        {
+          id: '1',
+          namespaces: ['*'],
+          type: 'dashboard',
+          name: 'Dashboard 1',
+          attributes: { name: 'Dashboard 1' },
+        },
+        {
+          id: '2',
+          namespaces: ['existing_space'],
+          type: 'dashboard',
+          name: 'Dashboard 2',
+          attributes: { title: 'Dashboard 2' },
+        },
+        {
+          id: '3',
+          namespaces: ['default', 'existing_space'],
+          type: 'dashboard',
+          name: 'Dashboard 3',
+          attributes: { name: 'Dashboard 3' },
+        },
       ]);
     });
   });

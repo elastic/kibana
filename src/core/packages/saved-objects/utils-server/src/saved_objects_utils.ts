@@ -117,10 +117,9 @@ export class SavedObjectsUtils {
   public static getName(
     savedObject?: Pick<SavedObject<unknown>, 'attributes'> | null,
     nameAttribute?: string
-  ): string {
+  ): string | undefined {
     if (!savedObject) {
-      // [ELENA] Todo make null?
-      return '';
+      return undefined;
     }
 
     const attributes = savedObject?.attributes as Record<string, unknown> & {

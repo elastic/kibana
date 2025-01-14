@@ -1403,10 +1403,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   auditObjectsForSpaceDeletion<T>(
     spaceId: string,
-    resultObjects: Array<SavedObjectsFindResult<T>>
+    resultObjects: Array<WithAuditName<SavedObjectsFindResult<T>>>
   ) {
     resultObjects.forEach((obj) => {
-      const { namespaces = [] } = obj;
+      const { namespaces = [], id, type, name } = obj;
 
       const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
       if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(spaceId)) {
@@ -1417,7 +1417,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: isOnlySpace ? AuditAction.DELETE : AuditAction.UPDATE_OBJECTS_SPACES,
         outcome: 'unknown',
-        savedObject: { type: obj.type, id: obj.id },
+        savedObject: { id, type, name },
         ...(!isOnlySpace && { deleteFromSpaces: [spaceId] }),
       });
     });
