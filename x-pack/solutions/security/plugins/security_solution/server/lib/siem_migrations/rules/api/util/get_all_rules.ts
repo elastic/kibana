@@ -36,8 +36,7 @@ export const getAllMigrationRules = async ({
 }: GetAllMigrationRulesProps): Promise<RuleMigration[]> => {
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
-  const options = { filters };
-  const batches = ruleMigrationsClient.data.rules.searchBatches(migrationId, options);
+  const batches = ruleMigrationsClient.data.rules.searchBatches(migrationId, { filters });
 
   const migrationRules: RuleMigration[] = [];
   let results = await batches.next();

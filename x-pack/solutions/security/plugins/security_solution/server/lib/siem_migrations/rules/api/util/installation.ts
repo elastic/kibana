@@ -170,7 +170,7 @@ export const installTranslated = async ({
   if (ids?.length) {
     const notFullyTranslatedRules = await getAllMigrationRules({
       migrationId,
-      filters: { ids, notFullyTranslated: true },
+      filters: { ids, fullyTranslated: false },
       securitySolutionContext,
     });
     if (notFullyTranslatedRules.length) {
@@ -187,7 +187,7 @@ export const installTranslated = async ({
 
   const customRulesToInstall = await getAllMigrationRules({
     migrationId,
-    filters: { ids, installable: true, custom: true },
+    filters: { ids, installable: true, prebuilt: false },
     securitySolutionContext,
   });
 
