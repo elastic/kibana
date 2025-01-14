@@ -10,11 +10,11 @@ import {
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../../common/field_maps/field_names';
-import { getUserRiskIndex } from '../../../../../../../common/search_strategy/security_solution/risk_score/common';
 import { RiskScoreFields } from '../../../../../../../common/search_strategy/security_solution/risk_score/all';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
 import type { CreateRiskEnrichment } from '../types';
 import { getFieldValue } from '../utils/events';
+import { getUserRiskIndex } from '@kbn/security-solution-plugin/common/search_strategy';
 
 export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   services,

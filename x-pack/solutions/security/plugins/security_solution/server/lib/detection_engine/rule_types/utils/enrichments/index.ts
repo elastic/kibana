@@ -21,7 +21,8 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
+import { getHostRiskIndex, getUserRiskIndex } from '@kbn/security-solution-plugin/common/search_strategy';
+
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,

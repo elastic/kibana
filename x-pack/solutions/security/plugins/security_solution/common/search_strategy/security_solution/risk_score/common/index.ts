@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 import {
-  RiskScoreEntity,
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
-export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -43,20 +42,15 @@ export const getUserRiskIndex = (
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {
-  return { terms: { 'host.name': hostNames } };
+  return buildEntityNameFilter(EntityType.host, hostNames);
 };
 
 export const buildUserNamesFilter = (userNames: string[]) => {
-  return { terms: { 'user.name': userNames } };
+  return buildEntityNameFilter(EntityType.user, userNames);
 };
 
-export const buildEntityNameFilter = (
-  entityNames: string[],
-  riskEntity: RiskScoreEntity
-): ESQuery => {
-  return riskEntity === RiskScoreEntity.host
-    ? { terms: { 'host.name': entityNames } }
-    : { terms: { 'user.name': entityNames } };
+export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
+  return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
 };
 
-export { RiskScoreEntity };
+export { EntityType };

@@ -90,7 +90,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: {
-          entities_types: params.entitiesTypes,
+          entity_types: params.entityTypes,
           sort_field: params.sortField,
           sort_order: params.sortOrder,
           page: params.page,

@@ -15,6 +15,8 @@ import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { getRiskEngineEntityTypes } from '../../../../common/entity_analytics/risk_engine/utils';
+import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   AssetCriticalityRecord,
@@ -26,7 +28,6 @@ import type {
   RiskScoreWeights,
 } from '../../../../common/api/entity_analytics/common';
 import {
-  type IdentifierType,
   getRiskLevel,
   RiskCategories,
   RiskWeightTypes,
@@ -110,7 +111,7 @@ const buildIdentifierTypeAggregation = ({
   scriptedMetricPainless,
 }: {
   afterKeys: AfterKeys;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
   pageSize: number;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
@@ -200,7 +201,7 @@ const processScores = async ({
 };
 
 export const getGlobalWeightForIdentifierType = (
-  identifierType: IdentifierType,
+  identifierType: EntityType,
   weights?: RiskScoreWeights
 ): number | undefined =>
   weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
@@ -237,12 +238,9 @@ export const calculateRiskScores = async ({
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }
-
-    const identifierTypes: IdentifierType[] = identifierType
+    const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
-      : experimentalFeatures.serviceEntityStoreEnabled
-      ? ['host', 'user', 'service']
-      : ['host', 'user'];
+      : getRiskEngineEntityTypes(experimentalFeatures);
 
     const request = {
       size: 0,
