@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { getSeverityData } from '@kbn/cases-plugin/public/components/severity/config';
+import * as i18n from './translations';
 
 export enum CaseSeverity {
   LOW = 'low',
@@ -31,9 +31,30 @@ interface Props {
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
   const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
-  const severities = getSeverityData(euiTheme);
-
+  const severities = {
+    [CaseSeverity.LOW]: {
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorSeverity5,
+      label: i18n.SEVERITY_LOW_LABEL,
+    },
+    [CaseSeverity.MEDIUM]: {
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.vis.euiColorSeverity7,
+      label: i18n.SEVERITY_MEDIUM_LABEL,
+    },
+    [CaseSeverity.HIGH]: {
+      color: isAmsterdam
+        ? euiTheme.colors.vis.euiColorVis7
+        : euiTheme.colors.vis.euiColorSeverity10,
+      label: i18n.SEVERITY_HIGH_LABEL,
+    },
+    [CaseSeverity.CRITICAL]: {
+      color: isAmsterdam
+        ? euiTheme.colors.vis.euiColorVis9
+        : euiTheme.colors.vis.euiColorSeverity14,
+      label: i18n.SEVERITY_CRITICAL_LABEL,
+    },
+  };
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];

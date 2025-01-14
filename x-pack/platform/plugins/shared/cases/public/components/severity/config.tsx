@@ -30,9 +30,11 @@ export const severities = {
   },
 };
 
-export const getSeverityData = (euiTheme: EuiThemeComputed) => {
+export const SeverityHealth: React.FC<Props> = ({ severity }) => {
+  const { euiTheme } = useEuiTheme();
   const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
-  return {
+
+  const severityData = {
     low: {
       color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorSeverity5,
       label: LOW,
@@ -54,12 +56,6 @@ export const getSeverityData = (euiTheme: EuiThemeComputed) => {
       label: CRITICAL,
     },
   };
-};
-
-export const SeverityHealth: React.FC<Props> = ({ severity }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const severityData = getSeverityData(euiTheme);
 
   const { color, label } = severityData[severity];
 
