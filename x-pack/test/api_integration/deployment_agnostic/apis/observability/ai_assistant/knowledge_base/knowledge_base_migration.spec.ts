@@ -48,7 +48,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return res.hits.hits;
   }
-  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/206474
+  describe.skip('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
     // security_exception: action [indices:admin/settings/update] is unauthorized for user [testing-internal] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_usage_counters_1,.kibana_1,.kibana_ingest_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]
     this.tags(['failsOnMKI']);
 
