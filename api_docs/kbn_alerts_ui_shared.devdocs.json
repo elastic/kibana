@@ -2089,6 +2089,20 @@
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionTypeModel.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2623,7 +2637,7 @@
                   },
                   "[]) => void) | undefined; }"
                 ],
-                "path": "src/plugins/unified_search/public/types.ts",
+                "path": "src/platform/plugins/shared/unified_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

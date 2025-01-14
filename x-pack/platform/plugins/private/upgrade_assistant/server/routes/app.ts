@@ -43,6 +43,12 @@ export function registerAppRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/privileges`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -47,6 +47,12 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
   router.get(
     {
       path: `${API_BASE_PATH}/node_disk_space`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {

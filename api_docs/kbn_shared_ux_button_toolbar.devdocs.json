@@ -23,7 +23,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,7 +72,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,7 +92,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +121,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,7 +141,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -170,7 +170,7 @@
           },
           "<T>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,7 +191,7 @@
               },
               "<T>"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,7 +220,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,7 +240,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,7 +260,7 @@
         "description": [
           "\nAn interface representing a single icon button in the `IconButtonGroup`."
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -273,7 +273,7 @@
             "description": [
               "The accessible button label."
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -289,7 +289,7 @@
             "signature": [
               "string | React.ComponentType<{}>"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -305,7 +305,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -323,7 +323,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -339,7 +339,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -355,7 +355,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +371,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +387,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -403,7 +403,7 @@
         "description": [
           "\nProps for `IconButtonGroup`."
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,7 +416,7 @@
             "description": [
               "Required accessible legend for the whole group"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -439,7 +439,7 @@
               },
               "[]"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -455,7 +455,7 @@
             "signature": [
               "\"m\" | \"s\" | \"compressed\" | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -471,7 +471,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -487,7 +487,7 @@
         "description": [
           "\nProps for a generic toolbar component"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -501,7 +501,7 @@
             "signature": [
               "NamedSlots"
             ],
-            "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -523,7 +523,7 @@
           "ButtonContentIconSide",
           "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -540,7 +540,7 @@
         "signature": [
           "T extends \"iconButton\" ? ToolbarIconButton : ToolbarStandardButton"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -557,7 +557,7 @@
         "signature": [
           "AllowedButtonProps & Omit<AllowedPopoverProps, \"children\"> & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal; }"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -590,7 +590,7 @@
           },
           ") => React.JSX.Element)"
         ],
-        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],

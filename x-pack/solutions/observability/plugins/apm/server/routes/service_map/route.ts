@@ -23,7 +23,7 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { TransformServiceMapResponse } from './transform_service_map_responses';
+import type { ServiceMapResponse } from './get_service_map';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -39,7 +39,7 @@ const serviceMapRoute = createApmServerRoute({
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<TransformServiceMapResponse> => {
+  handler: async (resources): Promise<ServiceMapResponse> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();

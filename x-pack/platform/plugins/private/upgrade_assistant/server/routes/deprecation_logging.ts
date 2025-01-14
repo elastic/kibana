@@ -28,6 +28,12 @@ export function registerDeprecationLoggingRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/deprecation_logging`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
@@ -46,6 +52,12 @@ export function registerDeprecationLoggingRoutes({
   router.put(
     {
       path: `${API_BASE_PATH}/deprecation_logging`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           isEnabled: schema.boolean(),
@@ -70,6 +82,12 @@ export function registerDeprecationLoggingRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/deprecation_logging/count`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.string(),
@@ -124,6 +142,12 @@ export function registerDeprecationLoggingRoutes({
   router.delete(
     {
       path: `${API_BASE_PATH}/deprecation_logging/cache`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {

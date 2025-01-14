@@ -9,6 +9,7 @@
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 import { getLogLevelBadgeCell } from './log_level_badge_cell';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
@@ -17,19 +18,21 @@ import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 const renderCell = (logLevelField: string, record: DataTableRecord) => {
   const LogLevelBadgeCell = getLogLevelBadgeCell(logLevelField);
   render(
-    <LogLevelBadgeCell
-      rowIndex={0}
-      colIndex={0}
-      columnId="log.level"
-      isExpandable={false}
-      isExpanded={false}
-      isDetails={false}
-      row={record}
-      dataView={dataViewMock}
-      fieldFormats={fieldFormatsMock}
-      setCellProps={() => {}}
-      closePopover={() => {}}
-    />
+    <EuiProvider>
+      <LogLevelBadgeCell
+        rowIndex={0}
+        colIndex={0}
+        columnId="log.level"
+        isExpandable={false}
+        isExpanded={false}
+        isDetails={false}
+        row={record}
+        dataView={dataViewMock}
+        fieldFormats={fieldFormatsMock}
+        setCellProps={() => {}}
+        closePopover={() => {}}
+      />
+    </EuiProvider>
   );
 };
 

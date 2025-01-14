@@ -6,9 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
 import { get, first } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiIconTip,
@@ -18,7 +17,13 @@ import {
   EuiScreenReaderOnly,
   EuiTextAlign,
   EuiButtonEmpty,
+  UseEuiTheme,
+  logicalCSS,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { getTechnicalPreview } from './get_technical_preview';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
@@ -26,8 +31,18 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 import { AlertsBadge } from '../../alerts/badge';
 import type { AlertsByName } from '../../alerts/types';
+import { Series } from './types';
 
-import './monitoring_timeseries_container.scss';
+const zoomStyle = ({ euiTheme }: UseEuiTheme) => css`
+  visibility: hidden;
+  ${logicalCSS('padding-right', euiTheme.size.m)}
+`;
+
+const wrapperStyle = css`
+  &:hover .rhythmChart__zoom {
+    visibility: visible;
+  }
+`;
 
 interface ZoomInfo {
   showZoomOutBtn: () => boolean;
@@ -37,9 +52,7 @@ interface ZoomInfo {
 interface SeriesAlert {
   alerts: AlertsByName;
 }
-interface Series {
-  metric: { title: string; label: string; description: string };
-}
+
 interface Props {
   series?: Series[] | SeriesAlert;
   onBrush?: ({ xaxis }: any) => void;
@@ -56,7 +69,7 @@ const zoomOutBtn = (zoomInfo?: ZoomInfo) => {
   }
 
   return (
-    <EuiFlexItem className="monRhythmChart__zoom">
+    <EuiFlexItem className="rhythmChart__zoom" css={zoomStyle}>
       <EuiTextAlign textAlign="right">
         <EuiButtonEmpty
           color="primary"
@@ -114,6 +127,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }: Pro
 
   let alertStatus = null;
   const seriesAlert = isSeriesAlert(series) ? series : undefined;
+
   if (seriesAlert?.alerts) {
     alertStatus = (
       <EuiFlexItem grow={false}>
@@ -123,7 +137,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }: Pro
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" className={`monRhythmChart__wrapper`}>
+    <EuiFlexGroup direction="column" gutterSize="s" css={wrapperStyle}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -147,7 +161,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }: Pro
               <EuiFlexItem grow={false}>
                 <Fragment>
                   <EuiIconTip
-                    anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
+                    anchorClassName="eui-textRight eui-alignMiddle"
                     type="iInCircle"
                     position="right"
                     content={<InfoTooltip series={seriesMetrics} bucketSize={bucketSize} />}

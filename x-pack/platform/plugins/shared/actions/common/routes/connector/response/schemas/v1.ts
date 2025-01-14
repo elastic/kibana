@@ -97,6 +97,13 @@ export const connectorTypesResponseSchema = schema.object({
   is_system_action_type: schema.boolean({
     meta: { description: 'Indicates whether the action is a system action.' },
   }),
+  sub_feature: schema.maybe(
+    schema.oneOf([schema.literal('endpointSecurity')], {
+      meta: {
+        description: 'Indicates the sub-feature type the connector is grouped under.',
+      },
+    })
+  ),
 });
 
 export const connectorExecuteResponseSchema = schema.object({
