@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -32,6 +32,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'test_logstash_reader',
       ]);
       await visualize.initTests();
+      await kibanaServer.uiSettings.update({
+        'theme:name': 'borealis',
+      });
     });
     beforeEach(async () => {
       await visualize.navigateToNewVisualization();
