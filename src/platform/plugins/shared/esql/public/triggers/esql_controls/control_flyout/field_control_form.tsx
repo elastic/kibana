@@ -77,7 +77,6 @@ export function FieldControlForm({
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
-            'data-test-subj': option,
             key: option,
           };
         })
@@ -102,7 +101,6 @@ export function FieldControlForm({
           columns.map((col) => {
             return {
               label: col.name,
-              'data-test-subj': col.name,
               key: col.name,
             };
           })
@@ -153,8 +151,8 @@ export function FieldControlForm({
       const normalizedSearchValue = searchValue.trim().toLowerCase();
 
       const newOption = {
-        value: searchValue,
         label: searchValue,
+        key: searchValue,
       };
 
       if (

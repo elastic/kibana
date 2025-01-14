@@ -113,7 +113,6 @@ export function ValueControlForm({
       ? SUGGESTED_INTERVAL_VALUES.map((option) => {
           return {
             label: option,
-            'data-test-subj': option,
             key: option,
           };
         })
@@ -125,7 +124,6 @@ export function ValueControlForm({
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
-            'data-test-subj': option,
             key: option,
           };
         })
@@ -182,6 +180,7 @@ export function ValueControlForm({
       const newOption = {
         value: searchValue,
         label: searchValue,
+        key: searchValue,
       };
 
       if (
