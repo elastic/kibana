@@ -31,7 +31,7 @@ export interface DocSearchResult {
   url: string;
   /** product name this document is associated to */
   productName: ProductName;
-  /** full content of the doc article, (in markdown) */
+  /** full content of the doc article */
   content: string;
   /** content highlights based on the query */
   highlights: string[];
@@ -45,4 +45,7 @@ export interface DocSearchResponse {
   results: DocSearchResult[];
 }
 
+/**
+ * Search API to be used to retrieve product documentation.
+ */
 export type SearchApi = (options: DocSearchOptions) => Promise<DocSearchResponse>;

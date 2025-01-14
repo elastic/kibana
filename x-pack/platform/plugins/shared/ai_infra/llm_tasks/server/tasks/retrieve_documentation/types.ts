@@ -60,18 +60,33 @@ export interface RetrieveDocumentationParams {
   functionCalling?: FunctionCallingMode;
 }
 
-export interface RetrievedDocument {
+/**
+ * Individual result item in a {@link RetrieveDocumentationResult}
+ */
+export interface RetrieveDocumentationResultDoc {
+  /** title of the document */
   title: string;
+  /** full url to the online documentation */
   url: string;
+  /** full content of the doc article */
   content: string;
+  /** true if content exceeded max token length and had to go through token reduction */
   summarized: boolean;
 }
 
+/**
+ * Response type for {@link RetrieveDocumentationAPI}
+ */
 export interface RetrieveDocumentationResult {
+  /** whether the call was successful or not */
   success: boolean;
-  documents: RetrievedDocument[];
+  /** List of results for this search */
+  documents: RetrieveDocumentationResultDoc[];
 }
 
+/**
+ * Retrieve documentation API
+ */
 export type RetrieveDocumentationAPI = (
   options: RetrieveDocumentationParams
 ) => Promise<RetrieveDocumentationResult>;
