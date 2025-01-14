@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '@kbn/streams-schema';
-
-export function isDescendandOf(parent: StreamDefinition, child: StreamDefinition) {
-  return child.name.startsWith(parent.name);
+export function isDescendantOf(parent: string, child: string) {
+  const parentSegments = parent.split('.');
+  const childSegments = child.split('.');
+  return (
+    parentSegments.length < childSegments.length &&
+    parentSegments.every((segment, index) => segment === childSegments[index])
+  );
 }
 
-export function isChildOf(parent: StreamDefinition, child: StreamDefinition) {
-  return (
-    isDescendandOf(parent, child) &&
-    child.name.split('.').length === parent.name.split('.').length + 1
-  );
+export function isChildOf(parent: string, child: string) {
+  return isDescendantOf(parent, child) && child.split('.').length === parent.split('.').length + 1;
 }
 
 export function getParentId(id: string) {

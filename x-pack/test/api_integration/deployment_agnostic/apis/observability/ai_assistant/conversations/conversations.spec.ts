@@ -44,7 +44,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
   });
 
-  describe('Conversations', () => {
+  describe('Conversations', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/206549
+    this.tags(['failsOnMKI']);
+
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const { status, body } = await observabilityAIAssistantAPIClient.editor({
