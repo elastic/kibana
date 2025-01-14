@@ -12,13 +12,13 @@ import {
 } from '@kbn/core/server/mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import { EntityType } from '../../../../common/search_strategy';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -89,7 +89,7 @@ describe('EntityStoreDataClient', () => {
     it('searches in the entities store indices', async () => {
       await dataClient.searchEntities({
         ...defaultSearchParams,
-        entityTypes: ['host', 'user'],
+        entityTypes: [EntityType.host, EntityType.user],
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(

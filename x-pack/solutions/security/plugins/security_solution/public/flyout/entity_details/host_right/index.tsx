@@ -23,7 +23,6 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
@@ -34,6 +33,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -48,7 +48,6 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: HostPanelProps;
 }
 
-export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
 export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
@@ -72,7 +71,7 @@ export const HostPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
     filterQuery: hostNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -89,7 +88,7 @@ export const HostPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
+    EntityType.host,
     hostName,
     { onSuccess: refetchRiskScore }
   );

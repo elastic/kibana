@@ -34,8 +34,6 @@ const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   universal: universalEntityEngineDescription,
   service: serviceEntityEngineDescription,
 };
-export const getAvailableEntityDescriptions = () =>
-  Object.keys(engineDescriptionRegistry) as EntityType[];
 
 interface EngineDescriptionParams {
   entityType: EntityType;
