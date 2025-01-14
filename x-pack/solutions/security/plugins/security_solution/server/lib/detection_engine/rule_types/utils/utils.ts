@@ -116,19 +116,19 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
-  let warningMessage;
+  let warningStatusMessage;
 
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
+    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningMessage,
+      message: warningStatusMessage,
     });
   }
 
-  return warningMessage;
+  return warningStatusMessage;
 };
 
 export const hasTimestampFields = async (args: {
