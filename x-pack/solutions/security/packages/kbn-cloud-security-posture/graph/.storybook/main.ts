@@ -20,6 +20,11 @@ const graphWebpack: Configuration = {
         '../src/components/mock/use_fetch_graph_data.mock.ts'
       ),
     },
+    fallback: {
+      fs: false,
+      stream: false,
+      os: false,
+    },
   },
 };
 
