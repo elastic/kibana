@@ -25,8 +25,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Navigate to the templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      // Click create template button
-      await testSubjects.click('createTemplateButton');
     });
 
     afterEach(async () => {
@@ -37,6 +35,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('can create an index template with data retention', async () => {
+      // Click create template button
+      await testSubjects.click('createTemplateButton');
       // Complete required fields from step 1
       await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
       await testSubjects.setValue('indexPatternsField', 'test-1');
@@ -76,6 +76,97 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Click Create template
       await pageObjects.indexManagement.clickNextButton();
+      // Close detail tab
+      await testSubjects.click('closeDetailsButton');
+    });
+
+    it('can modify ignore_above, ignore_malformed, ignore_dynamic_beyond_limit, subobjects and timestamp format in an index template with logsdb index mode', async () => {
+      await testSubjects.click('createTemplateButton');
+      // Fill out required fields
+      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
+      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
+
+      await testSubjects.click('indexModeField');
+      await testSubjects.click('index_mode_logsdb');
+
+      // Navigate to Index Settings
+      await testSubjects.click('formWizardStep-2');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      // Modify Index settings
+      await testSubjects.setValue(
+        'kibanaCodeEditor',
+        JSON.stringify({
+          index: {
+            mapping: {
+              ignore_above: '20',
+              total_fields: {
+                ignore_dynamic_beyond_limit: 'true',
+              },
+              ignore_malformed: 'true',
+            },
+          },
+        }),
+        {
+          clearWithKeyboard: true,
+        }
+      );
+
+      // Navigate to Mappings
+      await testSubjects.click('formWizardStep-3');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const mappingTabs = await testSubjects.findAll('formTab');
+      await mappingTabs[3].click();
+
+      // Modify timestamp format
+      await testSubjects.click('comboBoxClearButton');
+      await testSubjects.setValue('comboBoxInput', 'basic_date');
+      await testSubjects.pressEnter('comboBoxInput');
+
+      // Modify subobjects
+      await testSubjects.click('subobjectsToggle');
+
+      // Navigate to the last step of the wizard
+      await testSubjects.click('formWizardStep-5');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      const flyoutTabs = await testSubjects.findAll('tab');
+
+      // Verify Index Settings
+      await flyoutTabs[1].click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('settingsTabContent')).to.be(true);
+      const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
+      expect(JSON.parse(settingsTabContent)).to.eql({
+        index: {
+          mode: 'logsdb',
+          mapping: {
+            ignore_above: '20',
+            total_fields: {
+              ignore_dynamic_beyond_limit: 'true',
+            },
+            ignore_malformed: 'true',
+          },
+        },
+      });
+
+      // Verify Mappings
+      await flyoutTabs[2].click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
+      const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
+      expect(JSON.parse(mappingsTabContent)).to.eql({
+        dynamic_date_formats: ['basic_date'],
+        _source: {
+          mode: 'synthetic',
+        },
+        subobjects: false,
+      });
+
       // Close detail tab
       await testSubjects.click('closeDetailsButton');
     });
