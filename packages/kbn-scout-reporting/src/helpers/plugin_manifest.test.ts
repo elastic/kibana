@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { getManifestPath, readPluginManifest, getPluginManifestData } from './plugin_manufest';
+import { getManifestPath, readPluginManifest, getPluginManifestData } from './plugin_manifest';
 
 jest.mock('fs');
 

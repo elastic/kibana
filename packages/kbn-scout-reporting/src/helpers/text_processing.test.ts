@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseStdout } from './text_processing';
 import stripANSI from 'strip-ansi';
+import { parseStdout } from './text_processing';
 
 jest.mock('strip-ansi', () => jest.fn((input) => input.replace(/\x1b\[[0-9;]*m/g, '')));
 

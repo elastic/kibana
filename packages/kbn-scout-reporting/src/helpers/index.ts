@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPluginManifestData, type PluginManifest } from './plugin_manufest';
+export { getPluginManifestData, type PluginManifest } from './plugin_manifest';
 export { stripFilePath, parseStdout } from './text_processing';
 export { getRunTarget, stripRunCommand } from './cli_processing';
 export { getTestIDForTitle, generateTestRunId } from './test_id_generator';
