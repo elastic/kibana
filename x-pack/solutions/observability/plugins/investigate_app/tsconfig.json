@@ -82,7 +82,6 @@
     "@kbn/visualization-utils",
     "@kbn/zod",
     "@kbn/babel-register",
-    "@kbn/ai-assistant-common",
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
     "@kbn/datemath",
