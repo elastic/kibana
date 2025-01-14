@@ -13,7 +13,6 @@ import {
 import {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
-  PackageConnectorSettings,
   PackagePolicyMetadata,
   getConnectorsToDeploy,
   getPoliciesToDelete,
