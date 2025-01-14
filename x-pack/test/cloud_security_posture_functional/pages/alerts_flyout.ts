@@ -126,6 +126,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
       await timelinePage.ensureTimelineIsOpen();
       await timelinePage.waitForEvents();
+      await timelinePage.closeTimeline();
+
+      // Test query bar
+      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
     });
   });
 }
