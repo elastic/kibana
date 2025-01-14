@@ -16,7 +16,11 @@ import { TaskContext } from '../task_context';
 export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
   log.info('building required artifacts for the optimizer');
 
-  const packagesToBuild = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+  const packagesToBuild = [
+    'src/platform/packages/private/kbn-ui-shared-deps-npm',
+    'src/platform/packages/private/kbn-ui-shared-deps-src',
+    'src/platform/packages/shared/kbn-monaco',
+  ];
 
   async function buildPackage(packageName: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
@@ -24,7 +28,7 @@ export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
       : ['inherit', 'inherit', 'inherit'];
 
     await execa('yarn', ['build', '--quiet', ...(dist ? ['--dist'] : [])], {
-      cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+      cwd: path.resolve(REPO_ROOT, packageName),
       stdio: stdioOptions,
     });
   }

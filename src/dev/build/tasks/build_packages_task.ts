@@ -13,9 +13,9 @@ import * as Fsp from 'fs/promises';
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
-import { makeMatcher } from '@kbn/picomatcher/make_matcher';
+import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
-import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
+import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
@@ -313,13 +313,13 @@ export async function buildWebpackBundles(
   log: ToolingLog,
   { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
 ) {
-  async function buildPackage(packageName: string) {
+  async function buildPackage(packagePath: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
       ? ['ignore', 'pipe', 'pipe']
       : ['inherit', 'inherit', 'inherit'];
 
     await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
-      cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+      cwd: path.resolve(REPO_ROOT, packagePath),
       env: {
         ...process.env,
         REACT_VERSION: reactVersion,
@@ -328,9 +328,13 @@ export async function buildWebpackBundles(
     });
   }
 
-  const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
-  for (const packageName of packageNames) {
-    log.info(`building ${packageName}`);
-    await buildPackage(packageName);
+  const packageNames = [
+    'src/platform/packages/private/kbn-ui-shared-deps-npm',
+    'src/platform/packages/private/kbn-ui-shared-deps-src',
+    'src/platform/packages/shared/kbn-monaco',
+  ];
+  for (const packagePath of packageNames) {
+    log.info(`building ${packagePath}`);
+    await buildPackage(packagePath);
   }
 }
