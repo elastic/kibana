@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isChildOf, isWiredReadStream, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  conditionSchema,
+  isChildOf,
+  isWiredReadStream,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
