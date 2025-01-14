@@ -8,7 +8,6 @@
  */
 
 import React, { createContext, useMemo } from 'react';
-import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
@@ -30,17 +29,13 @@ import {
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
+import { LinksApi, LinksParentApi, LinksRuntimeState, ResolvedLink } from '../types';
+import { DISPLAY_NAME } from '../../common';
 import {
-  LinksApi,
   LinksByReferenceSerializedState,
   LinksByValueSerializedState,
-  LinksParentApi,
-  LinksRuntimeState,
   LinksSerializedState,
-  ResolvedLink,
-} from '../types';
-import { DISPLAY_NAME } from '../../common';
-import { injectReferences } from '../../common/persistable_state';
+} from '../../common/types';
 
 import '../components/links_component.scss';
 import { checkForDuplicateTitle, linksClient } from '../content_management';
@@ -62,8 +57,7 @@ export const getLinksEmbeddableFactory = () => {
   > = {
     type: CONTENT_ID,
     deserializeState: async (serializedState) => {
-      // Clone the state to avoid an object not extensible error when injecting references
-      const state = cloneDeep(serializedState.rawState);
+      const state = serializedState.rawState;
       const { title, description, hidePanelTitles } = serializedState.rawState;
 
       if (linksSerializeStateIsByReference(state)) {
@@ -77,21 +71,16 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const { attributes: attributesWithInjectedIds } = injectReferences({
-        attributes: state.attributes,
-        references: serializedState.references ?? [],
-      });
-
-      const resolvedLinks = await resolveLinks(attributesWithInjectedIds.links ?? []);
+      const resolvedLinks = await resolveLinks(state.attributes.links ?? []);
 
       return {
         title,
         description,
         hidePanelTitles,
         links: resolvedLinks,
-        layout: attributesWithInjectedIds.layout,
-        defaultPanelTitle: attributesWithInjectedIds.title,
-        defaultPanelDescription: attributesWithInjectedIds.description,
+        layout: state.attributes.layout,
+        defaultPanelTitle: state.attributes.title,
+        defaultPanelDescription: state.attributes.description,
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
@@ -130,12 +119,12 @@ export const getLinksEmbeddableFactory = () => {
               return { rawState: linksByReferenceState, references: [] };
             }
             const runtimeState = api.snapshotRuntimeState();
-            const { attributes, references } = serializeLinksAttributes(runtimeState);
+            const { attributes } = serializeLinksAttributes(runtimeState, false);
             const linksByValueState: LinksByValueSerializedState = {
               attributes,
               ...serializeTitles(),
             };
-            return { rawState: linksByValueState, references };
+            return { rawState: linksByValueState };
           },
           saveToLibrary: async (newTitle: string) => {
             defaultPanelTitle.next(newTitle);

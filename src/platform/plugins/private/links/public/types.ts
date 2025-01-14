@@ -18,14 +18,14 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
-import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
+import { Link, LinksLayoutType } from '../common/content_management';
+import { LinksByReferenceSerializedState, LinksSerializedState } from '../common/types';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_CONTAINER_TYPE> &
@@ -41,18 +41,6 @@ export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
   HasEditCapabilities &
   HasInPlaceLibraryTransforms<LinksRuntimeState>;
-
-export interface LinksByReferenceSerializedState {
-  savedObjectId: string;
-}
-
-export interface LinksByValueSerializedState {
-  attributes: LinksAttributes;
-}
-
-export type LinksSerializedState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> &
-  (LinksByReferenceSerializedState | LinksByValueSerializedState);
 
 export interface LinksRuntimeState
   extends Partial<LinksByReferenceSerializedState>,
