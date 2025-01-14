@@ -16,113 +16,23 @@ import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Graph, NodeProps, isEntityNode } from '../../..';
-import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
-import { useGraphLabelExpandPopover } from './use_graph_label_expand_popover';
+import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import {
-  ACTOR_ENTITY_ID,
-  EVENT_ACTION,
-  EVENT_ID,
-  RELATED_ENTITY,
-  TARGET_ENTITY_ID,
-} from '../../common/constants';
+import { EVENT_ID } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { addFilter, containsFilter, removeFilter } from './search_filters';
-import { NodeToggleAction } from './graph_node_expand_popover';
+import { addFilter } from './search_filters';
+import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
+import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 
 const useGraphPopovers = (
   dataViewId: string,
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   searchFilters: Filter[]
 ) => {
-  const getRelatedEntitiesAction = useCallback(
-    (node: NodeProps) => {
-      return containsFilter(searchFilters, RELATED_ENTITY, node.id) ? 'hide' : 'show';
-    },
-    [searchFilters]
-  );
-  const getActionsByEntityAction = useCallback(
-    (node: NodeProps) => {
-      return containsFilter(searchFilters, ACTOR_ENTITY_ID, node.id) ? 'hide' : 'show';
-    },
-    [searchFilters]
-  );
-  const getActionsOnEntityAction = useCallback(
-    (node: NodeProps) => {
-      return containsFilter(searchFilters, TARGET_ENTITY_ID, node.id) ? 'hide' : 'show';
-    },
-    [searchFilters]
-  );
-
-  const onToggleExploreRelatedEntitiesClick = useCallback(
-    (node: NodeProps, action: NodeToggleAction) => {
-      if (action === 'show') {
-        setSearchFilters((prev) => addFilter(dataViewId, prev, RELATED_ENTITY, node.id));
-      } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, RELATED_ENTITY, node.id));
-      }
-    },
-    [dataViewId, setSearchFilters]
-  );
-
-  const onToggleActionsByEntityClick = useCallback(
-    (node: NodeProps, action: NodeToggleAction) => {
-      if (action === 'show') {
-        setSearchFilters((prev) => addFilter(dataViewId, prev, ACTOR_ENTITY_ID, node.id));
-      } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, ACTOR_ENTITY_ID, node.id));
-      }
-    },
-    [dataViewId, setSearchFilters]
-  );
-
-  const onToggleActionsOnEntityClick = useCallback(
-    (node: NodeProps, action: NodeToggleAction) => {
-      if (action === 'show') {
-        setSearchFilters((prev) => addFilter(dataViewId, prev, TARGET_ENTITY_ID, node.id));
-      } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, TARGET_ENTITY_ID, node.id));
-      }
-    },
-    [dataViewId, setSearchFilters]
-  );
-
-  const nodeExpandPopover = useGraphNodeExpandPopover({
-    getRelatedEntitiesAction,
-    getActionsByEntityAction,
-    getActionsOnEntityAction,
-    onToggleExploreRelatedEntitiesClick,
-    onToggleActionsByEntityClick,
-    onToggleActionsOnEntityClick,
-  });
-
-  const getEventsWithThisActionToggleAction = useCallback(
-    (node: NodeProps) => {
-      return containsFilter(searchFilters, EVENT_ACTION, node.data.label ?? '') ? 'hide' : 'show';
-    },
-    [searchFilters]
-  );
-
-  const onShowEventsWithThisActionClick = useCallback(
-    (node: NodeProps, action: NodeToggleAction) => {
-      if (action === 'show') {
-        setSearchFilters((prev) =>
-          addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? '')
-        );
-      } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, EVENT_ACTION, node.data.label ?? ''));
-      }
-    },
-    [dataViewId, setSearchFilters]
-  );
-
-  const labelExpandPopover = useGraphLabelExpandPopover({
-    getEventsWithThisActionToggleAction,
-    onShowEventsWithThisActionClick,
-  });
+  const nodeExpandPopover = useEntityNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
+  const labelExpandPopover = useLabelNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
@@ -254,7 +164,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onLabelExpandButtonClick, ...args);
+      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
     const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
       ({ state: { isOpen } }) => isOpen
     );
