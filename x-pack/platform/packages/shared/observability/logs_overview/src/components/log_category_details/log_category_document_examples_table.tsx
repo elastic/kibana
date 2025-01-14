@@ -41,6 +41,7 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
       index={logsSource.indexName}
       timestampField={logsSource.timestampField}
       displayOptions={{
+        solutionNavIdOverride: 'oblt',
         enableDocumentViewer: false,
         enableFilters: false,
       }}
