@@ -76,7 +76,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             timeout: TIMEOUT_CHECK,
           });
         } else {
-          expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
+          expect(await (await getByVisibleText('~nav-item', by.text))?.getVisibleText()).to.be(
+            by.text
+          );
         }
       },
       async expectLinkMissing(
