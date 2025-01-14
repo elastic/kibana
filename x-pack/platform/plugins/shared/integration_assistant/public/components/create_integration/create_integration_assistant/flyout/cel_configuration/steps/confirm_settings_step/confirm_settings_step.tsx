@@ -282,7 +282,6 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       coalescedSelectedPath,
       selectedAuth,
       setIsFlyoutGenerating,
-      useOtherPath,
       reportCelGenerationComplete,
       onCelInputGenerationComplete,
       onShowValidation
