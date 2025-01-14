@@ -5,21 +5,30 @@
  * 2.0.
  */
 
-import { AuthorFilter, StatusFilter } from '../../../../../common/siem_migrations/constants';
-import type { FilterOptions } from './filters';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { FilterOptions } from '../../types';
+import { AuthorFilter, StatusFilter } from '../../types';
+
+const AUTHOR_FILTERS: Record<AuthorFilter, RuleMigrationFilters> = {
+  [AuthorFilter.ELASTIC]: { prebuilt: true },
+  [AuthorFilter.CUSTOM]: { prebuilt: false },
+};
+
+const STATUS_FILTERS: Record<StatusFilter, RuleMigrationFilters> = {
+  [StatusFilter.FAILED]: { failed: true },
+  [StatusFilter.INSTALLED]: { installed: true },
+  [StatusFilter.TRANSLATED]: { installed: false, fullyTranslated: true },
+  [StatusFilter.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
+  [StatusFilter.UNTRANSLATABLE]: { untranslatable: true },
+};
 
 export const convertFilterOptions = (filterOptions?: FilterOptions) => {
-  return {
-    ...(filterOptions?.author === AuthorFilter.ELASTIC ? { isPrebuilt: true } : {}),
-    ...(filterOptions?.author === AuthorFilter.CUSTOM ? { isPrebuilt: false } : {}),
-    ...(filterOptions?.status === StatusFilter.FAILED ? { isFailed: true } : {}),
-    ...(filterOptions?.status === StatusFilter.INSTALLED ? { isInstalled: true } : {}),
-    ...(filterOptions?.status === StatusFilter.TRANSLATED
-      ? { isInstalled: false, isFullyTranslated: true }
-      : {}),
-    ...(filterOptions?.status === StatusFilter.PARTIALLY_TRANSLATED
-      ? { isPartiallyTranslated: true }
-      : {}),
-    ...(filterOptions?.status === StatusFilter.UNTRANSLATABLE ? { isUntranslatable: true } : {}),
-  };
+  const filters: RuleMigrationFilters = {};
+  if (filterOptions?.author) {
+    Object.assign(filters, AUTHOR_FILTERS[filterOptions.author]);
+  }
+  if (filterOptions?.status) {
+    Object.assign(filters, STATUS_FILTERS[filterOptions.status]);
+  }
+  return filters;
 };

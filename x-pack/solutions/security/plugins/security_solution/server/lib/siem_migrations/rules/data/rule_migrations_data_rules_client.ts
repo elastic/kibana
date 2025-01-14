@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
@@ -36,18 +37,6 @@ export type CreateRuleMigrationInput = Omit<
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationFilters {
-  status?: SiemMigrationStatus | SiemMigrationStatus[];
-  ids?: string[];
-  installed?: boolean;
-  installable?: boolean;
-  prebuilt?: boolean;
-  failed?: boolean;
-  fullyTranslated?: boolean;
-  partiallyTranslated?: boolean;
-  untranslatable?: boolean;
-  searchTerm?: string;
-}
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
   sort?: RuleMigrationSort;

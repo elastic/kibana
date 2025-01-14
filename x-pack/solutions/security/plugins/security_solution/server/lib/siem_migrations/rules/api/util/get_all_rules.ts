@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/types';
 import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
-import type { RuleMigrationFilters } from '../../data/rule_migrations_data_rules_client';
 
 interface GetAllMigrationRulesProps {
   /**

@@ -39,7 +39,7 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
-import type { FilterOptions } from './filters';
+import type { FilterOptions } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './helpers';
 
@@ -100,8 +100,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       perPage: pageSize,
       sortField,
       sortDirection,
-      searchTerm,
-      ...convertFilterOptions(filterOptions),
+      filters: {
+        searchTerm,
+        ...convertFilterOptions(filterOptions),
+      },
     });
 
     const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);

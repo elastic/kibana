@@ -9,6 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import {
   RetryRuleMigrationRequestBody,
   RetryRuleMigrationRequestParams,
@@ -17,7 +18,6 @@ import {
 import { SIEM_RULE_MIGRATION_RETRY_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
-import type { RuleMigrationFilters } from '../data/rule_migrations_data_rules_client';
 
 export const registerSiemRuleMigrationsRetryRoute = (
   router: SecuritySolutionPluginRouter,
