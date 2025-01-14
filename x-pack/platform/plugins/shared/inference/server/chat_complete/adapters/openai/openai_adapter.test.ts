@@ -354,6 +354,18 @@ describe('openAIAdapter', () => {
         }),
       });
     });
+
+    it('propagates the temperature', () => {
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.7,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(getRequest().body.temperature).toBe(0.7);
+    });
   });
 
   describe('when handling the response', () => {
