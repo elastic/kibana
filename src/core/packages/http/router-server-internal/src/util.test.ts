@@ -14,7 +14,7 @@ import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
   it('wraps only expected values in "once"', () => {
-    const validation: RouteValidator<unknown, unknown, unknown> = {
+    const validation: RouteValidator<unknown, unknown, unknown, unknown> = {
       request: {},
       response: {
         200: {

@@ -22,9 +22,9 @@ import type {
  * @param withoutSecretHeaders Whether we want to exclude secret headers
  * @returns A KibanaRequest object
  */
-export function kibanaRequestFactory<P, Q, B>(
+export function kibanaRequestFactory<P, Q, B, RequestBody>(
   req: RawRequest,
-  routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfigRequest<P, Q, B>,
+  routeSchemas?: RouteValidator<P, Q, B, RequestBody> | RouteValidatorFullConfigRequest<P, Q, B>,
   withoutSecretHeaders: boolean = true
 ): KibanaRequest<P, Q, B> {
   return CoreKibanaRequest.from<P, Q, B>(req, routeSchemas, withoutSecretHeaders);

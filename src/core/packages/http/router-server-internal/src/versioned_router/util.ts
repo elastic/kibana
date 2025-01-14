@@ -18,9 +18,11 @@ import type {
 } from '@kbn/core-http-server';
 import { validRouteSecurity } from '../security_route_config_validator';
 
-export function isCustomValidation(
-  v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation
-): v is VersionedRouteCustomResponseBodyValidation {
+export function isCustomValidation<ResponseBody = unknown>(
+  v:
+    | VersionedRouteCustomResponseBodyValidation<ResponseBody>
+    | VersionedResponseBodyValidation<ResponseBody>
+): v is VersionedRouteCustomResponseBodyValidation<ResponseBody> {
   return 'custom' in v;
 }
 
@@ -31,8 +33,8 @@ export function isCustomValidation(
  * @param validation - versioned response body validation
  * @internal
  */
-export function unwrapVersionedResponseBodyValidation(
-  validation: VersionedResponseBodyValidation
+export function unwrapVersionedResponseBodyValidation<ResponseBody = unknown>(
+  validation: VersionedResponseBodyValidation<ResponseBody>
 ): RouteValidationSpec<unknown> {
   if (isCustomValidation(validation)) {
     return validation.custom;

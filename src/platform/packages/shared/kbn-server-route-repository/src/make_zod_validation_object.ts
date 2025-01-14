@@ -8,12 +8,9 @@
  */
 
 import { RouteValidatorFullConfigResponse } from '@kbn/core-http-server';
+import { ExtractResponseStatusBodyTypes } from '@kbn/server-route-repository-utils/src/typings';
 import { z, ZodObject } from '@kbn/zod';
-import {
-  ZodParamsObject,
-  ServerRouteHandlerReturnType,
-  TRouteResponse,
-} from '@kbn/server-route-repository-utils';
+import { ZodParamsObject, TRouteResponse } from '@kbn/server-route-repository-utils';
 import { noParamsValidationObject } from './validation_objects';
 
 export function makeZodValidationObject(params: ZodParamsObject) {
@@ -24,9 +21,10 @@ export function makeZodValidationObject(params: ZodParamsObject) {
   };
 }
 
-export function makeZodResponseValidationObject<TReturnType extends ServerRouteHandlerReturnType>(
-  responseSchema: TRouteResponse<TReturnType>
-): RouteValidatorFullConfigResponse<TReturnType> {
+export function makeZodResponseValidationObject<
+  T extends TRouteResponse,
+  TReturnType = ExtractResponseStatusBodyTypes<T>
+>(responseSchema: T): RouteValidatorFullConfigResponse<TReturnType> {
   const { unsafe, ...statusCodes } = responseSchema;
   const response: RouteValidatorFullConfigResponse<TReturnType> = { unsafe };
 

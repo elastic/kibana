@@ -11,7 +11,7 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidator } from './route_validator';
 import { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';
 
-type Validator = RouteValidator<unknown, unknown, unknown>;
+type Validator = RouteValidator<unknown, unknown, unknown, unknown>;
 
 describe('isFullValidatorContainer', () => {
   it('correctly identifies RouteValidatorRequestAndResponses', () => {

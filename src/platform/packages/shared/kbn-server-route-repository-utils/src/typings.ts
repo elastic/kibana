@@ -135,16 +135,21 @@ export type ServerRouteHandlerReturnType =
 interface TRouteResponseStatusCodes {
   [statusCode: number]: {
     body: z.ZodSchema<ServerRouteHandlerReturnType>;
-  } & Omit<VersionedRouteResponseValidation<ServerRouteHandlerReturnType>[number], 'body'>;
+  } & Omit<VersionedRouteResponseValidation[number], 'body'>;
 }
 
-type TRouteResponse = TRouteResponseStatusCodes & {
+export type TRouteResponse = TRouteResponseStatusCodes & {
   [StatusCode in keyof TRouteResponseStatusCodes]: {
     body: z.infer<TRouteResponseStatusCodes[StatusCode]['body']>;
   };
-};
+} & Omit<VersionedRouteResponseValidation, number>;
 
-type ExtractBodyTypes<T> = T extends Record<number, { body: z.ZodSchema<infer U> }> ? U : never;
+export type ExtractResponseStatusBodyTypes<T> = T extends Record<
+  number,
+  { body: z.ZodSchema<infer U> }
+>
+  ? U
+  : never;
 
 type ServerRouteHandler<
   TRouteHandlerResources extends ServerRouteHandlerResources,
@@ -174,7 +179,7 @@ export type CreateServerRouteFactory<
       TRouteHandlerResources,
       TRouteParamsRT,
       TResponseValidation extends TRouteResponse
-        ? ExtractBodyTypes<TResponseValidation>
+        ? ExtractResponseStatusBodyTypes<TResponseValidation>
         : ServerRouteHandlerReturnType
     >;
     params?: TRouteParamsRT;
@@ -196,7 +201,7 @@ export type CreateServerRouteFactory<
     TRouteParamsRT,
     TRouteHandlerResources,
     TResponseValidation extends TRouteResponse
-      ? ExtractBodyTypes<TResponseValidation>
+      ? ExtractResponseStatusBodyTypes<TResponseValidation>
       : ServerRouteHandlerReturnType,
     TRouteCreateOptions
   >

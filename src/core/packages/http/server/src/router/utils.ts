@@ -14,7 +14,7 @@ import {
   RouteValidatorRequestAndResponses,
 } from './route_validator';
 
-type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;
+type AnyRouteValidator = RouteValidator<unknown, unknown, unknown, unknown>;
 
 /**
  * {@link RouteValidator} is a union type of all possible ways that validation
@@ -24,7 +24,7 @@ type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;
  */
 export function isFullValidatorContainer(
   value: AnyRouteValidator
-): value is RouteValidatorRequestAndResponses<unknown, unknown, unknown> {
+): value is RouteValidatorRequestAndResponses<unknown, unknown, unknown, unknown> {
   return 'request' in value;
 }
 
@@ -34,7 +34,7 @@ export function isFullValidatorContainer(
  * @public
  */
 export function getRequestValidation<P, Q, B>(
-  value: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>)
+  value: RouteValidator<P, Q, B, unknown> | (() => RouteValidator<P, Q, B, unknown>)
 ): RouteValidatorFullConfigRequest<P, Q, B> {
   if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.request : value;
@@ -47,9 +47,9 @@ export function getRequestValidation<P, Q, B>(
  */
 export function getResponseValidation(
   value:
-    | RouteValidator<unknown, unknown, unknown>
-    | (() => RouteValidator<unknown, unknown, unknown>)
-): undefined | RouteValidatorFullConfigResponse {
+    | RouteValidator<unknown, unknown, unknown, unknown>
+    | (() => RouteValidator<unknown, unknown, unknown, unknown>)
+): undefined | RouteValidatorFullConfigResponse<unknown> {
   if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.response : undefined;
 }

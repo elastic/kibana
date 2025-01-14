@@ -63,7 +63,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   };
 }
 
-function createKibanaRequestMock<P = any, Q = any, B = any>({
+function createKibanaRequestMock<P = any, Q = any, B = any, RequestBody = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -84,7 +84,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
-  return kibanaRequestFactory<P, Q, B>(
+  return kibanaRequestFactory<P, Q, B, RequestBody>(
     hapiMocks.createRequest({
       app: kibanaRequestState,
       auth,

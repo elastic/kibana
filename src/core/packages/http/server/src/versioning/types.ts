@@ -283,7 +283,7 @@ export type VersionedResponseBodyValidation<B> =
  * }
  * @public
  */
-export interface VersionedRouteResponseValidation<B> {
+export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
      * A description of the response. This is required input for complete OAS documentation.
@@ -293,7 +293,7 @@ export interface VersionedRouteResponseValidation<B> {
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body?: VersionedResponseBodyValidation<B>;
+    body?: VersionedResponseBodyValidation<unknown>;
   };
   unsafe?: { body?: boolean };
 }
@@ -316,7 +316,7 @@ export interface VersionedRouteValidation<P, Q, B> {
    *
    * @public
    */
-  response?: VersionedRouteResponseValidation<B>;
+  response?: VersionedRouteResponseValidation;
 }
 
 /**
