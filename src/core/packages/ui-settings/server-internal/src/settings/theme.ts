@@ -9,9 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import type { Writable } from '@kbn/utility-types';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   type UiSettingsParams,
+  type ThemeName,
   parseThemeTags,
   SUPPORTED_THEME_NAMES,
   DEFAULT_THEME_NAME,
@@ -40,7 +42,7 @@ const getThemeInfo = ({ isDist }: GetThemeSettingsOptions): ThemeInfo => {
 export interface GetThemeSettingsOptions {
   isDist: boolean;
   isThemeSwitcherEnabled: boolean | undefined;
-  defaultTheme?: string;
+  defaultTheme?: ThemeName;
 }
 
 export const getThemeSettings = (
@@ -110,7 +112,8 @@ export const getThemeSettings = (
         defaultMessage: 'Theme',
       }),
       type: 'select',
-      options: SUPPORTED_THEME_NAMES,
+      // Cast to a mutable array to satisfy the `UiSettingsParams.options` type
+      options: SUPPORTED_THEME_NAMES as Writable<typeof SUPPORTED_THEME_NAMES>,
       optionLabels: {
         amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
           defaultMessage: 'Amsterdam',

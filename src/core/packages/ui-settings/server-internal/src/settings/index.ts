@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { ThemeName, UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getAccessibilitySettings } from './accessibility';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
@@ -19,7 +19,7 @@ import { getAnnouncementsSettings } from './announcements';
 export interface GetCoreSettingsOptions {
   isDist: boolean;
   isThemeSwitcherEnabled: boolean | undefined;
-  defaultTheme?: string;
+  defaultTheme?: ThemeName;
 }
 
 export const getCoreSettings = (

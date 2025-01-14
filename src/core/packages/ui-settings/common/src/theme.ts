@@ -8,7 +8,7 @@
  */
 
 export const DEFAULT_THEME_NAME = 'amsterdam';
-export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'];
+export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'] as const;
 
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
 

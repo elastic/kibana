@@ -12,6 +12,7 @@ import { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
+  type ThemeName,
   DEFAULT_THEME_NAME,
   parseDarkModeValue,
   parseThemeNameValue,
@@ -63,7 +64,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    let themeName: string = DEFAULT_THEME_NAME;
+    let themeName: ThemeName = DEFAULT_THEME_NAME;
 
     try {
       themeName = parseThemeNameValue(await uiSettingsClient.get('theme:name'));
