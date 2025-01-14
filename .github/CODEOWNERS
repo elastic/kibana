@@ -3313,7 +3313,6 @@ x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
 x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/ux @elastic/obs-ux-infra_services-team
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
