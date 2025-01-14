@@ -118,7 +118,7 @@ export class RuleMigrationsDataService {
 
     return new RuleMigrationsDataClient(
       indexNameProviders,
-      currentUser.username,
+      currentUser,
       esScopedClient,
       this.logger,
       packageService

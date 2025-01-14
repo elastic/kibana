@@ -6,8 +6,12 @@
  */
 
 import type {
-  RuleMigration,
-  RuleMigrationResource,
+  UpdateRuleMigrationData,
+  RuleMigrationTranslationResult,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import {
+  type RuleMigration,
+  type RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type Stored<T extends object> = T & { id: string };
@@ -31,3 +35,7 @@ export interface RuleMigrationPrebuiltRule {
   elser_embedding: string;
   mitre_attack_ids?: string[];
 }
+
+export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+  translation_result?: RuleMigrationTranslationResult;
+};
