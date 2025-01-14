@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export * from './processing';
-export * from './type_guards';
-export * from './hierarchy';
+export interface MicrosoftDefenderEndpointActionRequestCommonMeta {
+  /** The ID of the action in Microsoft Defender's system */
+  machineActionId: string;
+}
