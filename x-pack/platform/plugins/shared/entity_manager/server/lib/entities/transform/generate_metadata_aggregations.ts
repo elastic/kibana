@@ -19,7 +19,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
       agg = {
         filter: {
           range: {
-            [definition.latest.timestampField]: {
+            '@timestamp': {
               gte: `now-${lookbackPeriod}`,
             },
           },
@@ -40,7 +40,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
             must: [
               {
                 range: {
-                  [definition.latest.timestampField]: {
+                  '@timestamp': {
                     gte: `now-${lookbackPeriod}`,
                   },
                 },
