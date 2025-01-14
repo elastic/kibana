@@ -11,9 +11,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -39,12 +37,19 @@ export const mockKibanaValues = {
   consolePlugin: null,
   data: dataPluginMock.createStartContract(),
   esConfig: { elasticsearch_host: 'https://your_deployment_url' },
+  fleet: {
+    config: {
+      agentless: true,
+    },
+  },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   getNavLinks: jest.fn().mockReturnValue([]),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: null,
+  isAgentlessEnabled: false,
   isCloud: false,
+  isServerless: false,
   isSidebarEnabled: true,
   kibanaVersion: null,
   lens: {
@@ -53,6 +58,7 @@ export const mockKibanaValues = {
       formula: jest.fn(),
     }),
   } as unknown as LensPublicStart,
+  ml: mlPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,
@@ -70,7 +76,6 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
-  ml: mlPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
   user: null,
