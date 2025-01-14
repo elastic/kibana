@@ -19,7 +19,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
 
   const DOC_LINK_VERSION = meta.version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
-  const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
@@ -32,7 +31,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
-  const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
+  const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
 
