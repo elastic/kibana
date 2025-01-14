@@ -20,6 +20,7 @@ import type {
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getFieldValue } from '@kbn/discover-utils';
+import { isEmpty } from 'lodash';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -374,17 +375,42 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = useCallback(
       (row: DataTableRecord, euiTheme: EuiThemeComputed) => {
-        if (getFieldValue(row, 'event.kind') === 'signal') {
+        const isAlert = getFieldValue(row, 'event.kind') === 'signal';
+
+        const isEql =
+          !isEmpty(getFieldValue(row, 'eql.parentId')) &&
+          !isEmpty(getFieldValue(row, 'eql.sequenceNumber'));
+
+        if (isEql) {
+          const sequenceNumber = ((getFieldValue(row, 'eql.sequenceNumber') as string) ?? '').split(
+            '-'
+          )[0];
+
+          const isEvenSequence = parseInt(sequenceNumber, 10) % 2 === 0;
+
+          if (isEvenSequence) {
+            return {
+              color: euiTheme.colors.primary,
+              label: 'EQL Sequence',
+            };
+          }
+          return {
+            color: euiTheme.colors.accent,
+            label: 'EQL Non Sequence',
+          };
+        }
+
+        if (isAlert) {
           return {
             color: euiTheme.colors.warning,
             label: 'Alert',
           };
-        } else {
-          return {
-            color: euiTheme.colors.lightShade,
-            label: 'Event',
-          };
         }
+
+        return {
+          color: euiTheme.colors.lightShade,
+          label: 'Event',
+        };
       },
       []
     );

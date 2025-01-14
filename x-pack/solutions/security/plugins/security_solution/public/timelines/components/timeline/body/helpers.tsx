@@ -111,12 +111,11 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event?.kibana?.alert?.rule?.uuid)) {
-    return 'signal';
-  } else if (!isEmpty(event?.eql?.parentId)) {
+  if (!isEmpty(event?.eql?.parentId)) {
     return 'eql';
-  }
-  return 'raw';
+  } else if (!isEmpty(event?.kibana?.alert?.rule?.uuid)) {
+    return 'signal';
+  } else return 'raw';
 };
 
 export const NOTE_CONTENT_CLASS_NAME = 'note-content';

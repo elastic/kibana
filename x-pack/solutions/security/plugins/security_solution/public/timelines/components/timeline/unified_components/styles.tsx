@@ -120,7 +120,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlSequence),
   .udtTimeline .euiDataGridRow.eqlSequence {
-    .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
@@ -135,7 +134,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
   .udtTimeline .euiDataGridRow.eqlNonSequence {
-    .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
