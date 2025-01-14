@@ -7,7 +7,7 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 import { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import { RouteDependencies } from '../../types';
@@ -29,6 +29,15 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
     },
     async (contxt, req, res) => {
       const { file, copyAction } = req.body;
+      const privResult = await (
+        await contxt.core
+      ).elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        // same as privs for ingest pipelines management
+        cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
+      });
+      if (!privResult.has_all_requested) {
+        return res.unauthorized();
+      }
       try {
         const result = csvToIngestPipeline(file, copyAction);
         return res.ok({ body: result });
