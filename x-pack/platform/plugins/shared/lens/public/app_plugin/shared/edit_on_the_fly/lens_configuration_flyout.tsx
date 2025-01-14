@@ -87,7 +87,7 @@ export function LensEditConfigurationFlyout({
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
-  const prevQuery = useRef<AggregateQuery | Query | undefined>(undefined);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
   const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
@@ -123,6 +123,11 @@ export function LensEditConfigurationFlyout({
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
     [activeDatasource, datasourceState]
+  );
+
+  const attributesNeedRefresh = useMemo(
+    () => Boolean(attributes.state.needsRefresh),
+    [attributes.state.needsRefresh]
   );
 
   // needed for text based languages mode which works ONLY with adHoc dataviews
@@ -169,6 +174,7 @@ export function LensEditConfigurationFlyout({
           state: {
             ...attributes.state,
             query: { esql: updatedQuery },
+            needsRefresh: true,
           },
         });
         // open the edit flyout to continue editing
@@ -373,7 +379,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q: AggregateQuery, abortController?: AbortController) => {
+    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -383,7 +389,8 @@ export function LensEditConfigurationFlyout({
         setErrors,
         abortController,
         setDataGridAttrs,
-        esqlVariables
+        esqlVariables,
+        shouldUpdateAttrs
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -407,9 +414,9 @@ export function LensEditConfigurationFlyout({
   useEffect(() => {
     const abortController = new AbortController();
     const initializeChart = async () => {
-      if (!isEqual(prevQuery.current, query) && isOfAggregateQueryType(query) && !dataGridAttrs) {
+      if (isOfAggregateQueryType(query) && !dataGridAttrs) {
         try {
-          await runQuery(query, abortController);
+          await runQuery(query, abortController, attributesNeedRefresh);
         } catch (e) {
           setErrors([e]);
           prevQuery.current = query;
@@ -417,7 +424,15 @@ export function LensEditConfigurationFlyout({
       }
     };
     initializeChart();
-  }, [adHocDataViews, runQuery, esqlVariables, query, startDependencies, dataGridAttrs]);
+  }, [
+    adHocDataViews,
+    runQuery,
+    esqlVariables,
+    query,
+    startDependencies,
+    dataGridAttrs,
+    attributesNeedRefresh,
+  ]);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
