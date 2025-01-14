@@ -78,6 +78,7 @@ export function FieldControlForm({
           return {
             label: option,
             key: option,
+            'data-test-subj': option,
           };
         })
       : []
@@ -102,6 +103,7 @@ export function FieldControlForm({
             return {
               label: col.name,
               key: col.name,
+              'data-test-subj': col.name,
             };
           })
         );
@@ -153,6 +155,7 @@ export function FieldControlForm({
       const newOption = {
         label: searchValue,
         key: searchValue,
+        'data-test-subj': searchValue,
       };
 
       if (

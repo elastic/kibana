@@ -114,6 +114,7 @@ export function ValueControlForm({
           return {
             label: option,
             key: option,
+            'data-test-subj': option,
           };
         })
       : []
@@ -125,6 +126,7 @@ export function ValueControlForm({
           return {
             label: option,
             key: option,
+            'data-test-subj': option,
           };
         })
       : []
@@ -178,7 +180,7 @@ export function ValueControlForm({
       const normalizedSearchValue = searchValue.trim().toLowerCase();
 
       const newOption = {
-        value: searchValue,
+        'data-test-subj': searchValue,
         label: searchValue,
         key: searchValue,
       };
@@ -240,6 +242,7 @@ export function ValueControlForm({
                 return {
                   label: String(option),
                   key: String(option),
+                  'data-test-subj': String(option),
                 };
               });
             setSelectedValues(options);

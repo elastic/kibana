@@ -51,7 +51,7 @@ import {
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
+import { getSuggestions, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -87,7 +87,7 @@ export function LensEditConfigurationFlyout({
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
-  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const prevQuery = useRef<AggregateQuery | Query | undefined>(undefined);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
   const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
@@ -164,44 +164,18 @@ export function LensEditConfigurationFlyout({
         },
       });
       if (panel && updatedQuery) {
-        const abortController = new AbortController();
-        const newVariables = esqlVariablesService.getVariables();
-        const attrs = await getSuggestions(
-          { esql: updatedQuery },
-          startDependencies,
-          datasourceMap,
-          visualizationMap,
-          adHocDataViews,
-          undefined,
-          abortController,
-          undefined,
-          newVariables
-        );
-        if (attrs) {
-          panel.updateAttributes(attrs);
-        } else {
-          panel.updateAttributes({
-            ...attributes,
-            state: {
-              ...attributes.state,
-              query: { esql: updatedQuery },
-            },
-          });
-        }
+        panel.updateAttributes({
+          ...attributes,
+          state: {
+            ...attributes.state,
+            query: { esql: updatedQuery },
+          },
+        });
         // open the edit flyout to continue editing
         await panel.onEdit();
       }
     },
-    [
-      adHocDataViews,
-      attributes,
-      controlGroupApi,
-      datasourceMap,
-      panel,
-      panelId,
-      startDependencies,
-      visualizationMap,
-    ]
+    [attributes, controlGroupApi, panel, panelId]
   );
 
   const onCancelControl = useCallback(() => {
@@ -235,28 +209,6 @@ export function LensEditConfigurationFlyout({
     });
     return () => s?.unsubscribe();
   }, [dispatch, dataLoading$, layers]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const getESQLGridAttrs = async () => {
-      if (!dataGridAttrs && isOfAggregateQueryType(query)) {
-        const { dataView, columns, rows } = await getGridAttrs(
-          query,
-          adHocDataViews,
-          startDependencies,
-          abortController,
-          esqlVariables
-        );
-
-        setDataGridAttrs({
-          rows,
-          dataView,
-          columns,
-        });
-      }
-    };
-    getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, esqlVariables, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -451,6 +403,21 @@ export function LensEditConfigurationFlyout({
       esqlVariables,
     ]
   );
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const initializeChart = async () => {
+      if (!isEqual(prevQuery.current, query) && isOfAggregateQueryType(query) && !dataGridAttrs) {
+        try {
+          await runQuery(query, abortController);
+        } catch (e) {
+          setErrors([e]);
+          prevQuery.current = query;
+        }
+      }
+    };
+    initializeChart();
+  }, [adHocDataViews, runQuery, esqlVariables, query, startDependencies, dataGridAttrs]);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
