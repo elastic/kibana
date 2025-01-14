@@ -18,7 +18,6 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
-  nameAttribute: 'name',
   management: {
     displayName: 'data view',
     icon: 'indexPatternApp',
@@ -51,18 +50,6 @@ export const dataViewSavedObjectType: SavedObjectsType = {
           },
         },
       },
-    },
-  },
-  modelVersions: {
-    1: {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            nameAttribute: { type: 'keyword' },
-          },
-        },
-      ],
     },
   },
   migrations: indexPatternSavedObjectTypeMigrations,

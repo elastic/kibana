@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { title } from 'process';
-
 import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
@@ -123,7 +121,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     auditLogger,
     errors,
     securityExtension,
-    () => savedObjectsServiceMock.createTypeRegistryMock()
+    () => Promise.resolve(savedObjectsServiceMock.createTypeRegistryMock())
   );
   return {
     authorization,

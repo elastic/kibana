@@ -55,7 +55,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly auditLogger: AuditLogger,
     private readonly errors: SavedObjectsClient['errors'],
     private readonly securityExtension: ISavedObjectsSecurityExtension | undefined,
-    private readonly getTypeRegistry: () => ISavedObjectTypeRegistry
+    private readonly getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
   ) {
     this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
   }
@@ -283,10 +283,12 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     if (this.auditLogger.enabled && securityExtension !== undefined) {
       const finder = this.spacesClient.createSavedObjectFinder(id);
       try {
+        const registry = await this.getTypeRegistry();
+
         for await (const response of finder.find()) {
           const auditObjects = response.saved_objects.map((obj) => ({
             ...obj,
-            name: SavedObjectsUtils.getName(obj, this.getTypeRegistry().getNameAttribute(obj.type)),
+            name: SavedObjectsUtils.getName(obj, registry.getNameAttribute(obj.type)),
           }));
           this.securityExtension?.auditObjectsForSpaceDeletion(id, auditObjects);
         }

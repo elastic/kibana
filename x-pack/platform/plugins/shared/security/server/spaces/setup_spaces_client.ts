@@ -21,7 +21,7 @@ interface Deps {
   authz: AuthorizationServiceSetup;
   spaces?: SpacesPluginSetup;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  getTypeRegistry: () => ISavedObjectTypeRegistry;
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
 }
 
 export const setupSpacesClient = ({

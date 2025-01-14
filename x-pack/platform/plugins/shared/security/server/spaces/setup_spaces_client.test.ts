@@ -15,7 +15,7 @@ import { authorizationMock } from '../authorization/index.mock';
 const getCurrentUser = jest.fn();
 
 describe('setupSpacesClient', () => {
-  const getTypeRegistry = () => savedObjectsServiceMock.createTypeRegistryMock();
+  const getTypeRegistry = () => Promise.resolve(savedObjectsServiceMock.createTypeRegistryMock());
 
   it('does not setup the spaces client when spaces is disabled', () => {
     const authz = authorizationMock.create();

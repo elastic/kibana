@@ -29,9 +29,7 @@ export class SavedObjectsManagement {
 
   public getTitle(savedObject: SavedObject) {
     const getTitle = this.registry.getType(savedObject.type)?.management?.getTitle;
-    return getTitle
-      ? getTitle(savedObject)
-      : this._getTitle(savedObject as SavedObject<Record<string, unknown>>);
+    return getTitle ? getTitle(savedObject) : undefined;
   }
 
   public getEditUrl(savedObject: SavedObject) {
@@ -52,18 +50,17 @@ export class SavedObjectsManagement {
     return this.registry.getType(savedObject.type)?.hidden ?? false;
   }
 
-  private _getTitle(savedObject: SavedObject<Record<string, unknown>>): string {
-    const fallbackTitle = savedObject.attributes?.name ?? savedObject.attributes?.title ?? '';
-    const nameAttribute = this.registry.getType(savedObject.type)?.nameAttribute;
+  // private _getTitle(savedObject: SavedObject<{ name?: string; title?: string }>): string {
+  //   const fallbackTitle = savedObject.attributes?.name ?? savedObject.attributes?.title ?? '';
+  //   const nameAttribute = this.registry.getType(savedObject.type)?.nameAttribute;
 
-    if (nameAttribute) {
-      // @ts-expect-error
-      return (
-        savedObject?.attributes[nameAttribute as keyof (typeof savedObject)['attributes']] ??
-        fallbackTitle
-      );
-    }
-    // @ts-expect-error
-    return fallbackTitle;
-  }
+  //   if (nameAttribute) {
+  //     return (
+  //       savedObject?.attributes[nameAttribute as keyof (typeof savedObject)['attributes']] ??
+  //       fallbackTitle
+  //     );
+  //   }
+
+  //   return fallbackTitle;
+  // }
 }

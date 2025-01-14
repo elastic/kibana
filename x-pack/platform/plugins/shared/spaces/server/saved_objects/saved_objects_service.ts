@@ -26,7 +26,6 @@ export class SpacesSavedObjectsService {
       name: 'space',
       hidden: true,
       namespaceType: 'agnostic',
-      nameAttribute: 'name',
       mappings: SpacesSavedObjectMappings,
       schemas: SpacesSavedObjectSchemas,
       migrations: {
@@ -61,16 +60,6 @@ export class SpacesSavedObjectsService {
               type: 'mappings_addition',
               addedMappings: {
                 disabledFeatures: { type: 'keyword' },
-              },
-            },
-          ],
-        },
-        3: {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                nameAttribute: { type: 'keyword' },
               },
             },
           ],
