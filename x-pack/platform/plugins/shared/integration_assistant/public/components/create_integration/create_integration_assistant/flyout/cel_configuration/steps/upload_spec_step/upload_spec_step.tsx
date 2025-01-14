@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
   EuiTimeline,
   EuiTimelineItem,
 } from '@elastic/eui';
@@ -28,6 +27,7 @@ import { getApiPathsWithDescriptions } from './util';
 import { getLangSmithOptions } from '../../../../../../../common/lib/lang_smith';
 import { type AnalyzeApiRequestBody } from '../../../../../../../../common';
 import { runAnalyzeApiGraph } from '../../../../../../../common/lib/api';
+import { GenerationError } from '../../generation_error';
 
 interface UploadSpecStepProps {
   integrationSettings: State['integrationSettings'];
@@ -80,8 +80,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
       onUpdateValidation(!fieldValidationErrors.title && !fieldValidationErrors.specFile);
     }, [fieldValidationErrors, onUpdateValidation]);
 
-    const onModifySpecFile = useCallback((hasFile: boolean) => {
-      setFieldValidationErrors((current) => ({ ...current, specFile: !hasFile }));
+    const onModifySpecFile = useCallback((hasValidFile: boolean) => {
+      setFieldValidationErrors((current) => ({ ...current, specFile: !hasValidFile }));
       setSuccessfulGeneration(false);
     }, []);
 
@@ -99,6 +99,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
       ) {
         return;
       }
+
+      setError(null);
 
       const abortController = new AbortController();
       const deps = { http, abortSignal: abortController.signal };
@@ -184,6 +186,12 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                   />
                   {successfulGeneration ? (
                     <EuiCallOut title={i18n.SUCCESS} color="success" iconType="check" />
+                  ) : error ? (
+                    <GenerationError
+                      title={i18n.GENERATION_ERROR}
+                      error={error}
+                      retryAction={onAnalyze}
+                    />
                   ) : (
                     <EuiFlexGroup justifyContent="flexStart">
                       <EuiButton
@@ -213,19 +221,6 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                     </EuiFlexGroup>
                   )}
                 </EuiFlexGroup>
-                {error && (
-                  <EuiFlexItem>
-                    <EuiSpacer size="s" />
-                    <EuiCallOut
-                      title={i18n.GENERATION_ERROR}
-                      color="danger"
-                      iconType="alert"
-                      data-test-subj="apiAnalyzeErrorCallout"
-                    >
-                      {error}
-                    </EuiCallOut>
-                  </EuiFlexItem>
-                )}
               </EuiFlexItem>
             </EuiTimelineItem>
           </EuiTimeline>

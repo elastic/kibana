@@ -59,6 +59,12 @@ export const API_DEFINITION_ERROR = {
       defaultMessage: 'This spec file is too large to parse',
     }
   ),
+  NO_PATHS_IDENTIFIED: i18n.translate(
+    'xpack.integrationAssistant.celFlyout.step.uploadSpec.openapiSpec.noPathsIdentified',
+    {
+      defaultMessage: 'No paths found in OpenAPI spec file',
+    }
+  ),
 };
 export const GENERATION_ERROR = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.uploadSpec.generationError',

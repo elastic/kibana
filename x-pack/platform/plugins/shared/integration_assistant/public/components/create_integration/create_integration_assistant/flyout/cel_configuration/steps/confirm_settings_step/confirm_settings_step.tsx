@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -30,6 +29,7 @@ import { useKibana } from '../../../../../../../common/hooks/use_kibana';
 import { type CelInputRequestBody } from '../../../../../../../../common';
 import { getLangSmithOptions } from '../../../../../../../common/lib/lang_smith';
 import { runCelGraph } from '../../../../../../../common/lib/api';
+import { GenerationError } from '../../generation_error';
 
 export const translateDisplayAuthToType = (auth: string): string => {
   return auth === 'API Token' ? 'Header' : auth;
@@ -181,6 +181,8 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
         return;
       }
 
+      setError(null);
+
       const generationStartedAt = Date.now();
       const abortController = new AbortController();
       const deps = { http, abortSignal: abortController.signal };
@@ -319,43 +321,38 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           <EuiSpacer size="m" />
           {successfulGeneration && isSelectedPathGenerated ? (
             <EuiCallOut title="Success" color="success" iconType="check" />
-          ) : (
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiButton
-                fill
-                fullWidth={false}
-                isDisabled={isFlyoutGenerating}
-                isLoading={isFlyoutGenerating}
-                iconSide="right"
-                color="primary"
-                onClick={onGenerate}
-                data-test-subj="generateCelInputButton"
-              >
-                {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
-              </EuiButton>
-              {isFlyoutGenerating && (
-                <EuiButtonEmpty
-                  onClick={onCancel}
-                  flush="left"
-                  data-test-subj="buttonsFooter-cancelButton"
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexGroup>
-          )}
-          {error && (
-            <EuiFlexItem>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                title={i18n.GENERATION_ERROR}
-                color="danger"
-                iconType="alert"
-                data-test-subj="celGenerationErrorCallout"
-              >
-                {error}
-              </EuiCallOut>
-            </EuiFlexItem>
+            ) : (
+              error ? (
+                <GenerationError
+                  title={i18n.GENERATION_ERROR}
+                  error={error}
+                  retryAction={onGenerate}
+                />
+               ) : (
+                <EuiFlexGroup justifyContent="flexStart">
+                  <EuiButton
+                    fill
+                    fullWidth={false}
+                    isDisabled={isFlyoutGenerating}
+                    isLoading={isFlyoutGenerating}
+                    iconSide="right"
+                    color="primary"
+                    onClick={onGenerate}
+                    data-test-subj="generateCelInputButton"
+                  >
+                    {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
+                  </EuiButton>
+                  {isFlyoutGenerating && (
+                    <EuiButtonEmpty
+                      onClick={onCancel}
+                      flush="left"
+                      data-test-subj="buttonsFooter-cancelButton"
+                    >
+                      {i18n.CANCEL}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiFlexGroup>
+              )
           )}
         </EuiPanel>
       </EuiFlexGroup>

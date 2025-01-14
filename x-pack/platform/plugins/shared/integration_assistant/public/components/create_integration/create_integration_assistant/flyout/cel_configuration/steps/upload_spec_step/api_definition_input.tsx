@@ -51,7 +51,7 @@ interface ApiDefinitionInputProps {
   integrationSettings: IntegrationSettings | undefined;
   showValidation: boolean;
   isGenerating: boolean;
-  onModifySpecFile: (hasFile: boolean) => void;
+  onModifySpecFile: (hasValidFile: boolean) => void;
 }
 
 export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
@@ -93,6 +93,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           if (fileContent == null) {
             setApiFileError(i18n.API_DEFINITION_ERROR.CAN_NOT_READ);
+            onModifySpecFile(false);
             return;
           }
 
@@ -100,6 +101,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
             // V8-based browsers can't handle large files and return an empty string
             // instead of an error; see https://stackoverflow.com/a/61316641
             setApiFileError(i18n.API_DEFINITION_ERROR.TOO_LARGE_TO_PARSE);
+            onModifySpecFile(false);
             return;
           }
 
@@ -107,10 +109,16 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           if ('error' in prepareResult) {
             setApiFileError(prepareResult.error);
+            onModifySpecFile(false);
             return;
           }
 
           const { oas } = prepareResult;
+
+          if (!oas || Object.keys(oas.getPaths()).length === 0) {
+            setApiFileError(i18n.API_DEFINITION_ERROR.NO_PATHS_IDENTIFIED);
+            onModifySpecFile(false);
+          }
 
           setIntegrationSettings({
             ...integrationSettings,

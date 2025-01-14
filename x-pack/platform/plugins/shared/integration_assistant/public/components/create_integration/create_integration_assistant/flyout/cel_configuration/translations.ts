@@ -41,3 +41,10 @@ export const SAVE_CONFIG = i18n.translate(
 export const CANCEL = i18n.translate('xpack.integrationAssistant.celFlyout.footer.cancel', {
   defaultMessage: 'Cancel',
 });
+
+/**
+ * generation error
+ */
+export const RETRY = i18n.translate('xpack.integrationAssistant.celFlyout.retry', {
+  defaultMessage: 'Retry',
+});
