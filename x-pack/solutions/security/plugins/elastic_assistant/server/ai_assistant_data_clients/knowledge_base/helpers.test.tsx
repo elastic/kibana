@@ -230,7 +230,6 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'hi',
     });
 
     const nameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -245,7 +244,6 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'hi',
     });
 
     expect(tool.lc_kwargs.name).toMatch('testing');
