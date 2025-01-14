@@ -52,7 +52,7 @@ import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import { FleetUsage } from '../collectors/register';
+import type { FleetUsage } from '../collectors/register';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
