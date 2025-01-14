@@ -1624,22 +1624,6 @@
           }
         }
       },
-      "data_output_id": {
-        "type": "keyword"
-      },
-      "description": {
-        "type": "text"
-      },
-      "download_source_id": {
-        "type": "keyword"
-      },
-      "fleet_server_host_id": {
-        "type": "keyword"
-      },
-      "global_data_tags": {
-        "index": false,
-        "type": "flattened"
-      },
       "agentless": {
         "dynamic": false,
         "properties": {
@@ -1658,6 +1642,22 @@
             }
           }
         }
+      },
+      "data_output_id": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "download_source_id": {
+        "type": "keyword"
+      },
+      "fleet_server_host_id": {
+        "type": "keyword"
+      },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2013,22 +2013,6 @@
           }
         }
       },
-      "data_output_id": {
-        "type": "keyword"
-      },
-      "description": {
-        "type": "text"
-      },
-      "download_source_id": {
-        "type": "keyword"
-      },
-      "fleet_server_host_id": {
-        "type": "keyword"
-      },
-      "global_data_tags": {
-        "index": false,
-        "type": "flattened"
-      },
       "agentless": {
         "dynamic": false,
         "properties": {
@@ -2047,6 +2031,22 @@
             }
           }
         }
+      },
+      "data_output_id": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "download_source_id": {
+        "type": "keyword"
+      },
+      "fleet_server_host_id": {
+        "type": "keyword"
+      },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
