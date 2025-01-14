@@ -111,7 +111,7 @@ export function ServiceMap({
   const { onPageReady } = usePerformanceContext();
 
   const {
-    data = { elements: [] },
+    data = { elements: [], nodesCount: 0, tracesCount: 0 },
     status,
     error,
   } = useFetcher(
@@ -188,6 +188,12 @@ export function ServiceMap({
 
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
+      customMetrics: {
+        key1: 'num_of_nodes',
+        value1: data.nodesCount,
+        key2: 'num_of_traces',
+        value2: data.tracesCount,
+      },
       meta: { rangeFrom: start, rangeTo: end },
     });
   }

@@ -25,11 +25,11 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     messages,
     toolChoice,
     tools,
+    temperature = 0,
     functionCalling,
     logger,
     abortSignal,
   }) => {
-    const stream = true;
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
@@ -41,12 +41,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         tools,
       });
       request = {
-        stream,
+        stream: true,
+        temperature,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
-        stream,
+        stream: true,
+        temperature,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
@@ -59,7 +61,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         subActionParams: {
           body: JSON.stringify(request),
           signal: abortSignal,
-          stream,
+          stream: true,
         },
       })
     ).pipe(

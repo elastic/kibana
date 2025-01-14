@@ -17,9 +17,9 @@ import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeProvider } from 'styled-components';
-import { euiDarkVars } from '@kbn/ui-theme';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiThemeProvider } from '@elastic/eui';
+
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -73,7 +73,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
@@ -88,6 +88,9 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               http={mockHttp}
               baseConversations={{}}
               navigateToApp={mockNavigateToApp}
+              productDocBase={{
+                installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+              }}
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
               chrome={chrome}
@@ -95,7 +98,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               {children}
             </AssistantProvider>
           </QueryClientProvider>
-        </ThemeProvider>
+        </EuiThemeProvider>
       </I18nProvider>
     </KibanaRenderContextProvider>
   );

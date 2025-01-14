@@ -25,19 +25,19 @@ describe('RepositoryEsClient', () => {
 
   it('delegates call to ES client method', async () => {
     expect(repositoryClient.bulk).toStrictEqual(expect.any(Function));
-    await repositoryClient.bulk({ body: [] });
+    await repositoryClient.bulk({ operations: [] });
     expect(client.bulk).toHaveBeenCalledTimes(1);
   });
 
   it('wraps a method call in retryCallCluster', async () => {
-    await repositoryClient.bulk({ body: [] });
+    await repositoryClient.bulk({ operations: [] });
     expect(retryCallClusterMock).toHaveBeenCalledTimes(1);
   });
 
   it('keeps call options unchanged', async () => {
     expect(repositoryClient.bulk).toStrictEqual(expect.any(Function));
     const options = { maxRetries: 12 };
-    await repositoryClient.bulk({ body: [] }, options);
+    await repositoryClient.bulk({ operations: [] }, options);
     expect(client.bulk).toHaveBeenCalledWith(expect.any(Object), options);
   });
 
@@ -45,7 +45,7 @@ describe('RepositoryEsClient', () => {
     expect.assertions(1);
     client.bulk.mockRejectedValue(new Error('reason'));
     try {
-      await repositoryClient.bulk({ body: [] });
+      await repositoryClient.bulk({ operations: [] });
     } catch (e) {
       expect(SavedObjectsErrorHelpers.isSavedObjectsClientError(e)).toBe(true);
     }

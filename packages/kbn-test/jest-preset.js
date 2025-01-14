@@ -78,7 +78,7 @@ module.exports = {
 
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
-    '<rootDir>/packages/react/kibana_mount/test_helpers/react_mount_serializer.ts',
+    '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
     '<rootDir>/packages/kbn-test/src/jest/setup/emotion.js',
   ],
@@ -98,7 +98,7 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/packages/kbn-test/src/jest/transforms/babel.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/packages/kbn-test/src/jest/transforms/babel/index.js',
     '^.+\\.(txt|html)?$': '<rootDir>/packages/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/packages/kbn-test/src/jest/transforms/peggy.js',
   },
