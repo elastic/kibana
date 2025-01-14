@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
@@ -63,7 +63,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
-    color: ${(props) => props.theme.euiTheme.colors.textParagraph} !important;
+    color: ${({ theme }) => theme.euiTheme.colors.textParagraph} !important;
   }
 `;
 
