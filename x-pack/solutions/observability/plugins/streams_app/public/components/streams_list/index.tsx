@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { StreamDefinition, isDescendandOf, isWiredStream } from '@kbn/streams-schema';
+import { StreamDefinition, isDescendantOf, isWiredStream } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -45,7 +45,7 @@ function asTrees(definitions: StreamDefinition[]) {
     // traverse the tree following the prefix of the current id.
     // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
     while (
-      (existingNode = currentTree.find((node) => isDescendandOf(node.name, definition.name)))
+      (existingNode = currentTree.find((node) => isDescendantOf(node.name, definition.name)))
     ) {
       currentTree = existingNode.children;
     }

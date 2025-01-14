@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function isDescendandOf(parent: string, child: string) {
+export function isDescendantOf(parent: string, child: string) {
   const parentSegments = parent.split('.');
   const childSegments = child.split('.');
   return (
@@ -15,7 +15,7 @@ export function isDescendandOf(parent: string, child: string) {
 }
 
 export function isChildOf(parent: string, child: string) {
-  return isDescendandOf(parent, child) && child.split('.').length === parent.split('.').length + 1;
+  return isDescendantOf(parent, child) && child.split('.').length === parent.split('.').length + 1;
 }
 
 export function getParentId(id: string) {
