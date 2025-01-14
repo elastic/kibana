@@ -14,6 +14,7 @@ module.exports = {
   stories: [
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
+    '../../../../shared/kbn-shared-svg/**/*.stories.+(tsx|mdx)',
   ],
   reactOptions: {
     strictMode: true,
