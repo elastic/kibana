@@ -31,6 +31,7 @@ import {
   StorageClientGet,
   StorageClientExistsIndex,
   StorageDocumentOf,
+  StorageClientSearchResponse,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -63,6 +64,10 @@ function catchConflictError(error: Error) {
     return;
   }
   throw error;
+}
+
+function isNotFoundError(error: Error): error is errors.ResponseError & { statusCode: 404 } {
+  return isResponseError(error) && error.statusCode === 404;
 }
 
 /*
@@ -98,7 +103,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
   }
 
   private getSearchIndexPattern(): string {
-    return `${getAliasName(this.storage.name)}*`;
+    return `${getAliasName(this.storage.name)}`;
   }
 
   private getWriteTarget(): string {
@@ -147,7 +152,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     )
       .then((templates) => templates.index_templates[0]?.index_template)
       .catch((error) => {
-        if (isResponseError(error) && error.statusCode === 404) {
+        if (isNotFoundError(error)) {
           return undefined;
         }
         throw error;
@@ -311,11 +316,33 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
 
   private search: StorageClientSearch<TStorageSettings> = async (request) => {
     return (await wrapEsCall(
-      this.esClient.search({
-        ...request,
-        index: this.getSearchIndexPattern(),
-        allow_no_indices: true,
-      })
+      this.esClient
+        .search({
+          ...request,
+          index: this.getSearchIndexPattern(),
+          allow_no_indices: true,
+        })
+        .catch((error): StorageClientSearchResponse<StorageDocumentOf<TStorageSettings>, any> => {
+          if (isNotFoundError(error)) {
+            return {
+              _shards: {
+                failed: 0,
+                successful: 0,
+                total: 0,
+              },
+              hits: {
+                hits: [],
+                total: {
+                  relation: 'eq',
+                  value: 0,
+                },
+              },
+              timed_out: false,
+              took: 0,
+            };
+          }
+          throw error;
+        })
     )) as unknown as ReturnType<StorageClientSearch<TStorageSettings>>;
   };
 
