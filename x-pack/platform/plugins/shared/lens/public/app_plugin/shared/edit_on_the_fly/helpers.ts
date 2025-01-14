@@ -89,7 +89,7 @@ export const getSuggestions = async (
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
-  setErrors: (errors: Error[]) => void,
+  setErrors?: (errors: Error[]) => void,
   abortController?: AbortController,
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = []
@@ -135,7 +135,7 @@ export const getSuggestions = async (
     }) as TypedLensSerializedState['attributes'];
     return attrs;
   } catch (e) {
-    setErrors([e]);
+    setErrors?.([e]);
   }
   return undefined;
 };

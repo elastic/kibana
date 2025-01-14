@@ -128,11 +128,16 @@ export function LensEditConfigurationFlyout({
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
-  esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
-    if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
-      setEsqlVariables(nextVariables);
-    }
-  });
+  useEffect(() => {
+    const s = esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
+      if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
+        setEsqlVariables(nextVariables);
+      }
+    });
+    return () => {
+      return s?.unsubscribe();
+    };
+  }, [esqlVariables]);
 
   const panel = useMemo(() => {
     if (!panelId) {
@@ -167,9 +172,9 @@ export function LensEditConfigurationFlyout({
           datasourceMap,
           visualizationMap,
           adHocDataViews,
-          setErrors,
+          undefined,
           abortController,
-          setDataGridAttrs,
+          undefined,
           newVariables
         );
         if (attrs) {
