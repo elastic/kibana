@@ -221,4 +221,31 @@ describe('getStructuredToolForIndexEntry', () => {
     );
     expect(result).toContain(`I'm sorry, but I was unable to find any information`);
   });
+
+  it('should match the name regex correctly', () => {
+    const tool = getStructuredToolForIndexEntry({
+      indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        name: `1bad-name?`,
+      }) as IndexEntry,
+      esClient: mockEsClient,
+      logger: mockLogger,
+    });
+
+    const nameRegex = /^[a-zA-Z0-9_-]+$/;
+    expect(tool.lc_kwargs.name).toMatch(nameRegex);
+  });
+
+  it('dashes get removed before `a` is prepended', () => {
+    const tool = getStructuredToolForIndexEntry({
+      indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        name: `-testing`,
+      }) as IndexEntry,
+      esClient: mockEsClient,
+      logger: mockLogger,
+    });
+
+    expect(tool.lc_kwargs.name).toMatch('testing');
+  });
 });
