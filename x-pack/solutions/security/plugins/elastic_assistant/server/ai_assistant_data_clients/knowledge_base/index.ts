@@ -652,7 +652,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      const elserId = ASSISTANT_ELSER_INFERENCE_ID;
       const userFilter = getKBUserFilter(user);
       const results = await this.findDocuments<EsIndexEntry>({
         // Note: This is a magic number to set some upward bound as to not blow the context with too
@@ -682,7 +681,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
                 indexEntry,
                 esClient,
                 logger: this.options.logger,
-                elserId,
               });
             })
         );

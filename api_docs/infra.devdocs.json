@@ -239,13 +239,7 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
