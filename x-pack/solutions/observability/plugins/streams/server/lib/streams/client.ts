@@ -543,20 +543,15 @@ export class StreamsClient {
     const response =
       await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream();
 
-    return (
-      response.data_streams
-        // if the template ends with @stream, it means we manage it
-        .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
-        .map((dataStream) => ({
-          name: dataStream.name,
-          stream: {
-            ingest: {
-              processing: [],
-              routing: [],
-            },
-          },
-        }))
-    );
+    return response.data_streams.map((dataStream) => ({
+      name: dataStream.name,
+      stream: {
+        ingest: {
+          processing: [],
+          routing: [],
+        },
+      },
+    }));
   }
 
   /**
