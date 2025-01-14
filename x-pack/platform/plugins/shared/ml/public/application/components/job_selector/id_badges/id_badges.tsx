@@ -10,6 +10,8 @@ import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobSelectorBadge } from '../job_selector_badge';
 import type { GroupObj } from '../job_selector';
+import { AnomalyDetectionInfoButton } from '../job_selector_badge/job_selector_button';
+import type { MlPages } from '../../../../../common/constants/locator';
 
 export interface IdBadgesProps {
   limit: number;
@@ -17,6 +19,7 @@ export interface IdBadgesProps {
   selectedJobIds: string[];
   onLinkClick: () => void;
   showAllBarBadges: boolean;
+  page: MlPages;
 }
 
 export function IdBadges({
@@ -25,6 +28,7 @@ export function IdBadges({
   onLinkClick,
   selectedJobIds,
   showAllBarBadges,
+  page,
 }: IdBadgesProps) {
   const badges = [];
 
@@ -49,7 +53,7 @@ export function IdBadges({
     }
     badges.push(
       <EuiFlexItem grow={false} key={currentId}>
-        <JobSelectorBadge id={currentId} />
+        <AnomalyDetectionInfoButton jobId={currentId} page={page} />
       </EuiFlexItem>
     );
   }
