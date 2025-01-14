@@ -26,7 +26,9 @@ interface InferenceChunk {
 
 interface InferenceData {
   inference_id: string;
-  chunks: InferenceChunk[];
+  chunks: {
+    semantic_text: InferenceChunk[];
+  };
 }
 
 interface LegacySemanticTextField {
@@ -138,7 +140,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               return {
                 text: text ?? '',
                 inferenceId: inference?.inference_id,
-                chunkCount: inference?.chunks?.length ?? 0,
+                chunkCount: inference?.chunks?.semantic_text?.length ?? 0,
               };
             })
           ).to.eql([
