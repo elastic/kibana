@@ -70,7 +70,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     onCancel,
     onSubmit,
     onChangeMetaData,
-    initialMetadata = {},
+    initialMetadata,
     initialValues = {},
     isServerless,
   } = props;
