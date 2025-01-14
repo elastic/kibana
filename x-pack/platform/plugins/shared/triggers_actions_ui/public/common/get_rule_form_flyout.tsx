@@ -10,7 +10,7 @@ import { RuleForm, RuleFormProps } from '@kbn/response-ops-rule-form';
 import type { RuleTypeMetaData } from '../types';
 
 export const getRuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-  props: RuleFormProps<MetaData> & { onClose: () => void }
+  props: RuleFormProps<MetaData>
 ) => {
   return <RuleForm {...props} isFlyout />;
 };

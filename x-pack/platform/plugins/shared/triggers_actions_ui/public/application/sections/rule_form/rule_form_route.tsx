@@ -28,6 +28,7 @@ export const RuleFormRoute = () => {
     ruleTypeRegistry,
     actionTypeRegistry,
     chrome,
+    isServerless,
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
@@ -61,7 +62,7 @@ export const RuleFormRoute = () => {
   return (
     <IntlProvider locale="en">
       <RuleForm
-        plugins={{
+        services={{
           http,
           application,
           notifications,
@@ -73,6 +74,7 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          isServerless,
           ...startServices,
         }}
         id={id}

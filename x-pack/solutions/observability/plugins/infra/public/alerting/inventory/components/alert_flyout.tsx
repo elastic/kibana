@@ -33,7 +33,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
     () =>
       triggersActionsUI &&
       triggersActionsUI.getRuleFormFlyout({
-        plugins: services,
+        services,
         consumer: 'infrastructure',
         onCancel: onCloseFlyout,
         onSubmit: onCloseFlyout,
@@ -46,7 +46,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
           customMetrics,
           region,
         },
-        useRuleProducer: true,
+        shouldUseRuleProducer: true,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, visible]

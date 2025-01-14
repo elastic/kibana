@@ -38,7 +38,7 @@ export const CreateAlert = ({
       <EuiFlexItem>
         {ruleFlyoutVisible ? (
           <AddRuleFlyout
-            plugins={services}
+            services={services}
             consumer={ALERTING_EXAMPLE_APP_ID}
             onCancel={onCloseAlertFlyout}
             onSubmit={onCloseAlertFlyout}

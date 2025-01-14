@@ -345,7 +345,7 @@ export function HeaderActions({
       </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
         <EditRuleFlyout
-          plugins={services}
+          services={services}
           id={rule.id}
           onCancel={() => {
             setRuleConditionsFlyoutOpen(false);

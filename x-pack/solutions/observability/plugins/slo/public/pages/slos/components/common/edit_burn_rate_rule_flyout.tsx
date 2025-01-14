@@ -37,7 +37,7 @@ export function EditBurnRateRuleFlyout({
 
   return isEditRuleFlyoutOpen && rule ? (
     <EditRuleFlyout
-      plugins={plugins}
+      services={plugins}
       id={rule.id}
       onSubmit={handleSavedRule}
       onCancel={handleCloseRuleFlyout}

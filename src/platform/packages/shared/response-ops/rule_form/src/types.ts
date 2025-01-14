@@ -53,7 +53,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   flapping?: Rule<Params>['flapping'];
 }
 
-export interface RuleFormPlugins {
+export interface RuleFormServices {
   http: HttpStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
@@ -68,7 +68,10 @@ export interface RuleFormPlugins {
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  isServerless?: boolean;
 }
+
+export type RuleFormPlugins = Omit<RuleFormServices, 'isServerless'>;
 
 export interface RuleFormState<
   Params extends RuleTypeParams = RuleTypeParams,

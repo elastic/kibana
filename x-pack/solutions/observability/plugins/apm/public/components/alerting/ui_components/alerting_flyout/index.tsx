@@ -51,7 +51,7 @@ export function AlertingFlyout(props: Props) {
     () =>
       ruleType &&
       services.triggersActionsUi.getRuleFormFlyout<AlertMetadata>({
-        plugins: services,
+        services,
         consumer: APM_SERVER_FEATURE_ID,
         onCancel: onCloseAddFlyout,
         onSubmit: onCloseAddFlyout,

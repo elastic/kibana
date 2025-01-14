@@ -44,7 +44,7 @@ function getQuery(query?: Query | AggregateQuery): Query {
 
 export const AlertsPopover = () => {
   const {
-    services: { triggersActionsUi, slo, application, http, ...plugins },
+    services: { triggersActionsUi, slo, application, http, ...services },
   } = useKibanaContextForPlugin();
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
@@ -68,7 +68,7 @@ export const AlertsPopover = () => {
       ).toDataviewSpec();
 
       return triggersActionsUi.getRuleFormFlyout<ThresholdRuleTypeParams>({
-        plugins: { application, http, ...plugins },
+        services: { application, http, ...services },
         consumer: 'logs',
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         initialValues: {
@@ -94,7 +94,7 @@ export const AlertsPopover = () => {
     pageState,
     application,
     http,
-    plugins,
+    services,
     closeAddRuleFlyout,
   ]);
 

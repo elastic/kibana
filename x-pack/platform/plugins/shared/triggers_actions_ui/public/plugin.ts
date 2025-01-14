@@ -121,8 +121,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
   getRuleFormFlyout: <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-    props: Omit<RuleFormProps<MetaData>, 'plugins'> & {
-      plugins: Omit<Partial<RuleFormProps['plugins']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
+    props: Omit<RuleFormProps<MetaData>, 'services'> & {
+      services: Omit<Partial<RuleFormProps['services']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
     }
   ) => ReactElement<RuleFormProps<MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
@@ -486,7 +486,7 @@ export class Plugin
       getRuleFormFlyout: (props) => {
         return getRuleFormFlyoutLazy({
           ...props,
-          plugins: {
+          services: {
             ...validateRuleFormPlugins(props.plugins),
             actionTypeRegistry: this.actionTypeRegistry,
             ruleTypeRegistry: this.ruleTypeRegistry,

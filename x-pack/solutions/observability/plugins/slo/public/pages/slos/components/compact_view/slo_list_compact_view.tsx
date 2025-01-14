@@ -533,7 +533,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       />
       {sloToAddRule ? (
         <AddRuleFlyout
-          plugins={services}
+          services={services}
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}

@@ -51,6 +51,7 @@ export interface CreateRuleFormProps {
   onChangeMetaData?: (metadata: RuleFormState['metadata']) => void;
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleFormState['metadata'];
+  isServerless?: boolean;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -71,6 +72,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     onChangeMetaData,
     initialMetadata = {},
     initialValues = {},
+    isServerless,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;
@@ -210,6 +212,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             validConsumers,
             ruleType,
             ruleTypes,
+            isServerless,
           }),
         }}
       >

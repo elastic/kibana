@@ -68,7 +68,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
 
-  const { triggersActionsUi, ...plugins } = useKibana<ClientPluginsStart>().services;
+  const { triggersActionsUi, ...services } = useKibana<ClientPluginsStart>().services;
 
   const onClose = useMemo(() => () => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
 
@@ -79,7 +79,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       return null;
     }
     return triggersActionsUi.getRuleFormFlyout({
-      plugins,
+      services,
       onCancel: onClose,
       onSubmit: onClose,
       id: initialRule.id,
@@ -90,7 +90,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     defaultRules?.statusRule,
     isNewRule,
     triggersActionsUi,
-    plugins,
+    services,
     onClose,
   ]);
 
@@ -99,7 +99,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       return null;
     }
     return triggersActionsUi.getRuleFormFlyout({
-      plugins,
+      services,
       consumer: 'uptime',
       ruleTypeId: alertFlyoutVisible,
       onCancel: onClose,
@@ -115,7 +115,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
               }),
       },
     });
-  }, [isNewRule, alertFlyoutVisible, triggersActionsUi, plugins, onClose]);
+  }, [isNewRule, alertFlyoutVisible, triggersActionsUi, services, onClose]);
 
   return useMemo(
     () => ({ loading, EditAlertFlyout, NewRuleFlyout }),

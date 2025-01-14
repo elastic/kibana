@@ -24,7 +24,7 @@ export const AlertFlyout = (props: Props) => {
     () =>
       triggersActionsUI &&
       triggersActionsUI.getRuleFormFlyout({
-        plugins: services,
+        services,
         consumer: 'logs',
         onSubmit: onCloseFlyout,
         onCancel: onCloseFlyout,

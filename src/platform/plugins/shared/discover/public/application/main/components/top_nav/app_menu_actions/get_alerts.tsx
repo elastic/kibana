@@ -80,7 +80,7 @@ const CreateAlertFlyout: React.FC<{
   );
 
   return triggersActionsUi?.getRuleFormFlyout({
-    plugins: services,
+    services,
     initialMetadata: discoverMetadata,
     consumer: 'alerts',
     onCancel: onFinishAction,
