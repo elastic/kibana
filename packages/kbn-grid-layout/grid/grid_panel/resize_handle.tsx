@@ -45,6 +45,7 @@ export const ResizeHandle = ({
         position: absolute;
         width: ${euiTheme.size.l};
         max-width: 100%;
+        max-height: 100%;
         height: ${euiTheme.size.l};
         z-index: ${euiTheme.levels.toast};
         transition: opacity 0.2s, border 0.2s;
@@ -52,7 +53,8 @@ export const ResizeHandle = ({
         &:focus {
           cursor: se-resize;
         }
-        .kbnGrid--static & {
+        .kbnGrid--static &,
+        .kbnGridPanel--expanded & {
           opacity: 0 !important;
           display: none;
         }

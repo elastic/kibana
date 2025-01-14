@@ -13,6 +13,7 @@ import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+
 import {
   ActivePanel,
   GridAccessMode,
@@ -49,7 +50,7 @@ export const useGridLayoutState = ({
     []
   );
   useEffect(() => {
-    expandedPanelId$.next(expandedPanelId);
+    if (expandedPanelId !== expandedPanelId$.getValue()) expandedPanelId$.next(expandedPanelId);
   }, [expandedPanelId, expandedPanelId$]);
 
   const accessMode$ = useMemo(
@@ -58,7 +59,7 @@ export const useGridLayoutState = ({
     []
   );
   useEffect(() => {
-    accessMode$.next(accessMode);
+    if (accessMode !== accessMode$.getValue()) accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
 
   const runtimeSettings$ = useMemo(
@@ -89,7 +90,6 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
     );
@@ -120,7 +120,6 @@ export const useGridLayoutState = ({
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
         const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth -
@@ -132,9 +131,10 @@ export const useGridLayoutState = ({
             ...currentRuntimeSettings,
             columnPixelWidth,
           });
-        gridLayoutStateManager.isMobileView$.next(
-          shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
-        );
+        const isMobileView = shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m);
+        if (isMobileView !== gridLayoutStateManager.isMobileView$.getValue()) {
+          gridLayoutStateManager.isMobileView$.next(isMobileView);
+        }
       });
 
     const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$

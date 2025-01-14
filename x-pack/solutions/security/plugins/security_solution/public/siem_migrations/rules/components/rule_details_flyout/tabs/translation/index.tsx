@@ -42,15 +42,36 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
     const isInstalled = !!ruleMigration.elastic_rule?.id;
     const canEdit = !matchedPrebuiltRule && !isInstalled;
 
-    const ruleName = matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title;
-    const originalQuery = ruleMigration.original_rule.query;
-    const elasticQuery = useMemo(() => {
-      let query = ruleMigration.elastic_rule?.query;
+    const originalRuleQueryComponent = useMemo(() => {
+      return (
+        <MigrationRuleQuery
+          title={i18n.SPLUNK_QUERY_TITLE}
+          ruleName={ruleMigration.original_rule.title}
+          query={ruleMigration.original_rule.query}
+          queryLanguage={ruleMigration.original_rule.query_language}
+          canEdit={false}
+        />
+      );
+    }, [ruleMigration]);
+
+    const translatedRuleQueryComponent = useMemo(() => {
+      let translatedQuery = ruleMigration.elastic_rule?.query ?? '';
+      let translatedQueryLanguage = ruleMigration.elastic_rule?.query_language ?? '';
       if (matchedPrebuiltRule && matchedPrebuiltRule.type !== 'machine_learning') {
-        query = matchedPrebuiltRule.query;
+        translatedQuery = matchedPrebuiltRule.query ?? '';
+        translatedQueryLanguage = matchedPrebuiltRule.language;
       }
-      return query ?? '';
-    }, [matchedPrebuiltRule, ruleMigration.elastic_rule?.query]);
+      return (
+        <MigrationRuleQuery
+          title={i18n.ESQL_TRANSLATION_TITLE}
+          ruleName={matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title}
+          query={translatedQuery}
+          queryLanguage={translatedQueryLanguage}
+          canEdit={canEdit}
+          onTranslationUpdate={onTranslationUpdate}
+        />
+      );
+    }, [canEdit, matchedPrebuiltRule, onTranslationUpdate, ruleMigration]);
 
     return (
       <>
@@ -96,14 +117,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner grow>
                 <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-                  <EuiFlexItem grow={1}>
-                    <MigrationRuleQuery
-                      title={i18n.SPLUNK_QUERY_TITLE}
-                      ruleName={ruleMigration.original_rule.title}
-                      query={originalQuery}
-                      canEdit={false}
-                    />
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>{originalRuleQueryComponent}</EuiFlexItem>
                   <EuiFlexItem
                     grow={0}
                     css={css`
@@ -111,15 +125,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                       border-right: ${euiTheme.border.thin};
                     `}
                   />
-                  <EuiFlexItem grow={1}>
-                    <MigrationRuleQuery
-                      title={i18n.ESQL_TRANSLATION_TITLE}
-                      ruleName={ruleName}
-                      query={elasticQuery}
-                      canEdit={canEdit}
-                      onTranslationUpdate={onTranslationUpdate}
-                    />
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>{translatedRuleQueryComponent}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiSplitPanel.Inner>
             </EuiSplitPanel.Outer>
