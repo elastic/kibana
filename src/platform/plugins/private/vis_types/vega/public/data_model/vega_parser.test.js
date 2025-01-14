@@ -14,6 +14,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
 jest.mock('../services');
 
@@ -387,14 +388,14 @@ describe('VegaParser._parseMapConfig', () => {
     check(
       {
         mapStyle: true,
-        emsTileServiceId: 'dark_map',
+        emsTileServiceId: DEFAULT_EMS_DARKMAP_ID,
       },
       {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
         mapStyle: true,
-        emsTileServiceId: 'dark_map',
+        emsTileServiceId: DEFAULT_EMS_DARKMAP_ID,
         zoomControl: true,
         scrollWheelZoom: false,
       },
