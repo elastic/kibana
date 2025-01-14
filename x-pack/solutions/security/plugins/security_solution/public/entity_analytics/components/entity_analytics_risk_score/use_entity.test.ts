@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { RiskScoreEntity } from '../../../../common/search_strategy/security_solution/risk_score';
 import { useEntityInfo } from './use_entity';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -19,10 +19,10 @@ jest.mock('react-redux', () => {
 
 describe('useEntityInfo', () => {
   it('should return host entity info', () => {
-    const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.host));
+    const { result } = renderHook(() => useEntityInfo(EntityType.host));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "kpiQueryId": "headerHostRiskScoreKpiQuery",
+        "kpiQueryId": "hostHeaderRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "hosts",
           "onClick": [Function],
@@ -33,16 +33,27 @@ describe('useEntityInfo', () => {
     `);
   });
   it('should return user entity info', () => {
-    const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.user));
+    const { result } = renderHook(() => useEntityInfo(EntityType.user));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "kpiQueryId": "headerUserRiskScoreKpiQuery",
+        "kpiQueryId": "userHeaderRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "users",
           "onClick": [Function],
           "path": "/userRisk",
         },
         "tableQueryId": "userRiskDashboardTable",
+      }
+    `);
+  });
+
+  it('should return service entity info', () => {
+    const { result } = renderHook(() => useEntityInfo(EntityType.service));
+    expect(result?.current).toMatchInlineSnapshot(`
+      Object {
+        "kpiQueryId": "serviceHeaderRiskScoreKpiQuery",
+        "linkProps": undefined,
+        "tableQueryId": "serviceRiskDashboardTable",
       }
     `);
   });

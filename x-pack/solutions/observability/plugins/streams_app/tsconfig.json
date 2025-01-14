@@ -53,6 +53,8 @@
     "@kbn/react-field",
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/deeplinks-analytics",
+    "@kbn/dashboard-plugin"
   ]
 }
