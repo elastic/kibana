@@ -42,26 +42,19 @@ export function commentOnPR({
   context?: string;
   clearPrevious: boolean;
 }) {
-  const message = linkify(
-    messageTemplate.replace(/\${([^}]+)}/g, (_, envVar) => {
-      if (ALLOWED_ENV_VARS.includes(envVar)) {
-        return process.env[envVar] || '';
-      } else {
-        return '${' + envVar + '}';
-      }
-    })
-  );
+  const message = messageTemplate.replace(/\${([^}]+)}/g, (_, envVar) => {
+    if (ALLOWED_ENV_VARS.includes(envVar)) {
+      return process.env[envVar] || '';
+    } else {
+      return '${' + envVar + '}';
+    }
+  });
 
   if (context) {
     return upsertComment({ commentBody: message, commentContext: context, clearPrevious });
   } else {
     return addComment(message);
   }
-}
-
-function linkify(text: string) {
-  const linkRegex = /https?:\/\/\S+/g;
-  return text.replaceAll(linkRegex, '[$&]($&)');
 }
 
 if (require.main === module) {

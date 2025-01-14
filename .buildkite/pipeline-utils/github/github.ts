@@ -136,7 +136,7 @@ export async function upsertComment(
   }
 
   const commentMarker = `<!-- ${KIBANA_COMMENT_SIGIL}:${commentContext} -->`;
-  const body = `${commentMarker}${commentBody}`;
+  const body = `${commentMarker}\n${commentBody}`;
 
   const existingComment = (
     await github.paginate(github.issues.listComments, {
