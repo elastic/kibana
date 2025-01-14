@@ -75,7 +75,7 @@
   height: $euiSizeL;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiSizeXS;
-  box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, .9);
+  box-shadow: 0 0 $euiSizeXS * .5 $euiSizeXS * .5 $euiColorLightShade;
   padding-top: $euiSize * .1;
   overflow-y: auto;
 }
