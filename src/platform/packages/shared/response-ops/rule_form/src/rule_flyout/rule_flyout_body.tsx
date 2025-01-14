@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiStepsHorizontal,
   EuiTitle,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import { isEmpty } from 'lodash';
@@ -24,6 +25,8 @@ import {
   DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FLYOUT_HEADER_CREATE_TITLE,
   RULE_FLYOUT_HEADER_EDIT_TITLE,
+  RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TITLE,
+  RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TEXT,
 } from '../translations';
 import type { RuleFormData, RuleFormState } from '../types';
 import { hasRuleErrors } from '../validation';
@@ -61,6 +64,8 @@ export const RuleFlyoutBody = ({
     actionsParamsErrors = {},
     metadata = {},
   } = useRuleFormState();
+
+  const footerCalloutPaddingSize = useEuiPaddingSize('l');
 
   useEffect(() => {
     if (!isEmpty(metadata)) {
@@ -118,6 +123,11 @@ export const RuleFlyoutBody = ({
     });
   }, [actions, connectors, connectorTypes]);
 
+  const showNoActionsCallout = useMemo(
+    () => !hasActionsDisabled && actions.length === 0 && (isEdit || !hasNextStep),
+    [actions, hasActionsDisabled, hasNextStep, isEdit]
+  );
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -144,6 +154,17 @@ export const RuleFlyoutBody = ({
         )}
         {currentStepComponent}
       </EuiFlyoutBody>
+      {showNoActionsCallout && (
+        <EuiCallOut
+          size="s"
+          color="warning"
+          iconType="alert"
+          title={RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TITLE}
+          style={{ paddingLeft: footerCalloutPaddingSize, paddingRight: footerCalloutPaddingSize }}
+        >
+          <p>{RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TEXT}</p>
+        </EuiCallOut>
+      )}
       {isEdit ? (
         <RuleFlyoutEditFooter
           onCancel={onCancel}

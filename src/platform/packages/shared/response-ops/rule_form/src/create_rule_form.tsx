@@ -172,6 +172,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   return (
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
+        isFlyout={isFlyout}
         initialRuleFormState={{
           formData: {
             ...getDefaultFormData({

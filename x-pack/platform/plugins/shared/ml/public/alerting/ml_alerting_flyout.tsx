@@ -45,7 +45,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     if (!triggersActionsUi) return;
 
     const commonProps = {
-      plugins: services,
+      services,
       onCancel: () => {
         onCloseFlyout();
       },

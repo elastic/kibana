@@ -13,8 +13,9 @@ import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
 import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
-import { useRuleFormScreenContext } from '../hooks';
+import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { RuleFlyoutSelectConnector } from './rule_flyout_select_connector';
+import { RuleFlyoutConfirmCancel } from './rule_flyout_confirm_cancel';
 
 interface RuleFlyoutProps {
   isEdit?: boolean;
@@ -36,8 +37,10 @@ export const RuleFlyout = ({
   const {
     isConnectorsScreenVisible,
     isShowRequestScreenVisible,
+    isConfirmCancelScreenVisible,
     setIsShowRequestScreenVisible,
     setIsConnectorsScreenVisible,
+    setIsConfirmCancelScreenVisible,
   } = useRuleFormScreenContext();
   const onCloseConnectorsScreen = useCallback(() => {
     setInitialStep(RuleFormStepId.ACTIONS);
@@ -53,32 +56,46 @@ export const RuleFlyout = ({
     setIsShowRequestScreenVisible(false);
   }, [setIsShowRequestScreenVisible]);
 
+  const onCancelBack = useCallback(() => {
+    setIsConfirmCancelScreenVisible(false);
+  }, [setIsConfirmCancelScreenVisible]);
+
   const hideCloseButton = useMemo(
-    () => isShowRequestScreenVisible || isConnectorsScreenVisible,
-    [isConnectorsScreenVisible, isShowRequestScreenVisible]
+    () => isShowRequestScreenVisible || isConnectorsScreenVisible || isConfirmCancelScreenVisible,
+    [isConnectorsScreenVisible, isShowRequestScreenVisible, isConfirmCancelScreenVisible]
   );
 
-  const hideCloseButton = useMemo(() => isShowRequestOpen, [isShowRequestOpen]);
+  const { touched } = useRuleFormState();
+
+  const onCancelInternal = useCallback(() => {
+    if (touched) {
+      setIsConfirmCancelScreenVisible(true);
+    } else {
+      onCancel();
+    }
+  }, [touched, setIsConfirmCancelScreenVisible, onCancel]);
 
   return (
     <EuiPortal>
       <EuiFlyout
         ownFocus
-        onClose={onCancel}
+        onClose={onCancelInternal}
         aria-labelledby="flyoutTitle"
         size="m"
         maxWidth={500}
         className="ruleFormFlyout__container"
         hideCloseButton={hideCloseButton}
       >
-        {isShowRequestScreenVisible ? (
+        {isConfirmCancelScreenVisible ? (
+          <RuleFlyoutConfirmCancel onBack={onCancelBack} onConfirm={onCancel} />
+        ) : isShowRequestScreenVisible ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
         ) : isConnectorsScreenVisible ? (
           <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
         ) : (
           <RuleFlyoutBody
             onSave={onSave}
-            onCancel={onCancel}
+            onCancel={onCancelInternal}
             isEdit={isEdit}
             isSaving={isSaving}
             onShowRequest={onOpenShowRequest}

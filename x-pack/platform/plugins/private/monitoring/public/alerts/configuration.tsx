@@ -93,7 +93,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     () =>
       showFlyout &&
       Legacy.shims.triggersActionsUi.getRuleFormFlyout({
-        plugins: services,
+        services,
         id: alert.id,
         onSubmit: onClose,
         onCancel: onClose,

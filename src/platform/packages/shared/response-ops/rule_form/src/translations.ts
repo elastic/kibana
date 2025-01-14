@@ -561,6 +561,21 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
   }
 );
 
+export const RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyout.noActionsCalloutTitle',
+  {
+    defaultMessage: 'No actions configured',
+  }
+);
+
+export const RULE_FORM_FLYOUT_NO_ACTIONS_CALLOUT_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyout.noActionsCalloutText',
+  {
+    defaultMessage:
+      'This rule will be saved with no actions configured. You can add an action later at any time.',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
@@ -638,7 +653,7 @@ export const RULE_FORM_CANCEL_MODAL_CONFIRM = i18n.translate(
 export const RULE_FORM_CANCEL_MODAL_CANCEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalCancel',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Keep editing',
   }
 );
 
