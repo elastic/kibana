@@ -179,7 +179,8 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
-    describe('after rolling over the index manually and indexing the same document', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/206482
+    describe.skip('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
         await rolloverIndex();
