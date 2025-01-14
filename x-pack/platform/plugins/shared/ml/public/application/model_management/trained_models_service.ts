@@ -115,7 +115,6 @@ export class TrainedModelsService {
       tap({
         error: () => this.removeActiveOperation('downloading', modelId),
       }),
-      // Maybe use a MergeMap to allow multiple downloads in parallel
       switchMap(() => this.fetchModels$())
     );
   }
