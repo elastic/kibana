@@ -23,7 +23,6 @@ export const mockOptions: ObservedServiceDetailsRequestOptions = {
   serviceName: 'bastion00.siem.estc.dev',
 } as ObservedServiceDetailsRequestOptions;
 
-// TODO update response to be service
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   rawResponse: {
     took: 1,
@@ -39,161 +38,177 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
       hits: [],
     },
     aggregations: {
-      host_ip: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 665,
-        buckets: [
-          {
-            key: '11.245.5.152',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+      aggregations: {
+        service_id: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 117,
+          buckets: [
+            {
+              key: 'I30s36URfOdZ7gtpC4dum',
+              doc_count: 3,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '149.175.90.37',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_name: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'Service-alarm',
+              doc_count: 147,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '16.3.124.77',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_address: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 117,
+          buckets: [
+            {
+              key: '15.103.138.105',
+              doc_count: 3,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '161.120.111.159',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_environment: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'development',
+              doc_count: 57,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '179.124.88.33',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_ephemeral_id: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 117,
+          buckets: [
+            {
+              key: 'EV8lINfcelHgHrJMwuNvQ',
+              doc_count: 3,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '203.248.113.63',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_node_name: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 117,
+          buckets: [
+            {
+              key: 'corny-edger',
+              doc_count: 3,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '205.6.104.210',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_node_roles: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'data',
+              doc_count: 42,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '209.233.30.0',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+            {
+              key: 'ingest',
+              doc_count: 54,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '238.165.244.247',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+            {
+              key: 'master',
+              doc_count: 51,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-          {
-            key: '29.73.212.149',
-            doc_count: 133,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_node_role: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'ingest',
+              doc_count: 30,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-        ],
-      },
-      service_domain: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'NT AUTHORITY',
-            doc_count: 1905,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_state: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'running',
+              doc_count: 51,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-        ],
-      },
-      service_id: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'S-1-5-18',
-            doc_count: 1995,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_type: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'system',
+              doc_count: 147,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-        ],
-      },
-      service_name: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'SYSTEM',
-            doc_count: 1995,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
+          ],
+        },
+        service_version: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 117,
+          buckets: [
+            {
+              key: '2.1.9',
+              doc_count: 3,
+              timestamp: {
+                value: 1736851996820,
+                value_as_string: '2025-01-14T10:53:16.820Z',
+              },
             },
-          },
-        ],
-      },
-      host_os_family: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'Windows',
-            doc_count: 1995,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
-            },
-          },
-        ],
-      },
-      host_os_name: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'Windows',
-            doc_count: 1995,
-            timestamp: {
-              value: 1644837532000,
-              value_as_string: '2022-02-14T11:18:52.000Z',
-            },
-          },
-        ],
+          ],
+        },
       },
     },
   },

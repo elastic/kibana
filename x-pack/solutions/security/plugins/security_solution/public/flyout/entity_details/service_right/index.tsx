@@ -33,12 +33,10 @@ export interface ServicePanelProps extends Record<string, unknown> {
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'service-panel'; // | 'service-preview-panel'
+  key: 'service-panel';
   params: ServicePanelProps;
 }
 
-// export const ServicePreviewPanelKey: ServicePanelExpandableFlyoutProps['key'] =
-//   'service-preview-panel';
 export const SERVICE_PANEL_RISK_SCORE_QUERY_ID = 'servicePanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -91,7 +89,6 @@ export const ServicePanel = ({
     setQuery,
   });
 
-  // continue from here
   const { openDetailsPanel, isLinkEnabled } = useNavigateToServiceDetails({
     serviceName,
     scopeId,

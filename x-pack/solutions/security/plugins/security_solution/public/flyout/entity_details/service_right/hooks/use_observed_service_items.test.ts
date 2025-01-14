@@ -92,6 +92,7 @@ describe('useObservedServiceItems', () => {
       ['test ephemeral_id'], // ephemeral_id
       ['test node name'], // node name
       ['test node roles'], // node roles
+      ['test node role'], // node roles
       ['test state'], // state
       ['test type'], // type
       ['test version'], // version
