@@ -468,7 +468,7 @@ export const ModelsList: FC<Props> = ({
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
-      width: '200px',
+      width: '300px',
       actions,
       'data-test-subj': 'mlModelsTableColumnActions',
     },
