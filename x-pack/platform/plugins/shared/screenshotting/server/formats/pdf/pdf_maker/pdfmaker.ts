@@ -254,7 +254,16 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
-        myPort.postMessage(generatePdfRequest, this.transferList);
+        try {
+          myPort.postMessage(generatePdfRequest, this.transferList);
+        } catch (e) {
+          // See https://github.com/nodejs/node/issues/55593
+          if (e.name === 'DataCloneError') {
+            myPort.postMessage(generatePdfRequest);
+          } else {
+            throw e;
+          }
+        }
       });
     } finally {
       await this.cleanupWorker();
