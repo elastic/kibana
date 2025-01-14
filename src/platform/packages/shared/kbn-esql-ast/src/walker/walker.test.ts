@@ -279,6 +279,31 @@ describe('structurally can walk all nodes', () => {
         });
       });
 
+      describe('fields', () => {
+        test('can walk through "WHERE" binary expression', () => {
+          const query = 'FROM index | STATS a = 123 WHERE ...';
+          const { ast } = parse(query);
+          const fields: ESQLField[] = [];
+
+          throw new Error('Not implemented');
+
+          expect(fields).toMatchObject([
+            {
+              type: 'field',
+              column: {
+                type: 'column',
+                name: 'a',
+              },
+              value: {
+                type: 'literal',
+                literalType: 'integer',
+                value: 123,
+              },
+            },
+          ]);
+        });
+      });
+
       describe('functions', () => {
         test('can walk through functions', () => {
           const query = 'FROM a | STATS fn(1), agg(true)';
@@ -1189,11 +1214,11 @@ describe('Walker.matchAll()', () => {
 });
 
 describe('Walker.hasFunction()', () => {
-  test('can find assignment expression', () => {
+  test('can find binary expression expression', () => {
     const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
-    const query2 = 'FROM b | STATS var0 = bucket(bytes, 1 hour)';
-    const has1 = Walker.hasFunction(parse(query1).ast!, '=');
-    const has2 = Walker.hasFunction(parse(query2).ast!, '=');
+    const query2 = 'FROM b | STATS var0 == bucket(bytes, 1 hour)';
+    const has1 = Walker.hasFunction(parse(query1).ast!, '==');
+    const has2 = Walker.hasFunction(parse(query2).ast!, '==');
 
     expect(has1).toBe(false);
     expect(has2).toBe(true);
