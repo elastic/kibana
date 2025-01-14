@@ -16,7 +16,6 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiProgress,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -66,11 +65,11 @@ import { useRefresh } from '../routing/use_refresh';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from './config_mapping';
 import { DeleteModelsModal } from './delete_models_modal';
-import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
 import { useTrainedModelsService } from './hooks/use_trained_models_service';
+import { ModelStatusIndicator } from './model_status_indicator';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -417,51 +416,7 @@ export const ModelsList: FC<Props> = ({
       }),
       truncateText: false,
       width: '150px',
-      render: (item: TrainedModelUIItem) => {
-        if (!isBaseNLPModelItem(item)) return null;
-
-        const { state, downloadState } = item;
-        const config = getModelStateColor(state);
-        if (!config) return null;
-
-        const isProgressbarVisible = state === MODEL_STATE.DOWNLOADING && downloadState;
-
-        const label = (
-          <EuiText size="xs" color={config.color}>
-            {config.name}
-          </EuiText>
-        );
-
-        return (
-          <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>
-            {isProgressbarVisible ? (
-              <EuiFlexItem>
-                <EuiProgress
-                  label={config.name}
-                  valueText={
-                    <>
-                      {downloadState
-                        ? (
-                            (downloadState.downloaded_parts / (downloadState.total_parts || -1)) *
-                            100
-                          ).toFixed(0) + '%'
-                        : '100%'}
-                    </>
-                  }
-                  value={downloadState?.downloaded_parts ?? 1}
-                  max={downloadState?.total_parts ?? 1}
-                  size="xs"
-                  color={config.color}
-                />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
-                <span>{config.component ?? label}</span>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
+      render: (item: TrainedModelUIItem) => <ModelStatusIndicator modelId={item.model_id} />,
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
     {
