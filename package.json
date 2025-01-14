@@ -1640,6 +1640,7 @@
     "@types/picomatch": "^2.3.0",
     "@types/pixelmatch": "^5.2.4",
     "@types/pngjs": "^6.0.5",
+    "@types/prettier": "^2.0.0",
     "@types/prop-types": "^15.7.5",
     "@types/rbush": "^3.0.0",
     "@types/react": "~18.2.0",
