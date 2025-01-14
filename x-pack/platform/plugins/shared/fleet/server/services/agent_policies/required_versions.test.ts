@@ -6,6 +6,7 @@
  */
 
 import { appContextService } from '..';
+import { AgentPolicyInvalidError } from '../../errors';
 
 import { validateRequiredVersions } from './required_versions';
 
@@ -16,9 +17,11 @@ describe('validateRequiredVersions', () => {
       .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
 
     expect(() => {
-      validateRequiredVersions([{ version: '9.0.0', percentage: 100 }]);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"required_versions are not allowed when automatic upgrades feature is disabled"`
+      validateRequiredVersions('test policy', [{ version: '9.0.0', percentage: 100 }]);
+    }).toThrow(
+      new AgentPolicyInvalidError(
+        `Policy "test policy" failed validation: required_versions are not allowed when automatic upgrades feature is disabled`
+      )
     );
   });
 
@@ -31,44 +34,52 @@ describe('validateRequiredVersions', () => {
 
     it('should throw error if duplicate versions', () => {
       expect(() => {
-        validateRequiredVersions([
+        validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 10 },
           { version: '9.0.0', percentage: 10 },
         ]);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Duplicate versions not allowed in required_versions"`
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed validation: duplicate versions not allowed in required_versions`
+        )
       );
     });
 
     it('should throw error if has invalid semver version', () => {
       expect(() => {
-        validateRequiredVersions([
+        validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 10 },
           { version: '9.0.0invalid', percentage: 10 },
         ]);
-      }).toThrowErrorMatchingInlineSnapshot(`"Invalid semver version 9.0.0invalid"`);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed validation: invalid semver version 9.0.0invalid in required_versions`
+        )
+      );
     });
 
     it('should throw error if sum of percentages exceeds 100', () => {
       expect(() => {
-        validateRequiredVersions([
+        validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 100 },
           { version: '9.1.0', percentage: 10 },
         ]);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Sum of required_versions percentages cannot exceed 100"`
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed validation: sum of required_versions percentages cannot exceed 100`
+        )
       );
     });
 
     it('should not throw error if valid required_versions', () => {
-      validateRequiredVersions([
+      validateRequiredVersions('test policy', [
         { version: '9.0.0', percentage: 90 },
         { version: '9.1.0', percentage: 10 },
       ]);
     });
 
     it('should not throw error if required_versions undefined', () => {
-      validateRequiredVersions();
+      validateRequiredVersions('test policy');
     });
   });
 });

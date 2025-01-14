@@ -415,7 +415,7 @@ class AgentPolicyService {
       namespace: agentPolicy.namespace,
     });
     await validateOutputForPolicy(soClient, agentPolicy);
-    validateRequiredVersions(agentPolicy.fleet_ui?.required_versions);
+    validateRequiredVersions(agentPolicy.name, agentPolicy.fleet_ui?.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       savedObjectType,
@@ -716,7 +716,7 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
-    validateRequiredVersions(agentPolicy.fleet_ui?.required_versions);
+    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.fleet_ui?.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
