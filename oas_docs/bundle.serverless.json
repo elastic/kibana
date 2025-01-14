@@ -9297,6 +9297,33 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "fleet_ui": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "required_versions": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "percentage": {
+                                      "maximum": 100,
+                                      "minimum": 0,
+                                      "type": "number"
+                                    },
+                                    "version": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "version",
+                                    "percentage"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "global_data_tags": {
                             "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
                             "items": {
@@ -10053,6 +10080,33 @@
                     "nullable": true,
                     "type": "string"
                   },
+                  "fleet_ui": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "required_versions": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "percentage": {
+                              "maximum": 100,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "version": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "version",
+                            "percentage"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -10309,6 +10363,33 @@
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "fleet_ui": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "required_versions": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "percentage": {
+                                    "maximum": 100,
+                                    "minimum": 0,
+                                    "type": "number"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version",
+                                  "percentage"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
                         },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -11094,6 +11175,33 @@
                           "fleet_server_host_id": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "fleet_ui": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "required_versions": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "percentage": {
+                                      "maximum": 100,
+                                      "minimum": 0,
+                                      "type": "number"
+                                    },
+                                    "version": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "version",
+                                    "percentage"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
                           },
                           "global_data_tags": {
                             "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -12116,6 +12224,33 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fleet_ui": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "required_versions": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "percentage": {
+                                    "maximum": 100,
+                                    "minimum": 0,
+                                    "type": "number"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version",
+                                  "percentage"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
                           "items": {
@@ -12870,6 +13005,33 @@
                     "nullable": true,
                     "type": "string"
                   },
+                  "fleet_ui": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "required_versions": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "percentage": {
+                              "maximum": 100,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "version": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "version",
+                            "percentage"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -13126,6 +13288,33 @@
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "fleet_ui": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "required_versions": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "percentage": {
+                                    "maximum": 100,
+                                    "minimum": 0,
+                                    "type": "number"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version",
+                                  "percentage"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
                         },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -13911,6 +14100,33 @@
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "fleet_ui": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "required_versions": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "percentage": {
+                                    "maximum": 100,
+                                    "minimum": 0,
+                                    "type": "number"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version",
+                                  "percentage"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
                         },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
