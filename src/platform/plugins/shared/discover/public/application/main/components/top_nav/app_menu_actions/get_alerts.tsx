@@ -79,7 +79,7 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return triggersActionsUi?.getRuleFormFlyout({
+  return triggersActionsUi?.getRuleFormFlyout<EsQueryAlertMetaData>({
     services,
     initialMetadata: discoverMetadata,
     consumer: 'alerts',

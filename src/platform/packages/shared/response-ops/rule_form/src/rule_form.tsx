@@ -19,11 +19,11 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormServices, RuleFormState } from './types';
+import { RuleFormData, RuleFormServices, RuleTypeMetaData } from './types';
 
 const queryClient = new QueryClient();
 
-export interface RuleFormProps<MetaData = RuleFormState['metadata']> {
+export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaData> {
   services: RuleFormServices;
   id?: string;
   ruleTypeId?: string;
@@ -44,7 +44,7 @@ export interface RuleFormProps<MetaData = RuleFormState['metadata']> {
   initialMetadata?: MetaData;
 }
 
-export const RuleForm = <MetaData extends RuleFormState['metadata'] = RuleFormState['metadata']>(
+export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const {
@@ -103,6 +103,11 @@ export const RuleForm = <MetaData extends RuleFormState['metadata'] = RuleFormSt
       ruleTypeRegistry,
       actionTypeRegistry,
     };
+
+    // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
+    // only used for the benefit of consumers of the RuleForm component. Retype onChangeMetaData to ignore this type.
+    const retypedOnChangeMetaData = onChangeMetaData as (metadata?: RuleTypeMetaData) => void;
+
     if (id) {
       return (
         <EditRuleForm
@@ -110,7 +115,7 @@ export const RuleForm = <MetaData extends RuleFormState['metadata'] = RuleFormSt
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
-          onChangeMetaData={onChangeMetaData}
+          onChangeMetaData={retypedOnChangeMetaData}
           isFlyout={isFlyout}
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
@@ -125,7 +130,7 @@ export const RuleForm = <MetaData extends RuleFormState['metadata'] = RuleFormSt
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
-          onChangeMetaData={onChangeMetaData}
+          onChangeMetaData={retypedOnChangeMetaData}
           isFlyout={isFlyout}
           consumer={consumer}
           connectorFeatureId={connectorFeatureId}

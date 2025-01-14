@@ -9,7 +9,7 @@
 
 import { EuiFlyout, EuiPortal } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import type { RuleFormData, RuleFormState } from '../types';
+import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
 import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
@@ -21,7 +21,7 @@ interface RuleFlyoutProps {
   isSaving?: boolean;
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
-  onChangeMetaData?: (metadata?: RuleFormState['metadata']) => void;
+  onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
 }
 
 export const RuleFlyout = ({

@@ -122,6 +122,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<EditConnectorFlyoutProps>;
   getRuleFormFlyout: <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     props: Omit<RuleFormProps<MetaData>, 'services'> & {
+      // Use Partial<RuleFormProps['services']> for compatibility with useKibana hooks that return
+      // possibly undefined services. Use validateRuleFormPlugins to ensure that the services are not undefined.
       services: Omit<Partial<RuleFormProps['services']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
     }
   ) => ReactElement<RuleFormProps<MetaData>>;
@@ -487,7 +489,7 @@ export class Plugin
         return getRuleFormFlyoutLazy({
           ...props,
           services: {
-            ...validateRuleFormPlugins(props.plugins),
+            ...validateRuleFormPlugins(props.services),
             actionTypeRegistry: this.actionTypeRegistry,
             ruleTypeRegistry: this.ruleTypeRegistry,
           },

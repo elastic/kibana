@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleFormData, RuleFormPlugins, RuleFormState } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from './common/hooks';
 import { RulePage } from './rule_page';
@@ -36,8 +36,8 @@ export interface EditRuleFormProps {
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
-  onChangeMetaData?: (metadata: RuleFormState['metadata']) => void;
-  initialMetadata?: RuleFormState['metadata'];
+  onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
+  initialMetadata?: RuleTypeMetaData;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
