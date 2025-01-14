@@ -32,6 +32,7 @@ import {
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
+  ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -231,6 +232,7 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
+  contentReferencesStore: ContentReferencesStore;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

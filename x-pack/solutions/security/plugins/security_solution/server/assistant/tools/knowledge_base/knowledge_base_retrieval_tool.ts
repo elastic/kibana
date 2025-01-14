@@ -10,6 +10,9 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { APP_UI_ID } from '../../../../common';
+import { Document } from 'langchain/document';
+import { ContentReferencesStore, knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
+import { contentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
@@ -45,11 +48,11 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+        const docs = (await kbDataClient.getKnowledgeBaseDocumentEntries({
           query: input.query,
           kbResource: 'user',
           required: false,
-        });
+        })).map(enrichDocument(params.contentReferencesStore));
 
         return JSON.stringify(docs);
       },
@@ -58,3 +61,20 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     }) as unknown as DynamicStructuredTool;
   },
 };
+
+function enrichDocument(contentReferencesStore: ContentReferencesStore){
+  return (document: Document<Record<string, string>>) => {
+    if(document.id == null){
+      return document;
+    }
+    const documentId = document.id
+    const knowledgeBaseReference = contentReferencesStore.add(p=>knowledgeBaseReferenceFactory(p.id, document.metadata.name, documentId))
+    return new Document({
+      ...document,
+      metadata: {
+        ...document.metadata,
+        referenceElement: contentReferenceBlock(knowledgeBaseReference),
+      },
+    });
+  }
+}

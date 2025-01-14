@@ -8,6 +8,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
+  alertReferenceFactory,
   getAnonymizedValue,
   getOpenAndAcknowledgedAlertsQuery,
   getRawDataOrDefault,
@@ -19,6 +20,7 @@ import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-pl
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
+import { contentReferenceBlock } from '@kbn/elastic-assistant-common/impl/content_references';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -80,14 +82,19 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         };
 
         return JSON.stringify(
-          result.hits?.hits?.map((x) =>
-            transformRawData({
+          result.hits?.hits?.map((x) => {
+            const transformed = transformRawData({
               anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback
               rawData: getRawDataOrDefault(x.fields),
             })
+            const hitId = x._id
+            const alertReferenceString = hitId != null ? `\nReference,${contentReferenceBlock(params.contentReferencesStore.add(p => alertReferenceFactory(p.id, hitId)))}` : ''
+
+            return `${transformed}${alertReferenceString}`
+          }
           )
         );
       },

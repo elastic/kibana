@@ -30,6 +30,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorId,
+  contentReferencesStore,
   conversationId,
   dataClients,
   esClient,
@@ -103,6 +104,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     alertsIndexPattern,
     anonymizationFields,
     connectorId,
+    contentReferencesStore,
     esClient,
     inference,
     isEnabledKnowledgeBase,
@@ -124,6 +126,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       esClient,
+      contentReferencesStore
     });
     if (kbTools) {
       tools.push(...kbTools);

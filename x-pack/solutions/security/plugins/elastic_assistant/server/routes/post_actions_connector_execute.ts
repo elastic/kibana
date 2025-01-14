@@ -12,6 +12,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   API_VERSIONS,
+  contentReferencesStoreFactory,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
@@ -29,6 +30,7 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
+import { prunedContentReferences } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -109,6 +111,7 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
+          const contentReferencesStore = contentReferencesStoreFactory()
 
           onLlmResponse = async (
             content: string,
@@ -116,6 +119,8 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
+              const contentReferences = prunedContentReferences(content, contentReferencesStore)
+
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
@@ -123,6 +128,7 @@ export const postActionsConnectorExecuteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences
               });
             }
           };
@@ -140,6 +146,7 @@ export const postActionsConnectorExecuteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            contentReferencesStore,
             isOssModel,
             conversationId,
             context: ctx,

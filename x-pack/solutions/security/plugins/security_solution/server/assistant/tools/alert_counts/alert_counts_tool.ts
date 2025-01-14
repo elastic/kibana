@@ -12,6 +12,8 @@ import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-pl
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
+import { alertsCountReferenceFactory } from '@kbn/elastic-assistant-common/impl/content_references/references';
+import { contentReferenceString } from '@kbn/elastic-assistant-common/impl/content_references';
 
 export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -38,8 +40,9 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
+        const alertsCountReference = params.contentReferencesStore.add(p => alertsCountReferenceFactory(p.id))
 
-        return JSON.stringify(result);
+        return `${JSON.stringify(result)}\n${contentReferenceString(alertsCountReference)}`;
       },
       tags: ['alerts', 'alerts-count'],
     });

@@ -66,6 +66,7 @@ export const transformESSearchToConversations = (
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,
+            ...(message.metadata ? { metadata: message.metadata } : {}),
             ...(message.trace_data
               ? {
                   traceData: {

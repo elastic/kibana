@@ -11,6 +11,8 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { APP_UI_ID } from '../../../../common';
+import { knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
+import { contentReferenceString } from '@kbn/elastic-assistant-common/impl/content_references';
 
 const toolDetails = {
   description:
@@ -46,8 +48,12 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
+
+        const knowledgeBaseReference = params.contentReferencesStore.add(p => knowledgeBaseReferenceFactory(p.id, 'Elastic Security Labs content', 'securityLabsId'))
+
         // TODO: Token pruning
-        return JSON.stringify(docs).substring(0, 20000);
+        const result = JSON.stringify(docs).substring(0, 20000);
+        return `${result}\n${contentReferenceString(knowledgeBaseReference)}`
       },
       tags: ['security-labs', 'knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts

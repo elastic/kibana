@@ -10,8 +10,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, IndexEntry, knowledgeBaseReferenceFactory } from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { contentReferenceString } from '@kbn/elastic-assistant-common/impl/content_references';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (
@@ -138,10 +139,12 @@ export const getKBVectorSearchQuery = ({
 export const getStructuredToolForIndexEntry = ({
   indexEntry,
   esClient,
+  contentReferencesStore,
   logger,
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
+    contentReferencesStore: ContentReferencesStore
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -218,13 +221,15 @@ export const getStructuredToolForIndexEntry = ({
           };
         });
 
+        const knowledgeBaseReference = contentReferencesStore.add(p => knowledgeBaseReferenceFactory(p.id, indexEntry.name, indexEntry.id))
+
         logger.debug(() => `Similarity Search Params:\n ${JSON.stringify(params)}`);
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
         return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
           kbDocs
-        )}\n###`;
+        )}\n${contentReferenceString(knowledgeBaseReference)}###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;

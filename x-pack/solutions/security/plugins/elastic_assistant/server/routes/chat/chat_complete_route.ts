@@ -16,6 +16,7 @@ import {
   transformRawData,
   getAnonymizedValue,
   ConversationResponse,
+  contentReferencesStoreFactory,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -175,6 +176,8 @@ export const chatCompleteRoute = (
             }));
           }
 
+          const contentReferencesStore = contentReferencesStoreFactory()
+
           const onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
@@ -208,6 +211,7 @@ export const chatCompleteRoute = (
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
+            contentReferencesStore,
             request: {
               ...request,
               // TODO: clean up after empty tools will be available to use

@@ -74,6 +74,82 @@ export const ConversationConfidence = z.enum(['low', 'medium', 'high']);
 export type ConversationConfidenceEnum = typeof ConversationConfidence.enum;
 export const ConversationConfidenceEnum = ConversationConfidence.enum;
 
+/********* Begin Content References *********/
+/**
+ * Data referenced by the message content
+ */
+export type BaseContentReference = z.infer<typeof BaseContentReference>;
+export const BaseContentReference = z.object({
+  /**
+   * Identifies a ContentReference uniquely within a message
+   */
+  id: z.string(),
+  /**
+   * Specifies the type of ContentReference
+   */
+  type: z.string()
+});
+
+/**
+ * Knowledge base entry referenced by the message content
+ */
+export type KnowledgeBaseEntryContentReference = z.infer<typeof KnowledgeBaseEntryContentReference>;
+export const KnowledgeBaseEntryContentReference = BaseContentReference.extend({
+  /**
+   * Specifies this is a KnowledgeBaseEntryContentReference
+   */
+  type: z.literal("KnowledgeBaseEntry"),
+  /**
+   * Id of the knowledge base entry
+   */
+  knowledgeBaseEntryId: z.string(),
+  /**
+   * Name of the knowledge base entry
+   */
+  knowledgeBaseEntryName: z.string()
+});
+
+/**
+ * Alerts count referenced by the message content
+ */
+export type SecurityAlertsPageContentReference = z.infer<typeof SecurityAlertsPageContentReference>;
+export const SecurityAlertsPageContentReference = BaseContentReference.extend({
+  /**
+   * Specifies this is a SecurityAlertsPageContentReference
+   */
+  type: z.literal("SecurityAlertsPage"),
+});
+
+/**
+ * Alert referenced by the message content
+ */
+export type SecurityAlertContentReference = z.infer<typeof SecurityAlertContentReference>;
+export const SecurityAlertContentReference = BaseContentReference.extend({
+  /**
+   * Specifies this is a SecurityAlertContentReference
+   */
+  type: z.literal("SecurityAlert"),
+  /**
+   * Id of the alert
+   */
+  alertId: z.string()
+});
+
+export const ContentReference = z.union([KnowledgeBaseEntryContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference])
+export type ContentReference = z.infer<typeof ContentReference>
+export const ContentReferences = z.record(z.string(), ContentReference)
+export type ContentReferences = z.infer<typeof ContentReferences>
+/********* End Content References *********/
+
+/**
+ * Message specific metadata
+ */
+export type MessageMetadata = z.infer<typeof MessageMetadata>;
+export const MessageMetadata = z.object({
+
+  contentReferences: ContentReferences.optional()
+});
+
 /**
  * AI assistant conversation message.
  */
@@ -103,6 +179,10 @@ export const Message = z.object({
    * trace Data
    */
   traceData: TraceData.optional(),
+  /**
+   * Message metadata
+   */
+  metadata: MessageMetadata.optional()
 });
 
 export type ApiConfig = z.infer<typeof ApiConfig>;
