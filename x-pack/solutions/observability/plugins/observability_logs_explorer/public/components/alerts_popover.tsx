@@ -44,7 +44,7 @@ function getQuery(query?: Query | AggregateQuery): Query {
 
 export const AlertsPopover = () => {
   const {
-    services: { triggersActionsUi, slo, application, http },
+    services: { triggersActionsUi, slo, application, http, ...plugins },
   } = useKibanaContextForPlugin();
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
@@ -67,10 +67,10 @@ export const AlertsPopover = () => {
         pageState.context.allSelection
       ).toDataviewSpec();
 
-      return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
+      return triggersActionsUi.getRuleFormFlyout<ThresholdRuleTypeParams>({
+        plugins: { application, http, ...plugins },
         consumer: 'logs',
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        canChangeTrigger: false,
         initialValues: {
           params: {
             searchConfiguration: {
@@ -84,10 +84,19 @@ export const AlertsPopover = () => {
             },
           },
         },
-        onClose: closeAddRuleFlyout,
+        onCancel: closeAddRuleFlyout,
+        onSubmit: closeAddRuleFlyout,
       });
     }
-  }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen]);
+  }, [
+    isAddRuleFlyoutOpen,
+    triggersActionsUi,
+    pageState,
+    application,
+    http,
+    plugins,
+    closeAddRuleFlyout,
+  ]);
 
   const createSLOFlyout = useMemo(() => {
     if (isCreateSLOFlyoutOpen && pageState.matches({ initialized: 'validLogsExplorerState' })) {

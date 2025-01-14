@@ -32,6 +32,7 @@ interface RulesPageProps {
   activeTab?: string;
 }
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
+  const { services } = useKibana();
   const {
     http,
     docLinks,
@@ -39,11 +40,11 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     observabilityAIAssistant,
     triggersActionsUi: {
       ruleTypeRegistry,
-      getAddRuleFlyout: AddRuleFlyout,
+      getRuleFormFlyout: AddRuleFlyout,
       getRulesSettingsLink: RulesSettingsLink,
     },
     serverless,
-  } = useKibana().services;
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
@@ -201,21 +202,20 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
 
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
+          plugins={services}
           ruleTypeId={ruleTypeIdToCreate}
-          canChangeTrigger={false}
           consumer={ALERTING_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
-          initialSelectedConsumer={AlertConsumers.LOGS}
-          onClose={() => {
+          multiConsumerSelection={AlertConsumers.LOGS}
+          onCancel={() => {
             setAddRuleFlyoutVisibility(false);
           }}
-          onSave={() => {
+          onSubmit={() => {
             setRefresh(new Date());
-            return Promise.resolve();
+            setAddRuleFlyoutVisibility(false);
           }}
-          hideGrouping
-          useRuleProducer
+          shouldUseRuleProducer
         />
       )}
     </ObservabilityPageTemplate>

@@ -19,17 +19,18 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormPlugins } from './types';
+import { RuleFormData, RuleFormPlugins, RuleFormState } from './types';
 
 const queryClient = new QueryClient();
 
-export interface RuleFormProps {
+export interface RuleFormProps<MetaData = RuleFormState['metadata']> {
   plugins: RuleFormPlugins;
   id?: string;
   ruleTypeId?: string;
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata: MetaData) => void;
   consumer?: string;
   connectorFeatureId?: string;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
@@ -40,13 +41,17 @@ export interface RuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<RuleFormData>;
+  initialMetadata?: MetaData;
 }
 
-export const RuleForm = (props: RuleFormProps) => {
+export const RuleForm = <MetaData extends RuleFormState['metadata'] = RuleFormState['metadata']>(
+  props: RuleFormProps<MetaData>
+) => {
   const {
     plugins: _plugins,
     onCancel,
     onSubmit,
+    onChangeMetaData,
     id,
     ruleTypeId,
     isFlyout,
@@ -60,6 +65,7 @@ export const RuleForm = (props: RuleFormProps) => {
     canShowConsumerSelection,
     showMustacheAutocompleteSwitch,
     initialValues,
+    initialMetadata,
   } = props;
 
   const {
@@ -103,9 +109,11 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          onChangeMetaData={onChangeMetaData}
           isFlyout={isFlyout}
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
+          initialMetadata={initialMetadata}
         />
       );
     }
@@ -116,6 +124,7 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          onChangeMetaData={onChangeMetaData}
           isFlyout={isFlyout}
           consumer={consumer}
           connectorFeatureId={connectorFeatureId}
@@ -127,6 +136,7 @@ export const RuleForm = (props: RuleFormProps) => {
           canShowConsumerSelection={canShowConsumerSelection}
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
+          initialMetadata={initialMetadata}
         />
       );
     }
@@ -161,9 +171,11 @@ export const RuleForm = (props: RuleFormProps) => {
     ruleTypeId,
     onCancel,
     onSubmit,
+    onChangeMetaData,
     isFlyout,
     showMustacheAutocompleteSwitch,
     connectorFeatureId,
+    initialMetadata,
     consumer,
     multiConsumerSelection,
     hideInterval,
@@ -171,6 +183,7 @@ export const RuleForm = (props: RuleFormProps) => {
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
+    initialValues,
   ]);
 
   return (

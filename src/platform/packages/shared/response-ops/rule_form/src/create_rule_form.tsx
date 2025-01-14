@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { RuleFormData, RuleFormPlugins } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleFormState } from './types';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from './common/hooks';
@@ -48,7 +48,9 @@ export interface CreateRuleFormProps {
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata: RuleFormState['metadata']) => void;
   initialValues?: Partial<RuleFormData>;
+  initialMetadata?: RuleFormState['metadata'];
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -66,6 +68,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     isFlyout,
     onCancel,
     onSubmit,
+    onChangeMetaData,
+    initialMetadata = {},
     initialValues = {},
   } = props;
 
@@ -184,6 +188,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             }),
             ...initialValues,
           },
+          metadata: initialMetadata,
           plugins,
           connectors,
           connectorTypes,
@@ -213,6 +218,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           isSaving={isSaving}
           onCancel={onCancel}
           onSave={onSave}
+          onChangeMetaData={onChangeMetaData}
         />
       </RuleFormStateProvider>
     </div>

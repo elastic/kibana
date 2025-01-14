@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleFormData, RuleFormPlugins } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleFormState } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from './common/hooks';
 import { RulePage } from './rule_page';
@@ -36,6 +36,8 @@ export interface EditRuleFormProps {
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata: RuleFormState['metadata']) => void;
+  initialMetadata?: RuleFormState['metadata'];
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -47,6 +49,8 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     onCancel,
     onSubmit,
     isFlyout,
+    onChangeMetaData,
+    initialMetadata = {},
   } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
   const { toasts } = notifications;
@@ -202,6 +206,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
             actions: actionsWithFrequency,
           },
           id,
+          metadata: initialMetadata,
           plugins,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
@@ -221,6 +226,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           isSaving={isSaving}
           onSave={onSave}
           onCancel={onCancel}
+          onChangeMetaData={onChangeMetaData}
         />
       </RuleFormStateProvider>
     </div>

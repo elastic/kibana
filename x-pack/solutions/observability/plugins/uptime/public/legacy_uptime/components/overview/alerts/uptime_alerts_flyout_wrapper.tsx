@@ -24,18 +24,19 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   alertTypeId,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi } = useKibana<KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
   const onCloseAlertFlyout = useCallback(
     () => setAlertFlyoutVisibility(false),
     [setAlertFlyoutVisibility]
   );
   const AddAlertFlyout = useMemo(
     () =>
-      triggersActionsUi.getAddRuleFlyout({
+      triggersActionsUi.getRuleFormFlyout({
+        plugins,
         consumer: 'uptime',
-        onClose: onCloseAlertFlyout,
+        onCancel: onCloseAlertFlyout,
+        onSubmit: onCloseAlertFlyout,
         ruleTypeId: alertTypeId,
-        canChangeTrigger: !alertTypeId,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onCloseAlertFlyout, alertTypeId]

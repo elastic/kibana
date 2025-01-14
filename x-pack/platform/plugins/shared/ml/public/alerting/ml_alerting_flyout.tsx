@@ -38,39 +38,37 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
   onSave,
 }) => {
   const {
-    services: { triggersActionsUi },
+    services: { triggersActionsUi, ...services },
   } = useMlKibana();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
     const commonProps = {
-      onClose: () => {
+      plugins: services,
+      onCancel: () => {
         onCloseFlyout();
       },
-      onSave: async () => {
+      onSubmit: async () => {
         if (onSave) {
           onSave();
         }
+        onCloseFlyout();
       },
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditRuleFlyout({
+      return triggersActionsUi.getRuleFormFlyout({
         ...commonProps,
-        initialRule: {
-          ...initialAlert,
-          ruleTypeId: initialAlert.ruleTypeId ?? initialAlert.alertTypeId,
-        },
+        id: initialAlert.id,
       });
     }
 
-    return triggersActionsUi.getAddRuleFlyout({
+    return triggersActionsUi.getRuleFormFlyout({
       ...commonProps,
       consumer: PLUGIN_ID,
-      canChangeTrigger: false,
       ruleTypeId: ML_ALERT_TYPES.ANOMALY_DETECTION,
-      metadata: {},
+      initialMetadata: {},
       initialValues: {
         params: {
           jobSelection: {

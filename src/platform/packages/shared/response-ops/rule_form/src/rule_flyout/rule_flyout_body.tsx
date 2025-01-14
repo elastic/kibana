@@ -8,27 +8,28 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiStepsHorizontal,
   EuiTitle,
-  EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
-import React, { useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { RuleFormStepId } from '../constants';
 import { useRuleFormHorizontalSteps, useRuleFormState } from '../hooks';
 import {
+  DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FLYOUT_HEADER_CREATE_TITLE,
   RULE_FLYOUT_HEADER_EDIT_TITLE,
-  DISABLED_ACTIONS_WARNING_TITLE,
 } from '../translations';
-import type { RuleFormData } from '../types';
+import type { RuleFormData, RuleFormState } from '../types';
 import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
 import { RuleFlyoutEditFooter } from './rule_flyout_edit_footer';
 import { RuleFlyoutEditTabs } from './rule_flyout_edit_tabs';
-import { RuleFormStepId } from '../constants';
 
 interface RuleFlyoutBodyProps {
   isEdit?: boolean;
@@ -36,6 +37,7 @@ interface RuleFlyoutBodyProps {
   onCancel: () => void;
   onSave: (formData: RuleFormData) => void;
   onShowRequest: () => void;
+  onChangeMetaData?: (metadata?: RuleFormState['metadata']) => void;
   initialStep?: RuleFormStepId;
 }
 
@@ -46,6 +48,7 @@ export const RuleFlyoutBody = ({
   onCancel,
   onSave,
   onShowRequest,
+  onChangeMetaData = () => {},
 }: RuleFlyoutBodyProps) => {
   const {
     formData,
@@ -56,7 +59,14 @@ export const RuleFlyoutBody = ({
     paramsErrors = {},
     actionsErrors = {},
     actionsParamsErrors = {},
+    metadata = {},
   } = useRuleFormState();
+
+  useEffect(() => {
+    if (!isEmpty(metadata)) {
+      onChangeMetaData(metadata);
+    }
+  }, [metadata, onChangeMetaData]);
 
   const hasErrors = useMemo(() => {
     const hasBrokenConnectors = formData.actions.some((action) => {

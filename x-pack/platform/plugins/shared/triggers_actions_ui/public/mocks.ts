@@ -14,8 +14,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
+import { getRuleFormFlyoutLazy } from './common/get_rule_form_flyout';
 import {
   ActionTypeModel,
   RuleTypeModel,
@@ -86,16 +85,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAddRuleFlyout: (props) => {
-      return getAddRuleFlyoutLazy({
-        ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
-        connectorServices,
-      });
-    },
-    getEditRuleFlyout: (props) => {
-      return getEditRuleFlyoutLazy({
+    getRuleFormFlyout: (props) => {
+      return getRuleFormFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
+import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 
 interface Props {
   visible?: boolean;
@@ -15,22 +16,24 @@ interface Props {
 }
 
 export const AlertFlyout = (props: Props) => {
+  const { services } = useKibana();
   const { visible, setVisible } = props;
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
-      triggersActionsUI.getAddRuleFlyout({
+      triggersActionsUI.getRuleFormFlyout({
+        plugins: services,
         consumer: 'logs',
-        onClose: onCloseFlyout,
-        canChangeTrigger: false,
+        onSubmit: onCloseFlyout,
+        onCancel: onCloseFlyout,
         ruleTypeId: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-        metadata: {
+        initialMetadata: {
           isInternal: true,
         },
       }),
-    [triggersActionsUI, onCloseFlyout]
+    [triggersActionsUI, services, onCloseFlyout]
   );
 
   return <>{visible && AddAlertFlyout}</>;

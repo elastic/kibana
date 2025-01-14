@@ -7,6 +7,7 @@
 
 import { Plugin as CorePlugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
+import { RuleFormProps } from '@kbn/response-ops-rule-form';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
@@ -44,10 +45,9 @@ import {
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import { getActionFormLazy } from './common/get_action_form';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
+import { getRuleFormFlyoutLazy } from './common/get_rule_form_flyout';
 import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -59,7 +59,6 @@ import { getRulesListLazy } from './common/get_rules_list';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { LazyLoadProps } from './types';
 
-import { RuleFormProps } from '@kbn/response-ops-rule-form';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -77,6 +76,8 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { validateRuleFormPlugins } from './common/validate_rule_form_plugins';
+
 import type {
   ActionTypeModel,
   AlertsTableProps,
@@ -85,7 +86,6 @@ import type {
   EditConnectorFlyoutProps,
   GlobalRuleEventLogListProps,
   RuleDefinitionProps,
-  RuleEditProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
   RuleStatusDropdownProps,
@@ -95,7 +95,6 @@ import type {
   RuleTagFilterProps,
   RuleTypeMetaData,
   RuleTypeModel,
-  RuleTypeParams,
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
@@ -121,17 +120,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: (
-    props: Omit<RuleFormProps, 'plugins'> & {
-      plugins: Omit<RuleFormProps['plugins'], 'actionTypeRegistry' | 'ruleTypeRegistry'>;
+  getRuleFormFlyout: <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
+    props: Omit<RuleFormProps<MetaData>, 'plugins'> & {
+      plugins: Omit<Partial<RuleFormProps['plugins']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
     }
-  ) => ReactElement<RuleFormProps>;
-  getEditRuleFlyout: <
-    Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
-  >(
-    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps<Params, MetaData>>;
+  ) => ReactElement<RuleFormProps<MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
     props: P
@@ -490,22 +483,14 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAddRuleFlyout: (props) => {
-        return getAddRuleFlyoutLazy({
+      getRuleFormFlyout: (props) => {
+        return getRuleFormFlyoutLazy({
           ...props,
           plugins: {
-            ...props.plugins,
+            ...validateRuleFormPlugins(props.plugins),
             actionTypeRegistry: this.actionTypeRegistry,
             ruleTypeRegistry: this.ruleTypeRegistry,
           },
-        });
-      },
-      getEditRuleFlyout: (props) => {
-        return getEditRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
-          connectorServices: this.connectorServices!,
         });
       },
       getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {

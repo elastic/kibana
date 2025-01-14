@@ -31,6 +31,7 @@ import {
   RuleFormParamsErrors,
   RuleTypeModel,
   RuleTypeParams,
+  RuleTypeMetaData,
   RuleTypeRegistryContract,
   RuleTypeWithDescription,
   RuleUiAction,
@@ -69,7 +70,10 @@ export interface RuleFormPlugins {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
+export interface RuleFormState<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData = RuleTypeMetaData
+> {
   id?: string;
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
@@ -85,7 +89,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   selectedRuleTypeModel: RuleTypeModel<Params>;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
   showMustacheAutocompleteSwitch?: boolean;
-  metadata?: Record<string, unknown>;
+  metadata?: MetaData;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
   validConsumers: RuleCreationValidConsumer[];

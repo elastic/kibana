@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
-import { RuleForm } from '@kbn/response-ops-rule-form';
 import { i18n } from '@kbn/i18n';
 import {
   AppMenuActionId,
@@ -80,25 +79,20 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return triggersActionsUi?.getAddRuleFlyout({
+  return triggersActionsUi?.getRuleFormFlyout({
     plugins: services,
-    // metadata: discoverMetadata,
+    initialMetadata: discoverMetadata,
     consumer: 'alerts',
-    onCancel: (_, metadata) => {
-      // onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-      onFinishAction();
-    },
-    onSave: async (metadata) => {
-      // onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-      onFinishAction();
-    },
-    // canChangeTrigger: false,
+    onCancel: onFinishAction,
+    onSubmit: onFinishAction,
+    onChangeMetaData: (metadata: EsQueryAlertMetaData) =>
+      onUpdateAdHocDataViews(metadata.adHocDataViewList),
     ruleTypeId: ES_QUERY_ID,
     initialValues: { params: getParams() },
     validConsumers: EsQueryValidConsumer,
-    useRuleProducer: true,
+    shouldUseRuleProducer: true,
     // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
-    initialSelectedConsumer: AlertConsumers.LOGS,
+    multiConsumerSelection: AlertConsumers.LOGS,
   });
 };
 

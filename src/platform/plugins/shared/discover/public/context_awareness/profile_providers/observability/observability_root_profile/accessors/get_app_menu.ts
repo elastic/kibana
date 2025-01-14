@@ -74,7 +74,7 @@ const registerDatasetQualityLink = (
 
 const registerCustomThresholdRuleAction = (
   registry: AppMenuRegistry,
-  { data, triggersActionsUi }: ProfileProviderServices,
+  { data, triggersActionsUi, ...services }: ProfileProviderServices,
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
@@ -91,10 +91,10 @@ const registerCustomThresholdRuleAction = (
         const index = dataView?.toMinimalSpec();
         const { filters, query } = data.query.getState();
 
-        return triggersActionsUi.getAddRuleFlyout({
+        return triggersActionsUi.getRuleFormFlyout({
+          plugins: { data, ...services },
           consumer: 'logs',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          canChangeTrigger: false,
           initialValues: {
             params: {
               searchConfiguration: {
@@ -104,7 +104,8 @@ const registerCustomThresholdRuleAction = (
               },
             },
           },
-          onClose: onFinishAction,
+          onCancel: onFinishAction,
+          onSubmit: onFinishAction,
         });
       },
     },

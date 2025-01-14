@@ -40,11 +40,12 @@ export interface Props {
 }
 
 export function HeaderControl({ slo }: Props) {
+  const { services } = useKibana();
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
+    triggersActionsUi: { getRuleFormFlyout: AddRuleFlyout },
+  } = services;
 
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
@@ -401,12 +402,13 @@ export function HeaderControl({ slo }: Props) {
 
       {isRuleFlyoutVisible ? (
         <AddRuleFlyout
+          plugins={services}
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          canChangeTrigger={false}
-          onClose={onCloseRuleFlyout}
+          onCancel={onCloseRuleFlyout}
+          onSubmit={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
-          useRuleProducer
+          shouldUseRuleProducer
         />
       ) : null}
 

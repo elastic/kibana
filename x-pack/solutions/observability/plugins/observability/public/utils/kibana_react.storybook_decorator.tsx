@@ -97,7 +97,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         theme: {
           theme$: createTheme$Mock(),
         },
-        triggersActionsUi: { getAddRuleFlyout: {} },
+        triggersActionsUi: { getRuleFormFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
-import type { RuleAddProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { useContext, useMemo } from 'react';
+import type { InfraClientStartDeps } from '../../../types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 
 interface Props {
-  onClose: RuleAddProps['onClose'];
+  onClose: () => void;
 }
 
 export function AlertFlyout({ onClose }: Props) {
+  const { services } = useKibana<InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
   const addAlertFlyout = useMemo(() => {
@@ -22,12 +24,13 @@ export function AlertFlyout({ onClose }: Props) {
       return null;
     }
 
-    return triggersActionsUI.getAddRuleFlyout({
+    return triggersActionsUI.getRuleFormFlyout({
+      plugins: services,
       consumer: 'infrastructure',
-      onClose,
-      canChangeTrigger: false,
+      onCancel: onClose,
+      onSubmit: onClose,
       ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-      metadata: {
+      initialMetadata: {
         currentOptions: {
           /*
           Setting the groupBy is currently required in custom threshold
@@ -37,7 +40,7 @@ export function AlertFlyout({ onClose }: Props) {
         },
       },
     });
-  }, [onClose, triggersActionsUI]);
+  }, [onClose, triggersActionsUI, services]);
 
   return addAlertFlyout;
 }

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
@@ -24,6 +25,8 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const [isEnabled, setIsEnabled] = React.useState(alert.enabled);
   const [isMuted, setIsMuted] = React.useState(alert.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
+
+  const { services } = useKibana();
 
   async function disableAlert() {
     setIsSaving(true);
@@ -82,18 +85,18 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     setIsSaving(false);
   }
 
+  const onClose = useCallback(() => {
+    setShowFlyout(false);
+    showBottomBar();
+  }, []);
   const flyoutUi = useMemo(
     () =>
       showFlyout &&
-      Legacy.shims.triggersActionsUi.getEditRuleFlyout({
-        initialRule: {
-          ...alert,
-          ruleTypeId: alert.alertTypeId,
-        },
-        onClose: () => {
-          setShowFlyout(false);
-          showBottomBar();
-        },
+      Legacy.shims.triggersActionsUi.getRuleFormFlyout({
+        plugins: services,
+        id: alert.id,
+        onSubmit: onClose,
+        onCancel: onClose,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [showFlyout]

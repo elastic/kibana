@@ -113,7 +113,7 @@ const mockKibana = () => {
         },
       },
       triggersActionsUi: {
-        getAddRuleFlyout: jest.fn(() => (
+        getRuleFormFlyout: jest.fn(() => (
           <div data-test-subj="add-rule-flyout">mocked component</div>
         )),
       },
