@@ -1,0 +1,196 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import datemath from '@kbn/datemath';
+import { CreateInvestigationResponse } from '@kbn/investigation-shared';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
+import { defer, lastValueFrom, toArray } from 'rxjs';
+import { KibanaClient } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/kibana_client';
+import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
+import { getRCAContext } from '../../common/rca/llm_context';
+
+export interface RCAChatClient {
+  rootCauseAnalysis: (params: {
+    investigationId: string;
+    from: string;
+    to: string;
+    alert: EcsFieldsResponse;
+  }) => Promise<RootCauseAnalysisEvent[]>;
+  getAlert: (params: { alertId: string }) => Promise<EcsFieldsResponse>;
+  getTimeRange: (params: {
+    alert: EcsFieldsResponse;
+    fromOffset: string;
+    toOffset: string;
+  }) => Promise<{ from: number; to: number }>;
+  createInvestigation: (params: { alertId: string; from: number; to: number }) => Promise<string>;
+  deleteInvestigation: (params: { investigationId: string }) => Promise<void>;
+}
+
+export class RCAClient {
+  constructor(
+    // protected readonly log: ToolingLog,
+    // protected readonly url: string,
+    protected readonly kibanaClient: KibanaClient // protected readonly spaceId?: string
+  ) {}
+
+  async getAlert(alertId: string): Promise<EcsFieldsResponse> {
+    const response = await this.kibanaClient.callKibana<EcsFieldsResponse>('get', {
+      pathname: '/internal/rac/alerts',
+      query: {
+        id: alertId,
+      },
+    });
+    return response.data;
+  }
+
+  async getTimeRange({
+    fromOffset = 'now-15m',
+    toOffset = 'now+15m',
+    alert,
+  }: {
+    fromOffset: string;
+    toOffset: string;
+    alert: EcsFieldsResponse;
+  }) {
+    const alertStart = alert['kibana.alert.start'] as string | undefined;
+    if (!alertStart) {
+      throw new Error(
+        'Alert start time is missing from the alert data. Please double check your alert fixture.'
+      );
+    }
+    const from = datemath.parse(fromOffset, { forceNow: new Date(alertStart) })?.valueOf()!;
+    const to = datemath.parse(toOffset, { forceNow: new Date(alertStart) })?.valueOf()!;
+    return {
+      from,
+      to,
+    };
+  }
+
+  async createInvestigation({
+    alertId,
+    from,
+    to,
+  }: {
+    alertId: string;
+    from: number;
+    to: number;
+  }): Promise<string> {
+    const body = {
+      id: uuidv4(),
+      title: 'Investigate Custom threshold breached',
+      params: {
+        timeRange: {
+          from,
+          to,
+        },
+      },
+      tags: [],
+      origin: {
+        type: 'alert',
+        id: alertId,
+      },
+      externalIncidentUrl: null,
+    };
+
+    const response = await this.kibanaClient.callKibana<CreateInvestigationResponse>(
+      'post',
+      {
+        pathname: '/api/observability/investigations',
+      },
+      body
+    );
+
+    return response.data.id;
+  }
+
+  async deleteInvestigation({
+    investigationId,
+  }: Parameters<RCAChatClient['deleteInvestigation']>[0]) {
+    await this.kibanaClient.callKibana('delete', {
+      pathname: `/api/observability/investigations/${investigationId}`,
+    });
+  }
+
+  async rootCauseAnalysis({
+    connectorIdOverride,
+    investigationId,
+    from,
+    to,
+    alert,
+  }: {
+    connectorIdOverride?: string;
+    investigationId: string;
+    from: string;
+    to: string;
+    alert?: EcsFieldsResponse;
+  }) {
+    const { log } = this.kibanaClient;
+    log.debug(`Calling root cause analysis API`);
+    const serviceName = alert?.['service.name'] as string | undefined;
+    if (!alert) {
+      throw new Error(
+        'Alert not found. Please ensure you have loaded test fixture data prior to running tests.'
+      );
+    }
+    if (!serviceName) {
+      throw new Error(
+        'Service name is missing from the alert data. Please double check your alert fixture.'
+      );
+    }
+    const context = getRCAContext(alert, serviceName);
+    const body = {
+      investigationId,
+      connectorId: connectorIdOverride || '34002e09-65be-4332-9084-2649c86abacb',
+      context,
+      rangeFrom: from,
+      rangeTo: to,
+      serviceName: 'controller',
+      completeInBackground: false,
+    };
+
+    const chat$ = defer(async () => {
+      const response = await this.kibanaClient.callKibana(
+        'post',
+        {
+          pathname: '/internal/observability/investigation/root_cause_analysis',
+        },
+        body,
+        'stream',
+        NaN
+      );
+
+      return {
+        response: {
+          body: new ReadableStream<Uint8Array>({
+            start(controller) {
+              response.data.on('data', (chunk: Buffer) => {
+                log.info(`Analyzing root cause...`);
+                controller.enqueue(chunk);
+              });
+
+              response.data.on('end', () => {
+                log.info(`Root cause analysis completed`);
+                controller.close();
+              });
+
+              response.data.on('error', (err: Error) => {
+                log.error(`Error while analyzing root cause: ${err}`);
+                controller.error(err);
+              });
+            },
+          }),
+        },
+      };
+    }).pipe(httpResponseIntoObservable(), toArray());
+
+    const events = await lastValueFrom(chat$);
+
+    return events.map((event) => event.event) as RootCauseAnalysisEvent[];
+  }
+}

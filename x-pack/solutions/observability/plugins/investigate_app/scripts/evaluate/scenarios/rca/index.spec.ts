@@ -14,8 +14,11 @@ import type {
   ObservationToolMessage,
   ToolErrorMessage,
 } from '@kbn/observability-ai-server/root_cause_analysis';
-import { chatClient } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/services';
-import type { RCAChatClient } from '../../kibana_client';
+import {
+  chatClient,
+  kibanaClient,
+} from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/services';
+import { RCAClient } from '../../rca_client';
 
 type ToolCallMessage =
   | EndProcessToolMessage
@@ -27,6 +30,7 @@ const ALERT_FIXTURE_ID = '0265d890-8d8d-4c7e-a5bd-a3951f79574e';
 
 describe('Root cause analysis', () => {
   const investigations: string[] = [];
+  const rcaChatClient = new RCAClient(kibanaClient);
   function countEntities(entities: InvestigateEntityToolMessage[]) {
     const entityCount: Record<string, number> = {};
     entities.forEach((entity) => {
@@ -81,8 +85,7 @@ describe('Root cause analysis', () => {
   }
 
   it('can accurately pinpoint the root cause of cartservice bad entrypoint failure', async () => {
-    const rcaChatClient = chatClient as RCAChatClient;
-    const alert = await rcaChatClient.getAlert({ alertId: ALERT_FIXTURE_ID });
+    const alert = await rcaChatClient.getAlert(ALERT_FIXTURE_ID);
     const { from, to } = await rcaChatClient.getTimeRange({
       fromOffset: 'now-15m',
       toOffset: 'now+15m',
@@ -99,6 +102,7 @@ describe('Root cause analysis', () => {
       from: new Date(from).toISOString(),
       to: new Date(to).toISOString(),
       alert,
+      connectorIdOverride: 'azure-gpt4',
     });
     const { report, entities, errors } = categorizeEvents(events);
     const prompt = `
@@ -137,7 +141,6 @@ describe('Root cause analysis', () => {
   });
 
   after(async () => {
-    const rcaChatClient = chatClient as RCAChatClient;
     for (const investigationId of investigations) {
       await rcaChatClient.deleteInvestigation({ investigationId });
     }

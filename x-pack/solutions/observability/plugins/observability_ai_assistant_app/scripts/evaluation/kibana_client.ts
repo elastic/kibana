@@ -86,9 +86,9 @@ export interface ChatClient {
 export class KibanaClient {
   axios: AxiosInstance;
   constructor(
-    protected readonly log: ToolingLog,
-    protected readonly url: string,
-    protected readonly spaceId?: string
+    public readonly log: ToolingLog,
+    private readonly url: string,
+    private readonly spaceId?: string
   ) {
     this.axios = axios.create({
       headers: {
@@ -98,11 +98,7 @@ export class KibanaClient {
     });
   }
 
-  protected getUrl(props: {
-    query?: UrlObject['query'];
-    pathname: string;
-    ignoreSpaceId?: boolean;
-  }) {
+  private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
     const parsed = parse(this.url);
 
     const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
@@ -123,7 +119,9 @@ export class KibanaClient {
   callKibana<T>(
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
-    data?: any
+    data?: any,
+    responseType?: 'json' | 'stream',
+    timeout?: number
   ) {
     const url = this.getUrl(props);
     return this.axios<T>({
@@ -134,6 +132,8 @@ export class KibanaClient {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'Kibana',
       },
+      responseType: responseType || 'json',
+      timeout: timeout || undefined,
     }).catch((error) => {
       if (isAxiosError(error)) {
         const interestingPartsOfError = {

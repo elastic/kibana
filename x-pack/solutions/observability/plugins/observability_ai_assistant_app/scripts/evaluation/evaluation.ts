@@ -7,7 +7,6 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
-import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
 import chalk from 'chalk';
 import { castArray, omit } from 'lodash';
@@ -26,17 +25,7 @@ import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
-export function runEvaluations<KibanaClientType extends KibanaClient>(
-  {
-    testDirectory,
-    kbnClient,
-  }: {
-    testDirectory: string;
-    kbnClient?: new (...params: ConstructorParameters<typeof KibanaClient>) => KibanaClientType;
-  } = {
-    testDirectory: Path.join(__dirname, './scenarios/**/*.spec.ts'),
-  }
-) {
+export function runEvaluations<KibanaClientType extends KibanaClient>() {
   yargs(process.argv.slice(2))
     .command('*', 'Run AI Assistant evaluations', options, (argv) => {
       run(
@@ -49,9 +38,7 @@ export function runEvaluations<KibanaClientType extends KibanaClient>(
 
           log.info(`Elasticsearch URL: ${serviceUrls.esUrl}`);
 
-          const kibanaClient = kbnClient
-            ? new kbnClient(log, serviceUrls.kibanaUrl, argv.spaceId)
-            : new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
+          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
@@ -88,9 +75,8 @@ export function runEvaluations<KibanaClientType extends KibanaClient>(
           await kibanaClient.installKnowledgeBase();
 
           const scenarios =
-            (argv.files !== undefined &&
-              castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
-            fastGlob.sync(testDirectory);
+            argv.files !== undefined &&
+            castArray(argv.files).map((file) => Path.join(process.cwd(), file));
 
           if (!scenarios.length) {
             throw new Error('No scenarios to run');
