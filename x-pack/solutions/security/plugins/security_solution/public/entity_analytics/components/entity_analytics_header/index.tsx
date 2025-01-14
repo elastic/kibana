@@ -8,12 +8,14 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { sumBy } from 'lodash/fp';
+import { capitalize, sumBy } from 'lodash/fp';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
   Direction,
-  RiskScoreEntity,
+  EntityType,
   RiskScoreFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
@@ -34,13 +36,16 @@ import { isJobStarted } from '../../../../common/machine_learning/helpers';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import type { SeverityCount } from '../severity/types';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};
 `;
 
+// This is not used by the inspect feature but required by the refresh button
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
+const SERVICE_RISK_QUERY_ID = 'serviceRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
   const { from, to } = useGlobalTime();
@@ -52,6 +57,7 @@ export const EntityAnalyticsHeader = () => {
     }),
     [from, to]
   );
+  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
 
   const {
     severityCount: hostsSeverityCount,
@@ -60,7 +66,7 @@ export const EntityAnalyticsHeader = () => {
     refetch: refetchHostRiskScore,
   } = useRiskScoreKpi({
     timerange,
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
     filterQuery,
   });
 
@@ -72,7 +78,18 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     filterQuery,
     timerange,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
+  });
+
+  const {
+    severityCount: servicesSeverityCount,
+    loading: serviceRiskLoading,
+    refetch: refetchServiceRiskScore,
+    inspect: inspectServiceRiskScore,
+  } = useRiskScoreKpi({
+    filterQuery,
+    timerange,
+    riskEntity: EntityType.service,
   });
 
   const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });
@@ -146,6 +163,15 @@ export const EntityAnalyticsHeader = () => {
     inspect: inspectHostRiskScore,
   });
 
+  useQueryInspector({
+    queryId: SERVICE_RISK_QUERY_ID,
+    loading: serviceRiskLoading,
+    refetch: refetchServiceRiskScore,
+    setQuery,
+    deleteQuery,
+    inspect: inspectServiceRiskScore,
+  });
+
   // Anomaly jobs are enabled if at least one job is started or has data
   const areJobsEnabled = useMemo(
     () =>
@@ -173,56 +199,33 @@ export const EntityAnalyticsHeader = () => {
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
         {isPlatinumOrTrialLicense && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-              <EuiFlexItem className="eui-textCenter">
-                <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
-                  <span>
-                    {hostsSeverityCount ? (
-                      <FormattedCount count={hostsSeverityCount[RiskSeverity.Critical]} />
-                    ) : (
-                      '-'
-                    )}
-                  </span>
-                </StyledEuiTitle>
+          <>
+            <EuiFlexItem grow={false}>
+              <CriticalEntitiesCount
+                entityType={EntityType.host}
+                severityCount={hostsSeverityCount}
+                onClick={goToHostRiskTabFilteredByCritical}
+                href={hostRiskTabUrl}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CriticalEntitiesCount
+                entityType={EntityType.user}
+                severityCount={usersSeverityCount}
+                onClick={goToUserRiskTabFilteredByCritical}
+                href={userRiskTabUrl}
+              />
+            </EuiFlexItem>
+
+            {isServiceEntityStoreEnabled && (
+              <EuiFlexItem grow={false}>
+                <CriticalEntitiesCount
+                  entityType={EntityType.service}
+                  severityCount={servicesSeverityCount}
+                />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <LinkAnchor
-                  onClick={goToHostRiskTabFilteredByCritical}
-                  href={hostRiskTabUrl}
-                  data-test-subj="critical_hosts_link"
-                >
-                  {i18n.CRITICAL_HOSTS}
-                </LinkAnchor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        {isPlatinumOrTrialLicense && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-              <EuiFlexItem className="eui-textCenter">
-                <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
-                  <span>
-                    {usersSeverityCount ? (
-                      <FormattedCount count={usersSeverityCount[RiskSeverity.Critical]} />
-                    ) : (
-                      '-'
-                    )}
-                  </span>
-                </StyledEuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <LinkAnchor
-                  onClick={goToUserRiskTabFilteredByCritical}
-                  href={userRiskTabUrl}
-                  data-test-subj="critical_users_link"
-                >
-                  {i18n.CRITICAL_USERS}
-                </LinkAnchor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+            )}
+          </>
         )}
 
         <EuiFlexItem grow={false}>
@@ -241,5 +244,46 @@ export const EntityAnalyticsHeader = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+};
+
+const CriticalEntitiesCount = ({
+  entityType,
+  severityCount,
+  href,
+  onClick,
+}: {
+  severityCount?: SeverityCount;
+  href?: string;
+  onClick?: React.MouseEventHandler;
+  entityType: EntityType;
+}) => {
+  const CriticalEntitiesText = (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.header.criticalEntities"
+      defaultMessage="Critical {entityType}"
+      values={{ entityType: capitalize(entityType) }}
+    />
+  );
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexItem className="eui-textCenter">
+        <StyledEuiTitle data-test-subj={`critical_${entityType}s_quantity`} size="l">
+          <span>
+            {severityCount ? <FormattedCount count={severityCount[RiskSeverity.Critical]} /> : '-'}
+          </span>
+        </StyledEuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {href || onClick ? (
+          <LinkAnchor onClick={onClick} href={href} data-test-subj={`critical_${entityType}s_link`}>
+            {CriticalEntitiesText}
+          </LinkAnchor>
+        ) : (
+          CriticalEntitiesText
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
