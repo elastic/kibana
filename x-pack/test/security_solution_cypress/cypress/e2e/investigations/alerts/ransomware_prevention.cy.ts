@@ -52,7 +52,7 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
       deleteTimelines();
       login();
       createTimeline({ ...getTimeline(), query: 'event.code: "ransomware"' }).then((response) => {
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
+        cy.wrap(response.body.savedObjectId).as('timelineId');
       });
     });
 

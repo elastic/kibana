@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189464
+  // FLAKY: https://github.com/elastic/kibana/issues/193036
   describe.skip('Inference endpoints', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         inferenceEndpoints.some(
           (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
-      ).to.be(true);
+      ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);

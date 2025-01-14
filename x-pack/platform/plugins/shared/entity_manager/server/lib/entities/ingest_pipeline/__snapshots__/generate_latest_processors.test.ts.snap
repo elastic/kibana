@@ -1,0 +1,235 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLatestProcessors(definition) should generate a valid pipeline for builtin definition 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definition_id",
+      "value": "builtin_mock_entity_definition",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definition_version",
+      "value": "1.0.0",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schema_version",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.identity_fields",
+      "value": Array [
+        "log.logger",
+      ],
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.id",
+      "value": "{{{entity.identity.log.logger}}}",
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags?.data != null) {
+  ctx.tags = ctx.entity.metadata.tags.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.name?.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  ctx.host.name = ctx.entity.metadata.host.name.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name?.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  if (ctx.host.os == null) {
+    ctx.host.os = new HashMap();
+  }
+  ctx.host.os.name = ctx.entity.metadata.host.os.name.data.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex?.data != null) {
+  ctx.sourceIndex = ctx.entity.metadata.sourceIndex.data.keySet();
+}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.display_name",
+      "value": "{{log.logger}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "_index",
+      "value": ".entities.v1.latest.builtin_mock_entity_definition",
+    },
+  },
+]
+`;
+
+exports[`generateLatestProcessors(definition) should generate a valid pipeline for custom definition 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definition_id",
+      "value": "admin-console-services",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definition_version",
+      "value": "1.0.0",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schema_version",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.identity_fields",
+      "value": Array [
+        "log.logger",
+      ],
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.id",
+      "value": "{{{entity.identity.log.logger}}}",
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags?.data != null) {
+  ctx.tags = ctx.entity.metadata.tags.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.name?.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  ctx.host.name = ctx.entity.metadata.host.name.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name?.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  if (ctx.host.os == null) {
+    ctx.host.os = new HashMap();
+  }
+  ctx.host.os.name = ctx.entity.metadata.host.os.name.data.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex?.data != null) {
+  ctx.sourceIndex = ctx.entity.metadata.sourceIndex.data.keySet();
+}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.display_name",
+      "value": "{{log.logger}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "_index",
+      "value": ".entities.v1.latest.admin-console-services",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-latest@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@custom",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-latest@custom",
+    },
+  },
+]
+`;

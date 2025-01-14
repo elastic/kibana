@@ -2,11 +2,146 @@
   "id": "logsDataAccess",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.LogSourcesProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "LogSourcesProvider",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<React.PropsWithChildren<{ logSourcesService: ",
+          "LogSourcesService",
+          "; }>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_data_access/public/hooks/use_log_sources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesProvider.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.LogSourcesSettingSynchronisationInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "LogSourcesSettingSynchronisationInfo",
+        "description": [],
+        "signature": [
+          "({ isLoading, logSourcesValue, getUrlForApp, title }: { isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_data_access/public/components/logs_sources_setting.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesSettingSynchronisationInfo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ isLoading, logSourcesValue, getUrlForApp, title }",
+            "description": [],
+            "signature": [
+              "{ isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/logs_data_access/public/components/logs_sources_setting.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.useLogSourcesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useLogSourcesContext",
+        "description": [],
+        "signature": [
+          "() => { isUninitialized: boolean; isLoadingLogSources: boolean; hasFailedLoadingLogSources: boolean; logSourcesError: Error | undefined; logSources: ",
+          "LogSource",
+          "[]; combinedIndices: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/logs_data_access/public/hooks/use_log_sources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "logsDataAccess",
+      "id": "def-public.LogsDataAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "LogsDataAccessPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/platform/plugins/shared/logs_data_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "logsDataAccess",
+      "id": "def-public.LogsDataAccessPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "LogsDataAccessPluginStart",
+      "description": [],
+      "signature": [
+        "{ services: { logSourcesService: ",
+        "LogSourcesService",
+        "; }; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/logs_data_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -19,7 +154,7 @@
         "tags": [],
         "label": "LogsRatesMetrics",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +165,7 @@
             "tags": [],
             "label": "logRatePerMinute",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,7 +179,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -58,7 +193,7 @@
         "tags": [],
         "label": "LogsRatesServiceReturnType",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
+        "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,7 +214,7 @@
                 "text": "LogsRatesMetrics"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -100,7 +235,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/observability_solution/logs_data_access/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/logs_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -132,21 +267,17 @@
         "LogsErrorRateTimeseries",
         ") => Promise<",
         "LogsErrorRateTimeseriesReturnType",
-        ">; getLogSourcesService: (request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "server",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
-        "<unknown, unknown, unknown, any>) => Promise<{ getLogSources: () => Promise<",
-        "LogSource",
-        "[]>; setLogSources: (sources: ",
-        "LogSource",
-        "[]) => Promise<void>; }>; }; }"
+        ">; logSourcesServiceFactory: { getLogSourcesService(savedObjectsClient: ",
+        "SavedObjectsClientContract",
+        "): Promise<",
+        "LogSourcesService",
+        ">; getScopedLogSourcesService(request: ",
+        "KibanaRequest",
+        "<unknown, unknown, unknown, any>): Promise<",
+        "LogSourcesService",
+        ">; }; }; }"
       ],
-      "path": "x-pack/plugins/observability_solution/logs_data_access/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/logs_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

@@ -1,21 +1,17 @@
 ---
 apiVersion: v1
-
 # The repository name in registry1, excluding /ironbank/
 name: 'elastic/kibana/kibana'
-
 # List of tags to push for the repository in registry1
 # The most specific version should be the first tag and will be shown
 # on ironbank.dsop.io
 tags:
   - '{{version}}'
   - 'latest'
-
 # Build args passed to Dockerfile ARGs
 args:
   BASE_IMAGE: 'redhat/ubi/ubi9'
-  BASE_TAG: '9.4'
-
+  BASE_TAG: "9.5"
 # Docker image labels
 labels:
   org.opencontainers.image.title: 'kibana'
@@ -27,7 +23,6 @@ labels:
   # mil.dso.ironbank.image.keywords: ""
   # mil.dso.ironbank.image.type: "commercial"
   mil.dso.ironbank.product.name: 'Kibana'
-
 # List of resources to make available to the offline build context
 resources:
   - filename: kibana-{{version}}-linux-x86_64.tar.gz
@@ -45,22 +40,49 @@ resources:
     validation:
       type: sha512
       value: 0ce56bde1853fed3e53282505bac65707385275a27816c29712ab04c187aa249797c82c58759b2b36c210d4e2683eda92359d739a8045cb8385c2c34d37cc9e1
-
 # List of project maintainers
 maintainers:
-  - email: 'jon@elastic.co'
-    name: 'Jonathan Budzenski'
-    username: 'jbudz'
-    cht_member: false
+  # AppEx Operations Members
   - email: 'brad.white@elastic.co'
     name: 'Brad White'
     username: 'brad.white'
     cht_member: false
+  - email: 'jon@elastic.co'
+    name: 'Jonathan Budzenski'
+    username: 'jbudz'
+    cht_member: false
+  # AppEx Platform Security Members
+  - email: 'aleh.zasypkin@elastic.co'
+    name: 'Aleh Zasypkin'
+    username: 'azasypkin'
+    cht_member: false
+  - email: 'larry.gregory@elastic.co'
+    name: 'Larry Gregory'
+    username: 'legrego'
+    cht_member: false
+  # InfoSec Members
+  - email: 'abby.zumstein@elastic.co'
+    name: 'Abby Zumstein'
+    username: 'azumstein'
+    cht_member: false
+  - email: 'arsalan.khan@elastic.co'
+    name: 'Arsalan Khan'
+    username: 'khanarsalan'
+    cht_member: false
+  - email: 'iaroslava.zhomir@elastic.co'
+    name: 'Slava Zhomir'
+    username: 'slava-elastic'
+    cht_member: false
+  - email: 'ryan.kam@elastic.co'
+    name: 'Ryan Kam'
+    username: 'ryankam'
+    cht_member: false
+  - email: 'saumya.shree@elastic.co'
+    name: 'Saumya Shree'
+    username: 'shreesaumya'
+    cht_member: false
+  # CHT Members
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
-    cht_member: true
-  - email: "yalabe.dukuly@anchore.com"
-    name: "Yalabe Dukuly"
-    username: "yalabe.dukuly"
     cht_member: true

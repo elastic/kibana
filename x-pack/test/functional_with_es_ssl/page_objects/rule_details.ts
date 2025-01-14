@@ -92,7 +92,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async clickPaginationNextPage() {
       const nextButton = await testSubjects.find(`pagination-button-next`);
-      nextButton.click();
+      await nextButton.click();
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {

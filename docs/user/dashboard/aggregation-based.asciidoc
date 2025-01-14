@@ -7,7 +7,7 @@ With aggregation-based visualizations, you can:
 
 * Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
 * Create visualization with non-time series data
-* Use a <<save-open-search,saved search>> as an input
+* Use a <<save-open-search,Discover session>> as an input
 * Sort data tables and use the summary row and percentage column features
 * Assign colors to data series
 * Extend features with plugins
@@ -112,7 +112,7 @@ Choose the type of visualization you want to create, then use the editor to conf
 
 .. Select the data source you want to visualize.
 +
-NOTE: There is no performance impact on the data source you select. For example, *Discover* saved searches perform the same as {data-sources}. 
+NOTE: There is no performance impact on the data source you select. For example, saved Discover sessions perform the same as {data-sources}. 
 
 . Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +
@@ -140,13 +140,9 @@ a bar chart that displays the top five log traffic sources for every three hours
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
-. Click *Other sample data sets*. 
-
-. On the *Sample web logs* card, click *Add data*.
-
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { OpenAPIV3 } from 'openapi-types';
@@ -19,5 +20,19 @@ export function mergeTags(
 
   const merged = mergeArrays(tagsArrayOfArrays);
 
-  return merged.length > 0 ? merged : undefined;
+  if (merged.length === 0) {
+    return;
+  }
+
+  // To streamline API endpoints categorization it's expected that
+  // tags are sorted alphabetically by name
+  merged.sort((a, b) => getTagName(a).localeCompare(getTagName(b)));
+
+  return merged;
+}
+
+function getTagName(tag: OpenAPIV3.TagObject): string {
+  return 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
+    ? tag['x-displayName']
+    : tag.name;
 }

@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlexItemSetting component renders a null label if label/tooltip text not supplied 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiFormRow
+    hasEmptyLabelSpace={true}
+    label={null}
+  >
+    <p>
+      The child elements
+    </p>
+  </EuiFormRow>
+</EuiFlexItem>
+`;
+
+exports[`FlexItemSetting component renders component and children as expected 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiFormRow
+    hasEmptyLabelSpace={false}
+    label={
+      <FormLabelWithIconTip
+        formRowLabelText="label text"
+        formRowTooltipText="tooltip text"
+      />
+    }
+  >
+    <p>
+      The child elements
+    </p>
+  </EuiFormRow>
+</EuiFlexItem>
+`;

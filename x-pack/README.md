@@ -1,8 +1,7 @@
 # Elastic License Functionality
 
-This directory tree contains files subject to the Elastic License 2.0. The files subject
-to the Elastic License 2.0 are grouped in this directory to clearly separate them
-from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
+This directory tree contains files subject to the Elastic License 2.0.
+The files subject to the Elastic License 2.0 are grouped in this directory to clearly separate them from files licensed otherwise.
 
 ## Alert Details page feature flags (feature-flag-per-App)
 
@@ -101,4 +100,4 @@ See [here](./test/functional/apps/dashboard/reporting/README.md) for more inform
 
 #### Running Security Solution Cypress E2E/integration tests
 
-See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.
+See [here](./solutions/security/plugins/security_solution/cypress/README.md) for information on running this test suite.

@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Ingest Pipelines', () => {
-    loadTestFile(require.resolve('./ingest_pipelines'));
+  describe('Ingest pipelines', () => {
+    loadTestFile(require.resolve('./databases'));
   });
 }

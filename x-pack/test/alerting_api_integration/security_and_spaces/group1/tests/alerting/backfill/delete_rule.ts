@@ -103,13 +103,13 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
 
       // check that the ad hoc run SOs were created
       const adHocRunSO1 = (await getAdHocRunSO(backfillId1)) as SavedObject<AdHocRunSO>;
-      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
       expect(adHocRun1).not.to.be(undefined);
       const adHocRunSO2 = (await getAdHocRunSO(backfillId2)) as SavedObject<AdHocRunSO>;
-      const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+      const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
       expect(adHocRun2).not.to.be(undefined);
       const adHocRunSO3 = (await getAdHocRunSO(backfillId3)) as SavedObject<AdHocRunSO>;
-      const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
+      const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params')!;
       expect(adHocRun3).not.to.be(undefined);
 
       // check that the scheduled tasks were created

@@ -8,8 +8,9 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
-import { pageObjects } from '../page_objects';
 import type { TargetTags } from '../target_tags';
+import { PageObjects } from '../page_objects';
+import { Services } from '../services';
 
 export const SUITE_TAGS: Record<
   'ess' | 'serverless',
@@ -33,6 +34,7 @@ export const generateConfig = async ({
   kbnServerArgs = [],
   target,
   services,
+  pageObjects,
 }: {
   ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
@@ -40,7 +42,8 @@ export const generateConfig = async ({
   junitReportName: string;
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
-  services: any;
+  services: Services;
+  pageObjects: PageObjects;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
   // services are not ready yet, so we need to import them here

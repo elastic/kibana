@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-vm-images
+  description: Build CI agent VM images for Kibana
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-vm-images'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-operations
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / vm images
+      description: Build CI agent VM images for Kibana
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      default_branch: main
+      repository: elastic/ci-agent-images
+      pipeline_file: vm-images/.buildkite/pipeline.yml
+      provider_settings:
+        trigger_mode: none
+      schedules:
+        daily kibana image build:
+          branch: main
+          cronline: '0 0 * * *'
+          env:
+            IMAGES_CONFIG: kibana/images.yml
+          message: Builds Kibana VM images daily
+        daily kibana fips image build:
+          branch: main
+          cronline: '0 4 * * *' # make sure this runs after the daily kibana image build
+          env:
+            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/images.yml'
+            IMAGES_CONFIG: kibana/fips.yml
+          message: Builds Kibana FIPS VM image daily
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ

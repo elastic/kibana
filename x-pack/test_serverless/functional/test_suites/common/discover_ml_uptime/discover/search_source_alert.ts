@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'timePicker',
     'dashboard',
+    'unifiedFieldList',
   ]);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
@@ -47,53 +48,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let connectorId: string;
 
   const createSourceIndex = () =>
-    es.index({
-      index: SOURCE_DATA_VIEW,
-      body: {
-        settings: { number_of_shards: 1 },
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            message: { type: 'keyword' },
-          },
-        },
-      },
-    });
+    retry.try(() =>
+      createIndex(SOURCE_DATA_VIEW, {
+        '@timestamp': { type: 'date' },
+        message: { type: 'keyword' },
+      })
+    );
 
-  const generateNewDocs = async (docsNumber: number) => {
+  const createOutputDataIndex = () =>
+    retry.try(() =>
+      createIndex(OUTPUT_DATA_VIEW, {
+        rule_id: { type: 'text' },
+        rule_name: { type: 'text' },
+        alert_id: { type: 'text' },
+        context_link: { type: 'text' },
+      })
+    );
+
+  async function createIndex(index: string, properties: unknown) {
+    try {
+      await es.index({
+        index,
+        body: {
+          settings: { number_of_shards: 1 },
+          mappings: { properties },
+        },
+      });
+    } catch (e) {
+      log.error(`Failed to create index "${index}" with error "${e.message}"`);
+    }
+  }
+
+  async function generateNewDocs(docsNumber: number, index = SOURCE_DATA_VIEW) {
     const mockMessages = Array.from({ length: docsNumber }, (_, i) => `msg-${i}`);
     const dateNow = new Date();
     const dateToSet = new Date(dateNow);
     dateToSet.setMinutes(dateNow.getMinutes() - 10);
-    for await (const message of mockMessages) {
-      es.transport.request({
-        path: `/${SOURCE_DATA_VIEW}/_doc`,
-        method: 'POST',
-        body: {
-          '@timestamp': dateToSet.toISOString(),
-          message,
-        },
-      });
+    try {
+      await Promise.all(
+        mockMessages.map((message) =>
+          es.transport.request({
+            path: `/${index}/_doc`,
+            method: 'POST',
+            body: {
+              '@timestamp': dateToSet.toISOString(),
+              message,
+            },
+          })
+        )
+      );
+    } catch (e) {
+      log.error(`Failed to generate new docs in "${index}" with error "${e.message}"`);
     }
-  };
-
-  const createOutputDataIndex = () =>
-    es.index({
-      index: OUTPUT_DATA_VIEW,
-      body: {
-        settings: {
-          number_of_shards: 1,
-        },
-        mappings: {
-          properties: {
-            rule_id: { type: 'text' },
-            rule_name: { type: 'text' },
-            alert_id: { type: 'text' },
-            context_link: { type: 'text' },
-          },
-        },
-      },
-    });
+  }
 
   const deleteAlerts = (alertIds: string[]) =>
     asyncForEach(alertIds, async (alertId: string) => {
@@ -194,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '1');
+    await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
@@ -215,7 +222,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    // Different create rule buttons in serverless
+    if (await testSubjects.exists('discoverCreateAlertButton')) {
+      await testSubjects.click('discoverCreateAlertButton');
+    } else {
+      await testSubjects.click('discoverAppMenuCustomThresholdRule');
+    }
   };
 
   const openManagementAlertFlyout = async () => {
@@ -235,6 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
+    await testSubjects.click('toggleLongFieldValue-context_link');
     const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
 
@@ -364,6 +377,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
+    // Failing: https://github.com/elastic/kibana/issues/203045
+    this.tags(['skipSvlOblt']);
+
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -497,8 +513,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '1');
-      await testSubjects.click('saveEditedRuleButton');
+      await testSubjects.setValue('alertThresholdInput0', '1');
+
+      // Different save buttons in serverless
+      if (await testSubjects.exists('saveEditedRuleButton')) {
+        await testSubjects.click('saveEditedRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(RULE_NAME);
@@ -531,9 +553,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // change title
       await testSubjects.click('editIndexPatternButton');
-      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');
@@ -561,7 +583,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
+      await retry.try(async () => {
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain(
+          'runtime-message-field'
+        );
+      });
 
       // create an alert
       await openDiscoverAlertFlyout();
@@ -642,8 +670,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        await testSubjects.setValue('ruleNameInput', newAlert);
-        const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        let ruleName;
+        // Rule name input is different in serverless
+        if (await testSubjects.exists('ruleNameInput')) {
+          await testSubjects.setValue('ruleNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        } else {
+          await testSubjects.setValue('ruleDetailsNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+        }
         return ruleName === newAlert;
       });
 
@@ -667,7 +702,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
       }
 
-      await testSubjects.click('saveRuleButton');
+      // Save rule button is different in serverless
+      if (await testSubjects.exists('saveRuleButton')) {
+        await testSubjects.click('saveRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
 
       await retry.waitFor('confirmation modal', async () => {
         return await testSubjects.exists('confirmModalConfirmButton');

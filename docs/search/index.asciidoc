@@ -1,0 +1,73 @@
+[role="xpack"]
+[[search-space]]
+= Search
+
+The *Search* space in the {kib} UI contains the following GUI features:
+
+* https://www.elastic.co/guide/en/enterprise-search/current/connectors.html[Connectors]
+* https://www.elastic.co/guide/en/enterprise-search/current/crawler.html[Web crawler]
+* <<playground,Playground>>
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/search-application-overview.html[Search Applications]
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html[Behavioral Analytics]
+* <<inference-endpoints,Inference Endpoints UI>>
+* <<search-ai-assistant,AI Assistant for Search>>
+* Dev Tools <<console-kibana, Console>>
+
+[float]
+[[search-release-notes]]
+== Docs and release notes
+
+The Search solution and use case is made up of many tools and features across the {stack}.
+As a result, the release notes for your features of interest might live in different Elastic docs.
+Use the following table to find links to the appropriate documentation, API references (if applicable), and release notes.
+
+[options="header"]
+|===
+| Name               | API reference           | Documentation         | Release notes
+
+| Connectors
+| {ref}/connector-apis.html[API reference]
+| {ref}/es-connectors.html[Elastic Connectors]
+| {ref}/es-connectors-release-notes.html[Elasticsearch guide]
+
+| Web crawler
+| N/A
+| {enterprise-search-ref}/crawler.html[Documentation]
+| {enterprise-search-ref}/changelog.html[Enterprise Search Guide]
+
+| Playground
+| N/A
+| {kibana-ref}/playground.html[Documentation]
+| {kibana-ref}/release-notes.html[Kibana guide]
+
+| Search Applications
+| {ref}/search-application-apis.html[API reference]
+| {enterprise-search-ref}/app-search-workplace-search.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
+
+| Behavioral Analytics
+| {ref}/behavioral-analytics-apis.html[API reference]
+| {ref}/behavioral-analytics-start.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
+
+| Inference Endpoints
+| {ref}/inference-apis.html[API reference]
+| {kibana-ref}/inference-endpoints.html[Documentation]
+| {ref}/es-release-notes.html[Elasticsearch guide]
+
+| Console
+| N/A
+| {kibana-ref}/console-kibana.html[Documentation]
+| {kibana-ref}/release-notes.html[Kibana guide]
+
+| Search UI
+| https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
+| https://www.elastic.co/docs/current/search-ui[Documentation]
+| https://www.elastic.co/docs/current/search-ui[Search UI]
+
+|===
+
+include::search-connection-details.asciidoc[]
+include::playground/index.asciidoc[]
+include::search-ai-assistant/index.asciidoc[]
+include::inference-endpoints/index.asciidoc[]

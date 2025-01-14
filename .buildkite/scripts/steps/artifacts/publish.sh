@@ -23,6 +23,8 @@ download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-wolfi-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-wolfi-$FULL_VERSION-docker-image-aarch64.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
@@ -33,6 +35,7 @@ download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-wolfi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
 download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
@@ -51,7 +54,7 @@ chmod -R a+r target/*
 chmod -R a+w target
 
 echo "--- Pull latest Release Manager CLI"
-docker pull docker.elastic.co/infra/release-manager:latest
+docker_with_retry pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then

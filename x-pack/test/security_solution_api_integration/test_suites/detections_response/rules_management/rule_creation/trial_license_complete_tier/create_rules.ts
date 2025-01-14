@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@serverless @ess create_rules', () => {
+  describe('@serverless @ess @serverlessQA create_rules', () => {
     describe('rule creation', () => {
       before(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });

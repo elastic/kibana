@@ -1,0 +1,29 @@
+{
+  "snapshot.repository_verify_integrity": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "meta_thread_pool_concurrency": "",
+      "blob_thread_pool_concurrency": "",
+      "snapshot_verification_concurrency": "",
+      "index_verification_concurrency": "",
+      "index_snapshot_verification_concurrency": "",
+      "max_failed_shard_snapshots": "",
+      "verify_blob_contents": "__flag__",
+      "max_bytes_per_sec": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/_verify_integrity"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

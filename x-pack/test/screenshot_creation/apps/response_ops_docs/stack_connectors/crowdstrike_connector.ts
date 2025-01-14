@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
+  // const toasts = getService('toasts');
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
@@ -44,9 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('secrets.clientId-input', 'test');
       await testSubjects.setValue('secrets.clientSecret-input', 'secret');
       await commonScreenshots.takeScreenshot('crowdstrike-connector', screenshotDirectories);
-      await testSubjects.click('create-connector-flyout-save-test-btn');
-      await toasts.dismissAll();
-      await commonScreenshots.takeScreenshot('crowdstrike-params-test', screenshotDirectories);
+      // You cannot test the CrowdStrike connector
+      // await testSubjects.click('create-connector-flyout-save-test-btn');
+      // await toasts.dismissAll();
+      // await commonScreenshots.takeScreenshot('crowdstrike-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });

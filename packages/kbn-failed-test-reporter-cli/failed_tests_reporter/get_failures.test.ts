@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getFailures } from './get_failures';
@@ -27,6 +28,7 @@ it('discovers failures in ftr report', async () => {
           ",
         "likelyIrrelevant": false,
         "name": "maps app  maps loaded from sample data ecommerce \\"before all\\" hook",
+        "owners": "elastic/kibana-presentation",
         "system-out": "
             [00:00:00]       │
     [00:07:04]         └-: maps app
@@ -48,6 +50,7 @@ it('discovers failures in ftr report', async () => {
         "likelyIrrelevant": true,
         "metadata-json": "{\\"messages\\":[\\"foo\\"],\\"screenshots\\":[{\\"name\\":\\"failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]\\",\\"url\\":\\"https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png\\"}]}",
         "name": "maps app \\"after all\\" hook",
+        "owners": "elastic/kibana-presentation",
         "system-out": "
             [00:00:00]       │
     [00:07:04]         └-: maps app
@@ -66,6 +69,7 @@ it('discovers failures in ftr report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }",
         "likelyIrrelevant": true,
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
+        "owners": "elastic/ml-ui",
         "system-out": "[00:21:57]         └-: machine learning...",
         "time": "6.040",
       },
@@ -86,6 +90,7 @@ it('discovers failures in jest report', async () => {
           ",
         "likelyIrrelevant": false,
         "name": "launcher can reconnect if process died",
+        "owners": undefined,
         "system-out": "",
         "time": "7.060",
       },
@@ -115,6 +120,7 @@ it('discovers failures in mocha report', async () => {
           ",
         "likelyIrrelevant": true,
         "name": "code in multiple nodes \\"before all\\" hook",
+        "owners": undefined,
         "system-out": "
             
           ",
@@ -130,6 +136,7 @@ it('discovers failures in mocha report', async () => {
           ",
         "likelyIrrelevant": true,
         "name": "code in multiple nodes \\"after all\\" hook",
+        "owners": undefined,
         "system-out": "
             
           ",

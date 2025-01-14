@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/url-forwarding-plugin",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "urlForwarding",
+    "browser": true,
+    "server": false
+  }
+}

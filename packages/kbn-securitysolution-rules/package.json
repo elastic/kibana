@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/securitysolution-rules",
-  "version": "1.0.0",
-  "description": "security solution rule utilities to use across plugins",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true
-}

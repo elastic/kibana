@@ -43,11 +43,11 @@ export default ({ getService }: FtrProviderContext): void => {
      * Tests the legacy actions to ensure we can export legacy notifications
      * @deprecated Once the legacy notification system is removed, remove this test too.
      */
-    describe('legacy_notification_system', async () => {
+    describe('legacy_notification_system', () => {
       it('should be able to a read a scheduled action correctly', async () => {
         // create an connector/action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
-                actionTypeId: hookAction.actionTypeId,
+                actionTypeId: hookAction.connector_type_id,
               },
             ],
           })
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
-              action_type_id: hookAction.actionTypeId,
+              action_type_id: hookAction.connector_type_id,
               frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ],

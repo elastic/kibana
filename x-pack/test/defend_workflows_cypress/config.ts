@@ -48,9 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'endpointResponseActionsEnabled',
-        ])}`,
       ],
     },
   };

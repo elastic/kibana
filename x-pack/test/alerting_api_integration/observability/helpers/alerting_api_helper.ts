@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Agent as SuperTestAgent } from 'supertest';
+import expect from '@kbn/expect';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { refreshSavedObjectIndices } from './refresh_index';
@@ -62,7 +63,7 @@ export async function createRule<Params = ThresholdParams>({
   logger: ToolingLog;
   esClient: Client;
 }) {
-  const { body } = await supertest
+  const { body, status } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .send({
@@ -75,8 +76,9 @@ export async function createRule<Params = ThresholdParams>({
       name,
       rule_type_id: ruleTypeId,
       actions,
-    })
-    .expect(200);
+    });
+
+  expect(status).to.eql(200, JSON.stringify(body));
 
   await refreshSavedObjectIndices(esClient);
   logger.debug(`Created rule id: ${body.id}`);

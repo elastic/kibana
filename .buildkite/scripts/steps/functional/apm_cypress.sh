@@ -8,6 +8,7 @@ APM_CYPRESS_RECORD_KEY="$(vault_get apm-cypress-dashboard-record-key CYPRESS_REC
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
+.buildkite/scripts/copy_es_snapshot_cache.sh
 
 export JOB=kibana-apm-cypress
 IS_FLAKY_TEST_RUNNER=${CLI_COUNT:-0}
@@ -30,6 +31,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/observability_solution/apm/scripts/test/e2e.js \
+node solutions/observability/plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   $CYPRESS_ARGS

@@ -55,7 +55,7 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message: `API [DELETE /internal/alerting/rules/maintenance_window/${maintenanceWindowBody.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               objectRemover.add(

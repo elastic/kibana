@@ -1,0 +1,136 @@
+---
+id: kibDevDocsUpdatingPuppeteerAndChromium
+slug: /kibana-dev-docs/updating-puppeteer-and-chromium
+title: Updating Puppeteer and Chromium
+description: Describes the process to update the Puppeteer node module and build a compatible version of Chromium
+tags: ['kibana', 'dev', 'puppeteer', 'chromium', 'reporting', 'screenshotting']
+---
+
+# Updating Puppeteer and Chromium for Kibana
+
+This document builds off of [Keeping Chromium Up-To-Date](https://docs.google.com/presentation/d/19Z6ocVSoNnvY_wPjEG6Wstt-sOuIYkkNr4jqAqT6TGo/edit#slide=id.g6eae63e93f_4_112)
+
+## 1. **Installing new puppeteer version**
+
+- Determine the version for the current latest release by checking [here](https://github.com/puppeteer/puppeteer/releases).
+- We can go ahead and install the current version within kibana like so; `yarn add puppeteer@23.3.1` if we assume for the sake of this guide that the latest version is `23.3.1`, on installing this, we'd also want to run `yarn kbn bootstrap` to fix the white space that gets generated which would in turn will cause CI failures if left as is.
+
+- Next up we want to determine the version of chromium that's been verified to work with this specific version of puppeteer, we so by run a utility script created solely for this purpose within Kibana; `node scripts/chromium_version.js 23.3.1`, On running the aforementioned script we would get a result very similar to the one below;
+
+  ![image][./chromium_version_command.png]
+
+  The important information to take note of here is the chromium revision and commit value. The revision value is important for selecting the appropriate chromium that has been pre-built by google, whilst the commit version we use to build our variant of headless chromium that gets distributed for linux variants of kibana.
+
+## 2. **Specifying Chromium install version for platform variants**
+
+Kibana provides a verified version of chromium that's guaranteed to work for the version of puppeteer we would be upgrading to. For the Mac and Windows platform we use the pre-built binaries provided by google, whilst for linux we build our own because it doesn't exist and it also allows us to strip down the build to the bare minimum required to run reporting.
+
+For the tasks, ahead the file located at [https://github.com/elastic/kibana/blob/main/packages/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-screenshotting-server/src/paths.ts) would require some edits.
+
+Taking a look at the aforementioned file, you'd notice there's a `ChromiumArchivePaths` definition that specifies platform, revision, checksum information. This is how Kibana is informed of the appropriate chromium version to install. This information is sourced from [here](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html), and the process is quite manual.
+
+It's worth pointing out that to avoid errors it's recommended to create a separate directory that all the assets for this upgrade would be accessed from.
+
+### **2.1 Determining and specifying chromium version details for Mac and Windows**
+
+For example to determine the appropriate version for Mac;
+
+- We navigate to the following link; [https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html)
+
+- Select Mac, in the search field we provide the expected revision number for the current puppeteer version, for the purpose of this guide, the revision number to input is `1331488`. It's worth pointing out that it oftentimes happens that the specific revision doesn't exists; As is the case for this specific revision see image below;
+
+  ![image][./browser_snapshots_filter1.png]
+
+  In the event that this is the case, we can opt to delete the last digit from the revision (or whatever heuristics works for you), so we might find an existing revision that's as close as possible to the expected revision number.
+
+  ![image][./browser_snapshots_filter2.png]
+
+  On doing this we are presented with a couple of options, in this case we would opt to pick revision `1331485` as it's the closest to the expected `1331488` revision.
+
+- After deciding on a revision copy this value and update the revision value in paths.ts for the selected package with it's archive path titled ‘Mac', we might then go ahead to open the directory, within the directory we would typically be presented with couple of files like so;
+
+  ![image][./browser_snapshots_listing.png]
+
+  For whichever platform we are performing this task for, we want to download the file that matches the current platform we are updating's `archiveFilename` value, in this case it's titled `chrome-mac.zip`.
+- We then download this file, so we can compute it's checksum, (we use sha256), so that we can verify later on for users that will be downloading this same archive that they got the correct one.
+
+- To compute said checksum we might do so by leveraging pre-installed utils on most unix machines like so; `sha256sum <path-to-just-downloaded-file>`.
+
+- We'd then want to copy the checksum value of this file and update the current value of `archiveChecksum`, next we extract the content of this archive, so we might also compute the value of `binaryChecksum` to determine the correct path for the platform; we check the value of `binaryRelativePath` knowing this value we run the sha256sum util against this path and update the current value with the one received from the computation.
+
+  We repeat the same process for Windows.
+
+### **2.2 Providing chromium version for Linux**
+
+Given that chromium is typically operated with a GUI and our assumption is that folks that are installing kibana on linux machines are doing so on their servers, hence the variant of chromium that kibana uses on linux machines is slightly different in that by default they are able to run without a GUI for this reason we build our own variant.
+
+However because the chromium codebase is large to say the least, we build the headless chrome on a VM, for the next steps, you'll need to have access to the "elastic-kibana" project on google console. Also have `gcloud` cli tool installed. (You can install this pretty quickly using [brew](https://formulae.brew.sh/cask/google-cloud-sdk), alternatively if you'd rather install from source because reasons, you'd want to [see here](https://cloud.google.com/sdk/docs/install))
+
+  A VM template has been created that fulfills all the compute, network and build requirements so that the build process is sped up as much as possible;
+
+- On GCP, opt to create a VM from an instance template, the template you should select would be the **"rd-build-chromium-linux"** template. On creating this VM, you'd want to take a look at the README file for building chromium **[here](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium)**.
+- Next you'd want to connect to the VM using the gcloud tool we'd initially installed, you can grab the command for your own particular VM by selecting the VM and clicking the SSH option, when you select the view gcloud command. The value displayed to you should be something along the lines of;
+
+  ```
+  gcloud compute ssh --zone "us-central1-a" "rd-eokoneyo-build-chromium-linux" --project "elastic-kibana-184716" --ssh-key-file ~/.ssh/id_ed25519
+  ```
+
+  Depending on the setup you have you might not need to pass your SSH key, but if it's slightly different you might need to pass a key that's identifiable by google using the **"--ssh-key-file"** option.
+
+- From here on simply run through the steps outlined in the readme.
+
+- If it happens that on completing the build your user doesn't have permissions within the VM to upload the build artifacts to the dedicated storage. This is fine, we'll deal with that later.
+- Next we need to extract said artifact from your VM so we can compute the checksums for the archive and the binary we just built.
+
+- To get the build artifact out of the VM, you'd want to leverage the **scp** functionality provided by gcloud cli; We do this by running a command similar to the one below again only providing the ssh key if it is required to identify yourself, we should replace the host name with the name of your VM and the path to the zip file with the correct path on your vm;
+
+  ```
+  gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" --ssh-key-file ~/.ssh/id_ed25519 rd-eokoneyo-build-chromium-linux:/home/eyo.eyo/chromium/chromium/src/out/headless/chromium-fe621c5-locales-linux_x64.zip .
+  ```
+
+  Preferably run this command in the same directory we'd created to contain all our build artifacts. This command assumes we just built the linux x64 variant, there will be two files created: a **.zip** and a **.sha256** file (this is useful to verify that the file we download from the build is not corrupted). We'd want to run a similar command to download the .sha256 file too.
+
+  We should perform this step before building another variant (i.e. the arm64) because artifacts from the previous build gets cleaned out.
+
+- On downloading both the .zip and .sha256 file to our machine, we attempt to calculate the checksum of the just downloaded archive; it should equal the value of the contents of the .sha256 file. Assuming all is well we would repeat the same process we did undertake for the mac and windows platform updating path.ts with the checksum value. In every update the value of revision for linux is always the version our script provided.
+
+- Assuming we've completed this step for both variants we currently build for; we might then choose to upload the archives and their respective .sha256 files to the storage buckets so they can be accessed publicly, leveraging gcloud cli this time with the gsutil command that comes bundled with gcloud;
+
+  Running the following command;
+
+  ```
+  gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell_staging
+  ```
+
+  and
+
+  ```
+  gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell
+  ```
+
+  Would copy the files to both the staging and production buckets.
+
+If you've made it all the way through, all that's left is testing everything works as it should.
+
+## 3. Testing
+
+### **3.1 Locally**
+
+The first step of verification is to start kibana, locally. On whatever machine you use kibana should be able to download the new version of chromium from the updated path.ts file, it might help to add the following to your kibana.yml;
+
+```
+  logging.loggers:
+    - name: plugins.reporting
+      level: debug
+    - name: plugins.screenshotting
+      level: debug
+```
+so we can verify that on requesting report generation the chromium version being used is indeed the one we just provided;
+
+### **3.2 Docker**
+
+This step is required to validate our linux builds, especially considering that we are mostly developing with machines that have a GUI, For this step you want to follow the instructions outlined in an example puppeteer update PR [https://github.com/elastic/kibana/pull/192345](https://github.com/elastic/kibana/pull/192345)
+
+### 3.3 **CI**
+
+CI also runs against the build too pulling the assets we upload to the buckets, to run integration test.

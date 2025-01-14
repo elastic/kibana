@@ -21,7 +21,7 @@
         "description": [
           "\nUsage data on this cluster's configuration of Core features"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,7 +35,7 @@
             "signature": [
               "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47,9 +47,9 @@
             "label": "http",
             "description": [],
             "signature": [
-              "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; crossOriginOpenerPolicy: string; }; }"
+              "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; crossOriginOpenerPolicy: string; }; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +63,7 @@
             "signature": [
               "{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +77,7 @@
             "signature": [
               "{ customIndex: boolean; maxImportPayloadBytes: number; maxImportExportSize: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -91,7 +91,76 @@
             "signature": [
               "{ set: string[]; unset: string[]; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.CoreDeprecatedApiUsageStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreDeprecatedApiUsageStats",
+        "description": [],
+        "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiId",
+            "type": "string",
+            "tags": [],
+            "label": "apiId",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.totalMarkedAsResolved",
+            "type": "number",
+            "tags": [],
+            "label": "totalMarkedAsResolved",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.markedAsResolvedLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "markedAsResolvedLastCalledAt",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiTotalCalls",
+            "type": "number",
+            "tags": [],
+            "label": "apiTotalCalls",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "apiLastCalledAt",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -107,7 +176,7 @@
         "description": [
           "\nUsage data on this Kibana node's runtime environment."
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +190,7 @@
             "signature": [
               "{ arrayBuffersBytes: number; residentSetSizeBytes: number; externalBytes: number; heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -135,7 +204,7 @@
         "tags": [],
         "label": "CoreIncrementCounterParams",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +217,7 @@
             "description": [
               "The name of the counter"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,7 +233,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,7 +249,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -196,7 +265,7 @@
         "description": [
           "\nUsage data from Core services"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +279,7 @@
             "signature": [
               "{ indices: { alias: string; docsCount: number; docsDeleted: number; storeSizeBytes: number; primaryStoreSizeBytes: number; savedObjectsDocsCount: number; }[]; legacyUrlAliases: { activeCount: number; inactiveCount: number; disabledCount: number; totalCount: number; }; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -224,7 +293,7 @@
         "tags": [],
         "label": "CoreUsageCounter",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -240,23 +309,11 @@
           "\nType describing Core's usage data payload"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreUsageData",
-            "text": "CoreUsageData"
-          },
+          "CoreUsageData",
           " extends ",
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreUsageStats",
-            "text": "CoreUsageStats"
-          }
+          "CoreUsageStats"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,15 +325,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreConfigUsageData",
-                "text": "CoreConfigUsageData"
-              }
+              "CoreConfigUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,15 +339,9 @@
             "label": "services",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreServicesUsageData",
-                "text": "CoreServicesUsageData"
-              }
+              "CoreServicesUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -308,15 +353,9 @@
             "label": "environment",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreEnvironmentUsageData",
-                "text": "CoreEnvironmentUsageData"
-              }
+              "CoreEnvironmentUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -327,14 +366,12 @@
         "parentPluginId": "@kbn/core-usage-data-server",
         "id": "def-server.CoreUsageDataSetup",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": [],
         "label": "CoreUsageDataSetup",
         "description": [
           "\nInternal API for registering the Usage Tracker used for Core's usage data payload.\n"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -349,16 +386,10 @@
             ],
             "signature": [
               "(usageCounter: ",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreUsageCounter",
-                "text": "CoreUsageCounter"
-              },
+              "CoreUsageCounter",
               ") => void"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -370,15 +401,43 @@
                 "label": "usageCounter",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-usage-data-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreUsageDataServerPluginApi",
-                    "section": "def-server.CoreUsageCounter",
-                    "text": "CoreUsageCounter"
-                  }
+                  "CoreUsageCounter"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+                "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDeprecatedUsageFetch",
+            "description": [],
+            "signature": [
+              "(fetchFn: ",
+              "DeprecatedApiUsageFetcher",
+              ") => void"
+            ],
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server",
+                "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fetchFn",
+                "description": [],
+                "signature": [
+                  "DeprecatedApiUsageFetcher"
+                ],
+                "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -400,7 +459,7 @@
         "description": [
           "\nInternal API for getting Core's usage data payload.\n"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -413,16 +472,10 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.ConfigUsageData",
-                "text": "ConfigUsageData"
-              },
+              "ConfigUsageData",
               ">"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -438,7 +491,7 @@
         "tags": [],
         "label": "CoreUsageStats",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -452,7 +505,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,7 +519,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,7 +533,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -494,7 +547,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,7 +561,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -522,7 +575,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -536,7 +589,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,7 +603,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,7 +617,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -578,7 +631,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -592,7 +645,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,7 +659,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,7 +673,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,7 +687,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -648,7 +701,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,7 +715,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -676,7 +729,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,7 +743,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -704,7 +757,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -718,7 +771,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,7 +785,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -746,7 +799,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -760,7 +813,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -774,7 +827,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -788,7 +841,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -802,7 +855,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -816,7 +869,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -830,7 +883,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -844,7 +897,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -858,7 +911,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -872,7 +925,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -886,7 +939,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -900,7 +953,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -914,7 +967,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -928,7 +981,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -942,7 +995,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -956,7 +1009,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -970,7 +1023,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -984,7 +1037,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -998,7 +1051,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1012,7 +1065,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1026,7 +1079,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1040,7 +1093,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1054,7 +1107,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1068,7 +1121,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1082,7 +1135,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1096,7 +1149,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1163,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1124,7 +1177,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1138,7 +1191,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1152,7 +1205,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1166,7 +1219,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1180,7 +1233,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1194,7 +1247,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1208,7 +1261,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1222,7 +1275,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1236,7 +1289,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1250,7 +1303,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1264,7 +1317,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1278,7 +1331,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1292,7 +1345,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1306,7 +1359,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,7 +1373,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1387,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1348,7 +1401,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1362,7 +1415,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1376,7 +1429,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1390,7 +1443,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1404,7 +1457,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1418,7 +1471,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1432,7 +1485,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1446,7 +1499,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1460,7 +1513,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1474,7 +1527,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1488,7 +1541,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1502,7 +1555,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1516,7 +1569,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1530,7 +1583,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1544,7 +1597,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1558,7 +1611,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1572,7 +1625,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1586,7 +1639,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1600,7 +1653,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1614,7 +1667,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1628,7 +1681,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1642,7 +1695,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1656,7 +1709,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1670,7 +1723,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1684,7 +1737,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1698,7 +1751,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1712,7 +1765,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,7 +1779,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1740,7 +1793,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1754,7 +1807,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1768,7 +1821,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,7 +1835,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,7 +1849,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1810,7 +1863,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1824,7 +1877,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,7 +1891,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1852,7 +1905,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1866,7 +1919,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1880,7 +1933,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1894,7 +1947,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1908,7 +1961,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,7 +1975,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1936,7 +1989,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1950,7 +2003,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1964,7 +2017,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1978,7 +2031,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1992,7 +2045,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2006,7 +2059,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2020,7 +2073,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2034,7 +2087,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2048,7 +2101,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2062,7 +2115,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2076,7 +2129,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2090,7 +2143,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2104,7 +2157,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2118,7 +2171,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2132,7 +2185,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2146,7 +2199,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2160,7 +2213,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2174,7 +2227,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2188,7 +2241,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2202,7 +2255,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2216,7 +2269,35 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls_resolved.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls_resolved.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2238,7 +2319,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2252,16 +2333,10 @@
         "description": [],
         "signature": [
           "(params: ",
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreIncrementCounterParams",
-            "text": "CoreIncrementCounterParams"
-          },
+          "CoreIncrementCounterParams",
           ") => void"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2274,15 +2349,47 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreIncrementCounterParams",
-                "text": "CoreIncrementCounterParams"
-              }
+              "CoreIncrementCounterParams"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.DeprecatedApiUsageFetcher",
+        "type": "Type",
+        "tags": [],
+        "label": "DeprecatedApiUsageFetcher",
+        "description": [],
+        "signature": [
+          "(params: { soClient: ",
+          "ISavedObjectsRepository",
+          "; }) => Promise<",
+          "CoreDeprecatedApiUsageStats",
+          "[]>"
+        ],
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.DeprecatedApiUsageFetcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ soClient: ",
+              "ISavedObjectsRepository",
+              "; }"
+            ],
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -243,7 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('list source maps', async () => {
+    describe('list source maps', () => {
       before(async () => {
         const totalCount = 6;
         const sourcemapCount = times(totalCount);

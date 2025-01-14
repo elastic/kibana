@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function createRuleSuggestionValuesTests({ getService }: FtrProviderContext) {
   const space1 = Spaces[0].id;
 
-  describe('alerts/suggestions/values', async () => {
+  describe('alerts/suggestions/values', () => {
     const esArchiver = getService('esArchiver');
     const supertest = getService('supertest');
 

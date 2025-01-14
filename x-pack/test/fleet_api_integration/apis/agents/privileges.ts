@@ -47,23 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
-    });
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-      await supertest
-        .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
-        .set('kbn-xsrf', 'xxxx');
-      await es.transport
-        .request({
-          method: 'DELETE',
-          path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
-        })
-        .catch(() => {});
-    });
 
-    const fleetServerVersion = '8.14.0';
-
-    before(async () => {
       await supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'kibana').send({
         name: 'Fleet Server policy 1',
         id: 'fleet-server-policy',
@@ -90,7 +74,33 @@ export default function (providerContext: FtrProviderContext) {
         'fleet-server-policy',
         fleetServerVersion
       );
+
+      // Make agent 1 upgradeable
+      await es.update({
+        id: 'agent1',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        doc: {
+          local_metadata: {
+            elastic: { agent: { upgradeable: true, version: '8.13.0' } },
+          },
+        },
+      });
     });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await supertest
+        .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
+        .set('kbn-xsrf', 'xxxx');
+      await es.transport
+        .request({
+          method: 'DELETE',
+          path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
+        })
+        .catch(() => {});
+    });
+
+    const fleetServerVersion = '8.14.0';
 
     const READ_SCENARIOS = [
       {
@@ -252,7 +262,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         method: 'GET',
-        path: '/api/fleet/agent-status',
+        path: '/api/fleet/agent_status',
         scenarios: READ_SCENARIOS,
       },
       {
@@ -319,19 +329,6 @@ export default function (providerContext: FtrProviderContext) {
         afterEach: deleteFileAfterEach,
       },
     ];
-    before(async () => {
-      // Make agent 1 upgradeable
-      await es.update({
-        id: 'agent1',
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        doc: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: '8.13.0' } },
-          },
-        },
-      });
-    });
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

@@ -1,0 +1,244 @@
+openapi: 3.0.0
+info:
+  title: Common Attack Discovery Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AttackDiscovery:
+      type: object
+      description: An attack discovery generated from one or more alerts
+      required:
+        - 'alertIds'
+        - 'detailsMarkdown'
+        - 'summaryMarkdown'
+        - 'title'
+      properties:
+        alertIds:
+          description: The alert IDs that the attack discovery is based on
+          items:
+            type: string
+          type: array
+        id:
+          description: UUID of attack discovery
+          type: string
+        detailsMarkdown:
+          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+          type: string
+        entitySummaryMarkdown:
+          description: A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+          type: string
+        mitreAttackTactics:
+          description: An array of MITRE ATT&CK tactic for the attack discovery
+          items:
+            type: string
+          type: array
+        summaryMarkdown:
+          description: A markdown summary of attack discovery, using the same syntax
+          type: string
+        title:
+          description: A title for the attack discovery, in plain text
+          type: string
+        timestamp:
+          description: The time the attack discovery was generated
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+    AttackDiscoveries:
+      type: array
+      description: Array of attack discoveries
+      items:
+        $ref: '#/components/schemas/AttackDiscovery'
+
+    AttackDiscoveryStatus:
+      type: string
+      description: The status of the attack discovery.
+      enum:
+        - running
+        - succeeded
+        - failed
+        - canceled
+
+    GenerationInterval:
+      type: object
+      description: Run durations for the attack discovery
+      required:
+        - 'date'
+        - 'durationMs'
+      properties:
+        date:
+          description: The time the attack discovery was generated
+          type: string
+        durationMs:
+          description: The duration of the attack discovery generation
+          type: integer
+
+    AttackDiscoveryStat:
+      type: object
+      description: Attack discovery stats
+      required:
+        - 'hasViewed'
+        - 'status'
+        - 'count'
+        - 'connectorId'
+      properties:
+        hasViewed:
+          description: Whether the user has viewed the results of the attack discovery run
+          type: boolean
+        count:
+          description: The number of attack discoveries for the connector
+          type: integer
+        connectorId:
+          description: The connector ID for the attack discovery
+          type: string
+        status:
+          $ref: '#/components/schemas/AttackDiscoveryStatus'
+          description: The status of the attack discovery.
+
+    AttackDiscoveryStats:
+      type: object
+      description: Stats on existing attack discovery documents
+      required:
+        - 'newDiscoveriesCount'
+        - 'newConnectorResultsCount'
+        - 'statsPerConnector'
+      properties:
+        newDiscoveriesCount:
+          description: The number of attack discoveries that have not yet been viewed
+          type: integer
+        newConnectorResultsCount:
+          description: The number of connectors with new results that have not yet been viewed
+          type: integer
+        statsPerConnector:
+          type: array
+          description: Attack discovery stats per connector
+          items:
+            $ref: '#/components/schemas/AttackDiscoveryStat'
+
+
+    AttackDiscoveryResponse:
+      type: object
+      required:
+        - apiConfig
+        - id
+        - createdAt
+        - updatedAt
+        - lastViewedAt
+        - users
+        - namespace
+        - attackDiscoveries
+        - status
+        - backingIndex
+        - generationIntervals
+        - averageIntervalMs
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        'timestamp':
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: The last time attack discovery was updated.
+          type: string
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
+          type: string
+        alertsContextCount:
+            type: integer
+            description: The number of alerts in the context.
+        createdAt:
+          description: The time attack discovery was created.
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        status:
+          $ref: '#/components/schemas/AttackDiscoveryStatus'
+          description: The status of the attack discovery.
+        attackDiscoveries:
+          $ref: '#/components/schemas/AttackDiscoveries'
+          description: The attack discoveries.
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        namespace:
+          type: string
+          description: Kibana space
+        backingIndex:
+          type: string
+          description: The backing index required for update requests.
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/GenerationInterval'
+        averageIntervalMs:
+          type: integer
+          description: The average generation interval in milliseconds
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
+
+    AttackDiscoveryUpdateProps:
+      type: object
+      required:
+        - id
+        - backingIndex
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        alertsContextCount:
+          type: integer
+          description: The number of alerts in the context.
+        attackDiscoveries:
+          $ref: '#/components/schemas/AttackDiscoveries'
+          description: The attack discoveries.
+        status:
+          $ref: '#/components/schemas/AttackDiscoveryStatus'
+          description: The status of the attack discovery.
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/GenerationInterval'
+        backingIndex:
+          type: string
+          description: The backing index required for update requests.
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
+          type: string
+
+    AttackDiscoveryCreateProps:
+      type: object
+      required:
+        - attackDiscoveries
+        - apiConfig
+        - status
+      properties:
+        id:
+          type: string
+          description: The attack discovery id.
+        status:
+          $ref: '#/components/schemas/AttackDiscoveryStatus'
+          description: The status of the attack discovery.
+        alertsContextCount:
+          type: integer
+          description: The number of alerts in the context.
+        attackDiscoveries:
+          $ref: '#/components/schemas/AttackDiscoveries'
+          description: The attack discoveries.
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+

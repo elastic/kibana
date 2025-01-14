@@ -15,7 +15,7 @@
           "\nReact Component that acts as a wrapper for DatePickerContext.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<React.PropsWithChildren<",
+          "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/ml-date-picker",
             "scope": "public",
@@ -23,9 +23,9 @@
             "section": "def-public.DatePickerDependencies",
             "text": "DatePickerDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
               "- The component props"
             ],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
                 "scope": "public",
@@ -47,9 +47,9 @@
                 "section": "def-public.DatePickerDependencies",
                 "text": "DatePickerDependencies"
               },
-              ">>"
+              ">"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,25 +72,25 @@
           "\nDatePickerWrapper React Component\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<DatePickerWrapperProps>) => JSX.Element | null"
+          "(props: DatePickerWrapperProps) => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/date_picker_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
             "id": "def-public.DatePickerWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `DatePickerWrapper` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<DatePickerWrapperProps>"
+              "DatePickerWrapperProps"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/date_picker_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,7 +113,7 @@
           "\nComponent for rendering a button which automatically sets the range of the time filter\nto the time range of data in the index(es) mapped to the supplied Kibana data view or query.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-date-picker",
             "scope": "public",
@@ -121,33 +121,31 @@
             "section": "def-public.FullTimeRangeSelectorProps",
             "text": "FullTimeRangeSelectorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
             "id": "def-public.FullTimeRangeSelector.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `FullTimeRangeSelectorProps` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
                 "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
                 "section": "def-public.FullTimeRangeSelectorProps",
                 "text": "FullTimeRangeSelectorProps"
-              },
-              ">"
+              }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -178,7 +176,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,7 +192,7 @@
             "signature": [
               "GetTimeFieldRangeOptions"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,7 +230,7 @@
             "text": "TimeRange"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -254,7 +252,7 @@
                 "text": "TimefilterContract"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -285,7 +283,7 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -311,7 +309,7 @@
             "text": "RefreshInterval"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -339,7 +337,7 @@
             "text": "TimefilterContract"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,7 +353,7 @@
             "signature": [
               "UseTimefilterOptions"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,7 +383,7 @@
             "text": "TimeRange"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,7 +399,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -423,7 +421,7 @@
         "description": [
           "\nDate Picker Dependencies to be passed on via `DatePickerContextProvider`."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -445,7 +443,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,15 +457,9 @@
               "\nhttp service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -481,15 +473,25 @@
               "\nnotifications service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.DatePickerDependencies.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nKibana Security User Profile Service"
+            ],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,15 +505,9 @@
               "\nEUI theme"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,15 +521,9 @@
               "\nKibana UI advanced settings"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -549,7 +539,7 @@
             "signature": [
               "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; readonly DATE_FORMAT: \"dateFormat\"; readonly DATEFORMAT_TZ: \"dateFormat:tz\"; }"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,15 +553,9 @@
               "\nInternationalisation service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,7 +571,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -603,7 +587,7 @@
         "description": [
           "\nFullTimeRangeSelectorProps React Component props interface"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -619,7 +603,7 @@
             "signature": [
               "\"exclude-frozen\" | \"include-frozen\""
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -643,7 +627,7 @@
               },
               " | undefined) => void"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -666,7 +650,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+                "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -728,7 +712,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -854,7 +838,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -876,7 +860,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -889,7 +873,7 @@
             "description": [
               "\nBoolean flag to enable/disable the full time range button."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,7 +890,7 @@
               "QueryDslQueryContainer",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -930,7 +914,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -952,7 +936,7 @@
                     "text": "GetTimeFieldRangeResponse"
                   }
                 ],
-                "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+                "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -979,7 +963,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -995,7 +979,7 @@
         "description": [
           "\nResponse interface for the `setFullTimeRange` function."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1008,7 +992,7 @@
             "description": [
               "\nSuccess boolean flag."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,7 +1008,7 @@
             "signature": [
               "GetTimeFieldRangeResponseTime"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1040,7 +1024,7 @@
             "signature": [
               "GetTimeFieldRangeResponseTime"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1056,7 +1040,7 @@
         "description": [
           "\nState definition of `mlTimefilterRefresh$` observable."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1069,7 +1053,7 @@
             "description": [
               "\nTimestamp of the last time a refresh got triggered."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1085,7 +1069,7 @@
             "signature": [
               "{ start: string; end: string; } | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1101,7 +1085,7 @@
         "description": [
           "\nReturn type for the `getTimeFilterRange` function."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1114,7 +1098,7 @@
             "description": [
               "\nFrom timestamp."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1127,7 +1111,7 @@
             "description": [
               "\nTo timestamp."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1149,7 +1133,7 @@
         "signature": [
           "\"exclude-frozen\" | \"include-frozen\""
         ],
-        "path": "x-pack/packages/ml/date_picker/src/storage.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1166,7 +1150,7 @@
         "signature": [
           "\"/internal/file_upload/time_field_range\" | \"/internal/ml/fields_service/time_field_range\""
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1185,7 +1169,7 @@
         "signature": [
           "{ readonly EXCLUDE: \"exclude-frozen\"; readonly INCLUDE: \"include-frozen\"; }"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/storage.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1211,7 +1195,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,10 @@
+steps:
+  - command: .buildkite/scripts/steps/console_definitions_sync.sh
+    label: Console Definitions Sync
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true

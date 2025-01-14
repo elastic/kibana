@@ -11,12 +11,15 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('create email action', () => {
     let createdActionId = '';
@@ -103,7 +106,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           },
         })
         .expect(200)
-        .then((resp: any) => {
+        .then(async (resp: any) => {
           expect(resp.body.data.message.messageId).to.be.a('string');
           expect(resp.body.data.messageId).to.be.a('string');
 
@@ -131,6 +134,23 @@ export default function emailTest({ getService }: FtrProviderContext) {
               headers: {},
             },
           });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: createdActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(350);
         });
     });
 

@@ -11,10 +11,32 @@
         "tags": [],
         "label": "AppContext",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isDev",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDev",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "observabilityOnboarding",
             "id": "def-public.AppContext.isServerless",
@@ -22,7 +44,7 @@
             "tags": [],
             "label": "isServerless",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -33,7 +55,21 @@
             "tags": [],
             "label": "stackVersion",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.cloudServiceProvider",
+            "type": "string",
+            "tags": [],
+            "label": "cloudServiceProvider",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -47,7 +83,7 @@
         "tags": [],
         "label": "ConfigSchema",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +97,7 @@
             "signature": [
               "{ enabled: boolean; }"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,7 +111,7 @@
             "signature": [
               "{ enabled: boolean; }"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -89,7 +125,7 @@
         "tags": [],
         "label": "ObservabilityOnboardingAppServices",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,15 +137,9 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,15 +151,9 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -169,7 +193,7 @@
               },
               ">): void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +213,7 @@
                 "text": "AppContext"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +233,7 @@
                 "text": "ConfigSchema"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -221,15 +245,9 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,15 +259,9 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -270,7 +282,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -293,7 +305,7 @@
         "signature": [
           "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly serverless: Readonly<{} & { enabled: true; }>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/server/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,7 +319,7 @@
       "tags": [],
       "label": "ObservabilityOnboardingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_onboarding/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -321,7 +333,7 @@
       "tags": [],
       "label": "ObservabilityOnboardingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/observability_onboarding/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -345,7 +357,7 @@
         "signature": [
           "\"observabilityOnboarding\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -360,7 +372,7 @@
         "signature": [
           "\"observabilityOnboarding\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/observability_onboarding/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

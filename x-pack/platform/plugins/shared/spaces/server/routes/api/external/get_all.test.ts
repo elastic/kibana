@@ -1,0 +1,163 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as Rx from 'rxjs';
+
+import type { ObjectType } from '@kbn/config-schema';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import {
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type { RouteValidatorConfig } from '@kbn/core-http-server';
+import { getRequestValidation } from '@kbn/core-http-server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+
+import { initGetAllSpacesApi } from './get_all';
+import { API_VERSIONS } from '../../../../common';
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+
+describe('GET /spaces/space', () => {
+  const spacesSavedObjects = createSpaces();
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
+
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter();
+    const versionedRouterMock = router.versioned as MockedVersionedRouter;
+
+    const coreStart = coreMock.createStart();
+
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
+
+    const log = loggingSystemMock.create().get('spaces');
+
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
+    });
+
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
+
+    initGetAllSpacesApi({
+      router,
+      getStartServices: async () => [coreStart, {}, {}],
+      log,
+      getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
+      isServerless: false,
+    });
+
+    const { handler, config } = versionedRouterMock.getRoute('get', '/api/spaces/space').versions[
+      API_VERSIONS.public.v1
+    ];
+
+    return {
+      routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}> | false,
+      routeHandler: handler,
+    };
+  };
+
+  [undefined, 'any', 'copySavedObjectsIntoSpace', 'shareSavedObjectsIntoSpace'].forEach(
+    (purpose) => {
+      describe(`with purpose='${purpose}'`, () => {
+        it(`returns expected result when not specifying include_authorized_purposes`, async () => {
+          const { routeHandler } = await setup();
+
+          const request = httpServerMock.createKibanaRequest({ method: 'get', query: { purpose } });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
+
+        it(`returns expected result when specifying include_authorized_purposes=true`, async () => {
+          const { routeValidation, routeHandler } = await setup();
+
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, include_authorized_purposes: true },
+          });
+
+          if (routeValidation === false) {
+            throw new Error('Test setup failure. Expected route validation');
+          }
+          const queryParamsValidation = getRequestValidation(routeValidation)
+            .query! as ObjectType<any>;
+
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+          if (purpose === undefined) {
+            expect(() => queryParamsValidation.validate(request.query)).not.toThrow();
+            expect(response.status).toEqual(200);
+            expect(response.payload).toEqual(spaces);
+          } else {
+            expect(() => queryParamsValidation.validate(request.query)).toThrowError(
+              '[include_authorized_purposes]: expected value to equal [false]'
+            );
+          }
+        });
+
+        it(`returns expected result when specifying include_authorized_purposes=false`, async () => {
+          const { routeHandler } = await setup();
+
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, include_authorized_purposes: false },
+          });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
+      });
+    }
+  );
+
+  it(`returns http/403 when the license is invalid`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+    });
+
+    const response = await routeHandler(
+      mockRouteContextWithInvalidLicense,
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(403);
+    expect(response.payload).toEqual({
+      message: 'License is invalid for spaces',
+    });
+  });
+});

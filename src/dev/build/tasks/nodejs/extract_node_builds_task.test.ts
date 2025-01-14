@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFileSync } from 'fs';
@@ -92,8 +93,15 @@ it('runs expected fs operations', async () => {
     Object {
       "copy": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-x64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-x64/extract/node.exe,
+          Object {
+            "clone": true,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/default/win32-arm64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-arm64/extract/node.exe,
           Object {
             "clone": true,
           },
@@ -101,57 +109,57 @@ it('runs expected fs operations', async () => {
       ],
       "untar": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node-v<node version>-darwin-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64,
+          <absolute path>/.node_binaries/<node version>/default/darwin-x64/download/node-v<node version>-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/default/darwin-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node-v<node version>-darwin-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64,
+          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },

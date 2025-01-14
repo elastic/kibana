@@ -17,12 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
-  const service = 'elser';
+  const service = 'elasticsearch';
   const modelId = '.elser_model_2';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189333
-  // Failing: See https://github.com/elastic/kibana/issues/189333
-  describe.skip('Inference endpoints', function () {
+  describe('Inference endpoints', function () {
     after(async () => {
       try {
         log.debug(`Deleting underlying trained model`);
@@ -56,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         inferenceEndpoints.some(
           (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
-      ).to.be(true);
+      ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);

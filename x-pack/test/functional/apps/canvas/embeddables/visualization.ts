@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'header', 'visualize']);
+  const { canvas, visualize } = getPageObjects(['canvas', 'visualize']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -30,10 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // open canvas home
-      await PageObjects.canvas.goToListingPage();
+      await canvas.goToListingPage();
       // create new workpad
-      await PageObjects.canvas.createNewWorkpad();
-      await PageObjects.canvas.setWorkpadName('visualization tests');
+      await canvas.createNewWorkpad();
+      await canvas.setWorkpadName('visualization tests');
     });
 
     after(async () => {
@@ -42,62 +42,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('by-reference', () => {
       it('adds existing visualize embeddable from the visualize library', async () => {
-        await PageObjects.canvas.clickAddFromLibrary();
+        await canvas.clickAddFromLibrary();
         await dashboardAddPanel.addVisualization('Rendering-Test: metric');
         await testSubjects.existOrFail('embeddablePanelHeading-RenderingTest:metric');
       });
 
       it('edits visualize by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('Rendering Test: metric');
-        await PageObjects.visualize.saveVisualization('Rendering Test: metric v2', {
+        await visualize.saveVisualization('Rendering Test: metric v2', {
           saveAsNew: false,
           redirectToOrigin: true,
         });
         await testSubjects.existOrFail('embeddablePanelHeading-RenderingTest:metricv2');
-        await PageObjects.canvas.deleteSelectedElement();
+        await canvas.deleteSelectedElement();
       });
     });
 
     describe('by-value', () => {
       it('creates new tsvb embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await PageObjects.canvas.createNewVis('metrics');
-        await PageObjects.visualize.saveVisualizationAndReturn();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
+        await canvas.createNewVis('metrics');
+        await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          const embeddableCount = await canvas.getEmbeddableCount();
           expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
         });
       });
 
       it('edits tsvb by-value embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.openContextMenu();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.visualize.saveVisualizationAndReturn();
+        await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          const embeddableCount = await canvas.getEmbeddableCount();
           expect(embeddableCount).to.eql(originalEmbeddableCount);
         });
-        await PageObjects.canvas.deleteSelectedElement();
+        await canvas.deleteSelectedElement();
       });
 
       it('creates new vega embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await PageObjects.canvas.createNewVis('vega');
-        await PageObjects.visualize.saveVisualizationAndReturn();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
+        await canvas.createNewVis('vega');
+        await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          const embeddableCount = await canvas.getEmbeddableCount();
           expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
         });
       });
 
       it('edits vega by-value embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.openContextMenu();
+        const originalEmbeddableCount = await canvas.getEmbeddableCount();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.visualize.saveVisualizationAndReturn();
+        await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          const embeddableCount = await canvas.getEmbeddableCount();
           expect(embeddableCount).to.eql(originalEmbeddableCount);
         });
       });

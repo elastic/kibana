@@ -79,6 +79,8 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:detection_engine:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` excluding `e2e/detection_response/detection_engine` directory in headless mode |
 | cypress:ai_assistant:run:ess | Runs all tests tagged as ESS in the `e2e/ai_assistant` directory in headless mode |
 | cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
+| cypress:cloud_security_posture:run:ess | Runs all tests tagged as ESS in the `e2e/cloud_security_posture` directory in headless mode |
+| cypress:cloud_security_posture:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode |
 | cypress:detection_engine:exceptions:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:investigations:run:ess | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
@@ -88,6 +90,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:run:qa:serverless:entity_analytics | Runs all tests tagged as SERVERLESS placed in the `e2e/entity_analytics` directory in headless mode using the QA environment and real MKI projects.|
 | cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
 | cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:cloud_security_posture | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` directory, excluding `e2e/detection_response/rule_management/prebuilt_rules` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
@@ -303,8 +306,86 @@ Per the way we set the environment during the execution process on CI, the above
 
 For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
 
+#### Custom Roles
 
-### Running serverless tests locally pointing to a MKI project created in QA environment (Kibana QA quality gate)
+Custom roles for serverless is currently supported only for stateless environments (non MKI environments).
+
+##### Creating a Custom Role
+
+To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
+- **`roleDescriptor`**: Defines the permissions and access for the role.
+- **`roleName`**: A unique name for the custom role.
+
+Example:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+```
+
+##### Using a Custom Role
+
+Once the custom role is created, you can log in to the application using your regular `login`` method and passing the name of the role.
+
+```typescript
+login('customRole');
+```
+
+
+##### Deleting a Custom Role
+
+After your tests, always delete the custom role to ensure a clean environment. Use the `deleteServerlessCustomRole` task and provide the name of the role as the parameter.
+
+```typescript
+cy.task('deleteServerlessCustomRole', 'customRole');
+```
+
+##### Full workflow
+
+Here’s the complete workflow for creating, using, and deleting a custom role:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+before(() => {
+  cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+});
+
+beforeEach(() => {
+  login('customRole');
+});
+
+after(() => {
+  cy.task('deleteServerlessCustomRole', 'customRole');
+});
+```
+
+### Running serverless tests locally pointing to a MKI project created in QA environment
 
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.

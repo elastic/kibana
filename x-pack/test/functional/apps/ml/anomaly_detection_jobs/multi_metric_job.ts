@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId, jobGroups));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobId,
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)
@@ -376,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobIdClone, getExpectedRow(jobIdClone, jobGroupsClone));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobIdClone,
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)

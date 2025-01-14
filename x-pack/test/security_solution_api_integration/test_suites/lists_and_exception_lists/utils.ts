@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import limit from 'p-limit';
 
 import type {
   Type,
@@ -229,12 +230,16 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      const limiter = limit(10);
+      const promises = ids.map((id) =>
+        limiter(() =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+      await Promise.all(promises);
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
@@ -563,50 +568,22 @@ export const createLegacyListsIndices = async (es: Client) => {
 };
 
 /**
+ * Helper function to emulate reindexed lists/items from version 7 index to version 8
+ * These indices has prefix .lists-v8-, .items-v8-, that hints they are v8 compatible after reindex
+ * @param es es client
+ */
+export const createReindexedListsIndices = async (es: Client) => {
+  await configurePolicyAndIndexTemplate(es);
+  await createReindexedBootstrapIndex(es, 'lists-default');
+  await createReindexedBootstrapIndex(es, 'items-default');
+};
+
+/**
  * Utility to create list indices, before they were migrated to data streams
  * @param es ES client
  */
 export const createListsIndices = async (es: Client) => {
-  await setPolicy(es, '.lists-default', testPolicy);
-  await setPolicy(es, '.items-default', testPolicy);
-  await setIndexTemplate(es, '.lists-default', {
-    index_patterns: [`.lists-default-*`],
-    template: {
-      mappings: listsMappings,
-      settings: {
-        index: {
-          lifecycle: {
-            name: '.lists-default',
-            rollover_alias: '.lists-default',
-          },
-        },
-        mapping: {
-          total_fields: {
-            limit: 10000,
-          },
-        },
-      },
-    },
-  });
-  await setIndexTemplate(es, '.items-default', {
-    index_patterns: [`.items-default-*`],
-    template: {
-      mappings: itemsMappings,
-      settings: {
-        index: {
-          lifecycle: {
-            name: '.items-default',
-            rollover_alias: '.items-default',
-          },
-        },
-        mapping: {
-          total_fields: {
-            limit: 10000,
-          },
-        },
-      },
-    },
-  });
+  await configurePolicyAndIndexTemplate(es);
   await createBootstrapIndex(es, '.lists-default');
   await createBootstrapIndex(es, '.items-default');
 };
@@ -683,4 +660,74 @@ export const createListItemBypassingChecks = async ({
     id: response._id,
     ...body,
   };
+};
+
+/**
+ * Creates policies and index templates for both the Lists and List Items indices.
+ */
+const configurePolicyAndIndexTemplate = async (es: Client) => {
+  await setPolicy(es, '.lists-default', testPolicy);
+  await setPolicy(es, '.items-default', testPolicy);
+  await setIndexTemplate(es, '.lists-default', {
+    index_patterns: [`.lists-default-*`],
+    template: {
+      mappings: listsMappings,
+      settings: {
+        index: {
+          lifecycle: {
+            name: '.lists-default',
+            rollover_alias: '.lists-default',
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+    },
+  });
+  await setIndexTemplate(es, '.items-default', {
+    index_patterns: [`.items-default-*`],
+    template: {
+      mappings: itemsMappings,
+      settings: {
+        index: {
+          lifecycle: {
+            name: '.items-default',
+            rollover_alias: '.items-default',
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+    },
+  });
+};
+
+/**
+ * Emulates an index that was reindexed from 7.x to 8.x
+ * 1. this index has  prefix .reindexed-v8-
+ * 2. it has 2 aliases: index and name of origjnal index(usually bootstrap index with number in the end). For example: .items-another-4, .items-another-4-000001
+ */
+const createReindexedBootstrapIndex = async (esClient: Client, index: string): Promise<unknown> => {
+  return (
+    await esClient.indices.create(
+      {
+        index: `.reindexed-v8-${index}-000001`,
+        body: {
+          aliases: {
+            [`.${index}`]: {
+              is_write_index: true,
+            },
+            [`.${index}-000001`]: {},
+          },
+        },
+      },
+      { meta: true }
+    )
+  ).body;
 };

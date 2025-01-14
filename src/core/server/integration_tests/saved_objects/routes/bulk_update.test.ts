@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -19,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const testTypes = [
@@ -36,6 +37,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -55,11 +57,18 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'put');
 
     const config = setupConfig();
     const access = 'public';
 
-    registerBulkUpdateRoute(router, { config, coreUsageData, logger, access });
+    registerBulkUpdateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -96,6 +105,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',
@@ -126,6 +136,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',
@@ -166,6 +177,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'hidden-from-http',
@@ -176,12 +188,14 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         },
       ])
       .expect(400);
+
     expect(result.body.message).toContain('Unsupported saved object type(s):');
   });
 
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',
@@ -200,5 +214,35 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
       ])
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send([
+        {
+          type: 'visualization',
+          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing visualization',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing dashboard',
+          },
+        },
+      ])
+      .expect(200);
+
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

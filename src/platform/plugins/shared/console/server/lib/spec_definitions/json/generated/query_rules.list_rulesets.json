@@ -1,0 +1,23 @@
+{
+  "query_rules.list_rulesets": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_query_rules"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-query-rulesets.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

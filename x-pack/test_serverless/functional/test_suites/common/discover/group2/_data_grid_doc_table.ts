@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -179,9 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
-          await testSubjects.exists(`docViewerFlyoutNavigationPage0`);
+          await testSubjects.existOrFail('docViewerFlyoutNavigationPage-0');
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
-          await testSubjects.exists(`docViewerFlyoutNavigationPage1`);
+          await testSubjects.existOrFail('docViewerFlyoutNavigationPage-1');
           await dataGrid.closeFlyout();
         });
       });

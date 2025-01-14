@@ -20,16 +20,10 @@
         "description": [],
         "signature": [
           "({ client, maxRetries, maxRetryDelay, }: { client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; maxRetries?: number | undefined; maxRetryDelay?: number | undefined; }) => Promise<boolean>"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,7 +34,7 @@
             "tags": [],
             "label": "{\n  client,\n  maxRetries = 20,\n  maxRetryDelay = 64,\n}",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -190,7 +184,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -226,6 +220,32 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "BulkResponse",
+                  ">; }; capabilities: { (this: That, params?: ",
+                  "TODO",
+                  " | ",
+                  "TODO",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "TODO",
+                  ">; (this: That, params?: ",
+                  "TODO",
+                  " | ",
+                  "TODO",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "TODO",
+                  ", unknown>>; (this: That, params?: ",
+                  "TODO",
+                  " | ",
+                  "TODO",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "TODO",
                   ">; }; cat: ",
                   "default",
                   "; ccr: ",
@@ -283,6 +303,8 @@
                   " | undefined): Promise<",
                   "ClosePointInTimeResponse",
                   ">; }; cluster: ",
+                  "default",
+                  "; connector: ",
                   "default",
                   "; count: { (this: That, params?: ",
                   "CountRequest",
@@ -878,7 +900,9 @@
                   "PingRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+                  " | undefined): Promise<boolean>; }; profiling: ",
+                  "default",
+                  "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -904,7 +928,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
-                  ">; }; queryRuleset: ",
+                  ">; }; queryRules: ",
                   "default",
                   "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
@@ -1150,6 +1174,8 @@
                   "default",
                   "; shutdown: ",
                   "default",
+                  "; simulate: ",
+                  "default",
                   "; slm: ",
                   "default",
                   "; snapshot: ",
@@ -1276,7 +1302,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+                "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1290,7 +1316,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+                "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1304,7 +1330,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+                "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1326,7 +1352,7 @@
         "signature": [
           "(args: { statusCode: number | null; headers: Record<string, string | string[] | undefined> | null; }) => boolean"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1337,7 +1363,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1351,7 +1377,7 @@
                 "signature": [
                   "number | null"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+                "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1365,7 +1391,7 @@
                 "signature": [
                   "Record<string, string | string[] | undefined> | null"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+                "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1391,7 +1417,7 @@
           "ElasticsearchClientError",
           ") => boolean"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1405,7 +1431,7 @@
             "signature": [
               "ElasticsearchClientError"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1426,7 +1452,7 @@
         "signature": [
           "(headers: Record<string, string | string[] | undefined> | null | undefined) => boolean"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1442,7 +1468,7 @@
             "signature": [
               "Record<string, string | string[] | undefined> | null | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1462,26 +1488,14 @@
         "description": [],
         "signature": [
           "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckStartupInterval, }: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-            "section": "def-server.PollEsNodesVersionOptions",
-            "text": "PollEsNodesVersionOptions"
-          },
+          "PollEsNodesVersionOptions",
           ") => ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-            "section": "def-server.NodesVersionCompatibility",
-            "text": "NodesVersionCompatibility"
-          },
+          "NodesVersionCompatibility",
           ">"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1493,15 +1507,9 @@
             "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckStartupInterval,\n}",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.PollEsNodesVersionOptions",
-                "text": "PollEsNodesVersionOptions"
-              }
+              "PollEsNodesVersionOptions"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1521,7 +1529,7 @@
         ],
         "label": "ClusterInfo",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1532,7 +1540,7 @@
             "tags": [],
             "label": "cluster_name",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1543,7 +1551,7 @@
             "tags": [],
             "label": "cluster_uuid",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1554,7 +1562,7 @@
             "tags": [],
             "label": "cluster_version",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1568,7 +1576,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1582,7 +1590,7 @@
         "tags": [],
         "label": "NodeInfo",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1593,7 +1601,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1604,7 +1612,7 @@
             "tags": [],
             "label": "ip",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1618,7 +1626,7 @@
             "signature": [
               "{ publish_address: string; } | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1629,7 +1637,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1643,7 +1651,7 @@
         "tags": [],
         "label": "NodesInfo",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1656,16 +1664,10 @@
             "description": [],
             "signature": [
               "{ [key: string]: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
-                "text": "NodeInfo"
-              },
+              "NodeInfo",
               "; }"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1679,7 +1681,7 @@
         "tags": [],
         "label": "NodesVersionCompatibility",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1690,7 +1692,7 @@
             "tags": [],
             "label": "isCompatible",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1704,7 +1706,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1716,16 +1718,10 @@
             "label": "incompatibleNodes",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
-                "text": "NodeInfo"
-              },
+              "NodeInfo",
               "[]"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1737,16 +1733,10 @@
             "label": "warningNodes",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
-                "text": "NodeInfo"
-              },
+              "NodeInfo",
               "[]"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1757,7 +1747,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1771,7 +1761,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1785,7 +1775,7 @@
         "tags": [],
         "label": "PollEsNodesVersionOptions",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1935,7 +1925,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1971,6 +1961,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -2028,6 +2044,8 @@
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; }; cluster: ",
+              "default",
+              "; connector: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -2623,7 +2641,9 @@
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -2649,7 +2669,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; queryRuleset: ",
+              ">; }; queryRules: ",
               "default",
               "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
@@ -2895,6 +2915,8 @@
               "default",
               "; shutdown: ",
               "default",
+              "; simulate: ",
+              "default",
               "; slm: ",
               "default",
               "; snapshot: ",
@@ -3021,7 +3043,7 @@
               "default",
               "; }"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3041,7 +3063,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3052,7 +3074,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3063,7 +3085,7 @@
             "tags": [],
             "label": "ignoreVersionMismatch",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3074,7 +3096,7 @@
             "tags": [],
             "label": "healthCheckInterval",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3088,7 +3110,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3106,7 +3128,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -3116,7 +3138,7 @@
           },
           "; readonly idleSocketTimeout: moment.Duration; readonly compression: boolean; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly requestTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; readonly dnsCacheTtl: moment.Duration; }"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3460,9 +3482,17 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<moment.Duration>; }>"
+          "<moment.Duration>; publicBaseUrl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
+        "path": "src/core/packages/elasticsearch/server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

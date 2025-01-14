@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
@@ -17,8 +18,10 @@ import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  resetRulesSettings,
   TaskManagerDoc,
 } from '../../../../../common/lib';
+import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
@@ -32,14 +35,19 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  describe('alerts as data flapping', () => {
+  describe('alerts as data flapping', function () {
+    this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
+    });
+
+    after(async () => {
+      await resetRulesSettings(supertestWithoutAuth, 'space1');
     });
 
     // These are the same tests from x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/event_log.ts
@@ -56,6 +64,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 4,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
@@ -187,6 +197,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 4,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false, true].concat(
@@ -315,6 +327,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 3,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, false, false, false, false, false],
@@ -373,6 +387,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 5,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, false, true, false, true, false, true, false].concat(
@@ -524,6 +540,210 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
     });
+
+    it('should allow rule specific flapping to override space flapping', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: true,
+          look_back_window: 10,
+          status_change_threshold: 2,
+        })
+        .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+      const pattern = {
+        alertA: [true, false, true, false, true, false, true, false],
+      };
+
+      const ruleParameters = { pattern };
+      const createdRule1 = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            // set the schedule long so we can use "runSoon" to specify rule runs
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+            notify_when: RuleNotifyWhen.CHANGE,
+          })
+        )
+        .expect(200);
+
+      const rule1Id = createdRule1.body.id;
+      objectRemover.add(Spaces.space1.id, rule1Id, 'rule', 'alerting');
+
+      // Wait for the rule to run once
+      let run = 1;
+      let runWhichItFlapped = 0;
+
+      await waitForEventLogDocs(rule1Id, new Map([['execute', { equal: 1 }]]));
+      // Run them all
+      for (let i = 0; i < 7; i++) {
+        await retry.try(async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${rule1Id}/_run_soon`)
+            .set('kbn-xsrf', 'foo');
+          expect(response.status).to.eql(204);
+        });
+
+        await waitForEventLogDocs(rule1Id, new Map([['execute', { equal: ++run }]]));
+
+        const alertDocs = await queryForAlertDocs<PatternFiringAlert>(rule1Id);
+        const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
+
+        if (!runWhichItFlapped && isFlapping) {
+          runWhichItFlapped = run;
+        }
+      }
+
+      // Flapped on the 4th run
+      expect(runWhichItFlapped).eql(4);
+
+      // Create a rule with flapping
+      const createdRule2 = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            // set the schedule long so we can use "runSoon" to specify rule runs
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+            notify_when: RuleNotifyWhen.CHANGE,
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 4,
+            },
+          })
+        )
+        .expect(200);
+
+      const rule2Id = createdRule2.body.id;
+      objectRemover.add(Spaces.space1.id, rule2Id, 'rule', 'alerting');
+
+      // Wait for the rule to run once
+      run = 1;
+      runWhichItFlapped = 0;
+
+      await waitForEventLogDocs(rule2Id, new Map([['execute', { equal: 1 }]]));
+      // Run them all
+      for (let i = 0; i < 7; i++) {
+        await retry.try(async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${rule2Id}/_run_soon`)
+            .set('kbn-xsrf', 'foo');
+          expect(response.status).to.eql(204);
+        });
+
+        await waitForEventLogDocs(rule2Id, new Map([['execute', { equal: ++run }]]));
+
+        const alertDocs = await queryForAlertDocs<PatternFiringAlert>(rule2Id);
+        const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
+
+        if (!runWhichItFlapped && isFlapping) {
+          runWhichItFlapped = run;
+        }
+      }
+
+      // Flapped on the 6th run, which is more than the space status change threshold
+      expect(runWhichItFlapped).eql(6);
+    });
+
+    it('should ignore rule flapping if the space flapping is disabled', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: true,
+          look_back_window: 10,
+          status_change_threshold: 2,
+        })
+        .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+      const pattern = {
+        alertA: [true, false, true, false, true, false, true, false],
+      };
+
+      const ruleParameters = { pattern };
+      // Create a rule with flapping
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            // set the schedule long so we can use "runSoon" to specify rule runs
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+            notify_when: RuleNotifyWhen.CHANGE,
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 4,
+            },
+          })
+        )
+        .expect(200);
+
+      const ruleId = createdRule.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // Turn global flapping off, need to do this after the rule is created because
+      // we do not allow rules to be created with flapping if global flapping is off.
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: false,
+          look_back_window: 10,
+          status_change_threshold: 2,
+        })
+        .expect(200);
+
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+      // Wait for the rule to run once
+      let run = 1;
+      let runWhichItFlapped = 0;
+
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      // Run them all
+      for (let i = 0; i < 7; i++) {
+        await retry.try(async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+            .set('kbn-xsrf', 'foo');
+          expect(response.status).to.eql(204);
+        });
+
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+
+        const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
+
+        if (!runWhichItFlapped && isFlapping) {
+          runWhichItFlapped = run;
+        }
+      }
+
+      // Never flapped, since globl flapping is off
+      expect(runWhichItFlapped).eql(0);
+    });
   });
 
   async function getRuleState(ruleId: string) {
@@ -539,6 +759,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
     const searchResult = await es.search({
       index: alertsAsDataIndex,
       body: {
+        sort: [
+          {
+            '@timestamp': 'desc',
+          },
+        ],
         query: {
           bool: {
             must: {

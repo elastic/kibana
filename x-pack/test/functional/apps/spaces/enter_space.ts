@@ -20,6 +20,10 @@ export default function enterSpaceFunctionalTests({
   describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       await spacesService.create({
         id: 'another-space',
         name: 'Another Space',
@@ -45,6 +49,9 @@ export default function enterSpaceFunctionalTests({
       await PageObjects.security.forceLogout();
     });
     after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       await spacesService.delete('another-space');
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -110,9 +117,36 @@ export default function enterSpaceFunctionalTests({
       const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
       const path = await anchorElement.getAttribute('href');
 
-      const pathWithNextRoute = `${path}?next=/app/management/kibana/objects?initialQuery=type:(visualization)#/view`;
+      const pathWithNextRoute = `${path}?next=/app/management/kibana/objects?initialQuery=type:(visualization)#/view/uuid`;
 
       await browser.navigateTo(pathWithNextRoute);
+
+      await PageObjects.spaceSelector.expectRoute(
+        spaceId,
+        '/app/management/kibana/objects?initialQuery=type%3A(visualization)#/view/uuid'
+      );
+    });
+
+    it('allows user to navigate to different space with default route preserving url hash and search', async () => {
+      const spaceId = 'another-space';
+
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/management/kibana/objects?initialQuery=type:(visualization)#/view',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
+
+      await PageObjects.security.login(undefined, undefined, {
+        expectSpaceSelector: true,
+      });
+
+      const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
+      const path = await anchorElement.getAttribute('href');
+
+      await browser.navigateTo(path!);
 
       await PageObjects.spaceSelector.expectRoute(
         spaceId,
@@ -141,6 +175,15 @@ export default function enterSpaceFunctionalTests({
 
     it('falls back to the default home page if provided next route is malformed', async () => {
       const spaceId = 'another-space';
+
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/canvas',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
 
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,

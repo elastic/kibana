@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {

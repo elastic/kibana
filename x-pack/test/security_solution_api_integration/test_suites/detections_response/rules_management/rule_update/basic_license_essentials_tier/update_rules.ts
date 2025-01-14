@@ -18,6 +18,9 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  createRuleAssetSavedObject,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -33,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_rules', () => {
+  describe('@ess @serverless @serverlessQA update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -102,20 +105,24 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedRule).toMatchObject(expectedRule);
       });
 
-      it('@skipInServerless should return a 403 forbidden if it is a machine learning job', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+      describe('@skipInServerless', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should return a 403 forbidden if it is a machine learning job', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        // update a simple rule's type to try to be a machine learning job type
-        const updatedRule = getSimpleMlRuleUpdate('rule-1');
-        updatedRule.rule_id = 'rule-1';
-        updatedRule.name = 'some other name';
-        delete updatedRule.id;
+          // update a simple rule's type to try to be a machine learning job type
+          const updatedRule = getSimpleMlRuleUpdate('rule-1');
+          updatedRule.rule_id = 'rule-1';
+          updatedRule.name = 'some other name';
+          delete updatedRule.id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
+          const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
 
-        expect(body).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          expect(body).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
 
@@ -304,6 +311,34 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(updatedRuleResponse).toMatchObject(expectedRule);
         });
+      });
+
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', license: 'elastic' }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        const { body: existingRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        const { body } = await securitySolutionApi
+          .updateRule({
+            body: getCustomQueryRuleParams({
+              ...existingRule,
+              rule_id: 'rule-1',
+              id: undefined,
+              license: 'new license',
+            }),
+          })
+          .expect(400);
+
+        expect(body.message).toEqual('Cannot update "license" field for prebuilt rules');
       });
     });
   });

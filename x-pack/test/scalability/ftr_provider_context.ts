@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
+import { services } from './services';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof commonFunctionalServices, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 export class FtrService extends GenericFtrService<FtrProviderContext> {}

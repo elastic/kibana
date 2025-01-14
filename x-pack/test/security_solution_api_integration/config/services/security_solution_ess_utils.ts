@@ -5,18 +5,32 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecuritySolutionUtils } from './types';
+import { format as formatUrl } from 'url';
+import supertest from 'supertest';
+import { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
+import { SecuritySolutionESSUtilsInterface } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtils {
+}: FtrProviderContextWithSpaces): SecuritySolutionESSUtilsInterface {
   const config = getService('config');
-  const supertest = getService('supertest');
+  const search = getService('search');
+  const supertestWithoutAuth = getService('supertest');
 
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
-    createSuperTest: (_role?: string) => Promise.resolve(supertest),
+    createSearch: (_role?: string) => Promise.resolve(search),
+    createSuperTest: async (role?: string, password: string = 'changeme') => {
+      if (!role) {
+        return supertestWithoutAuth;
+      }
+      const kbnUrl = formatUrl({
+        ...config.get('servers.kibana'),
+        auth: false,
+      });
+
+      return supertest.agent(kbnUrl).auth(role, password);
+    },
   };
 }

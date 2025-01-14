@@ -6,29 +6,40 @@
  */
 
 import expect from '@kbn/expect';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
+  const utils = getService('securitySolutionUtils');
+  const endpointTestresources = getService('endpointTestResources');
 
-  describe('@ess @serverless Endpoint policy api', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint policy response api', function () {
+    let adminSupertest: TestAgent;
+
+    before(async () => {
+      adminSupertest = await utils.createSuperTest();
+    });
+
     describe('GET /api/endpoint/policy_response', () => {
-      before(
-        async () =>
-          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/policy', {
-            useCreate: true,
-          })
-      );
+      let mockData: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
+
+      before(async () => {
+        mockData = await endpointTestresources.loadEndpointData();
+      });
 
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
-      after(async () => await endpointDataStreamHelpers.deletePolicyStream(getService));
+      after(async () => {
+        if (mockData) {
+          await endpointTestresources.unloadEndpointData(mockData);
+          // @ts-expect-error
+          mockData = undefined;
+        }
+      });
 
       it('should return one policy response for an id', async () => {
-        const expectedAgentId = 'a10ac658-a3bc-4ac6-944a-68d9bd1c5a5e';
-        const { body } = await supertest
+        const expectedAgentId = mockData.hosts[0].agent.id;
+        const { body } = await adminSupertest
           .get(`/api/endpoint/policy_response?agentId=${expectedAgentId}`)
           .send()
           .expect(200);
@@ -38,12 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return not found if host has no policy response', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(`/api/endpoint/policy_response?agentId=bad_id`)
           .send()
           .expect(404);
 
-        expect(body.message).to.contain('Policy Response Not Found');
+        expect(body.message).to.contain('Policy response for endpoint id [bad_id] not found');
       });
     });
   });

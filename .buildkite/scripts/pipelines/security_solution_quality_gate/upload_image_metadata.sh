@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .buildkite/scripts/common/util.sh
+
 if [ "$KIBANA_MKI_QUALITY_GATE" == "1" ]; then
     echo "Triggered by quality gate!"
     triggered_by="Serverless Quality Gate."
@@ -17,11 +19,11 @@ else
     KBN_IMAGE=${KIBANA_LATEST}
 fi
 
-docker pull ${KBN_IMAGE}
+docker_with_retry pull ${KBN_IMAGE}
 build_date=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
 vcs_ref=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
 vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
-version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')   
+version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')
 
 markdown_text="""
 #### $triggered_by
@@ -32,9 +34,9 @@ markdown_text="""
 ---
 
 #### Kibana Container Metadata
-- Build Date            : $build_date 
-- Github Commit Hash    : $vcs_ref 
-- Github Repo           : $vcs_url 
+- Build Date            : $build_date
+- Github Commit Hash    : $vcs_ref
+- Github Repo           : $vcs_url
 - Version               : $version
 """
 echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"

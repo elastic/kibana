@@ -28,38 +28,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const serviceNames = ['opbeans-java', 'opbeans-go'];
 
   registry.when(
-    'Services detailed statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles the empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `POST /internal/apm/services/detailed_statistics`,
-          params: {
-            query: {
-              start,
-              end,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-              offset: '1d',
-              probability: 1,
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              bucketSizeInSeconds: 60,
-            },
-            body: {
-              serviceNames: JSON.stringify(serviceNames),
-            },
-          },
-        });
-
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod).to.be.empty();
-        expect(response.body.previousPeriod).to.be.empty();
-      });
-    }
-  );
-
-  registry.when(
     'Services detailed statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
@@ -208,6 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
+      // eslint-disable-next-line mocha/no-sibling-hooks
       before(async () => {
         const response = await apmApiClient.readUser({
           endpoint: `POST /internal/apm/services/detailed_statistics`,
@@ -232,13 +201,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         servicesDetailedStatistics = response.body;
       });
-      it('returns current period data', async () => {
+      it('returns current period data with time comparison', async () => {
         expect(servicesDetailedStatistics.currentPeriod).not.to.be.empty();
       });
       it('returns previous period data', async () => {
         expect(servicesDetailedStatistics.previousPeriod).not.to.be.empty();
       });
-      it('returns current data for requested service names', () => {
+      it('returns current data for requested service names with time comparison', () => {
         serviceNames.forEach((serviceName) => {
           expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
         });
@@ -248,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
         });
       });
-      it('returns correct statistics', () => {
+      it('returns correct statistics with time comparison', () => {
         const currentPeriodStatistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
         const previousPeriodStatistics = servicesDetailedStatistics.previousPeriod[serviceNames[0]];
 

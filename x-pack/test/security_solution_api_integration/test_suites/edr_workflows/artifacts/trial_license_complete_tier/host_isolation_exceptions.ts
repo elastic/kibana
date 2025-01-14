@@ -17,16 +17,16 @@ import {
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import TestAgent from 'supertest/lib/agent';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'
     >;
     type HostIsolationExceptionApiCallsInterface<BodyGetter = UnknownBodyGetter> = Array<{
-      method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+      method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
       info?: string;
       path: string;
       // The body just needs to have the properties we care about in the tests. This should cover most
@@ -138,8 +138,13 @@ export default function ({ getService }: FtrProviderContext) {
       },
     ];
 
+    let t1AnalystSupertest: TestAgent;
+    let endpointPolicyManagerSupertest: TestAgent;
+
     before(async () => {
-      // Create an endpoint policy in fleet we can work with
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
+
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
     });
 
@@ -164,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return 400 for import of endpoint exceptions', async () => {
-      await supertest
+      await endpointPolicyManagerSupertest
         .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
         .set('kbn-xsrf', 'true')
         .attach(
@@ -190,10 +195,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           body.entries[0].field = 'some.invalid.field';
 
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -206,10 +210,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           body.entries.push({ ...body.entries[0] });
 
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -229,10 +232,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ];
 
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -245,10 +247,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           body.os_types = ['linux', 'windows'];
 
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -262,7 +263,9 @@ export default function ({ getService }: FtrProviderContext) {
           body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
           // Using superuser here as we need custom license for this action
-          await supertest[hostIsolationExceptionApiCall.method](hostIsolationExceptionApiCall.path)
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
+            hostIsolationExceptionApiCall.path
+          )
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -272,10 +275,9 @@ export default function ({ getService }: FtrProviderContext) {
       }
       for (const hostIsolationExceptionApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${hostIsolationExceptionApiCall.method}] - [${hostIsolationExceptionApiCall.info}]`, async () => {
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await endpointPolicyManagerSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(200);
@@ -285,15 +287,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     // no such role in serverless
     describe('@skipInServerless and user has authorization to read host isolation exceptions', function () {
+      let hunterSupertest: TestAgent;
+      before(async () => {
+        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+      });
+
       for (const hostIsolationExceptionApiCall of [
         ...hostIsolationExceptionCalls,
         ...needsWritePrivilege,
       ]) {
         it(`should error on [${hostIsolationExceptionApiCall.method}] - [${hostIsolationExceptionApiCall.info}]`, async () => {
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await hunterSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(403);
@@ -302,10 +308,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const hostIsolationExceptionApiCall of needsReadPrivilege) {
         it(`should not error on [${hostIsolationExceptionApiCall.method}] - [${hostIsolationExceptionApiCall.info}]`, async () => {
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await hunterSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(200);
@@ -320,10 +325,9 @@ export default function ({ getService }: FtrProviderContext) {
         ...needsReadPrivilege,
       ]) {
         it(`should error on [${hostIsolationExceptionApiCall.method}] - [${hostIsolationExceptionApiCall.info}]`, async () => {
-          await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
+          await t1AnalystSupertest[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(403);

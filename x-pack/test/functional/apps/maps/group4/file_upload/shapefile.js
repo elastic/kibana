@@ -10,7 +10,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
+  const { geoFileUpload, maps } = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
   const retry = getService('retry');
 
@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }) {
         'geoall_data_writer',
         'global_index_pattern_management_all',
       ]);
-      await PageObjects.maps.openNewMap();
+      await maps.openNewMap();
     });
 
     after(async () => {
@@ -30,20 +30,20 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should preview part of shapefile', async () => {
-      await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectFileUploadCard();
-      await PageObjects.geoFileUpload.previewShapefile(
+      await maps.clickAddLayer();
+      await maps.selectFileUploadCard();
+      await geoFileUpload.previewShapefile(
         path.join(__dirname, 'files', 'cb_2018_us_csa_500k.shp')
       );
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
 
-      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      const numberOfLayers = await maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
       // preview text is inconsistent. Skip expect for now
       // https://github.com/elastic/kibana/issues/124334
       /*
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('cb_2018_us_csa_500k');
+      const tooltipText = await maps.getLayerTocTooltipMsg('cb_2018_us_csa_500k');
       expect(tooltipText).to.be(
         'cb_2018_us_csa_500k\nResults limited to 141 features, 81% of file.'
       );
@@ -52,23 +52,23 @@ export default function ({ getPageObjects, getService }) {
 
     it('should import shapefile', async () => {
       indexName = uuidv4();
-      await PageObjects.geoFileUpload.setIndexName(indexName);
-      await PageObjects.geoFileUpload.uploadFile();
+      await geoFileUpload.setIndexName(indexName);
+      await geoFileUpload.uploadFile();
 
-      const statusText = await PageObjects.geoFileUpload.getFileUploadStatusCalloutMsg();
+      const statusText = await geoFileUpload.getFileUploadStatusCalloutMsg();
       expect(statusText).to.be('File upload complete\nIndexed 174 features.');
     });
 
     it('should add as document layer', async () => {
-      await PageObjects.geoFileUpload.addFileAsDocumentLayer();
-      await PageObjects.maps.waitForLayersToLoad();
+      await geoFileUpload.addFileAsDocumentLayer();
+      await maps.waitForLayersToLoad();
 
-      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      const numberOfLayers = await maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
       await retry.try(async () => {
-        await PageObjects.maps.waitForLayersToLoad();
-        const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
+        await maps.waitForLayersToLoad();
+        const tooltipText = await maps.getLayerTocTooltipMsg(indexName);
         expect(tooltipText).to.be(`${indexName}\nFound 174 documents.`);
       });
     });

@@ -38,7 +38,8 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  describe('alerts', () => {
+  describe('alerts', function () {
+    this.tags('skipFIPS');
     let alertUtils: AlertUtils;
     let indexRecordActionId: string;
     const authorizationIndex = '.kibana-test-authorization';

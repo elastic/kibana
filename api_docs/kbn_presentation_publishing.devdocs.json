@@ -22,7 +22,7 @@
             "text": "CanAccessViewMode"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,47 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiCanLockHoverActions",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanLockHoverActions",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.CanLockHoverActions",
+            "text": "CanLockHoverActions"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiCanLockHoverActions.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +102,7 @@
             "text": "HasAppContext"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +116,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,7 +142,7 @@
             "text": "HasDisableTriggers"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,7 +156,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,7 +182,7 @@
             "text": "HasExecutionContext"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -156,7 +196,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,7 +223,7 @@
           },
           "<object>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,7 +237,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,25 +265,25 @@
             "text": "HasLegacyLibraryTransforms"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
           }
         ],
         "children": [
@@ -257,7 +297,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -284,7 +324,7 @@
           },
           "<StateT>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,7 +338,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -327,7 +367,7 @@
           },
           "<unknown>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -341,7 +381,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -367,7 +407,7 @@
             "text": "HasSupportedTriggers"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -381,7 +421,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -408,7 +448,7 @@
           },
           "<string>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -422,7 +462,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -448,7 +488,7 @@
             "text": "HasUniqueId"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -462,7 +502,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -489,7 +529,7 @@
           },
           "<T>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -503,7 +543,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -518,7 +558,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -544,7 +584,7 @@
             "text": "PublishesBlockingError"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,7 +598,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -584,7 +624,7 @@
             "text": "PublishesDataLoading"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -598,7 +638,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -624,7 +664,7 @@
             "text": "PublishesDataViews"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -638,7 +678,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -666,7 +706,7 @@
             "text": "PublishesDisabledActionIds"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -680,7 +720,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -706,7 +746,7 @@
             "text": "PublishesFilters"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -720,7 +760,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -746,7 +786,7 @@
             "text": "PublishesPanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -760,7 +800,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -786,7 +826,7 @@
             "text": "PublishesPanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -800,7 +840,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -827,7 +867,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -841,7 +881,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -867,7 +907,7 @@
             "text": "PublishesPhaseEvents"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -881,7 +921,87 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesReload",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesReload",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesReload",
+            "text": "PublishesReload"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesReload.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesRendered",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesRendered",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesRendered",
+            "text": "PublishesRendered"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesRendered.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -909,7 +1029,7 @@
             "text": "PublishesSavedObjectId"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -923,7 +1043,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -949,7 +1069,7 @@
             "text": "PublishesTimeRange"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -963,7 +1083,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -989,7 +1109,7 @@
             "text": "PublishesTimeslice"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1003,7 +1123,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1029,7 +1149,7 @@
             "text": "PublishesUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1043,7 +1163,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1067,9 +1187,10 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
-          }
+          },
+          "<object>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1083,7 +1204,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1111,7 +1232,7 @@
             "text": "PublishesViewMode"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1125,7 +1246,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1151,7 +1272,7 @@
             "text": "PublishesWritablePanelDescription"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1165,7 +1286,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1191,7 +1312,7 @@
             "text": "PublishesWritablePanelTitle"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1205,7 +1326,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1231,7 +1352,7 @@
             "text": "PublishesWritableUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1245,7 +1366,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1271,7 +1392,7 @@
             "text": "PublishesWritableViewMode"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1285,7 +1406,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1304,7 +1425,7 @@
         "signature": [
           "(api: unknown) => boolean"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1318,7 +1439,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1347,7 +1468,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1361,7 +1482,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1398,7 +1519,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1419,7 +1540,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1446,7 +1567,7 @@
           },
           "<StateType>, comparatorKeys: (keyof StateType)[]) => Partial<StateType>"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1467,7 +1588,7 @@
               },
               "<StateType>"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1482,7 +1603,7 @@
             "signature": [
               "(keyof StateType)[]"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1509,7 +1630,7 @@
           },
           ">) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1531,7 +1652,7 @@
               },
               ">"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1558,7 +1679,7 @@
           },
           ">) => string | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1580,7 +1701,7 @@
               },
               ">"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1609,7 +1730,7 @@
           },
           "<State, Key>"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/fallback_comparator.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/fallback_comparator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1650,7 +1771,7 @@
           },
           "> | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1671,7 +1792,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1690,7 +1811,7 @@
         "signature": [
           "(api: unknown) => boolean"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1704,7 +1825,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1732,7 +1853,7 @@
             "text": "HasEditCapabilities"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1746,7 +1867,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1799,7 +1920,7 @@
           },
           ">; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1819,7 +1940,7 @@
                 "text": "SerializedTimeRange"
               }
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1872,7 +1993,7 @@
           },
           "; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1892,7 +2013,47 @@
                 "text": "SerializedTitles"
               }
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.isEmbeddableApiContext",
+        "type": "Function",
+        "tags": [],
+        "label": "isEmbeddableApiContext",
+        "description": [],
+        "signature": [
+          "(context: unknown) => context is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.isEmbeddableApiContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1919,7 +2080,7 @@
           },
           "<StateType>, comparatorKeys: (keyof StateType)[], lastSavedState: StateType | undefined, latestState: Partial<StateType>) => Partial<StateType> | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1940,7 +2101,7 @@
               },
               "<StateType>"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1955,7 +2116,7 @@
             "signature": [
               "(keyof StateType)[]"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1970,7 +2131,7 @@
             "signature": [
               "StateType | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1985,7 +2146,7 @@
             "signature": [
               "Partial<StateType>"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/state_comparators.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/state_comparators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2011,7 +2172,7 @@
             "text": "SerializedTitles"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2025,7 +2186,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2050,7 +2211,7 @@
           "UnwrapPublishingSubjectTuple",
           "<SubjectsType>"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2066,7 +2227,7 @@
             "signature": [
               "[...SubjectsType]"
             ],
-            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2097,7 +2258,7 @@
           "UnwrapPublishingSubjectTuple",
           "<SubjectsType>"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2113,7 +2274,7 @@
             "signature": [
               "[...SubjectsType]"
             ],
-            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2139,7 +2300,7 @@
             "text": "FetchContext"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2153,7 +2314,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2198,7 +2359,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2212,7 +2373,7 @@
             "signature": [
               "ApiType | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2241,7 +2402,7 @@
           },
           "<T>"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2257,7 +2418,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2348,7 +2509,7 @@
           },
           " | undefined>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2359,7 +2520,7 @@
             "tags": [],
             "label": "{\n  filters,\n  query,\n  timeRange,\n}",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2380,7 +2541,7 @@
                   },
                   "[] | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2409,7 +2570,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2430,7 +2591,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2470,7 +2631,7 @@
           "ValueFromPublishingSubject",
           "<SubjectType>"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2486,7 +2647,7 @@
             "signature": [
               "SubjectType"
             ],
-            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2499,12 +2660,224 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.CanLockHoverActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanLockHoverActions",
+        "description": [
+          "\nThis API can lock hover actions"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.CanLockHoverActions.hasLockedHoverActions$",
+            "type": "Object",
+            "tags": [],
+            "label": "hasLockedHoverActions$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<boolean>; <A>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; lift: <R>(operator: ",
+              "Operator",
+              "<boolean, R>) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<boolean>> | ((value: boolean) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.CanLockHoverActions.lockHoverActions",
+            "type": "Function",
+            "tags": [],
+            "label": "lockHoverActions",
+            "description": [],
+            "signature": [
+              "(lock: boolean) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-public.CanLockHoverActions.lockHoverActions.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "lock",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.EmbeddableApiContext",
         "type": "Interface",
         "tags": [],
         "label": "EmbeddableApiContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/index.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2520,7 +2893,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/index.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2534,7 +2907,7 @@
         "tags": [],
         "label": "EmbeddableAppContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2550,7 +2923,7 @@
             "signature": [
               "(() => string) | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2563,7 +2936,7 @@
             "tags": [],
             "label": "currentAppId",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2577,7 +2950,7 @@
         "tags": [],
         "label": "FetchContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2588,7 +2961,7 @@
             "tags": [],
             "label": "isReload",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2609,7 +2982,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2638,7 +3011,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2652,7 +3025,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2673,7 +3046,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2687,7 +3060,7 @@
             "signature": [
               "[number, number] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2701,7 +3074,7 @@
         "tags": [],
         "label": "HasAppContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2722,7 +3095,7 @@
                 "text": "EmbeddableAppContext"
               }
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2738,7 +3111,7 @@
         "tags": [],
         "label": "HasDisableTriggers",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2749,7 +3122,7 @@
             "tags": [],
             "label": "disableTriggers",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2782,7 +3155,7 @@
             "text": "HasTypeDisplayName"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2796,7 +3169,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2812,7 +3185,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2828,7 +3201,7 @@
             "signature": [
               "(() => Promise<string | undefined>) | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2844,7 +3217,7 @@
         "tags": [],
         "label": "HasExecutionContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2857,16 +3230,10 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2892,7 +3259,7 @@
           },
           "<RuntimeState> extends Partial<LibraryTransformGuards>,DuplicateTitleCheck"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3040,25 +3407,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3074,7 +3441,7 @@
             "signature": [
               "(title: string) => Promise<string>"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3088,7 +3455,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3110,7 +3477,7 @@
             "signature": [
               "() => RuntimeState"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3128,7 +3495,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3156,41 +3523,57 @@
           },
           "<StateT> extends LibraryTransformGuards,DuplicateTitleCheck"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/react_embeddable/types.ts"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/react_embeddable/types.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/react_embeddable/library_transforms.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/react_embeddable/library_transforms.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/library_transforms.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/library_transforms.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
           }
         ],
         "children": [
@@ -3206,7 +3589,7 @@
             "signature": [
               "(title: string) => Promise<string>"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3220,7 +3603,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3242,7 +3625,7 @@
             "signature": [
               "(libraryId: string) => StateT"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3256,7 +3639,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3278,7 +3661,7 @@
             "signature": [
               "() => StateT"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3306,7 +3689,7 @@
           },
           "<ParentApiType>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3320,7 +3703,7 @@
             "signature": [
               "ParentApiType"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3334,7 +3717,7 @@
         "tags": [],
         "label": "HasSupportedTriggers",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3348,7 +3731,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3374,7 +3757,7 @@
           },
           "<T>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3388,7 +3771,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3402,7 +3785,7 @@
         "tags": [],
         "label": "HasTypeDisplayName",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3416,7 +3799,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3432,7 +3815,7 @@
             "signature": [
               "(() => string) | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3448,7 +3831,7 @@
         "tags": [],
         "label": "HasUniqueId",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3459,7 +3842,7 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3473,7 +3856,7 @@
         "tags": [],
         "label": "PhaseEvent",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3484,7 +3867,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3496,9 +3879,9 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+              "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3519,7 +3902,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3530,7 +3913,7 @@
             "tags": [],
             "label": "timeToEvent",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3544,7 +3927,7 @@
         "tags": [],
         "label": "PublishesBlockingError",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3690,25 +4073,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, Error | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<Error | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<Error | undefined>; operator: ",
-              "Operator",
-              "<any, Error | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<Error | undefined>> | ((value: Error | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: Error | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<Error | undefined>; (PromiseCtor: PromiseConstructor): Promise<Error | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Error | undefined>; }; }"
+              "; }; toPromise: { (): Promise<Error | undefined>; (PromiseCtor: PromiseConstructor): Promise<Error | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Error | undefined>; }; observers: ",
+              "Observer",
+              "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<Error | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3722,7 +4105,7 @@
         "tags": [],
         "label": "PublishesDataLoading",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3868,25 +4251,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<boolean | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: boolean | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3900,7 +4283,7 @@
         "tags": [],
         "label": "PublishesDataViews",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4166,9 +4549,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4176,7 +4559,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -4188,27 +4571,7 @@
               },
               "[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -4262,9 +4625,29 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined>; }; }"
+              "[] | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4278,7 +4661,7 @@
         "tags": [],
         "label": "PublishesDisabledActionIds",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4424,27 +4807,59 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string[] | undefined>; operator: ",
-              "Operator",
-              "<any, string[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string[] | undefined>> | ((value: string[] | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string[] | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string[] | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string[] | undefined>; }; observers: ",
+              "Observer",
+              "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string[] | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesDisabledActionIds.setDisabledActionIds",
+            "type": "Function",
+            "tags": [],
+            "label": "setDisabledActionIds",
+            "description": [],
+            "signature": [
+              "(ids: string[] | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-public.PublishesDisabledActionIds.setDisabledActionIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/presentation-publishing",
@@ -4456,7 +4871,7 @@
             "signature": [
               "(() => boolean) | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4472,7 +4887,7 @@
         "tags": [],
         "label": "PublishesFilters",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4738,9 +5153,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4748,7 +5163,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -4760,27 +5175,7 @@
               },
               "[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -4834,9 +5229,29 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined>; }; }"
+              "[] | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4850,7 +5265,7 @@
         "tags": [],
         "label": "PublishesPanelDescription",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4996,25 +5411,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5035,7 +5450,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5049,7 +5464,7 @@
         "tags": [],
         "label": "PublishesPanelTitle",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5195,25 +5610,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5359,25 +5774,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<boolean | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: boolean | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5398,7 +5813,7 @@
               },
               "<string | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5412,7 +5827,7 @@
         "tags": [],
         "label": "PublishesPhaseEvents",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5678,9 +6093,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -5688,7 +6103,7 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              " | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -5700,27 +6115,7 @@
               },
               " | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PhaseEvent",
-                "text": "PhaseEvent"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PhaseEvent",
-                "text": "PhaseEvent"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -5774,9 +6169,381 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PhaseEvent",
+                "text": "PhaseEvent"
+              },
+              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PhaseEvent",
+                "text": "PhaseEvent"
+              },
+              " | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesReload",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesReload",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesReload.reload$",
+            "type": "Object",
+            "tags": [],
+            "label": "reload$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; forEach: { (next: (value: void) => void): Promise<void>; (next: (value: void) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; pipe: { (): ",
+              "Observable",
+              "<void>; <A>(op1: ",
+              "OperatorFunction",
+              "<void, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<void, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, void> | undefined; lift: <R>(operator?: ",
+              "Operator",
+              "<void, R> | undefined) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<void>> | ((value: void) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<void | undefined>; (PromiseCtor: PromiseConstructor): Promise<void | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<void | undefined>; }; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesRendered",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesRendered",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesRendered.rendered$",
+            "type": "Object",
+            "tags": [],
+            "label": "rendered$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<boolean>; <A>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; lift: <R>(operator: ",
+              "Operator",
+              "<boolean, R>) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<boolean>> | ((value: boolean) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5792,7 +6559,7 @@
         "description": [
           "\nThis API publishes a saved object id which can be used to determine which saved object this API is linked to."
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5938,25 +6705,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5988,7 +6755,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6254,9 +7021,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -6264,7 +7031,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              " | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -6276,27 +7043,7 @@
               },
               " | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -6350,9 +7097,29 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6373,7 +7140,7 @@
               },
               "<boolean | undefined> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6387,7 +7154,7 @@
         "tags": [],
         "label": "PublishesTimeslice",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6533,25 +7300,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<[number, number] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, [number, number] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<[number, number] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<[number, number] | undefined>; operator: ",
-              "Operator",
-              "<any, [number, number] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<[number, number] | undefined>> | ((value: [number, number] | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: [number, number] | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructor): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<[number, number] | undefined>; }; }"
+              "; }; toPromise: { (): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructor): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<[number, number] | undefined>; }; observers: ",
+              "Observer",
+              "<[number, number] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<[number, number] | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6565,7 +7332,17 @@
         "tags": [],
         "label": "PublishesUnsavedChanges",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<Runtime>"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6579,21 +7356,21 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: object | undefined; error: (err: any) => void; forEach: { (next: (value: object | undefined) => void): Promise<void>; (next: (value: object | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => object | undefined; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: Partial<Runtime> | undefined; error: (err: any) => void; forEach: { (next: (value: Partial<Runtime> | undefined) => void): Promise<void>; (next: (value: Partial<Runtime> | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => Partial<Runtime> | undefined; closed: boolean; pipe: { (): ",
               "Observable",
-              "<object | undefined>; <A>(op1: ",
+              "<Partial<Runtime> | undefined>; <A>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>): ",
+              "<Partial<Runtime> | undefined, A>): ",
               "Observable",
               "<A>; <A, B>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>): ",
               "Observable",
               "<B>; <A, B, C>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6601,7 +7378,7 @@
               "Observable",
               "<C>; <A, B, C, D>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6611,7 +7388,7 @@
               "Observable",
               "<D>; <A, B, C, D, E>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6623,7 +7400,7 @@
               "Observable",
               "<E>; <A, B, C, D, E, F>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6637,7 +7414,7 @@
               "Observable",
               "<F>; <A, B, C, D, E, F, G>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6653,7 +7430,7 @@
               "Observable",
               "<G>; <A, B, C, D, E, F, G, H>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6671,7 +7448,7 @@
               "Observable",
               "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6691,7 +7468,7 @@
               "Observable",
               "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
               "OperatorFunction",
-              "<object | undefined, A>, op2: ",
+              "<Partial<Runtime> | undefined, A>, op2: ",
               "OperatorFunction",
               "<A, B>, op3: ",
               "OperatorFunction",
@@ -6711,25 +7488,25 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<object | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
               "Operator",
-              "<object | undefined, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<object | undefined>; operator: ",
+              "<any, Partial<Runtime> | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
-              "<any, object | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<Partial<Runtime> | undefined, R>) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
-              "<object | undefined>> | ((value: object | undefined) => void) | undefined): ",
+              "<Partial<Runtime> | undefined>> | ((value: Partial<Runtime> | undefined) => void) | undefined): ",
               "Subscription",
-              "; (next?: ((value: object | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "; (next?: ((value: Partial<Runtime> | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<object | undefined>; (PromiseCtor: PromiseConstructor): Promise<object | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<object | undefined>; }; }"
+              "; }; toPromise: { (): Promise<Partial<Runtime> | undefined>; (PromiseCtor: PromiseConstructor): Promise<Partial<Runtime> | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Partial<Runtime> | undefined>; }; observers: ",
+              "Observer",
+              "<Partial<Runtime> | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<Partial<Runtime> | undefined>; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6741,9 +7518,9 @@
             "label": "resetUnsavedChanges",
             "description": [],
             "signature": [
-              "() => void"
+              "() => boolean"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6761,7 +7538,7 @@
         "description": [
           "\nThis API publishes a universal view mode which can change compatibility of actions and the\nvisibility of components."
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7027,9 +7804,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -7037,7 +7814,7 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -7049,27 +7826,7 @@
               },
               ", R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
-                "text": "ViewMode"
-              },
-              ">; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
-                "text": "ViewMode"
-              },
-              "> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -7123,9 +7880,29 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ViewMode",
+                "text": "ViewMode"
+              },
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ViewMode",
+                "text": "ViewMode"
+              },
+              ">; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7139,7 +7916,7 @@
         "tags": [],
         "label": "SerializedTimeRange",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7160,7 +7937,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7174,7 +7951,7 @@
         "tags": [],
         "label": "SerializedTitles",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7188,7 +7965,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7202,7 +7979,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7216,7 +7993,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7262,7 +8039,7 @@
           },
           ">>>"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7293,7 +8070,7 @@
           },
           "<StateType, KeyType> | undefined)?]"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7308,7 +8085,7 @@
         "signature": [
           "(last: StateType[KeyType] | undefined, current: StateType[KeyType] | undefined, lastState?: Partial<StateType> | undefined, currentState?: Partial<StateType> | undefined) => boolean"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -7323,7 +8100,7 @@
             "signature": [
               "StateType[KeyType] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7337,7 +8114,7 @@
             "signature": [
               "StateType[KeyType] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7351,7 +8128,7 @@
             "signature": [
               "Partial<StateType> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7365,7 +8142,7 @@
             "signature": [
               "Partial<StateType> | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7392,33 +8169,25 @@
           },
           "<object>, \"canLinkToLibrary\" | \"canUnlinkFromLibrary\"> & { linkToLibrary: () => Promise<void>; unlinkFromLibrary: () => Promise<void>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
           }
         ],
         "initialIsOpen": false
@@ -7433,9 +8202,9 @@
           "------------------------------------------------------------------------------------------\nPerformance Tracking Types\n------------------------------------------------------------------------------------------"
         ],
         "signature": [
-          "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+          "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7463,7 +8232,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7489,7 +8258,37 @@
           },
           " | undefined>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesWritableDataViews",
+        "type": "Type",
+        "tags": [],
+        "label": "PublishesWritableDataViews",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & { setDataViews: (dataViews: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "[]) => void; }"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7511,7 +8310,7 @@
           },
           " & { setPanelDescription: (newTitle: string | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7533,7 +8332,7 @@
           },
           " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7561,7 +8360,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7611,7 +8410,7 @@
           },
           " | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7643,7 +8442,7 @@
           },
           ") => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7792,25 +8591,25 @@
           "OperatorFunction",
           "<any, any>[]): ",
           "Observable",
-          "<unknown>; }; observers: ",
-          "Observer",
-          "<T>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+          "<unknown>; }; operator: ",
+          "Operator",
+          "<any, T> | undefined; lift: <R>(operator: ",
           "Operator",
           "<T, R>) => ",
           "Observable",
-          "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-          "Observable",
-          "<T>; operator: ",
-          "Operator",
-          "<any, T> | undefined; subscribe: { (observerOrNext?: Partial<",
+          "<R>; subscribe: { (observerOrNext?: Partial<",
           "Observer",
           "<T>> | ((value: T) => void) | undefined): ",
           "Subscription",
           "; (next?: ((value: T) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
           "Subscription",
-          "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
+          "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; observers: ",
+          "Observer",
+          "<T>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+          "Observable",
+          "<T>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/types.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7833,7 +8632,7 @@
           },
           "<StateType, KeyType>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/comparators/types.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/comparators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7846,9 +8645,9 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"edit\" | \"view\" | \"preview\" | \"print\""
+          "\"edit\" | \"view\" | \"print\" | \"preview\""
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

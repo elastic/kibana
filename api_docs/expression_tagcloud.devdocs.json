@@ -17,7 +17,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/chart_expressions/expression_tagcloud/public/plugin.ts",
+      "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -48,7 +48,7 @@
         "signature": [
           "\"tagcloud\""
         ],
-        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -106,7 +106,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_tagcloud/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,7 +123,7 @@
         "signature": [
           "{ readonly SINGLE: \"single\"; readonly RIGHT_ANGLED: \"right angled\"; readonly MULTIPLE: \"multiple\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -138,7 +138,7 @@
         "signature": [
           "{ readonly LINEAR: \"linear\"; readonly LOG: \"log\"; readonly SQUARE_ROOT: \"square root\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

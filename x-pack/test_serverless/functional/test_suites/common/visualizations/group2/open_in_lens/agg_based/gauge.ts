@@ -43,13 +43,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Basic')).to.eql(true);
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Agg with params');
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -69,13 +67,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not convert aggregation with not supported field type', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Unsupported field type');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Unsupported field type')).to.eql(
+        false
+      );
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Color ranges');
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);

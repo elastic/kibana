@@ -14,6 +14,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     'common',
     'svlIngestPipelines',
     'svlManagementPage',
+    'embeddedConsole',
   ]);
   describe('ingest pipelines', function () {
     before(async () => {

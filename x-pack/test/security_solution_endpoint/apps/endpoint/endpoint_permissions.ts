@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint permissions:', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/191243
+  describe.skip('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -91,8 +92,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointSummary['Endpoint version']).to.be(endpoint.agent.version);
 
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
-          expect(endpointSummary['Policy status']).not.be('—');
-          expect(endpointSummary['Agent status']).not.to.be('—');
+          expect(endpointSummary['Policy status']).not.to.equal('—');
+          expect(endpointSummary['Agent status']).not.to.equal('—');
         });
       });
     }

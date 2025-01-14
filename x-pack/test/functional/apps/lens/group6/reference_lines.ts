@@ -9,15 +9,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   describe('lens reference lines tests', () => {
     it('should show a disabled reference layer button if no data dimension is defined', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
 
       await testSubjects.click('lnsLayerAddButton');
       await retry.waitFor('wait for layer popup to appear', async () =>
@@ -29,21 +29,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add a reference layer with a static value in it', async () => {
-      await PageObjects.lens.goToTimeRange();
-
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.createLayer('referenceLine');
+      await lens.createLayer('referenceLine');
 
       expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
       expect(
@@ -54,27 +52,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create a dynamic referenceLine when dragging a field to a referenceLine dimension group', async () => {
-      await PageObjects.lens.dragFieldToDimensionTrigger(
+      await lens.dragFieldToDimensionTrigger(
         'bytes',
         'lnsXY_yReferenceLineLeftPanel > lns-empty-dimension'
       );
 
-      expect(
-        await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yReferenceLineLeftPanel')
-      ).to.eql(['Static value: 4992.44', 'Median of bytes']);
+      expect(await lens.getDimensionTriggersTexts('lnsXY_yReferenceLineLeftPanel')).to.eql([
+        'Static value: 4992.44',
+        'Median of bytes',
+      ]);
     });
 
     it('should add a new group to the reference layer when a right axis is enabled', async () => {
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
         keepOpen: true,
       });
 
-      await PageObjects.lens.changeAxisSide('right');
+      await lens.changeAxisSide('right');
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
       await testSubjects.existOrFail('lnsXY_yReferenceLineRightPanel > lns-empty-dimension');
     });
@@ -83,10 +82,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // style it enabling the fill
       await testSubjects.click('lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger');
       await testSubjects.click('lnsXY_fill_below');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
       // drag and drop it to the left axis
-      await PageObjects.lens.dragDimensionToDimension({
+      await lens.dragDimensionToDimension({
         from: 'lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
         to: 'lnsXY_yReferenceLineRightPanel > lns-empty-dimension',
       });
@@ -98,12 +97,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         )
       ).to.be(true);
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
     });
 
     it('should duplicate also the original style when duplicating a reference line', async () => {
       // drag and drop to the empty field to generate a duplicate
-      await PageObjects.lens.dragDimensionToDimension({
+      await lens.dragDimensionToDimension({
         from: 'lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger',
         to: 'lnsXY_yReferenceLineRightPanel > lns-empty-dimension',
       });
@@ -118,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '[data-test-subj="lnsXY_fill_below"][class*="euiButtonGroupButton-isSelected"]'
         )
       ).to.be(true);
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
     });
   });
 }

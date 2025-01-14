@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function getAllActionTests({ getService }: FtrProviderContext) {
+export default function getAllConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -24,12 +23,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle get all action request appropriately', async () => {
-          const { body: createdAction } = await supertest
+        it('should handle get all connector request appropriately', async () => {
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -39,7 +38,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/internal/actions/connectors`)
@@ -78,11 +77,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
-                  id: createdAction.id,
+                  id: createdConnector.id,
                   is_preconfigured: false,
                   is_system_action: false,
                   is_deprecated: false,
-                  name: 'My action',
+                  name: 'My Connector',
                   connector_type_id: 'test.index-record',
                   is_missing_secrets: false,
                   config: {
@@ -206,11 +205,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle get all request appropriately with proper referenced_by_count', async () => {
-          const { body: createdAction } = await supertest
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -220,7 +219,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -230,7 +229,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: createdConnector.id,
                     params: {},
                   },
                   {
@@ -244,7 +243,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, RULE_SAVED_OBJECT_TYPE, 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/internal/actions/connectors`)
@@ -283,11 +282,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
-                  id: createdAction.id,
+                  id: createdConnector.id,
                   is_preconfigured: false,
                   is_system_action: false,
                   is_deprecated: false,
-                  name: 'My action',
+                  name: 'My Connector',
                   connector_type_id: 'test.index-record',
                   is_missing_secrets: false,
                   config: {
@@ -411,12 +410,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't get actions from another space`, async () => {
-          const { body: createdAction } = await supertest
+        it(`shouldn't get connectors from another space`, async () => {
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -426,7 +425,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix('other')}/internal/actions/connectors`)
@@ -590,12 +589,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
       it('calculates the references correctly', async () => {
         const { user, space } = SuperuserAtSpace1;
 
-        const { body: createdAction } = await supertest
+        const { body: thisCreatedConnector } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password)
           .send({
-            name: 'My action',
+            name: 'My Connector',
             connector_type_id: 'test.index-record',
             config: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -606,7 +605,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+        objectRemover.add(space.id, thisCreatedConnector.id, 'connector', 'actions');
 
         const ruleRes = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -616,7 +615,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               actions: [
                 systemAction,
                 {
-                  id: createdAction.id,
+                  id: thisCreatedConnector.id,
                   group: 'default',
                   params: {},
                 },
@@ -634,7 +633,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
         const connectors = response.body as Array<{ id: string; referenced_by_count: number }>;
 
-        const createdConnector = connectors.find((connector) => connector.id === createdAction.id);
+        const createdConnector = connectors.find(
+          (connector) => connector.id === thisCreatedConnector.id
+        );
         const systemConnector = connectors.find((connector) => connector.id === systemAction.id);
 
         expect(createdConnector?.referenced_by_count).to.be(1);

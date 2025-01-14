@@ -166,7 +166,7 @@ const savedObject = resolveResult.saved_object;
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 2 of the POC]!
 
 The
-{kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts[SavedObjectsResolveResponse
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/api-server/src/apis/resolve.ts[SavedObjectsResolveResponse
 interface] has four fields, summarized below:
 
 * `saved_object` - The saved object that was found.
@@ -373,7 +373,7 @@ image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registrati
 > *Update saved object delete API usage to handle multiple spaces*
 
 If an object is shared to multiple spaces, it cannot be deleted without using the
-{kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-api-server/src/apis/delete.ts[`force`
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/api-server/src/apis/delete.ts[`force`
 delete option]. You should always be aware when a saved object exists in multiple spaces, and you should warn users in that case.
 
 If your UI allows users to delete your objects, you can define a warning message like this:
@@ -390,7 +390,7 @@ const warningMessage =
 ```
 
 The <<data-views,Data Views page>> in <<management>> uses a
-https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
+https://github.com/elastic/kibana/blob/{branch}/src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
 approach] to show a warning in its delete confirmation modal:
 
 image::images/sharing-saved-objects-step-7.png["Sharing Saved Objects deletion warning"]
@@ -407,7 +407,7 @@ this in two ways, and many consumers will want to implement both:
    the spaces plugin, and you can use them in your own application.
 +
 First, make sure your page contents are wrapped in a
-https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/spaces_context/types.ts[spaces context provider]:
+https://github.com/elastic/kibana/blob/{branch}/x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts[spaces context provider]:
 +
 ```tsx
 const ContextWrapper = useMemo(
@@ -425,11 +425,11 @@ return (
 );
 ```
 +
-Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/space_list/types.ts[list of spaces] for an
+Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/platform/plugins/shared/spaces/public/space_list/types.ts[list of spaces] for an
 object, and third, show a
-https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
+https://github.com/elastic/kibana/blob/{branch}/x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
 edit the object's assigned spaces. You may want to follow the example of the <<data-views,Data Views page>> and
-https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
+https://github.com/elastic/kibana/blob/{branch}/src/platform/plugins/shared/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
 these into a single component] so that the space list can be clicked to show the flyout:
 +
 ```tsx
@@ -477,7 +477,7 @@ return (
 
 2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
    ensuring that your objects are marked as
-   {kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
+   {kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_management.ts[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
 +
 ```ts
 name: 'my-object-type',

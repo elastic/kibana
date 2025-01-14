@@ -59,10 +59,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.id;
     });
 
     beforeEach(() => {
@@ -79,6 +77,26 @@ export default function ({ getService }: FtrProviderContext) {
       // Hit get endpoint and expect 404 as well
       await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
     });
+
+    it('deletes monitor by param id', async () => {
+      const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
+
+      const deleteResponse = await monitorTestService.deleteMonitorByIdParam(monitorId, 200);
+
+      expect(deleteResponse.body).eql([{ id: monitorId, deleted: true }]);
+
+      // Hit get endpoint and expect 404 as well
+      await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
+    });
+
+    it('throws error if both body and param are missing', async () => {
+      const deleteResponse = await supertest
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .send()
+        .set('kbn-xsrf', 'true');
+      expect(deleteResponse.status).to.eql(400);
+    });
+
     it('deletes multiple monitors by id', async () => {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
       const { id: monitorId2 } = await saveMonitor({
@@ -90,6 +108,33 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(
         deleteResponse.body.sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1))
+      ).eql(
+        [
+          { id: monitorId2, deleted: true },
+          { id: monitorId, deleted: true },
+        ].sort((a, b) => (a.id > b.id ? 1 : -1))
+      );
+
+      // Hit get endpoint and expect 404 as well
+      await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
+    });
+
+    it('deletes multiple monitors by bulk delete', async () => {
+      const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
+      const { id: monitorId2 } = await saveMonitor({
+        ...httpMonitorJson,
+        name: 'another -2',
+      } as MonitorFields);
+
+      const deleteResponse = await monitorTestService.deleteMonitorBulk(
+        [monitorId2, monitorId],
+        200
+      );
+
+      expect(
+        deleteResponse.body.result.sort((a: { id: string }, b: { id: string }) =>
+          a.id > b.id ? 1 : -1
+        )
       ).eql(
         [
           { id: monitorId2, deleted: true },

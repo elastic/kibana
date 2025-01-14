@@ -10,10 +10,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, timePicker, visEditor, visChart } = getPageObjects([
+  const { visualize, lens, visEditor, visChart } = getPageObjects([
     'visualize',
     'lens',
-    'timePicker',
     'visEditor',
     'visChart',
   ]);
@@ -21,19 +20,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
 
-  // Failing: See https://github.com/elastic/kibana/issues/181895
-  describe.skip('Gauge', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
+  describe('Gauge', function describeIndexTests() {
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickGauge();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
       await elasticChart.setNewChartUiDebugFlag(true);
     });
 

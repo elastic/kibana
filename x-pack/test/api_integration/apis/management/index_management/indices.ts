@@ -22,7 +22,6 @@ export default function ({ getService }: FtrProviderContext) {
     flushIndex,
     refreshIndex,
     forceMerge,
-    unfreeze,
     list,
     reload,
     clearCache,
@@ -148,20 +147,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
         await forceMerge(index, { maxNumSegments: 1 }).expect(200);
-      });
-    });
-
-    describe('unfreeze', () => {
-      it('should unfreeze an index', async () => {
-        const index = await createIndex();
-
-        // Even if the index is already unfrozen, calling the unfreeze api
-        // will have no effect on it and will return a 200.
-        await unfreeze(index).expect(200);
-        const {
-          body: [cat2],
-        } = await catIndex(index, 'sth');
-        expect(cat2.sth).to.be('false');
       });
     });
 

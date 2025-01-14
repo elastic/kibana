@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -426,16 +427,16 @@ export class WebElementWrapper {
   /**
    * Moves the remote environment’s mouse cursor to the current element with optional offset
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
-   * @param { xOffset: 0, yOffset: 0 } options
+   * @param { xOffset: 0, yOffset: 0, topOffset: number } options Optional
    * @return {Promise<void>}
    */
-  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
+  public async moveMouseTo({ xOffset = 0, yOffset = 0, topOffset = 0 } = {}) {
     await this.retryCall(async function moveMouseTo(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper.getActions().move({ x: 0, y: 0 }).perform();
       await wrapper
         .getActions()
-        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .move({ x: xOffset, y: yOffset, origin: wrapper._webElement })
         .perform();
     });
   }

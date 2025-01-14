@@ -9,7 +9,8 @@ an index pattern, and then rolls it into a new index. Rollup indices are a good
 way to compactly store months or years of historical data for use in
 visualizations and reports.
 
-To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
+You can go to the *Rollup Jobs* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image::images/management_rollup_list.png[List of currently active rollup jobs]
@@ -23,7 +24,8 @@ detailed information.
 
 The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
 
-To add the privilege, open the main menu, then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [float]
 [[create-and-manage-rollup-job]]
@@ -142,7 +144,8 @@ rollup index, or you can remove or archive it using
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Go to the *Data Views* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 . Click *Create data view*, and select *Rollup data view* from the dropdown.
 
@@ -153,7 +156,7 @@ The notation for a combination data view with both raw and rolled up data is
 `rollup_logstash,kibana_sample_data_logs`. In this data view, `rollup_logstash`
 matches the rollup index and `kibana_sample_data_logs` matches the raw data.
 
-. Open the main menu, click *Dashboard*, then *Create dashboard*.
+. Go to *Dashboards*, then select *Create dashboard*.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
@@ -165,7 +168,7 @@ as your source to see both the raw and rolled up data.
 [role="screenshot"]
 image::images/management-create-rollup-bar-chart.png[Create visualization of rolled up data]
 
-. Select *Bar vertical stacked* in the chart type dropdown.
+. Select *Bar* in the chart type dropdown.
 
 . Add the `@timestamp` field to the *Horizontal axis*.
 

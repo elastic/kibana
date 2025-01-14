@@ -44,7 +44,7 @@
             "text": "SpanOptions"
           }
         ],
-        "path": "packages/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,7 +65,7 @@
                 "text": "SpanOptions"
               }
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,9 +92,11 @@
           },
           ", cb: (span?: ",
           "Span",
-          " | undefined) => Promise<T>) => Promise<T>"
+          " | undefined) => Promise<T>, logger: ",
+          "Logger",
+          " | undefined) => Promise<T>"
         ],
-        "path": "packages/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +117,7 @@
                 "text": "SpanOptions"
               }
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,10 +134,26 @@
               "Span",
               " | undefined) => Promise<T>"
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.withSpan.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -150,7 +168,7 @@
         "tags": [],
         "label": "SpanOptions",
         "description": [],
-        "path": "packages/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -161,7 +179,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,7 +193,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +207,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,7 +221,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,7 +235,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

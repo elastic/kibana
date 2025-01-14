@@ -21,7 +21,7 @@ import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 
-describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   const testRules = [
     getNewRule({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
     getNewRule({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),

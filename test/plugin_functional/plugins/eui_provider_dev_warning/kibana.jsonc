@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/eui-provider-dev-warning",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "euiProviderDevWarning",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "eui_provider_dev_warning"
+    ]
+  }
+}

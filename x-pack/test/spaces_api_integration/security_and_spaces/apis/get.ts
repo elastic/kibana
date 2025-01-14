@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestSuiteFactory } from '../../common/suites/get';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
@@ -21,7 +23,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
     createExpectNotFoundResult,
     createExpectRbacForbidden,
     nonExistantSpaceId,
-  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('get', () => {
     [
@@ -51,6 +53,22 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
+      },
+      {
+        spaceId: SPACES.SPACE_3.spaceId, // This space has a solution set and we expect disabledFeatures to be automatically set
+        otherSpaceId: SPACES.DEFAULT.spaceId,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_READ_USER,
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,

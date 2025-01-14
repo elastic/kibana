@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['cloud_security_posture_agentless']);
     loadTestFile(require.resolve('./cis_integration_aws'));
     loadTestFile(require.resolve('./cis_integration_gcp'));
+    loadTestFile(require.resolve('./create_agent'));
   });
 }

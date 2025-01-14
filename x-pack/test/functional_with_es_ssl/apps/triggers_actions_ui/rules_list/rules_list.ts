@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createAction,
+  createConnector,
   createAlert,
   createAlertManualCleanup,
   createFailingAlert,
@@ -223,7 +223,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         )
         .expect(200);
 
-      objectRemover.add(createdRule.id, 'alert', 'alerts');
+      objectRemover.add(createdRule.id, 'rule', 'alerting');
 
       await retry.try(async () => {
         const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
@@ -265,7 +265,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         )
         .expect(200);
 
-      objectRemover.add(createdRule.id, 'alert', 'alerts');
+      objectRemover.add(createdRule.id, 'rule', 'alerting');
 
       await retry.try(async () => {
         const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
@@ -449,7 +449,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
 
-      await testSubjects.click('cancelSaveEditedRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
     });
 
     it('should delete all selection', async () => {
@@ -606,7 +606,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         supertest,
         objectRemover,
       });
-      const action = await createAction({ supertest, objectRemover });
+      const action = await createConnector({ supertest, objectRemover });
       const noopAlertWithAction = await createAlert({
         supertest,
         objectRemover,
@@ -787,7 +787,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
-      const action = await createAction({ supertest, objectRemover });
+      const action = await createConnector({ supertest, objectRemover });
       await createAlert({
         supertest,
         objectRemover,
