@@ -122,7 +122,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       screen.getByText('We are setting up your knowledge base', { exact: false })
     ).toBeInTheDocument();
   });
-  it('renders "Setting up Knowledge base" message while while model is being deployed and starting', () => {
+  it('renders "Setting up Knowledge base" message while model is being deployed and starting', () => {
     renderComponent({
       knowledgeBase: {
         isInstalling: false,
