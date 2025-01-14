@@ -14,6 +14,7 @@ import {
   type DarkModeValue,
   DEFAULT_THEME_NAME,
   parseDarkModeValue,
+  parseThemeNameValue,
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -65,8 +66,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     let themeName: string = DEFAULT_THEME_NAME;
 
     try {
-      // parse before updating the var just like darkMode below
-      themeName = await uiSettingsClient.get('theme:name');
+      themeName = parseThemeNameValue(await uiSettingsClient.get('theme:name'));
 
       const authenticated = isAuthenticated(request);
 
