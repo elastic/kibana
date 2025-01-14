@@ -13,6 +13,10 @@ import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
+// used in x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/insight/insight.tsx
+const CONTEXT_INSTRUCTION =
+  'The following contextual information is available to help you understand the alert';
+
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
     services: { observabilityAIAssistant, http },
@@ -62,7 +66,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         instructions: dedent(
           `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
 
-        The following contextual information is available to help you understand the alert:
+        ${CONTEXT_INSTRUCTION}:
         ${obsAlertContext}
 
         The user already know the alert reason so do not repeat this: ${alert.formatted.reason}
