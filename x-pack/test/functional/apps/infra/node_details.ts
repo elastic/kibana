@@ -576,6 +576,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Osquery Tab', () => {
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
