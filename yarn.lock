@@ -6425,6 +6425,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/multiplayer-plugin@link:x-pack/solutions/observability/plugins/multiplayer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""

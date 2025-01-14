@@ -685,6 +685,7 @@
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/platform/plugins/private/monitoring_collection",
     "@kbn/monitoring-plugin": "link:x-pack/platform/plugins/private/monitoring",
+    "@kbn/multiplayer-plugin": "link:x-pack/solutions/observability/plugins/multiplayer",
     "@kbn/navigation-plugin": "link:src/platform/plugins/shared/navigation",
     "@kbn/newsfeed-plugin": "link:src/platform/plugins/shared/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
