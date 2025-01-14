@@ -123,6 +123,7 @@ export function useFetchAgentsData() {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([
     'healthy',
     'unhealthy',
+    'orphaned',
     'updating',
     'offline',
     ...(urlHasInactive ? ['inactive'] : []),
@@ -235,7 +236,6 @@ export function useFetchAgentsData() {
               perPage: MAX_AGENT_ACTIONS,
             }),
           ]);
-
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
@@ -263,6 +263,7 @@ export function useFetchAgentsData() {
           }
 
           const statusSummary = agentsResponse.data.statusSummary;
+
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }

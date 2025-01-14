@@ -121,7 +121,13 @@ describe('useFetchAgentsData', () => {
     const { result } = renderer.renderHook(() => useFetchAgentsData());
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
+    expect(result?.current.selectedStatus).toEqual([
+      'healthy',
+      'unhealthy',
+      'orphaned',
+      'updating',
+      'offline',
+    ]);
     expect(result?.current.allAgentPolicies).toEqual([
       {
         id: 'agent-policy-1',
@@ -144,7 +150,7 @@ describe('useFetchAgentsData', () => {
       },
     });
     expect(result?.current.kuery).toEqual(
-      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline'
+      'status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
     expect(result?.current.currentRequestRef).toEqual({ current: 2 });
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });

@@ -14,10 +14,12 @@ import type { SimplifiedAgentStatus } from '../../../types';
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
   'healthy',
   'unhealthy',
+  'orphaned',
   'updating',
   'offline',
   'inactive',
   'unenrolled',
+  'uninstalled',
 ];
 
 export function getColorForAgentStatus(
@@ -33,10 +35,14 @@ export function getColorForAgentStatus(
       return euiTheme.colors.darkShade;
     case 'unhealthy':
       return euiTheme.colors.backgroundFilledWarning;
+    case 'orphaned':
+      return euiTheme.colors.backgroundFilledWarning;
     case 'updating':
       return euiTheme.colors.backgroundFilledPrimary;
     case 'unenrolled':
       return euiTheme.colors.backgroundBaseDisabled;
+    case 'uninstalled':
+      return euiTheme.colors.lightShade;
     default:
       throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
@@ -52,6 +58,10 @@ export function getLabelForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
       return i18n.translate('xpack.fleet.agentStatus.offlineLabel', {
         defaultMessage: 'Offline',
       });
+    case 'uninstalled':
+      return i18n.translate('xpack.fleet.agentStatus.uninstalledLabel', {
+        defaultMessage: 'Uninstalled',
+      });
     case 'inactive':
       return i18n.translate('xpack.fleet.agentStatus.inactiveLabel', {
         defaultMessage: 'Inactive',
@@ -63,6 +73,10 @@ export function getLabelForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
     case 'unhealthy':
       return i18n.translate('xpack.fleet.agentStatus.unhealthyLabel', {
         defaultMessage: 'Unhealthy',
+      });
+    case 'orphaned':
+      return i18n.translate('xpack.fleet.agentStatus.orphanedLabel', {
+        defaultMessage: 'Orphaned',
       });
     case 'updating':
       return i18n.translate('xpack.fleet.agentStatus.updatingLabel', {
