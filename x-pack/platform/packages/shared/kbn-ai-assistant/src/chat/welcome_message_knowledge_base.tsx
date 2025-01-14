@@ -76,7 +76,7 @@ export function WelcomeMessageKnowledgeBase({
     if (modelIsReady) {
       setPollKnowledgeBaseStatus(false);
     }
-  }, [pollKnowledgeBaseStatus, modelIsReady]);
+  }, [modelIsReady]);
 
   // poll for knowledge base status every 5 seconds
   useInterval(
