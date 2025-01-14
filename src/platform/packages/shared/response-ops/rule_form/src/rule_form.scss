@@ -15,13 +15,13 @@
   }
   .ruleDefinitionHeader {
     flex-direction: column;
-    gap: 12px;
+    gap: $euiSizeM;
   }
   .ruleDefinitionHeaderRuleTypeName {
-    font-size: 18px;
-    margin-bottom: 4px;
+    font-size: $euiFontSizeM;
+    margin-bottom: $euiSizeXS;
   }
   .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
-    font-size: 14px;
+    font-size: $euiFontSizeS;
   }
 }
