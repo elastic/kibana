@@ -7,7 +7,6 @@
 
 import type { PropsWithChildren, FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
@@ -36,7 +35,6 @@ import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields
 export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
-  theme: ThemeServiceStart;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
   disablePopulatedFields?: boolean;
@@ -65,7 +63,6 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
   const {
     dataView,
     fieldStatsServices,
-    theme,
     timeRangeMs,
     dslQuery,
     disablePopulatedFields = false,
@@ -174,7 +171,6 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
         fieldValue,
         timeRangeMs,
         populatedFields,
-        theme,
       }}
     >
       <FieldStatsFlyout

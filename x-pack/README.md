@@ -100,4 +100,4 @@ See [here](./test/functional/apps/dashboard/reporting/README.md) for more inform
 
 #### Running Security Solution Cypress E2E/integration tests
 
-See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.
+See [here](./solutions/security/plugins/security_solution/cypress/README.md) for information on running this test suite.

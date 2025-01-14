@@ -48,6 +48,7 @@ import {
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/204167
+// Failing: See https://github.com/elastic/kibana/issues/204167
 describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
