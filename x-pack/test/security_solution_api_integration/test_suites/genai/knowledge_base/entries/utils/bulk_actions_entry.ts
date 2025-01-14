@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+  API_VERSIONS,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryUpdateProps,
   PerformKnowledgeBaseEntryBulkActionResponse,
