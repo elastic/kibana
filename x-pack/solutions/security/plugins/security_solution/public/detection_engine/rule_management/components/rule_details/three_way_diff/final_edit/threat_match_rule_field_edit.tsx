@@ -6,16 +6,23 @@
  */
 
 import React from 'react';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { UpgradeableThreatMatchFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { KqlQueryEditForm } from './fields/kql_query';
 import { DataSourceEditForm } from './fields/data_source';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
+import { ThreatMatchIndexEditForm } from './fields/threat_match_index';
+import { ThreatMatchQueryEditForm } from './fields/threat_match_query';
+import { ThreatMatchMappingEditForm } from './fields/threat_match_mapping';
+import { ThreatMatchIndicatorPathEditForm } from './fields/threat_index_indicator_path';
 
 interface ThreatMatchRuleFieldEditProps {
   fieldName: UpgradeableThreatMatchFields;
 }
 
-export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEditProps) {
+export function ThreatMatchRuleFieldEdit({
+  fieldName,
+}: ThreatMatchRuleFieldEditProps): JSX.Element | null {
   switch (fieldName) {
     case 'kql_query':
       return <KqlQueryEditForm />;
@@ -23,7 +30,15 @@ export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEdit
       return <DataSourceEditForm />;
     case 'alert_suppression':
       return <AlertSuppressionEditForm />;
+    case 'threat_index':
+      return <ThreatMatchIndexEditForm />;
+    case 'threat_query':
+      return <ThreatMatchQueryEditForm />;
+    case 'threat_mapping':
+      return <ThreatMatchMappingEditForm />;
+    case 'threat_indicator_path':
+      return <ThreatMatchIndicatorPathEditForm />;
     default:
-      return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

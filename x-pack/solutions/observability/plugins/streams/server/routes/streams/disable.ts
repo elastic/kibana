@@ -22,16 +22,11 @@ export const disableStreamsRoute = createServerRoute({
       requiredPrivileges: ['streams_write'],
     },
   },
-  handler: async ({
-    request,
-    response,
-    logger,
-    getScopedClients,
-  }): Promise<{ acknowledged: true }> => {
+  handler: async ({ request, logger, getScopedClients }): Promise<{ acknowledged: true }> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
-      await deleteStream(scopedClusterClient, 'logs', logger);
+      await deleteStream(scopedClusterClient, assetClient, 'logs', logger);
 
       return { acknowledged: true };
     } catch (e) {

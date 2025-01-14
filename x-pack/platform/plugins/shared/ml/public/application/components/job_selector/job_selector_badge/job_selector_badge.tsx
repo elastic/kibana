@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
+import { useEuiTheme, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tabColor } from '../../../../../common/util/group_color_utils';
 
@@ -27,7 +27,8 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
   numJobs,
   removeId,
 }) => {
-  const color = isGroup ? tabColor(id) : 'hollow';
+  const { euiTheme } = useEuiTheme();
+  const color = isGroup ? tabColor(id, euiTheme) : 'hollow';
   let props = { color } as EuiBadgeProps;
   let jobCount;
 

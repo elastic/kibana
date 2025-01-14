@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -15,7 +14,6 @@ import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_ref
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
@@ -30,12 +28,11 @@ import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
-import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -65,7 +62,6 @@ export const UserPanel = ({
   isDraggable,
   isPreviewMode,
 }: UserPanelProps) => {
-  const { telemetry } = useKibana().services;
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
@@ -120,47 +116,26 @@ export const UserPanel = ({
     setQuery,
   });
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const openPanelTab = useCallback(
-    (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-        entity: 'user',
-      });
+  const { openDetailsPanel, isLinkEnabled } = useNavigateToUserDetails({
+    userName,
+    email,
+    scopeId,
+    contextID,
+    isDraggable,
+    isRiskScoreExist: !!userRiskData?.user?.risk,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode,
+  });
 
-      openLeftPanel({
-        id: UserDetailsPanelKey,
-        params: {
-          isRiskScoreExist: !!userRiskData?.user?.risk,
-          scopeId,
-          user: {
-            name: userName,
-            email,
-          },
-          path: tab ? { tab } : undefined,
-          hasMisconfigurationFindings,
-          hasNonClosedAlerts,
-        },
-      });
-    },
-    [
-      telemetry,
-      openLeftPanel,
-      userRiskData?.user?.risk,
-      scopeId,
-      userName,
-      email,
-      hasMisconfigurationFindings,
-      hasNonClosedAlerts,
-    ]
-  );
   const openPanelFirstTab = useCallback(
     () =>
-      openPanelTab(
-        isRiskScoreExist
+      openDetailsPanel({
+        tab: isRiskScoreExist
           ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
-      ),
-    [isRiskScoreExist, openPanelTab]
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      }),
+    [isRiskScoreExist, openDetailsPanel]
   );
 
   const hasUserDetailsData =
@@ -213,8 +188,9 @@ export const UserPanel = ({
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
             />
             {isPreviewMode && (
               <UserPreviewPanelFooter

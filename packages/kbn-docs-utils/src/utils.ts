@@ -74,7 +74,7 @@ function escapeRegExp(regexp: string) {
 /**
  * If the file is at the top level, returns undefined, otherwise returns the
  * name of the first nested folder in the plugin. For example a path of
- * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
+ * 'src/platform/plugins/shared/data/public/search_services/file.ts' would return 'search_service' while
  * 'src/plugin/data/server/file.ts' would return undefined.
  * @param filePath
  */

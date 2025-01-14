@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { UptimeThemeContext } from '../../../contexts';
 import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
@@ -30,9 +29,10 @@ interface Props {
 }
 
 export const DonutChartLegend = ({ down, up }: Props) => {
-  const {
-    colors: { gray, danger },
-  } = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+  const danger = theme.euiTheme.colors.danger;
+  const gray = theme.euiTheme.colors.lightShade;
+
   return (
     <LegendContainer>
       <DonutChartLegendRow

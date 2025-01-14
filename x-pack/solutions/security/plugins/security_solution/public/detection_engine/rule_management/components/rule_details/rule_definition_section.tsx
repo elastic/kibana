@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLoadingSpinner,
+  EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
@@ -23,8 +25,9 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import useToggle from 'react-use/lib/useToggle';
+import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   EqlOptionalFields,
@@ -40,10 +43,7 @@ import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/desc
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
-import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
-import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
 import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
@@ -60,11 +60,14 @@ import {
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
+import { convertDateMathToDuration } from '../../../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
 import {
   EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
 } from '../../../rule_creation/components/eql_query_edit/translations';
+import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -89,16 +92,34 @@ export const Filters = ({
   index,
   'data-test-subj': dataTestSubj,
 }: FiltersProps) => {
-  const flattenedFilters = mapAndFlattenFilters(filters);
-
   const defaultIndexPattern = useDefaultIndexPattern();
+  const useDataViewParams = dataViewId
+    ? { dataViewId }
+    : { indexPatterns: index ?? defaultIndexPattern };
+  const { dataView } = useDataView(useDataViewParams);
+  const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
+  const searchBarFilters = useMemo(() => {
+    if (!index || isDataView(index) || isEsql) {
+      return filters;
+    }
+    const filtersWithUpdatedMetaIndex = filters.map((filter) => {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: index.join(','),
+        },
+      };
+    });
 
-  const { indexPattern } = useRuleIndexPattern({
-    dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-    index: index ?? defaultIndexPattern,
-    dataViewId,
-  });
+    return filtersWithUpdatedMetaIndex;
+  }, [filters, index, isEsql]);
 
+  if (!dataView) {
+    return null;
+  }
+
+  const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
   const styles = filtersStyles;
 
   return (
@@ -109,7 +130,7 @@ export const Filters = ({
       responsive={false}
       gutterSize="xs"
     >
-      <FilterItems filters={flattenedFilters} indexPatterns={[indexPattern as DataView]} readOnly />
+      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 };
@@ -219,7 +240,7 @@ interface MachineLearningJobListProps {
 }
 
 export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
-  const { jobs } = useSecurityJobs();
+  const { jobs: availableJobs } = useSecurityJobs();
 
   if (!jobIds) {
     return null;
@@ -227,11 +248,20 @@ export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearnin
 
   const jobIdsArray = Array.isArray(jobIds) ? jobIds : [jobIds];
 
+  const unavailableJobIds = jobIdsArray.filter(
+    (jobId) => !availableJobs.some((job) => job.id === jobId)
+  );
+
   if (isInteractive) {
-    return <MlJobsDescription jobIds={jobIdsArray} />;
+    return (
+      <>
+        <MlJobsDescription jobIds={jobIdsArray} />
+        <UnavailableMlJobs unavailableJobIds={unavailableJobIds} />
+      </>
+    );
   }
 
-  const relevantJobs = jobs.filter((job) => jobIdsArray.includes(job.id));
+  const relevantJobs = availableJobs.filter((job) => jobIdsArray.includes(job.id));
 
   return (
     <>
@@ -242,7 +272,45 @@ export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearnin
           jobName={job.customSettings?.security_app_display_name}
         />
       ))}
+      <UnavailableMlJobs unavailableJobIds={unavailableJobIds} />
     </>
+  );
+};
+
+interface UnavailableMlJobsProps {
+  unavailableJobIds: string[];
+}
+
+const UnavailableMlJobs = ({ unavailableJobIds }: UnavailableMlJobsProps) => {
+  return unavailableJobIds.map((jobId) => (
+    <div key={jobId}>
+      <UnavailableMlJobLink jobId={jobId} />
+    </div>
+  ));
+};
+
+interface UnavailableMlJobLinkProps {
+  jobId: string;
+}
+
+const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) => {
+  const [isPopoverOpen, togglePopover] = useToggle(false);
+
+  const button = (
+    <EuiButtonIcon
+      iconType="questionInCircle"
+      onClick={togglePopover}
+      aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
+    />
+  );
+
+  return (
+    <EuiText component="span" color="subdued" size="s">
+      {jobId}
+      <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
+        {i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
+      </EuiPopover>
+    </EuiText>
   );
 };
 
@@ -418,7 +486,9 @@ interface HistoryWindowSizeProps {
 }
 
 export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
-  const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
+  const size = historyWindowStart
+    ? convertDateMathToDuration(historyWindowStart)
+    : DEFAULT_HISTORY_WINDOW_SIZE;
 
   return (
     <EuiText size="s" data-test-subj={`newTermsWindowSizePropertyValue-${historyWindowStart}`}>
@@ -701,15 +771,6 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('threat_mapping' in rule && rule.threat_mapping) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="threatMappingPropertyTitle">{i18n.THREAT_MAPPING_FIELD_LABEL}</span>
-      ),
-      description: <ThreatMapping threatMapping={rule.threat_mapping} />,
-    });
-  }
-
   if ('threat_filters' in rule && rule.threat_filters && rule.threat_filters.length > 0) {
     definitionSectionListItems.push({
       title: (
@@ -749,6 +810,15 @@ const prepareDefinitionSectionListItems = (
           {getQueryLanguageLabel(rule.threat_language)}
         </span>
       ),
+    });
+  }
+
+  if ('threat_mapping' in rule && rule.threat_mapping) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="threatMappingPropertyTitle">{i18n.THREAT_MAPPING_FIELD_LABEL}</span>
+      ),
+      description: <ThreatMapping threatMapping={rule.threat_mapping} />,
     });
   }
 

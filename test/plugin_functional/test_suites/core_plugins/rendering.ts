@@ -128,7 +128,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
         'discover.experimental.enabledProfiles (array?)',
-        'enterpriseSearch.canDeployEntSearch (boolean?)',
         'enterpriseSearch.host (string?)',
         'enterpriseSearch.ui.enabled (boolean?)',
         'home.disableWelcomeScreen (boolean?)',
@@ -251,6 +250,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.performance_url (string?)',
         'xpack.cloud.users_and_roles_url (string?)',
         'xpack.cloud.projects_url (string?|never)',
+        'xpack.cloudSecurityPosture.enableExperimental (array?)',
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',

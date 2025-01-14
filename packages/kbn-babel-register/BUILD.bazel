@@ -25,7 +25,7 @@ SRCS = glob(
 #
 #  To reference other packages use:
 #    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
+#    eg. "//src/platform/packages/shared/kbn-utils"
 #
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
@@ -37,8 +37,8 @@ BUNDLER_DEPS = [
   "@npm//lmdb",
   "@npm//date-fns",
   "@npm//source-map-support",
-  "//packages/kbn-repo-packages",
-  "//packages/kbn-repo-info",
+  "//src/platform/packages/private/kbn-repo-packages",
+  "//src/platform/packages/shared/kbn-repo-info",
   "//packages/kbn-babel-transform",
 ]
 

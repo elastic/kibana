@@ -225,7 +225,6 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
-    "@kbn/core-user-profile-browser",
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
@@ -234,6 +233,10 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
-    "@kbn/llm-tasks-plugin"
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/ai-assistant-icon",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/charts-theme",
+    "@kbn/product-doc-base-plugin"
   ]
 }

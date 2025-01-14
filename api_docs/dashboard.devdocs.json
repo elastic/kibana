@@ -13,7 +13,7 @@
         "signature": [
           "(stateObj: Record<string, unknown>) => Record<string, unknown>"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "Record<string, unknown>"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -46,7 +46,7 @@
         "signature": [
           "(id: string | undefined, editMode: boolean | undefined) => string"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +60,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -75,7 +75,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -96,7 +96,7 @@
           "DashboardListingProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_listing/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,7 +110,7 @@
             "signature": [
               "DashboardListingProps"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_listing/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -131,7 +131,7 @@
           "DashboardTopNavProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,7 +145,7 @@
             "signature": [
               "DashboardTopNavProps"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -236,7 +236,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -306,7 +306,7 @@
               },
               ">>>"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -327,7 +327,7 @@
                 "text": "DashboardDrilldownOptions"
               }
             ],
-            "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -348,7 +348,7 @@
           "DashboardRendererProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -362,7 +362,7 @@
             "signature": [
               "DashboardRendererProps"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -380,7 +380,7 @@
         "tags": [],
         "label": "DashboardCreationOptions",
         "description": [],
-        "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -396,7 +396,7 @@
               "DashboardState",
               ">) | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -420,7 +420,7 @@
               },
               " | undefined) | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -436,7 +436,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -476,7 +476,7 @@
               },
               ">; } | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -490,7 +490,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -504,7 +504,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,7 +526,7 @@
               },
               "; } | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -542,7 +542,7 @@
               "LoadDashboardReturn",
               ") => \"valid\" | \"invalid\" | \"redirected\") | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -556,7 +556,7 @@
                 "signature": [
                   "LoadDashboardReturn"
                 ],
-                "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+                "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -574,7 +574,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -588,7 +588,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -610,7 +610,7 @@
               },
               ") | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -624,7 +624,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+                "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -642,7 +642,7 @@
         "tags": [],
         "label": "DashboardFeatureFlagConfig",
         "description": [],
-        "path": "src/plugins/dashboard/public/plugin.tsx",
+        "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -653,82 +653,9 @@
             "tags": [],
             "label": "allowByValueEmbeddables",
             "description": [],
-            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.IProvidesLegacyPanelPlacementSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "IProvidesLegacyPanelPlacementSettings",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dashboard",
-            "scope": "public",
-            "docId": "kibDashboardPluginApi",
-            "section": "def-public.IProvidesLegacyPanelPlacementSettings",
-            "text": "IProvidesLegacyPanelPlacementSettings"
-          },
-          "<InputType, AttributesType>"
-        ],
-        "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings",
-            "type": "Function",
-            "tags": [],
-            "label": "getLegacyPanelPlacementSettings",
-            "description": [],
-            "signature": [
-              "(input: InputType, attributes?: AttributesType | undefined) => Partial<",
-              "PanelPlacementSettings",
-              ">"
-            ],
-            "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "input",
-                "description": [],
-                "signature": [
-                  "InputType"
-                ],
-                "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "attributes",
-                "description": [],
-                "signature": [
-                  "AttributesType | undefined"
-                ],
-                "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -740,7 +667,7 @@
         "tags": [],
         "label": "SearchDashboardsResponse",
         "description": [],
-        "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -751,7 +678,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -765,7 +692,7 @@
             "signature": [
               "Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{} & { title: string; description: string; timeRestore: boolean; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]"
             ],
-            "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+            "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -781,7 +708,7 @@
         "tags": [],
         "label": "PanelPlacementStrategy",
         "description": [],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -798,7 +725,7 @@
         "signature": [
           "\"dashboards\""
         ],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -813,7 +740,7 @@
         "signature": [
           "\"dashboard\""
         ],
-        "path": "src/plugins/dashboard/public/dashboard_container/index.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -828,7 +755,7 @@
         "signature": [
           "48"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1075,8 +1002,18 @@
             "text": "PublishingSubject"
           },
           "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
-          "DashboardStateFromSettingsFlyout",
-          "; getDashboardPanelFromId: (id: string) => ",
+          "DashboardSettings",
+          "; getSerializedState: () => { attributes: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardAttributes",
+            "text": "DashboardAttributes"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
             "scope": "common",
@@ -1183,7 +1120,7 @@
             "text": "Query"
           },
           " | undefined) => void; setScrollToPanelId: (id: string | undefined) => void; setSettings: (settings: ",
-          "DashboardStateFromSettingsFlyout",
+          "DashboardSettings",
           ") => void; setTags: (tags: string[]) => void; setTimeRange: (timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
@@ -1208,41 +1145,9 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; untilEmbeddableLoaded: (id: string) => Promise<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any> | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ErrorEmbeddable",
-            "text": "ErrorEmbeddable"
-          },
-          ">; }"
+          "[] | undefined>; untilEmbeddableLoaded: (id: string) => Promise<unknown>; }"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1272,7 +1177,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/locator/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1329,7 +1234,7 @@
           },
           ") | undefined; }"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_container/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1344,7 +1249,7 @@
         "signature": [
           "\"dashboard\""
         ],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1358,7 +1263,7 @@
       "tags": [],
       "label": "DashboardSetup",
       "description": [],
-      "path": "src/plugins/dashboard/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1379,7 +1284,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1394,7 +1299,7 @@
       "tags": [],
       "label": "DashboardStart",
       "description": [],
-      "path": "src/plugins/dashboard/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1415,7 +1320,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1435,7 +1340,7 @@
               "text": "DashboardFeatureFlagConfig"
             }
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1451,7 +1356,7 @@
             "FindDashboardsService",
             ">"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1469,7 +1374,7 @@
             "GetPanelPlacementSettings",
             "<SerializedState>) => void"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1483,7 +1388,7 @@
               "signature": [
                 "string"
               ],
-              "path": "src/plugins/dashboard/public/plugin.tsx",
+              "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1499,7 +1404,7 @@
                 "GetPanelPlacementSettings",
                 "<SerializedState>"
               ],
-              "path": "src/plugins/dashboard/public/plugin.tsx",
+              "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1550,7 +1455,7 @@
             "section": "def-common.ControlWidth",
             "text": "ControlWidth"
           },
-          "; }>[]; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; syncTooltips: boolean; useMargins: boolean; syncColors: boolean; syncCursor: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
+          "; }>[]; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; syncColors: boolean; syncCursor: boolean; syncTooltips: boolean; useMargins: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1586,7 +1491,7 @@
           "DashboardPanel",
           "[]; }"
         ],
-        "path": "src/plugins/dashboard/server/content_management/v3/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/server/content_management/v3/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1601,7 +1506,7 @@
         "signature": [
           "{ readonly version?: number | undefined; readonly timeRestore?: boolean | undefined; readonly refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; readonly hits?: number | undefined; readonly timeFrom?: string | undefined; readonly timeTo?: string | undefined; readonly controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; readonly optionsJSON?: string | undefined; readonly title: string; readonly description: string; readonly kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; readonly panelsJSON: string; }"
         ],
-        "path": "src/plugins/dashboard/server/dashboard_saved_object/schema/v2/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/schema/v2/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1616,7 +1521,7 @@
         "signature": [
           "\"/api/dashboards/dashboard\""
         ],
-        "path": "src/plugins/dashboard/server/api/constants.ts",
+        "path": "src/platform/plugins/shared/dashboard/server/api/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1630,7 +1535,7 @@
       "tags": [],
       "label": "DashboardPluginSetup",
       "description": [],
-      "path": "src/plugins/dashboard/server/types.ts",
+      "path": "src/platform/plugins/shared/dashboard/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1644,7 +1549,7 @@
       "tags": [],
       "label": "DashboardPluginStart",
       "description": [],
-      "path": "src/plugins/dashboard/server/types.ts",
+      "path": "src/platform/plugins/shared/dashboard/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1683,7 +1588,7 @@
           },
           "> & { id: string; }, \"id\" | \"title\" | \"savedObjectId\">; version?: string | undefined; }[]"
         ],
-        "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1703,7 +1608,7 @@
                 "text": "DashboardPanelMap"
               }
             ],
-            "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1718,7 +1623,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1746,7 +1651,7 @@
             "text": "DashboardPanelMap"
           }
         ],
-        "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1761,7 +1666,7 @@
               "DashboardPanel",
               "[] | undefined"
             ],
-            "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1803,16 +1708,10 @@
             "text": "EmbeddableStateWithType"
           },
           "; references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]; }"
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1832,7 +1731,7 @@
                 "text": "EmbeddablePersistableStateService"
               }
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1866,13 +1765,7 @@
             "text": "EmbeddableStateWithType"
           },
           ", references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]) => ",
           {
             "pluginId": "embeddable",
@@ -1882,7 +1775,7 @@
             "text": "EmbeddableStateWithType"
           }
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1902,7 +1795,7 @@
                 "text": "EmbeddablePersistableStateService"
               }
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1932,7 +1825,7 @@
           ") => ",
           "DashboardAttributesAndReferences"
         ],
-        "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1946,7 +1839,7 @@
             "signature": [
               "DashboardAttributesAndReferences"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1967,10 +1860,105 @@
                 "text": "InjectExtractDeps"
               }
             ],
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.generateNewPanelIds",
+        "type": "Function",
+        "tags": [],
+        "label": "generateNewPanelIds",
+        "description": [
+          "\nWhen saving a dashboard as a copy, we should generate new IDs for all panels so that they are\nproperly refreshed when navigating between Dashboards"
+        ],
+        "signature": [
+          "(panels: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardPanelMap",
+            "text": "DashboardPanelMap"
+          },
+          ", references?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined) => { panels: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardPanelMap",
+            "text": "DashboardPanelMap"
+          },
+          "; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.generateNewPanelIds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "panels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.DashboardPanelMap",
+                "text": "DashboardPanelMap"
+              }
+            ],
+            "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.generateNewPanelIds.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2003,7 +1991,7 @@
             "text": "DashboardAttributes"
           }
         ],
-        "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2017,7 +2005,7 @@
             "signature": [
               "DashboardAttributesAndReferences"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2038,7 +2026,7 @@
                 "text": "InjectExtractDeps"
               }
             ],
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2073,7 +2061,7 @@
           },
           "[]"
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2087,7 +2075,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2109,7 +2097,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2127,7 +2115,7 @@
         "tags": [],
         "label": "DashboardCapabilities",
         "description": [],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2138,7 +2126,7 @@
             "tags": [],
             "label": "showWriteControls",
             "description": [],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2149,7 +2137,7 @@
             "tags": [],
             "label": "saveQuery",
             "description": [],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2160,7 +2148,7 @@
             "tags": [],
             "label": "createNew",
             "description": [],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2171,7 +2159,7 @@
             "tags": [],
             "label": "show",
             "description": [],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2185,7 +2173,7 @@
             "signature": [
               "[key: string]:  boolean"
             ],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2207,16 +2195,17 @@
             "section": "def-common.DashboardContainerInput",
             "text": "DashboardContainerInput"
           },
-          " extends ",
+          " extends Omit<",
           {
             "pluginId": "embeddable",
             "scope": "common",
             "docId": "kibEmbeddablePluginApi",
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
-          }
+          },
+          ", \"viewMode\">"
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2230,7 +2219,7 @@
             "signature": [
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2251,7 +2240,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2262,7 +2251,7 @@
             "tags": [],
             "label": "timeRestore",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2283,7 +2272,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2297,7 +2286,7 @@
             "signature": [
               "[number, number] | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2318,7 +2307,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2329,7 +2318,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2343,27 +2332,21 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
             "id": "def-common.DashboardContainerInput.viewMode",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
             "description": [],
             "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.ViewMode",
-                "text": "ViewMode"
-              }
+              "\"edit\" | \"view\" | \"print\" | \"preview\""
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2377,7 +2360,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2390,16 +2373,10 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; }"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2410,7 +2387,7 @@
             "tags": [],
             "label": "hidePanelTitles",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2421,7 +2398,7 @@
             "tags": [],
             "label": "syncTooltips",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2432,7 +2409,7 @@
             "tags": [],
             "label": "useMargins",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2443,7 +2420,7 @@
             "tags": [],
             "label": "syncColors",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2454,7 +2431,7 @@
             "tags": [],
             "label": "syncCursor",
             "description": [],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2474,7 +2451,7 @@
                 "text": "DashboardPanelMap"
               }
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2488,7 +2465,7 @@
         "tags": [],
         "label": "DashboardPanelMap",
         "description": [],
-        "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2518,7 +2495,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2550,7 +2527,7 @@
           },
           "<TEmbeddableInput>"
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2564,7 +2541,7 @@
             "signature": [
               "Omit<Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>, \"i\"> & { readonly i: string; }"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2578,7 +2555,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2594,7 +2571,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2617,7 +2594,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2631,7 +2608,7 @@
         "tags": [],
         "label": "InjectExtractDeps",
         "description": [],
-        "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2660,7 +2637,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2686,7 +2663,7 @@
             "text": "SavedObjectEmbeddableInput"
           }
         ],
-        "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2703,10 +2680,10 @@
         "signature": [
           "{ id?: string | undefined; version?: string | undefined; tags?: string[] | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.ViewMode",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
           " | undefined; timeRestore?: boolean | undefined; timeRange?: ",
@@ -2742,14 +2719,8 @@
             "text": "Filter"
           },
           "[] | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
-          " | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: ",
+          "KibanaExecutionContext",
+          " | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -2757,11 +2728,11 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; panels?: ",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; useMargins?: boolean | undefined; panels?: ",
           "DashboardPanel",
           "[] | undefined; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2775,7 +2746,7 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "path": "src/plugins/dashboard/common/index.ts",
+        "path": "src/platform/plugins/shared/dashboard/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2786,7 +2757,7 @@
             "tags": [],
             "label": "ENABLE_LABS_UI",
             "description": [],
-            "path": "src/plugins/dashboard/common/index.ts",
+            "path": "src/platform/plugins/shared/dashboard/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -49,12 +49,6 @@ const riskScore = {
   },
 };
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
-
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-}));
-
 const riskScoreWithAssetCriticalityContribution = (contribution: number) => {
   const score = JSON.parse(JSON.stringify(riskScore));
   score.user.risk.category_2_score = contribution;
@@ -129,8 +123,7 @@ describe('RiskInputsTab', () => {
     expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
   });
 
-  it('it renders alert preview button when feature flag is enable', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('it renders alert preview button', () => {
     mockUseRiskScore.mockReturnValue({
       loading: false,
       error: false,
@@ -149,28 +142,6 @@ describe('RiskInputsTab', () => {
     );
 
     expect(getByTestId(EXPAND_ALERT_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('it does not render alert preview button when feature flag is disable', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseRiskScore.mockReturnValue({
-      loading: false,
-      error: false,
-      data: [riskScore],
-    });
-    mockUseRiskContributingAlerts.mockReturnValue({
-      loading: false,
-      error: false,
-      data: [alertInputDataMock],
-    });
-
-    const { queryByTestId } = render(
-      <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
-      </TestProviders>
-    );
-
-    expect(queryByTestId(EXPAND_ALERT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {

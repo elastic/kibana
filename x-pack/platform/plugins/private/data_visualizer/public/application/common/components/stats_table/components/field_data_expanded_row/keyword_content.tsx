@@ -7,16 +7,24 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
+
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
-import type { FieldDataRowProps } from '../../types/field_data_row';
-import { TopValues } from '../../../top_values';
+
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
+
+import { TopValues } from '../../../top_values';
+
+import type { FieldDataRowProps } from '../../types/field_data_row';
+
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
 import { ErrorMessageContent } from './error_message';
+import { useBarColor } from './use_bar_color';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+  const barColor = useBarColor();
+
   const [suggestion, setSuggestion] = useState<EMSTermJoinConfig | null>(null);
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
@@ -62,14 +70,14 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
       <TopValues
         stats={stats}
         fieldFormat={fieldFormat}
-        barColor="accentSecondary"
+        barColor={barColor}
         onAddFilter={onAddFilter}
       />
       {config.stats?.sampledValues && fieldName !== undefined ? (
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="accentSecondary"
+          barColor={barColor}
           onAddFilter={onAddFilter}
           showSampledValues={true}
         />
