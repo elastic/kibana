@@ -77,9 +77,6 @@ export const performCheckConflicts = async <T>(
   const includeSavedObjectNames = securityExtension?.includeSavedObjectNames() ?? false;
 
   const bulkGetDocs = validObjects.map(({ value: { type, id } }) => {
-    const nameAttribute = registry.getNameAttribute(type);
-    const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
-
     return {
       _id: serializer.generateRawId(namespace, type, id),
       _index: commonHelper.getIndexForType(type),
@@ -87,7 +84,9 @@ export const performCheckConflicts = async <T>(
         includes: [
           'type',
           'namespaces',
-          ...(includeSavedObjectNames ? nameFields.map((field) => `${type}.${field}`) : []),
+          ...(includeSavedObjectNames
+            ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
+            : []),
         ],
       },
     };

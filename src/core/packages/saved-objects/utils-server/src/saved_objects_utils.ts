@@ -132,11 +132,19 @@ export class SavedObjectsUtils {
 
     if (nameAttribute) {
       return (
-        (attributes[nameAttribute as keyof (typeof savedObject)['attributes']] as string) ??
+        (attributes?.[nameAttribute as keyof (typeof savedObject)['attributes']] as string) ??
         fallbackTitle
       );
     }
 
     return fallbackTitle;
+  }
+
+  public static getIncludedNameFields(type: string, nameAttribute?: string) {
+    const sourceIncludes = nameAttribute
+      ? [`${type}.${nameAttribute}`]
+      : [`${type}.name`, `${type}.title`];
+
+    return sourceIncludes;
   }
 }

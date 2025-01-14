@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
+  ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -68,7 +69,12 @@ export const performBulkDelete = async <T>(
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
-  const expectedBulkGetResults = presortObjectsByNamespaceType(objects, allowedTypes, registry);
+  const expectedBulkGetResults = presortObjectsByNamespaceType(
+    objects,
+    allowedTypes,
+    registry,
+    securityExtension
+  );
   if (expectedBulkGetResults.length === 0) {
     return { statuses: [] };
   }
@@ -99,14 +105,26 @@ export const performBulkDelete = async <T>(
         const preflightResult =
           index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
+        console.log(multiNamespaceDocsResponse?.body);
+
+        const name = preflightResult
+          ? SavedObjectsUtils.getName(
+              // @ts-expect-error MultiGetHit._source is optional
+              { attributes: preflightResult?._source?.[type] },
+              registry.getNameAttribute(type)
+            )
+          : undefined;
+
         return {
           type,
           id,
-          // @ts-expect-error _source optional here
+          name,
+          // @ts-expect-error MultiGetHit._source is optional
           existingNamespaces: preflightResult?._source?.namespaces ?? [],
         };
       }
     );
+
     await securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
   }
 
@@ -227,7 +245,8 @@ export const performBulkDelete = async <T>(
 function presortObjectsByNamespaceType(
   objects: SavedObjectsBulkDeleteObject[],
   allowedTypes: string[],
-  registry: ISavedObjectTypeRegistry
+  registry: ISavedObjectTypeRegistry,
+  securityExtension?: ISavedObjectsSecurityExtension
 ) {
   let bulkGetRequestIndexCounter = 0;
   return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
@@ -240,9 +259,13 @@ function presortObjectsByNamespaceType(
       });
     }
     const requiresNamespacesCheck = registry.isMultiNamespace(type);
+
     return right({
       type,
       id,
+      fields: securityExtension?.includeSavedObjectNames()
+        ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
+        : [],
       ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
     });
   });
