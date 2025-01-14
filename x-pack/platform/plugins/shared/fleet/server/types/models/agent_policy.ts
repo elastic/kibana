@@ -158,6 +158,18 @@ export const AgentPolicyBaseSchema = {
       ),
     })
   ),
+  fleet_ui: schema.maybe(
+    schema.object({
+      required_versions: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            version: schema.string(),
+            percentage: schema.number({ min: 0, max: 100 }),
+          })
+        )
+      ),
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

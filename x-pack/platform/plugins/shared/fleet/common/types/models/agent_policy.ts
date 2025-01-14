@@ -64,6 +64,14 @@ export interface NewAgentPolicy {
       max_dur?: string;
     };
   };
+  fleet_ui?: {
+    required_versions?: AgentTargetVersion[];
+  };
+}
+
+export interface AgentTargetVersion {
+  version: string;
+  percentage: number;
 }
 
 export interface GlobalDataTag {
