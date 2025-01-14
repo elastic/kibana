@@ -42,9 +42,10 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
  * @returns Created rule asset saved object
  */
 export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificCreateProps>(
-  type: T['type']
+  type: T['type'],
+  rewrites?: Partial<PrebuiltRuleAsset>
 ) => ({
-  'security-rule': getPrebuiltRuleMockOfType<T>(type),
+  'security-rule': { ...getPrebuiltRuleMockOfType<T>(type), ...rewrites },
   ...ruleAssetSavedObjectESFields,
 });
 

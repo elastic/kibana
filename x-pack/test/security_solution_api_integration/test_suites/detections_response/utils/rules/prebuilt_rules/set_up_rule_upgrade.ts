@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ToolingLog } from '@kbn/tooling-log';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { Client } from '@elastic/elasticsearch';
+import type SuperTest from 'supertest';
+import {
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObjectOfType,
+} from './create_prebuilt_rule_saved_objects';
+import { patchRule } from '../patch_rule';
+import { installPrebuiltRules } from './install_prebuilt_rules';
+
+interface SetUpRuleUpgradeDeps {
+  supertest: SuperTest.Agent;
+  log: ToolingLog;
+  es: Client;
+}
+
+type PartialPrebuiltRuleAsset = Pick<PrebuiltRuleAsset, 'type'> & Partial<PrebuiltRuleAsset>;
+
+interface RuleUpgradeAssets {
+  installed: PartialPrebuiltRuleAsset;
+  patch: Partial<RuleResponse>;
+  upgrade: PartialPrebuiltRuleAsset;
+}
+
+interface SetUpRuleUpgradeParams {
+  assets: RuleUpgradeAssets;
+  deps: SetUpRuleUpgradeDeps;
+}
+
+export async function setUpRuleUpgrade({ assets, deps }: SetUpRuleUpgradeParams): Promise<void> {
+  await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
+    createRuleAssetSavedObjectOfType(assets.installed.type, {
+      rule_id: 'rule-1',
+      version: 1,
+      ...assets.installed,
+    }),
+  ]);
+  await installPrebuiltRules(deps.es, deps.supertest);
+  await patchRule(deps.supertest, deps.log, {
+    rule_id: 'rule-1',
+    ...assets.patch,
+  });
+
+  await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
+    createRuleAssetSavedObjectOfType(assets.upgrade.type, {
+      rule_id: 'rule-1',
+      version: 2,
+      ...assets.upgrade,
+    }),
+  ]);
+}
