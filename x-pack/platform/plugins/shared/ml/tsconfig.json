@@ -137,5 +137,6 @@
     "@kbn/core-security-server",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
+    "@kbn/unsaved-changes-prompt",
   ]
 }
