@@ -36,7 +36,7 @@ export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   defaultQuery.page,
   defaultQuery.per_page,
-  API_VERSIONS.internal.v1,
+  API_VERSIONS.public.v1,
 ];
 
 /**
@@ -66,7 +66,7 @@ export const useKnowledgeBaseEntries = ({
         ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
         {
           method: 'GET',
-          version: API_VERSIONS.internal.v1,
+          version: API_VERSIONS.public.v1,
           query,
           signal,
         }

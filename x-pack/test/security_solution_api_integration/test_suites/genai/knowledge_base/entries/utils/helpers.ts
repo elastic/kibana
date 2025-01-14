@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import {
+  API_VERSIONS,
   CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
@@ -73,7 +74,7 @@ export const setupKnowledgeBase = async (
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send();
   if (response.status !== 200) {
     throw new Error(

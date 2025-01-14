@@ -50,7 +50,7 @@ export const bulkActionKnowledgeBaseEntries = async ({
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send(payload)
     .expect(expectedHttpCode);
 

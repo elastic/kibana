@@ -48,7 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'alertSuppressionForSequenceEqlRuleEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
-        '--xpack.cloud.id=test',
+        // '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
         // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
