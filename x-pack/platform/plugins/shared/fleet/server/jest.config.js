@@ -13,5 +13,5 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/fleet/server',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/fleet/{server}/**/*.{ts,tsx}'],
-  workerIdleMemoryLimit: '512mb',
+  workerIdleMemoryLimit: '2gb',
 };
