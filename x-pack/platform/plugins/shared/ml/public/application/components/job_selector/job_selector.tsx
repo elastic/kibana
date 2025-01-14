@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -27,6 +27,10 @@ import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
+import {
+  JobDetailsFlyoutProvider,
+  JobDetailsFlyout,
+} from '../../jobs/components/job_details_flyout';
 
 export interface GroupObj {
   groupId: string;
@@ -141,6 +145,10 @@ export function JobSelector({
     [onSelectionChange]
   );
 
+  const page = useMemo(() => {
+    return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
+  }, [singleSelection]);
+
   function renderJobSelectionBar() {
     return (
       <>
@@ -160,6 +168,7 @@ export function JobSelector({
                   selectedJobIds={selectedJobIds}
                   selectedGroups={selectedGroups}
                   showAllBarBadges={showAllBarBadges}
+                  page={page}
                 />
               </EuiFlexGroup>
             ) : (
@@ -187,10 +196,7 @@ export function JobSelector({
           <EuiFlexItem />
 
           <EuiFlexItem grow={false}>
-            <FeedBackButton
-              jobIds={selectedIds}
-              page={singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER}
-            />
+            <FeedBackButton jobIds={selectedIds} page={page} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
@@ -223,8 +229,11 @@ export function JobSelector({
 
   return (
     <div>
-      {renderJobSelectionBar()}
-      {renderFlyout()}
+      <JobDetailsFlyoutProvider>
+        {renderJobSelectionBar()}
+        {renderFlyout()}
+        <JobDetailsFlyout />
+      </JobDetailsFlyoutProvider>
     </div>
   );
 }

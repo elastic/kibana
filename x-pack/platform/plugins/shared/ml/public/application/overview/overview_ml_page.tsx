@@ -46,15 +46,12 @@ export const MLOverviewCard = ({
   cardDataTestSubj,
   buttonDataTestSubj,
 }: {
-  layout?: EuiCardProps['layout'];
   path: string;
-  title: string;
-  description: string;
   iconType: string;
   buttonLabel: string;
   cardDataTestSubj: string;
   buttonDataTestSubj: string;
-}) => {
+} & EuiCardProps) => {
   const navigateToPath = useNavigateToPath();
 
   return (
@@ -93,7 +90,7 @@ export const MLOverviewCard = ({
 
 export const OverviewPage: FC = () => {
   const {
-    services: { docLinks, capabilities },
+    services: { docLinks },
   } = useMlKibana();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
