@@ -16,10 +16,6 @@ import {
   MISCONFIGURATION_STATUS,
 } from '@kbn/cloud-security-posture-common';
 
-const isBorealis = (euiThemeName: string) => {
-  return euiThemeName?.toLowerCase().includes('borealis');
-};
-
 const isAmsterdam = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('amsterdam');
 };
