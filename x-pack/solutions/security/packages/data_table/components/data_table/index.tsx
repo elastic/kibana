@@ -103,7 +103,6 @@ const gridStyle: EuiDataGridStyle = {
   border: 'none',
   fontSize: 's',
   header: 'underline',
-  stripes: false,
 };
 
 const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
