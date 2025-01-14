@@ -22,6 +22,7 @@ import {
   IngestReadStreamDefinition,
   isWiredReadStream,
   WiredReadStreamDefinition,
+  getAncestors,
 } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_INDEX } from '../../../common/constants';
@@ -35,7 +36,6 @@ import {
 } from './data_streams/manage_data_streams';
 import { DefinitionNotFound } from './errors';
 import { MalformedFields } from './errors/malformed_fields';
-import { getAncestors } from './helpers/hierarchy';
 import { generateIndexTemplate } from './index_templates/generate_index_template';
 import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
 import { getIndexTemplateName } from './index_templates/name';

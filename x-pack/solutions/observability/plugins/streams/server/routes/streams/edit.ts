@@ -10,6 +10,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import {
+  getParentId,
   isRootStream,
   isWiredStream,
   isWiredStreamConfig,
@@ -35,7 +36,6 @@ import {
   validateDescendantFields,
 } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';

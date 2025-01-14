@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import { conditionSchema, isWiredReadStream, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  conditionSchema,
+  isChildOf,
+  isWiredReadStream,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -17,7 +22,6 @@ import {
 import { createServerRoute } from '../create_server_route';
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { isChildOf } from '../../lib/streams/helpers/hierarchy';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
@@ -76,7 +80,7 @@ export const forkStreamsRoute = createServerRoute({
         );
       }
 
-      if (!isChildOf(rootDefinition, childDefinition)) {
+      if (!isChildOf(rootDefinition.name, childDefinition.name)) {
         throw new MalformedStreamId(
           `The ID (${params.body.stream.name}) from the new stream must start with the parent's id (${rootDefinition.name}), followed by a dot and a name`
         );
