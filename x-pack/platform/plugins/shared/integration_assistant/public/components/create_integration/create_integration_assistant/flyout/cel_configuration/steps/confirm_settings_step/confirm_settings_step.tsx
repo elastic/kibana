@@ -333,14 +333,16 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
                 data-test-subj="generateCelInputButton"
               >
                 {isFlyoutGenerating ? i18n.GENERATING : i18n.GENERATE}
-              </EuiButton> 
-              {isFlyoutGenerating && (<EuiButtonEmpty
-                onClick={onCancel}
-                flush="left"
-                data-test-subj="buttonsFooter-cancelButton"
-              >
-                {i18n.CANCEL}
-              </EuiButtonEmpty>)}
+              </EuiButton>
+              {isFlyoutGenerating && (
+                <EuiButtonEmpty
+                  onClick={onCancel}
+                  flush="left"
+                  data-test-subj="buttonsFooter-cancelButton"
+                >
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              )}
             </EuiFlexGroup>
           )}
           {error && (
