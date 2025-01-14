@@ -379,6 +379,23 @@ describe('useDiscoverHistogram', () => {
       });
       expect(hook.result.current.isChartLoading).toBe(true);
     });
+
+    it('should use timerange + timeRangeRelative + query given by the internalState container', async () => {
+      const fetch$ = new Subject<void>();
+      const stateContainer = getStateContainer();
+      const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      const timeRangeRel = { from: 'now-15m', to: 'now' };
+      stateContainer.internalState.transitions.setDataRequestParams({
+        timeRangeAbsolute: timeRangeAbs,
+        timeRangeRelative: timeRangeRel,
+      });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      act(() => {
+        fetch$.next();
+      });
+      expect(hook.result.current.timeRange).toBe(timeRangeAbs);
+      expect(hook.result.current.relativeTimeRange).toBe(timeRangeRel);
+    });
   });
 
   describe('refetching', () => {
