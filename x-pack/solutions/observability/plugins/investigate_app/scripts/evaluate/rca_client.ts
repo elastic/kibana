@@ -161,8 +161,7 @@ export class RCAClient {
           pathname: '/internal/observability/investigation/root_cause_analysis',
         },
         body,
-        'stream',
-        NaN
+        { responseType: 'stream', timeout: NaN }
       );
 
       return {

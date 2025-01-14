@@ -120,8 +120,7 @@ export class KibanaClient {
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any,
-    responseType?: 'json' | 'stream',
-    timeout?: number
+    axiosParams: { responseType?: 'json' | 'stream'; timeout?: number } = {}
   ) {
     const url = this.getUrl(props);
     return this.axios<T>({
@@ -132,8 +131,7 @@ export class KibanaClient {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'Kibana',
       },
-      responseType: responseType || 'json',
-      timeout: timeout || undefined,
+      ...axiosParams,
     }).catch((error) => {
       if (isAxiosError(error)) {
         const interestingPartsOfError = {
