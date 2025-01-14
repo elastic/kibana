@@ -43,7 +43,6 @@ const fullHeightClassName = css`
 `;
 
 const centerMaxWidthClassName = css`
-  max-width: 600px;
   text-align: center;
 `;
 
