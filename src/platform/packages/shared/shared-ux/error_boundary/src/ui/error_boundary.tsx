@@ -58,11 +58,11 @@ class ErrorBoundaryInternal extends React.Component<
             error={error}
             errorInfo={errorInfo}
             name={componentName}
-            onRecoverAttempt={this.props.services.onClickRefresh}
+            onClickRefresh={this.props.services.onClickRefresh}
           />
         );
       } else {
-        return <RecoverablePrompt onRecoverAttempt={this.props.services.onClickRefresh} />;
+        return <RecoverablePrompt onClickRefresh={this.props.services.onClickRefresh} />;
       }
     }
 

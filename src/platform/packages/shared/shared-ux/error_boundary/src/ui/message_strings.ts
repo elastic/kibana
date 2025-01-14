@@ -75,9 +75,9 @@ export const errorMessageStrings = {
             defaultMessage: 'Refreshing should resolve any issues in {sectionName}.',
             values: { sectionName },
           }),
-        recoverButton: () =>
+        pageReloadButton: () =>
           i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
-            defaultMessage: 'Refresh',
+            defaultMessage: 'Refresh page',
           }),
       },
     },

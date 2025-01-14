@@ -41,7 +41,9 @@ describe('<KibanaSectionErrorBoundary>', () => {
   });
 
   it('renders a recoverable prompt when a recoverable error is caught', () => {
-    const { rerender, getByTestId, getByText } = render(
+    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
+
+    const { getByTestId, getByText } = render(
       <Template>
         <ChunkLoadErrorComponent />
       </Template>
@@ -50,17 +52,11 @@ describe('<KibanaSectionErrorBoundary>', () => {
 
     expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
-    expect(getByText(strings.section.callout.recoverable.recoverButton())).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
     getByTestId('sectionErrorBoundaryRecoverBtn').click();
 
-    rerender(
-      <Template>
-        <span>Good component</span>
-      </Template>
-    );
-
-    expect(getByText('Good component')).toBeInTheDocument();
+    expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 
   it('renders a fatal prompt when a fatal error is caught', () => {

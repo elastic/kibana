@@ -43,13 +43,6 @@ interface ErrorBoundaryState {
   isFatal: null | boolean;
 }
 
-const DEFAULT_STATE = {
-  error: null,
-  errorInfo: null,
-  componentName: null,
-  isFatal: null,
-} as const;
-
 interface ServiceContext {
   services: KibanaErrorBoundaryServices;
 }
@@ -61,7 +54,12 @@ class SectionErrorBoundaryInternal extends React.Component<
   constructor(props: SectionErrorBoundaryProps & ServiceContext) {
     super(props);
 
-    this.state = DEFAULT_STATE;
+    this.state = {
+      error: null,
+      errorInfo: null,
+      componentName: null,
+      isFatal: null,
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
@@ -93,10 +91,8 @@ class SectionErrorBoundaryInternal extends React.Component<
     return (
       <SectionRecoverablePrompt
         sectionName={this.props.sectionName}
-        onRecoverAttempt={this.resetState}
+        onClickRefresh={this.props.services.onClickRefresh}
       />
     );
   }
-
-  private resetState = () => this.setState(DEFAULT_STATE);
 }
