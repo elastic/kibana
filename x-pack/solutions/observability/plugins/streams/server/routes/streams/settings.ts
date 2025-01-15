@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { streamsEnabled } from '../../lib/streams/stream_crud';
 import { createServerRoute } from '../create_server_route';
 
 export const getStreamsStatusRoute = createServerRoute({
@@ -19,10 +18,10 @@ export const getStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     return {
-      enabled: await streamsEnabled({ scopedClusterClient }),
+      enabled: await streamsClient.isStreamsEnabled(),
     };
   },
 });
