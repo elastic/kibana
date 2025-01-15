@@ -30,8 +30,8 @@ export const usePrivateLocationsAPI = () => {
     }
   }, [data, dispatch]);
 
-  const onSubmit = (data: NewLocation) => {
-    dispatch(createPrivateLocationAction.get(data));
+  const onSubmit = (newLoc: NewLocation) => {
+    dispatch(createPrivateLocationAction.get(newLoc));
   };
 
   const onDelete = (id: string) => {
