@@ -35,18 +35,18 @@ describe('Mobile kpi config test', function () {
     {
       colors: {
         vis: {
-          euiColorVis0: "#54B399",
-          euiColorVis1: "#54B399",
-          euiColorVis2: "#54B399",
-          euiColorVis3: "#54B399",
-          euiColorVis4: "#54B399",
-          euiColorVis5: "#54B399",
-          euiColorVis6: "#54B399",
-          euiColorVis7: "#54B399",
-          euiColorVis8: "#54B399",
-          euiColorVis9: "#54B399",
+          euiColorVis0: '#54B399',
+          euiColorVis1: '#54B399',
+          euiColorVis2: '#54B399',
+          euiColorVis3: '#54B399',
+          euiColorVis4: '#54B399',
+          euiColorVis5: '#54B399',
+          euiColorVis6: '#54B399',
+          euiColorVis7: '#54B399',
+          euiColorVis8: '#54B399',
+          euiColorVis9: '#54B399',
         },
-      }
+      },
     } as unknown as EuiThemeComputed,
     { mobile: mockDataView } as DataViewState,
     obsvReportConfigMap
