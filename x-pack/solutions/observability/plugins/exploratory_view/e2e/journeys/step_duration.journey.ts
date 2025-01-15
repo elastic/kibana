@@ -67,13 +67,12 @@ journey('Step Duration series', async ({ page, params }) => {
 
   step('Verify that changes are applied', async () => {
     await waitForLoadingToFinish({ page });
-
-    await page.click('[aria-label="series color: #54b399"]');
-    await page.click('[aria-label="series color: #6092c0"]');
-    await page.click('[aria-label="series color: #d36086"] path');
-    await page.click('[aria-label="series color: #9170b8"]');
-    await page.click('[aria-label="series color: #ca8eae"]');
-    await page.click('[aria-label="series color: #d6bf57"]');
+    await page.click('svg[aria-label="series color: #16c5c0"]');
+    await page.click('svg[aria-label="series color: #a6edea"]');
+    await page.click('svg[aria-label="series color: #61a2ff"]');
+    await page.click('svg[aria-label="series color: #bfdbff"]');
+    await page.click('svg[aria-label="series color: #ee72a6"]');
+    await page.click('svg[aria-label="series color: #ffc7db"]');
     await page.click('text=load homepage');
     await page.click('text=load homepage');
     await page.click('text=load github');

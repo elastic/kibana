@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLEditorProps } from '@kbn/esql-editor';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export interface EsqlPluginStart {
-  Editor: React.ComponentType<ESQLEditorProps>;
-}
+export const usePanelErrorCss = () => {
+  const euiTheme = useEuiTheme();
+  return css({
+    padding: euiTheme.euiTheme.size.l,
+    '& > *': {
+      maxHeight: '100%',
+      overflow: 'auto',
+    },
+  });
+};
