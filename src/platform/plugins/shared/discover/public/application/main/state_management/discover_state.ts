@@ -341,7 +341,7 @@ export function getDiscoverStateContainer({
 
     services.dataViews.clearInstanceCache(prevDataView.id);
 
-    updateFiltersReferences({
+    await updateFiltersReferences({
       prevDataView,
       nextDataView,
       services,

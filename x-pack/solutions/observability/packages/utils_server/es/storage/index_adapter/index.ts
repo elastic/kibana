@@ -6,31 +6,28 @@
  */
 
 import type {
+  BulkOperationContainer,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
   IndicesPutIndexTemplateIndexTemplateMapping,
   MappingProperty,
-  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { InferSearchResponseOf } from '@kbn/es-types';
 import { last, mapValues, padStart } from 'lodash';
 import {
-  IStorageAdapter,
   IndexStorageSettings,
-  StorageAdapterBulkRequest,
-  StorageAdapterBulkResponse,
-  StorageAdapterDeleteRequest,
-  StorageAdapterDeleteResponse,
-  StorageAdapterIndexRequest,
-  StorageAdapterIndexResponse,
-  StorageAdapterSearchRequest,
-  StorageAdapterSearchResponse,
+  StorageClientBulkResponse,
+  StorageClientDeleteResponse,
+  StorageClientBulk,
+  StorageClientDelete,
+  StorageClientIndex,
+  StorageClientIndexResponse,
+  StorageClientSearch,
+  IStorageClient,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
-import { StorageClient } from '../storage_client';
 import { StorageMappingProperty } from '../types';
 
 function getAliasName(name: string) {
@@ -79,9 +76,7 @@ function catchConflictError(error: Error) {
  * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
-export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
-  implements IStorageAdapter<TStorageSettings>
-{
+export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> {
   private readonly logger: Logger;
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -207,7 +202,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getIndexTemplateName(this.storage.name),
+      name: getBackingIndexName(this.storage.name, 999999),
     });
 
     if (simulateIndexTemplateResponse.template.settings) {
@@ -261,16 +256,6 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     return await cb();
   }
 
-  async search<TDocument, TSearchRequest extends Omit<SearchRequest, 'index'>>(
-    request: StorageAdapterSearchRequest
-  ): Promise<StorageAdapterSearchResponse<TDocument, TSearchRequest>> {
-    return this.esClient.search({
-      ...request,
-      index: this.getSearchIndexPattern(),
-      allow_no_indices: true,
-    }) as unknown as Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  }
-
   /**
    * Get items from all non-write indices for the specified ids.
    */
@@ -279,6 +264,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
 
     if (writeIndex && ids.length) {
       const danglingItemsResponse = await this.search({
+        track_total_hits: false,
         query: {
           bool: {
             filter: [{ terms: { _id: ids } }],
@@ -302,11 +288,21 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     return [];
   }
 
-  async index(request: StorageAdapterIndexRequest): Promise<StorageAdapterIndexResponse> {
+  private search: StorageClientSearch<TStorageSettings> = async (request) => {
+    return (await this.esClient.search({
+      ...request,
+      index: this.getSearchIndexPattern(),
+      allow_no_indices: true,
+    })) as unknown as ReturnType<StorageClientSearch<TStorageSettings>>;
+  };
+
+  private index: StorageClientIndex<TStorageSettings> = async ({
+    id,
+    refresh = 'wait_for',
+    ...request
+  }): Promise<StorageClientIndexResponse> => {
     const attemptIndex = async (): Promise<IndexResponse> => {
-      const [danglingItem] = request.id
-        ? await this.getDanglingItems({ ids: [request.id] })
-        : [undefined];
+      const [danglingItem] = id ? await this.getDanglingItems({ ids: [id] }) : [undefined];
 
       if (danglingItem) {
         await this.esClient.delete({
@@ -318,25 +314,43 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
 
       return this.esClient.index({
         ...request,
-        refresh: request.refresh,
+        id,
+        refresh,
         index: this.getWriteTarget(),
         require_alias: true,
       });
     };
 
     return this.validateComponentsBeforeWriting(attemptIndex).then(async (response) => {
-      this.logger.debug(() => `Indexed document ${request.id} into ${response._index}`);
+      this.logger.debug(() => `Indexed document ${id} into ${response._index}`);
 
       return response;
     });
-  }
+  };
 
-  async bulk<TDocument extends Record<string, any>>(
-    request: StorageAdapterBulkRequest<TDocument>
-  ): Promise<StorageAdapterBulkResponse> {
+  private bulk: StorageClientBulk<TStorageSettings> = ({
+    operations,
+    refresh = 'wait_for',
+    ...request
+  }): Promise<StorageClientBulkResponse> => {
+    const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
+      if ('index' in operation) {
+        return [
+          {
+            index: {
+              _id: operation.index._id,
+            },
+          },
+          operation.index.document,
+        ];
+      }
+
+      return [operation];
+    });
+
     const attemptBulk = async () => {
       const indexedIds =
-        request.operations?.flatMap((operation) => {
+        bulkOperations.flatMap((operation) => {
           if (
             'index' in operation &&
             operation.index &&
@@ -357,7 +371,8 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
 
       return this.esClient.bulk({
         ...request,
-        operations: (request.operations || []).concat(
+        refresh,
+        operations: bulkOperations.concat(
           danglingItems.map((item) => ({ delete: { _index: item.index, _id: item.id } }))
         ),
         index: this.getWriteTarget(),
@@ -368,21 +383,50 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     return this.validateComponentsBeforeWriting(attemptBulk).then(async (response) => {
       return response;
     });
-  }
+  };
 
-  async delete({
+  private delete: StorageClientDelete = async ({
     id,
-    index,
-    refresh,
-  }: StorageAdapterDeleteRequest): Promise<StorageAdapterDeleteResponse> {
-    return await this.esClient.delete({
-      index,
-      id,
-      refresh,
+    refresh = 'wait_for',
+    ...request
+  }): Promise<StorageClientDeleteResponse> => {
+    const searchResponse = await this.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                id,
+              },
+            },
+          ],
+        },
+      },
     });
-  }
 
-  getClient(): StorageClient<TStorageSettings> {
-    return new StorageClient<TStorageSettings>(this, this.logger);
+    const document = searchResponse.hits.hits[0];
+
+    if (document) {
+      await this.esClient.delete({
+        ...request,
+        id,
+        index: document._index,
+      });
+
+      return { acknowledged: true, result: 'deleted' };
+    }
+
+    return { acknowledged: true, result: 'not_found' };
+  };
+
+  getClient(): IStorageClient<TStorageSettings> {
+    return {
+      bulk: this.bulk,
+      delete: this.delete,
+      index: this.index,
+      search: this.search,
+    };
   }
 }
