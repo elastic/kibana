@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -55,7 +55,6 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
-        margin: calc(var(--kbnGridGutterSize) * 1px);
         overflow-anchor: none;
         transition: height 500ms linear;
 
@@ -63,9 +62,6 @@ export const GridHeightSmoother = ({
           height: 100% !important;
           position: relative;
           transition: none;
-          // switch to padding so that the panel does not extend the height of the parent
-          margin: 0px;
-          padding: calc(var(--kbnGridGutterSize) * 1px);
         }
       `}
     >

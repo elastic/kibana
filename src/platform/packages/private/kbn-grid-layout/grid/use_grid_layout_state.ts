@@ -146,10 +146,9 @@ export const useGridLayoutState = ({
       .pipe(distinctUntilChanged(deepEqual))
       .subscribe(({ gutterSize, columnPixelWidth, rowHeight }) => {
         if (!layoutRef.current) return;
-        const variableScope = layoutRef.current.parentElement ?? layoutRef.current;
-        variableScope.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-        variableScope.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
-        variableScope.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+        layoutRef.current.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+        layoutRef.current.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
+        layoutRef.current.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
       });
 
     return () => {
