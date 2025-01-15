@@ -105,6 +105,16 @@ exports[`FieldIcon renders known field types dense_vector is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types double is rendered 1`] = `
+<EuiToken
+  aria-label="double"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="double"
+/>
+`;
+
 exports[`FieldIcon renders known field types flattened is rendered 1`] = `
 <EuiToken
   aria-label="flattened"
@@ -182,6 +192,16 @@ exports[`FieldIcon renders known field types keyword is rendered 1`] = `
   iconType="tokenKeyword"
   size="s"
   title="keyword"
+/>
+`;
+
+exports[`FieldIcon renders known field types long is rendered 1`] = `
+<EuiToken
+  aria-label="long"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="long"
 />
 `;
 
