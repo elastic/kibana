@@ -23,7 +23,6 @@ export const ResizeHandle = ({
     <button
       className="kbnGridPanel--resizeHandle"
       onMouseDown={(e) => {
-        if (e.button !== 0) return; // ignore right clicks
         interactionStart('resize', e);
       }}
       onMouseUp={(e) => {

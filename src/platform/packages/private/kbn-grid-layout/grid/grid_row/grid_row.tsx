@@ -133,11 +133,22 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               gridLayoutStateManager={gridLayoutStateManager}
               renderPanelContents={renderPanelContents}
               interactionStart={(type, e) => {
-                e.stopPropagation();
-
-                // Disable interactions when a panel is expanded
-                const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
+                // ignore all interactions when panel is expanded or when not in edit mode
+                const isInteractive =
+                  gridLayoutStateManager.expandedPanelId$.value === undefined &&
+                  gridLayoutStateManager.accessMode$.getValue() === 'EDIT';
                 if (!isInteractive) return;
+
+                // ignore anything but left clicks for mouse events
+                if (isMouseEvent(e) && e.button !== 0) {
+                  return;
+                }
+                // ignore multi-touch events for touch events
+                if (isTouchEvent(e) && e.touches.length > 1) {
+                  return;
+                }
+
+                e.stopPropagation();
 
                 const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
                 if (!panelRef) return;
