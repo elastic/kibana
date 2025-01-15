@@ -91,16 +91,17 @@ export interface TelemetryPluginStart {
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    *
-   * @track-adoption
+   * @deprecated Use {@link TelemetryPluginStart.isOptedIn$ | isOptedIn$} instead.
    */
   getIsOptedIn: () => Promise<boolean>;
 
   /**
    * An Observable object that can be subscribed to for changes in global telemetry config.
    *
-   * Pushes `true` if sending usage to Elastic is enabled.
-   * Pushes `false` if the user explicitly opted out of sending usage data to Elastic
-   * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
+   * Pushes `true` when sending usage to Elastic is enabled.
+   * Pushes `false` when the user explicitly opts out of sending usage data to Elastic.
+   *
+   * Additionally, pushes the actual value on Kibana startup.
    *
    * @track-adoption
    */
