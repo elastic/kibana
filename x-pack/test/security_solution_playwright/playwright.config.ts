@@ -65,7 +65,8 @@ export default defineConfig({
       'kbn-xsrf': 'playwright',
     },
 
-    headless: !!process.env.CI ?? 'false',
+    headless: false,
+    // headless: !!process.env.CI ?? 'false',
     ignoreHTTPSErrors: true,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
