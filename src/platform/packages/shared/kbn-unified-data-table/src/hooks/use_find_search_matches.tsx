@@ -25,7 +25,9 @@ export interface UseFindSearchMatchesProps {
   visibleColumns: string[];
   rows: DataTableRecord[] | undefined;
   uiSearchTerm: string | undefined;
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => ReactNode;
+  renderCellValue: (
+    props: EuiDataGridCellValueElementProps & { onHighlightsCountFound?: (count: number) => void }
+  ) => ReactNode;
   scrollToFoundMatch: (params: {
     rowIndex: number;
     fieldName: string;
@@ -159,23 +161,18 @@ export const useFindSearchMatches = ({
         let rowMatchesCount = 0;
 
         for (const fieldName of visibleColumns) {
-          const formattedFieldValue = addSearchHighlights(
-            await getCellHtmlPromise(
-              <UnifiedDataTableRenderCellValue
-                columnId={fieldName}
-                rowIndex={rowIndex}
-                isExpandable={false}
-                isExpanded={false}
-                isDetails={false}
-                colIndex={0}
-                setCellProps={() => {}}
-              />
-            ),
+          const matchesCountForFieldName = await getCellMatchesCount(
+            <UnifiedDataTableRenderCellValue
+              columnId={fieldName}
+              rowIndex={rowIndex}
+              isExpandable={false}
+              isExpanded={false}
+              isDetails={false}
+              colIndex={0}
+              setCellProps={() => {}}
+            />,
             uiSearchTerm
           );
-
-          const matchesCountForFieldName =
-            findSearchMatchesInFormattedAndHighlightedValue(formattedFieldValue);
 
           if (matchesCountForFieldName) {
             matchesCountPerField[fieldName] = matchesCountForFieldName;
@@ -232,48 +229,61 @@ export const useFindSearchMatches = ({
   };
 };
 
-function getCellHtmlPromise(cell: ReactNode): Promise<string> {
+function getCellMatchesCount(cell: ReactNode, uiSearchTerm: string): Promise<number> {
   const container = document.createElement('div');
+  // TODO: add a timeout to prevent infinite waiting
   return new Promise((resolve) => {
     ReactDOM.render(
-      <GetHtmlWrapper
-        onReady={(html) => {
-          resolve(html);
+      <CellValueWrapper
+        uiSearchTerm={uiSearchTerm}
+        onHighlightsCountFound={(count) => {
+          resolve(count);
           ReactDOM.unmountComponentAtNode(container);
         }}
       >
         {cell}
-      </GetHtmlWrapper>,
+      </CellValueWrapper>,
       container
     );
   });
 }
 
-function GetHtmlWrapper({
-  onReady,
+export function CellValueWrapper({
+  uiSearchTerm,
+  onHighlightsCountFound,
   children,
 }: {
+  uiSearchTerm?: string;
+  onHighlightsCountFound?: (count: number) => void;
   children: ReactNode;
-  onReady: (html: string) => void;
 }) {
   const cellValueRef = useRef<HTMLDivElement | null>(null);
-  const processedRef = useRef<boolean>(false);
+  const renderedForSearchTerm = useRef<string>();
 
   useEffect(() => {
-    if (!processedRef.current) {
-      processedRef.current = true;
-      onReady(cellValueRef.current?.innerHTML || '');
+    if (uiSearchTerm && cellValueRef.current && renderedForSearchTerm.current !== uiSearchTerm) {
+      renderedForSearchTerm.current = uiSearchTerm;
+      const count = modifyDOMAndAddSearchHighlights(
+        cellValueRef.current,
+        uiSearchTerm,
+        Boolean(onHighlightsCountFound)
+      );
+      onHighlightsCountFound?.(count);
     }
-  }, [onReady]);
+  }, [uiSearchTerm, onHighlightsCountFound]);
 
   return <div ref={cellValueRef}>{children}</div>;
 }
 
 function getSearchTermRegExp(searchTerm: string): RegExp {
-  return new RegExp(`(${escape(searchTerm)})`, 'gi');
+  return new RegExp(`(${escape(searchTerm.trim())})`, 'gi');
 }
 
-export function modifyDOMAndAddSearchHighlights(originalNode: Node, uiSearchTerm: string) {
+export function modifyDOMAndAddSearchHighlights(
+  originalNode: Node,
+  uiSearchTerm: string,
+  dryRun: boolean
+): number {
   let matchIndex = 0;
   const searchTermRegExp = getSearchTermRegExp(uiSearchTerm);
 
@@ -291,6 +301,11 @@ export function modifyDOMAndAddSearchHighlights(originalNode: Node, uiSearchTerm
         const nodeWithHighlights = document.createDocumentFragment();
 
         parts.forEach((part) => {
+          if (dryRun && searchTermRegExp.test(part)) {
+            matchIndex++;
+            return;
+          }
+
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;
@@ -302,28 +317,14 @@ export function modifyDOMAndAddSearchHighlights(originalNode: Node, uiSearchTerm
           }
         });
 
-        nodeWithText.replaceWith(nodeWithHighlights);
+        if (!dryRun) {
+          nodeWithText.replaceWith(nodeWithHighlights);
+        }
       }
     }
   }
 
   Array.from(originalNode.childNodes).forEach(insertSearchHighlights);
-}
 
-export function addSearchHighlights(
-  formattedFieldValueAsHtml: string,
-  uiSearchTerm: string
-): string {
-  if (!uiSearchTerm) return formattedFieldValueAsHtml;
-
-  const parser = new DOMParser();
-  const result = parser.parseFromString(formattedFieldValueAsHtml, 'text/html');
-
-  modifyDOMAndAddSearchHighlights(result.body, uiSearchTerm);
-
-  return result.body.innerHTML;
-}
-
-function findSearchMatchesInFormattedAndHighlightedValue(value: string): number {
-  return (value.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []).length;
+  return matchIndex;
 }

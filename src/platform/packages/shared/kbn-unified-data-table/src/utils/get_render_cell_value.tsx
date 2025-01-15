@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useContext, memo, useRef } from 'react';
+import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -24,7 +24,7 @@ import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { modifyDOMAndAddSearchHighlights } from '../hooks/use_find_search_matches';
+import { CellValueWrapper } from '../hooks/use_find_search_matches';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -79,15 +79,15 @@ export const getRenderCellValueFn = ({
       }
     }, [ctx, row, setCellProps]);
 
-    if (typeof row === 'undefined') {
-      return <span className={CELL_CLASS}>-</span>;
-    }
+    const render = () => {
+      if (typeof row === 'undefined') {
+        return <span className={CELL_CLASS}>-</span>;
+      }
 
-    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+      const CustomCellRenderer = externalCustomRenderers?.[columnId];
 
-    if (CustomCellRenderer) {
-      return (
-        <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+      if (CustomCellRenderer) {
+        return (
           <span className={CELL_CLASS}>
             <CustomCellRenderer
               rowIndex={rowIndex}
@@ -104,33 +104,31 @@ export const getRenderCellValueFn = ({
               isCompressed={isCompressed}
             />
           </span>
-        </CellValueWrapper>
+        );
+      }
+
+      /**
+       * when using the fields api this code is used to show top level objects
+       * this is used for legacy stuff like displaying products of our ecommerce dataset
+       */
+      const useTopLevelObjectColumns = Boolean(
+        !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
       );
-    }
 
-    /**
-     * when using the fields api this code is used to show top level objects
-     * this is used for legacy stuff like displaying products of our ecommerce dataset
-     */
-    const useTopLevelObjectColumns = Boolean(
-      !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
-    );
+      if (isDetails) {
+        return renderPopoverContent({
+          row,
+          field,
+          columnId,
+          dataView,
+          useTopLevelObjectColumns,
+          fieldFormats,
+          closePopover,
+        });
+      }
 
-    if (isDetails) {
-      return renderPopoverContent({
-        row,
-        field,
-        columnId,
-        dataView,
-        useTopLevelObjectColumns,
-        fieldFormats,
-        closePopover,
-      });
-    }
-
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
-      return (
-        <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+      if (field?.type === '_source' || useTopLevelObjectColumns) {
+        return (
           <SourceDocument
             useTopLevelObjectColumns={useTopLevelObjectColumns}
             row={row}
@@ -142,12 +140,10 @@ export const getRenderCellValueFn = ({
             isPlainRecord={isPlainRecord}
             isCompressed={isCompressed}
           />
-        </CellValueWrapper>
-      );
-    }
+        );
+      }
 
-    return (
-      <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+      return (
         <span
           className={CELL_CLASS}
           // formatFieldValue guarantees sanitized values
@@ -162,6 +158,15 @@ export const getRenderCellValueFn = ({
             ),
           }}
         />
+      );
+    };
+
+    return (
+      <CellValueWrapper
+        key={uiSearchTerm} // it's very important to have a unique key for each uiSearchTerm change so it can add the highlights again
+        uiSearchTerm={uiSearchTerm}
+      >
+        {render()}
       </CellValueWrapper>
     );
   };
@@ -174,26 +179,6 @@ export const getRenderCellValueFn = ({
     ? UnifiedDataTableRenderCellValue
     : memo(UnifiedDataTableRenderCellValue);
 };
-
-function CellValueWrapper({
-  uiSearchTerm,
-  children,
-}: {
-  uiSearchTerm?: string;
-  children: React.ReactElement | string;
-}) {
-  const cellValueRef = useRef<HTMLDivElement | null>(null);
-  const renderedForSearchTerm = useRef<string>();
-
-  useEffect(() => {
-    if (uiSearchTerm && cellValueRef.current && renderedForSearchTerm.current !== uiSearchTerm) {
-      renderedForSearchTerm.current = uiSearchTerm;
-      modifyDOMAndAddSearchHighlights(cellValueRef.current, uiSearchTerm);
-    }
-  }, [uiSearchTerm]);
-
-  return <div ref={cellValueRef}>{children}</div>;
-}
 
 /**
  * Helper function for the cell popover
