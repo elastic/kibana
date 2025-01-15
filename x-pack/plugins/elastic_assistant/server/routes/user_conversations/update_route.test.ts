@@ -14,6 +14,7 @@ import {
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
 import { updateConversationRoute } from './update_route';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import expect from 'expect';
 
 describe('Update conversation route', () => {
