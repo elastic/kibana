@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-import { cloneDeep } from 'lodash';
+
 import { useEuiTheme } from '@elastic/eui';
+
 import {
   ActivePanel,
   GridAccessMode,
@@ -48,7 +51,7 @@ export const useGridLayoutState = ({
     []
   );
   useEffect(() => {
-    expandedPanelId$.next(expandedPanelId);
+    if (expandedPanelId !== expandedPanelId$.getValue()) expandedPanelId$.next(expandedPanelId);
   }, [expandedPanelId, expandedPanelId$]);
 
   const accessMode$ = useMemo(
@@ -58,8 +61,27 @@ export const useGridLayoutState = ({
   );
 
   useEffect(() => {
-    accessMode$.next(accessMode);
+    if (accessMode !== accessMode$.getValue()) accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
+
+  const runtimeSettings$ = useMemo(
+    () =>
+      new BehaviorSubject<RuntimeGridSettings>({
+        ...gridSettings,
+        columnPixelWidth: 0,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    const runtimeSettings = runtimeSettings$.getValue();
+    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth: runtimeSettings.columnPixelWidth,
+      });
+  }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
@@ -71,10 +93,6 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
-      ...gridSettings,
-      columnPixelWidth: 0,
-    });
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
     );
@@ -104,15 +122,22 @@ export const useGridLayoutState = ({
     const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
+        const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
-          (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
-          gridSettings.columnCount;
+          (elementWidth -
+            currentRuntimeSettings.gutterSize * (currentRuntimeSettings.columnCount - 1)) /
+          currentRuntimeSettings.columnCount;
 
-        gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-        gridLayoutStateManager.isMobileView$.next(
-          shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
-        );
+        if (columnPixelWidth !== currentRuntimeSettings.columnPixelWidth)
+          gridLayoutStateManager.runtimeSettings$.next({
+            ...currentRuntimeSettings,
+            columnPixelWidth,
+          });
+        const isMobileView = shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m);
+        if (isMobileView !== gridLayoutStateManager.isMobileView$.getValue()) {
+          gridLayoutStateManager.isMobileView$.next(isMobileView);
+        }
       });
 
     return () => {
