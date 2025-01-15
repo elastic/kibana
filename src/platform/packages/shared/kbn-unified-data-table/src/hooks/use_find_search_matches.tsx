@@ -13,8 +13,12 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { escape } from 'lodash';
 
-type MatchesMap = Record<number, Record<string, number>>; // per row index, per field name, number of matches
-const DEFAULT_MATCHES: MatchesMap = {};
+interface RowMatches {
+  rowIndex: number;
+  rowMatchesCount: number;
+  matchesCountPerField: Record<string, number>;
+}
+const DEFAULT_MATCHES: RowMatches[] = [];
 const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 
 export interface UseFindSearchMatchesProps {
@@ -45,7 +49,7 @@ export const useFindSearchMatches = ({
   renderCellValue,
   scrollToFoundMatch,
 }: UseFindSearchMatchesProps): UseFindSearchMatchesReturn => {
-  const [matchesMap, setMatchesMap] = useState<MatchesMap>(DEFAULT_MATCHES);
+  const [matchesList, setMatchesList] = useState<RowMatches[]>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
   const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
     DEFAULT_ACTIVE_MATCH_POSITION
@@ -55,28 +59,37 @@ export const useFindSearchMatches = ({
   const scrollToMatch = useCallback(
     ({
       matchPosition,
-      activeMatchesMap,
+      activeMatchesList,
       activeColumns,
       shouldJump,
     }: {
       matchPosition: number;
-      activeMatchesMap: MatchesMap;
+      activeMatchesList: RowMatches[];
       activeColumns: string[];
       shouldJump: boolean;
     }) => {
-      const rowIndices = Object.keys(activeMatchesMap);
       let traversedMatchesCount = 0;
 
-      for (const rowIndex of rowIndices) {
-        const matchesPerFieldName = activeMatchesMap[Number(rowIndex)];
+      for (const rowMatch of activeMatchesList) {
+        const rowIndex = rowMatch.rowIndex;
+
+        if (traversedMatchesCount + rowMatch.rowMatchesCount < matchPosition) {
+          // going faster to next row
+          traversedMatchesCount += rowMatch.rowMatchesCount;
+          continue;
+        }
+
+        const matchesCountPerField = rowMatch.matchesCountPerField;
 
         for (const fieldName of activeColumns) {
-          const matchesCountForFieldName = matchesPerFieldName[fieldName] ?? 0;
+          // going slow to next field within the row
+          const matchesCountForFieldName = matchesCountPerField[fieldName] ?? 0;
 
           if (
             traversedMatchesCount < matchPosition &&
             traversedMatchesCount + matchesCountForFieldName >= matchPosition
           ) {
+            // can even go slower to next match within the field within the row
             scrollToFoundMatch({
               rowIndex: Number(rowIndex),
               fieldName,
@@ -101,13 +114,13 @@ export const useFindSearchMatches = ({
       const nextMatchPosition = prev - 1;
       scrollToMatch({
         matchPosition: nextMatchPosition,
-        activeMatchesMap: matchesMap,
+        activeMatchesList: matchesList,
         activeColumns: visibleColumns,
         shouldJump: true,
       });
       return nextMatchPosition;
     });
-  }, [setActiveMatchPosition, scrollToMatch, matchesMap, visibleColumns]);
+  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns]);
 
   const goToNextMatch = useCallback(() => {
     setActiveMatchPosition((prev) => {
@@ -117,17 +130,17 @@ export const useFindSearchMatches = ({
       const nextMatchPosition = prev + 1;
       scrollToMatch({
         matchPosition: nextMatchPosition,
-        activeMatchesMap: matchesMap,
+        activeMatchesList: matchesList,
         activeColumns: visibleColumns,
         shouldJump: true,
       });
       return nextMatchPosition;
     });
-  }, [setActiveMatchPosition, scrollToMatch, matchesMap, visibleColumns, matchesCount]);
+  }, [setActiveMatchPosition, scrollToMatch, matchesList, visibleColumns, matchesCount]);
 
   useEffect(() => {
     if (!rows?.length || !uiSearchTerm?.length) {
-      setMatchesMap(DEFAULT_MATCHES);
+      setMatchesList(DEFAULT_MATCHES);
       setMatchesCount(0);
       setActiveMatchPosition(DEFAULT_ACTIVE_MATCH_POSITION);
       return;
@@ -137,10 +150,13 @@ export const useFindSearchMatches = ({
 
     const findMatches = async () => {
       const UnifiedDataTableRenderCellValue = renderCellValue;
-      const result: Record<number, Record<string, number>> = {};
+
+      const result: RowMatches[] = [];
       let totalMatchesCount = 0;
+
       for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        const matchesPerFieldName: Record<string, number> = {};
+        const matchesCountPerField: Record<string, number> = {};
+        let rowMatchesCount = 0;
 
         for (const fieldName of visibleColumns) {
           const formattedFieldValue = addSearchHighlights(
@@ -162,19 +178,24 @@ export const useFindSearchMatches = ({
             findSearchMatchesInFormattedAndHighlightedValue(formattedFieldValue);
 
           if (matchesCountForFieldName) {
-            matchesPerFieldName[fieldName] = matchesCountForFieldName;
+            matchesCountPerField[fieldName] = matchesCountForFieldName;
             totalMatchesCount += matchesCountForFieldName;
+            rowMatchesCount += matchesCountForFieldName;
           }
         }
 
-        if (Object.keys(matchesPerFieldName).length) {
-          result[rowIndex] = matchesPerFieldName;
+        if (Object.keys(matchesCountPerField).length) {
+          result.push({
+            rowIndex,
+            rowMatchesCount,
+            matchesCountPerField,
+          });
         }
       }
 
-      const nextMatchesMap = totalMatchesCount > 0 ? result : DEFAULT_MATCHES;
+      const nextMatchesList = totalMatchesCount > 0 ? result : DEFAULT_MATCHES;
       const nextActiveMatchPosition = DEFAULT_ACTIVE_MATCH_POSITION;
-      setMatchesMap(nextMatchesMap);
+      setMatchesList(nextMatchesList);
       setMatchesCount(totalMatchesCount);
       setActiveMatchPosition(nextActiveMatchPosition);
       setIsProcessing(false);
@@ -182,7 +203,7 @@ export const useFindSearchMatches = ({
       if (totalMatchesCount > 0) {
         scrollToMatch({
           matchPosition: nextActiveMatchPosition,
-          activeMatchesMap: nextMatchesMap,
+          activeMatchesList: nextMatchesList,
           activeColumns: visibleColumns,
           shouldJump: false,
         });
@@ -191,7 +212,7 @@ export const useFindSearchMatches = ({
 
     void findMatches();
   }, [
-    setMatchesMap,
+    setMatchesList,
     setMatchesCount,
     setActiveMatchPosition,
     setIsProcessing,
