@@ -120,28 +120,12 @@ export const useSourcererDataView = (
     () => ({
       browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
-      indexPattern: {
-        fields: Object.values(sourcererDataView.fields || {}),
-        title: selectedPatterns.join(','),
-        getName: () => selectedPatterns.join(','),
-      },
       indicesExist,
       loading: loading || sourcererDataView.loading,
-      // all active & inactive patterns in DATA_VIEW
-      patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter
       selectedPatterns,
-      // if we have to do an update to data view, tell us which patterns are active
-      ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
       sourcererDataView: sourcererDataView.dataView,
     }),
-    [
-      browserFields,
-      sourcererDataView,
-      selectedPatterns,
-      indicesExist,
-      loading,
-      legacyPatterns.length,
-    ]
+    [browserFields, sourcererDataView, selectedPatterns, indicesExist, loading]
   );
 };
