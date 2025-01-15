@@ -16,6 +16,7 @@ export type ChatCompleteRequestBody = {
   connectorId: string;
   stream?: boolean;
   system?: string;
+  temperature?: number;
   messages: Message[];
   functionCalling?: FunctionCallingMode;
 } & ToolOptions;
