@@ -94,6 +94,17 @@ export interface TelemetryPluginStart {
    * @track-adoption
    */
   getIsOptedIn: () => Promise<boolean>;
+
+  /**
+   * An Observable object that can be subscribed to for changes in global telemetry config.
+   *
+   * Pushes `true` if sending usage to Elastic is enabled.
+   * Pushes `false` if the user explicitly opted out of sending usage data to Elastic
+   * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
+   *
+   * @track-adoption
+   */
+  isOptedIn$: Observable<boolean>;
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
@@ -256,6 +267,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getIsOptedIn: async () => this.isOptedIn === true,
+      isOptedIn$: this.isOptedIn$,
     };
   }
 
