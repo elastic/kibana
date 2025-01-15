@@ -19,8 +19,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
   uiSearchTerm,
   visibleColumns,
   rows,
-  dataView,
-  fieldFormats,
+  renderCellValue,
   scrollToFoundMatch,
   onChange,
 }) => {
@@ -29,8 +28,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       visibleColumns,
       rows,
       uiSearchTerm,
-      dataView,
-      fieldFormats,
+      renderCellValue,
       scrollToFoundMatch,
     });
 
@@ -52,17 +50,22 @@ export const SearchControl: React.FC<SearchControlProps> = ({
         matchesCount ? (
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
-            {/* TODO: disabled states */}
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType="arrowUp"
                 aria-label="Previous match"
+                disabled={activeMatchPosition <= 1}
                 onClick={goToPrevMatch}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/* TODO: i18n */}
-              <EuiButtonIcon iconType="arrowDown" aria-label="Next match" onClick={goToNextMatch} />
+              <EuiButtonIcon
+                iconType="arrowDown"
+                aria-label="Next match"
+                disabled={activeMatchPosition >= matchesCount}
+                onClick={goToNextMatch}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : undefined

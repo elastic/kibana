@@ -8,10 +8,6 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { escape } from 'lodash';
-import { formatFieldValue } from '../utils/format_value';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -42,19 +38,6 @@ export class DataTableRecord {
    */
   readonly isAnchor?: boolean;
 
-  /**
-   * Cache for formatted field values per field name
-   * @private
-   */
-  private formattedFieldValuesCache: Record<
-    string,
-    {
-      formatted: string;
-      formattedAndHighlighted: string;
-      uiSearchTerm?: string;
-    }
-  >;
-
   constructor({
     id,
     raw,
@@ -70,104 +53,5 @@ export class DataTableRecord {
     this.raw = raw;
     this.isAnchor = isAnchor;
     this.flattened = flattened;
-
-    this.formattedFieldValuesCache = {};
   }
-
-  formatAndCacheFieldValue({
-    dataView,
-    fieldName,
-    fieldFormats,
-    uiSearchTerm,
-  }: {
-    dataView: DataView;
-    fieldName: string;
-    fieldFormats: FieldFormatsStart;
-    uiSearchTerm: string | undefined;
-  }): string {
-    if (!dataView?.id) {
-      return '';
-    }
-
-    const cachedFieldValue = this.formattedFieldValuesCache[fieldName]?.formattedAndHighlighted;
-    if (
-      typeof cachedFieldValue === 'string' &&
-      uiSearchTerm === this.formattedFieldValuesCache[fieldName].uiSearchTerm
-    ) {
-      return cachedFieldValue;
-    }
-
-    const newlyFormattedFieldValue = formatFieldValue(
-      this.flattened[fieldName],
-      this.raw,
-      fieldFormats,
-      dataView,
-      dataView.fields.getByName(fieldName)
-    );
-
-    this.formattedFieldValuesCache[fieldName] = {
-      formatted: newlyFormattedFieldValue,
-      formattedAndHighlighted: newlyFormattedFieldValue,
-    };
-
-    if (uiSearchTerm?.length) {
-      const formattedAndHighlighted = addSearchHighlights(newlyFormattedFieldValue, uiSearchTerm);
-      this.formattedFieldValuesCache[fieldName].formattedAndHighlighted = formattedAndHighlighted;
-      this.formattedFieldValuesCache[fieldName].uiSearchTerm = uiSearchTerm;
-    }
-
-    return this.formattedFieldValuesCache[fieldName].formattedAndHighlighted || '';
-  }
-
-  findSearchMatchesInFormattedAndHighlightedValue(value: string): number {
-    return (value.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []).length;
-  }
-}
-
-export function addSearchHighlights(
-  formattedFieldValueAsHtml: string,
-  uiSearchTerm: string
-): string {
-  if (!uiSearchTerm) return formattedFieldValueAsHtml;
-  const searchTerm = escape(uiSearchTerm);
-
-  const parser = new DOMParser();
-  const result = parser.parseFromString(formattedFieldValueAsHtml, 'text/html');
-  const searchTermRegExp = new RegExp(`(${searchTerm})`, 'gi');
-
-  let matchIndex = 0;
-
-  function insertSearchHighlights(node: Node) {
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      Array.from(node.childNodes).forEach(insertSearchHighlights);
-      return;
-    }
-
-    if (node.nodeType === Node.TEXT_NODE) {
-      const nodeWithText = node as Text;
-      const parts = (nodeWithText.textContent || '').split(searchTermRegExp);
-
-      if (parts.length > 1) {
-        const nodeWithHighlights = document.createDocumentFragment();
-
-        parts.forEach((part) => {
-          if (searchTermRegExp.test(part)) {
-            const mark = document.createElement('mark');
-            mark.textContent = part;
-            mark.setAttribute('class', 'unifiedDataTable__findMatch');
-            mark.setAttribute('data-match-index', `${matchIndex++}`);
-            nodeWithHighlights.appendChild(mark);
-          } else {
-            nodeWithHighlights.appendChild(document.createTextNode(part));
-          }
-        });
-
-        nodeWithText.replaceWith(nodeWithHighlights);
-      }
-    }
-  }
-
-  Array.from(result.body.childNodes).forEach(insertSearchHighlights);
-
-  return result.body.innerHTML;
 }

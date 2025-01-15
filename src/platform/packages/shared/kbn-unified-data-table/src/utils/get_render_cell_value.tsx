@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useContext, memo } from 'react';
+import React, { useEffect, useContext, memo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -18,11 +18,13 @@ import {
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
+import { modifyDOMAndAddSearchHighlights } from '../hooks/use_find_search_matches';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -83,25 +85,26 @@ export const getRenderCellValueFn = ({
 
     const CustomCellRenderer = externalCustomRenderers?.[columnId];
 
-    // TODO: what to do with highlights here?
     if (CustomCellRenderer) {
       return (
-        <span className={CELL_CLASS}>
-          <CustomCellRenderer
-            rowIndex={rowIndex}
-            columnId={columnId}
-            isDetails={isDetails}
-            setCellProps={setCellProps}
-            isExpandable={isExpandable}
-            isExpanded={isExpanded}
-            colIndex={colIndex}
-            row={row}
-            dataView={dataView}
-            fieldFormats={fieldFormats}
-            closePopover={closePopover}
-            isCompressed={isCompressed}
-          />
-        </span>
+        <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+          <span className={CELL_CLASS}>
+            <CustomCellRenderer
+              rowIndex={rowIndex}
+              columnId={columnId}
+              isDetails={isDetails}
+              setCellProps={setCellProps}
+              isExpandable={isExpandable}
+              isExpanded={isExpanded}
+              colIndex={colIndex}
+              row={row}
+              dataView={dataView}
+              fieldFormats={fieldFormats}
+              closePopover={closePopover}
+              isCompressed={isCompressed}
+            />
+          </span>
+        </CellValueWrapper>
       );
     }
 
@@ -123,40 +126,44 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
-        uiSearchTerm,
       });
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
       return (
-        <SourceDocument
-          useTopLevelObjectColumns={useTopLevelObjectColumns}
-          row={row}
-          dataView={dataView}
-          columnId={columnId}
-          fieldFormats={fieldFormats}
-          shouldShowFieldHandler={shouldShowFieldHandler}
-          maxEntries={maxEntries}
-          isPlainRecord={isPlainRecord}
-          isCompressed={isCompressed}
-        />
+        <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+          <SourceDocument
+            useTopLevelObjectColumns={useTopLevelObjectColumns}
+            row={row}
+            dataView={dataView}
+            columnId={columnId}
+            fieldFormats={fieldFormats}
+            shouldShowFieldHandler={shouldShowFieldHandler}
+            maxEntries={maxEntries}
+            isPlainRecord={isPlainRecord}
+            isCompressed={isCompressed}
+          />
+        </CellValueWrapper>
       );
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: row.formatAndCacheFieldValue({
-            dataView,
-            fieldName: columnId,
-            fieldFormats,
-            uiSearchTerm,
-          }),
-        }}
-      />
+      <CellValueWrapper uiSearchTerm={uiSearchTerm} key={uiSearchTerm}>
+        <span
+          className={CELL_CLASS}
+          // formatFieldValue guarantees sanitized values
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: formatFieldValue(
+              row.flattened[columnId],
+              row.raw,
+              fieldFormats,
+              dataView,
+              field
+            ),
+          }}
+        />
+      </CellValueWrapper>
     );
   };
 
@@ -169,6 +176,26 @@ export const getRenderCellValueFn = ({
     : memo(UnifiedDataTableRenderCellValue);
 };
 
+function CellValueWrapper({
+  uiSearchTerm,
+  children,
+}: {
+  uiSearchTerm?: string;
+  children: React.ReactElement | string;
+}) {
+  const cellValueRef = useRef<HTMLDivElement | null>(null);
+  const renderedForSearchTerm = useRef<string>();
+
+  useEffect(() => {
+    if (uiSearchTerm && cellValueRef.current && renderedForSearchTerm.current !== uiSearchTerm) {
+      renderedForSearchTerm.current = uiSearchTerm;
+      modifyDOMAndAddSearchHighlights(cellValueRef.current, uiSearchTerm);
+    }
+  }, [uiSearchTerm]);
+
+  return <div ref={cellValueRef}>{children}</div>;
+}
+
 /**
  * Helper function for the cell popover
  */
@@ -180,7 +207,6 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
-  uiSearchTerm,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -189,7 +215,6 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
-  uiSearchTerm: string | undefined;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -227,12 +252,13 @@ function renderPopoverContent({
             // formatFieldValue guarantees sanitized values
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
-              __html: row.formatAndCacheFieldValue({
-                dataView,
-                fieldName: columnId,
+              __html: formatFieldValue(
+                row.flattened[columnId],
+                row.raw,
                 fieldFormats,
-                uiSearchTerm,
-              }),
+                dataView,
+                field
+              ),
             }}
           />
         </DataTablePopoverCellValue>
