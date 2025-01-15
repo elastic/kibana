@@ -13,7 +13,7 @@ import {
   Metric,
   MetricTrendShape,
   Settings,
-  MetricDatum,
+  MetricWTrend,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,7 +46,7 @@ const getSloChartData = ({
   sliValue: string;
   sloTarget: string;
   historicalSummary?: HistoricalSummaryResponse[];
-}): MetricDatum => {
+}): MetricWTrend => {
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return {
@@ -54,10 +54,7 @@ const getSloChartData = ({
     subtitle: subTitle,
     value: sliValue,
     trendShape: MetricTrendShape.Area,
-    trend: historicalSliData?.map((d) => ({
-      x: d.key as number,
-      y: d.value as number,
-    })),
+    trend: historicalSliData.map(({ key, value }) => ({ x: key, y: value })),
     extra: (
       <FormattedMessage
         id="xpack.slo.sloGridItem.targetFlexItemLabel"
@@ -106,7 +103,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
   });
 
   const { colors } = useSloCardColor();
-  const chartsData: MetricDatum[][] = [[]];
+  const chartsData: MetricWTrend[][] = [[]];
   sloList?.results.forEach((slo) => {
     const subTitle = getSubTitle(slo);
     const cardColor = colors[slo.summary.status ?? 'NO_DATA'];

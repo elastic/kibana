@@ -32,7 +32,7 @@ interface BurnRateRuleParams extends RuleTypeParams {
 
 interface ChartData {
   key: number;
-  value: number | undefined;
+  value: number;
 }
 
 export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema, Dependency };

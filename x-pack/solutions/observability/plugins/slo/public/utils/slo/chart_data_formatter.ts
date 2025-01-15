@@ -31,6 +31,6 @@ export function formatHistoricalData(
 
   return historicalSummary.map((data) => ({
     key: new Date(data.date).getTime(),
-    value: data.status === 'NO_DATA' ? undefined : getDataValue(data),
+    value: data.status === 'NO_DATA' ? NaN : getDataValue(data),
   }));
 }
