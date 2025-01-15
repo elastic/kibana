@@ -47,6 +47,14 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
               ? { operationType: originalColumn.operationType }
               : {}),
             ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
+            ...('params' in originalColumn
+              ? {
+                  params: {
+                    ...(originalColumn.params as object),
+                    used_interval: `${originalColumn.interval}ms`,
+                  },
+                }
+              : {}),
           },
         },
       }));
