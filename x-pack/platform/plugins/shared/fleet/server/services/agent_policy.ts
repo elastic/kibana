@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk, groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
+import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
@@ -25,8 +25,6 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { asyncForEach } from '@kbn/std';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
@@ -507,7 +505,7 @@ class AgentPolicyService {
     return agentPolicy;
   }
 
-  public async getByIDs(
+  public async getByIds(
     soClient: SavedObjectsClientContract,
     ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
@@ -1073,24 +1071,13 @@ class AgentPolicyService {
       }
     );
 
-    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-      await scheduleDeployAgentPoliciesTask(
-        appContextService.getTaskManagerStart()!,
-        savedObjectsResults.map((policy) => ({
-          id: policy.id,
-          spaceId: policy.namespaces?.[0],
-        }))
-      );
-    } else {
-      await pMap(
-        savedObjectsResults,
-        (policy) =>
-          this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
-            spaceId: policy.namespaces?.[0],
-          }),
-        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
-      );
-    }
+    await scheduleDeployAgentPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      savedObjectsResults.map((policy) => ({
+        id: policy.id,
+        spaceId: policy.namespaces?.[0],
+      }))
+    );
 
     return res;
   }
@@ -1345,7 +1332,7 @@ class AgentPolicyService {
       });
     }
 
-    const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
+    const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
     const fullPolicies = await pMap(
       agentPolicyIds,
@@ -1750,24 +1737,13 @@ class AgentPolicyService {
 
     const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
 
-    const config = appContextService.getConfig();
-    const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
-    const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
-
-    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-      await scheduleDeployAgentPoliciesTask(
-        appContextService.getTaskManagerStart()!,
-        updatedPoliciesSuccess.map((policy) => ({
-          id: policy.id,
-          spaceId: policy.namespaces?.[0],
-        }))
-      );
-    } else {
-      await asyncForEach(
-        chunk(policyIds, batchSize),
-        async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
-      );
-    }
+    await scheduleDeployAgentPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      updatedPoliciesSuccess.map((policy) => ({
+        id: policy.id,
+        spaceId: policy.namespaces?.[0],
+      }))
+    );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
