@@ -4,27 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { format, parse } from 'url';
 import { Argv } from 'yargs';
-import { readKibanaConfig } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/read_kibana_config';
-
-const config = readKibanaConfig();
-
-export const kibanaOption = {
-  describe: 'Where Kibana is running',
-  string: true as const,
-  default: process.env.KIBANA_HOST || 'http://localhost:5601',
-};
-
-export const elasticsearchOption = {
-  alias: 'es',
-  describe: 'Where Elasticsearch is running',
-  string: true as const,
-  default: format({
-    ...parse(config['elasticsearch.hosts']),
-    auth: `${config['elasticsearch.username']}:${config['elasticsearch.password']}`,
-  }),
-};
+import {
+  elasticsearchOption,
+  kibanaOption,
+} from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/cli';
 
 export async function options(y: Argv) {
   const argv = y
