@@ -17,16 +17,6 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
         return entry
     }
 
-    const addFromMessages = (messages: Message[]) => {
-        for (const message of messages) {
-            const contentReferences = message.metadata?.contentReferences
-            if (!contentReferences) continue
-            for (const [key, value] of Object.entries(contentReferences)) {
-                store.set(key, value)
-            }
-        }
-    }
-
     const getStore: ContentReferencesStore['getStore'] = () => {
         return Object.fromEntries(store)
     }
@@ -42,7 +32,6 @@ export const contentReferencesStoreFactory: () => ContentReferencesStore = () =>
     return {
         add,
         getStore,
-        addFromMessages
     }
 }
 

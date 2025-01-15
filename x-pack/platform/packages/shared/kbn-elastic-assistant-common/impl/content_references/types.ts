@@ -14,7 +14,6 @@ export type ContentReferencesStore = {
      */
     add: <T extends ContentReference>(generator: (params: { id: ContentReferenceId }) => T) => T
     
-    addFromMessages: (messages: Message[]) => void
     /**
      * Used to read the content reference store.
      * @returns a record that contains all of the ContentReference that have been added .
