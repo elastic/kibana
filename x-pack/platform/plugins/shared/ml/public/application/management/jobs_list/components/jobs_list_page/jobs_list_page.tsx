@@ -27,7 +27,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
@@ -44,8 +44,7 @@ import type { MlSavedObjectType } from '../../../../../../common/types/saved_obj
 
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
-
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+import { getEmptyFunctionComponent } from '../../../../components/empty_component/get_empty_function_component';
 
 interface Props {
   coreStart: CoreStart;

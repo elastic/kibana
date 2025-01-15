@@ -19,6 +19,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { getEmptyFunctionComponent } from '../../components/empty_component/get_empty_function_component';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -36,8 +37,6 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortField: 'id',
   sortDirection: 'asc',
 });
-
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(

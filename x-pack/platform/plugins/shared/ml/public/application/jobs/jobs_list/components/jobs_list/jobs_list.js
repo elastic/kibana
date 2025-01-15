@@ -109,6 +109,12 @@ export class JobsListUI extends Component {
   }
 
   render() {
+    const { spaces, application } = this.props.kibana.services;
+    const shouldShowSpacesColumn =
+      spaces !== undefined &&
+      application.capabilities &&
+      application.capabilities.spaces?.manage === true &&
+      application.capabilities.savedObjectsManagement?.shareIntoSpace === true;
     const { loading } = this.props;
     const selectionControls = {
       selectable: (job) => job.blocked === undefined,
@@ -329,7 +335,7 @@ export class JobsListUI extends Component {
         render: (item) => <ResultLinks jobs={[item]} />,
         width: '64px',
       },
-      ...(this.props.kibana.services.spaces !== undefined
+      ...(shouldShowSpacesColumn
         ? [
             {
               name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
