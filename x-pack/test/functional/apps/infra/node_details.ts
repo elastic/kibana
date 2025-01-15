@@ -510,6 +510,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
           await retry.tryForTime(5000, async () => {
