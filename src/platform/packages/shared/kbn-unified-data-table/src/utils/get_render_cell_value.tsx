@@ -112,7 +112,6 @@ export const getRenderCellValueFn = ({
      * when using the fields api this code is used to show top level objects
      * this is used for legacy stuff like displaying products of our ecommerce dataset
      */
-    // TODO: does it need an update?
     const useTopLevelObjectColumns = Boolean(
       !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );

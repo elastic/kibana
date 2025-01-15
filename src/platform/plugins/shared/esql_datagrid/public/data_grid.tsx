@@ -24,7 +24,7 @@ import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import { DataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -109,11 +109,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return props.rows
       .map((row) => zipObject(columnNames, row))
       .map((row, idx: number) => {
-        return new DataTableRecord({
+        return {
           id: String(idx),
           raw: row,
           flattened: row,
-        });
+        } as unknown as DataTableRecord;
       });
   }, [props.columns, props.rows]);
 

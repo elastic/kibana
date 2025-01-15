@@ -13,7 +13,7 @@ import {
   flattenHit,
   getFlattenedFieldsComparator,
 } from '@kbn/data-service';
-import { DataTableRecord, EsHitRecord } from '../data_types/data_table_record';
+import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
 
 /**
@@ -28,7 +28,7 @@ export function buildDataTableRecord(
   isAnchor?: boolean,
   options?: { flattenedFieldsComparator?: FlattenedFieldsComparator }
 ): DataTableRecord {
-  return new DataTableRecord({
+  return {
     id: getDocId(doc),
     raw: doc,
     flattened: flattenHit(doc, dataView, {
@@ -36,7 +36,7 @@ export function buildDataTableRecord(
       flattenedFieldsComparator: options?.flattenedFieldsComparator,
     }),
     isAnchor,
-  });
+  };
 }
 
 /**
