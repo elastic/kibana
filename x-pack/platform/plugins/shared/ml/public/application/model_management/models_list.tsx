@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchFilterConfig } from '@elastic/eui';
+import type { HorizontalAlignment, SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -70,6 +70,10 @@ import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
+import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
+import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
+import { useSavedObjectsApiService } from '../services/ml_api_service/saved_objects';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -111,11 +115,13 @@ export const ModelsList: FC<Props> = ({
 
   const {
     services: {
+      spaces,
       application: { capabilities },
       docLinks,
     },
   } = useMlKibana();
 
+  const savedObjectsApiService = useSavedObjectsApiService();
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
   const { isNLPEnabled } = useEnabledFeatures();
@@ -173,7 +179,20 @@ export const ModelsList: FC<Props> = ({
   const fetchModelsData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resultItems = await trainedModelsApiService.getTrainedModelsList();
+      const [trainedModelsResult, trainedModelsSpacesResult] = await Promise.allSettled([
+        trainedModelsApiService.getTrainedModelsList(),
+        canManageSpacesAndSavedObjects
+          ? savedObjectsApiService.trainedModelsSpaces()
+          : ({} as Record<string, Record<string, string[]>>),
+      ]);
+
+      const resultItems =
+        trainedModelsResult.status === 'fulfilled' ? trainedModelsResult.value : [];
+      const trainedModelsSpaces =
+        trainedModelsSpacesResult.status === 'fulfilled' ? trainedModelsSpacesResult.value : {};
+
+      const trainedModelsSavedObjects: Record<string, string[]> =
+        trainedModelsSpaces?.trainedModels ?? {};
 
       setItems((prevItems) => {
         // Need to merge existing items with new items
@@ -182,6 +201,7 @@ export const ModelsList: FC<Props> = ({
           const prevItem = prevItems.find((i) => i.model_id === item.model_id);
           return {
             ...item,
+            spaces: trainedModelsSavedObjects[item.model_id],
             ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
               ? {
                   state: prevItem.state,
@@ -381,6 +401,7 @@ export const ModelsList: FC<Props> = ({
     modelAndDeploymentIds,
     onModelDownloadRequest,
   });
+  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
   const toggleDetails = async (item: TrainedModelUIItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -555,6 +576,30 @@ export const ModelsList: FC<Props> = ({
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
+    ...(canManageSpacesAndSavedObjects && spaces
+      ? [
+          {
+            name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
+              defaultMessage: 'Spaces',
+            }),
+            'data-test-subj': 'mlTableColumnSpaces',
+            truncateText: true,
+            align: 'right' as HorizontalAlignment,
+            width: '10%',
+            render: (item: TrainedModelUIItem) => {
+              return (
+                <MLSavedObjectsSpacesList
+                  spacesApi={spaces}
+                  spaceIds={item.spaces}
+                  id={item.model_id}
+                  mlSavedObjectType={TRAINED_MODEL_SAVED_OBJECT_TYPE}
+                  refresh={fetchModelsData}
+                />
+              );
+            },
+          },
+        ]
+      : []),
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',

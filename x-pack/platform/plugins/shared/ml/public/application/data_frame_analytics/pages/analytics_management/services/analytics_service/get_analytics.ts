@@ -139,9 +139,9 @@ export const useGetAnalytics = (
 
         let savedObjectsSpaces: Record<string, string[]> = {};
         if (canManageSpacesAndSavedObjects && mlApi.savedObjects.jobsSpaces) {
-          savedObjectsSpaces = await mlApi.savedObjects.jobsSpaces();
-          if (isPopulatedObject(savedObjectsSpaces, [DFA_SAVED_OBJECT_TYPE])) {
-            savedObjectsSpaces = savedObjectsSpaces[DFA_SAVED_OBJECT_TYPE];
+          const results = await mlApi.savedObjects.jobsSpaces();
+          if (isPopulatedObject(results, [DFA_SAVED_OBJECT_TYPE])) {
+            savedObjectsSpaces = results[DFA_SAVED_OBJECT_TYPE];
           }
         }
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)

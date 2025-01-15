@@ -144,7 +144,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload })
                 return (
                   <MLSavedObjectsSpacesList
                     spacesApi={spacesApi}
-                    spaceIds={item.spaces ?? []}
+                    spaceIds={item.spaces}
                     id={item.id}
                     mlSavedObjectType={currentTabId}
                     refresh={refresh.bind(null, currentTabId)}

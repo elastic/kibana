@@ -25,7 +25,7 @@ import {
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
@@ -41,7 +41,7 @@ import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
-import { getEmptyFunctionComponent } from '../../../../../components/empty_component/get_empty_function_component';
+import { useSpacesContextWrapper } from '../../../../../hooks/use_spaces';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -97,9 +97,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   pageState,
   updatePageState,
 }) => {
-  const {
-    services: { spaces },
-  } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
   const searchQueryText = pageState.queryText ?? '';
@@ -174,11 +171,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const SpacesContextWrapper = useCallback(
-    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spaces]
-  );
+  const SpacesContextWrapper = useSpacesContextWrapper();
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   const { refresh } = useRefreshAnalyticsList({

@@ -335,14 +335,13 @@ export class JobsListUI extends Component {
         render: (item) => <ResultLinks jobs={[item]} />,
         width: '64px',
       },
-      ...(shouldShowSpacesColumn
+      ...(shouldShowSpacesColumn && this.props.kibana.services.spaces
         ? [
             {
               name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
                 defaultMessage: 'Spaces',
               }),
               'data-test-subj': 'mlTableColumnSpaces',
-              sortable: true,
               truncateText: true,
               align: 'right',
               width: '10%',
@@ -350,7 +349,7 @@ export class JobsListUI extends Component {
                 return (
                   <MLSavedObjectsSpacesList
                     spacesApi={this.props.kibana.services.spaces}
-                    spaceIds={item.spaces ?? []}
+                    spaceIds={item.spaces}
                     id={item.id}
                     mlSavedObjectType={ANOMALY_DETECTOR_SAVED_OBJECT_TYPE}
                     refresh={this.props.refreshJobs}

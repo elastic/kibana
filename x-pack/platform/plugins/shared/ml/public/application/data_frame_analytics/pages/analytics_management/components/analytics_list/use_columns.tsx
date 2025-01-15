@@ -168,7 +168,7 @@ export const useColumns = (
   refresh: () => void = () => {}
 ) => {
   const {
-    services: { spaces, application },
+    services: { spaces },
   } = useMlKibana();
   const { actions, modals } = useActions();
   function toggleDetails(item: DataFrameAnalyticsListRow) {
@@ -292,22 +292,21 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnStatus',
     },
     progressColumn,
-    ...(canManageSpacesAndSavedObjects
+    ...(canManageSpacesAndSavedObjects && spaces
       ? [
           {
             name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
               defaultMessage: 'Spaces',
             }),
             'data-test-subj': 'mlTableColumnSpaces',
-            sortable: true,
             truncateText: true,
             align: 'right',
             width: '10%',
-            render: (item) => {
+            render: (item: DataFrameAnalyticsListRow) => {
               return (
                 <MLSavedObjectsSpacesList
                   spacesApi={spaces}
-                  spaceIds={item.spaces ?? []}
+                  spaceIds={item.spaces}
                   id={item.id}
                   mlSavedObjectType={DFA_SAVED_OBJECT_TYPE}
                   refresh={refresh}
