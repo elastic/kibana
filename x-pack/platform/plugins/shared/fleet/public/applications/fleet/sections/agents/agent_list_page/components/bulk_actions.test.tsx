@@ -48,9 +48,7 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
-    } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
   });
 
   beforeEach(() => {
