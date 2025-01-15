@@ -15,7 +15,7 @@ import type {
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
-import { DATASET_VAR_NAME } from '../constants';
+import { AGENTLESS_DISABLED_INPUTS, DATASET_VAR_NAME } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 
 import { packageToPackagePolicy } from '.';
@@ -76,14 +76,18 @@ export function generateInputId(input: NewPackagePolicyInput) {
   return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
 }
 
-export function formatInputs(inputs: NewPackagePolicy['inputs']) {
+export function formatInputs(inputs: NewPackagePolicy['inputs'], supportsAgentless?: boolean) {
   return inputs.reduce((acc, input) => {
     const inputId = generateInputId(input);
     if (!acc) {
       acc = {};
     }
+    const enabled =
+      supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(input.type)
+        ? false
+        : input.enabled;
     acc[inputId] = {
-      enabled: input.enabled,
+      enabled,
       vars: formatVars(input.vars),
       streams: formatStreams(input.streams),
     };
