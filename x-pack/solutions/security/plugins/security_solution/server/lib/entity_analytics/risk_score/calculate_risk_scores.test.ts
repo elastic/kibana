@@ -14,6 +14,7 @@ import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { mockGlobalState } from '../../../../public/common/mock';
+import { EntityType } from '../../../../common/search_strategy';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -80,7 +81,7 @@ describe('calculateRiskScores()', () => {
       });
 
       it('creates an aggregation per specified identifierType', async () => {
-        params = { ...params, identifierType: 'host' };
+        params = { ...params, identifierType: EntityType.host };
         await calculateRiskScores(params);
         const [[call]] = (esClient.search as jest.Mock).mock.calls;
         expect(call).toEqual(

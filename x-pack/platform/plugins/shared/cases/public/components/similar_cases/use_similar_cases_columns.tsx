@@ -12,15 +12,14 @@ import type {
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { EuiBadgeGroup, EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 
-import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI, SimilarCaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
 import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
-import { severities } from '../severity/config';
+import { SeverityHealth } from '../severity/config';
 import { useCasesColumnsConfiguration } from '../all_cases/use_cases_columns_configuration';
 import * as i18n from './translations';
 
@@ -157,14 +156,11 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         sortable: false,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
-            const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
-              <EuiHealth
+              <SeverityHealth
                 data-test-subj={`similar-cases-table-column-severity-${severity}`}
-                color={severityData.color}
-              >
-                {severityData.label}
-              </EuiHealth>
+                severity={severity}
+              />
             );
           }
           return getEmptyCellValue();
