@@ -45,11 +45,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const { columnCount, rowHeight } = runtimeSettings;
-
+      const { columnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
-        grid-auto-rows: ${rowHeight}px;
+        grid-auto-rows: calc(var(--kbnGridRowHeight) * 1px);
         grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
         gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
