@@ -28,11 +28,13 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
+  layoutRef,
   gridSettings,
   expandedPanelId,
   accessMode,
 }: {
   layout: GridLayoutData;
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   gridSettings: GridSettings;
   expandedPanelId?: string;
   accessMode: GridAccessMode;
@@ -137,17 +139,22 @@ export const useGridLayoutState = ({
         }
       });
 
-    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
+    /**
+     * This subscription sets CSS variables that can be used by `layoutRef` and all of its children
+     */
+    const cssVariableSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(distinctUntilChanged(deepEqual))
       .subscribe(({ gutterSize, columnPixelWidth, rowHeight }) => {
-        document.documentElement.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-        document.documentElement.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
-        document.documentElement.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+        if (!layoutRef.current) return;
+        const variableScope = layoutRef.current.parentElement ?? layoutRef.current;
+        variableScope.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+        variableScope.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
+        variableScope.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
       });
 
     return () => {
       resizeSubscription.unsubscribe();
-      globalCssVariableSubscription.unsubscribe();
+      cssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

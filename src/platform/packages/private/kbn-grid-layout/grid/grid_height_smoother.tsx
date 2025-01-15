@@ -44,23 +44,8 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    /**
-     * This subscription sets global CSS variables that can be used by all components contained within
-     * this wrapper; note that this is **currently** only used for the gutter size, but things like column
-     * count could be added here once we add the ability to change these values
-     */
-    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(
-        map(({ gutterSize }) => gutterSize),
-        distinctUntilChanged()
-      )
-      .subscribe((gutterSize) => {
-        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-      });
-
     return () => {
       interactionStyleSubscription.unsubscribe();
-      globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -44,14 +44,15 @@ export const GridLayout = ({
   accessMode = 'EDIT',
   className,
 }: GridLayoutProps) => {
+  const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
+    layoutRef,
     gridSettings,
     expandedPanelId,
     accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
-  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
