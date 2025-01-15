@@ -67,6 +67,8 @@ export async function rolloverDataStreamIfNecessary({
       continue;
     }
     try {
+      console.log('try updating mapping for ' + writeIndex.index_name);
+      console.log(JSON.stringify(mappings, null, 2));
       await retryTransientEsErrors(
         () => esClient.indices.putMapping({ index: writeIndex.index_name, properties: mappings }),
         {
@@ -74,6 +76,7 @@ export async function rolloverDataStreamIfNecessary({
         }
       );
     } catch (error: any) {
+      console.log(JSON.stringify(error, null, 2));
       if (
         typeof error.message !== 'string' ||
         !error.message.includes('illegal_argument_exception')

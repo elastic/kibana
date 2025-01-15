@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
@@ -138,37 +138,35 @@ export default function ({ getService }: FtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    it('checks whether deeply nested stream is created correclty', async () => {
+    it('checks whether deeply nested stream is created correctly', async () => {
+      function getChildNames(stream: ReadStreamDefinition['stream']) {
+        return stream.ingest.routing.map((r) => r.name);
+      }
       const logs = await apiClient.fetch('GET /api/streams/{id}', {
         params: {
           path: { id: 'logs' },
         },
       });
-      expect(logs.body.stream.ingest.routing).to.contain({
-        name: 'logs.deeply',
-      });
+      expect(getChildNames(logs.body.stream)).to.contain('logs.deeply');
 
       const logsDeeply = await apiClient.fetch('GET /api/streams/{id}', {
         params: {
           path: { id: 'logs.deeply' },
         },
       });
-      expect(logsDeeply.body.stream.ingest.routing).to.contain({
-        name: 'logs.deeply.nested',
-      });
+      expect(getChildNames(logsDeeply.body.stream)).to.contain('logs.deeply.nested');
 
       const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{id}', {
         params: {
           path: { id: 'logs.deeply.nested' },
         },
       });
-      expect(logsDeeplyNested.body.stream.ingest.routing).to.contain({
-        name: 'logs.deeply.nested.streamname',
-      });
-
+      expect(getChildNames(logsDeeplyNested.body.stream)).to.contain(
+        'logs.deeply.nested.streamname'
+      );
       const logsDeeplyNestedStreamname = await apiClient.fetch('GET /api/streams/{id}', {
         params: {
-          path: { id: 'logs.deeply.nested' },
+          path: { id: 'logs.deeply.nested.streamname' },
         },
       });
       expect(
