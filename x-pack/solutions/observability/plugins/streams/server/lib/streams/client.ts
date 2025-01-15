@@ -363,6 +363,11 @@ export class StreamsClient {
       if (descendantsById[child.name]) {
         continue;
       }
+      if (!isChildOf(definition.name, child.name)) {
+        throw new MalformedStreamId(
+          `The ID (${child.name}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
+        );
+      }
       await this.validateAndUpsertStream({
         definition: {
           name: child.name,
