@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import { ResyncStreamsResponse } from '../../lib/streams/client';
 import { createServerRoute } from '../create_server_route';
-import { syncStream, readStream, listStreams } from '../../lib/streams/stream_crud';
 
 export const resyncStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_resync',
@@ -22,29 +22,9 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    response,
-    logger,
-    request,
-    getScopedClients,
-  }): Promise<{ acknowledged: true }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+  handler: async ({ request, getScopedClients }): Promise<ResyncStreamsResponse> => {
+    const { streamsClient } = await getScopedClients({ request });
 
-    const { definitions: streams } = await listStreams({ scopedClusterClient });
-
-    for (const stream of streams) {
-      const { definition } = await readStream({
-        scopedClusterClient,
-        id: stream.id,
-      });
-
-      await syncStream({
-        scopedClusterClient,
-        definition,
-        logger,
-      });
-    }
-
-    return { acknowledged: true };
+    return await streamsClient.resyncStreams();
   },
 });

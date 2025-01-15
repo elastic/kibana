@@ -67,7 +67,7 @@ export class SloOrphanSummaryCleanupTask {
             },
 
             cancel: async () => {
-              this.abortController.abort('[SLO] Definitions clean up Task timed out');
+              this.abortController.abort('orphan-slo-summary-cleanup task timed out');
             },
           };
         },
@@ -101,7 +101,7 @@ export class SloOrphanSummaryCleanupTask {
 
         if (sloSummaryIdsToDelete.length > 0) {
           this.logger.info(
-            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summaries from the summary index`
+            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
           );
 
           await this.esClient.deleteByQuery({
@@ -124,7 +124,7 @@ export class SloOrphanSummaryCleanupTask {
     searchAfter?: AggregationsCompositeAggregateKey;
     sloSummaryIds: Array<{ id: string; revision: number }>;
   }> => {
-    this.logger.debug(`[SLO] Fetching SLO Summaries ids after ${searchAfter}`);
+    this.logger.debug(`[TASK] Fetching SLO Summary ids after ${searchAfter}`);
     if (!this.esClient) {
       return {
         searchAfter: undefined,
@@ -227,7 +227,9 @@ export class SloOrphanSummaryCleanupTask {
     this.esClient = esClient;
 
     if (!taskManager) {
-      this.logger.info('[SLO] Missing required service during startup, skipping task.');
+      this.logger.info(
+        'Missing required service during startup, skipping orphan-slo-summary-cleanup task.'
+      );
       return;
     }
 

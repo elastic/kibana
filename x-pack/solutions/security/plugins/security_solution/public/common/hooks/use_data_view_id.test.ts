@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../mock';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
@@ -17,10 +16,7 @@ describe('useDataViewId', () => {
   it.each(Object.values(SourcererScopeName))(
     'should return the data view id for %s scope',
     (scope) => {
-      const { result } = renderHook<
-        PropsWithChildren<{ scope: SourcererScopeName }>,
-        string | undefined
-      >((props) => useDataViewId(props.scope), {
+      const { result } = renderHook((props) => useDataViewId(props.scope), {
         initialProps: { scope },
         wrapper: TestProviders,
       });
@@ -33,10 +29,7 @@ describe('useDataViewId', () => {
       .spyOn(sourcererSelectors, 'sourcererScopeSelectedDataViewId')
       .mockImplementationOnce(() => null);
 
-    const { result } = renderHook<
-      PropsWithChildren<{ scope: SourcererScopeName }>,
-      string | undefined
-    >((props) => useDataViewId(props.scope), {
+    const { result } = renderHook((props) => useDataViewId(props.scope), {
       initialProps: { scope: SourcererScopeName.default },
       wrapper: TestProviders,
     });

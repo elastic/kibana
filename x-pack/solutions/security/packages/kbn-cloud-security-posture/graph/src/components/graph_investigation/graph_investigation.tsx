@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   BooleanRelation,
@@ -19,13 +20,22 @@ import {
 } from '@kbn/es-query';
 import type { Filter, Query, TimeRange, PhraseFilter } from '@kbn/es-query';
 import { css } from '@emotion/react';
+import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Graph } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
-import { useFetchGraphData } from '../../hooks/use_fetch_graph_data';
+import { useGraphLabelExpandPopover } from './use_graph_label_expand_popover';
+import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { ACTOR_ENTITY_ID, RELATED_ENTITY, TARGET_ENTITY_ID } from '../../common/constants';
+import {
+  ACTOR_ENTITY_ID,
+  EVENT_ACTION,
+  EVENT_ID,
+  RELATED_ENTITY,
+  TARGET_ENTITY_ID,
+} from '../../common/constants';
+import { Actions, type ActionsProps } from '../controls/actions';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -78,9 +88,13 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
     ];
   } else if (isFilter(firstFilter) && firstFilter.meta?.type !== 'custom') {
     return [
-      buildCombinedFilter(BooleanRelation.OR, [firstFilter, buildPhraseFilter(key, value)], {
-        id: dataViewId,
-      }),
+      buildCombinedFilter(
+        BooleanRelation.OR,
+        [firstFilter, buildPhraseFilter(key, value, dataViewId)],
+        {
+          id: dataViewId,
+        }
+      ),
       ...otherFilters,
     ];
   } else {
@@ -112,20 +126,26 @@ const useGraphPopovers = (
     },
   });
 
+  const labelExpandPopover = useGraphLabelExpandPopover({
+    onShowEventsWithThisActionClick: (node) => {
+      setSearchFilters((prev) => addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? ''));
+    },
+  });
+
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover].forEach(({ actions: { closePopover } }) => {
+      [nodeExpandPopover, labelExpandPopover].forEach(({ actions: { closePopover } }) => {
         closePopover();
       });
       cb(...args);
     },
-    [nodeExpandPopover]
+    [nodeExpandPopover, labelExpandPopover]
   );
 
-  return { nodeExpandPopover, openPopoverCallback };
+  return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
 };
 
-interface GraphInvestigationProps {
+export interface GraphInvestigationProps {
   /**
    * The initial state to use for the graph investigation view.
    */
@@ -155,44 +175,109 @@ interface GraphInvestigationProps {
      */
     timeRange: TimeRange;
   };
+
+  /**
+   * Whether to show investigate in timeline action button. Defaults value is false.
+   */
+  showInvestigateInTimeline?: boolean;
+
+  /**
+   * Callback when investigate in timeline action button is clicked, ignored if showInvestigateInTimeline is false.
+   */
+  onInvestigateInTimeline?: (
+    query: Query | undefined,
+    filters: Filter[],
+    timeRange: TimeRange
+  ) => void;
+
+  /**
+   * Whether to show toggle search action button. Defaults value is false.
+   */
+  showToggleSearch?: boolean;
 }
+
+const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
+type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
 
 /**
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
-export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
+export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
     initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    showInvestigateInTimeline = false,
+    showToggleSearch = false,
+    onInvestigateInTimeline,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+    const lastValidEsQuery = useRef<EsQuery | undefined>();
+    const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
-    const {
-      services: { uiSettings },
-    } = useKibana();
-    const query = useMemo(
-      () =>
-        buildEsQuery(
-          dataView,
-          [],
-          [...searchFilters],
-          getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-        ),
-      [dataView, searchFilters, uiSettings]
+    const onInvestigateInTimelineCallback = useCallback(() => {
+      const query = { ...kquery };
+      const filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
+        return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+      }, searchFilters);
+
+      if (query.query.trim() !== '' && originEventIds.length > 0) {
+        query.query = `(${query.query})${originEventIds
+          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
+          .join('')}`;
+      }
+
+      onInvestigateInTimeline?.(query, filters, timeRange);
+    }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
+
+    const actionsProps: ActionsProps = useMemo(
+      () => ({
+        showInvestigateInTimeline,
+        showToggleSearch,
+        onInvestigateInTimeline: onInvestigateInTimelineCallback,
+      }),
+      [onInvestigateInTimelineCallback, showInvestigateInTimeline, showToggleSearch]
     );
 
-    const { nodeExpandPopover, openPopoverCallback } = useGraphPopovers(
+    const {
+      services: { uiSettings, notifications },
+    } = useKibana();
+    const esQuery = useMemo(() => {
+      try {
+        lastValidEsQuery.current = buildEsQuery(
+          dataView,
+          [kquery],
+          [...searchFilters],
+          getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
+        );
+      } catch (err) {
+        notifications?.toasts.addError(err, {
+          title: i18n.translate(
+            'securitySolutionPackages.csp.graph.investigation.errorBuildingQuery',
+            {
+              defaultMessage: 'Unable to retrieve search results',
+            }
+          ),
+        });
+      }
+      return lastValidEsQuery.current;
+    }, [dataView, kquery, notifications, searchFilters, uiSettings]);
+
+    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
       dataView?.id ?? '',
       setSearchFilters
     );
-    const expandButtonClickHandler = (...args: unknown[]) =>
+    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
+    const labelExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(labelExpandPopover.onLabelExpandButtonClick, ...args);
+    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
+      ({ state: { isOpen } }) => isOpen
+    );
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
         query: {
           originEventIds,
-          esQuery: query,
+          esQuery,
           start: timeRange.from,
           end: timeRange.to,
         },
@@ -206,13 +291,19 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
-          const nodeHandlers =
-            node.shape !== 'label' && node.shape !== 'group'
-              ? {
-                  expandButtonClick: expandButtonClickHandler,
-                }
-              : undefined;
-          return { ...node, ...nodeHandlers };
+          if (isEntityNode(node)) {
+            return {
+              ...node,
+              expandButtonClick: nodeExpandButtonClickHandler,
+            };
+          } else if (node.shape === 'label') {
+            return {
+              ...node,
+              expandButtonClick: labelExpandButtonClickHandler,
+            };
+          }
+
+          return { ...node };
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,32 +322,30 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
           {dataView && (
             <EuiFlexItem grow={false}>
               <SearchBar<Query>
-                {...{
-                  appName: 'graph-investigation',
-                  intl: null,
-                  showFilterBar: true,
-                  showDatePicker: true,
-                  showAutoRefreshOnly: false,
-                  showSaveQuery: false,
-                  showQueryInput: false,
-                  isLoading: isFetching,
-                  isAutoRefreshDisabled: true,
-                  dateRangeFrom: timeRange.from,
-                  dateRangeTo: timeRange.to,
-                  query: { query: '', language: 'kuery' },
-                  indexPatterns: [dataView],
-                  filters: searchFilters,
-                  submitButtonStyle: 'iconOnly',
-                  onFiltersUpdated: (newFilters) => {
-                    setSearchFilters(newFilters);
-                  },
-                  onQuerySubmit: (payload, isUpdate) => {
-                    if (isUpdate) {
-                      setTimeRange({ ...payload.dateRange });
-                    } else {
-                      refresh();
-                    }
-                  },
+                showFilterBar={true}
+                showDatePicker={true}
+                showAutoRefreshOnly={false}
+                showSaveQuery={false}
+                showQueryInput={true}
+                disableQueryLanguageSwitcher={true}
+                isLoading={isFetching}
+                isAutoRefreshDisabled={true}
+                dateRangeFrom={timeRange.from}
+                dateRangeTo={timeRange.to}
+                query={kquery}
+                indexPatterns={[dataView]}
+                filters={searchFilters}
+                submitButtonStyle={'iconOnly'}
+                onFiltersUpdated={(newFilters) => {
+                  setSearchFilters(newFilters);
+                }}
+                onQuerySubmit={(payload, isUpdate) => {
+                  if (isUpdate) {
+                    setTimeRange({ ...payload.dateRange });
+                    setKQuery(payload.query || EMPTY_QUERY);
+                  } else {
+                    refresh();
+                  }
                 }}
               />
             </EuiFlexItem>
@@ -271,10 +360,15 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
-            />
+            >
+              <Panel position="top-right">
+                <Actions {...actionsProps} />
+              </Panel>
+            </Graph>
           </EuiFlexItem>
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
+        <labelExpandPopover.PopoverComponent />
       </>
     );
   }

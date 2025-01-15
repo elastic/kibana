@@ -39,7 +39,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
                 "text": "GetUserDisplayNameParams"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,7 +90,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,7 +110,7 @@
                 "text": "UserAvatarProps"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -139,7 +139,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar_tip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,7 +159,7 @@
                 "text": "UserAvatarProps"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar_tip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,7 +188,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/services.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +210,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-user-profile-components/src/services.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -247,7 +247,7 @@
           },
           "<Option>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,7 +268,7 @@
               },
               "<Option>"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,7 +291,7 @@
           "Services",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/services.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,7 +307,7 @@
               "Services",
               ">"
             ],
-            "path": "packages/kbn-user-profile-components/src/services.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -344,7 +344,7 @@
           },
           "<Option>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,7 +365,7 @@
               },
               "<Option>"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -394,7 +394,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,7 +414,7 @@
                 "text": "UserToolTipProps"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -439,7 +439,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -447,9 +447,9 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
-        "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -463,7 +463,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -483,7 +483,7 @@
         "description": [
           "\nSet of available name-related fields to pick as display name."
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -496,7 +496,7 @@
             "description": [
               "\nUsername of the user."
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -512,7 +512,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -528,7 +528,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -556,7 +556,7 @@
           "EuiAvatarProps",
           ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"initials\" | \"initialsLength\" | \"imageUrl\" | \"iconSize\">"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -579,7 +579,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,7 +602,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -616,7 +616,7 @@
         "tags": [],
         "label": "UserProfile",
         "description": [
-          "\nIMPORTANT:\n\nThe types in this file have been imported from\n`x-pack/plugins/security/common/model/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
+          "\nIMPORTANT:\n\nThe types in this file have been imported from\n`x-pack/platform/plugins/shared/security/common/model/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
         ],
         "signature": [
           {
@@ -628,7 +628,7 @@
           },
           "<D>"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -641,7 +641,7 @@
             "description": [
               "\nUnique ID for of the user profile."
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -654,7 +654,7 @@
             "description": [
               "\nIndicates whether user profile is enabled or not."
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -676,7 +676,7 @@
                 "text": "UserProfileUserInfo"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -692,7 +692,7 @@
             "signature": [
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -708,7 +708,7 @@
         "description": [
           "\nAvatar stored in user profile."
         ],
-        "path": "packages/kbn-user-profile-components/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -724,7 +724,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,7 +740,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,7 +756,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -770,7 +770,7 @@
         "tags": [],
         "label": "UserProfileData",
         "description": [],
-        "path": "packages/kbn-user-profile-components/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -791,7 +791,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,7 +812,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,7 +826,7 @@
             "signature": [
               "[key: string]:  unknown"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -842,7 +842,7 @@
         "description": [
           "\nKibana-specific service types."
         ],
-        "path": "packages/kbn-user-profile-components/src/services.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -857,40 +857,16 @@
             ],
             "signature": [
               "{ notifications: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              },
+              "NotificationsStart",
               "; theme: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               "; userProfile: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               "; i18n: ",
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              },
+              "I18nStart",
               "; }"
             ],
-            "path": "packages/kbn-user-profile-components/src/services.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,7 +882,7 @@
               "UserProfileAPIClient",
               "; }"
             ],
-            "path": "packages/kbn-user-profile-components/src/services.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,16 +905,10 @@
                 "text": "ToMountPointParams"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>"
             ],
-            "path": "packages/kbn-user-profile-components/src/services.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -953,7 +923,7 @@
                 "signature": [
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -966,21 +936,9 @@
                 "description": [],
                 "signature": [
                   "{ i18n: ",
-                  {
-                    "pluginId": "@kbn/core-i18n-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreI18nBrowserPluginApi",
-                    "section": "def-public.I18nStart",
-                    "text": "I18nStart"
-                  },
+                  "I18nStart",
                   "; analytics?: Pick<",
-                  {
-                    "pluginId": "@kbn/core-analytics-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                    "section": "def-public.AnalyticsServiceStart",
-                    "text": "AnalyticsServiceStart"
-                  },
+                  "AnalyticsServiceStart",
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
@@ -990,16 +948,10 @@
                     "text": "ThemeServiceStart"
                   },
                   "; userProfile?: Pick<",
-                  {
-                    "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-public.UserProfileService",
-                    "text": "UserProfileService"
-                  },
+                  "UserProfileService",
                   ", \"getUserProfile$\"> | undefined; }"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1028,7 +980,7 @@
           "<Option> extends ",
           "EuiPopoverProps"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1046,7 +998,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1071,7 +1023,7 @@
               },
               "<Option>"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1099,7 +1051,7 @@
           "EuiSelectableProps",
           "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1115,7 +1067,7 @@
             "signature": [
               "Option[] | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1131,7 +1083,7 @@
             "signature": [
               "Option[] | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1147,7 +1099,7 @@
             "signature": [
               "Option[] | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1163,7 +1115,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1179,7 +1131,7 @@
             "signature": [
               "((options: Option[]) => void) | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1195,7 +1147,7 @@
                 "signature": [
                   "Option[]"
                 ],
-                "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+                "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1215,7 +1167,7 @@
             "signature": [
               "((searchTerm: string) => void) | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1231,7 +1183,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+                "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1251,7 +1203,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1267,7 +1219,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1283,7 +1235,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1299,7 +1251,7 @@
             "signature": [
               "((selectedCount: number) => React.ReactNode) | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1315,7 +1267,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+                "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1335,7 +1287,7 @@
             "signature": [
               "((limit: number) => React.ReactNode) | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1351,7 +1303,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+                "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1371,7 +1323,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1387,7 +1339,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1423,7 +1375,7 @@
               "EuiSelectableOptionBase",
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }), \"append\">> | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1439,7 +1391,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1455,7 +1407,7 @@
         "description": [
           "\nBasic user information returned in user profile."
         ],
-        "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1468,7 +1420,7 @@
             "description": [
               "\nUsername of the user."
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1484,7 +1436,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1500,7 +1452,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1516,7 +1468,7 @@
         "description": [
           "\nUser settings stored in the data object of the User Profile"
         ],
-        "path": "packages/kbn-user-profile-components/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1537,7 +1489,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1551,7 +1503,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1579,7 +1531,7 @@
           "EuiToolTipProps",
           ", \"title\" | \"content\">"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1601,7 +1553,7 @@
                 "text": "UserProfileUserInfo"
               }
             ],
-            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1624,7 +1576,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1642,9 +1594,9 @@
         "label": "DarkModeValue",
         "description": [],
         "signature": [
-          "\"\" | \"light\" | \"dark\""
+          "\"light\" | \"dark\" | \"system\" | \"space_default\""
         ],
-        "path": "packages/kbn-user-profile-components/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1665,7 +1617,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1673,9 +1625,9 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
-        "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1690,7 +1642,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1724,7 +1676,7 @@
           },
           " | undefined; }>"
         ],
-        "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

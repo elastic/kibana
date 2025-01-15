@@ -10,11 +10,10 @@
 import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
-import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
-import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
@@ -25,10 +24,7 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
@@ -38,6 +34,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     panelRef
   ) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
+    const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
       const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
@@ -71,19 +68,20 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
+      const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
+        position: relative;
+        height: calc(
+          1px *
+            (
+              ${initialPanel.height} * (${rowHeight} + var(--kbnGridGutterSize)) -
+                var(--kbnGridGutterSize)
+            )
+        );
         grid-column-start: ${initialPanel.column + 1};
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
-        &.kbnGridPanel--isExpanded {
-          transform: translate(9999px, 9999px);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -107,7 +105,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
 
-              ref.style.zIndex = `${euiThemeVars.euiZModal}`;
+              ref.style.zIndex = `${euiTheme.levels.modal}`;
               if (currentInteractionEvent?.type === 'resize') {
                 // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
                 ref.style.width = `${Math.max(
@@ -137,6 +135,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
+              const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
+
               ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
@@ -144,7 +144,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               ref.style.left = ``;
               ref.style.top = ``;
               ref.style.width = ``;
-              ref.style.height = ``;
+              // setting the height is necessary for mobile mode
+              ref.style.height = `calc(1px * (${panel.height} * (${rowHeight} + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;
@@ -154,55 +155,33 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
-        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
-          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe((expandedPanelId) => {
+        /**
+         * This subscription adds and/or removes the necessary class name for expanded panel styling
+         */
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+          (expandedPanelId) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
             const panel = gridLayout[rowIndex].panels[panelId];
             if (!ref || !panel) return;
 
             if (expandedPanelId && expandedPanelId === panelId) {
-              ref.classList.add('kbnGridPanel--isExpanded');
+              ref.classList.add('kbnGridPanel--expanded');
             } else {
-              ref.classList.remove('kbnGridPanel--isExpanded');
+              ref.classList.remove('kbnGridPanel--expanded');
             }
-          });
-
-        const mobileViewStyleSubscription = gridLayoutStateManager.isMobileView$
-          .pipe(skip(1))
-          .subscribe((isMobileView) => {
-            if (!isMobileView) {
-              return;
-            }
-            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-            const allPanels = gridLayout[rowIndex].panels;
-            const panel = allPanels[panelId];
-            if (!ref || !panel) return;
-
-            const sortedKeys = getKeysInOrder(gridLayout[rowIndex].panels);
-            const currentPanelPosition = sortedKeys.indexOf(panelId);
-            const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
-            const responsiveGridRowStart = sortedKeysBefore.reduce(
-              (acc, key) => acc + allPanels[key].height,
-              1
-            );
-            ref.style.gridColumnStart = `1`;
-            ref.style.gridColumnEnd = `-1`;
-            ref.style.gridRowStart = `${responsiveGridRowStart}`;
-            ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
-          });
+          }
+        );
 
         return () => {
-          expandedPanelStyleSubscription.unsubscribe();
-          mobileViewStyleSubscription.unsubscribe();
+          expandedPanelSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
+
     /**
      * Memoize panel contents to prevent unnecessary re-renders
      */
@@ -213,21 +192,13 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
     return (
       <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
-        <div
-          css={css`
-            padding: 0;
-            height: 100%;
-            position: relative;
-          `}
-        >
-          <DragHandle
-            ref={setDragHandleApi}
-            gridLayoutStateManager={gridLayoutStateManager}
-            interactionStart={interactionStart}
-          />
-          {panelContents}
-          <ResizeHandle interactionStart={interactionStart} />
-        </div>
+        <DragHandle
+          ref={setDragHandleApi}
+          gridLayoutStateManager={gridLayoutStateManager}
+          interactionStart={interactionStart}
+        />
+        {panelContents}
+        <ResizeHandle interactionStart={interactionStart} />
       </div>
     );
   }

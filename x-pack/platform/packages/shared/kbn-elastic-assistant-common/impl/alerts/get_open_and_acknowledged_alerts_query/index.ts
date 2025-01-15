@@ -7,6 +7,34 @@
 
 import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
+export const DEFAULT_END = 'now';
+export const DEFAULT_START = 'now-24h';
+
+interface GetOpenAndAcknowledgedAlertsQuery {
+  allow_no_indices: boolean;
+  body: {
+    fields: Array<{
+      field: string;
+      include_unmapped: boolean;
+    }>;
+    query: {
+      bool: {
+        filter: Array<Record<string, unknown>>;
+      };
+    };
+    runtime_mappings: Record<string, unknown>;
+    size: number;
+    sort: Array<{
+      [key: string]: {
+        order: string;
+      };
+    }>;
+    _source: boolean;
+  };
+  ignore_unavailable: boolean;
+  index: string[];
+}
+
 /**
  * This query returns open and acknowledged (non-building block) alerts in the last 24 hours.
  *
@@ -15,12 +43,18 @@ import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fie
 export const getOpenAndAcknowledgedAlertsQuery = ({
   alertsIndexPattern,
   anonymizationFields,
+  end,
+  filter,
   size,
+  start,
 }: {
   alertsIndexPattern: string;
   anonymizationFields: AnonymizationFieldResponse[];
+  end?: string | null;
+  filter?: Record<string, unknown> | null;
   size: number;
-}) => ({
+  start?: string | null;
+}): GetOpenAndAcknowledgedAlertsQuery => ({
   allow_no_indices: true,
   body: {
     fields: anonymizationFields
@@ -53,11 +87,12 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
                     minimum_should_match: 1,
                   },
                 },
+                ...(filter != null ? [filter] : []),
                 {
                   range: {
                     '@timestamp': {
-                      gte: 'now-24h',
-                      lte: 'now',
+                      gte: start != null ? start : DEFAULT_START,
+                      lte: end != null ? end : DEFAULT_END,
                       format: 'strict_date_optional_time',
                     },
                   },

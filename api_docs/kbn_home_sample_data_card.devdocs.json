@@ -37,7 +37,7 @@
           "InstalledStatus",
           " | undefined; statusMsg?: string | undefined; }"
         ],
-        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +53,7 @@
               "SampleDataSet",
               ">"
             ],
-            "path": "packages/home/sample_data_card/src/mocks/index.ts",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,7 +76,7 @@
           "InstalledStatus",
           " | undefined; }; includeAppLinks: { control: string; defaultValue: boolean; }; simulateErrors: { control: string; defaultValue: boolean; }; }"
         ],
-        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -110,7 +110,7 @@
             "text": "Services"
           }
         ],
-        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +130,7 @@
                 "text": "Params"
               }
             ],
-            "path": "packages/home/sample_data_card/src/mocks/index.ts",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -159,7 +159,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/sample_data_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,7 +179,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/sample_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -208,7 +208,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_card/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,7 +230,7 @@
               },
               ">"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -259,7 +259,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_card/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -281,7 +281,7 @@
               },
               ">"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -299,7 +299,7 @@
         "tags": [],
         "label": "KibanaDependencies",
         "description": [],
-        "path": "packages/home/sample_data_card/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -313,7 +313,7 @@
             "signature": [
               "{ application: { navigateToUrl: NavigateToUrl; }; http: { basePath: { prepend: (path: string) => string; }; delete: (path: string) => Promise<unknown>; post: (path: string) => Promise<unknown>; }; notifications: { toasts: { addDanger: NotifyFn; addSuccess: NotifyFn; }; }; uiSettings: { get: (key: string, defaultOverride?: any) => any; isDefault: (key: string) => boolean; set: (key: string, value: any) => Promise<boolean>; }; }"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,7 +327,7 @@
             "signature": [
               "{ clearCache: () => void; }"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -361,7 +361,7 @@
           },
           ", \"onStatusChange\">"
         ],
-        "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/sample_data_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -377,7 +377,7 @@
             "signature": [
               "SampleDataSet"
             ],
-            "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/sample_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -393,7 +393,7 @@
         "description": [
           "\nA list of services that are consumed by this component."
         ],
-        "path": "packages/home/sample_data_card/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -407,7 +407,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -421,7 +421,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -439,7 +439,7 @@
             "signature": [
               "(path: string) => React.MouseEventHandler<Element>"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,7 +453,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -471,7 +471,7 @@
             "signature": [
               "(id: string, defaultIndex: string) => Promise<void>"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -485,7 +485,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -500,7 +500,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -518,7 +518,7 @@
             "signature": [
               "(notification: NotifyInput) => void"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -533,7 +533,7 @@
                 "signature": [
                   "string | NotifyInputFields"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -549,7 +549,7 @@
             "signature": [
               "(notification: NotifyInput) => void"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -564,7 +564,7 @@
                 "signature": [
                   "string | NotifyInputFields"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -580,7 +580,7 @@
             "signature": [
               "(id: string, defaultIndex: string) => Promise<void>"
             ],
-            "path": "packages/home/sample_data_card/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -594,7 +594,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -609,7 +609,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/home/sample_data_card/src/services.tsx",
+                "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -635,7 +635,7 @@
         "signature": [
           "{ name: any; description: any; status: any; includeAppLinks: any; simulateErrors: any; }"
         ],
-        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
@@ -15,6 +15,7 @@ import {
   NodeIcon,
   NodeButton,
   HandleStyleOverride,
+  useNodeFillColor,
   NODE_WIDTH,
   NODE_HEIGHT,
 } from './styles';
@@ -23,8 +24,7 @@ import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
 
-// eslint-disable-next-line react/display-name
-export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
@@ -50,7 +50,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <EllipseShape
-            fill={useEuiBackgroundColor(color ?? 'primary')}
+            fill={useNodeFillColor(color)}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
           {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
@@ -59,6 +59,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           <>
             <NodeButton onClick={(e) => nodeClick?.(e, props)} />
             <NodeExpandButton
+              color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2}px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
@@ -84,3 +85,5 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </>
   );
 });
+
+EllipseNode.displayName = 'EllipseNode';

@@ -40,7 +40,7 @@ export function expectSuppressionFields(fieldNames: string[]): void {
 
 export function setDurationType(value: 'Per rule execution' | 'Per time period'): void {
   act(() => {
-    fireEvent.click(within(screen.getByTestId('alertSuppressionDuration')).getByLabelText(value));
+    fireEvent.click(within(screen.getByTestId('alertSuppressionDuration')).getByText(value));
   });
 }
 
