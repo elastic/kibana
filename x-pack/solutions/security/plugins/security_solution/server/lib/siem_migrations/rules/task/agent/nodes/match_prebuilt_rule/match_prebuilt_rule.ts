@@ -33,7 +33,7 @@ export const getMatchPrebuiltRuleNode = ({
   return async (state) => {
     const query = state.semantic_query;
     const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
-    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(
+    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.search(
       query,
       techniqueIds.join(',')
     );
@@ -74,8 +74,11 @@ export const getMatchPrebuiltRuleNode = ({
           elastic_rule: {
             title: matchedRule.name,
             description: matchedRule.description,
-            id: matchedRule.installed_rule_id,
             prebuilt_rule_id: matchedRule.rule_id,
+            id: matchedRule.current?.id,
+            integration_ids: matchedRule.target?.related_integrations?.map((i) => i.package),
+            severity: matchedRule.target?.severity,
+            risk_score: matchedRule.target?.risk_score,
           },
           translation_result: RuleTranslationResult.FULL,
         };

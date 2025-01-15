@@ -47,10 +47,6 @@ export const registerSiemRuleMigrationsStartRoute = (
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const inferenceClient = ctx.securitySolution.getInferenceClient();
-            const actionsClient = ctx.actions.getActionsClient();
-            const soClient = ctx.core.savedObjects.client;
-            const rulesClient = await ctx.alerting.getRulesClient();
 
             const invocationConfig = {
               callbacks: [
@@ -63,10 +59,6 @@ export const registerSiemRuleMigrationsStartRoute = (
               migrationId,
               connectorId,
               invocationConfig,
-              inferenceClient,
-              actionsClient,
-              soClient,
-              rulesClient,
             });
 
             if (!exists) {
