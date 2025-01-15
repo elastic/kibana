@@ -25,7 +25,7 @@ export function FieldFinalSideHeader(): JSX.Element {
     useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
   const {
-    actions: { setIsFieldCurrentlyEdited },
+    actions: { setFieldAsCurrentlyEdited },
   } = useUpgradePrebuiltRulesTableContext();
 
   const handleAccept = useCallback(
@@ -62,7 +62,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               disabled={!form?.isValid}
               onClick={() => {
                 handleSave();
-                setIsFieldCurrentlyEdited(false);
+                setFieldAsCurrentlyEdited(false);
               }}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}

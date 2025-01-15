@@ -98,9 +98,9 @@ export interface UpgradePrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
   /**
-   * Sets a flag to indicate if any field is currently being edited in the rule upgrade flyout
+   * Sets a field as currently being edited in the rule upgrade flyout
    */
-  setIsFieldCurrentlyEdited: (editing: boolean) => void;
+  setFieldAsCurrentlyEdited: (editing: boolean) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -134,7 +134,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     ruleSource: [],
   });
   const { addError } = useAppToasts();
-  const [isFieldCurrentlyEdited, setIsFieldCurrentlyEdited] = useState<boolean>(false);
+
+  const [noOfFieldsCurrentlyEdited, setNoOfFieldsCurrentlyEdited] = useState<number>(0);
+  const setFieldAsCurrentlyEdited = useCallback(
+    (editing: boolean) => {
+      setNoOfFieldsCurrentlyEdited((prev) => (editing ? prev + 1 : prev - 1));
+    },
+    [setNoOfFieldsCurrentlyEdited]
+  );
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -289,7 +296,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             isRefetching ||
             isUpgradingSecurityPackages ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
-            isFieldCurrentlyEdited
+            noOfFieldsCurrentlyEdited > 0
           }
           onClick={() => {
             if (hasRuleTypeChange) {
@@ -314,7 +321,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       isUpgradingSecurityPackages,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
-      isFieldCurrentlyEdited,
+      noOfFieldsCurrentlyEdited,
     ]
   );
   const extraTabsFactory = useCallback(
@@ -408,9 +415,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       openRulePreview,
-      setIsFieldCurrentlyEdited,
+      setFieldAsCurrentlyEdited,
     }),
-    [refetch, upgradeRules, upgradeAllRules, openRulePreview, setIsFieldCurrentlyEdited]
+    [refetch, upgradeRules, upgradeAllRules, openRulePreview, setFieldAsCurrentlyEdited]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(
