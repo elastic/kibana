@@ -64,6 +64,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 // These are options that are not persisted in the saved object, but can be used by solutions
 // when utilising the SavedSearchComponent package outside of dashboard contexts.
 export interface NonPersistedDisplayOptions {
+  solutionNavIdOverride?: 'oblt' | 'security' | 'search';
   enableDocumentViewer?: boolean;
   enableFilters?: boolean;
 }
