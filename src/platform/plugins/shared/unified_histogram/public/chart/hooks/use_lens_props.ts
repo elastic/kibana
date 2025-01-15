@@ -23,13 +23,13 @@ import { useStableCallback } from '../../hooks/use_stable_callback';
 export const useLensProps = ({
   request,
   getTimeRange,
-  refetch$,
+  fetch$,
   visContext,
   onLoad,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
+  fetch$: Observable<UnifiedHistogramInputMessage>;
   visContext: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
@@ -46,13 +46,14 @@ export const useLensProps = ({
     };
   }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
 
-  const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
+  // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
+  const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const subscription = refetch$.subscribe(updateLensPropsContext);
+    const subscription = fetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
-  }, [refetch$, updateLensPropsContext]);
+  }, [fetch$, updateLensPropsContext]);
 
   return lensPropsContext;
 };

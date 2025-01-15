@@ -51,7 +51,7 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
   };
 
   const timefilterUpdateHandler = jest.fn();
-  const refetch$: UnifiedHistogramInput$ = new Subject();
+  const fetch$: UnifiedHistogramInput$ = new Subject();
   const props = {
     services: unifiedHistogramServicesMock,
     request: {
@@ -73,17 +73,20 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     }),
-    refetch$,
+    fetch$,
     visContext: (await getMockLensAttributes())!,
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
     withDefaultActions: undefined,
   };
 
-  return {
-    props,
-    component: mountWithIntl(<Histogram {...props} />),
-  };
+  const component = mountWithIntl(<Histogram {...props} />);
+
+  act(() => {
+    props.fetch$?.next({ type: 'fetch' });
+  });
+
+  return { props, component: component.update() };
 }
 
 describe('Histogram', () => {
@@ -92,7 +95,7 @@ describe('Histogram', () => {
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 
-  it('should only update lens.EmbeddableComponent props when refetch$ is triggered', async () => {
+  it('should only update lens.EmbeddableComponent props when fetch$ is triggered', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     expect(component.find(embeddable).exists()).toBe(true);
@@ -108,7 +111,7 @@ describe('Histogram', () => {
     lensProps = component.find(embeddable).props();
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     await act(async () => {
-      props.refetch$.next({ type: 'refetch' });
+      props.fetch$.next({ type: 'fetch' });
     });
     component.update();
     lensProps = component.find(embeddable).props();

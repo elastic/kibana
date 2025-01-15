@@ -45,7 +45,7 @@ export interface HistogramProps {
   isPlainRecord?: boolean;
   hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
+  fetch$: Observable<UnifiedHistogramInputMessage>;
   visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
@@ -92,7 +92,7 @@ export function Histogram({
   isPlainRecord,
   hasLensSuggestions,
   getTimeRange,
-  refetch$,
+  fetch$,
   visContext,
   disableTriggers,
   disabledActions,
@@ -161,10 +161,10 @@ export function Histogram({
     }
   );
 
-  const { lensProps, requestData } = useLensProps({
+  const lensPropsContext = useLensProps({
     request,
     getTimeRange,
-    refetch$,
+    fetch$,
     visContext,
     onLoad,
   });
@@ -200,6 +200,13 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
+
+  // Avoid rendering until a fetch has been triggered
+  if (!lensPropsContext) {
+    return null;
+  }
+
+  const { lensProps, requestData } = lensPropsContext;
 
   return (
     <>

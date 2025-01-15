@@ -41,7 +41,7 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
-import { useRefetch } from './hooks/use_refetch';
+import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import { LensVisService } from '../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../hooks/use_request_params';
@@ -64,7 +64,6 @@ export interface ChartProps {
   breakdown?: UnifiedHistogramBreakdownContext;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   appendHistogram?: ReactElement;
-  disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
@@ -99,7 +98,6 @@ export function Chart({
   isPlainRecord,
   renderCustomChartToggleActions,
   appendHistogram,
-  disableAutoFetching,
   disableTriggers,
   disabledActions,
   input$: originalInput$,
@@ -140,20 +138,9 @@ export function Chart({
 
   const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = requestParams;
 
-  const refetch$ = useRefetch({
-    dataView,
-    request,
-    hits,
-    chart,
-    chartVisible,
-    breakdown,
-    filters,
-    query,
-    relativeTimeRange,
-    currentSuggestion,
-    disableAutoFetching,
+  const fetch$ = useFetch({
     input$,
-    beforeRefetch: updateTimeRange,
+    beforeFetch: updateTimeRange,
   });
 
   useTotalHits({
@@ -165,7 +152,7 @@ export function Chart({
     filters,
     query,
     getTimeRange,
-    refetch$,
+    fetch$,
     onTotalHitsChange,
     isPlainRecord,
   });
@@ -364,7 +351,7 @@ export function Chart({
               hits={hits}
               chart={chart}
               getTimeRange={getTimeRange}
-              refetch$={refetch$}
+              fetch$={fetch$}
               visContext={visContext}
               isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}

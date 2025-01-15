@@ -19,7 +19,7 @@ import {
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -252,9 +252,7 @@ export const useDiscoverHistogram = ({
     }
 
     const fetchStart = stateContainer.dataState.fetchChart$.subscribe(() => {
-      if (!skipRefetch.current) {
-        setIsSuggestionLoading(true);
-      }
+      setIsSuggestionLoading(true);
     });
     const fetchComplete = esqlFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
@@ -269,18 +267,6 @@ export const useDiscoverHistogram = ({
   /**
    * Data fetching
    */
-
-  const skipRefetch = useRef<boolean>();
-
-  // Skip refetching when showing the chart since Lens will
-  // automatically fetch when the chart is shown
-  useEffect(() => {
-    if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
-    } else {
-      skipRefetch.current = !hideChart;
-    }
-  }, [hideChart]);
 
   // Handle unified histogram refetching
   useEffect(() => {
@@ -307,18 +293,14 @@ export const useDiscoverHistogram = ({
     }
 
     const subscription = fetchChart$.subscribe((source) => {
-      if (!skipRefetch.current) {
-        if (source === 'discover') addLog('Unified Histogram - Discover refetch');
-        if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-        unifiedHistogram.refetch();
-      }
-
-      skipRefetch.current = false;
+      if (source === 'discover') addLog('Unified Histogram - Discover refetch');
+      if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
+      unifiedHistogram.fetch();
     });
 
-    // triggering the initial request for total hits hook
-    if (!isEsqlMode && !skipRefetch.current) {
-      unifiedHistogram.refetch();
+    // triggering the initial chart request
+    if (!isEsqlMode) {
+      unifiedHistogram.fetch();
     }
 
     return () => {
