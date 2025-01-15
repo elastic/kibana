@@ -28,9 +28,7 @@ import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData } from '../../common/types';
 import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
-import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -73,10 +71,6 @@ export const renderApp = (
     ml,
     fleet,
   } = plugins;
-
-  // TODO: remove this
-  const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
-  externalUrl.enterpriseSearchUrl = entCloudHost || config.host || '';
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
