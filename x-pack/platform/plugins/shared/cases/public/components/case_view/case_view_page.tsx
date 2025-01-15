@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -84,17 +83,15 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       [onUpdateField]
     );
 
-    const location = useLocation();
-
     return (
       <>
         <HeaderPage
-          key={location.key}
           border={false}
           showBackButton={true}
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
+              key={caseData.id}
               isLoading={isLoading && loadingKey === 'title'}
               title={caseData.title}
               onSubmit={onSubmitTitle}
