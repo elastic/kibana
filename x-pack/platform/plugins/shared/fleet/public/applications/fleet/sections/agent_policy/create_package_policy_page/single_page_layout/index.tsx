@@ -351,15 +351,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
   const { isAgentlessIntegration } = useAgentless();
-  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
-    newAgentPolicy,
-    setNewAgentPolicy,
-    updateAgentPolicies,
-    updatePackagePolicy,
-    setSelectedPolicyTab,
-    packageInfo,
-    packagePolicy,
-  });
+  const { handleSetupTechnologyChange, selectedSetupTechnology, defaultSetupTechnology } =
+    useSetupTechnology({
+      newAgentPolicy,
+      setNewAgentPolicy,
+      updateAgentPolicies,
+      updatePackagePolicy,
+      setSelectedPolicyTab,
+      packageInfo,
+      packagePolicy,
+    });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -376,6 +377,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            defaultSetupTechnology={defaultSetupTechnology}
           />
         </ExtensionWrapper>
       )
