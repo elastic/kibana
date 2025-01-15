@@ -83,7 +83,7 @@ export const performBulkGet = async <T>(
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
-      const { type, id, fields = [] } = object;
+      const { type, id, fields } = object;
 
       let error: DecoratedError | undefined;
       if (!allowedTypes.includes(type)) {
@@ -104,17 +104,24 @@ export const performBulkGet = async <T>(
       if (spacesExtension && namespaces?.includes(ALL_NAMESPACES_STRING)) {
         namespaces = await getAvailableSpaces();
       }
+
+      const getFields = () => {
+        const isEmpty = !fields || fields.length === 0;
+
+        if (securityExtension && securityExtension.includeSavedObjectNames() && !isEmpty) {
+          const nameAttribute = registry.getNameAttribute(type);
+          const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
+
+          return [...fields, ...nameFields];
+        }
+
+        return fields;
+      };
+
       return right({
         type,
         id,
-        fields: [
-          ...fields,
-          ...(securityExtension &&
-          securityExtension.includeSavedObjectNames() &&
-          fields.length !== 0
-            ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
-            : []),
-        ],
+        fields: getFields(),
         namespaces,
         esRequestIndex: bulkGetRequestIndexCounter++,
       });
