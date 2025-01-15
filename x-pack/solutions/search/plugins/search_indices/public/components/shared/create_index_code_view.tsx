@@ -41,11 +41,7 @@ export const CreateIndexCodeView = ({
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const {
-    createIndexExamples: selectedCodeExamples,
-    selectedWorkflowId,
-    setSelectedWorkflowId,
-  } = useIndexExampleWorkflow();
+  const { createIndexExamples: selectedCodeExamples } = useIndexExampleWorkflow();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
