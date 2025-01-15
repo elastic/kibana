@@ -7,20 +7,21 @@
 
 import { expect, type Page, type Locator } from '@playwright/test';
 
-export class KubernetesOverviewDashboardPage {
+export class OtelKubernetesOverviewDashboardPage {
   page: Page;
 
-  private readonly nodesPanelChart: Locator;
+  private readonly nodesPanelValue: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.nodesPanelChart = this.page
-      .locator(`#panel-7116207b-48ce-4d93-9fbd-26d73af1c185`)
-      .getByTestId('xyVisChart');
+    this.nodesPanelValue = this.page.locator(
+      `#panel-6119419c-1899-4765-aed4-c050cde4c30a .echMetricText__value`
+    );
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.nodesPanelChart).toBeVisible();
+    await expect(this.nodesPanelValue).toBeVisible();
+    expect(await this.nodesPanelValue.textContent()).toMatch(/\d+/);
   }
 }
