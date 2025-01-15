@@ -119,6 +119,7 @@ import {
 import {
   fetchAgentsUsage,
   fetchFleetUsage,
+  type FleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
 import { FleetArtifactsClient } from './services/artifacts';
@@ -198,6 +199,7 @@ export interface FleetAppContext {
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
   taskManagerStart?: TaskManagerStartContract;
+  fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
 }
 
 export type FleetSetupContract = void;
@@ -301,6 +303,7 @@ export class FleetPlugin
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
+  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -603,9 +606,9 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    const fetch = async (abortController: AbortController) =>
+    this.fetchUsage = async (abortController: AbortController) =>
       await fetchFleetUsage(core, config, abortController);
-    this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
+    this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const fetchAgents = async (abortController: AbortController) =>
@@ -694,6 +697,7 @@ export class FleetPlugin
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
       taskManagerStart: plugins.taskManager,
+      fetchUsage: this.fetchUsage,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
