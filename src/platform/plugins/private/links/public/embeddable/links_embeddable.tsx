@@ -15,7 +15,6 @@ import { EuiListGroup, EuiPanel } from '@elastic/eui';
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   SerializedTitles,
-  getUnchangingComparator,
   initializeTitles,
   SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
@@ -104,6 +103,7 @@ export const getLinksEmbeddableFactory = () => {
       const defaultPanelDescription = new BehaviorSubject<string | undefined>(
         state.defaultPanelDescription
       );
+      const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
       const isByReference = Boolean(state.savedObjectId);
 
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -216,7 +216,7 @@ export const getLinksEmbeddableFactory = () => {
             defaultPanelTitle,
             (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
           ],
-          savedObjectId: getUnchangingComparator(),
+          savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );
 
