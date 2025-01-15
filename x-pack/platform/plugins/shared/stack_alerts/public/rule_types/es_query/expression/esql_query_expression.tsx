@@ -163,7 +163,7 @@ export const EsqlQueryExpression: React.FC<
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
 
     const timestampField = esqlDataView.timeFieldName;
-    if (timestampField) {
+    if (!timeField && timestampField) {
       setParam('timeField', timestampField);
     }
     setDetectedTimestamp(timestampField);
