@@ -9,7 +9,7 @@
 
 import type { AnalyticsClientInitContext, Event, IShipper } from '@kbn/core-analytics-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { TELEMETRY_LOCAL_EBT_INDICES } from '../../common/constants';
+import { TELEMETRY_LOCAL_EBT_INDICES } from '../../common/local_shipper';
 
 export interface LocalShipperConfig {
   getElasticsearchClient: () => Promise<ElasticsearchClient>;

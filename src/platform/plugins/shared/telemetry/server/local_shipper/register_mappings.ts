@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { IndicesPutIndexTemplateIndexTemplateMapping } from '@elastic/elasticsearch/lib/api/types';
 import { TELEMETRY_LOCAL_EBT_INDICES } from '../../common/local_shipper';
 
 export async function registerIndexMappings(
@@ -20,10 +21,15 @@ export async function registerIndexMappings(
 
     await registerIngestPipeline(getElasticsearchClient);
     const indices = Object.entries(MAPPINGS);
+
     await Promise.all(
-      indices.map(async ([index, settings]) =>
-        esClient.indices.create({ ...settings, index }, { ignore: [409] })
-      )
+      indices.map(async ([index, template]) => {
+        await esClient.indices.putIndexTemplate({
+          name: index,
+          index_patterns: `${index}*`,
+          template,
+        });
+      })
     );
   } catch (err) {
     logger.error(err);
@@ -53,7 +59,7 @@ async function registerIngestPipeline(getElasticsearchClient: () => Promise<Elas
   });
 }
 
-const MAPPINGS = {
+const MAPPINGS: Record<string, IndicesPutIndexTemplateIndexTemplateMapping> = {
   [TELEMETRY_LOCAL_EBT_INDICES.SERVER]: {
     mappings: {
       properties: {
