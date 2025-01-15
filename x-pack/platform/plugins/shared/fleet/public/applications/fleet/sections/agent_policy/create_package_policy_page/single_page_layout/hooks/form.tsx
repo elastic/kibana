@@ -235,7 +235,6 @@ export function useOnSubmit({
         ...packagePolicy,
         ...updatedFields,
       };
-      // this state update doesn't propagate immediately
       setPackagePolicy(newPackagePolicy);
 
       // eslint-disable-next-line no-console
