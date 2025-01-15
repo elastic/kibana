@@ -40,7 +40,6 @@ export const indexNameToDataStreamParts = (dataStreamName: string) => {
 };
 
 export const extractIndexNameFromBackingIndex = (indexString: string): string => {
-  // TODO: Undo this change once ::failures is supported
   const pattern = /.(?:ds|fs)-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/;
   const match = indexString.match(pattern);
 

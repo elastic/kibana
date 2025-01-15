@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
 import merge from 'lodash/merge';
 import { DatasetQualityFtrProviderContext } from './config';
@@ -70,13 +71,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Enable failure store for logs
       await synthtrace.createCustomPipeline(customLogLevelProcessor, 'logs-apache.access@custom');
-      await synthtrace.createComponentTemplate('logs-apache.access@custom', undefined, {
-        'index.default_pipeline': 'logs-apache.access@custom',
+      await synthtrace.createComponentTemplate({
+        name: 'logs-apache.access@custom',
+        settings: {
+          'index.default_pipeline': 'logs-apache.access@custom',
+        },
       });
       await synthtrace.updateIndexTemplate(
         'logs-apache.access',
-        (template: Record<string, any>): Record<string, any> => {
-          const next: Record<string, any> = {
+        (template): IndicesPutIndexTemplateRequest => {
+          const next = {
             name: 'logs-apache.access',
             data_stream: {
               failure_store: true,

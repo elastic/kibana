@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SearchHit } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
 import { TIMESTAMP } from '../../../../common/es_fields';
 
@@ -29,7 +30,7 @@ export async function getFailedDocsErrors({
   };
 
   const response = await datasetQualityESClient.search({
-    index: dataStream,
+    index: `${dataStream}${FAILURE_STORE_SELECTOR}`,
     size: 10000,
     query: {
       bool,
@@ -41,7 +42,7 @@ export async function getFailedDocsErrors({
         },
       },
     ],
-    failure_store: 'only',
+    /* failure_store: 'only', */
   });
 
   const errors = extractAndDeduplicateValues(response.hits.hits);

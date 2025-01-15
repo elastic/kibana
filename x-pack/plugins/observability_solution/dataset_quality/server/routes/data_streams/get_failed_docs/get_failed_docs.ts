@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   extractIndexNameFromBackingIndex,
   streamPartsToIndexPattern,
@@ -32,9 +33,8 @@ async function getPaginatedResults(options: {
     filter: [...rangeQuery(start, end)],
   };
 
-  // TODO: Fix index for accesing failure store (::failures) and remove the search parameter
   const response = await datasetQualityESClient.search({
-    index,
+    index: `${index}${FAILURE_STORE_SELECTOR}`,
     size: 0,
     query: {
       bool,
@@ -48,7 +48,6 @@ async function getPaginatedResults(options: {
         },
       },
     },
-    failure_store: 'only',
   });
 
   const currResults = (response.aggregations?.datasets.buckets ?? []).reduce((acc, curr) => {

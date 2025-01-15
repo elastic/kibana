@@ -42,3 +42,6 @@ export const MASKED_FIELD_PLACEHOLDER = '<custom field>';
 export const UNKOWN_FIELD_PLACEHOLDER = '<unkwon>';
 
 export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces', 'synthetics'];
+
+export const ALL_PATTERNS_SELECTOR = '::*';
+export const FAILURE_STORE_SELECTOR = '::failures';

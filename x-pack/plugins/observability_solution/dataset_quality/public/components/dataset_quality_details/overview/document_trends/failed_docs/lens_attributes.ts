@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ALL_PATTERNS_SELECTOR, FAILURE_STORE_SELECTOR } from '../../../../../../common/constants';
 import {
   flyoutFailedDocsTrendText,
   flyoutFailedDocsPercentageText,
@@ -24,6 +25,7 @@ enum DatasetQualityLensColumn {
 }
 
 const MAX_BREAKDOWN_SERIES = 5;
+const FAILED_DOCS_QUERY = `_index: "${FAILURE_STORE_SELECTOR}"`;
 
 interface GetLensAttributesParams {
   color: string;
@@ -130,7 +132,6 @@ export function getLensAttributes({
 }
 
 function getAdHocDataViewState(id: string, dataStream: string, title: string) {
-  // TODO: Need to fix the index pattern used here (aka ::failures)
   return {
     internalReferences: [
       {
@@ -147,14 +148,14 @@ function getAdHocDataViewState(id: string, dataStream: string, title: string) {
     adHocDataViews: {
       [id]: {
         id,
-        title: dataStream,
+        title: `${dataStream}${ALL_PATTERNS_SELECTOR}`,
         timeFieldName: '@timestamp',
         sourceFilters: [],
         fieldFormats: {},
         runtimeFieldMap: {},
         fieldAttrs: {},
         allowNoIndex: false,
-        name: title,
+        name: `${dataStream}${ALL_PATTERNS_SELECTOR}`,
       },
     },
   };
@@ -181,7 +182,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
       scale: 'ratio',
       sourceField: '___records___',
       filter: {
-        query: '',
+        query: FAILED_DOCS_QUERY,
         language: 'kuery',
       },
       params: {
@@ -216,7 +217,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
             min: 0,
             max: 34,
           },
-          text: "count(kql='') / count()",
+          text: `count(kql='${FAILED_DOCS_QUERY}') / count()`,
         },
       },
       references: ['count_failed', 'count_total'],
@@ -230,7 +231,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
       references: [DatasetQualityLensColumn.Math],
       isBucketed: false,
       params: {
-        formula: "count(kql='') / count()",
+        formula: `count(kql='${FAILED_DOCS_QUERY}') / count()`,
         format: {
           id: 'percent',
           params: {
@@ -257,7 +258,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
               },
               orderDirection: 'desc',
               otherBucket: true,
-              missingBucket: true,
+              missingBucket: false,
               parentFormat: {
                 id: 'terms',
               },

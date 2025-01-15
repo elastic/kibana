@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { TIMESTAMP } from '../../../../common/es_fields';
 import { FailedDocsDetails } from '../../../../common/api_types';
 import { getFieldIntervalInSeconds } from '../../../utils/get_interval';
@@ -48,7 +49,7 @@ export async function getFailedDocsDetails({
   };
 
   const response = await datasetQualityESClient.search({
-    index: dataStream,
+    index: `${dataStream}${FAILURE_STORE_SELECTOR}`,
     track_total_hits: true,
     size: 0,
     query: {
@@ -57,7 +58,6 @@ export async function getFailedDocsDetails({
       },
     },
     aggs,
-    failure_store: 'only',
   });
 
   return {
