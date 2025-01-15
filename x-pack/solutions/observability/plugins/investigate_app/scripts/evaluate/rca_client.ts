@@ -8,6 +8,7 @@ import { Readable } from 'stream';
 import { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import datemath from '@kbn/datemath';
+import { ToolingLog } from '@kbn/tooling-log';
 import { CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
@@ -17,11 +18,7 @@ import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_c
 import { getRCAContext } from '../../common/rca/llm_context';
 
 export class RCAClient {
-  constructor(
-    // protected readonly log: ToolingLog,
-    // protected readonly url: string,
-    protected readonly kibanaClient: KibanaClient // protected readonly spaceId?: string
-  ) {}
+  constructor(protected readonly kibanaClient: KibanaClient, protected readonly log: ToolingLog) {}
 
   async getAlert(alertId: string): Promise<EcsFieldsResponse> {
     const response = await this.kibanaClient.callKibana<EcsFieldsResponse>('get', {
@@ -112,8 +109,8 @@ export class RCAClient {
     to: string;
     alert?: EcsFieldsResponse;
   }) {
-    const { log } = this.kibanaClient;
-    log.debug(`Calling root cause analysis API`);
+    this.log.debug(`Calling root cause analysis API`);
+    const that = this;
     const serviceName = alert?.['service.name'] as string | undefined;
     if (!alert) {
       throw new Error(
@@ -128,7 +125,7 @@ export class RCAClient {
     const context = getRCAContext(alert, serviceName);
     const body = {
       investigationId,
-      connectorId: connectorIdOverride || '34002e09-65be-4332-9084-2649c86abacb',
+      connectorId: connectorIdOverride,
       context,
       rangeFrom: from,
       rangeTo: to,
@@ -151,17 +148,17 @@ export class RCAClient {
           body: new ReadableStream<Uint8Array>({
             start(controller) {
               response.data.on('data', (chunk: Buffer) => {
-                log.info(`Analyzing root cause...`);
+                that.log.info(`Analyzing root cause...`);
                 controller.enqueue(chunk);
               });
 
               response.data.on('end', () => {
-                log.info(`Root cause analysis completed`);
+                that.log.info(`Root cause analysis completed`);
                 controller.close();
               });
 
               response.data.on('error', (err: Error) => {
-                log.error(`Error while analyzing root cause: ${err}`);
+                that.log.error(`Error while analyzing root cause: ${err}`);
                 controller.error(err);
               });
             },

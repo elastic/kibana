@@ -86,7 +86,7 @@ export interface ChatClient {
 export class KibanaClient {
   axios: AxiosInstance;
   constructor(
-    public readonly log: ToolingLog,
+    private readonly log: ToolingLog,
     private readonly url: string,
     private readonly spaceId?: string
   ) {

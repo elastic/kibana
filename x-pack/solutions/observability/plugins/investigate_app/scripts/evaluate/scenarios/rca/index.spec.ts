@@ -17,6 +17,7 @@ import type {
 import {
   chatClient,
   kibanaClient,
+  logger,
 } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/services';
 import { RCAClient } from '../../rca_client';
 
@@ -30,7 +31,7 @@ const ALERT_FIXTURE_ID = '0265d890-8d8d-4c7e-a5bd-a3951f79574e';
 
 describe('Root cause analysis', () => {
   const investigations: string[] = [];
-  const rcaChatClient = new RCAClient(kibanaClient);
+  const rcaChatClient = new RCAClient(kibanaClient, logger);
   function countEntities(entities: InvestigateEntityToolMessage[]) {
     const entityCount: Record<string, number> = {};
     entities.forEach((entity) => {
