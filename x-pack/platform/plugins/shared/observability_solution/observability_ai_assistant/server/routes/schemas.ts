@@ -51,7 +51,7 @@ const functionSchema = z.intersection(
   })
 );
 
-export const chatCompleteBodyBaseSchema = z.intersection(
+const chatCompleteBodyBaseSchema = z.intersection(
   z.object({
     messages: z.array(messageSchema),
     connectorId: z.string(),
