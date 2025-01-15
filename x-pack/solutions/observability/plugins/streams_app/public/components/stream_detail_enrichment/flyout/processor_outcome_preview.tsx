@@ -91,9 +91,22 @@ export const ProcessorOutcomePreview = ({
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
   }, [samples, simulation?.documents, selectedDocsFilter]);
 
-  const detectedFieldsColumns = simulation?.detected_fields
-    ? simulation.detected_fields.map((field) => field.name)
-    : [];
+  const detectedFieldsColumns = useMemo(
+    () =>
+      simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
+    [simulation?.detected_fields]
+  );
+
+  const tableColumns = useMemo(() => {
+    switch (selectedDocsFilter) {
+      case 'outcome_filter_unmatched':
+        return [formFields.field];
+      case 'outcome_filter_matched':
+      case 'outcome_filter_all':
+      default:
+        return [formFields.field, ...detectedFieldsColumns];
+    }
+  }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
 
   const detectedFieldsEnabled =
     isWiredReadStream(definition) && simulation && !isEmpty(simulation.detected_fields);
@@ -136,7 +149,7 @@ export const ProcessorOutcomePreview = ({
       <EuiSpacer size="m" />
       <OutcomePreviewTable
         documents={simulationDocuments}
-        columns={[formFields.field, ...detectedFieldsColumns]}
+        columns={tableColumns}
         error={simulationError}
         isLoading={isLoading}
       />
