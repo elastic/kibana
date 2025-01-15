@@ -21,6 +21,72 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getAncestors",
+        "type": "Function",
+        "tags": [],
+        "label": "getAncestors",
+        "description": [],
+        "signature": [
+          "(id: string) => string[]"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getAncestors.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getParentId",
+        "type": "Function",
+        "tags": [],
+        "label": "getParentId",
+        "description": [],
+        "signature": [
+          "(id: string) => string | undefined"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getParentId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getProcessorType",
         "type": "Function",
         "tags": [],
@@ -37,7 +103,7 @@
           },
           "; }) => \"grok\" | \"dissect\""
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/processing.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/processing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +125,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/processing.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/processing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +144,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,7 +158,55 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isChildOf",
+        "type": "Function",
+        "tags": [],
+        "label": "isChildOf",
+        "description": [],
+        "signature": [
+          "(parent: string, child: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isChildOf.$1",
+            "type": "string",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isChildOf.$2",
+            "type": "string",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,7 +233,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/processing.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/processing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,10 +253,58 @@
                 "text": "Condition"
               }
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/processing.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/processing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isDescendantOf",
+        "type": "Function",
+        "tags": [],
+        "label": "isDescendantOf",
+        "description": [],
+        "signature": [
+          "(parent: string, child: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isDescendantOf.$1",
+            "type": "string",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isDescendantOf.$2",
+            "type": "string",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -158,7 +320,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -172,7 +334,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -191,7 +353,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,7 +367,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -224,7 +386,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,7 +400,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -257,7 +419,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -271,7 +433,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -322,7 +484,7 @@
           },
           "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -368,7 +530,7 @@
               },
               "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -387,7 +549,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,7 +563,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -420,7 +582,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +596,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -453,7 +615,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +629,40 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isRoot",
+        "type": "Function",
+        "tags": [],
+        "label": "isRoot",
+        "description": [],
+        "signature": [
+          "(id: string) => boolean"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isRoot.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -486,7 +681,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -500,7 +695,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -519,7 +714,7 @@
         "signature": [
           "(zodSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>, subject: T) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,7 +728,7 @@
             "signature": [
               "Zod.ZodType<any, Zod.ZodTypeDef, any>"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,7 +743,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -567,7 +762,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -581,7 +776,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -600,7 +795,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -614,7 +809,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -633,7 +828,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -647,7 +842,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -698,7 +893,7 @@
           },
           "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -744,7 +939,7 @@
               },
               "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -763,7 +958,7 @@
         "signature": [
           "(subject: any) => boolean"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -777,7 +972,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -795,7 +990,7 @@
         "tags": [],
         "label": "AndCondition",
         "description": [],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -816,7 +1011,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -830,7 +1025,7 @@
         "tags": [],
         "label": "OrCondition",
         "description": [],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -851,7 +1046,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -871,7 +1066,7 @@
         "signature": [
           "{ value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -902,7 +1097,7 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -917,7 +1112,7 @@
         "signature": [
           "{ dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -932,7 +1127,7 @@
         "signature": [
           "{ id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[]"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -947,7 +1142,7 @@
         "signature": [
           "{ [x: string]: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,7 +1157,7 @@
         "signature": [
           "{ type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -977,7 +1172,7 @@
         "signature": [
           "{ type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -992,7 +1187,7 @@
         "signature": [
           "{ field: string; operator: \"exists\" | \"notExists\"; } | { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1007,7 +1202,7 @@
         "signature": [
           "{ grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1038,7 +1233,7 @@
           },
           "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/ingest_read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/ingest_read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1069,7 +1264,7 @@
           },
           "; }[]; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/ingest_stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/ingest_stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1100,7 +1295,7 @@
           },
           "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/ingest_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/ingest_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1115,7 +1310,7 @@
         "signature": [
           "{ [x: string]: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1162,7 +1357,7 @@
           },
           "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/apis/list_streams_response.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/apis/list_streams_response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1185,7 +1380,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1200,7 +1395,7 @@
         "signature": [
           "\"grok\" | \"dissect\""
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1247,7 +1442,7 @@
           },
           "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1294,7 +1489,7 @@
           },
           "; }[]; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/apis/read_streams_response.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/apis/read_streams_response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1317,7 +1512,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1364,7 +1559,7 @@
           },
           "; }[]; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1411,7 +1606,7 @@
           },
           "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1426,7 +1621,7 @@
         "signature": [
           "{ type: \"dlm\"; data_retention?: string | undefined; } | { type: \"ilm\"; policy: string; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1441,7 +1636,7 @@
         "signature": [
           "{ field: string; operator: \"exists\" | \"notExists\"; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1472,7 +1667,7 @@
           },
           "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; inherited_fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/wired_read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/wired_read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1503,7 +1698,7 @@
           },
           "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/wired_stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/wired_stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1534,7 +1729,7 @@
           },
           "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/wired_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/wired_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1551,7 +1746,7 @@
         "signature": [
           "Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1582,7 +1777,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1597,7 +1792,7 @@
         "signature": [
           "Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1612,7 +1807,7 @@
         "signature": [
           "Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodEnum<[\"ingest_pipeline\", \"component_template\", \"index_template\", \"data_stream\"]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }>, \"many\">"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1627,7 +1822,7 @@
         "signature": [
           "readonly [\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1642,7 +1837,7 @@
         "signature": [
           "Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1657,7 +1852,7 @@
         "signature": [
           "Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { name: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1672,7 +1867,7 @@
         "signature": [
           "Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1687,7 +1882,7 @@
         "signature": [
           "Zod.ZodDiscriminatedUnion<\"operator\", [Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"exists\", \"notExists\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; operator: \"exists\" | \"notExists\"; }, { field: string; operator: \"exists\" | \"notExists\"; }>, Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"eq\", \"neq\", \"lt\", \"lte\", \"gt\", \"gte\", \"contains\", \"startsWith\", \"endsWith\"]>; value: Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>; }, \"strip\", Zod.ZodTypeAny, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }, { value: string | number | boolean; field: string; operator: \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"contains\" | \"gt\" | \"lt\" | \"eq\" | \"neq\"; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1702,7 +1897,7 @@
         "signature": [
           "Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1877,7 +2072,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; inherited_fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }> | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/ingest_read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/ingest_read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2020,7 +2215,7 @@
           },
           "; }[] | undefined; }; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/ingest_stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/ingest_stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2195,7 +2390,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/ingest_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/ingest_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2210,7 +2405,7 @@
         "signature": [
           "Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; format: Zod.ZodOptional<Zod.ZodString>; }, { from: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }>>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2225,7 +2420,7 @@
         "signature": [
           "Zod.ZodDiscriminatedUnion<\"type\", [Zod.ZodObject<{ type: Zod.ZodLiteral<\"dlm\">; data_retention: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"dlm\"; data_retention?: string | undefined; }, { type: \"dlm\"; data_retention?: string | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"ilm\">; policy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: \"ilm\"; policy: string; }, { type: \"ilm\"; policy: string; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2624,7 +2819,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; })[]; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/apis/list_streams_response.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/apis/list_streams_response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2639,7 +2834,7 @@
         "signature": [
           "Zod.ZodUnion<[Zod.ZodObject<{ grok: Zod.ZodObject<{ field: Zod.ZodString; patterns: Zod.ZodArray<Zod.ZodString, \"many\">; pattern_definitions: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }, { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }, { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; }; }>, Zod.ZodObject<{ dissect: Zod.ZodObject<{ field: Zod.ZodString; pattern: Zod.ZodString; append_separator: Zod.ZodOptional<Zod.ZodString>; ignore_failure: Zod.ZodOptional<Zod.ZodBoolean>; ignore_missing: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }, { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }, { dissect: { field: string; pattern: string; ignore_failure?: boolean | undefined; ignore_missing?: boolean | undefined; append_separator?: string | undefined; }; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2686,7 +2881,7 @@
           },
           "; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3021,7 +3216,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; inherited_fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }> | undefined; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3420,7 +3615,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; inherited_fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }> | undefined; })[]; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/apis/read_streams_response.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/apis/read_streams_response.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3467,7 +3662,7 @@
           },
           "; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3738,7 +3933,7 @@
           },
           "; }[] | undefined; }; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4073,7 +4268,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }>]>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4088,7 +4283,7 @@
         "signature": [
           "Zod.ZodObject<{ field: Zod.ZodString; operator: Zod.ZodEnum<[\"exists\", \"notExists\"]>; }, \"strip\", Zod.ZodTypeAny, { field: string; operator: \"exists\" | \"notExists\"; }, { field: string; operator: \"exists\" | \"notExists\"; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/common.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4263,7 +4458,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; inherited_fields?: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; from: string; format?: string | undefined; }> | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/read_streams/wired_read_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/read_streams/wired_read_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4406,7 +4601,7 @@
           },
           "; }[] | undefined; }; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/stream_config/wired_stream_config.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/stream_config/wired_stream_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4581,7 +4776,7 @@
           },
           "; }[] | undefined; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-streams-schema/src/models/streams/wired_stream.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/streams/wired_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

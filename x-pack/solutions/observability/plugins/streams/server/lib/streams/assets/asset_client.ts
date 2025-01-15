@@ -8,7 +8,7 @@ import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { StorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
+import { IStorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -90,7 +90,7 @@ export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperat
 export class AssetClient {
   constructor(
     private readonly clients: {
-      storageClient: StorageClient<AssetStorageSettings>;
+      storageClient: IStorageClient<AssetStorageSettings>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
     }
@@ -121,7 +121,7 @@ export class AssetClient {
     assetType: AssetType;
     assetIds: string[];
   }) {
-    const assetsResponse = await this.clients.storageClient.search('get_assets_for_entity', {
+    const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
@@ -174,7 +174,7 @@ export class AssetClient {
   ) {
     const { _id: id } = getAssetDocument(properties);
 
-    await this.clients.storageClient.delete(id);
+    await this.clients.storageClient.delete({ id });
   }
 
   async getAssetIds({
@@ -186,7 +186,7 @@ export class AssetClient {
     entityType: 'stream';
     assetType: AssetType;
   }): Promise<string[]> {
-    const assetsResponse = await this.clients.storageClient.search('get_assets_for_entity', {
+    const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
@@ -207,8 +207,8 @@ export class AssetClient {
     { entityId, entityType }: { entityId: string; entityType: string },
     operations: AssetBulkOperation[]
   ) {
-    return await this.clients.storageClient.bulk(
-      operations.map((operation) => {
+    return await this.clients.storageClient.bulk({
+      operations: operations.map((operation) => {
         const { _id, ...document } = getAssetDocument({
           ...Object.values(operation)[0].asset,
           entityId,
@@ -229,8 +229,8 @@ export class AssetClient {
             _id,
           },
         };
-      })
-    );
+      }),
+    });
   }
 
   async getAssets({
@@ -240,7 +240,7 @@ export class AssetClient {
     entityId: string;
     entityType: 'stream';
   }): Promise<Asset[]> {
-    const assetsResponse = await this.clients.storageClient.search('get_assets_for_entity', {
+    const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
@@ -264,7 +264,7 @@ export class AssetClient {
     ) as Record<AssetType, string[]>;
 
     assetLinks.forEach((assetLink) => {
-      const assetType = assetLink['asset.type'];
+      const assetType = assetLink['asset.type'] as AssetType;
       const assetId = assetLink['asset.id'];
       idsByType[assetType].push(assetId);
     });

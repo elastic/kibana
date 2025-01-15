@@ -209,7 +209,10 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (astContext.type === 'expression') {
+  if (
+    astContext.type === 'expression' ||
+    (astContext.type === 'option' && astContext.command?.name === 'join')
+  ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -220,7 +223,8 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata,
       resourceRetriever?.getPreferences,
-      fullAst
+      fullAst,
+      resourceRetriever
     );
   }
   if (astContext.type === 'setting') {
@@ -399,7 +403,8 @@ async function getSuggestionsWithinCommandExpression(
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullAst?: ESQLAst
+  fullAst?: ESQLAst,
+  callbacks?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -419,7 +424,9 @@ async function getSuggestionsWithinCommandExpression(
       (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,
-      fullAst
+      fullAst,
+      commandDef,
+      callbacks
     );
   } else {
     // The deprecated path.
