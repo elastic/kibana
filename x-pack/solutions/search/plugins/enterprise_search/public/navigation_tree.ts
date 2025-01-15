@@ -270,6 +270,10 @@ export const getNavigationTreeDefinition = ({
                       title: 'Alerts and Insights',
                     },
                     {
+                      children: [{ link: 'ml:nodesOverview' }],
+                      title: 'Machine Learning',
+                    },
+                    {
                       children: [
                         { link: 'management:users' },
                         { link: 'management:roles' },

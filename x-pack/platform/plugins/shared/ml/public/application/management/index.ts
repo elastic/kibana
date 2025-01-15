@@ -14,23 +14,44 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
 
-const managementSectionIds = {
-  overview: i18n.translate('xpack.ml.management.overviewTitle', {
+export enum MANAGEMENT_SECTION_IDS {
+  OVERVIEW = 'overview',
+  ANOMALY_DETECTION = 'anomaly_detection',
+  ANALYTICS = 'analytics',
+  TRAINED_MODELS = 'trained_models',
+  SUPPLIED_CONFIGURATIONS = 'supplied_configurations',
+  AD_SETTINGS = 'ad_settings',
+}
+
+export const MANAGEMENT_SECTIONS = {
+  [MANAGEMENT_SECTION_IDS.OVERVIEW]: i18n.translate('xpack.ml.management.overviewTitle', {
     defaultMessage: 'Overview',
   }),
-  anomaly_detection: i18n.translate('xpack.ml.management.anomalyDetectionJobsTitle', {
-    defaultMessage: 'Anomaly Detection Jobs',
-  }),
-  analytics: i18n.translate('xpack.ml.management.dataFrameAnalyticsJobsTitle', {
-    defaultMessage: 'Data Frame Analytics Jobs',
-  }),
-  trained_models: i18n.translate('xpack.ml.management.trainedModelsTitle', {
-    defaultMessage: 'Trained Models',
-  }),
-  supplied_configurations: i18n.translate('xpack.ml.management.suppliedConfigurationsTitle', {
-    defaultMessage: 'Supplied Configurations',
-  }),
-  settings: i18n.translate('xpack.ml.management.settingsTitle', {
+  [MANAGEMENT_SECTION_IDS.ANOMALY_DETECTION]: i18n.translate(
+    'xpack.ml.management.anomalyDetectionJobsTitle',
+    {
+      defaultMessage: 'Anomaly Detection Jobs',
+    }
+  ),
+  [MANAGEMENT_SECTION_IDS.ANALYTICS]: i18n.translate(
+    'xpack.ml.management.dataFrameAnalyticsJobsTitle',
+    {
+      defaultMessage: 'Data Frame Analytics Jobs',
+    }
+  ),
+  [MANAGEMENT_SECTION_IDS.TRAINED_MODELS]: i18n.translate(
+    'xpack.ml.management.trainedModelsTitle',
+    {
+      defaultMessage: 'Trained Models',
+    }
+  ),
+  [MANAGEMENT_SECTION_IDS.SUPPLIED_CONFIGURATIONS]: i18n.translate(
+    'xpack.ml.management.suppliedConfigurationsTitle',
+    {
+      defaultMessage: 'Supplied Configurations',
+    }
+  ),
+  [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: i18n.translate('xpack.ml.management.settingsTitle', {
     defaultMessage: 'Settings',
   }),
 };
@@ -44,8 +65,8 @@ export function registerManagementSections(
   nlpSettings: NLPSettings,
   experimentalFeatures: ExperimentalFeatures
 ) {
-  Object.keys(managementSectionIds).forEach((sectionId) => {
-    const sectionTitle = managementSectionIds[sectionId];
+  Object.keys(MANAGEMENT_SECTIONS).forEach((sectionId) => {
+    const sectionTitle = MANAGEMENT_SECTIONS[sectionId];
     management.sections.section.machineLearning
       .registerApp({
         id: sectionId,
@@ -67,9 +88,7 @@ export function registerManagementSections(
             data: pluginsStart.data,
             dataViewEditor: pluginsStart.dataViewEditor,
             dataVisualizer: pluginsStart.dataVisualizer,
-            // embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
-            // kibanaVersion: this.initializerContext.env.packageInfo.version,
             lens: pluginsStart.lens,
             licensing: pluginsStart.licensing,
             maps: pluginsStart.maps,

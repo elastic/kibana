@@ -28,7 +28,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
 import { separateCalendarsByType } from './calendars/dst_utils';
-const SETTINGS_APP_ID = 'settings';
+import { MANAGEMENT_SECTION_IDS } from '../management';
 
 export const AnomalyDetectionSettings: FC = () => {
   const mlApi = useMlApi();
@@ -47,27 +47,27 @@ export const AnomalyDetectionSettings: FC = () => {
   const { displayErrorToast } = useToastNotificationService();
   const redirectToCalendarList = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.CALENDARS_MANAGE,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
   const redirectToCalendarDstList = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.CALENDARS_DST_MANAGE,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
   const redirectToNewCalendarPage = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.CALENDARS_NEW,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
   const redirectToNewCalendarDstPage = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.CALENDARS_DST_NEW,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
   const redirectToFilterLists = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.FILTER_LISTS_MANAGE,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
   const redirectToNewFilterListPage = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.FILTER_LISTS_NEW,
-    SETTINGS_APP_ID
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
 
   useEffect(() => {

@@ -37,6 +37,7 @@ import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { MANAGEMENT_SECTION_IDS } from '../../management';
 interface RouteModules {
   [key: string]: (navigateToPath: NavigateToPath, basePath: string) => MlRoute;
 }
@@ -93,22 +94,22 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         let currentRoutes: RouteModules = routes;
 
         switch (entryPoint) {
-          case 'overview':
+          case MANAGEMENT_SECTION_IDS.OVERVIEW:
             currentRoutes = overviewRoutes;
             break;
-          case 'anomaly_detection':
+          case MANAGEMENT_SECTION_IDS.ANOMALY_DETECTION:
             currentRoutes = anomalyDetectionRoutes;
             break;
-          case 'analytics':
+          case MANAGEMENT_SECTION_IDS.ANALYTICS:
             currentRoutes = dfaRoutes;
             break;
-          case 'trained_models':
+          case MANAGEMENT_SECTION_IDS.TRAINED_MODELS:
             currentRoutes = trainedModelsRoutes;
             break;
-          case 'supplied_configurations':
+          case MANAGEMENT_SECTION_IDS.SUPPLIED_CONFIGURATIONS:
             currentRoutes = suppliedConfigsRoutes;
             break;
-          case 'settings':
+          case MANAGEMENT_SECTION_IDS.AD_SETTINGS:
             currentRoutes = settingsRoutes;
             break;
           default:
