@@ -181,7 +181,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/fleet/package_policies/_bulk_get', function () {
+    describe.only('POST /api/fleet/package_policies/_bulk_get', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;

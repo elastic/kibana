@@ -73,6 +73,7 @@ describe('#setup', () => {
         "asScoped": [Function],
         "withoutRequest": Object {
           "enabled": true,
+          "includeSavedObjectNames": true,
           "log": [Function],
         },
       }
