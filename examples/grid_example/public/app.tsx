@@ -123,32 +123,27 @@ export const GridExample = ({
   );
 
   const customLayoutCss = useMemo(() => {
+    const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
     return css`
       .kbnGridLayout--targettedRow {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
           calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: linear-gradient(
-            to right,
-            ${euiTheme.colors.backgroundLightAccentSecondary} 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            to bottom,
-            ${euiTheme.colors.backgroundLightAccentSecondary} 1px,
-            transparent 1px
-          );
-        background-color: ${transparentize(euiTheme.colors.backgroundLightAccentSecondary, 0.25)};
+        background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
+        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)};
       }
 
       .kbnGridLayout--dragPreview {
         border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
+        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)};
         transition: opacity 100ms linear;
       }
 
       .kbnGridPanel--resizeHandle {
+        opacity: 0;
+        transition: opacity 100ms linear;
         border-radius: 7px 0 7px 0;
         border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
         border-right: 2px solid ${euiTheme.colors.accentSecondary};
