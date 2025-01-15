@@ -27,7 +27,7 @@ import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_
 import {
   getServiceLocations,
   selectAddingNewPrivateLocation,
-  setAddingNewPrivateLocation,
+  setIsCreatePrivateLocationFlyoutVisible,
   getAgentPoliciesAction,
   selectAgentPolicies,
   cleanMonitorListState,
@@ -134,7 +134,7 @@ export const GettingStartedOnPrem = () => {
   const isAddingNewLocation = useSelector(selectAddingNewPrivateLocation);
 
   const setIsAddingNewLocation = useCallback(
-    (val: boolean) => dispatch(setAddingNewPrivateLocation(val)),
+    (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
 

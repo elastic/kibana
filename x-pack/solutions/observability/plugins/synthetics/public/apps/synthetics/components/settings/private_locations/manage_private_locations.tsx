@@ -12,31 +12,28 @@ import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout, NewLocation } from './add_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
-  getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
-  setAddingNewPrivateLocation,
+  setIsCreatePrivateLocationFlyoutVisible,
 } from '../../../state/private_locations';
 import { getServiceLocations } from '../../../state';
+import { getAgentPoliciesAction } from '../../../state/agent_policies';
 
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
 
   const isAddingNew = useSelector(selectAddingNewPrivateLocation);
   const setIsAddingNew = useCallback(
-    (val: boolean) => dispatch(setAddingNewPrivateLocation(val)),
+    (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
 
-  // make sure flyout is closed when first visiting the page
-  useEffect(() => {
-    setIsAddingNew(false);
-  }, [setIsAddingNew]);
-
   useEffect(() => {
     dispatch(getAgentPoliciesAction.get());
     dispatch(getServiceLocations());
+    // make sure flyout is closed when first visiting the page
+    dispatch(setIsCreatePrivateLocationFlyoutVisible(false));
   }, [dispatch]);
 
   const handleSubmit = (formData: NewLocation) => {

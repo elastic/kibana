@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -92,14 +93,33 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
 
     const { spaces } = location;
 
-    const result = await savedObjectsClient.create<PrivateLocationAttributes>(
-      privateLocationSavedObjectName,
-      formattedLocation,
-      {
-        initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
-      }
-    );
+    try {
+      const result = await savedObjectsClient.create<PrivateLocationAttributes>(
+        privateLocationSavedObjectName,
+        formattedLocation,
+        {
+          initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
+        }
+      );
 
-    return toClientContract(result, agentPolicies);
+      return toClientContract(result, agentPolicies);
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
+        if (spaces?.includes('*')) {
+          return response.badRequest({
+            body: {
+              message: `You do not have permission to create a location in all spaces.`,
+            },
+          });
+        }
+        return response.customError({
+          statusCode: error.output.statusCode,
+          body: {
+            message: error.message,
+          },
+        });
+      }
+      throw error;
+    }
   },
 });

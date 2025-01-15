@@ -25,7 +25,7 @@ import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setAddingNewPrivateLocation } from '../../../state/private_locations';
+import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
@@ -43,7 +43,7 @@ export const PrivateLocationsTable = ({
   onDelete,
   privateLocations,
 }: {
-  deleteLoading: boolean;
+  deleteLoading?: boolean;
   onDelete: (id: string) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -137,7 +137,7 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
-  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
+  const setIsAddingNew = (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val));
 
   const renderToolRight = () => {
     return [

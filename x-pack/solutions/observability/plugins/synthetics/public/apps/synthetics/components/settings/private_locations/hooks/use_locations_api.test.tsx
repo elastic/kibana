@@ -9,7 +9,7 @@ import { createElement } from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
-import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
+import { setIsCreatePrivateLocationFlyoutVisible } from '../../../../state/private_locations';
 import { usePrivateLocationsAPI } from './use_locations_api';
 import * as locationAPI from '../../../../state/private_locations/api';
 import * as reduxHooks from 'react-redux';
@@ -18,7 +18,7 @@ describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();
   const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue([]);
   const deletedAPI = jest
-    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocations')
+    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocation')
     .mockResolvedValue([]);
   jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
@@ -91,7 +91,7 @@ describe('usePrivateLocationsAPI', () => {
         label: 'new',
         agentPolicyId: 'newPolicy',
       });
-      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(setIsCreatePrivateLocationFlyoutVisible(false));
       expect(dispatch).toBeCalledWith(getServiceLocations());
     });
   });
@@ -109,7 +109,7 @@ describe('usePrivateLocationsAPI', () => {
 
     await waitFor(() => {
       expect(deletedAPI).toHaveBeenLastCalledWith('Test');
-      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(setIsCreatePrivateLocationFlyoutVisible(false));
       expect(dispatch).toBeCalledWith(getServiceLocations());
     });
   });
