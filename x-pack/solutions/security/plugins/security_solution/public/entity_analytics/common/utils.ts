@@ -34,17 +34,17 @@ export const useRiskSeverityColors = (): { [k in RiskSeverity]: string } => {
     [RiskSeverity.Unknown]: euiTheme.colors.vis.euiColorVisNeutral0, // TODO: this is a closest guess based on severity colors, change to grey20 when available
     // TODO: update these with V9.0.0 severity palette colors when available / keep if the below are  updated with the palette
     [RiskSeverity.Low]: euiTheme.flags.hasVisColorAdjustment
-      ? '#54B399'
-      : euiTheme.colors.vis.euiColorVis0,
+      ? euiTheme.colors.vis.euiColorVis0 // amsterdam palette
+      : euiTheme.colors.vis.euiColorVisSuccess0, // borealis palette
     [RiskSeverity.Moderate]: euiTheme.flags.hasVisColorAdjustment
-      ? '#D6BF57'
-      : euiTheme.colors.vis.euiColorVis5,
+      ? euiTheme.colors.vis.euiColorVis5 // amsterdam palette
+      : euiTheme.colors.vis.euiColorSeverity7, // borealis palette
     [RiskSeverity.High]: euiTheme.flags.hasVisColorAdjustment
-      ? '#DA8B45'
-      : euiTheme.colors.vis.euiColorVis7,
+      ? euiTheme.colors.vis.euiColorVis7 // amsterdam palette
+      : euiTheme.colors.vis.euiColorSeverity10, // borealis palette
     [RiskSeverity.Critical]: euiTheme.flags.hasVisColorAdjustment
-      ? '#E7664C'
-      : euiTheme.colors.vis.euiColorVis9,
+      ? euiTheme.colors.vis.euiColorVis9 // amsterdam palette
+      : euiTheme.colors.vis.euiColorSeverity14, // borealis palette
   };
 };
 
