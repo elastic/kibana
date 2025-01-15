@@ -7,12 +7,9 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
-import {
-  createPrivateLocationAction,
-  deletePrivateLocationAction,
-  IHttpSerializedFetchError,
-} from '..';
+import { createPrivateLocationAction, deletePrivateLocationAction } from './actions';
 import { setIsCreatePrivateLocationFlyoutVisible, getPrivateLocationsAction } from './actions';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface PrivateLocationsState {
   data?: SyntheticsPrivateLocations | null;
@@ -53,6 +50,7 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     .addCase(createPrivateLocationAction.success, (state, action) => {
       state.newLocation = action.payload;
       state.createLoading = false;
+      state.data = null;
       state.isCreatePrivateLocationFlyoutVisible = false;
     })
     .addCase(createPrivateLocationAction.fail, (state, action) => {
@@ -64,6 +62,7 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     })
     .addCase(deletePrivateLocationAction.success, (state, action) => {
       state.deleteLoading = false;
+      state.data = null;
     })
     .addCase(deletePrivateLocationAction.fail, (state, action) => {
       state.error = action.payload;
@@ -73,7 +72,3 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
       state.isCreatePrivateLocationFlyoutVisible = action.payload;
     });
 });
-
-export * from './actions';
-export * from './effects';
-export * from './selectors';

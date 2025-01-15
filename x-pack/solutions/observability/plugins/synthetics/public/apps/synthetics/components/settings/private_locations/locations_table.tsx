@@ -25,7 +25,6 @@ import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
@@ -33,6 +32,7 @@ import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
+import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 
 interface ListItem extends PrivateLocation {
   monitors: number;

@@ -10,13 +10,13 @@ import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldTextProps } from 
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
+import { selectAgentPolicies } from '../../../state/agent_policies';
 import { BrowserMonitorCallout } from './browser_monitor_callout';
 import { SpaceSelector } from '../components/spaces_select';
 import { TagsField } from '../components/tags_field';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
-import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);

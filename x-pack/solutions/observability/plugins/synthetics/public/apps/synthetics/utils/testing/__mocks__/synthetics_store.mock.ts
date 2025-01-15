@@ -114,6 +114,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  privateLocations: {
+    isCreatePrivateLocationFlyoutVisible: false,
+    loading: false,
+    error: null,
+    data: [],
+  },
   settings: {
     loading: false,
     error: null,

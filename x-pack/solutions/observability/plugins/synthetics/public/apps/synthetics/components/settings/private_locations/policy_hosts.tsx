@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { AgentPolicyCallout } from './agent_policy_callout';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
-import { selectAgentPolicies } from '../../../state/private_locations';
+import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 

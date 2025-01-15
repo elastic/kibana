@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+import { useSelector } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
@@ -29,6 +30,7 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { selectPrivateLocationsState } from '../../../state/private_locations/selectors';
 
 export type NewLocation = Omit<PrivateLocation, 'id'>;
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
@@ -37,9 +39,7 @@ export const AddLocationFlyout = ({
   onSubmit,
   setIsOpen,
   privateLocations,
-  isLoading,
 }: {
-  isLoading: boolean;
   onSubmit: (val: NewLocation) => void;
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
@@ -60,6 +60,8 @@ export const AddLocationFlyout = ({
   });
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+
+  const { createLoading } = useSelector(selectPrivateLocationsState);
 
   const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
 
@@ -96,7 +98,7 @@ export const AddLocationFlyout = ({
                   iconType="cross"
                   onClick={closeFlyout}
                   flush="left"
-                  isLoading={isLoading}
+                  isLoading={createLoading}
                 >
                   {CANCEL_LABEL}
                 </EuiButtonEmpty>
@@ -107,7 +109,7 @@ export const AddLocationFlyout = ({
                     data-test-subj="syntheticsAddLocationFlyoutButton"
                     fill
                     onClick={handleSubmit(onSubmit)}
-                    isLoading={isLoading}
+                    isLoading={createLoading}
                     isDisabled={!canSave || !canManagePrivateLocations}
                   >
                     {SAVE_LABEL}

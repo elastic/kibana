@@ -11,12 +11,10 @@ import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout, NewLocation } from './add_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
-import {
-  selectAddingNewPrivateLocation,
-  setIsCreatePrivateLocationFlyoutVisible,
-} from '../../../state/private_locations';
+import { selectAddingNewPrivateLocation } from '../../../state/private_locations/selectors';
 import { getServiceLocations } from '../../../state';
 import { getAgentPoliciesAction } from '../../../state/agent_policies';
+import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
@@ -59,7 +57,6 @@ export const ManagePrivateLocations = () => {
           setIsOpen={setIsAddingNew}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
-          isLoading={loading}
         />
       ) : null}
     </>

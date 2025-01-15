@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { put, takeEvery, takeLeading } from 'redux-saga/effects';
-import { getServiceLocations } from '..';
+import { takeLeading } from 'redux-saga/effects';
+import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   createSyntheticsPrivateLocation,
@@ -36,16 +36,15 @@ export function* createPrivateLocationEffect() {
     fetchEffectFactory(
       createSyntheticsPrivateLocation,
       createPrivateLocationAction.success,
-      createPrivateLocationAction.fail
+      createPrivateLocationAction.fail,
+      i18n.translate('xpack.synthetics.createPrivateLocationSuccess', {
+        defaultMessage: 'Successfully created private location.',
+      }),
+      i18n.translate('xpack.synthetics.createPrivateLocationFailure', {
+        defaultMessage: 'Failed to create private location.',
+      })
     )
   );
-}
-
-function* watchCreateSuccessEffect() {
-  yield takeEvery(createPrivateLocationAction.success, function* resetLocations() {
-    yield put({ type: getPrivateLocationsAction.get() });
-    yield put({ type: getServiceLocations() });
-  });
 }
 
 export function* deletePrivateLocationEffect() {
@@ -59,17 +58,8 @@ export function* deletePrivateLocationEffect() {
   );
 }
 
-function* watchDeleteSuccessEffect() {
-  yield takeEvery(deletePrivateLocationAction.success, function* resetLocations() {
-    yield put({ type: getPrivateLocationsAction.get() });
-    yield put({ type: getServiceLocations() });
-  });
-}
-
 export const privateLocationsEffects = [
   fetchPrivateLocationsEffect,
   createPrivateLocationEffect,
   deletePrivateLocationEffect,
-  watchCreateSuccessEffect,
-  watchDeleteSuccessEffect,
 ];

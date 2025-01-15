@@ -12,19 +12,23 @@ import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
   getPrivateLocationsAction,
-  selectPrivateLocations,
-  selectPrivateLocationsState,
-} from '../../../../state/private_locations';
+} from '../../../../state/private_locations/actions';
+import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
 
 export const usePrivateLocationsAPI = () => {
   const dispatch = useDispatch();
 
-  const privateLocations = useSelector(selectPrivateLocations);
-  const { loading, createLoading, deleteLoading } = useSelector(selectPrivateLocationsState);
+  const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (data === null) {
+      dispatch(getPrivateLocationsAction.get());
+    }
+  }, [data, dispatch]);
 
   const onSubmit = (data: NewLocation) => {
     dispatch(createPrivateLocationAction.get(data));
@@ -39,7 +43,7 @@ export const usePrivateLocationsAPI = () => {
     onDelete,
     deleteLoading,
     loading,
-    privateLocations,
     createLoading,
+    privateLocations: data ?? [],
   };
 };

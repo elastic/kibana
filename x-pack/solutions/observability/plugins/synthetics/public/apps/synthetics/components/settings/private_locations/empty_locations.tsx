@@ -16,7 +16,7 @@ import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
 import {
   setIsCreatePrivateLocationFlyoutVisible,
   setManageFlyoutOpen,
-} from '../../../state/private_locations';
+} from '../../../state/private_locations/actions';
 
 export const EmptyLocations = ({
   inFlyout = true,

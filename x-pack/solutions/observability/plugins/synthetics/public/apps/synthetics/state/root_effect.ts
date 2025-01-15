@@ -28,7 +28,7 @@ import {
   setDynamicSettingsEffect,
 } from './settings/effects';
 import { syncGlobalParamsEffect } from './settings';
-import { privateLocationsEffects } from './private_locations';
+import { privateLocationsEffects } from './private_locations/effects';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
