@@ -5863,7 +5863,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grid-layout@link:packages/kbn-grid-layout":
+"@kbn/grid-layout@link:src/platform/packages/private/kbn-grid-layout":
   version "0.0.0"
   uid ""
 

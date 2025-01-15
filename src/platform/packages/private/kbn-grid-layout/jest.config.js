@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-grid-layout'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-grid-layout'],
 };
