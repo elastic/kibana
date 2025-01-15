@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Readable } from 'stream';
+import { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import datemath from '@kbn/datemath';
 import { CreateInvestigationResponse } from '@kbn/investigation-shared';
@@ -14,23 +15,6 @@ import { defer, lastValueFrom, toArray } from 'rxjs';
 import { KibanaClient } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/kibana_client';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { getRCAContext } from '../../common/rca/llm_context';
-
-export interface RCAChatClient {
-  rootCauseAnalysis: (params: {
-    investigationId: string;
-    from: string;
-    to: string;
-    alert: EcsFieldsResponse;
-  }) => Promise<RootCauseAnalysisEvent[]>;
-  getAlert: (params: { alertId: string }) => Promise<EcsFieldsResponse>;
-  getTimeRange: (params: {
-    alert: EcsFieldsResponse;
-    fromOffset: string;
-    toOffset: string;
-  }) => Promise<{ from: number; to: number }>;
-  createInvestigation: (params: { alertId: string; from: number; to: number }) => Promise<string>;
-  deleteInvestigation: (params: { investigationId: string }) => Promise<void>;
-}
 
 export class RCAClient {
   constructor(
@@ -109,9 +93,7 @@ export class RCAClient {
     return response.data.id;
   }
 
-  async deleteInvestigation({
-    investigationId,
-  }: Parameters<RCAChatClient['deleteInvestigation']>[0]) {
+  async deleteInvestigation({ investigationId }: { investigationId: string }): Promise<void> {
     await this.kibanaClient.callKibana('delete', {
       pathname: `/api/observability/investigations/${investigationId}`,
     });
@@ -155,7 +137,7 @@ export class RCAClient {
     };
 
     const chat$ = defer(async () => {
-      const response = await this.kibanaClient.callKibana(
+      const response: AxiosResponse<Readable> = await this.kibanaClient.callKibana(
         'post',
         {
           pathname: '/internal/observability/investigation/root_cause_analysis',
