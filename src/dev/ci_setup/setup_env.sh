@@ -136,9 +136,11 @@ export CHECKS_REPORTER_ACTIVE=false
 
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
-  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
-  export DETECT_CHROMEDRIVER_VERSION=true
-  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+  # Chromedriver 132:
+  # SessionNotCreatedError: session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
+  # echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  # export DETECT_CHROMEDRIVER_VERSION=true
+  # export CHROMEDRIVER_FORCE_DOWNLOAD=true
 else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
