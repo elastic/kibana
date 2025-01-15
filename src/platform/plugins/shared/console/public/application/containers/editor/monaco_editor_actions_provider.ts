@@ -828,7 +828,7 @@ export class MonacoEditorActionsProvider {
 
   /*
    * Returns true if any of the selected requests is an internal Kibana request
-   * (starting with the kbn prefix). Returns false otherwise
+   * (starting with the kbn: prefix). Returns false otherwise
    */
   public async isKbnRequestSelected(): Promise<boolean> {
     const requests = await this.getRequests();
