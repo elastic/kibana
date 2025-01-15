@@ -10,7 +10,12 @@
   container-type: inline-size;
 }
 
-@container (max-width: 767px) {
+/* EUI breakpoint mixins only support @media screen, we need to manually configure them for @container */
+$euiBreakpointMMax: map-get($euiBreakpoints, 'm') - 1px;
+$euiBreakpointSMax: map-get($euiBreakpoints, 's') - 1px;
+$euiBreakpointSMin: map-get($euiBreakpoints, 's');
+
+@container (max-width: $euiBreakpointMMax) {
   .euiDescribedFormGroup {
     flex-direction: column;
   }
@@ -34,7 +39,7 @@
   display: none;
 }
 
-@container (max-width: 767px) and (min-width: 575px) {
+@container (max-width: $euiBreakpointMMax) and (min-width: $euiBreakpointSMin) {
   .hideForContainer--s {
     display: none;
   }
@@ -44,7 +49,7 @@
   }
 }
 
-@container (max-width: 574px) {
+@container (max-width: $euiBreakpointSMax) {
   .hideForContainer--xs {
     display: none;
   }
