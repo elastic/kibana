@@ -13,11 +13,11 @@ When commenting on an unsaved timeline or an event in a timeline or when pinning
 
 What's causing this bug is that the associated saved objects have a field `timelineId` that connects them to the timeline. When a (pin/note) save request comes in, the server checks for that field and if it doesn't exist, it will create a new timeline on the fly and return its `timelineId` and `timelineVersion` as part of the saved object's response.
 
-https://github.com/elastic/kibana/blob/2df44b9f7f76f3d03f6e32be7f2a39034f97c22e/x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object/notes/saved_object.ts#L138-L148
+https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object/notes/saved_object.ts#L147-148
 
 These two fields are currently not used in the timeline middleware:
 
-https://github.com/elastic/kibana/blob/2df44b9f7f76f3d03f6e32be7f2a39034f97c22e/x-pack/solutions/security/plugins/security_solution/public/timelines/store/middlewares/timeline_note.ts#L60
+https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/public/timelines/store/middlewares/timeline_note.ts#L65
 
 This gives the false impression that the associated saved object has been stored but it actually has been associated to a different timeline. Subsequent saves of the active timeline (which is not the associated timeline) will then create a new `timelineId`. When the page is reloaded, the associated saved objects will be gone from that timeline.
 
@@ -77,7 +77,7 @@ This approach has been proposed here: https://github.com/elastic/kibana/pull/178
 Notes and pinned events are stored locally, until the timeline is persisted. When the timeline is saved, the locally stored saved objects are either sent alongside the save request or they are saved on the client once the save request finishes.
 This approach comes out of an internal Slack thread.
 
-| Pros | Cons                                                                                                                                                                   
+| Pros | Cons
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |      | (potentially) requires public API changes                                                                                                                                        |
 |      | We need to make sure, this local cache is emptied properly when switching timelines                                                                                              |

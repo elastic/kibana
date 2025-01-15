@@ -34,13 +34,6 @@ Table of Contents
     - [Index](#index)
     - [Webhook](#webhook)
     - [PagerDuty](#pagerduty)
-  - [Action type model definition](#action-type-model-definition)
-    - [CustomConnectorSelectionItem Properties](#customconnectorselectionitem-properties)
-  - [Register action type model](#register-action-type-model)
-  - [Create and register new action type UI](#create-and-register-new-action-type-ui)
-  - [Embed the Alert Actions form within any Kibana plugin](#embed-the-alert-actions-form-within-any-kibana-plugin)
-  - [Embed the Create Connector flyout within any Kibana plugin](#embed-the-create-connector-flyout-within-any-kibana-plugin)
-  - [Embed the Edit Connector flyout within any Kibana plugin](#embed-the-edit-connector-flyout-within-any-kibana-plugin)
 
 ## Built-in Alert Types
 
@@ -305,7 +298,7 @@ Alert type UI is expected to be defined as `RuleTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
-1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/platform/plugins/shared/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
+1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 
 ```
 import { lazy } from 'react';
@@ -1115,7 +1108,7 @@ export function getActionType(): ActionTypeModel {
 and action params form available in Create Alert form:
 ![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
 
-} 
+}
 ```
 
 ### D3Security
@@ -1401,7 +1394,7 @@ Follow the instructions bellow to embed the Alert Actions form within any Kibana
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
+ } from '@kbn/triggers-actions-ui-plugin/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1415,8 +1408,8 @@ Then this dependencies will be used to embed Actions form or register your own a
 
 ```
 import React, { useCallback } from 'react';
-import { ActionForm } from '../../../../../../../../../../../platform/plugins/shared/triggers_actions_ui/public';
-import { RuleAction } from '../../../../../../../../../../../platform/plugins/shared/triggers_actions_ui/public/types';
+import { ActionForm } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleAction } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export const ComponentWithActionsForm: () => {
   const { http, triggersActionsUi, notifications } = useKibana().services;
@@ -1531,7 +1524,7 @@ Follow the instructions bellow to embed the Create Connector flyout within any K
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
+ } from '@kbn/triggers-actions-ui-plugin/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1545,7 +1538,7 @@ Then this dependency will be used to embed Create Connector flyout or register n
 
 ```
 // import section
-import { ActionsConnectorsContextProvider, CreateConnectorFlyout } from '../../../../../../../../../triggers_actions_ui/public';
+import { ActionsConnectorsContextProvider, CreateConnectorFlyout } from '@kbn/triggers-actions-ui-plugin/public';
 
 // in the component state definition section
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -1615,7 +1608,7 @@ Follow the instructions bellow to embed the Edit Connector flyout within any Kib
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
+ } from '@kbn/triggers-actions-ui-plugin/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1629,7 +1622,7 @@ Then this dependency will be used to embed Edit Connector flyout.
 
 ```
 // import section
-import { ActionsConnectorsContextProvider, EditConnectorFlyout } from '../../../../../../../../../triggers_actions_ui/public';
+import { ActionsConnectorsContextProvider, EditConnectorFlyout } from '@kbn/triggers-actions-ui-plugin/public';
 
 // in the component state definition section
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);

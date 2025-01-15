@@ -33,7 +33,7 @@ type RequestHandler = (
 ```
 and accepts next Kibana specific parameters as arguments:
 - context: [Context](https://github.com/elastic/kibana/blob/main/rfcs/text/0003_handler_interface.md#handler-context). A handler context contains core service and plugin functionality already scoped to the incoming request.
-- request: [KibanaRequest](https://github.com/elastic/kibana/blob/main/src/core/server/http/router/request.ts). An immutable representation of the incoming request details, such as body, parameters, query, url and route information. Note: you **must** to specify route schema during route declaration to have access to `body, parameters, query` in the request object. You  cannot extend KibanaRequest with arbitrary data nor remove any properties from it.
+- request: [KibanaRequest](https://github.com/elastic/kibana/blob/main/src/core/packages/http/server/src/router/request.ts). An immutable representation of the incoming request details, such as body, parameters, query, url and route information. Note: you **must** to specify route schema during route declaration to have access to `body, parameters, query` in the request object. You  cannot extend KibanaRequest with arbitrary data nor remove any properties from it.
 ```typescript
 interface KibanaRequest {
   url: url.Url;
@@ -50,7 +50,7 @@ interface KibanaRequest {
   }
 }
 ```
--  t: [KibanaResponseToolkit](https://github.com/elastic/kibana/blob/main/src/core/server/http/router/response.ts#L27)
+-  t: [KibanaResponseToolkit](https://github.com/elastic/kibana/blob/main/src/core/packages/http/server/src/router/response.ts)
 Provides a set of pre-configured methods to respond to an incoming request. It is expected that handler **always** returns a result of one of `KibanaResponseToolkit` methods as an output:
 ```typescript
 interface KibanaResponseToolkit {
@@ -67,7 +67,7 @@ router.get(...,
 ```
 *KibanaResponseToolkit*  methods allow an end user to adjust the next response parameters:
 - Body. Supported values:`undefined | string | JSONValue | Buffer | Stream`.
-- Status code. 
+- Status code.
 - Headers. Supports adjusting [known values](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/v10/http.d.ts#L8) and attaching [custom values as well](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/v10/http.d.ts#L67)
 
 Other response parameters, such as `etag`, `MIME-type`, `bytes` that used in the Legacy platform could be adjusted via Headers.
@@ -162,7 +162,7 @@ export const kibanaResponseToolkit = {
 - `Handler` doesn't cover **all** functionality of the Legacy server at the current moment. For example, we cannot render a view in New platform yet and in this case, we have to proxy the request to the Legacy platform endpoint to perform rendering. All such cases should be considered in an individual order.
 - `KibanaResponseToolkit` may not cover all use cases and requires an extension for specific use-cases.
 - `KibanaResponseToolkit` operates low-level Http primitives, such as Headers e.g., and it is not always handy to work with them directly.
-- `KibanaResponse` cannot be extended with arbitrary data. 
+- `KibanaResponse` cannot be extended with arbitrary data.
 
 # Alternatives
 

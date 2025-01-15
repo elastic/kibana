@@ -142,10 +142,6 @@ migrations will never fail, but when they fail for intermittent reasons like
 an Elasticsearch cluster running out of heap, Kibana will automatically be
 able to successfully complete the migration once the cluster has enough heap.
 
-For more background information on the problem see the [saved object
-migrations
-RFC](https://github.com/elastic/kibana/blob/main/rfcs/text/0013_saved_object_migrations.md).
-
 # Algorithm steps
 
 The design goals for the algorithm was to keep downtime below 10 minutes for

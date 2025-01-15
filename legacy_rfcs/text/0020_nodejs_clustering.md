@@ -9,14 +9,57 @@
 - [2. Motivation](#2-motivation)
 - [3. Architecture](#3-architecture)
 - [4. Testing](#4-testing)
+  - [4.1 Local testing](#41-local-testing)
+    - [4.1.1 Raw results](#411-raw-results)
+      - [Non-clustered mode](#non-clustered-mode)
+      - [Clustered mode, 2 workers](#clustered-mode-2-workers)
+      - [Clustered mode, 4 workers](#clustered-mode-4-workers)
+    - [4.1.2 Analysis](#412-analysis)
+  - [4.2 Testing against cloud](#42-testing-against-cloud)
 - [5. Detailed design](#5-detailed-design)
+  - [5.1 Enabling clustering mode](#51-enabling-clustering-mode)
+  - [5.2 Cross-worker communication](#52-cross-worker-communication)
+  - [5.3 Executing code on a single worker](#53-executing-code-on-a-single-worker)
+  - [5.4 The node service API](#54-the-node-service-api)
+    - [5.4.1 Example: Saved Object Migrations](#541-example-saved-object-migrations)
+  - [5.5 Sharing state between workers](#55-sharing-state-between-workers)
 - [6. Technical impact](#6-technical-impact)
-  - [6.1 Technical impact on Core](#6.1-technical-impact-on-core)
-  - [6.2 Technical impact on Plugins](#6.2-technical-impact-on-plugins)
-  - [6.3 Summary of breaking changes](#6.3-summary-of-breaking-changes)
+  - [6.1 Technical impact on Core](#61-technical-impact-on-core)
+    - [6.1.1 Handling multi-process logs](#611-handling-multi-process-logs)
+      - [Options we considered:](#options-we-considered)
+      - [Our recommended approach:](#our-recommended-approach)
+    - [6.1.2 The rolling-file appender](#612-the-rolling-file-appender)
+      - [Options we considered:](#options-we-considered-1)
+      - [Our recommended approach:](#our-recommended-approach-1)
+    - [6.1.3 The status API](#613-the-status-api)
+    - [6.1.4 The stats API \& metrics service](#614-the-stats-api--metrics-service)
+      - [Options we considered:](#options-we-considered-2)
+      - [Our recommended approach:](#our-recommended-approach-2)
+    - [6.1.5 PID file](#615-pid-file)
+    - [6.1.6 Saved Objects migration](#616-saved-objects-migration)
+    - [6.1.7 Memory consumption](#617-memory-consumption)
+    - [6.1.8 Workers error handling](#618-workers-error-handling)
+    - [6.1.9 Data folder](#619-data-folder)
+    - [6.1.10 instanceUUID](#6110-instanceuuid)
+  - [6.2 Technical impact on Plugins](#62-technical-impact-on-plugins)
+    - [6.2.1 What types of things could break?](#621-what-types-of-things-could-break)
+      - [Concurrent access to the same resources](#concurrent-access-to-the-same-resources)
+      - [Using instanceUUID as a unique Kibana process identifier](#using-instanceuuid-as-a-unique-kibana-process-identifier)
+      - [Things needing to run only once per Kibana instance](#things-needing-to-run-only-once-per-kibana-instance)
+    - [6.2.2 Identified required changes](#622-identified-required-changes)
+      - [Reporting](#reporting)
+      - [Telemetry](#telemetry)
+      - [Task Manager](#task-manager)
+      - [Alerting](#alerting)
+  - [6.3 Summary of breaking changes](#63-summary-of-breaking-changes)
+    - [6.3.1 `/stats` API \& metrics service](#631-stats-api--metrics-service)
 - [7. Drawbacks](#7-drawbacks)
 - [8. Alternatives](#8-alternatives)
 - [9. Adoption strategy](#9-adoption-strategy)
+  - [Phase 0](#phase-0)
+  - [Phase 1](#phase-1)
+  - [Phase 2](#phase-2)
+  - [Phase 3](#phase-3)
 - [10. How we teach this](#10-how-we-teach-this)
 - [11. Unresolved questions](#11-unresolved-questions)
 - [12. Resolved questions](#12-resolved-questions)
@@ -107,17 +150,17 @@ Intel Core i9 - 32 GB 2400 MHz DDR4), using the default configuration of the `ki
 
 ![image](../images/20_clustering/perf_4_workers.png)
 
-### 4.1.2 Analysis 
+### 4.1.2 Analysis
 
-- Between non-clustered and 2-worker cluster mode, we observe a 20/25% gain in the 50th percentile response time. 
+- Between non-clustered and 2-worker cluster mode, we observe a 20/25% gain in the 50th percentile response time.
   Gain for the 75th and 95th are between 10% and 40%
-- Between 2-worker and 4-workers cluster mode, the gain on 50th is negligible, but the 75th and the 95th are 
+- Between 2-worker and 4-workers cluster mode, the gain on 50th is negligible, but the 75th and the 95th are
   significantly better on the 4-workers results, sometimes up to 100% gain (factor 2 ratio)
 
-Overall, switching to 2 workers comes with the most significant improvement in the 50th pct, 
-and increasing further to 4 workers decreases even more significantly the highest percentiles. 
-Even if increasing the number of workers doesn’t just linearly increase the performances 
-(which totally make sense, most of our requests response time is caused by awaiting ES response), 
+Overall, switching to 2 workers comes with the most significant improvement in the 50th pct,
+and increasing further to 4 workers decreases even more significantly the highest percentiles.
+Even if increasing the number of workers doesn’t just linearly increase the performances
+(which totally make sense, most of our requests response time is caused by awaiting ES response),
 the improvements of the clustering mode on performance under heavy load are far from negligible.
 
 ## 4.2 Testing against cloud
@@ -125,9 +168,9 @@ the improvements of the clustering mode on performance under heavy load are far 
 There is currently no easy way to test the performance improvements this could provide on Cloud, as we can't
 deploy custom builds or branches on Cloud at the moment.
 
-On Cloud, Kibana is running in a containerised environment using CPU CFS quota and CPU shares. 
+On Cloud, Kibana is running in a containerised environment using CPU CFS quota and CPU shares.
 
-If we want to investigate the potential perf improvement on Cloud further, our only option would be to setup a 
+If we want to investigate the potential perf improvement on Cloud further, our only option would be to setup a
 similar-ish environment locally (which wasn't done during the initial investigation).
 
 # 5. Detailed design
@@ -184,16 +227,16 @@ To preserve isolation and to avoid creating an implicit cross-plugin API, handle
 given plugin will only be invoked for messages sent by the same plugin.
 
 Notes:
--  To reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
+-  To reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops.
    It will avoid forcing (most) code to check which mode Kibana is running before calling them.
      - In the case where `sendToSelf` is true, we would still attempt to broadcast the message.
 -  We could eventually use an Observable pattern instead of a handler pattern to subscribe to messages.
 
 ## 5.3 Executing code on a single worker
 
-In some scenarios, we would like to have parts of the code executed only from a single process. 
+In some scenarios, we would like to have parts of the code executed only from a single process.
 
-Saved object migrations would be a good example: 
+Saved object migrations would be a good example:
 we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying
 the migration, and the others waiting for it. Due to the architecture, we can't have the coordinator perform
 such single-process jobs, as it doesn't actually run a Kibana server.
@@ -210,7 +253,7 @@ export interface NodeServiceSetup {
 ```
 
 Notes:
-- In non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and 
+- In non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and
   non-clustered modes.
 
 ## 5.4 The node service API
@@ -289,7 +332,7 @@ runMigration() {
 ```
 
 Notes:
-  - To be sure that we do not encounter a race condition with the event subscribing / sending (workers subscribing after 
+  - To be sure that we do not encounter a race condition with the event subscribing / sending (workers subscribing after
     the main worker actually sent the `migration-complete` event and then waiting indefinitely), we are using the `persist`
     option of the `broadcast` API. We felt this was a better approach than the alternative of having shared state among workers.
 
@@ -319,7 +362,7 @@ This is an example of log output in a 2 workers cluster, coming from the POC:
 [2021-03-02T10:23:41.903+01:00][WARN ][savedobjects-service] Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.
 ```
 
-The workers logs are interleaved, and, most importantly, there is no way to see which process each log entry is coming from. 
+The workers logs are interleaved, and, most importantly, there is no way to see which process each log entry is coming from.
 We will need to address that.
 
 #### Options we considered:
@@ -337,7 +380,7 @@ of our logging system, it solves several problems:
 - Provides a solution for the rolling-file appender (see below), as the coordinator would handle rolling all log files
 - The changes to BaseLogger could potentially have the added benefit of paving the way for our future logging MDC.
 
-We could add the process name information to the log messages, and add a new conversion to be able to display it with 
+We could add the process name information to the log messages, and add a new conversion to be able to display it with
 the pattern layout, such as `%worker` for example.
 
 The default pattern could evolve to (ideally, only when clustering is enabled):
@@ -352,14 +395,14 @@ The logging output would then look like:
 ```
 
 Notes:
-- The coordinator will probably need to output logs too. `%worker` would be interpolated to `coordinator` 
+- The coordinator will probably need to output logs too. `%worker` would be interpolated to `coordinator`
   for the coordinator process.
 - Even if we add the `%worker` pattern, we could still consider letting users configure per-worker log
 files as a future enhancement.
 
 ### 6.1.2 The rolling-file appender
 
-The rolling process of the `rolling-file` appender is going to be problematic in clustered mode, as it will cause 
+The rolling process of the `rolling-file` appender is going to be problematic in clustered mode, as it will cause
 concurrency issues during the rolling. We need to find a way to have this rolling stage clustered-proof.
 
 #### Options we considered:
@@ -377,17 +420,17 @@ file handler.
 
 2. have the coordinator process perform the rolling
 
-Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender 
-would send a message to the coordinator, which would perform the rolling and notify the workers once the operation is complete. 
+Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender
+would send a message to the coordinator, which would perform the rolling and notify the workers once the operation is complete.
 
-Note that this option is even more complicated than the previous one, as it forces to move the rolling implementation 
+Note that this option is even more complicated than the previous one, as it forces to move the rolling implementation
 outside of the appender, without any significant upsides identified.
 
 3. centralize the logging system in the coordinator
 
-We could go further, and change the way the logging system works in clustering mode by having the coordinator centralize 
-the logging system. The worker’s logger implementation would just send messages to the coordinator. If this may be a 
-correct design, the main downside is that the logging implementation would be totally different in cluster and 
+We could go further, and change the way the logging system works in clustering mode by having the coordinator centralize
+the logging system. The worker’s logger implementation would just send messages to the coordinator. If this may be a
+correct design, the main downside is that the logging implementation would be totally different in cluster and
 non cluster mode, and seems to be way more work that the other options.
 
 #### Our recommended approach:
@@ -396,12 +439,12 @@ as it will also solve for how to enable the coordinator to log its own messages.
 
 ### 6.1.3 The status API
 
-In clustering mode, the workers will all have an individual status. One could have a connectivity issue with ES 
-while the other ones are green. Hitting the `/status` endpoint will reach a random (and different each time) worker, 
+In clustering mode, the workers will all have an individual status. One could have a connectivity issue with ES
+while the other ones are green. Hitting the `/status` endpoint will reach a random (and different each time) worker,
 meaning that it would not be possible to know the status of the cluster as a whole.
 
-We will need to add some centralized status state in the coordinator. Also, as the `/status` endpoint cannot be served 
-from the coordinator, we will also need to have the workers retrieve the global status from the coordinator to serve 
+We will need to add some centralized status state in the coordinator. Also, as the `/status` endpoint cannot be served
+from the coordinator, we will also need to have the workers retrieve the global status from the coordinator to serve
 the status endpoint.
 
 Ultimately, we'd need to make the following updates to the `/status` API, neither of which
@@ -483,29 +526,29 @@ stats.
 
 ### 6.1.5 PID file
 
-Without changes, each worker is going to try to write and read the same PID file. Also, this breaks the whole pid file 
+Without changes, each worker is going to try to write and read the same PID file. Also, this breaks the whole pid file
 usage, as the PID stored in the file will be a arbitrary worker’s PID, instead of the coordinator (main process) PID.
 
-In clustering mode, we will need to have to coordinator handle the PID file logic, and to disable pid file handling 
+In clustering mode, we will need to have to coordinator handle the PID file logic, and to disable pid file handling
 in the worker's environment service.
 
 ### 6.1.6 Saved Objects migration
 
-In the current state, all workers are going to try to perform the migration. Ideally, we would have only one process 
-perform the migration, and the other ones just wait for a ready signal. We can’t easily have the coordinator do it, 
+In the current state, all workers are going to try to perform the migration. Ideally, we would have only one process
+perform the migration, and the other ones just wait for a ready signal. We can’t easily have the coordinator do it,
 so we would probably have to leverage the ‘main worker’ concept here.
 
-The SO migration v2 is supposed to be resilient to concurrent attempts though, as we already support multi-instances 
+The SO migration v2 is supposed to be resilient to concurrent attempts though, as we already support multi-instances
 Kibana, so this can probably be considered an improvement.
 
 ### 6.1.7 Memory consumption
 
-In clustered mode, node options such as `max-old-space-size` will be used by all processes. 
+In clustered mode, node options such as `max-old-space-size` will be used by all processes.
 
 The `kibana` startup script will read this setting out of the CLI or `config/node.options` and set a NODE_OPTIONS environment
 variable, which will be passed to any workers, possibly leading to unexpected behavior.
 
-e.g. using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
+e.g. using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers).
 
 Our plan for addressing this is to _disable clustering if a user has `max-old-space-size` set at all_, which would ensure it isn't
 possible to hit unpredictable behavior. To enable clustering, the user would simply remove `max-old-space-size` settings, and
@@ -513,11 +556,11 @@ clustering would be on by default. They could alternatively configure memory set
 
 ### 6.1.8 Workers error handling
 
-When using `cluster`, the common best practice is to have the coordinator recreate ('restart') workers when they terminate unexpectedly. 
-However, given Kibana's architecture, some failures are not recoverable (workers failing because of config validation, failed migration...). 
+When using `cluster`, the common best practice is to have the coordinator recreate ('restart') workers when they terminate unexpectedly.
+However, given Kibana's architecture, some failures are not recoverable (workers failing because of config validation, failed migration...).
 
 For instance, if a worker (well, all workers) terminates because of an invalid configuration property, it doesn't make
-any sense to have the coordinator recreate them indefinitely, as the error requires manual intervention. 
+any sense to have the coordinator recreate them indefinitely, as the error requires manual intervention.
 
 As a first step, we plan to terminate the main Kibana process when any worker terminates unexpectedly for any reason (after all,
 this is already the behavior in non-cluster mode). In the future, we will look toward distinguishing between recoverable
@@ -525,7 +568,7 @@ and non-recoverable errors as an enhancement, so that we can automatically resta
 
 ### 6.1.9 Data folder
 
-The data folder (`path.data`) is currently the same for all workers. 
+The data folder (`path.data`) is currently the same for all workers.
 
 We still have to identify with the teams if this is going to be a problem. It could be, for example, if some plugins
 are accessing files in write mode, which could result in concurrency issues between the workers.
@@ -535,7 +578,7 @@ as we don't consider the layout of this directory to be part of our public API.
 
 ### 6.1.10 instanceUUID
 
-The same instance UUID (`server.uuid` / `{dataFolder}/uuid`) is currently used by all the workers. 
+The same instance UUID (`server.uuid` / `{dataFolder}/uuid`) is currently used by all the workers.
 
 So far, we have not identified any places where this will be problematic, however, we will look to other teams to
 help validate this.
@@ -550,49 +593,49 @@ IDs with `${serverUuid}-${workerId}`.
 
 #### Concurrent access to the same resources
 
-Is there, for example, some part of the code that is accessing and writing files from the data folder (or anywhere else) 
+Is there, for example, some part of the code that is accessing and writing files from the data folder (or anywhere else)
 and makes the assumption that it is the sole process actually writing to that file?
 
 #### Using instanceUUID as a unique Kibana process identifier
 
-Is there, for example, schedulers that are using the instanceUUID a single process id, in opposition to a single 
+Is there, for example, schedulers that are using the instanceUUID a single process id, in opposition to a single
 Kibana instance id? Are there situations where having the same instance UUID for all the workers is going to be a problem?
 
 #### Things needing to run only once per Kibana instance
 
-Is there any part of the code that needs to be executed only once in a multi-worker mode, such as initialization code, 
-or starting schedulers? 
+Is there any part of the code that needs to be executed only once in a multi-worker mode, such as initialization code,
+or starting schedulers?
 
-An example would be Reporting's queueFactory polling. As we want to only be running a single headless at a time per 
+An example would be Reporting's queueFactory polling. As we want to only be running a single headless at a time per
 Kibana instance, only one worker should have polling enabled.
 
 ### 6.2.2 Identified required changes
 
 #### Reporting
 
-We will probably want to restrict to a single headless per Kibana instance. For that, we will have to change the logic 
-in [createQueueFactory](https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/x-pack/platform/plugins/private/reporting/server/lib/create_queue.ts#L60-L64) 
+We will probably want to restrict to a single headless per Kibana instance. For that, we will have to change the logic
+in [createQueueFactory](https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/x-pack/plugins/reporting/server/lib/create_queue.ts#L60-L64)
 to only have the 'main' worker be polling for reporting tasks.
 
 #### Telemetry
 
 - Server side fetcher
-  
-The telemetry/server/fetcher.ts will attempt sending the telemetry usage multiple times once per day from each process. 
-We do store a state in the SavedObjects store of the last time the usage was sent to prevent sending multiple times 
+
+The telemetry/server/fetcher.ts will attempt sending the telemetry usage multiple times once per day from each process.
+We do store a state in the SavedObjects store of the last time the usage was sent to prevent sending multiple times
 (although race conditions might occur).
 
 - Tasks storing telemetry data
-  
-We have tasks across several plugins storing data in savedobjects specifically for telemetry. Under clustering these 
+
+We have tasks across several plugins storing data in savedobjects specifically for telemetry. Under clustering these
 tasks will be registered multiple times.
 
-Note that sending the data multiple times doesn’t have any real consequences, apart from the additional number of ES requests, 
+Note that sending the data multiple times doesn’t have any real consequences, apart from the additional number of ES requests,
 so this should be considered non-blocking and only an improvement.
 
 - Event-based telemetry
 
-Event-based telemetry may be affected as well. Both the existing one in the Security Solutions team and the general 
+Event-based telemetry may be affected as well. Both the existing one in the Security Solutions team and the general
 one that is in the works. More specifically, the size of the queues will be multiplied per worker, also growing in the
 amount of network bandwidth used, and potentially affecting our customers.
 
@@ -600,7 +643,7 @@ We could address that by making sure that the queues are held only in the main w
 
 #### Task Manager
 
-Currently, task manager does "claims" for jobs to run based on the server uuid. We think this could still work with 
+Currently, task manager does "claims" for jobs to run based on the server uuid. We think this could still work with
 a multi-process setup - each task manager in the worker would be doing "claims" for the same server uuid, which
 seems functionally the same as setting max_workers to `current max_workers * number of workers`.
 Another alternative would be to compose something like `${server.uuid}-${worker.Id}`, as TM only
@@ -654,7 +697,7 @@ One alternative to the `cluster` module is using a worker pool via `worker_threa
 though. Clustering is meant to have multiple workers with the same codebase, often sharing a network socket to balance
 network traffic. Worker threads is a way to create specialized workers in charge of executing isolated, CPU intensive
 tasks on demand (e.g. encrypting or descrypting a file). If we were to identify that under heavy load, the actual bottleneck
-is ES, maybe exposing a worker thread service and API from Core (task_manager would be a perfect example of potential consumer) 
+is ES, maybe exposing a worker thread service and API from Core (task_manager would be a perfect example of potential consumer)
 would make more sense.
 
 However, we believe the simplicity and broad acceptance of the `cluster` API in the Node community makes it the

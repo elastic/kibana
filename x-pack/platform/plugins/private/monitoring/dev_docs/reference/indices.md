@@ -18,7 +18,7 @@ With the change to [package-driven collection](data_collection_modes.md#package-
 
 Additionally, in version 8.0 only, Enterprise Search metrics are published to the `metricbeat-*` index pattern. This was a bug and corrected in 8.1 ([kibana-pr2981](https://github.com/elastic/beats/pull/29871)).
 
-And finally if using the standalone metricbeat modules with `xpack.enabled: false`, they will write data into the `metricbeat-*` index pattern. Stack Monitoring UI was never adapted to read this data, so it would only be available for custom dashboards. 
+And finally if using the standalone metricbeat modules with `xpack.enabled: false`, they will write data into the `metricbeat-*` index pattern. Stack Monitoring UI was never adapted to read this data, so it would only be available for custom dashboards.
 
 ## Mapping sources
 
@@ -42,7 +42,7 @@ The best place to reference information for each field is in the metricbeat modu
 - [Elasticsearch](https://github.com/elastic/beats/blob/main/metricbeat/module/elasticsearch/_meta/README.md)
 - [Kibana](https://github.com/elastic/beats/blob/main/metricbeat/module/kibana/_meta/README.md)
 - [Logstash](https://github.com/elastic/beats/blob/main/metricbeat/module/logstash/_meta/README.md)
-- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/README.md) (\*beat, apm-server, fleet server)
+- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/) (\*beat, apm-server, fleet server)
 - [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch/_meta/README.md)
 
 ## Aliasing

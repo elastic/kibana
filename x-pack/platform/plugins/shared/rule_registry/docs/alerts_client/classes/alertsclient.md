@@ -49,7 +49,7 @@ on alerts as data.
 
 #### Defined in
 
-[alerts_client.ts:117](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L117)
+[alerts_client.ts:117](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L117)
 
 ## Properties
 
@@ -59,7 +59,7 @@ on alerts as data.
 
 #### Defined in
 
-[alerts_client.ts:114](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L114)
+[alerts_client.ts:114](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L114)
 
 ___
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:115](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L115)
+[alerts_client.ts:115](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L115)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:116](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L116)
+[alerts_client.ts:116](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L116)
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:113](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L113)
+[alerts_client.ts:113](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L113)
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:117](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L117)
+[alerts_client.ts:117](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L117)
 
 ## Methods
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:367](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L367)
+[alerts_client.ts:367](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L367)
 
 ___
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:570](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L570)
+[alerts_client.ts:570](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L570)
 
 ___
 
@@ -172,7 +172,7 @@ Accepts an array of ES documents and executes ensureAuthorized for the given ope
 
 #### Defined in
 
-[alerts_client.ts:152](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L152)
+[alerts_client.ts:152](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L152)
 
 ___
 
@@ -204,7 +204,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:628](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L628)
+[alerts_client.ts:628](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L628)
 
 ___
 
@@ -224,7 +224,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:491](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L491)
+[alerts_client.ts:491](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L491)
 
 ___
 
@@ -245,7 +245,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:137](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L137)
+[alerts_client.ts:137](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L137)
 
 ___
 
@@ -265,7 +265,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:674](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L674)
+[alerts_client.ts:674](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L674)
 
 ___
 
@@ -289,7 +289,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:129](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L129)
+[alerts_client.ts:129](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L129)
 
 ___
 
@@ -315,7 +315,7 @@ When an update by ids is requested, do a multi-get, ensure authz and audit alert
 
 #### Defined in
 
-[alerts_client.ts:308](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L308)
+[alerts_client.ts:308](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L308)
 
 ___
 
@@ -340,7 +340,7 @@ executes a search after to find alerts with query (+ authz filter)
 
 #### Defined in
 
-[alerts_client.ts:423](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L423)
+[alerts_client.ts:423](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L423)
 
 ___
 
@@ -363,7 +363,7 @@ In the future we will add an "aggs" param
 
 #### Defined in
 
-[alerts_client.ts:220](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L220)
+[alerts_client.ts:220](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L220)
 
 ___
 
@@ -389,4 +389,4 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:520](https://github.com/elastic/kibana/blob/42f5a948210/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L520)
+[alerts_client.ts:520](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts#L520)
