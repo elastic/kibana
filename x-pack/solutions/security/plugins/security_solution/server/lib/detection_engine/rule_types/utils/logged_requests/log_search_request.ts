@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const logSearchRequest = (searchRequest: estypes.SearchRequest): string | undefined => {
+export const logSearchRequest = (searchRequest: estypes.SearchRequest): string => {
   const { body, index, ...params } = searchRequest;
   const urlParams = Object.entries(params)
     .reduce<string[]>((acc, [key, value]) => {
