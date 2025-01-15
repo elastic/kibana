@@ -74,20 +74,19 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline [data-gridcell-column-id|='select'] {
     border-right: none;
   }
-  .udtTimeline
-    [data-gridcell-column-id|='openDetails']
-    .euiDataGridRowCell__content--lineCountHeight {
-    margin-top: 9px;
-  }
+  .udtTimeline [data-gridcell-column-id|='openDetails'] {
+    /* custom row height based on number of lines */
+    .euiDataGridRowCell__content--lineCountHeight,
 
-  .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__content--autoHeight {
-    margin-top: 10px;
-  }
+     /* auto row height */
+    .euiDataGridRowCell__content--autoHeight {
+      margin-top: 9px;
+    }
 
-  .udtTimeline
-    [data-gridcell-column-id|='openDetails']
+    /* single row height */
     .euiDataGridRowCell__content--defaultHeight {
-    margin-top: 3px;
+      margin-top: 3px;
+    }
   }
 
   .udtTimeline
@@ -103,11 +102,15 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   .udtTimeline [data-gridcell-column-id|='select'] {
+    /* custom row height based on number of lines */
     .euiDataGridRowCell__content--lineCountHeight,
+
+    /* auto row height */
     .euiDataGridRowCell__content--autoHeight {
       margin-top: 6px;
     }
 
+    /* single row height */
     .euiDataGridRowCell__content--defaultHeight {
       margin-top: 3px;
     }
