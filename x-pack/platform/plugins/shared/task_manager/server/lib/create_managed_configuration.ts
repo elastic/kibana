@@ -151,17 +151,17 @@ export function createPollIntervalScan(
             );
             newPollInterval = previousPollInterval;
           }
-        }
 
-        // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
-        avgTmUtilization = getAverageUtilization(tmUtilization, window);
-        if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
-          updatedForCapacity = true;
-          if (avgTmUtilization < 25) {
-            newPollInterval = DEFAULT_POLL_INTERVAL;
-          } else {
-            // If the the used capacity is greater than or equal to 25% reset the polling interval.
-            newPollInterval = startingPollInterval;
+          // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
+          avgTmUtilization = getAverageUtilization(tmUtilization, window);
+          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+            updatedForCapacity = true;
+            if (avgTmUtilization < 25) {
+              newPollInterval = DEFAULT_POLL_INTERVAL;
+            } else {
+              // If the the used capacity is greater than or equal to 25% reset the polling interval.
+              newPollInterval = startingPollInterval;
+            }
           }
         }
       }
@@ -174,9 +174,6 @@ export function createPollIntervalScan(
                 : `seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
             }`
           );
-        }
-        if (newPollInterval === startingPollInterval) {
-          logger.debug(`Poll interval has been set to the default (${startingPollInterval}ms)`);
         }
       }
       return newPollInterval;
@@ -302,7 +299,6 @@ function getAverageUtilization(
   while (window.length > 0 && window[0].timestamp < currentTime - TM_UTILIZATION_WINDOW) {
     window.shift();
   }
-
   return getRunningAverage(window);
 }
 

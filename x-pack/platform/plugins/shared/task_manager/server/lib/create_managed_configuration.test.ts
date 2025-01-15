@@ -502,7 +502,7 @@ describe('createManagedConfiguration()', () => {
       });
 
       test('should log a warning when the configuration changes from the starting value', async () => {
-        const { errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        const { errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
@@ -511,7 +511,7 @@ describe('createManagedConfiguration()', () => {
       });
 
       test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 3600);
@@ -521,9 +521,6 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(6, 3000);
         // No new calls due to value not changing and usage of distinctUntilChanged()
         expect(subscription).toHaveBeenCalledTimes(6);
-        expect(logger.debug).toHaveBeenCalledWith(
-          'Poll interval has been set to the default (3000ms)'
-        );
       });
 
       test('should decrease configuration after error and reset to initial poll interval when poll interval < default and TM utilization > 25%', async () => {
@@ -536,9 +533,6 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(5, 2800);
         // No new calls due to value not changing and usage of distinctUntilChanged()
         expect(subscription).toHaveBeenCalledTimes(5);
-        expect(logger.debug).toHaveBeenCalledWith(
-          'Poll interval has been set to the default (2800ms)'
-        );
       });
 
       test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization > 25%', async () => {
