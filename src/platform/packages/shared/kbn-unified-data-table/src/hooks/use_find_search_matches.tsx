@@ -11,7 +11,8 @@ import React, { useCallback, useEffect, useState, ReactNode, useRef } from 'reac
 import ReactDOM from 'react-dom';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { escape } from 'lodash';
+import { escape, memoize } from 'lodash';
+import { UnifiedDataTableContext } from '../table_context';
 
 interface RowMatches {
   rowIndex: number;
@@ -151,8 +152,6 @@ export const useFindSearchMatches = ({
     setIsProcessing(true);
 
     const findMatches = async () => {
-      const UnifiedDataTableRenderCellValue = renderCellValue;
-
       const result: RowMatches[] = [];
       let totalMatchesCount = 0;
 
@@ -162,16 +161,10 @@ export const useFindSearchMatches = ({
 
         for (const fieldName of visibleColumns) {
           const matchesCountForFieldName = await getCellMatchesCount(
-            <UnifiedDataTableRenderCellValue
-              columnId={fieldName}
-              rowIndex={rowIndex}
-              isExpandable={false}
-              isExpanded={false}
-              isDetails={false}
-              colIndex={0}
-              setCellProps={() => {}}
-            />,
-            uiSearchTerm
+            uiSearchTerm,
+            rowIndex,
+            fieldName,
+            renderCellValue
           );
 
           if (matchesCountForFieldName) {
@@ -229,20 +222,38 @@ export const useFindSearchMatches = ({
   };
 };
 
-function getCellMatchesCount(cell: ReactNode, uiSearchTerm: string): Promise<number> {
+function getCellMatchesCount(
+  uiSearchTerm: string,
+  rowIndex: number,
+  fieldName: string,
+  renderCellValue: UseFindSearchMatchesProps['renderCellValue']
+): Promise<number> {
+  const UnifiedDataTableRenderCellValue = renderCellValue;
+
   const container = document.createElement('div');
   // TODO: add a timeout to prevent infinite waiting
   return new Promise((resolve) => {
     ReactDOM.render(
-      <CellValueWrapper
-        uiSearchTerm={uiSearchTerm}
-        onHighlightsCountFound={(count) => {
-          resolve(count);
-          ReactDOM.unmountComponentAtNode(container);
+      <UnifiedDataTableContext.Provider
+        value={{
+          uiSearchTerm,
+          // TODO: add other context values?
         }}
       >
-        {cell}
-      </CellValueWrapper>,
+        <UnifiedDataTableRenderCellValue
+          columnId={fieldName}
+          rowIndex={rowIndex}
+          isExpandable={false}
+          isExpanded={false}
+          isDetails={false}
+          colIndex={0}
+          setCellProps={() => {}}
+          onHighlightsCountFound={(count) => {
+            resolve(count);
+            ReactDOM.unmountComponentAtNode(container);
+          }}
+        />
+      </UnifiedDataTableContext.Provider>,
       container
     );
   });
@@ -275,9 +286,9 @@ export function CellValueWrapper({
   return <div ref={cellValueRef}>{children}</div>;
 }
 
-function getSearchTermRegExp(searchTerm: string): RegExp {
+const getSearchTermRegExp = memoize((searchTerm: string): RegExp => {
   return new RegExp(`(${escape(searchTerm.trim())})`, 'gi');
-}
+});
 
 export function modifyDOMAndAddSearchHighlights(
   originalNode: Node,

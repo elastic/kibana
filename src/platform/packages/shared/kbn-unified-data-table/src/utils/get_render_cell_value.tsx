@@ -59,7 +59,8 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) => {
+    onHighlightsCountFound,
+  }: EuiDataGridCellValueElementProps & { onHighlightsCountFound?: (count: number) => void }) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
@@ -165,6 +166,7 @@ export const getRenderCellValueFn = ({
       <CellValueWrapper
         key={uiSearchTerm} // it's very important to have a unique key for each uiSearchTerm change so it can add the highlights again
         uiSearchTerm={uiSearchTerm}
+        onHighlightsCountFound={onHighlightsCountFound}
       >
         {render()}
       </CellValueWrapper>
