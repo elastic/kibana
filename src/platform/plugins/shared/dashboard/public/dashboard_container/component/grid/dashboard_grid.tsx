@@ -142,7 +142,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
             mask-repeat: no-repeat;
             background-color: grey;
             mask-position: bottom 8px right 8px;
-            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath fill='%23000000' d='M6 6H0V4.2h4.2V0H6z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cg clip-path='url(%23clip0_472_172810)'%3E%3Ccircle cx='7' cy='1' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip1_472_172810)'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='4' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip2_472_172810)'%3E%3Ccircle cx='1' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='4' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='7' r='1' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E");
             &:hover,
             &:focus {
               background-color: ${euiTheme.colors.vis.euiColorVis0};
