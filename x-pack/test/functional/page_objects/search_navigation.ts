@@ -19,7 +19,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
   return {
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearch/start', {
+        await common.navigateToApp('elasticsearchStart', {
           shouldLoginIfPrompted: false,
         });
         if (!expectRedirect) {
