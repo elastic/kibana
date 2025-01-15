@@ -84,8 +84,6 @@ export const performBulkGet = async <T>(
   const expectedBulkGetResults = await Promise.all(
     objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
       const { type, id, fields = [] } = object;
-      const nameAttribute = registry.getNameAttribute(type);
-      const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
 
       let error: DecoratedError | undefined;
       if (!allowedTypes.includes(type)) {
@@ -111,7 +109,11 @@ export const performBulkGet = async <T>(
         id,
         fields: [
           ...fields,
-          ...(securityExtension && securityExtension.includeSavedObjectNames() ? nameFields : []),
+          ...(securityExtension &&
+          securityExtension.includeSavedObjectNames() &&
+          fields.length !== 0
+            ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
+            : []),
         ],
         namespaces,
         esRequestIndex: bulkGetRequestIndexCounter++,
