@@ -120,7 +120,6 @@ export function AddProcessorFlyout({
 }
 
 export function EditProcessorFlyout({
-  definition,
   onClose,
   onDeleteProcessor,
   onUpdateProcessor,
@@ -140,20 +139,11 @@ export function EditProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const { simulate, error } = useProcessingSimulator({
-    definition,
-    condition: { field: formFields.field, operator: 'exists' },
-  });
-
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    simulate(processingDefinition).then((responseBody) => {
-      if (responseBody instanceof Error) return;
-
-      onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
-      onClose();
-    });
+    onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
+    onClose();
   };
 
   const handleProcessorDelete = () => {
@@ -190,7 +180,6 @@ export function EditProcessorFlyout({
         </EuiButton>
       }
     >
-      {error && <InvalidProcessorConfig message={error.body?.message} />}
       <FormProvider {...methods}>
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector disabled />
@@ -204,21 +193,3 @@ export function EditProcessorFlyout({
     </ProcessorFlyoutTemplate>
   );
 }
-
-const InvalidProcessorConfig = ({ message }: { message?: string }) => {
-  return (
-    <>
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.calloutEditError',
-          { defaultMessage: 'The processor configuration is invalid.' }
-        )}
-        iconType="alert"
-        color="danger"
-      >
-        {message}
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </>
-  );
-};
