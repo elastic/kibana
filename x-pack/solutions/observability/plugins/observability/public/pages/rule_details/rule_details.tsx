@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiSteps } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
@@ -36,7 +36,7 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths, relativePaths } from '../../../common/locators/paths';
+import { paths } from '../../../common/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
@@ -58,12 +58,12 @@ export function RuleDetailsPage() {
     },
     triggersActionsUi: {
       actionTypeRegistry,
+      ruleTypeRegistry,
       getAlertSummaryWidget: AlertSummaryWidget,
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
     serverless,
-    ruleTypeRegistry,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -248,7 +248,7 @@ export function RuleDetailsPage() {
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
           useNewRuleForm={true}
-          rulePath={relativePaths.observability.editRule(rule.id)}
+          ruleEditBasePath={http.basePath.prepend(paths.observability.alerts)}
           onEditRule={async () => {
             refetch();
           }}
@@ -269,16 +269,6 @@ export function RuleDetailsPage() {
         onEsQueryChange={setEsQuery}
         onSetTabId={handleSetTabId}
       />
-
-      {/* {isEditRuleFlyoutVisible && (
-        <EditRuleFlyout
-          initialRule={rule}
-          onClose={handleCloseRuleFlyout}
-          onSave={async () => {
-            refetch();
-          }}
-        />
-      )} */}
 
       {ruleToDelete ? (
         <DeleteConfirmationModal

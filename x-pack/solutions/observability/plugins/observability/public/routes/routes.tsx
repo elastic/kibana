@@ -17,7 +17,7 @@ import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
-import { RulePage } from '../pages/rules/rule_page';
+import { RulePage } from '../pages/rules/rule';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
