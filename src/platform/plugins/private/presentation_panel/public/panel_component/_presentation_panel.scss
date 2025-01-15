@@ -114,15 +114,6 @@
 
 // LOADING and ERRORS
 
-.embPanel__error {
-  padding: $euiSizeL;
-
-  & > * {
-    max-height: 100%;
-    overflow: auto;
-  }
-}
-
 .embPanel__label {
   position: absolute;
   padding-left: $euiSizeS;
