@@ -81,7 +81,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__content--autoHeight {
-    margin-top: 9px;
+    margin-top: 10px;
   }
 
   .udtTimeline
@@ -105,7 +105,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline [data-gridcell-column-id|='select'] {
     .euiDataGridRowCell__content--lineCountHeight,
     .euiDataGridRowCell__content--autoHeight {
-      margin-top: 9px;
+      margin-top: 6px;
     }
 
     .euiDataGridRowCell__content--defaultHeight {
