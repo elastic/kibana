@@ -73,9 +73,6 @@ export const universalEntityEngineDescription: EntityDescription = {
   fields: [newestValue({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
     timestampField: 'event.ingested',
-    frequency: '2s',
-    lookbackPeriod: '1m',
-    syncDelay: '2s',
   },
   pipeline: (processors: IngestProcessorContainer[]) => {
     const index = processors.findIndex((p) => Boolean(p.enrich));

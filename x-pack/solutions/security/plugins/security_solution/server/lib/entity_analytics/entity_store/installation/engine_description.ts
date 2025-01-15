@@ -75,8 +75,6 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
     addIndexMappings
   ) as EntityEngineInstallationDescriptor;
 
-  console.log(updatedDescription);
-
   return updatedDescription;
 };
 

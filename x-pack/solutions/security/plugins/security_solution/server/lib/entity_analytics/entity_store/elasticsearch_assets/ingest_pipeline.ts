@@ -69,18 +69,22 @@ const buildIngestPipeline = ({
         value: `{{${description.identityField}}}`,
       },
     },
-    {
-      set: {
-        field: 'debug.collected',
-        value: '{{collected.metadata}}',
-      },
-    },
-    {
-      set: {
-        field: 'debug._source',
-        value: '{{_source}}',
-      },
-    },
+    ...(debugMode
+      ? [
+          {
+            set: {
+              field: 'debug.collected',
+              value: '{{collected.metadata}}',
+            },
+          },
+          {
+            set: {
+              field: 'debug._source',
+              value: '{{_source}}',
+            },
+          },
+        ]
+      : []),
     {
       enrich: {
         policy_name: enrichPolicyName,
