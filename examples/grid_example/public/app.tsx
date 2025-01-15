@@ -125,7 +125,7 @@ export const GridExample = ({
   const customLayoutCss = useMemo(() => {
     const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
     return css`
-      .kbnGridRow--targetted {
+      .kbnGridRow--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
