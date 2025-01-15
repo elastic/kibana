@@ -159,16 +159,6 @@ export const GridExample = ({
           background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
         }
       }
-
-      .kbnGridLayout--activePanel {
-        .embPanel {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
-        }
-        .embPanel__hoverActions {
-          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
-          border-bottom: 0px solid !important;
-        }
-      }
     `;
   }, [euiTheme]);
 

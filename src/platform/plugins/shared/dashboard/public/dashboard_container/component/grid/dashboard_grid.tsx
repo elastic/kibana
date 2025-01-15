@@ -10,10 +10,12 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
 
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
 import { DashboardPanelState } from '../../../../common';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
@@ -25,6 +27,8 @@ import {
 import { DashboardGridItem } from './dashboard_grid_item';
 
 export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
+  const { euiTheme } = useEuiTheme();
+
   const dashboardApi = useDashboardApi();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
@@ -115,6 +119,47 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        css={css`
+          .kbnGridLayout--targettedRow {
+            background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+              calc((var(--kbnGridGutterSize) / 2) * -1px);
+            background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+              calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+            background-image: radial-gradient(
+              at top left,
+              ${euiTheme.colors.accentSecondary} 2px,
+              transparent 2px
+            );
+          }
+
+          .kbnGridLayout--dragPreview {
+            border-radius: ${euiTheme.border.radius};
+            background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+            transition: opacity 100ms linear;
+          }
+
+          .kbnGridPanel--resizeHandle {
+            border-radius: 7px 0 7px 0;
+            border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
+            border-right: 2px solid ${euiTheme.colors.accentSecondary};
+            &:hover,
+            &:focus {
+              outline-style: none !important;
+              opacity: 1;
+              background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
+            }
+          }
+
+          .kbnGridLayout--activePanel {
+            .embPanel {
+              outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
+            }
+            .embPanel__hoverActions {
+              border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
+              border-bottom: 0px solid !important;
+            }
+          }
+        `}
         layout={currentLayout}
         gridSettings={{
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
@@ -127,7 +172,15 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />
     );
-  }, [currentLayout, useMargins, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
+  }, [
+    euiTheme,
+    currentLayout,
+    useMargins,
+    renderPanelContents,
+    onLayoutChange,
+    expandedPanelId,
+    viewMode,
+  ]);
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,

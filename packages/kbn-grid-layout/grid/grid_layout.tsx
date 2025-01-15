@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
@@ -175,7 +176,7 @@ export const GridLayout = ({
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className="kbnGrid"
+        className={classNames('kbnGrid', className)}
         css={css`
           &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}

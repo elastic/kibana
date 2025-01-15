@@ -137,6 +137,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
+              ref.classList.remove('kbnGridLayout--activePanel');
+
               const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
 
               ref.style.zIndex = `auto`;
