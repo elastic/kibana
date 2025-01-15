@@ -17,35 +17,21 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 
 ## Running it locally
 
-### Start test server
+### Start with Cypress Dashboard
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --server
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --headed
 ```
 
 ### Run tests
 Runs all tests in the terminal
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --runner
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e
 ```
 
-### Open cypress dashboard
-Opens cypress dashboard, there it's possible to select what test you want to run.
-
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
-```
 ### Arguments
 
 | Option       | Description                                     |
 | ------------ | ----------------------------------------------- |
-| --server     | Only start ES and Kibana                        |
-| --runner     | Only run tests                                  |
-| --spec       | Specify the specs to run                        |
-| --times      | Repeat the test n number of times               |
-| --bail       | stop tests after the first failure              |
-
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e.js --runner --spec cypress/e2e/profiling.cy.ts --times 2
-```
+| --headed     | Opens Cypress dashboard                        |
