@@ -56,13 +56,17 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
         const { dataStreamTitle, celDetails, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
+
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
           const connector = await actionsClient.get({ id: req.body.connectorId });
+
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+
           const actionTypeId = connector.actionTypeId;
           const llmType = getLLMType(actionTypeId);
           const llmClass = getLLMClass(llmType);
+
           const model = new llmClass({
             actionsClient,
             connectorId: connector.id,
@@ -74,6 +78,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
             signal: abortSignal,
             streaming: false,
           });
+
           const parameters = {
             dataStreamName: dataStreamTitle,
             path: celDetails.path,
@@ -84,14 +89,17 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
               ? JSON.parse(celDetails.openApiDetails?.auth)
               : undefined,
           };
+
           const options = {
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
+
           const graph = await getCelGraph({ model });
           const results = await graph.withConfig({ runName: 'CEL' }).invoke(parameters, options);
+
           return res.ok({ body: CelInputResponse.parse(results) });
         } catch (e) {
           if (isErrorThatHandlesItsOwnResponse(e)) {

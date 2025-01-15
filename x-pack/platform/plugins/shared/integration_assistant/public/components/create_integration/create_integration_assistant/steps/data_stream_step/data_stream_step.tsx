@@ -290,15 +290,6 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                                     {i18n.OPEN_API_SPEC_BUTTON_CONFIGURED}
                                   </EuiText>
                                 </EuiButton>
-                                {/* <EuiBadge
-                                  iconType="check"
-                                  color="success"
-                                  data-test-subj="openApiConfigured"
-                                >
-                                  <EuiText size="xs">
-                                    {i18n.OPEN_API_SPEC_BUTTON_CONFIGURED}
-                                  </EuiText>
-                                </EuiBadge> */}
                               </EuiFlexItem>
                             </EuiFlexGroup>
                             <EuiTitle size="xxxs">

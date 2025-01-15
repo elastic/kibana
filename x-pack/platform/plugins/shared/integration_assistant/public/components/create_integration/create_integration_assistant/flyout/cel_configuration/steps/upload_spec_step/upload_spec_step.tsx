@@ -213,7 +213,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                         onClick={onAnalyze}
                         data-test-subj="analyzeApiButton"
                       >
-                        {i18n.ANALYZE}
+                        {isFlyoutGenerating ? i18n.ANALYZING : i18n.ANALYZE}
                       </EuiButton>
                       {isFlyoutGenerating && (
                         <EuiButtonEmpty

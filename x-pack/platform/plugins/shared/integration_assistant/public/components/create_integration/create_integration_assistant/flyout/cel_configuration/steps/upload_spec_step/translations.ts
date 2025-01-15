@@ -78,6 +78,12 @@ export const ANALYZE = i18n.translate(
     defaultMessage: 'Analyze',
   }
 );
+export const ANALYZING = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.uploadSpec.analyzing',
+  {
+    defaultMessage: 'Analyzing',
+  }
+);
 export const CANCEL = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.uploadSpec.cancel',
   {
