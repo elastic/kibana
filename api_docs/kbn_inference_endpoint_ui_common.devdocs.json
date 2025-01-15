@@ -479,9 +479,36 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.ServiceProviderKeys",
+        "type": "Enum",
+        "tags": [],
+        "label": "ServiceProviderKeys",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.DEFAULT_TASK_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_TASK_TYPE",
+        "description": [],
+        "signature": [
+          "\"completion\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/inference-endpoint-ui-common",
         "id": "def-public.FieldsConfiguration",
@@ -506,7 +533,659 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.SERVICE_PROVIDERS",
+        "type": "Object",
+        "tags": [],
+        "label": "SERVICE_PROVIDERS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.amazonbedrock",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.amazonbedrock]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.amazonbedrock.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.amazonbedrock.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.amazonbedrock.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"Search\" | \"Observability\" | \"Security\")[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureaistudio",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.azureaistudio]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureaistudio.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureaistudio.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureaistudio.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureopenai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.azureopenai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureopenai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureopenai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.azureopenai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"Search\" | \"Observability\" | \"Security\")[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.anthropic",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.anthropic]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.anthropic.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.anthropic.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.anthropic.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.cohere",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.cohere]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.cohere.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.cohere.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.cohere.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.elasticsearch]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.elasticsearch.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.elasticsearch.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.elasticsearch.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googleaistudio",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.googleaistudio]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googleaistudio.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googleaistudio.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googleaistudio.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googlevertexai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.googlevertexai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googlevertexai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googlevertexai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.googlevertexai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"Search\" | \"Observability\" | \"Security\")[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.hugging_face",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.hugging_face]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.hugging_face.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.hugging_face.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.hugging_face.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.mistral",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.mistral]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.mistral.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.mistral.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.mistral.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.openai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.openai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.openai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.openai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.openai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"Search\" | \"Observability\" | \"Security\")[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeysalibabacloudaisearch",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys['alibabacloud-ai-search']]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeysalibabacloudaisearch.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeysalibabacloudaisearch.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeysalibabacloudaisearch.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.watsonxai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.watsonxai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.watsonxai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.watsonxai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.watsonxai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
 export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
@@ -15,7 +15,7 @@ export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
   }
 );
 
-export const ENABLE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
+export const ENABLE_RISK_SCORE = (riskEntity: EntityType) =>
   i18n.translate('xpack.securitySolution.enableRiskScore.enableRiskScore', {
     defaultMessage: 'Enable {riskEntity} Risk Score',
     values: {
@@ -23,7 +23,7 @@ export const ENABLE_RISK_SCORE = (riskEntity: RiskScoreEntity) =>
     },
   });
 
-export const ENABLE_RISK_SCORE_DESCRIPTION = (riskEntity: RiskScoreEntity) =>
+export const ENABLE_RISK_SCORE_DESCRIPTION = (riskEntity: EntityType) =>
   i18n.translate('xpack.securitySolution.enableRiskScore.enableRiskScoreDescription', {
     defaultMessage:
       'Once you have enabled this feature you can get quick access to the {riskEntity} risk scores in this section. The data might need an hour to be generated after enabling the module.',
