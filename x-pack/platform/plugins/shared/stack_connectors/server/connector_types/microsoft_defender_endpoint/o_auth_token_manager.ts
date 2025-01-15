@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { ConnectorToken } from '@kbn/actions-plugin/server/types';
 import { MicrosoftDefenderEndpointDoNotValidateResponseSchema } from '../../../common/microsoft_defender_endpoint/schema';
 import {
   MicrosoftDefenderEndpointConfig,
@@ -16,7 +17,9 @@ import {
 
 export class OAuthTokenManager {
   private accessToken: string = '';
+  private connectorToken: ConnectorToken | undefined = undefined;
   private readonly oAuthTokenUrl: string;
+  private readonly tokenType = 'access_token';
 
   constructor(
     private readonly params: ServiceParams<
@@ -34,7 +37,46 @@ export class OAuthTokenManager {
     this.oAuthTokenUrl = url.toString();
   }
 
+  private isTokenExpired(token: ConnectorToken): boolean {
+    const now = new Date();
+    now.setSeconds(-30); // Allows for a threshold of 30s before considering the token expired
+
+    const isExpired = token.expiresAt < now.toISOString();
+
+    if (isExpired) {
+      this.params.logger.debug(`Cached access token expired at [${token.expiresAt}]`);
+    }
+
+    return isExpired;
+  }
+
   private async generateNewToken(connectorUsageCollector: ConnectorUsageCollector): Promise<void> {
+    const {
+      connector: { id: connectorId },
+      logger,
+    } = this.params;
+    const connectorTokenClient = this.params.services.connectorTokenClient;
+
+    if (!this.connectorToken) {
+      logger.debug(`Retrieving cached connector access token (if any)`);
+
+      const cachedToken = await connectorTokenClient.get({
+        connectorId,
+        tokenType: this.tokenType,
+      });
+
+      if (cachedToken.connectorToken) {
+        this.connectorToken = cachedToken.connectorToken;
+      }
+    }
+
+    if (this.connectorToken && !this.isTokenExpired(this.connectorToken)) {
+      // If current token is not expires, then there is nothing else to do
+      return;
+    }
+
+    logger.debug(`Requesting a new Microsoft access token for connector id [${connectorId}]]`);
+
     // FYI: API Docs: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow#get-a-token
     const { oAuthScope, clientId } = this.params.config;
     const newToken = await this.params.apiRequest<MicrosoftDefenderEndpointApiTokenResponse>(
@@ -53,7 +95,7 @@ export class OAuthTokenManager {
       connectorUsageCollector
     );
 
-    this.params.logger.debug(
+    logger.debug(
       () =>
         `Successfully created an access token for Microsoft Defend for Endpoint:\n${JSON.stringify({
           ...newToken.data,
