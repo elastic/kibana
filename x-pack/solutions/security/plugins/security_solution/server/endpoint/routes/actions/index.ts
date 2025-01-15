@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { registerActionFileInfoRoute } from './file_info_handler';
 import { registerActionFileDownloadRoutes } from './file_download_handler';
 import { registerActionDetailsRoutes } from './details';
@@ -21,14 +22,15 @@ import { registerResponseActionRoutes } from './response_actions';
 export function registerActionRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext,
+  docLinks: DocLinksServiceSetup,
   canEncrypt?: boolean
 ) {
   registerActionStatusRoutes(router, endpointContext);
   registerActionStateRoutes(router, endpointContext, canEncrypt);
-  registerActionAuditLogRoutes(router, endpointContext);
+  registerActionAuditLogRoutes(router, endpointContext, docLinks);
   registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
-  registerResponseActionRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext, docLinks);
   registerActionFileDownloadRoutes(router, endpointContext);
   registerActionFileInfoRoute(router, endpointContext);
 }
