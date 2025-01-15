@@ -7,33 +7,22 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
-import {
-  conditionSchema,
-  isChildOf,
-  isCompleteCondition,
-  isWiredReadStream,
-  WiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { conditionSchema, isCompleteCondition } from '@kbn/streams-schema';
 import { errors } from '@elastic/elasticsearch';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
+  RootStreamImmutabilityException,
   SecurityException,
 } from '../../../lib/streams/errors';
 import { createServerRoute } from '../../create_server_route';
-import {
-  syncStream,
-  readStream,
-  listStreams,
-  streamsEnabled,
-  validateAncestorFields,
-  checkAccess,
-} from '../../../lib/streams/stream_crud';
+import { checkAccess } from '../../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
 import { validateCondition } from '../../../lib/streams/helpers/condition_fields';
 import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { getFields } from '../../../lib/streams/helpers/condition_fields';
+import { ResyncStreamsResponse } from '../../../lib/streams/client';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork',
@@ -53,12 +42,7 @@ export const forkStreamsRoute = createServerRoute({
     }),
     body: z.object({ stream: z.object({ name: z.string() }), condition: conditionSchema }),
   }),
-  handler: async ({
-    params,
-    logger,
-    request,
-    getScopedClients,
-  }): Promise<{ acknowledged: true }> => {
+  handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     try {
       if (!params.body.condition) {
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
@@ -66,66 +50,15 @@ export const forkStreamsRoute = createServerRoute({
 
       validateCondition(params.body.condition);
 
-      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
-
-      const rootDefinition = await readStream({
-        scopedClusterClient,
-        id: params.path.id,
+      const { streamsClient } = await getScopedClients({
+        request,
       });
 
-      if (!isWiredReadStream(rootDefinition)) {
-        throw new MalformedStreamId('Cannot fork a stream that is not managed');
-      }
-
-      const childDefinition: WiredStreamDefinition = {
-        ...params.body.stream,
-        stream: { ingest: { processing: [], routing: [], wired: { fields: {} } } },
-      };
-
-      // check whether root stream has a child of the given name already
-      if (
-        rootDefinition.stream.ingest.routing.some((child) => child.name === childDefinition.name)
-      ) {
-        throw new MalformedStreamId(
-          `The stream with ID (${params.body.stream.name}) already exists as a child of the parent stream`
-        );
-      }
-
-      if (!isChildOf(rootDefinition.name, childDefinition.name)) {
-        throw new MalformedStreamId(
-          `The ID (${params.body.stream.name}) from the new stream must start with the parent's id (${rootDefinition.name}), followed by a dot and a name`
-        );
-      }
-
-      await validateAncestorFields(
-        scopedClusterClient,
-        childDefinition.name,
-        childDefinition.stream.ingest.wired.fields
-      );
-
-      // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
-      await syncStream({
-        scopedClusterClient,
-        assetClient,
-        definition: childDefinition,
-        rootDefinition,
-        logger,
-      });
-
-      rootDefinition.stream.ingest.routing.push({
-        name: params.body.stream.name,
+      return await streamsClient.forkStream({
+        parent: params.path.id,
         condition: params.body.condition,
+        name: params.body.stream.name,
       });
-
-      await syncStream({
-        scopedClusterClient,
-        assetClient,
-        definition: rootDefinition,
-        rootDefinition,
-        logger,
-      });
-
-      return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
         throw notFound(e);
@@ -134,7 +67,8 @@ export const forkStreamsRoute = createServerRoute({
       if (
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
-        e instanceof MalformedStreamId
+        e instanceof MalformedStreamId ||
+        e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);
       }
@@ -157,26 +91,10 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ logger, request, getScopedClients }): Promise<{ acknowledged: true }> => {
-    const { scopedClusterClient, assetClient } = await getScopedClients({ request });
+  handler: async ({ request, getScopedClients }): Promise<ResyncStreamsResponse> => {
+    const { streamsClient } = await getScopedClients({ request });
 
-    const { streams } = await listStreams({ scopedClusterClient });
-
-    for (const stream of streams) {
-      const definition = await readStream({
-        scopedClusterClient,
-        id: stream.name,
-      });
-
-      await syncStream({
-        scopedClusterClient,
-        assetClient,
-        definition,
-        logger,
-      });
-    }
-
-    return { acknowledged: true };
+    return await streamsClient.resyncStreams();
   },
 });
 
@@ -191,10 +109,10 @@ export const getStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     return {
-      enabled: await streamsEnabled({ scopedClusterClient }),
+      enabled: await streamsClient.isStreamsEnabled(),
     };
   },
 });
