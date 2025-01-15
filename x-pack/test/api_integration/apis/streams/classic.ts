@@ -6,17 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { cleanUpRootStream } from './helpers/cleanup';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
-import { fetchDocument, indexDocument } from './helpers/requests';
+import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
 
   const TEST_STREAM_NAME = 'logs-test-default';
 
@@ -24,14 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Classic streams', () => {
     before(async () => {
-      await apiClient.fetch('POST /api/streams/_enable');
+      await enableStreams(apiClient);
     });
 
     after(async () => {
-      await cleanUpRootStream(esClient);
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
+      await disableStreams(apiClient);
     });
 
     it('Shows non-wired data streams', async () => {
@@ -69,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           body: {
             ingest: {
+              routing: [],
               processing: [
                 {
                   config: {
@@ -131,13 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
       expect(response.result).to.eql('created');
-      await waitForDocumentInIndex({
-        esClient,
-        indexName: TEST_STREAM_NAME,
-        retryService,
-        logger,
-        docCountTarget: 2,
-      });
+
       const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -175,13 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
       expect(response.result).to.eql('created');
-      await waitForDocumentInIndex({
-        esClient,
-        indexName: TEST_STREAM_NAME,
-        retryService,
-        logger,
-        docCountTarget: 3,
-      });
+
       const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
       expect(result._source).to.eql({
         // accept any date

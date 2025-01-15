@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 import type { RuleMigrationStats } from '../../types';
 
@@ -67,6 +67,10 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
+          <EuiTitle size="xxxs">
+            <h6>{i18n.SIEM_MIGRATIONS_OPTION_TITLE}</h6>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
           <EuiComboBox
             aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
             onChange={onChange}
