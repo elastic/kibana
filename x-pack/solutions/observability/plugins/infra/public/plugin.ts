@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type {
+  PluginInitializerContext,
+  AppDeepLinkLocations,
+  ApplicationStart,
+} from '@kbn/core/public';
 import {
   type AppMountParameters,
   type AppUpdater,
   type CoreStart,
   type AppDeepLink,
   DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
-  AppDeepLinkLocations,
   AppStatus,
-  ApplicationStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
-import {
-  METRICS_EXPLORER_LOCATOR_ID,
-  MetricsExplorerLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
+import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
+import { METRICS_EXPLORER_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import {
   BehaviorSubject,
   combineLatest,
@@ -35,7 +35,7 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   INVENTORY_LOCATOR_ID,
@@ -43,7 +43,7 @@ import {
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
-import { NavigationEntry } from '@kbn/observability-shared-plugin/public';
+import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -72,7 +72,8 @@ import {
   metricsExplorerTitle,
   metricsTitle,
 } from './translations';
-import { LogsAppRoutes, LogsRoute, getLogsAppRoutes } from './pages/logs/routes';
+import type { LogsAppRoutes, LogsRoute } from './pages/logs/routes';
+import { getLogsAppRoutes } from './pages/logs/routes';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -372,7 +373,7 @@ export class Plugin implements InfraClientPluginClass {
     if (isLogsStreamEnabled) {
       plugins.uiActions.registerAction<EmbeddableApiContext>({
         id: ADD_LOG_STREAM_ACTION_ID,
-        grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
+        grouping: [ADD_PANEL_LEGACY_GROUP],
         order: 30,
         getDisplayName: () =>
           i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {

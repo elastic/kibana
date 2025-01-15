@@ -184,6 +184,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
@@ -222,7 +223,6 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
-    "@kbn/core-user-profile-browser",
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
@@ -230,7 +230,11 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
-    "@kbn/ai-assistant-icon"
+    "@kbn/charts-theme",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/shared-ux-error-boundary"
   ]
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { InvokeCreator, Receiver } from 'xstate';
-import { TimeKey } from '../../../../../common/time';
-import { VisiblePositions } from '../../../log_stream_position_state';
-import { ExtendedTimeRange, ParsedQuery, Timestamps } from '../../../log_stream_query_state';
-import { LogStreamPageContext, LogStreamPageEvent } from './types';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { InvokeCreator, Receiver } from 'xstate';
+import type { TimeKey } from '../../../../../common/time';
+import type { VisiblePositions } from '../../../log_stream_position_state';
+import type { ExtendedTimeRange, ParsedQuery, Timestamps } from '../../../log_stream_query_state';
+import type { LogStreamPageContext, LogStreamPageEvent } from './types';
 
 export const waitForInitialQueryParameters =
   (): InvokeCreator<LogStreamPageContext, LogStreamPageEvent> =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 
 import moment from 'moment';

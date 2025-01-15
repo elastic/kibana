@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { VectorStyleDescriptor } from '@kbn/maps-plugin/common';
 import {
-  VectorStyleDescriptor,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,

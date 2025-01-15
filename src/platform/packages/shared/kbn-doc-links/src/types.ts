@@ -691,6 +691,9 @@ export interface DocLinks {
   readonly cases: {
     readonly legacyApiDeprecations: string;
   };
+  readonly synonyms: {
+    readonly synonymsAPIDocumentation: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';

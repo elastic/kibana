@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
@@ -15,7 +15,7 @@ import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import { InventoryItemType } from './types';
+import type { InventoryItemType } from './types';
 export { metrics } from './metrics';
 
 const catalog = {

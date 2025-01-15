@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageHeaderContentProps } from '@elastic/eui';
+import type { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TopNComparisonFunctionSortField } from '@kbn/profiling-utils';

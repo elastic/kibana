@@ -26,7 +26,7 @@ export const allowedExperimentalValues = Object.freeze({
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -184,18 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
-
   /**
    * Enables graph visualization in alerts flyout
    */
@@ -273,6 +261,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows initializing the Universal Entity Store via the API.
    */
   assetInventoryStoreEnabled: false,
+
+  /**
+   * Enables the Asset Inventory feature
+   */
+  assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions client
+   */
+  responseActionsMSDefenderEndpointEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

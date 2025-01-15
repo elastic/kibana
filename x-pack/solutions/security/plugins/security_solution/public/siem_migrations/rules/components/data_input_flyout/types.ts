@@ -6,17 +6,10 @@
  */
 
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => void;
 export type OnResourcesCreated = () => void;
-export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceData[]) => void;
-
-export enum DataInputStep {
-  Rules = 1,
-  Macros = 2,
-  Lookups = 3,
-  End = 10,
-}
+export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceBase[]) => void;

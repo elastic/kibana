@@ -26,7 +26,11 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await Promise.all(request.body.ids.map((connectorId) => deleteConnectorById(client.asCurrentUser, connectorId)))
+      await Promise.all(
+        request.body.ids.map((connectorId) =>
+          deleteConnectorById(client.asCurrentUser, connectorId)
+        )
+      );
       return response.ok({
         body: { deleted: request.body.ids },
         headers: { 'content-type': 'application/json' },
@@ -46,7 +50,11 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await Promise.all(request.body.ids.map((connectorId) => putUpdateNative(client.asCurrentUser, connectorId, false)))
+      await Promise.all(
+        request.body.ids.map((connectorId) =>
+          putUpdateNative(client.asCurrentUser, connectorId, false)
+        )
+      );
       return response.ok({
         body: { converted_to_client: request.body.ids },
         headers: { 'content-type': 'application/json' },

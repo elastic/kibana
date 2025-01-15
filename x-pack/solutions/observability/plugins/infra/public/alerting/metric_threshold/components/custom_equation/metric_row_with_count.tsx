@@ -8,9 +8,10 @@ import { EuiFormRow, EuiHorizontalRule, EuiFlexItem, EuiFlexGroup, EuiSelect } f
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MetricsExplorerKueryBar } from '../../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
+import type { CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
-import { MetricRowBaseProps } from './types';
+import type { MetricRowBaseProps } from './types';
 
 interface MetricRowWithCountProps extends MetricRowBaseProps {
   agg?: Aggregators;

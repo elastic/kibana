@@ -34,6 +34,12 @@ const actionType = { id: '.bedrock', name: 'Bedrock', iconClass: 'logoBedrock' }
 mockServices.triggersActionsUi.actionTypeRegistry.register(
   actionType as unknown as ActionTypeModel
 );
+
+const inferenceActionType = { id: '.inference', name: 'Inference', iconClass: 'logoInference' };
+mockServices.triggersActionsUi.actionTypeRegistry.register(
+  inferenceActionType as unknown as ActionTypeModel
+);
+
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () => ({
   useLoadActionTypes: jest.fn(() => ({ data: [actionType] })),
 }));

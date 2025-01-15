@@ -10,7 +10,8 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { APMLinkExtendProps, getLegacyApmHref } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link';
+import { getLegacyApmHref } from './apm_link';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

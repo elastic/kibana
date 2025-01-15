@@ -7,9 +7,8 @@
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { AlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
+import type { AlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
-import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 interface Bucket {
   key: Record<string, any>;
@@ -20,12 +19,12 @@ type EntityTypeBucketsAggregation = Record<string, { buckets: Bucket[] }>;
 
 export async function getLatestEntitiesAlerts({
   alertsClient,
-  identityFieldsPerEntityType,
+  identityFieldsBySource,
 }: {
   alertsClient: AlertsClient;
-  identityFieldsPerEntityType: IdentityFieldsPerEntityType;
-}): Promise<Array<{ [key: string]: any; alertsCount?: number; entityType: string }>> {
-  if (identityFieldsPerEntityType.size === 0) {
+  identityFieldsBySource: Record<string, string[]>;
+}): Promise<Array<{ [key: string]: any; alertsCount?: number }>> {
+  if (Object.keys(identityFieldsBySource).length === 0) {
     return [];
   }
 
@@ -41,22 +40,23 @@ export async function getLatestEntitiesAlerts({
 
   const response = await alertsClient.search({
     ...filter,
-    aggs: getGroupByTermsAgg(identityFieldsPerEntityType),
+    aggs: getGroupByTermsAgg(identityFieldsBySource),
   });
 
   const aggregations = response.aggregations as EntityTypeBucketsAggregation;
 
-  const alerts = Array.from(identityFieldsPerEntityType).flatMap(([entityType]) => {
-    const entityAggregation = aggregations?.[entityType];
+  const alerts = Object.keys(identityFieldsBySource)
+    .map((sourceId) => {
+      const entityAggregation = aggregations?.[sourceId];
 
-    const buckets = entityAggregation.buckets ?? [];
+      const buckets = entityAggregation.buckets ?? [];
 
-    return buckets.map((bucket: Bucket) => ({
-      alertsCount: bucket.doc_count,
-      entityType,
-      ...bucket.key,
-    }));
-  });
+      return buckets.map((bucket: Bucket) => ({
+        alertsCount: bucket.doc_count,
+        ...bucket.key,
+      }));
+    })
+    .flat();
 
   return alerts;
 }

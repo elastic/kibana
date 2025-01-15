@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Environment } from '../environment_rt';
-import { AnomalyDetectorType } from './apm_ml_detectors';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
+import type { Environment } from '../environment_rt';
+import type { AnomalyDetectorType } from './apm_ml_detectors';
+import type { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 export function getPreferredServiceAnomalyTimeseries({
   preferredEnvironment,

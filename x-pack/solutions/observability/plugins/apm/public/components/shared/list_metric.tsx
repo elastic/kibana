@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { SparkPlot } from './charts/spark_plot';
 
 interface ListMetricProps extends ComponentProps<typeof SparkPlot> {
