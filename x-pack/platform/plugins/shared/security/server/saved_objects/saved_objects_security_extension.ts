@@ -228,7 +228,7 @@ interface AuditHelperParams {
   /** The audit action to log */
   action: AuditAction;
   /** The objects applicable to the action */
-  objects?: Array<{ type: string; id: string }>;
+  objects?: SavedObjectAudit[];
   /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
   useSuccessOutcome?: boolean;
   /**
@@ -527,7 +527,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     for (const obj of toAudit) {
       this.addAuditEvent({
         action,
-        ...(!!obj && { savedObject: { type: obj.type, id: obj.id } }),
+        ...(!!obj && { savedObject: { type: obj.type, id: obj.id, name: obj.name } }),
         error,
         // By default, if authorization was a success the outcome is 'unknown' because the operation has not occurred yet
         // The GET action is one of the few exceptions to this, and hence it passes true to useSuccessOutcome
