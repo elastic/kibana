@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +15,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   AndCondition,
@@ -64,7 +66,7 @@ export function ConditionForm(props: {
   }, [syntaxEditor, props.condition]);
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow>
           <EuiText
             className={css`
@@ -75,6 +77,22 @@ export function ConditionForm(props: {
             {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Condition' })}
           </EuiText>
         </EuiFlexItem>
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
+            defaultMessage: 'Route no documents to this stream without deleting existing data',
+          })}
+        >
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => props.onConditionChange(undefined)}
+            disabled={props.condition === undefined}
+          >
+            {i18n.translate('xpack.streams.conditionEditor.disable', {
+              defaultMessage: 'Disable routing',
+            })}
+          </EuiButtonEmpty>
+        </EuiToolTip>
+
         <EuiSwitch
           label={i18n.translate('xpack.streams.conditionEditor.switch', {
             defaultMessage: 'Syntax editor',
