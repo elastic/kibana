@@ -195,7 +195,7 @@ describe('UsageCountersService', () => {
     const usageCountersService = new UsageCountersService({
       logger,
       retryCount: retryConst,
-      bufferDurationMs,
+      bufferDurationMs: 1000,
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
@@ -224,11 +224,12 @@ describe('UsageCountersService', () => {
     jest.runOnlyPendingTimers();
 
     // wait for retries to kick in on next scheduler call
-    await tickWithDelay(80); // check retry up to 2 times
+    await tickWithDelay(500);
     // number of incrementCounter calls + number of retries
     expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
-    expect(logger.warn).toHaveBeenNthCalledWith(1, `${mockError}, retrying attempt ${retryConst}`); // assert counterA increment error warning log
-    expect(logger.warn).toHaveBeenNthCalledWith(3, mockError); // reassert counterA increment error warning log
+    // assert counterA increment error warning logs
+    expect(logger.warn).toHaveBeenNthCalledWith(1, `${mockError}, retrying attempt ${retryConst}`);
+    expect(logger.warn).toHaveBeenNthCalledWith(3, mockError);
     expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
       kibana: {
         usageCounters: {

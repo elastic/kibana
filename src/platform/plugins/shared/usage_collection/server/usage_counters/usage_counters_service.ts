@@ -159,7 +159,7 @@ export class UsageCountersService {
     };
   };
 
-  private backoffDelay = (attempt: number) => Math.pow(2, attempt) * 10; // exponential backoff: 20ms, 40ms, 80ms, 150ms etc
+  private backoffDelay = (attempt: number) => Math.pow(2, attempt) * 50; // exponential backoff: 20ms, 40ms, 80ms, 150ms etc
 
   private storeDate$(
     counters: UsageCounters.v1.CounterMetric[],
