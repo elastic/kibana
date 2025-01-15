@@ -125,6 +125,24 @@ describe('useSetupTechnology', () => {
     inactivity_timeout: 3600,
   };
 
+  const packageInfoWithoutAgentless = {
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'Template 1',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: false,
+          },
+        },
+      },
+    ] as RegistryPolicyTemplate[],
+  } as PackageInfo;
+
   const packageInfoMock = {
     policy_templates: [
       {
@@ -150,8 +168,23 @@ describe('useSetupTechnology', () => {
         },
       },
       {
-        name: 'cspm2',
+        name: 'not-cspm',
         title: 'Template 2',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+        },
+      },
+    ] as RegistryPolicyTemplate[],
+  } as PackageInfo;
+
+  const packageInfoWithoutResources = {
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'Template 1',
         description: '',
         deployment_modes: {
           default: {
@@ -159,9 +192,6 @@ describe('useSetupTechnology', () => {
           },
           agentless: {
             enabled: true,
-            organization: 'org',
-            division: 'div',
-            team: 'team',
           },
         },
       },
@@ -538,7 +568,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -579,13 +609,13 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: packageInfoWithoutResources,
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm2');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -597,7 +627,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should not have agentless section on the request when creating regular policy', async () => {
+  it('should have empty agentless section on the request when creating policy with agentless disabled', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -619,18 +649,18 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: packageInfoWithoutAgentless,
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'not-cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
-        expect.not.objectContaining({
+        expect.objectContaining({
           agentless: {},
         })
       );
