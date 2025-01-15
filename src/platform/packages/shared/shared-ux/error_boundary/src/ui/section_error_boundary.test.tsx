@@ -10,14 +10,14 @@
 import { render } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorService } from '../services/error_service';
+import { KibanaSectionErrorBoundary } from './section_error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
 
-describe('<KibanaErrorBoundary>', () => {
+describe('<KibanaSectionErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -27,7 +27,9 @@ describe('<KibanaErrorBoundary>', () => {
   const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
-        <KibanaErrorBoundary>{children}</KibanaErrorBoundary>
+        <KibanaSectionErrorBoundary sectionName="test section name">
+          {children}
+        </KibanaSectionErrorBoundary>
       </KibanaErrorBoundaryDepsProvider>
     );
   };
@@ -38,42 +40,36 @@ describe('<KibanaErrorBoundary>', () => {
     expect(res.getByText(inputText)).toBeInTheDocument();
   });
 
-  it('renders a "soft" callout when an unknown error is caught', async () => {
+  it('renders a recoverable prompt when a recoverable error is caught', () => {
     const reloadSpy = jest.spyOn(services, 'onClickRefresh');
 
-    const { findByTestId, findByText } = render(
+    const { getByTestId, getByText } = render(
       <Template>
         <ChunkLoadErrorComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    getByTestId('clickForErrorBtn').click();
 
-    expect(await findByText(strings.page.callout.recoverable.title())).toBeVisible();
-    expect(await findByText(strings.page.callout.recoverable.pageReloadButton())).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
+    getByTestId('sectionErrorBoundaryRecoverBtn').click();
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a fatal callout when an unknown error is caught', async () => {
-    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
-
-    const { findByTestId, findByText } = render(
+  it('renders a fatal prompt when a fatal error is caught', () => {
+    const { getByTestId, getByText } = render(
       <Template>
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    getByTestId('clickForErrorBtn').click();
 
-    expect(await findByText(strings.page.callout.fatal.title())).toBeVisible();
-    expect(await findByText(strings.page.callout.fatal.body())).toBeVisible();
-    expect(await findByText(strings.page.callout.fatal.showDetailsButton())).toBeVisible();
-    expect(await findByText(strings.page.callout.fatal.pageReloadButton())).toBeVisible();
-
-    (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
-
-    expect(reloadSpy).toHaveBeenCalledTimes(1);
+    expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
+    expect(getByText(strings.section.callout.fatal.showDetailsButton())).toBeVisible();
   });
 
   it('captures the error event for telemetry', async () => {
