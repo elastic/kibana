@@ -33,6 +33,7 @@ import {
 } from './saved_objects';
 import { registerUsageCountersRollups } from './rollups';
 import { searchUsageCounters } from './search';
+import { USAGE_COUNTERS_BACKOFF_DELAY_IN_MS } from '../../common/constants';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -159,7 +160,8 @@ export class UsageCountersService {
     };
   };
 
-  private backoffDelay = (attempt: number) => Math.pow(2, attempt) * 50; // exponential backoff: 20ms, 40ms, 80ms, 150ms etc
+  private backoffDelay = (attempt: number) =>
+    Math.pow(2, attempt) * USAGE_COUNTERS_BACKOFF_DELAY_IN_MS; // exponential backoff: 50ms, 100ms, 200ms
 
   private storeDate$(
     counters: UsageCounters.v1.CounterMetric[],
