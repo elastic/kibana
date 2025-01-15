@@ -38,7 +38,6 @@
     "@kbn/licensing-plugin",
     "@kbn/user-profile-components",
     "@kbn/rule-data-utils",
-    "@kbn/ui-theme",
     "@kbn/std",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
