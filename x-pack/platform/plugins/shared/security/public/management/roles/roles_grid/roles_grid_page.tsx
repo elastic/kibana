@@ -309,7 +309,7 @@ export const RolesGridPage: FC<Props> = ({
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
         }),
-        sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
+        sortable: false,
         render: (_metadata: Role['metadata'], record: Role) => getRoleStatusBadges(record),
       });
     }
