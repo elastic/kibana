@@ -51,7 +51,6 @@ describe('StorageIndexAdapter', () => {
       properties: {
         foo: {
           type: 'keyword',
-          required: true,
         },
       },
     },
@@ -180,6 +179,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/206482
+    // FLAKY: https://github.com/elastic/kibana/issues/206483
     describe.skip('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
@@ -500,12 +500,9 @@ describe('StorageIndexAdapter', () => {
       _meta: {
         version,
       },
+      dynamic: 'strict',
       properties: {
         foo: {
-          meta: {
-            multi_value: 'false',
-            required: 'true',
-          },
           type: 'keyword',
         },
       },
