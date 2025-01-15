@@ -62,7 +62,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
-      dashboardApi.expandedPanelId,
+      dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$
