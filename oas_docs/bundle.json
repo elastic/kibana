@@ -9297,33 +9297,6 @@
                             "nullable": true,
                             "type": "string"
                           },
-                          "fleet_ui": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "required_versions": {
-                                "items": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "percentage": {
-                                      "maximum": 100,
-                                      "minimum": 0,
-                                      "type": "number"
-                                    },
-                                    "version": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "version",
-                                    "percentage"
-                                  ],
-                                  "type": "object"
-                                },
-                                "type": "array"
-                              }
-                            },
-                            "type": "object"
-                          },
                           "global_data_tags": {
                             "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
                             "items": {
@@ -9875,6 +9848,30 @@
                               }
                             ]
                           },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "revision": {
                             "type": "number"
                           },
@@ -10080,33 +10077,6 @@
                     "nullable": true,
                     "type": "string"
                   },
-                  "fleet_ui": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "required_versions": {
-                        "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "percentage": {
-                              "maximum": 100,
-                              "minimum": 0,
-                              "type": "number"
-                            },
-                            "version": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "version",
-                            "percentage"
-                          ],
-                          "type": "object"
-                        },
-                        "type": "array"
-                      }
-                    },
-                    "type": "object"
-                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -10258,6 +10228,30 @@
                     "nullable": true,
                     "type": "object"
                   },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
+                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -10363,33 +10357,6 @@
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
-                        },
-                        "fleet_ui": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "required_versions": {
-                              "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "percentage": {
-                                    "maximum": 100,
-                                    "minimum": 0,
-                                    "type": "number"
-                                  },
-                                  "version": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "version",
-                                  "percentage"
-                                ],
-                                "type": "object"
-                              },
-                              "type": "array"
-                            }
-                          },
-                          "type": "object"
                         },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -10942,6 +10909,30 @@
                             }
                           ]
                         },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "revision": {
                           "type": "number"
                         },
@@ -11175,33 +11166,6 @@
                           "fleet_server_host_id": {
                             "nullable": true,
                             "type": "string"
-                          },
-                          "fleet_ui": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "required_versions": {
-                                "items": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "percentage": {
-                                      "maximum": 100,
-                                      "minimum": 0,
-                                      "type": "number"
-                                    },
-                                    "version": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "version",
-                                    "percentage"
-                                  ],
-                                  "type": "object"
-                                },
-                                "type": "array"
-                              }
-                            },
-                            "type": "object"
                           },
                           "global_data_tags": {
                             "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -11753,6 +11717,30 @@
                                 "type": "array"
                               }
                             ]
+                          },
+                          "required_versions": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "percentage": {
+                                  "description": "Target percentage of agents to auto upgrade",
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "number"
+                                },
+                                "version": {
+                                  "description": "Target version for automatic agent upgrade",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "version",
+                                "percentage"
+                              ],
+                              "type": "object"
+                            },
+                            "nullable": true,
+                            "type": "array"
                           },
                           "revision": {
                             "type": "number"
@@ -12224,33 +12212,6 @@
                           "nullable": true,
                           "type": "string"
                         },
-                        "fleet_ui": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "required_versions": {
-                              "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "percentage": {
-                                    "maximum": 100,
-                                    "minimum": 0,
-                                    "type": "number"
-                                  },
-                                  "version": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "version",
-                                  "percentage"
-                                ],
-                                "type": "object"
-                              },
-                              "type": "array"
-                            }
-                          },
-                          "type": "object"
-                        },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
                           "items": {
@@ -12801,6 +12762,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -13005,33 +12990,6 @@
                     "nullable": true,
                     "type": "string"
                   },
-                  "fleet_ui": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "required_versions": {
-                        "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "percentage": {
-                              "maximum": 100,
-                              "minimum": 0,
-                              "type": "number"
-                            },
-                            "version": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "version",
-                            "percentage"
-                          ],
-                          "type": "object"
-                        },
-                        "type": "array"
-                      }
-                    },
-                    "type": "object"
-                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -13183,6 +13141,30 @@
                     "nullable": true,
                     "type": "object"
                   },
+                  "required_versions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "percentage": {
+                          "description": "Target percentage of agents to auto upgrade",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "version": {
+                          "description": "Target version for automatic agent upgrade",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "version",
+                        "percentage"
+                      ],
+                      "type": "object"
+                    },
+                    "nullable": true,
+                    "type": "array"
+                  },
                   "space_ids": {
                     "items": {
                       "type": "string"
@@ -13288,33 +13270,6 @@
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
-                        },
-                        "fleet_ui": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "required_versions": {
-                              "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "percentage": {
-                                    "maximum": 100,
-                                    "minimum": 0,
-                                    "type": "number"
-                                  },
-                                  "version": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "version",
-                                  "percentage"
-                                ],
-                                "type": "object"
-                              },
-                              "type": "array"
-                            }
-                          },
-                          "type": "object"
                         },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
@@ -13866,6 +13821,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
@@ -14101,33 +14080,6 @@
                           "nullable": true,
                           "type": "string"
                         },
-                        "fleet_ui": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "required_versions": {
-                              "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "percentage": {
-                                    "maximum": 100,
-                                    "minimum": 0,
-                                    "type": "number"
-                                  },
-                                  "version": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "version",
-                                  "percentage"
-                                ],
-                                "type": "object"
-                              },
-                              "type": "array"
-                            }
-                          },
-                          "type": "object"
-                        },
                         "global_data_tags": {
                           "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers.",
                           "items": {
@@ -14678,6 +14630,30 @@
                               "type": "array"
                             }
                           ]
+                        },
+                        "required_versions": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "percentage": {
+                                "description": "Target percentage of agents to auto upgrade",
+                                "maximum": 100,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "version": {
+                                "description": "Target version for automatic agent upgrade",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "version",
+                              "percentage"
+                            ],
+                            "type": "object"
+                          },
+                          "nullable": true,
+                          "type": "array"
                         },
                         "revision": {
                           "type": "number"
