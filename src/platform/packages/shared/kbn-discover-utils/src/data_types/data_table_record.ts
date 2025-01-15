@@ -10,6 +10,7 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { escape } from 'lodash';
 import { formatFieldValue } from '../utils/format_value';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
@@ -110,13 +111,7 @@ export class DataTableRecord {
     };
 
     if (uiSearchTerm?.length) {
-      let matchIndex = 0;
-      const formattedAndHighlighted = newlyFormattedFieldValue.replace(
-        // TODO: implement better replacement to account for html tags
-        new RegExp(uiSearchTerm, 'gi'), // TODO: escape the input as it would be passed to html
-        (match) =>
-          `<mark class="unifiedDataTable__findMatch" data-match-index="${matchIndex++}">${match}</mark>`
-      );
+      const formattedAndHighlighted = addSearchHighlights(newlyFormattedFieldValue, uiSearchTerm);
       this.formattedFieldValuesCache[fieldName].formattedAndHighlighted = formattedAndHighlighted;
       this.formattedFieldValuesCache[fieldName].uiSearchTerm = uiSearchTerm;
     }
@@ -133,4 +128,52 @@ export class DataTableRecord {
       formattedFieldValue.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []
     ).length;
   }
+}
+
+export function addSearchHighlights(
+  formattedFieldValueAsHtml: string,
+  uiSearchTerm: string
+): string {
+  if (!uiSearchTerm) return formattedFieldValueAsHtml;
+  const searchTerm = escape(uiSearchTerm);
+
+  const parser = new DOMParser();
+  const result = parser.parseFromString(formattedFieldValueAsHtml, 'text/html');
+  const searchTermRegExp = new RegExp(`(${searchTerm})`, 'gi');
+
+  let matchIndex = 0;
+
+  function insertSearchHighlights(node: Node) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(insertSearchHighlights);
+      return;
+    }
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const nodeWithText = node as Text;
+      const parts = (nodeWithText.textContent || '').split(searchTermRegExp);
+
+      if (parts.length > 1) {
+        const nodeWithHighlights = document.createDocumentFragment();
+
+        parts.forEach((part) => {
+          if (searchTermRegExp.test(part)) {
+            const mark = document.createElement('mark');
+            mark.textContent = part;
+            mark.setAttribute('class', 'unifiedDataTable__findMatch');
+            mark.setAttribute('data-match-index', `${matchIndex++}`);
+            nodeWithHighlights.appendChild(mark);
+          } else {
+            nodeWithHighlights.appendChild(document.createTextNode(part));
+          }
+        });
+
+        nodeWithText.replaceWith(nodeWithHighlights);
+      }
+    }
+  }
+
+  Array.from(result.body.childNodes).forEach(insertSearchHighlights);
+
+  return result.body.innerHTML;
 }
