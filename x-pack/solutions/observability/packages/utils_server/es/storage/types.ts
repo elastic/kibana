@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { merge } from 'lodash';
+import { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { Required } from 'utility-types';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];
 
@@ -21,19 +21,14 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'float'
     | 'double'
     | 'long'
+    | 'object'
   );
 
-type WithOptions<T extends MappingProperty> = T extends any
-  ? T & {
-      required?: boolean;
-      multi_value?: boolean;
-      enum?: string[];
-    }
-  : never;
+type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
 
-export type StorageMappingProperty = WithOptions<
-  Extract<MappingProperty, { type: StorageMappingPropertyType }>
->;
+export type StorageMappingProperty =
+  | Extract<MappingProperty, { type: Exclude<StorageMappingPropertyType, 'object'> }>
+  | StorageMappingPropertyObjectType;
 
 type MappingPropertyOf<TType extends StorageMappingPropertyType> = Extract<
   StorageMappingProperty,
@@ -65,7 +60,7 @@ function createFactory(
   };
 }
 
-const baseTypes = {
+const types = {
   keyword: createFactory('keyword', { ignore_above: 1024 }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
@@ -75,27 +70,9 @@ const baseTypes = {
   date: createFactory('date', { format: 'strict_date_optional_time' }),
   byte: createFactory('byte'),
   float: createFactory('float'),
+  object: createFactory('object'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
-};
-
-function enumFactory<
-  TEnum extends string,
-  TOverrides extends Partial<MappingPropertyOf<'keyword'>> | undefined
->(
-  enums: TEnum[],
-  overrides?: TOverrides
-): MappingPropertyOf<'keyword'> & { enum: TEnum[] } & Exclude<TOverrides, undefined>;
-
-function enumFactory(enums: string[], overrides?: Partial<MappingPropertyOf<'keyword'>>) {
-  const nextOverrides = merge({ enum: enums }, overrides);
-  const prop = baseTypes.keyword(nextOverrides);
-  return prop;
-}
-
-const types = {
-  ...baseTypes,
-  enum: enumFactory,
 };
 
 type PrimitiveOf<TProperty extends StorageMappingProperty> = {
@@ -112,22 +89,13 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
   long: number;
   byte: number;
   float: number;
+  object: TProperty extends { properties: Record<string, StorageMappingProperty> }
+    ? {
+        [key in keyof TProperty['properties']]: StorageFieldTypeOf<TProperty['properties'][key]>;
+      }
+    : object;
 }[TProperty['type']];
 
-type MaybeMultiValue<TProperty extends StorageMappingProperty, TPrimitive> = TProperty extends {
-  multi_value: true;
-}
-  ? TPrimitive[]
-  : TPrimitive;
-type MaybeRequired<TProperty extends StorageMappingProperty, TPrimitive> = TProperty extends {
-  required: true;
-}
-  ? TPrimitive
-  : TPrimitive | undefined;
-
-export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = MaybeRequired<
-  TProperty,
-  MaybeMultiValue<TProperty, PrimitiveOf<TProperty>>
->;
+export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = PrimitiveOf<TProperty>;
 
 export { types };

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { badRequest, internal } from '@hapi/boom';
+import { z } from '@kbn/zod';
+import { EnableStreamsResponse } from '../../lib/streams/client';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { streamsEnabled, syncStream } from '../../lib/streams/stream_crud';
-import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
-import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable',
@@ -26,29 +24,13 @@ export const enableStreamsRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({
-    request,
-    logger,
-    getScopedClients,
-  }): Promise<{ acknowledged: true; message: string }> => {
+  handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
     try {
-      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
-      const alreadyEnabled = await streamsEnabled({ scopedClusterClient });
-      if (alreadyEnabled) {
-        return { acknowledged: true, message: 'Streams was already enabled' };
-      }
-      await createStreamsIndex(scopedClusterClient);
-      await syncStream({
-        scopedClusterClient,
-        assetClient,
-        definition: rootStreamDefinition,
-        logger,
+      const { streamsClient } = await getScopedClients({
+        request,
       });
-      return {
-        acknowledged: true,
-        message:
-          'Streams enabled - reload your browser window to show the streams UI in the navigation',
-      };
+
+      return await streamsClient.enableStreams();
     } catch (e) {
       if (e instanceof SecurityException) {
         throw badRequest(e);

@@ -264,7 +264,7 @@ export class AssetClient {
     ) as Record<AssetType, string[]>;
 
     assetLinks.forEach((assetLink) => {
-      const assetType = assetLink['asset.type'];
+      const assetType = assetLink['asset.type'] as AssetType;
       const assetId = assetLink['asset.id'];
       idsByType[assetType].push(assetId);
     });

@@ -11,8 +11,10 @@ import {
   getApiClientFromSupertest,
 } from '../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
 
+export type StreamsSupertestRepositoryClient = RepositorySupertestClient<StreamsRouteRepository>;
+
 export function createStreamsRepositorySupertestClient(
   st: supertest.Agent
-): RepositorySupertestClient<StreamsRouteRepository> {
+): StreamsSupertestRepositoryClient {
   return getApiClientFromSupertest<StreamsRouteRepository>(st);
 }

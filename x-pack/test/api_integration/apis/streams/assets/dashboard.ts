@@ -5,10 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { enableStreams, indexDocument } from '../helpers/requests';
+import { disableStreams, enableStreams, indexDocument } from '../helpers/requests';
 import { createStreamsRepositorySupertestClient } from '../helpers/repository_client';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { cleanUpRootStream } from '../helpers/cleanup';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -108,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Asset links', () => {
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
 
       await indexDocument(esClient, 'logs', {
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -117,11 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await cleanUpRootStream(esClient);
-
-      await esClient.indices.deleteDataStream({
-        name: ['logs*'],
-      });
+      await disableStreams(apiClient);
 
       await deleteAssetIndices();
     });

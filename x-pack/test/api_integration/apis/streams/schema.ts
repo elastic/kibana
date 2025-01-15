@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
-  deleteStream,
+  disableStreams,
   enableStreams,
   forkStream,
   getUnmappedFieldsForStream,
@@ -15,23 +15,17 @@ import {
   simulateFieldsForStream,
 } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { cleanUpRootStream } from './helpers/cleanup';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
+
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
 
   describe('Streams Schema', () => {
-    after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
-      await cleanUpRootStream(esClient);
-    });
-
     before(async () => {
-      await enableStreams(supertest);
+      await enableStreams(apiClient);
 
       const doc = {
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -43,7 +37,10 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       await indexDocument(esClient, 'logs', doc);
-      await waitForDocumentInIndex({ esClient, indexName: 'logs', retryService, logger });
+    });
+
+    after(async () => {
+      await disableStreams(apiClient);
     });
 
     describe('Unmapped fields API', () => {
@@ -79,12 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
           condition: {
             field: 'log.logger',
-            operator: 'eq',
+            operator: 'eq' as const,
             value: 'nginx',
           },
         };
 
-        await forkStream(supertest, 'logs', forkBody);
+        await forkStream(apiClient, 'logs', forkBody);
         const response = await simulateFieldsForStream(supertest, 'logs.nginx', {
           field_definitions: [{ name: 'message', type: 'keyword' }],
         });
