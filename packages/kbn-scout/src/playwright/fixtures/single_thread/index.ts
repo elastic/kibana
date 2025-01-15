@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from '@playwright/test';
-import { browserAuthFixture } from './browser_auth';
-import { scoutPageFixture } from './page';
-import { pageObjectsFixture } from './page_objects';
-import { validateTagsFixture } from './validate_tags';
-
-export const scoutTestFixtures = mergeTests(
-  browserAuthFixture,
-  scoutPageFixture,
-  pageObjectsFixture,
-  validateTagsFixture
-);
+export { uiSettingsFixture } from './ui_settings';

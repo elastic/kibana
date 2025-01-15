@@ -18,9 +18,9 @@ import {
   createLogger,
   createSamlSessionManager,
   createScoutConfig,
-} from '../../../common/services';
-import { ScoutWorkerFixtures } from '../types/worker_scope';
-import { ScoutTestOptions } from '../../types';
+} from '../../../../common/services';
+import { ScoutWorkerFixtures } from '../../types/worker_scope';
+import { ScoutTestOptions } from '../../../types';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential

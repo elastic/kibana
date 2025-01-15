@@ -7,20 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from '@playwright/test';
+import { mergeTests } from 'playwright/test';
+import * as common from './common';
+import * as spaceAware from './parallel_run';
+import * as singleThread from './single_thread';
 
-import { scoutWorkerFixtures } from './worker';
-import { scoutTestFixtures } from './test';
+export const scoutCoreFixtures = mergeTests(
+  common.coreWorkerFixtures,
+  common.browserAuthFixture,
+  common.pageObjectsFixture,
+  common.scoutPageFixture,
+  common.validateTagsFixture,
+  singleThread.uiSettingsFixture
+);
+export const scoutCoreSpaceAwareFixtures = mergeTests(
+  common.coreWorkerFixtures,
+  spaceAware.browserAuthFixture,
+  common.pageObjectsFixture,
+  common.validateTagsFixture,
+  spaceAware.scoutSpacePageFixture,
+  spaceAware.uiSettingsSpaceFixture,
+  spaceAware.workerSpaceFixure
+);
 
-export const scoutCoreFixtures = mergeTests(scoutWorkerFixtures, scoutTestFixtures);
-
-export type {
-  EsArchiverFixture,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  ScoutPage,
-  Client,
-  KbnClient,
-  KibanaUrl,
-  ToolingLog,
-} from './types';
+export * from './types';

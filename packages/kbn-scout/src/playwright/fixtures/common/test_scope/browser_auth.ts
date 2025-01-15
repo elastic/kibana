@@ -8,9 +8,10 @@
  */
 
 import { test as base } from '@playwright/test';
-import { PROJECT_DEFAULT_ROLES } from '../../../common';
-import { LoginFixture, ScoutWorkerFixtures } from '../types';
-import { serviceLoadedMsg } from '../../utils';
+import { ScoutTestConfig, ToolingLog } from '../../../../types';
+import { PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { LoginFixture, SamlSessionManager } from '../../types';
+import { serviceLoadedMsg } from '../../../utils';
 
 type LoginFunction = (role: string) => Promise<void>;
 
@@ -19,7 +20,10 @@ type LoginFunction = (role: string) => Promise<void>;
  * different roles during tests. It uses the "samlAuth" fixture to create an authentication session
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
-export const browserAuthFixture = base.extend<{ browserAuth: LoginFixture }, ScoutWorkerFixtures>({
+export const browserAuthFixture = base.extend<
+  { browserAuth: LoginFixture },
+  { log: ToolingLog; samlAuth: SamlSessionManager; config: ScoutTestConfig }
+>({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {
     const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();

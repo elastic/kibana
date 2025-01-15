@@ -15,6 +15,7 @@ import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '.
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    globalSetup: options.globalSetup,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */

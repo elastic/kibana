@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_scope';
-export * from './worker_scope';
-export * from './parallel_run_test_scope';
-export * from './parallel_run_worker_scope';
+export { browserAuthFixture } from './browser_auth';
+export { pageObjectsFixture } from './page_objects';
+export { scoutPageFixture } from './page';
+export { validateTagsFixture } from './validate_tags';

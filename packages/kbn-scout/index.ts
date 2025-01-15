@@ -8,7 +8,14 @@
  */
 
 export * as cli from './src/cli';
-export { expect, test, tags, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
+export {
+  expect,
+  test,
+  spaceTest,
+  tags,
+  createPlaywrightConfig,
+  createLazyPageObject,
+} from './src/playwright';
 export type {
   ScoutPage,
   ScoutPlaywrightOptions,
@@ -17,6 +24,8 @@ export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   EsArchiverFixture,
+  ParallelRunTestFixtures,
+  ParallelRunWorkerFixtures,
 } from './src/playwright';
 
 export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';

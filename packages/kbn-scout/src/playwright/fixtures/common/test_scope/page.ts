@@ -9,7 +9,7 @@
 
 import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
+import { KibanaUrl, ScoutPage } from '../../types';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -69,6 +69,26 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   return extendedMethods as ScoutPage['testSubj'];
 }
 
+export function extendPlaywrightPage({
+  page,
+  kbnUrl,
+}: {
+  page: Page;
+  kbnUrl: KibanaUrl;
+}): ScoutPage {
+  const extendedPage = page as ScoutPage;
+  // Extend page with '@kbn/test-subj-selector' support
+  extendedPage.testSubj = extendPageWithTestSubject(page);
+  // Method to navigate to specific Kibana apps
+  extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+  // Method to wait for global loading indicator to be hidden
+  extendedPage.waitForLoadingIndicatorHidden = () =>
+    extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
+      state: 'attached',
+    });
+  return extendedPage;
+}
+
 /**
  * Extends the 'page' fixture with Kibana-specific functionality
  *
@@ -95,20 +115,12 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
  * await page.gotoApp('discover);
  * ```
  */
-export const scoutPageFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+export const scoutPageFixture = base.extend<{}, { kbnUrl: KibanaUrl }>({
   page: async (
     { page, kbnUrl }: { page: Page; kbnUrl: KibanaUrl },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
-    const extendedPage = page as ScoutPage;
-    // Extend page with '@kbn/test-subj-selector' support
-    extendedPage.testSubj = extendPageWithTestSubject(page);
-    // Method to navigate to specific Kibana apps
-    extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
-    // Method to wait for global loading indicator to be hidden
-    extendedPage.waitForLoadingIndicatorHidden = () =>
-      extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
-
+    const extendedPage = extendPlaywrightPage({ page, kbnUrl });
     await use(extendedPage);
   },
 });

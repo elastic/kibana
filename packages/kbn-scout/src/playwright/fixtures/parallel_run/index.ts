@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_scope';
-export * from './worker_scope';
-export * from './parallel_run_test_scope';
-export * from './parallel_run_worker_scope';
+export { scoutSpacePageFixture } from './page';
+export { uiSettingsSpaceFixture } from './ui_settings';
+export { workerSpaceFixure } from './worker_space';
+export { browserAuthFixture } from './browser_auth';

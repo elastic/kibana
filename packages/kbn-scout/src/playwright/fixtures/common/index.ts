@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from 'playwright/test';
-import { uiSettingsFixture } from './ui_settings';
-import { coreWorkerFixtures } from './core';
-
-export const scoutWorkerFixtures = mergeTests(coreWorkerFixtures, uiSettingsFixture);
+export * from './test_scope';
+export * from './worker_scope';

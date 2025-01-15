@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_scope';
-export * from './worker_scope';
-export * from './parallel_run_test_scope';
-export * from './parallel_run_worker_scope';
+import { LoginFixture, ScoutPage } from './test_scope';
+import { PageObjects } from '../../page_objects';
+
+/**
+ * The `ParallelRunTestScopeFixtures` type defines the set of fixtures that are available
+ */
+export interface ParallelRunTestFixtures {
+  browserAuth: LoginFixture;
+  page: ScoutPage;
+  pageObjects: PageObjects;
+}

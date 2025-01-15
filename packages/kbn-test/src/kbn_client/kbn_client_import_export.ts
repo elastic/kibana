@@ -70,7 +70,7 @@ export class KbnClientImportExport {
       method: 'POST',
       path: '/api/saved_objects/_import',
       query: {
-        overwrite: true,
+        createNewCopies: true,
       },
       body: formData,
       headers: formData.getHeaders(),

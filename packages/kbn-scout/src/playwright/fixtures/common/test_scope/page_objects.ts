@@ -8,8 +8,8 @@
  */
 
 import { test as base } from '@playwright/test';
-import { ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
-import { createCorePageObjects } from '../../page_objects';
+import { ScoutPage } from '../../types';
+import { PageObjects, createCorePageObjects } from '../../../page_objects';
 
 /**
  * The "pageObjects" fixture provides a centralized and consistent way to access and
@@ -19,7 +19,7 @@ import { createCorePageObjects } from '../../page_objects';
  *
  * Note: Page Objects are lazily instantiated on first access.
  */
-export const pageObjectsFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+export const pageObjectsFixture = base.extend<{ page: ScoutPage; pageObjects: PageObjects }>({
   pageObjects: async ({ page }, use) => {
     const corePageObjects = createCorePageObjects(page);
 
