@@ -97,7 +97,7 @@ export class Client {
     this.log = options.log;
   }
   /**
-    * An exception list groups exception items and can be associated with detection rules. You can assign detection rules with multiple exception lists.
+    * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
 > info
 > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
 

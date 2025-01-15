@@ -45,13 +45,13 @@ paths:
                 meta:
                   $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
                 expire_time:
-                  type: string
-                  format: date-time
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemExpireTime'
                 comments:
                   $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
                   default: []
                 _version:
                   type: string
+                  description: The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
               required:
                 - type
                 - name
@@ -114,8 +114,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      [request body]: item_id: Expected string, received number
+                    message: '[request body]: item_id: Expected string, received number'
         401:
           description: Unsuccessful authentication response
           content:
@@ -127,14 +126,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [PUT /api/exception_lists/items] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: Exception list item not found response
           content:
@@ -144,8 +148,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: |
-                      exception list item item_id: \"foo\" does not exist
+                    message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
         500:
           description: Internal server error response

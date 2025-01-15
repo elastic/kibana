@@ -17,6 +17,9 @@ paths:
           description: Detection rule's identifier
           schema:
             $ref: '#/components/schemas/RuleId'
+          examples:
+            id:
+              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
       requestBody:
         description: Rule exception items.
         required: true
@@ -80,11 +83,9 @@ paths:
                       comments: []
                       _version: WzQsMV0=
                       tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
-                      created_at: |
-                        2025-01-07T20:07:33.119Z
+                      created_at: 2025-01-07T20:07:33.119Z
                       created_by: elastic
-                      updated_at: |
-                        2025-01-07T20:07:33.119Z
+                      updated_at: 2025-01-07T20:07:33.119Z
                       updated_by: elastic
         400:
           description: Invalid input data response
@@ -99,14 +100,12 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      [request params]: id: Invalid uuid
+                    message: '[request params]: id: Invalid uuid'
                 badPayload:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      Invalid request payload JSON format
+                    message: 'Invalid request payload JSON format'
         401:
           description: Unsuccessful authentication response
           content:
@@ -118,14 +117,18 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    message: 'Unable to create exception-list'
+                    status_code: 403
         500:
           description: Internal server error response
           content:

@@ -14,12 +14,11 @@ paths:
         - name: list_id
           in: query
           required: true
-          description: List's id
+          description: The `list_id`s of the items to fetch.
           schema:
             type: array
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
-          example: simple_list
         - name: filter
           in: query
           required: false
@@ -31,7 +30,9 @@ paths:
             items:
               $ref: '#/components/schemas/FindExceptionListItemsFilter'
             default: []
-          example: [exception-list.attributes.name:%My%20item]
+          examples:
+            singleFilter:
+              value: [exception-list.attributes.name:%My%20item]
         - name: namespace_type
           in: query
           required: false
@@ -43,13 +44,15 @@ paths:
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: [single]
-          example: [single]
+          examples:
+            single:
+              value: [single]
         - name: search
           in: query
           required: false
           schema:
             type: string
-          example: host.name
+            example: host.name
         - name: page
           in: query
           required: false
@@ -57,7 +60,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-          example: 1
+            example: 1
         - name: per_page
           in: query
           required: false
@@ -65,22 +68,22 @@ paths:
           schema:
             type: integer
             minimum: 0
-          example: 20
+            example: 20
         - name: sort_field
           in: query
           required: false
-          description: Determines which field is used to sort the results
+          description: Determines which field is used to sort the results.
           schema:
             $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
           example: 'name'
         - name: sort_order
           in: query
           required: false
-          description: Determines the sort order, which can be `desc` or `asc`
+          description: Determines the sort order, which can be `desc` or `asc`.
           schema:
             type: string
             enum: [desc, asc]
-          example: desc
+            example: desc
       responses:
         200:
           description: Successful response
@@ -153,8 +156,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      [request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:
@@ -166,14 +168,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/exception_lists/items/_find?list_id=simple_list&namespace_type=single] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: Exception list not found response
           content:
@@ -183,8 +190,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: |
-                      exception list list_id: "foo" does not exist
+                    message: 'exception list list_id: "foo" does not exist'
                     status_code: 404
         500:
           description: Internal server error response

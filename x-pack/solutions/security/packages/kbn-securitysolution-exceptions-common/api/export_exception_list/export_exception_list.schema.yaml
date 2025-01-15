@@ -14,27 +14,27 @@ paths:
         - name: id
           in: query
           required: true
-          description: Exception list's identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
-          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
         - name: list_id
           in: query
           required: true
-          description: Exception list's human identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
-          example: simple_list
         - name: namespace_type
           in: query
           required: true
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
-          example: single
+          examples:
+            single:
+              value: single
+            agnostic:
+              value: agnostic
         - name: include_expired_exceptions
           in: query
           required: true
-          description: Determines whether to include expired exceptions in the exported list
+          description: Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
           schema:
             type: string
             enum: ['true', 'false']
@@ -68,8 +68,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      [request query]: list_id: Required, namespace_type: Required
+                    message: '[request query]: list_id: Required, namespace_type: Required'
         401:
           description: Unsuccessful authentication response
           content:
@@ -81,14 +80,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/exception_lists/_export] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: Exception list not found response
           content:

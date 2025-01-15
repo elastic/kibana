@@ -14,25 +14,27 @@ paths:
         - name: list_id
           in: query
           required: true
-          description: Exception list's human identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
-          example: simple_list
         - name: namespace_type
           in: query
           required: true
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
-          example: single
+          examples:
+            single:
+              value: single
+            agnostic:
+              value: agnostic
         - name: include_expired_exceptions
           in: query
           required: true
-          description: Determines whether to include expired exceptions in the exported list
+          description: Determines whether to include expired exceptions in the duplicated list. Expiration date defined by `expire_time`.
           schema:
             type: string
             enum: ['true', 'false']
             default: 'true'
-          example: true
+            example: true
       responses:
         200:
           description: Successful response
@@ -55,11 +57,9 @@ paths:
                     version: 1
                     _version: WzExNDY1LDFd
                     tie_breaker_id: 6fa670bd-666d-4c9c-9f1e-d1dbc516e985
-                    created_at: |
-                      2025-01-09T16:19:50.280Z
+                    created_at: 2025-01-09T16:19:50.280Z
                     created_by: elastic
-                    updated_at: |
-                      2025-01-09T16:19:50.280Z
+                    updated_at: 2025-01-09T16:19:50.280Z
                     updated_by: elastic
         400:
           description: Invalid input data response
@@ -74,8 +74,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: |
-                      [request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
         401:
           description: Unsuccessful authentication response
           content:
@@ -87,14 +86,19 @@ paths:
                   value:
                     statusCode: 401
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/exception_lists/_duplicate] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: Exception list not found
           content:
