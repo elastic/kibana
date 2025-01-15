@@ -22,8 +22,8 @@ export const configSchema = schema.object({
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
   hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
   hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
-  hasNativeConnectors: schema.boolean({ defaultValue: true }),
-  hasWebCrawler: schema.boolean({ defaultValue: true }),
+  hasNativeConnectors: schema.boolean({ defaultValue: false }),
+  hasWebCrawler: schema.boolean({ defaultValue: false }),
   host: schema.maybe(schema.string()),
   isCloud: schema.boolean({ defaultValue: false }),
   ssl: schema.object({

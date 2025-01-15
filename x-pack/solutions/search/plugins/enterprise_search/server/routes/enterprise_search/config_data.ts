@@ -28,8 +28,9 @@ export function registerConfigDataRoute({
           hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
           hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
           hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
-          hasNativeConnectors: config.hasNativeConnectors,
-          hasWebCrawler: config.hasWebCrawler,
+          // 9.x Does not have ent search node, and therefore does not have support for the following
+          hasNativeConnectors: false,
+          hasWebCrawler: false,
         },
         kibanaVersion: kibanaPackageJson.version,
       };
