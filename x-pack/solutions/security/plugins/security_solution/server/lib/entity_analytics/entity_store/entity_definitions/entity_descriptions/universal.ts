@@ -52,16 +52,11 @@ const entityMetadataExtractorProcessor = {
         }
       }
 
-      Map merged = ctx;
       def id = ctx.entity.id;
+      Map merged = ctx;
+      Object json = Processors.json(ctx.collected.metadata);
 
-      for (meta in ctx.collected.metadata) {
-        Object json = Processors.json(meta);
-
-        if (((Map)json)[id] == null) {
-          continue;
-        }
-
+      if (((Map)json)[id] != null) {
         overwriteLeafFields(merged, ((Map)json)[id]);
       }
 
