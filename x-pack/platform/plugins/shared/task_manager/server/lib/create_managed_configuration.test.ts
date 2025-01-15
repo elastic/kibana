@@ -492,13 +492,13 @@ describe('createManagedConfiguration()', () => {
 
     describe('mget claim strategy', () => {
       test('should increase configuration at the next interval when an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         clock.tick(1);
         expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
       });
 
       test('should log a warning when the configuration changes from the starting value', async () => {
@@ -506,12 +506,12 @@ describe('createManagedConfiguration()', () => {
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
         );
       });
 
       test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 3600);

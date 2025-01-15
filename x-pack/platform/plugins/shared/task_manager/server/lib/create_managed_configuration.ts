@@ -295,17 +295,12 @@ function getAverageUtilization(
   const currentTime = Date.now();
   window.push({ timestamp: currentTime, utilization });
 
-  // Remove old utilization data outside the 15s window
+  // Remove utilizations outside the 15s window
   while (window.length > 0 && window[0].timestamp < currentTime - TM_UTILIZATION_WINDOW) {
     window.shift();
   }
-  return getRunningAverage(window);
-}
 
-function getRunningAverage(window: TaskManagerUtilizationWindow[]): number {
-  if (window.length === 0) {
-    return 0;
-  }
+  // Return the avg utilization
   const total = sumBy(window, (w) => w.utilization);
   return total / window.length;
 }
