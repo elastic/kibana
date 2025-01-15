@@ -126,11 +126,9 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
-                <>
-                  <EuiText size="s" textAlign="center">
-                    {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
-                  </EuiText>
-                </>
+                <EuiText size="s" textAlign="center">
+                  {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                </EuiText>
               }
               accept="application/text"
               onChange={parseFile}

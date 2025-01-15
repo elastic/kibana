@@ -82,11 +82,9 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
-                <>
-                  <EuiText size="s" textAlign="center">
-                    {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT}
-                  </EuiText>
-                </>
+                <EuiText size="s" textAlign="center">
+                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                </EuiText>
               }
               accept="application/json, application/x-ndjson"
               onChange={onFileChange}

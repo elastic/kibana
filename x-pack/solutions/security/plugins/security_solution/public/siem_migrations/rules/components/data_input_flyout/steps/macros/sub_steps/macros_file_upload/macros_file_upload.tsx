@@ -78,11 +78,9 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
-                <>
-                  <EuiText size="s" textAlign="center">
-                    {i18n.MACROS_DATA_INPUT_FILE_UPLOAD_PROMPT}
-                  </EuiText>
-                </>
+                <EuiText size="s" textAlign="center">
+                  {i18n.MACROS_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                </EuiText>
               }
               accept="application/json, application/x-ndjson"
               onChange={onFileChange}

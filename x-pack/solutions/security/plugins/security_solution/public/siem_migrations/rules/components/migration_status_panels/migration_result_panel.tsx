@@ -24,7 +24,7 @@ import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { PanelText } from '../../../../common/components/panel_text';
 import {
   convertTranslationResultIntoText,
@@ -61,7 +61,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} className={headerStyle}>
+            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <PanelText size="s" semiBold>
