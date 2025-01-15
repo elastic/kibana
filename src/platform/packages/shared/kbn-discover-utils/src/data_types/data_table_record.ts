@@ -119,14 +119,8 @@ export class DataTableRecord {
     return this.formattedFieldValuesCache[fieldName].formattedAndHighlighted || '';
   }
 
-  findSearchMatchesInFormattedValue({
-    formattedFieldValue,
-  }: {
-    formattedFieldValue: string;
-  }): number {
-    return (
-      formattedFieldValue.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []
-    ).length;
+  findSearchMatchesInFormattedAndHighlightedValue(value: string): number {
+    return (value.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []).length;
   }
 }
 

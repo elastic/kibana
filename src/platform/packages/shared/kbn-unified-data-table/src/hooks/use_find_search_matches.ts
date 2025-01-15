@@ -70,9 +70,8 @@ export const useFindSearchMatches = ({
           uiSearchTerm,
         });
 
-        const matchesCountForFieldName = row.findSearchMatchesInFormattedValue({
-          formattedFieldValue,
-        });
+        const matchesCountForFieldName =
+          row.findSearchMatchesInFormattedAndHighlightedValue(formattedFieldValue);
 
         if (matchesCountForFieldName) {
           matchesPerFieldName[fieldName] = matchesCountForFieldName;
@@ -106,7 +105,7 @@ export const useFindSearchMatches = ({
       let traversedMatchesCount = 0;
 
       for (const rowIndex of rowIndices) {
-        const matchesPerFieldName = matchesMap[rowIndex];
+        const matchesPerFieldName = matchesMap[Number(rowIndex)];
         const fieldNames = Object.keys(matchesPerFieldName);
 
         for (const fieldName of fieldNames) {
