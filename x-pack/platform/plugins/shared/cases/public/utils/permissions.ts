@@ -15,13 +15,22 @@ export const isReadOnlyPermissions = (permissions: CasesPermissions) => {
     !permissions.delete &&
     !permissions.push &&
     !permissions.assignCase &&
+    !permissions.createComment &&
     permissions.read
   );
 };
 
 type CasePermission = Exclude<keyof CasesPermissions, 'all'>;
 
-export const allCasePermissions: CasePermission[] = ['create', 'read', 'update', 'delete', 'push'];
+export const allCasePermissions: CasePermission[] = [
+  'create',
+  'read',
+  'update',
+  'delete',
+  'push',
+  'assignCase',
+  'createComment',
+];
 
 export const getAllPermissionsExceptFrom = (capToExclude: CasePermission): CasePermission[] =>
   allCasePermissions.filter((permission) => permission !== capToExclude) as CasePermission[];
