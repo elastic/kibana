@@ -28,15 +28,10 @@ export const getTimelineRowTypeIndicator: NonNullable<UnifiedDataTableProps['get
 
     const isEvenSequence = parseInt(sequenceNumber, 10) % 2 === 0;
 
-    if (isEvenSequence) {
-      return {
-        color: euiTheme.colors.primary,
-        label: 'EQL Sequence',
-      };
-    }
     return {
-      color: euiTheme.colors.accent,
-      label: 'EQL Non Sequence',
+      /* alternating colors to differentiate consecutive sequences */
+      color: isEvenSequence ? euiTheme.colors.primary : euiTheme.colors.accent,
+      label: 'EQL Sequence',
     };
   }
 
