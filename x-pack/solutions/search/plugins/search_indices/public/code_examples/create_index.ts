@@ -47,7 +47,7 @@ export const DenseVectorCodeExamples: CreateIndexCodeExamples = {
 };
 
 export const SemanticCodeExamples: CreateIndexCodeExamples = {
-  exampleType: 'vector',
+  exampleType: 'semantic',
   installTitle: INSTALL_INSTRUCTIONS_TITLE,
   installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
   createIndexTitle: CONNECT_CREATE_SEMANTIC_INDEX_CMD_TITLE,
