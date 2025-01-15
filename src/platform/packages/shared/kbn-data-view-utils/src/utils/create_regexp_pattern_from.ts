@@ -7,12 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createRegExpPatternFrom = (basePatterns: string | string[]) => {
-  const patterns = Array.isArray(basePatterns) ? basePatterns : [basePatterns];
-  // Create the base patterns union with strict boundaries
-  const basePatternGroup = `[^,\\s]*(\\b|_)(${patterns.join('|')})(\\b|_)([^,\\s]*)?`;
-  // Apply base patterns union for local and remote clusters
-  const localAndRemotePatternGroup = `((${basePatternGroup})|([^:,\\s]*:${basePatternGroup}))`;
-  // Handle trailing comma and multiple pattern concatenation
-  return new RegExp(`^${localAndRemotePatternGroup}(,${localAndRemotePatternGroup})*(,$|$)`, 'i');
+export const createRegExpPatternFrom = (basePatterns: string | string[], selectors: string[]) => {
+  const indexNamePatterns = Array.isArray(basePatterns) ? basePatterns : [basePatterns];
+
+  const { allowNoSelector, normalizedSelectors } = normalizeSelectors(selectors);
+
+  return new RegExp(
+    `^(?:(?:[^:,\\s]*:)?[^:,\\s]*(?:\\b|_)(?:${indexNamePatterns.join(
+      '|'
+    )})(?:\\b|_)(?:[^:,\\s]*)?(?:::(?:${normalizedSelectors.join('|')}))${
+      allowNoSelector ? '?' : ''
+    },?)+$`,
+    'i'
+  );
+};
+
+const normalizeSelectors = (
+  selectors: string[]
+): { allowNoSelector: boolean; normalizedSelectors: string[] } => {
+  if (selectors.length === 0) {
+    return { allowNoSelector: true, normalizedSelectors: ['data'] };
+  } else if (selectors.includes('data')) {
+    return { allowNoSelector: true, normalizedSelectors: selectors };
+  } else {
+    return { allowNoSelector: false, normalizedSelectors: selectors };
+  }
 };

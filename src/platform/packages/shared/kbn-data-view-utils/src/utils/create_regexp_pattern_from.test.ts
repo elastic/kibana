@@ -10,7 +10,7 @@
 import { createRegExpPatternFrom } from './create_regexp_pattern_from';
 
 describe('createRegExpPatternFrom should create a regular expression starting from a string that', () => {
-  const regExpPattern = createRegExpPatternFrom('logs');
+  const regExpPattern = createRegExpPatternFrom('logs', ['data']);
 
   it('tests positive for single index patterns starting with the passed base pattern', () => {
     expect('logs*').toMatch(regExpPattern);
@@ -60,6 +60,24 @@ describe('createRegExpPatternFrom should create a regular expression starting fr
   it('tests positive for patterns with trailing commas', () => {
     expect('logs-*,').toMatch(regExpPattern);
     expect('cluster1:logs-*,logs-*,').toMatch(regExpPattern);
+  });
+
+  it('tests positive for patterns with the data selector suffix', () => {
+    expect('logs-*::data').toMatch(createRegExpPatternFrom('logs', ['data']));
+    expect('logs-*::data').toMatch(createRegExpPatternFrom('logs', []));
+    expect('logs-*').toMatch(createRegExpPatternFrom('logs', ['data']));
+    expect('cluster1:logs-*::data,logs-*::data').toMatch(createRegExpPatternFrom('logs', ['data']));
+  });
+
+  it('tests negative for patterns with the failures selector suffix', () => {
+    expect('logs-*::failures').not.toMatch(regExpPattern);
+    expect('cluster1:logs-*::failures,').not.toMatch(regExpPattern);
+    expect('cluster1:logs-*::failures,logs-*::failures').not.toMatch(regExpPattern);
+  });
+
+  it('tests negative for patterns with the wildcard selector suffix', () => {
+    expect('logs-*::*').not.toMatch(regExpPattern);
+    expect('cluster1:logs-*::*,logs-*::*').not.toMatch(regExpPattern);
   });
 
   it('tests negative for patterns with spaces and unexpected commas', () => {
