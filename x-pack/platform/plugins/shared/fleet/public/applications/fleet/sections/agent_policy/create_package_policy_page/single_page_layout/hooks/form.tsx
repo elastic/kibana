@@ -191,9 +191,6 @@ export function useOnSubmit({
       if (packageInfo) {
         setHasAgentPolicyError(false);
       }
-
-      // eslint-disable-next-line no-console
-      console.debug('Agent policy updated', updatedAgentPolicies);
     },
     [packageInfo, agentPolicies]
   );
@@ -208,8 +205,6 @@ export function useOnSubmit({
           spaceSettings
         );
         setValidationResults(newValidationResult);
-        // eslint-disable-next-line no-console
-        console.debug('Package policy validation results', newValidationResult);
 
         return newValidationResult;
       }
@@ -225,8 +220,6 @@ export function useOnSubmit({
       };
       setPackagePolicy(newPackagePolicy);
 
-      // eslint-disable-next-line no-console
-      console.debug('Package policy updated', newPackagePolicy);
       const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
       const hasPackage = newPackagePolicy.package;
       const hasValidationErrors = newValidationResults
