@@ -23,6 +23,7 @@ export const ResizeHandle = ({
     <button
       className="kbnGridPanel--resizeHandle"
       onMouseDown={(e) => {
+        if (e.button !== 0) return; // ignore right clicks
         interactionStart('resize', e);
       }}
       onMouseUp={(e) => {
@@ -40,7 +41,6 @@ export const ResizeHandle = ({
       css={css`
         right: 0;
         bottom: 0;
-        opacity: 0;
         margin: -2px;
         position: absolute;
         width: ${euiTheme.size.l};
@@ -57,12 +57,6 @@ export const ResizeHandle = ({
         .kbnGridPanel--expanded & {
           opacity: 0 !important;
           display: none;
-        }
-        .kbnGridPanel__dragHandle:has(~ &:hover) {
-          opacity: 0 !important;
-        }
-        .kbnGridPanel__dragHandle:has(~ &:focus) {
-          opacity: 0 !important;
         }
       `}
     />

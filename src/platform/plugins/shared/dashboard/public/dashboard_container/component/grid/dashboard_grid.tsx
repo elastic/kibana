@@ -139,13 +139,13 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
           }
 
           .kbnGridPanel--resizeHandle {
-            border-radius: 7px 0 7px 0;
-            border-bottom: 2px solid ${euiTheme.colors.vis.euiColorVis0};
-            border-right: 2px solid ${euiTheme.colors.vis.euiColorVis0};
+            mask-repeat: no-repeat;
+            background-color: grey;
+            mask-position: bottom 8px right 8px;
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath fill='%23000000' d='M6 6H0V4.2h4.2V0H6z'/%3E%3C/svg%3E");
             &:hover,
             &:focus {
-              outline-style: none !important;
-              opacity: 1;
+              background-color: ${euiTheme.colors.vis.euiColorVis0};
             }
           }
 
