@@ -128,6 +128,48 @@ createServerRouteFactory<{}, { tags: string[] }>()({
   handler: async (resources) => {},
 });
 
+// handler return, respects the responseValidation
+createServerRouteFactory<{}, { tags: string[] }>()({
+  endpoint: 'GET /api/endpoint_with_response_validation 2023-10-31',
+  options: {
+    tags: [],
+  },
+  responseValidation: {
+    200: {
+      body: z.object({
+        success: z.literal(true),
+        data: z.array(z.object({ id: z.number() })),
+      }),
+    },
+  },
+  // @ts-expect-error Property 'data' is missing in type '{ success: true; }' but required in type 'InferType<{ id: NumberC; }>[]'.
+  handler: async (resources) => {
+    return { success: true as const };
+  },
+});
+
+// handler return, respects the responseValidation with IKibanaResponseFactory
+createServerRouteFactory<{}, { tags: string[] }>()({
+  endpoint: 'GET /api/endpoint_with_response_validation 2023-10-31',
+  options: {
+    tags: [],
+  },
+  responseValidation: {
+    200: {
+      body: z.object({
+        success: z.literal(true),
+        data: z.array(z.object({ id: z.number() })),
+      }),
+    },
+  },
+  // @ts-expect-error Property 'data' is missing in type '{ success: true; }' but required in type 'InferType<{ id: NumberC; }>[]'.
+  handler: async (resources) => {
+    return kibanaResponseFactory.ok({
+      body: { data: [] },
+    });
+  },
+});
+
 // cannot return observables that are not in the SSE structure
 const route = createServerRouteFactory<{}, {}>()({
   endpoint: 'POST /internal/endpoint_returning_observable_without_sse_structure',
@@ -228,6 +270,55 @@ const repository = {
       return of({ type: 'foo' as const, streamed_response: true });
     },
   }),
+  ...createServerRoute({
+    endpoint: 'GET /internal/endpoint_with_response_validation_zod',
+    params: z.object({
+      query: z.object({
+        start: z.string(),
+      }),
+    }),
+    responseValidation: {
+      200: {
+        body: z.object({
+          success: z.literal(true),
+          data: z.array(z.object({ id: z.number() })),
+        }),
+      },
+      202: {
+        body: z.object({
+          success: z.literal(true),
+          data: z.array(z.object({ id: z.number() })).length(0),
+        }),
+      },
+      400: {
+        body: z.object({
+          success: z.literal(false),
+          error: z.string(),
+        }),
+      },
+    },
+    async handler(resources) {
+      const start = resources.params.query.start;
+
+      if (start === 'something-1') {
+        return {
+          success: true as const,
+          data: [{ id: 1 }, { id: 2 }],
+        };
+      }
+
+      if (start === 'something-2') {
+        return kibanaResponseFactory.accepted({
+          body: {
+            success: true as const,
+            data: [{ id: 1 }, { id: 2 }],
+          },
+        });
+      }
+
+      return { success: false as const, error: 'Example error' };
+    },
+  }),
 };
 
 type TestRepository = typeof repository;
@@ -240,6 +331,7 @@ assertType<Array<EndpointOf<TestRepository>>>([
   'GET /internal/endpoint_with_optional_params',
   'GET /internal/endpoint_with_params_zod',
   'GET /internal/endpoint_with_optional_params_zod',
+  'GET /internal/endpoint_with_response_validation_zod',
   'GET /internal/endpoint_returning_result',
   'GET /internal/endpoint_returning_kibana_response',
 ]);
@@ -369,6 +461,27 @@ client
 
     assertType<{
       yesParamsForMe: boolean;
+    }>(res);
+  });
+
+client
+  .fetch('GET /internal/endpoint_with_response_validation_zod', {
+    params: {
+      query: {
+        start: '',
+      },
+    },
+    timeout: 1,
+  })
+  .then((res) => {
+    assertType<{
+      success: true;
+      data: Array<{ id: number }>;
+    }>(res);
+
+    assertType<{
+      success: false;
+      error: string;
     }>(res);
   });
 

@@ -9,12 +9,6 @@
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import type {
-  IKibanaResponse,
-  RouteAccess,
-  RouteSecurity,
-  VersionedRouteResponseValidation,
-} from '@kbn/core-http-server';
-import type {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -22,6 +16,14 @@ import type {
   RouteConfigOptions,
   RouteMethod,
 } from '@kbn/core/server';
+import type {
+  HttpResponsePayload,
+  IKibanaResponse,
+  ResponseError,
+  RouteAccess,
+  RouteSecurity,
+  VersionedRouteResponseValidation,
+} from '@kbn/core-http-server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
@@ -144,22 +146,28 @@ export type TRouteResponse = TRouteResponseStatusCodes & {
   };
 } & Omit<VersionedRouteResponseValidation, number>;
 
-export type ExtractResponseStatusBodyTypes<T> = T extends Record<
-  number,
-  { body: z.ZodSchema<infer U> }
->
-  ? U
-  : never;
+export type ExtractResponseStatusBodyTypes<T extends TRouteResponse> = z.infer<
+  T[Extract<keyof T, number>]['body']
+>;
 
 type ServerRouteHandler<
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TRouteParamsRT extends RouteParamsRT | undefined,
-  TReturnType extends ServerRouteHandlerReturnType
+  TReturnType extends ServerRouteHandlerReturnType,
+  TResponseValidation extends TRouteResponse | undefined = undefined
 > = (
   options: TRouteHandlerResources &
     (TRouteParamsRT extends RouteParamsRT ? DecodedRequestParamsOfType<TRouteParamsRT> : {})
 ) => Promise<
-  TReturnType extends ServerRouteHandlerReturnTypeWithoutRecord
+  TResponseValidation extends TRouteResponse
+    ? ExtractResponseStatusBodyTypes<TResponseValidation> extends
+        | HttpResponsePayload
+        | ResponseError
+      ?
+          | ExtractResponseStatusBodyTypes<TResponseValidation>
+          | IKibanaResponse<ExtractResponseStatusBodyTypes<TResponseValidation>>
+      : ExtractResponseStatusBodyTypes<TResponseValidation>
+    : TReturnType extends ServerRouteHandlerReturnTypeWithoutRecord
     ? TReturnType
     : GuardAgainstInvalidRecord<TReturnType>
 >;
@@ -169,6 +177,7 @@ export type CreateServerRouteFactory<
   TRouteCreateOptions extends DefaultRouteCreateOptions | undefined
 > = <
   TEndpoint extends string,
+  TReturnType extends ServerRouteHandlerReturnType,
   TRouteParamsRT extends RouteParamsRT | undefined = undefined,
   TRouteAccess extends RouteAccess | undefined = undefined,
   TResponseValidation extends TRouteResponse | undefined = undefined
@@ -178,9 +187,8 @@ export type CreateServerRouteFactory<
     handler: ServerRouteHandler<
       TRouteHandlerResources,
       TRouteParamsRT,
-      TResponseValidation extends TRouteResponse
-        ? ExtractResponseStatusBodyTypes<TResponseValidation>
-        : ServerRouteHandlerReturnType
+      TReturnType,
+      TResponseValidation
     >;
     params?: TRouteParamsRT;
     responseValidation?: TResponseValidation;
@@ -200,10 +208,9 @@ export type CreateServerRouteFactory<
     TEndpoint,
     TRouteParamsRT,
     TRouteHandlerResources,
-    TResponseValidation extends TRouteResponse
-      ? ExtractResponseStatusBodyTypes<TResponseValidation>
-      : ServerRouteHandlerReturnType,
-    TRouteCreateOptions
+    Awaited<TReturnType>,
+    TRouteCreateOptions,
+    TResponseValidation
   >
 >;
 
@@ -212,10 +219,16 @@ export type ServerRoute<
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType extends ServerRouteHandlerReturnType,
-  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined
+  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined,
+  TResponseValidation extends TRouteResponse | undefined = undefined
 > = {
   endpoint: TEndpoint;
-  handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
+  handler: ServerRouteHandler<
+    TRouteHandlerResources,
+    TRouteParamsRT,
+    TReturnType,
+    TResponseValidation
+  >;
   security?: RouteSecurity;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions
@@ -226,7 +239,14 @@ export type ServerRoute<
 
 export type ServerRouteRepository = Record<
   string,
-  ServerRoute<string, RouteParamsRT | undefined, any, any, ServerRouteCreateOptions | undefined>
+  ServerRoute<
+    string,
+    RouteParamsRT | undefined,
+    any,
+    any,
+    ServerRouteCreateOptions | undefined,
+    TRouteResponse | undefined
+  >
 >;
 
 type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
@@ -280,7 +300,8 @@ export type ClientRequestParamsOf<
   infer TRouteParamsRT,
   any,
   any,
-  ServerRouteCreateOptions | undefined
+  ServerRouteCreateOptions | undefined,
+  any
 >
   ? TRouteParamsRT extends RouteParamsRT
     ? ClientRequestParamsOfType<TRouteParamsRT>

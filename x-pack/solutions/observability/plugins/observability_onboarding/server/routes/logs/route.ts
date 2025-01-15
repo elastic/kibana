@@ -97,7 +97,10 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
 
 const testOasGeneration = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /api/test_os_generation',
-  options: { tags: [] },
+  options: {
+    tags: [],
+    access: 'internal',
+  },
   params: z.object({
     query: z.object({
       start: z.string().optional(),
@@ -126,11 +129,11 @@ const testOasGeneration = createObservabilityOnboardingServerRoute({
 
     if (start) {
       return {
-        success: true,
+        success: true as const,
         data: [{ id: 1 }, { id: 2 }],
       };
     } else {
-      return { success: false, error: 'Example error' };
+      return { success: false as const, error: 'Example error' };
     }
   },
 });
