@@ -28,9 +28,11 @@ export interface RoleKibanaPrivilege {
   _reserved?: string[];
 }
 
+export type RemoteClusterPrivilege = 'monitor_enrich' | 'monitor_stats';
+
 export interface RoleRemoteClusterPrivilege {
-  clusters: string[];
-  privileges: string[];
+  clusters: string | string[];
+  privileges: RemoteClusterPrivilege[];
 }
 
 export interface Role {
