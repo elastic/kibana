@@ -8,10 +8,15 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { createFilter } from '../../../common/containers/helpers';
-import { EntityType, RiskScoreSortField, RiskScoreStrategyResponse, StrategyResponseType } from '../../../../common/search_strategy';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../common/search_strategy';
+import type {
+  RiskScoreSortField,
+  RiskScoreStrategyResponse,
+  StrategyResponseType,
+} from '../../../../common/search_strategy';
+import { getHostRiskIndex, getUserRiskIndex, EntityType } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -20,7 +25,6 @@ import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
-import { EntityRiskQueries } from '@kbn/security-solution-plugin/common/api/search_strategy';
 
 export interface RiskScoreState<T extends EntityType> {
   data: RiskScoreStrategyResponse<T>['data'];

@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import {
   getIngestPipelineName,
   getLegacyIngestPipelineName,
@@ -38,7 +38,7 @@ const mockTimerange = {
   to: 'endDate',
 };
 const mockRefetch = jest.fn();
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
+describe.each([EntityType.host, EntityType.user])(
   `installRiskScoreModule - %s`,
   (riskScoreEntity) => {
     beforeAll(async () => {
@@ -74,7 +74,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   }
 );
 
-describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
+describe.each([[EntityType.host], [EntityType.user]])(
   'uninstallRiskScoreModule - %s',
   (riskScoreEntity) => {
     beforeAll(async () => {
@@ -113,7 +113,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
     });
 
     it('Delete legacy stored scripts', () => {
-      if (riskScoreEntity === RiskScoreEntity.user) {
+      if (riskScoreEntity === EntityType.user) {
         expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
           Array [
             "ml_userriskscore_levels_script",
@@ -142,7 +142,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
   }
 );
 
-describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
+describe.each([[EntityType.host], [EntityType.user]])(
   'Restart Transforms - %s',
   (riskScoreEntity) => {
     beforeAll(async () => {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize } from 'lodash/fp';
-import { EntityType } from '@kbn/security-solution-plugin/common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,

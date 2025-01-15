@@ -7,14 +7,14 @@
 
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { HeaderSection } from '../../../common/components/header_section';
 import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 import type { inputsModel } from '../../../common/store';
 import { useIsNewRiskScoreModuleInstalled } from '../../api/hooks/use_risk_engine_status';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityType } from '@kbn/security-solution-plugin/common/search_strategy';
-import { i18n } from '@kbn/i18n';
+import type { EntityType } from '../../../../common/search_strategy';
 
 export const RESTART_TOOLTIP = i18n.translate(
   'xpack.securitySolution.riskScore.usersDashboardRestartTooltip',
@@ -33,25 +33,28 @@ const RiskScoresNoDataDetectedComponent = ({
 }) => {
   const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
-
   return (
     <EuiPanel data-test-subj={`${entityType}-risk-score-no-data-detected`} hasBorder>
       <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
-        title={<h2>
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.securitySolution.riskScore.entityDashboardWarningPanelTitle"
+              defaultMessage="No {entityType} risk score data available to display"
+              values={{
+                entityType,
+              }}
+            />
+          </h2>
+        }
+        body={
           <FormattedMessage
-            id="xpack.securitySolution.riskScore.entityDashboardWarningPanelTitle"
-            defaultMessage="No {entityType} risk score data available to display"
-            values={{
-              entityType,
-            }}
+            id="xpack.securitySolution.riskScore.entityDashboardWarningPanelBody"
+            defaultMessage={`We haven’t found any {entityType} risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the {entityType} risk module, the risk engine might need an hour to generate {entityType} risk score data and display in this panel.`}
+            values={{ entityType }}
           />
-        </h2>}
-        body={<FormattedMessage
-          id="xpack.securitySolution.riskScore.entityDashboardWarningPanelBody"
-          defaultMessage={`We haven’t found any {entityType} risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the {entityType} risk module, the risk engine might need an hour to generate {entityType} risk score data and display in this panel.`}
-          values={{ entityType }}
-        />}
+        }
         actions={
           <>
             {!isNewRiskScoreModuleInstalled && (

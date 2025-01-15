@@ -23,7 +23,7 @@ export const getHostRiskIndex = (
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
   if (isNewRiskScoreModuleInstalled) {
-    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+    return getRiskIndex(spaceId, onlyLatest);
   } else {
     return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
   }
@@ -35,10 +35,17 @@ export const getUserRiskIndex = (
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
   if (isNewRiskScoreModuleInstalled) {
-    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+    return getRiskIndex(spaceId, onlyLatest);
   } else {
     return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
   }
+};
+
+/**
+ * This implementation doesn't support the deprecated risk score module.
+ */
+export const getRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+  return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {

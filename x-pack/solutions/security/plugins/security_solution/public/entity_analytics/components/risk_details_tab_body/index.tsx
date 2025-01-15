@@ -24,8 +24,8 @@ import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { EntityType, HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildEntityNameFilter } from '../../../../common/search_strategy';
+import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
+import { EntityType, buildEntityNameFilter } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
@@ -187,10 +187,8 @@ const RiskDetailsTabBodyComponent: React.FC<
             <EuiFlexItem grow={2}>
               <RiskScoreOverTime
                 from={startDate}
-                loading={loading}
                 queryId={queryId}
                 riskEntity={riskEntity}
-                riskScore={data}
                 title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
                 to={endDate}
                 toggleQuery={toggleOverTimeQuery}

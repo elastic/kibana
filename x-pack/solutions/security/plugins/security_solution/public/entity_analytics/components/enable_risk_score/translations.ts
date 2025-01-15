@@ -31,3 +31,19 @@ export const ENABLE_RISK_SCORE_DESCRIPTION = (riskEntity: EntityType) =>
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
   });
+
+export const UPGRADE_RISK_SCORE = (riskEntity: EntityType) =>
+  i18n.translate('xpack.securitySolution.enableRiskScore.upgradeRiskScore', {
+    defaultMessage: 'Upgrade {riskEntity} Risk Score',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity),
+    },
+  });
+
+export const UPGRADE_RISK_SCORE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.riskDeprecated.entity.upgradeRiskScoreDescription',
+  {
+    defaultMessage:
+      'Current data is no longer supported. Please migrate your data and upgrade the module. The data might need an hour to be generated after enabling the module.',
+  }
+);
