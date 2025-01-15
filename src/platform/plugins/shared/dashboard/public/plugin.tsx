@@ -72,14 +72,14 @@ import {
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './dashboard_constants';
+} from './plugin_constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { buildAllDashboardActions } from './dashboard_actions';
+import { registerActions } from './dashboard_actions/register_actions';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -127,10 +127,20 @@ export interface DashboardStartDependencies {
 }
 
 export interface DashboardSetup {
+  /**
+   * @deprecated
+   *
+   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
+   */
   locator?: DashboardAppLocator;
 }
 
 export interface DashboardStart {
+  /**
+   * @deprecated
+   *
+   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
+   */
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
@@ -327,7 +337,7 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     untilPluginStartServicesReady().then(() => {
-      buildAllDashboardActions({
+      registerActions({
         plugins,
         allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
       });

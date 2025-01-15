@@ -8,7 +8,6 @@
 export * from './definition_id_invalid';
 export * from './definition_not_found';
 export * from './id_conflict_error';
-export * from './permission_denied';
 export * from './security_exception';
 export * from './index_template_not_found';
 export * from './fork_condition_missing';
