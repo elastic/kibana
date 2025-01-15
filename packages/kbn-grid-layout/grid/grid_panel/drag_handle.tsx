@@ -146,7 +146,8 @@ export const DragHandle = React.forwardRef<
         &:active {
           cursor: grabbing;
         }
-        .kbnGrid--static & {
+        .kbnGrid--static &,
+        .kbnGridPanel--expanded & {
           display: none;
         }
       `}

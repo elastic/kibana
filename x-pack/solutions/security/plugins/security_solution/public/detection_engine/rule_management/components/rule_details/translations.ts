@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const RULE_DETAILS_FLYOUT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.label',
+  {
+    defaultMessage: 'Rule details',
+  }
+);
+
 export const OVERVIEW_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.overviewTabLabel',
   {

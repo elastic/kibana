@@ -224,7 +224,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Helpers
 
-  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
+  const loginWithReadOnlyUser = async () => {
     await security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
         indices: [
@@ -260,17 +260,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expectSpaceSelector: false,
       }
     );
-
-    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-    await pageObjects.header.waitUntilLoadingHasFinished();
-    await pageObjects.timePicker.setAbsoluteRange(
-      START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
-      END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
-    );
-
-    await waitForPageToLoad();
-
-    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
   };
 
   const logoutAndDeleteReadOnlyUser = async () => {
@@ -997,13 +986,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
       describe('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
-            await loginWithReadOnlyUserAndNavigateToHostsFlyout();
-            await pageObjects.assetDetails.clickDashboardsTab();
+            await loginWithReadOnlyUser();
+            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            await pageObjects.timePicker.setAbsoluteRange(
+              START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
+              END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
+            );
+
+            await waitForPageToLoad();
+
+            await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+            await browser.scrollTop();
           });
 
           after(async () => {
@@ -1014,6 +1013,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
+            await pageObjects.assetDetails.dashboardsTabExistsOrFail();
+            await pageObjects.assetDetails.clickDashboardsTab();
             await pageObjects.assetDetails.addDashboardExists();
             const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
             await retry.tryForTime(5000, async () => {

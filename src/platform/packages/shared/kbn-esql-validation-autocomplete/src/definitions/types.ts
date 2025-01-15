@@ -16,6 +16,7 @@ import type {
   ESQLMessage,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
+import type { ESQLCallbacks } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -182,6 +183,12 @@ export interface FunctionDefinition {
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
+
+  /**
+   * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
+   */
+  types?: CommandTypeDefinition[];
+
   alias?: string;
   description: string;
   /**
@@ -196,7 +203,9 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getSuggestedVariableName: () => string,
     getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst
+    fullTextAst?: ESQLAst,
+    definition?: CommandDefinition<CommandName>,
+    callbacks?: ESQLCallbacks
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
   signature: {
@@ -214,6 +223,11 @@ export interface CommandBaseDefinition<CommandName extends string> {
       wildcards?: boolean;
     }>;
   };
+}
+
+export interface CommandTypeDefinition {
+  name: string;
+  description?: string;
 }
 
 export interface CommandOptionsDefinition<CommandName extends string = string>
