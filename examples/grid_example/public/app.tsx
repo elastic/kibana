@@ -143,7 +143,7 @@ export const GridExample = ({
 
       .kbnGridPanel--resizeHandle {
         opacity: 0;
-        transition: opacity 100ms linear;
+        transition: opacity 0.2s, border 0.2s;
         border-radius: 7px 0 7px 0;
         border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
         border-right: 2px solid ${euiTheme.colors.accentSecondary};

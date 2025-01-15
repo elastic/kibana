@@ -39,6 +39,7 @@ export const ResizeHandle = ({
         defaultMessage: 'Resize panel',
       })}
       css={css`
+        display: block;
         right: 0;
         bottom: 0;
         margin: -2px;
@@ -48,14 +49,12 @@ export const ResizeHandle = ({
         max-height: 100%;
         height: ${euiTheme.size.l};
         z-index: ${euiTheme.levels.toast};
-        transition: opacity 0.2s, border 0.2s;
         &:hover,
         &:focus {
           cursor: se-resize;
         }
         .kbnGrid--static &,
         .kbnGridPanel--expanded & {
-          opacity: 0 !important;
           display: none;
         }
       `}
