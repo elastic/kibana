@@ -93,7 +93,7 @@ import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 
-export const MAX_RULE_GAP_RATIO = 4;
+export const MAX_RULE_GAP_RATIO = 1;
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;

@@ -23,7 +23,7 @@ describe('getRulesWithGaps', () => {
   const params = {
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-02T00:00:00.000Z',
-    statuses: ['active', 'error'],
+    statuses: ['unfilled', 'partially_filled'],
   };
 
   const mockAuthFilter = {
@@ -60,7 +60,7 @@ describe('getRulesWithGaps', () => {
       await getRulesWithGaps(context, params);
 
       expect(context.authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        authorizationEntity: AlertingAuthorizationEntity.Alert,
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
         filterOpts: {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
@@ -110,11 +110,8 @@ describe('getRulesWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         mockAuthFilter.filter,
         expect.objectContaining({
-          start: params.start,
-          end: params.end,
-          filter:
-            'kibana.alert.rule.gap: * AND (kibana.alert.rule.gap.status:active OR kibana.alert.rule.gap.status:error)',
-          aggs: expect.any(Object),
+          filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
+          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
         })
       );
 
@@ -161,7 +158,7 @@ describe('getRulesWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         mockAuthFilter.filter,
         expect.objectContaining({
-          filter: 'kibana.alert.rule.gap: *',
+          filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
         })
       );
     });

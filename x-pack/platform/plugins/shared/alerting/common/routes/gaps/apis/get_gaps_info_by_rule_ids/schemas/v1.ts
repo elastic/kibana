@@ -10,7 +10,6 @@ export const getGapsInfoByRuleIdsQuerySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
-    statuses: schema.maybe(schema.arrayOf(schema.string())),
     rule_ids: schema.arrayOf(schema.string()),
   },
   {

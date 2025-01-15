@@ -7,11 +7,7 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import {
-  AlertingAuthorizationFilterType,
-  AlertingAuthorizationEntity,
-  ReadOperations,
-} from '../../../../authorization';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
 import { GetGapsInfoByRuleIdsParams, GetGapsInfoByRuleIdsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -22,6 +18,7 @@ import {
   alertingAuthorizationFilterOpts,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../../../../rules_client/common/constants';
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
 export async function getGapsInfoByRuleIds(
   context: RulesClientContext,
@@ -31,7 +28,7 @@ export async function getGapsInfoByRuleIds(
     let authorizationTuple;
     try {
       authorizationTuple = await context.authorization.getFindAuthorizationFilter({
-        authorizationEntity: AlertingAuthorizationEntity.Alert,
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
         filterOpts: alertingAuthorizationFilterOpts,
       });
     } catch (error) {
@@ -44,7 +41,7 @@ export async function getGapsInfoByRuleIds(
       throw error;
     }
 
-    const { start, end, statuses, ruleIds } = params;
+    const { start, end, ruleIds } = params;
     const { filter: authorizationFilter } = authorizationTuple;
     const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
     const kueryNodeFilterWithAuth =
@@ -101,20 +98,15 @@ export async function getGapsInfoByRuleIds(
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const gapFilter = 'kibana.alert.rule.gap: *';
-    const statusFilter =
-      statuses && statuses.length > 0
-        ? `(${statuses.map((status) => `kibana.alert.rule.gap.status:${status}`).join(' OR ')})`
-        : undefined;
-
-    const filter = [gapFilter, statusFilter].filter(Boolean).join(' AND ');
+    const filter = buildGapsFilter({
+      start,
+      end,
+    });
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
       ruleIds,
       {
-        start,
-        end,
         filter,
         aggs: {
           unique_rule_ids: {
@@ -167,7 +159,7 @@ export async function getGapsInfoByRuleIds(
 
     return result;
   } catch (err) {
-    const errorMessage = `Failed to find gaps info for rules}`;
+    const errorMessage = `Failed to find gaps info for rules`;
     context.logger.error(`${errorMessage} - ${err}`);
     throw Boom.boomify(err, { message: errorMessage });
   }

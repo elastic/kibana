@@ -14,7 +14,7 @@ import {
 import { RulesClientContext } from '../../../../rules_client';
 import { GetRulesWithGapsParams, GetRulesWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 export async function getRulesWithGaps(
@@ -25,7 +25,7 @@ export async function getRulesWithGaps(
     let authorizationTuple;
     try {
       authorizationTuple = await context.authorization.getFindAuthorizationFilter({
-        authorizationEntity: AlertingAuthorizationEntity.Alert,
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
         filterOpts: {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
@@ -47,19 +47,16 @@ export async function getRulesWithGaps(
     const { start, end, statuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const gapFilter = 'kibana.alert.rule.gap: *';
-    const statusFilter = statuses?.length
-      ? `(${statuses.map((status) => `kibana.alert.rule.gap.status:${status}`).join(' OR ')})`
-      : null;
-
-    const filter = [gapFilter, statusFilter].filter(Boolean).join(' AND ');
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+    });
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
       {
-        start,
-        end,
         filter,
         aggs: {
           unique_rule_ids: {

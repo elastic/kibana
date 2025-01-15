@@ -91,7 +91,6 @@ describe('getGapsInfoByRuleIds', () => {
     const ruleIds = ['1', '2'];
     const start = '2023-11-16T08:00:00.000Z';
     const end = '2023-11-16T09:00:00.000Z';
-    const statuses = ['unfilled', 'in_progress'];
 
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
@@ -130,11 +129,10 @@ describe('getGapsInfoByRuleIds', () => {
       ruleIds,
       start,
       end,
-      statuses,
     });
 
     expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-      authorizationEntity: 'alert',
+      authorizationEntity: 'rule',
       filterOpts: {
         fieldNames: {
           consumer: 'alert.attributes.consumer',
@@ -161,10 +159,7 @@ describe('getGapsInfoByRuleIds', () => {
     );
 
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      start,
-      end,
-      filter:
-        'kibana.alert.rule.gap: * AND (kibana.alert.rule.gap.status:unfilled OR kibana.alert.rule.gap.status:in_progress)',
+      filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
       aggs: {
         unique_rule_ids: {
           terms: {
@@ -249,9 +244,7 @@ describe('getGapsInfoByRuleIds', () => {
     });
 
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      start,
-      end,
-      filter: 'kibana.alert.rule.gap: *',
+      filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
       aggs: expect.any(Object),
     });
 

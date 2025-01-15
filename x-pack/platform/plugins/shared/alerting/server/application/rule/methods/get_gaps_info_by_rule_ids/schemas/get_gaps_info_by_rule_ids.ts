@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 export const getGapsInfoByRuleIdsParamsSchema = schema.object({
   start: schema.string(),
   end: schema.string(),
-  statuses: schema.maybe(schema.arrayOf(schema.string())),
   ruleIds: schema.arrayOf(schema.string()),
 });
 

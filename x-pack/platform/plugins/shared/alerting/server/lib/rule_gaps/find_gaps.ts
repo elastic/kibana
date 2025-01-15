@@ -11,30 +11,8 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { FindGapsParams } from './types';
 import { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
+import { buildGapsFilter } from './build_gaps_filter';
 import { GapStatus } from '../../../common/constants/gap_status';
-
-export const buildGapsFilter = ({
-  start,
-  end,
-  statuses,
-}: {
-  start?: string;
-  end?: string;
-  statuses?: GapStatus[];
-}) => {
-  const baseFilter = 'event.action: gap AND event.provider: alerting';
-
-  const rangeFilter =
-    end && start
-      ? `kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}"`
-      : null;
-
-  const statusesFilter = statuses?.length
-    ? `(${statuses.map((status) => `kibana.alert.rule.gap.status : ${status}`).join(' OR ')})`
-    : null;
-
-  return [baseFilter, rangeFilter, statusesFilter].filter(Boolean).join(' AND ');
-};
 
 export const findGaps = async ({
   eventLogClient,

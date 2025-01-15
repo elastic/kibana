@@ -13,10 +13,8 @@ export const transformRequest = ({
   rule_ids,
   start,
   end,
-  statuses,
 }: GetGapsInfoByRuleIdsQueryV1): GetGapsInfoByRuleIdsParams => ({
   ruleIds: rule_ids,
   start,
   end,
-  statuses,
 });

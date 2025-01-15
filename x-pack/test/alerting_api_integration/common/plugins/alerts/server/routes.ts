@@ -33,6 +33,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_event_logger/alerting_event_logger';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -628,7 +629,6 @@ export function defineRoutes(
 
       const alertingEventLogger = new AlertingEventLogger(eventLogger);
 
-      // mocked ruleData to initialize alert event logger
       alertingEventLogger.initialize({
         context: {
           savedObjectId: req.body.ruleId,
@@ -641,16 +641,16 @@ export function defineRoutes(
         runDate: new Date(),
         ruleData: {
           id: req.body.ruleId,
-          consumer: 'siem',
+          consumer: 'alertsFixture',
           type: {
-            id: req.body.ruleId,
+            id: 'test.patternFiringAutoRecoverFalse',
             name: 'My test rule',
             actionGroups: [],
             defaultActionGroupId: 'default',
             minimumLicenseRequired: 'basic',
             isExportable: true,
             executor: async () => ({ state: {} }),
-            category: 'test',
+            category: 'siem.queryRule',
             producer: 'alerts',
             cancelAlertsOnRuleTimeout: true,
             ruleTaskTimeout: '5m',
@@ -728,6 +728,41 @@ export function defineRoutes(
         req.body.fieldsToUpdate
       );
       return res.ok({ body: { ok: true, result } });
+    }
+  );
+
+  router.post(
+    {
+      path: '/_test/delete_gaps',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
+      try {
+        const es = (await context.core).elasticsearch.client.asInternalUser;
+
+        await es.deleteByQuery({
+          index: '.kibana-event-log*',
+          query: {
+            exists: {
+              field: 'kibana.alert.rule.gap.range',
+            },
+          },
+          conflicts: 'proceed',
+          wait_for_completion: true,
+        });
+
+        return res.ok({ body: { ok: true } });
+      } catch (err) {
+        logger.error(err);
+        return res.customError({
+          statusCode: 500,
+          body: { message: 'Error when removing gaps' },
+        });
+      }
     }
   );
 }
