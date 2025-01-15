@@ -561,12 +561,16 @@ describe('deprecation header pre-response handler', () => {
     const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
-    handler({ route: { options: { deprecated: { message: deprecationMessage } } } } as any, {} as any, toolkit);
+    handler(
+      { route: { options: { deprecated: { message: deprecationMessage } } } } as any,
+      {} as any,
+      toolkit
+    );
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
-        warning: warningHeader
+        warning: warningHeader,
       },
     });
   });
@@ -577,12 +581,12 @@ describe('deprecation header pre-response handler', () => {
     const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
-    handler({ route: { options: { deprecated: { } } } } as any, {} as any, toolkit);
+    handler({ route: { options: { deprecated: {} } } } as any, {} as any, toolkit);
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).not.toHaveBeenCalledWith({
       headers: {
-        warning: warningHeader
+        warning: warningHeader,
       },
     });
   });
