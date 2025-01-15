@@ -140,13 +140,12 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
 
           .kbnGridPanel--resizeHandle {
             border-radius: 7px 0 7px 0;
-            border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
-            border-right: 2px solid ${euiTheme.colors.accentSecondary};
+            border-bottom: 2px solid ${euiTheme.colors.vis.euiColorVis0};
+            border-right: 2px solid ${euiTheme.colors.vis.euiColorVis0};
             &:hover,
             &:focus {
               outline-style: none !important;
               opacity: 1;
-              background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
             }
           }
 
