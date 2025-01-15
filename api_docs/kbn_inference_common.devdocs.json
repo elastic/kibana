@@ -2162,7 +2162,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              "{ [P in \"temperature\" | \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2364,7 +2364,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; functionCalling?: ",
+              "[]; temperature?: number | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2432,7 +2432,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; functionCalling?: ",
+          "[]; temperature?: number | undefined; functionCalling?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3455,7 +3455,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          "{ [P in \"temperature\" | \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
