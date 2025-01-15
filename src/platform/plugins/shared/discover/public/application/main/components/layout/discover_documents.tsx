@@ -46,7 +46,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -112,6 +111,7 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -269,20 +269,14 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
-
   const { filters } = useQuerySubscriber({ data: services.data });
-
-  const timeRange = useObservable(
-    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
-    services.timefilter.getTime()
-  );
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
-    timeRange,
+    timeRange: requestParams.timeRangeAbsolute,
   });
 
   const renderDocumentView = useCallback(

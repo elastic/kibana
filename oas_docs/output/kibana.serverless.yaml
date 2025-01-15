@@ -9367,6 +9367,27 @@ paths:
       tags:
         - Security Endpoint Management API
       x-beta: true
+  /api/endpoint/action/runscript:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+          description: OK
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
+      x-beta: true
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -9857,7 +9878,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -15880,9 +15901,13 @@ paths:
                         type: number
                       online:
                         type: number
+                      orphaned:
+                        type: number
                       other:
                         type: number
                       unenrolled:
+                        type: number
+                      uninstalled:
                         type: number
                       updating:
                         type: number
@@ -16249,6 +16274,8 @@ paths:
                             - unenrolled
                             - updating
                             - degraded
+                            - uninstalled
+                            - orphaned
                           type: string
                         tags:
                           items:
@@ -16696,6 +16723,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -17035,6 +17064,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -46578,6 +46609,23 @@ components:
         type: string
       minItems: 1
       type: array
+    Security_Endpoint_Management_API_CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
     Security_Endpoint_Management_API_Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -46704,6 +46752,23 @@ components:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+    Security_Endpoint_Management_API_HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
     Security_Endpoint_Management_API_IsolateRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
@@ -46857,6 +46922,34 @@ components:
       properties:
         note:
           type: string
+    Security_Endpoint_Management_API_RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
+    Security_Endpoint_Management_API_RunScriptRouteRequestBody:
+      type: object
+      properties:
+        parameters:
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
+          oneOf:
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
+      required:
+        - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -47238,6 +47331,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -47462,6 +47556,42 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - '@timestamp'
+        - service
+        - entity
     Security_Entity_Analytics_API_StoreStatus:
       enum:
         - not_installed

@@ -188,6 +188,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
@@ -225,7 +226,6 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
-    "@kbn/core-user-profile-browser",
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
@@ -237,6 +237,7 @@
     "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/product-doc-base-plugin"
   ]
 }
