@@ -11,7 +11,6 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/i18n",
     "@kbn/alerting-comparators",
-    "@kbn/data-views-plugin",
     "@kbn/es-query",
   ]
 }
