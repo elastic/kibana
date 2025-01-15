@@ -1274,7 +1274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 
