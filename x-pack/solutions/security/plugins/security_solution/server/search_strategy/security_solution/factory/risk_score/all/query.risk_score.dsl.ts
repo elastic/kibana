@@ -6,12 +6,9 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
-import {
-  Direction,
-  RiskScoreFields,
-  RiskScoreEntity,
-} from '../../../../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
@@ -26,9 +23,10 @@ export const buildRiskScoreQuery = ({
   },
   sort,
   riskScoreEntity,
-}: RiskScoreRequestOptions) => {
+}: Omit<RiskScoreRequestOptions, 'factoryQueryType'>) => {
   const filter = createQueryFilterClauses(filterQuery);
-  const nameField = riskScoreEntity === RiskScoreEntity.host ? 'host.name' : 'user.name';
+  const nameField = EntityTypeToIdentifierField[riskScoreEntity];
+
   if (timerange) {
     filter.push({
       range: {
@@ -77,6 +75,10 @@ const getQueryOrder = (sort?: RiskScoreRequestOptions['sort']): Sort => {
 
   if (sort.field === RiskScoreFields.userRisk) {
     return [{ [RiskScoreFields.userRiskScore]: sort.direction }];
+  }
+
+  if (sort.field === RiskScoreFields.serviceRisk) {
+    return [{ [RiskScoreFields.serviceRiskScore]: sort.direction }];
   }
 
   return [{ [sort.field]: sort.direction }];
