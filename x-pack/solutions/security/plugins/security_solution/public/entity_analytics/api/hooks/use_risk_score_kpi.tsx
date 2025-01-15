@@ -8,12 +8,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import {
-  RiskQueries,
-  RiskSeverity,
-  EMPTY_SEVERITY_COUNT,
-} from '../../../../common/search_strategy';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
+import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { SeverityCount } from '../../components/severity/types';
@@ -21,7 +18,7 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 import type { InspectResponse } from '../../../types';
 import type { inputsModel } from '../../../common/store';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useGetDefaulRiskIndex } from '../../hooks/use_get_default_risk_index';
+import { useGetDefaultRiskIndex } from '../../hooks/use_get_default_risk_index';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 
 interface RiskScoreKpi {
@@ -37,7 +34,7 @@ interface RiskScoreKpi {
 interface UseRiskScoreKpiProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: RiskScoreEntity;
+  riskEntity: EntityType;
   timerange?: { to: string; from: string };
 }
 
@@ -48,7 +45,7 @@ export const useRiskScoreKpi = ({
   timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
-  const defaultIndex = useGetDefaulRiskIndex(riskEntity);
+  const defaultIndex = useGetDefaultRiskIndex(riskEntity);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
@@ -56,8 +53,8 @@ export const useRiskScoreKpi = ({
   } = useRiskEngineStatus();
   const riskEngineHasBeenEnabled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const { loading, result, search, refetch, inspect, error } =
-    useSearchStrategy<RiskQueries.kpiRiskScore>({
-      factoryQueryType: RiskQueries.kpiRiskScore,
+    useSearchStrategy<EntityRiskQueries.kpi>({
+      factoryQueryType: EntityRiskQueries.kpi,
       initialResult: {
         kpiRiskScore: EMPTY_SEVERITY_COUNT,
       },
