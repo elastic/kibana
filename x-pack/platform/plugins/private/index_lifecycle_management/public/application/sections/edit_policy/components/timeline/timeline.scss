@@ -60,33 +60,17 @@ $ilmTimelineBarHeight: $euiSizeS;
 
   &__hotPhase {
     width: var(--ilm-timeline-hot-phase-width);
-
-    &__colorBar {
-      background-color: $euiColorVis9;
-    }
   }
 
   &__warmPhase {
     width: var(--ilm-timeline-warm-phase-width);
-
-    &__colorBar {
-      background-color: $euiColorVis5;
-    }
   }
 
   &__coldPhase {
     width: var(--ilm-timeline-cold-phase-width);
-
-    &__colorBar {
-      background-color: $euiColorVis1;
-    }
   }
 
   &__frozenPhase {
     width: var(--ilm-timeline-frozen-phase-width);
-
-    &__colorBar {
-      background-color: $euiColorVis4;
-    }
   }
 }

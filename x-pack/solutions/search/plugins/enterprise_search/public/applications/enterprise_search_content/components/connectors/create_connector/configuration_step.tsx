@@ -18,6 +18,8 @@ import {
   EuiText,
   EuiButton,
   EuiProgress,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -38,7 +40,7 @@ interface ConfigurationStepProps {
 }
 
 export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, setCurrentStep }) => {
-  const { connector } = useValues(ConnectorViewLogic);
+  const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic);
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
   const { setFormDirty } = useActions(NewConnectorLogic);
   const { overlays } = useKibana().services;
@@ -46,9 +48,11 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const isSyncing = false;
 
-  const isNextStepEnabled =
+  const isConnectorConfigured =
     connector?.status === ConnectorStatus.CONNECTED ||
     connector?.status === ConnectorStatus.CONFIGURED;
+
+  const isNextStepEnabled = !isWaitingOnAgentlessDeployment && isConnectorConfigured;
 
   useEffect(() => {
     setTimeout(() => {
@@ -64,6 +68,37 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
+        {isWaitingOnAgentlessDeployment && (
+          <EuiCallOut
+            color="warning"
+            title={
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.title',
+                    {
+                      defaultMessage: 'Provisioning infrastructure',
+                    }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
+                {
+                  defaultMessage:
+                    'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
+                }
+              )}
+            </EuiText>
+          </EuiCallOut>
+        )}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l" style={{ position: 'relative' }}>
             <EuiTitle size="m">
@@ -114,6 +149,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             </EuiText>
             <EuiSpacer size="m" />
             <EuiButton
+              disabled={!isNextStepEnabled}
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
               onClick={async () => {
                 if (isFormEditing) {

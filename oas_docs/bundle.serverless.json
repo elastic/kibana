@@ -15406,10 +15406,16 @@
                         "online": {
                           "type": "number"
                         },
+                        "orphaned": {
+                          "type": "number"
+                        },
                         "other": {
                           "type": "number"
                         },
                         "unenrolled": {
+                          "type": "number"
+                        },
+                        "uninstalled": {
                           "type": "number"
                         },
                         "updating": {
@@ -15715,6 +15721,9 @@
                             ],
                             "type": "object"
                           },
+                          "audit_unenrolled_reason": {
+                            "type": "string"
+                          },
                           "components": {
                             "items": {
                               "additionalProperties": false,
@@ -15943,7 +15952,9 @@
                               "unenrolling",
                               "unenrolled",
                               "updating",
-                              "degraded"
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
                             ],
                             "type": "string"
                           },
@@ -17725,6 +17736,9 @@
                           ],
                           "type": "object"
                         },
+                        "audit_unenrolled_reason": {
+                          "type": "string"
+                        },
                         "components": {
                           "items": {
                             "additionalProperties": false,
@@ -17953,7 +17967,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
@@ -18202,6 +18218,9 @@
                           ],
                           "type": "object"
                         },
+                        "audit_unenrolled_reason": {
+                          "type": "string"
+                        },
                         "components": {
                           "items": {
                             "additionalProperties": false,
@@ -18430,7 +18449,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },

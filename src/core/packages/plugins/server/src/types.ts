@@ -291,10 +291,10 @@ export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = obj
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
 > {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
@@ -451,10 +451,10 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
  * @public
  */
 export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends Record<string, any> = never,
+  TPluginsStart extends Record<string, any> = never
 > = (
   core: PluginInitializerContext
 ) => Promise<
