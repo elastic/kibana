@@ -212,16 +212,15 @@ export class RuleMigrationsTaskClient {
   /** Updates all the rules in a migration to be re-executed */
   public async updateToRetry(
     migrationId: string,
-    filter: RuleMigrationFilters = {}
+    filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
     if (this.migrationsRunning.has(migrationId)) {
       return { updated: false };
     }
-    // Update all the rules in the migration to pending
+
     await this.data.rules.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
-    // await this.data.rules.updateRetry(migrationId);
     return { updated: true };
   }
 

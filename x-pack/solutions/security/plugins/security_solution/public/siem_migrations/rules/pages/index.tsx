@@ -39,7 +39,8 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     },
   }) => {
     const { navigateTo } = useNavigation();
-    const { data: ruleMigrationsStats, isLoading, refreshStats } = useLatestStats();
+    const { data, isLoading, refreshStats } = useLatestStats();
+    const ruleMigrationsStats = useMemo(() => data.slice().reverse(), [data]); // Show the most recent migration first
 
     const [integrations, setIntegrations] = React.useState<
       Record<string, RelatedIntegration> | undefined
