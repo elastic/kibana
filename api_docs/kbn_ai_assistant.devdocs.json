@@ -1073,6 +1073,24 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useGenAIConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
         "id": "def-public.useKnowledgeBase",
         "type": "Function",
         "tags": [],
@@ -1230,6 +1248,18 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

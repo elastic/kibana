@@ -1001,7 +1001,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
+          "<string | undefined>; setFocusedPanelId: (id: string | undefined) => void; forceRefresh: () => void; getSettings: () => ",
           "DashboardSettings",
           "; getSerializedState: () => { attributes: ",
           {
