@@ -1512,7 +1512,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (indexPattern) {
-        await dashboard.selectIndexPattern(indexPattern);
+        await dataViews.switchTo(indexPattern);
+        await header.waitUntilLoadingHasFinished();
       }
 
       await this.configureDimension({
