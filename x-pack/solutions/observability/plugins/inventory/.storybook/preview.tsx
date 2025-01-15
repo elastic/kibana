@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import * as jest from 'jest-mock';
 import { KibanaReactStorybookDecorator } from './storybook_decorator';
+
+// @ts-ignore
+window.jest = jest;
 
 export const decorators = [KibanaReactStorybookDecorator];

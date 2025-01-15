@@ -9,7 +9,6 @@
 
 import type { ProjectAnnotations } from '@storybook/types';
 import type { ReactRenderer } from '@storybook/react';
-import * as jest from 'jest-mock';
 
 import { decorators } from './decorators';
 
@@ -20,6 +19,3 @@ const preview: ProjectAnnotations<ReactRenderer> = {
 
 // eslint-disable-next-line import/no-default-export
 export default preview;
-
-/* @ts-expect-error TS doesn't see jest as a property of window, and I don't want to edit our global config. */
-window.jest = jest;
