@@ -90,6 +90,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
   ]);
 
+  const waitForChartsToLoad = async () =>
+    await retry.waitFor(
+      'wait for table and Metric charts to load',
+      async () => await pageObjects.assetDetails.isMetricChartsLoaded()
+    );
+
   const getNodeDetailsUrl = (queryParams?: QueryParams) => {
     return rison.encodeUnknown(
       Object.entries(queryParams ?? {}).reduce<Record<string, string>>((acc, [key, value]) => {
@@ -457,6 +463,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_DATE.format(DATE_PICKER_FORMAT)
           );
+
+          await waitForChartsToLoad();
+        });
+
+        after(async () => {
+          await browser.scrollTop();
         });
 
         [
@@ -879,6 +891,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              await waitForChartsToLoad();
               const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });
