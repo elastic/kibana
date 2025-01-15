@@ -30,7 +30,7 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | 'typeTitle';
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | (string & {});
 
 const i18nText = {
   accessedDescSort: i18n.translate(
@@ -60,28 +60,31 @@ const i18nText = {
       defaultMessage: 'Recently updated',
     }
   ),
-  typeAsc: i18n.translate('contentManagement.tableList.listing.tableSortSelect.typeAscLabel', {
-    defaultMessage: 'Type A-Z',
-  }),
-  typeDesc: i18n.translate('contentManagement.tableList.listing.tableSortSelect.typeDescLabel', {
-    defaultMessage: 'Type Z-A',
-  }),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
     defaultMessage: 'Sort by',
   }),
 };
 
+export interface CustomSortingOptions {
+  field: string;
+  sortingLabels: TableColumnSortSelectOption[];
+}
+interface TableColumnSortSelectOption {
+  label: string;
+  direction: 'asc' | 'desc';
+}
+
 interface Props {
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
-  hasSortByTypeOption: boolean;
+  customSortingOptions: CustomSortingOptions;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
 export function TableSortSelect({
   tableSort,
-  hasSortByTypeOption,
+  customSortingOptions,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
   onChange,
@@ -105,20 +108,16 @@ export function TableSortSelect({
       },
     ];
 
-    if (hasSortByTypeOption) {
-      opts.push(
-        {
-          label: i18nText.typeAsc,
-          column: 'typeTitle',
-          direction: 'asc',
-          append: <EuiIcon type="sortUp" />,
-        },
-        {
-          label: i18nText.typeDesc,
-          column: 'typeTitle',
-          direction: 'desc',
-          append: <EuiIcon type="sortDown" />,
-        }
+    if (customSortingOptions) {
+      opts = opts.concat(
+        customSortingOptions.sortingLabels.map(({ label, direction }) => {
+          return {
+            column: customSortingOptions.field,
+            label,
+            direction,
+            append: direction === 'asc' ? <EuiIcon type="sortUp" /> : <EuiIcon type="sortDown" />,
+          };
+        })
       );
     }
 
@@ -227,7 +226,7 @@ export function TableSortSelect({
         };
       });
     });
-  }, [tableSort]);
+  }, [customSortingOptions, tableSort]);
 
   return (
     <EuiPopover

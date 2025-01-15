@@ -42,7 +42,7 @@ import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel, TagFilterContextProvider } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
-import type { SortColumnField } from './table_sort_select';
+import type { CustomSortingOptions, SortColumnField } from './table_sort_select';
 import {
   UserFilterPanel,
   UserFilterContextProvider,
@@ -71,7 +71,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
-  hasSortByTypeOption: boolean;
+  customSortingOptions: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -96,7 +96,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableFilter,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
-  hasSortByTypeOption,
+  customSortingOptions,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -193,7 +193,7 @@ export function Table<T extends UserContentCommonSchema>({
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
             hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
-            hasSortByTypeOption={hasSortByTypeOption}
+            customSortingOptions={customSortingOptions}
             onChange={onSortChange}
           />
         );
@@ -204,7 +204,7 @@ export function Table<T extends UserContentCommonSchema>({
     onSortChange,
     tableSort,
     hasRecentlyAccessedMetadata,
-    hasSortByTypeOption,
+    customSortingOptions,
   ]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {

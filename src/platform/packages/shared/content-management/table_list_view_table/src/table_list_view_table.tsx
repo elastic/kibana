@@ -61,7 +61,7 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
-import { sortByRecentlyAccessed } from './components/table_sort_select';
+import { CustomSortingOptions, sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 const disabledEditAction = {
@@ -87,6 +87,7 @@ export interface TableListViewTableProps<
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
+  customSortingOptions?: CustomSortingOptions;
   urlStateEnabled?: boolean;
   createdByEnabled?: boolean;
   /**
@@ -160,7 +161,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   };
   selectedIds: string[];
   totalItems: number;
-  hasSortByTypeOption: boolean;
   hasUpdatedAtMetadata: boolean;
   hasCreatedByMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
@@ -328,6 +328,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   initialPageSize,
   listingLimit,
   urlStateEnabled = true,
+  customSortingOptions,
   customTableColumn,
   emptyPrompt,
   rowItemActions,
@@ -455,7 +456,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     selectedIds,
     totalItems,
     hasUpdatedAtMetadata,
-    hasSortByTypeOption,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
     pagination: _pagination,
@@ -1205,7 +1205,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           searchQuery={searchQuery}
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-          hasSortByTypeOption={hasSortByTypeOption}
+          customSortingOptions={customSortingOptions}
           hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
           tableSort={tableSort}
           tableFilter={tableFilter}

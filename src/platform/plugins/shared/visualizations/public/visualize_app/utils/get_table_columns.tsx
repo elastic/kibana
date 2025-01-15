@@ -90,6 +90,26 @@ export const getCustomColumn = () => {
   };
 };
 
+export const getCustomSortingOptions = () => {
+  return {
+    field: 'typeTitle',
+    sortingLabels: [
+      {
+        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameAsc', {
+          defaultMessage: 'Type A-Z',
+        }),
+        direction: 'asc',
+      },
+      {
+        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameDesc', {
+          defaultMessage: 'Type Z-A',
+        }),
+        direction: 'desc',
+      },
+    ],
+  };
+};
+
 export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
