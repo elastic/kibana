@@ -7,10 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
+import { ListStreamsResponse } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { listStreams } from '../../lib/streams/stream_crud';
-import { StreamDefinition } from '../../../common';
 
 export const listStreamsRoute = createServerRoute({
   endpoint: 'GET /api/streams',
@@ -25,17 +24,11 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    response,
-    request,
-    getScopedClients,
-  }): Promise<{ definitions: StreamDefinition[] }> => {
+  handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
-      const { definitions } = await listStreams({ scopedClusterClient });
-
+      const { streamsClient } = await getScopedClients({ request });
       return {
-        definitions,
+        streams: await streamsClient.listStreams(),
       };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {

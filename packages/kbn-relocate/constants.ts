@@ -13,13 +13,7 @@ export const BASE_FOLDER = process.cwd() + '/';
 export const BASE_FOLDER_DEPTH = process.cwd().split('/').length;
 export const KIBANA_FOLDER = process.cwd().split('/').pop()!;
 export const EXCLUDED_MODULES = ['@kbn/core'];
-export const TARGET_FOLDERS = [
-  'src/platform/plugins/',
-  'src/platform/packages/',
-  'x-pack/platform/plugins/',
-  'x-pack/platform/packages/',
-  'x-pack/solutions/',
-];
+
 export const EXTENSIONS = [
   'eslintignore',
   'gitignore',
@@ -33,8 +27,10 @@ export const EXTENSIONS = [
   'mdz',
   'asciidoc',
   'sh',
+  'snap',
   'ts',
   'jsonc',
+  'xml',
   'yaml',
   'yml',
 ];
@@ -95,5 +91,7 @@ This PR aims at relocating some of the Kibana modules (plugins and packages) int
 > * Any manual contributions will be lost if the 'relocate' script is re-run.
 > * Try to obtain the missing reviews / approvals before applying manual fixes, and/or keep your changes in a .patch / git stash.
 > * Please use [#sustainable_kibana_architecture](https://elastic.slack.com/archives/C07TCKTA22E) Slack channel for feedback.
+
+Are you trying to rebase this PR to solve merge conflicts? Please follow the steps describe [here](https://elastic.slack.com/archives/C07TCKTA22E/p1734019532879269?thread_ts=1734019339.935419&cid=C07TCKTA22E).
 
 `;

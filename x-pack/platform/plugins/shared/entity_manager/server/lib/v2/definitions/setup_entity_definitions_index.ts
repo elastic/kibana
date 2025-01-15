@@ -22,6 +22,8 @@ const definitionsIndexTemplate = {
   template: {
     settings: {
       hidden: true,
+      number_of_shards: 1,
+      auto_expand_replicas: '0-1',
     },
     aliases: {
       [DEFINITIONS_ALIAS]: {

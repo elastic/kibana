@@ -6,6 +6,7 @@
  */
 
 import {
+  useEuiTheme,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
@@ -21,7 +22,6 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface Option {
   name?: string | ReactNode;
@@ -60,7 +60,7 @@ export const MultiSelectPicker: FC<{
   postfix?: React.ReactElement;
   cssStyles?: MultiSelectPickerStyles;
 }> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -153,8 +153,8 @@ export const MultiSelectPicker: FC<{
                     flexDirection: 'row',
                     color:
                       item.disabled === true
-                        ? euiTheme.euiColorDisabledText
-                        : euiTheme.euiTextColor,
+                        ? euiTheme.colors.textDisabled
+                        : euiTheme.colors.textParagraph,
                   }}
                   data-test-subj={`${dataTestSubj}-option-${item.value}${
                     checked ? '-checked' : ''

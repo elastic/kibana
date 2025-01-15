@@ -51,7 +51,7 @@ export async function createAlert({
   overwrites?: Record<string, any>;
 }) {
   const createdAlert = await createAlertManualCleanup({ supertest, overwrites });
-  objectRemover.add(createdAlert.id, 'alert', 'alerts');
+  objectRemover.add(createdAlert.id, 'rule', 'alerting');
   return createdAlert;
 }
 

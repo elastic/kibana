@@ -130,7 +130,12 @@ tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
     x-displayName: Security AI assistant
-  - description: You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.
+  - description: |
+      Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
+      > warn
+      > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
+
+      > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
@@ -142,10 +147,67 @@ tags:
   - description: ''
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
-  - description: Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
+  - description: |
+      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
+
+      Exceptions are made up of:
+
+      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
+      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
+
+      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
+      > info
+      > You cannot use lists with endpoint rule exceptions.
+
+      > info
+      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
+
+      ## Exceptions requirements
+
+      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: |
+      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
+
+      Lists are made up of:
+
+      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
+          * `boolean`
+          * `byte`
+          * `date`
+          * `date_nanos`
+          * `date_range`
+          * `double`
+          * `double_range`
+          * `float`
+          * `float_range`
+          * `half_float`
+          * `integer`
+          * `integer_range`
+          * `ip`
+          * `ip_range`
+          * `keyword`
+          * `long`
+          * `long_range`
+          * `short`
+          * `text`
+      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
+
+      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
+      1. `192.168.1.1`
+      2. `192.168.1.3`
+      3. `192.168.1.18`
+      4. `192.168.1.12`
+      5. `192.168.1.7`
+
+      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
+      > info
+      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
+
+      ## Lists requirements
+
+      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
@@ -4457,724 +4519,6 @@ paths:
         '403':
           description: Indicates that this call is forbidden.
       summary: Get information about rules
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}:
-    delete:
-      deprecated: true
-      description: |
-        Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.
-      operationId: legaryDeleteAlert
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Delete an alert
-      tags:
-        - alerting
-    get:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the get rule API instead.
-      operationId: legacyGetAlert
-      parameters:
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_alert_response_properties'
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Get an alert by identifier
-      tags:
-        - alerting
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the create rule API instead.
-      operationId: legacyCreateAlert
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: An UUID v1 or v4 identifier for the alert. If this parameter is omitted, the identifier is randomly generated.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              title: Legacy create alert request properties
-              type: object
-              properties:
-                actions:
-                  items:
-                    type: object
-                    properties:
-                      actionTypeId:
-                        description: The identifier for the action type.
-                        type: string
-                      group:
-                        description: |
-                          Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.
-                        type: string
-                      id:
-                        description: The ID of the action saved object.
-                        type: string
-                      params:
-                        description: |
-                          The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.
-                        type: object
-                    required:
-                      - actionTypeId
-                      - group
-                      - id
-                      - params
-                  type: array
-                alertTypeId:
-                  description: The ID of the alert type that you want to call when the alert is scheduled to run.
-                  type: string
-                consumer:
-                  description: The name of the application that owns the alert. This name has to match the Kibana feature name, as that dictates the required role-based access control privileges.
-                  type: string
-                enabled:
-                  description: Indicates if you want to run the alert on an interval basis after it is created.
-                  type: boolean
-                name:
-                  description: A name to reference and search.
-                  type: string
-                notifyWhen:
-                  description: The condition for throttling the notification.
-                  enum:
-                    - onActionGroupChange
-                    - onActiveAlert
-                    - onThrottleInterval
-                  type: string
-                params:
-                  description: The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.
-                  type: object
-                schedule:
-                  description: |
-                    The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
-                  type: object
-                  properties:
-                    interval:
-                      description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
-                      example: 10s
-                      type: string
-                tags:
-                  description: A list of keywords to reference and search.
-                  items:
-                    type: string
-                  type: array
-                throttle:
-                  description: |
-                    How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.
-                  type: string
-              required:
-                - alertTypeId
-                - consumer
-                - name
-                - notifyWhen
-                - params
-                - schedule
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_alert_response_properties'
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Create an alert
-      tags:
-        - alerting
-    put:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the update rule API instead.
-      operationId: legacyUpdateAlert
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              title: Legacy update alert request properties
-              type: object
-              properties:
-                actions:
-                  items:
-                    type: object
-                    properties:
-                      actionTypeId:
-                        description: The identifier for the action type.
-                        type: string
-                      group:
-                        description: |
-                          Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.
-                        type: string
-                      id:
-                        description: The ID of the action saved object.
-                        type: string
-                      params:
-                        description: |
-                          The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.
-                        type: object
-                    required:
-                      - actionTypeId
-                      - group
-                      - id
-                      - params
-                  type: array
-                name:
-                  description: A name to reference and search.
-                  type: string
-                notifyWhen:
-                  description: The condition for throttling the notification.
-                  enum:
-                    - onActionGroupChange
-                    - onActiveAlert
-                    - onThrottleInterval
-                  type: string
-                params:
-                  description: The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.
-                  type: object
-                schedule:
-                  description: |
-                    The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
-                  type: object
-                  properties:
-                    interval:
-                      description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
-                      example: 1d
-                      type: string
-                tags:
-                  description: A list of keywords to reference and search.
-                  items:
-                    type: string
-                  type: array
-                throttle:
-                  description: |
-                    How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.
-                  type: string
-              required:
-                - name
-                - notifyWhen
-                - params
-                - schedule
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_alert_response_properties'
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Update an alert
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/_disable:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the disable rule API instead.
-      operationId: legacyDisableAlert
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Disable an alert
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/_enable:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the enable rule API instead.
-      operationId: legacyEnableAlert
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Enable an alert
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/_mute_all:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the mute all alerts API instead.
-      operationId: legacyMuteAllAlertInstances
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Mute all alert instances
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/_unmute_all:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the unmute all alerts API instead.
-      operationId: legacyUnmuteAllAlertInstances
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: The identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Unmute all alert instances
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the mute alert API instead.
-      operationId: legacyMuteAlertInstance
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: An identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-        - description: An identifier for the alert instance.
-          in: path
-          name: alertInstanceId
-          required: true
-          schema:
-            example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Mute an alert instance
-      tags:
-        - alerting
-  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
-    post:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the unmute alert API instead.
-      operationId: legacyUnmuteAlertInstance
-      parameters:
-        - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - description: An identifier for the alert.
-          in: path
-          name: alertId
-          required: true
-          schema:
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-            type: string
-        - description: An identifier for the alert instance.
-          in: path
-          name: alertInstanceId
-          required: true
-          schema:
-            example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Unmute an alert instance
-      tags:
-        - alerting
-  /api/alerts/alerts/_find:
-    get:
-      deprecated: true
-      description: |
-        Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
-      operationId: legacyFindAlerts
-      parameters:
-        - description: The default operator to use for the `simple_query_string`.
-          example: OR
-          in: query
-          name: default_search_operator
-          schema:
-            default: OR
-            type: string
-        - description: The fields to return in the `attributes` key of the response.
-          in: query
-          name: fields
-          schema:
-            items:
-              type: string
-            type: array
-        - description: |
-            A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.
-          in: query
-          name: filter
-          schema:
-            type: string
-        - description: Filters the rules that have a relation with the reference objects with a specific type and identifier.
-          in: query
-          name: has_reference
-          schema:
-            type: object
-            properties:
-              id:
-                type: string
-              type:
-                type: string
-        - description: The page number to return.
-          example: 1
-          in: query
-          name: page
-          schema:
-            default: 1
-            type: integer
-        - description: The number of alerts to return per page.
-          example: 20
-          in: query
-          name: per_page
-          schema:
-            default: 20
-            type: integer
-        - description: An Elasticsearch `simple_query_string` query that filters the alerts in the response.
-          in: query
-          name: search
-          schema:
-            type: string
-        - description: The fields to perform the `simple_query_string` parsed query against.
-          in: query
-          name: search_fields
-          schema:
-            oneOf:
-              - type: string
-              - items:
-                  type: string
-                type: array
-        - description: |
-            Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.
-          in: query
-          name: sort_field
-          schema:
-            type: string
-        - description: Determines the sort order.
-          example: asc
-          in: query
-          name: sort_order
-          schema:
-            default: desc
-            enum:
-              - asc
-              - desc
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    items:
-                      $ref: '#/components/schemas/Alerting_alert_response_properties'
-                    type: array
-                  page:
-                    type: integer
-                  perPage:
-                    type: integer
-                  total:
-                    type: integer
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Get a paginated set of alerts
-      tags:
-        - alerting
-  /api/alerts/alerts/_health:
-    get:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the get alerting framework health API instead.
-      operationId: legacyGetAlertingHealth
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  alertingFrameworkHealth:
-                    description: |
-                      Three substates identify the health of the alerting framework: `decryptionHealth`, `executionHealth`, and `readHealth`.
-                    type: object
-                    properties:
-                      decryptionHealth:
-                        description: The timestamp and status of the alert decryption.
-                        type: object
-                        properties:
-                          status:
-                            enum:
-                              - error
-                              - ok
-                              - warn
-                            example: ok
-                            type: string
-                          timestamp:
-                            example: '2023-01-13T01:28:00.280Z'
-                            format: date-time
-                            type: string
-                      executionHealth:
-                        description: The timestamp and status of the alert execution.
-                        type: object
-                        properties:
-                          status:
-                            enum:
-                              - error
-                              - ok
-                              - warn
-                            example: ok
-                            type: string
-                          timestamp:
-                            example: '2023-01-13T01:28:00.280Z'
-                            format: date-time
-                            type: string
-                      readHealth:
-                        description: The timestamp and status of the alert reading events.
-                        type: object
-                        properties:
-                          status:
-                            enum:
-                              - error
-                              - ok
-                              - warn
-                            example: ok
-                            type: string
-                          timestamp:
-                            example: '2023-01-13T01:28:00.280Z'
-                            format: date-time
-                            type: string
-                  hasPermanentEncryptionKey:
-                    description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
-                    example: true
-                    type: boolean
-                  isSufficientlySecure:
-                    description: If `false`, security is enabled but TLS is not.
-                    example: true
-                    type: boolean
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Get the alerting framework health
-      tags:
-        - alerting
-  /api/alerts/alerts/list_alert_types:
-    get:
-      deprecated: true
-      description: Deprecated in 7.13.0. Use the get rule types API instead.
-      operationId: legacyGetAlertTypes
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                items:
-                  type: object
-                  properties:
-                    actionGroups:
-                      description: |
-                        An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert actions validation uses this configuration to ensure that groups are valid.
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          name:
-                            type: string
-                      type: array
-                    actionVariables:
-                      description: |
-                        A list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI will use this information to prompt users for these variables in action parameter editors.
-                      type: object
-                      properties:
-                        context:
-                          items:
-                            type: object
-                            properties:
-                              description:
-                                type: string
-                              name:
-                                type: string
-                          type: array
-                        params:
-                          items:
-                            type: object
-                            properties:
-                              description:
-                                type: string
-                              name:
-                                type: string
-                          type: array
-                        state:
-                          items:
-                            type: object
-                            properties:
-                              description:
-                                type: string
-                              name:
-                                type: string
-                          type: array
-                    authorizedConsumers:
-                      description: The list of the plugins IDs that have access to the alert type.
-                      type: object
-                    defaultActionGroupId:
-                      description: The default identifier for the alert type group.
-                      type: string
-                    enabledInLicense:
-                      description: Indicates whether the rule type is enabled based on the subscription.
-                      type: boolean
-                    id:
-                      description: The unique identifier for the alert type.
-                      type: string
-                    isExportable:
-                      description: Indicates whether the alert type is exportable in Saved Objects Management UI.
-                      type: boolean
-                    minimumLicenseRequired:
-                      description: The subscriptions required to use the alert type.
-                      type: string
-                    name:
-                      description: The descriptive name of the alert type.
-                      type: string
-                    producer:
-                      description: An identifier for the application that produces this alert type.
-                      type: string
-                    recoveryActionGroup:
-                      description: |
-                        An action group to use when an alert instance goes from an active state to an inactive one. If it is not specified, the default recovered action group is used.
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        name:
-                          type: string
-                type: array
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Alerting_401_response'
-          description: Authorization information is missing or invalid.
-      summary: Get the alert types
       tags:
         - alerting
   /api/apm/agent_keys:
@@ -12205,6 +11549,26 @@ paths:
       summary: Get running processes
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/runscript:
+    post:
+      description: Run a shell command on an endpoint.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+          description: OK
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -12677,7 +12041,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -14002,6 +13366,7 @@ paths:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
       operationId: get-fleet-agent-download-sources
       parameters: []
       responses:
@@ -14067,6 +13432,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-agent-download-sources
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14153,7 +13519,7 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_download_sources/{sourceId}:
     delete:
-      description: Delete an agent binary download source by ID.
+      description: 'Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-agent-download-sources-sourceid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14200,7 +13566,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     get:
-      description: Get an agent binary download source by ID.
+      description: 'Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
         - in: path
@@ -14260,7 +13626,7 @@ paths:
       tags:
         - Elastic Agent binary download sources
     put:
-      description: Update an agent binary download source by ID.
+      description: 'Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-agent-download-sources-sourceid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14352,6 +13718,7 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_policies:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies
       parameters:
         - in: query
@@ -14930,6 +14297,7 @@ paths:
       tags:
         - Elastic Agent policies
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15622,6 +14990,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/_bulk_get:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -16166,7 +15535,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
-      description: Get an agent policy by ID.
+      description: 'Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
         - in: path
@@ -16687,7 +16056,7 @@ paths:
       tags:
         - Elastic Agent policies
     put:
-      description: Update an agent policy by ID.
+      description: 'Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: put-fleet-agent-policies-agentpolicyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -17388,7 +16757,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
-      description: Copy an agent policy by ID.
+      description: 'Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies-agentpolicyid-copy
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -17931,7 +17300,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: Download an agent policy by ID.
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -17997,7 +17366,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
-      description: Get a full agent policy by ID.
+      description: 'Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - in: path
@@ -18345,7 +17714,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/outputs:
     get:
-      description: Get a list of outputs associated with agent policy by policy id.
+      description: 'Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
         - in: path
@@ -18441,7 +17810,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
-      description: Delete an agent policy by ID.
+      description: 'Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18501,7 +17870,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/outputs:
     post:
-      description: Get a list of outputs associated with agent policies.
+      description: 'Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
       operationId: post-fleet-agent-policies-outputs
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18662,9 +18031,13 @@ paths:
                         type: number
                       online:
                         type: number
+                      orphaned:
+                        type: number
                       other:
                         type: number
                       unenrolled:
+                        type: number
+                      uninstalled:
                         type: number
                       updating:
                         type: number
@@ -18702,6 +18075,7 @@ paths:
         - Elastic Agent status
   /api/fleet/agent_status/data:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agent-status-data
       parameters:
         - in: query
@@ -18776,6 +18150,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents
       parameters:
         - in: query
@@ -18862,6 +18237,8 @@ paths:
                           required:
                             - id
                             - version
+                        audit_unenrolled_reason:
+                          type: string
                         components:
                           items:
                             additionalProperties: false
@@ -19025,6 +18402,8 @@ paths:
                             - unenrolled
                             - updating
                             - degraded
+                            - uninstalled
+                            - orphaned
                           type: string
                         tags:
                           items:
@@ -19154,6 +18533,7 @@ paths:
       tags:
         - Elastic Agents
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19211,7 +18591,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}:
     delete:
-      description: Delete an agent by ID.
+      description: 'Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-agents-agentid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19260,7 +18640,7 @@ paths:
       tags:
         - Elastic Agents
     get:
-      description: Get an agent by ID.
+      description: 'Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-agentid
       parameters:
         - in: path
@@ -19303,6 +18683,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
@@ -19466,6 +18848,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -19581,7 +18965,7 @@ paths:
       tags:
         - Elastic Agents
     put:
-      description: Update an agent by ID.
+      description: 'Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: put-fleet-agents-agentid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19639,6 +19023,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
@@ -19802,6 +19188,8 @@ paths:
                           - unenrolled
                           - updating
                           - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       tags:
                         items:
@@ -19918,6 +19306,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-actions
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20030,7 +19419,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -20054,6 +19442,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/reassign:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20108,6 +19497,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20169,6 +19559,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/unenroll:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20201,6 +19592,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/upgrade:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20261,6 +19653,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/uploads:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-agentid-uploads
       parameters:
         - in: path
@@ -20333,6 +19726,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/action_status:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-action-status
       parameters:
         - in: query
@@ -20490,6 +19884,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/actions/{actionId}/cancel:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20552,7 +19947,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -20576,6 +19970,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/available_versions:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-available-versions
       parameters: []
       responses:
@@ -20613,6 +20008,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/bulk_reassign:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20678,6 +20074,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_request_diagnostics:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20743,6 +20140,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_unenroll:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20813,6 +20211,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_update_agent_tags:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20883,6 +20282,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_upgrade:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20959,7 +20359,7 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/files/{fileId}:
     delete:
-      description: Delete a file uploaded by an agent.
+      description: 'Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-agents-files-fileid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21010,7 +20410,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/files/{fileId}/{fileName}:
     get:
-      description: Get a file uploaded by an agent.
+      description: 'Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
         - in: path
@@ -21050,6 +20450,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/setup:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: get-fleet-agents-setup
       parameters: []
       responses:
@@ -21109,6 +20510,7 @@ paths:
       tags:
         - Elastic Agents
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: post-fleet-agents-setup
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21166,6 +20568,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/tags:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-tags
       parameters:
         - in: query
@@ -21260,6 +20663,7 @@ paths:
         - Fleet internals
   /api/fleet/data_streams:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
       operationId: get-fleet-data-streams
       parameters: []
       responses:
@@ -21356,6 +20760,7 @@ paths:
         - Data streams
   /api/fleet/enrollment_api_keys:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
       operationId: get-fleet-enrollment-api-keys
       parameters:
         - in: query
@@ -21478,6 +20883,7 @@ paths:
       tags:
         - Fleet enrollment API keys
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-enrollment-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21567,7 +20973,7 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
-      description: Revoke an enrollment API key by ID by marking it as inactive.
+      description: 'Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21616,7 +21022,7 @@ paths:
       tags:
         - Fleet enrollment API keys
     get:
-      description: Get an enrollment API key by ID.
+      description: 'Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
         - in: path
@@ -21684,6 +21090,7 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/epm/bulk_assets:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: post-fleet-epm-bulk-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21774,6 +21181,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/categories:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-categories
       parameters:
         - in: query
@@ -21837,6 +21245,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/custom_integrations:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-custom-integrations
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21971,6 +21380,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-data-streams
       parameters:
         - in: query
@@ -22045,6 +21455,7 @@ paths:
         - Data streams
   /api/fleet/epm/packages:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages
       parameters:
         - in: query
@@ -22436,6 +21847,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22555,6 +21967,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/_bulk:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22729,6 +22142,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23306,6 +22720,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23447,6 +22862,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     put:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23908,6 +23324,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
         - in: path
@@ -24035,6 +23452,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
         - in: path
@@ -24081,6 +23499,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/installed:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-installed
       parameters:
         - in: query
@@ -24226,6 +23645,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/limited:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-limited
       parameters: []
       responses:
@@ -24263,6 +23683,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
         - in: path
@@ -24362,6 +23783,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/verification_key_id:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-verification-key-id
       parameters: []
       responses:
@@ -24398,6 +23820,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/fleet_server_hosts:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-settings-read].'
       operationId: get-fleet-fleet-server-hosts
       parameters: []
       responses:
@@ -24469,6 +23892,7 @@ paths:
       tags:
         - Fleet Server hosts
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-fleet-server-hosts
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24567,7 +23991,7 @@ paths:
         - Fleet Server hosts
   /api/fleet/fleet_server_hosts/{itemId}:
     delete:
-      description: Delete a Fleet Server host by ID.
+      description: 'Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-fleet-server-hosts-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24614,7 +24038,7 @@ paths:
       tags:
         - Fleet Server hosts
     get:
-      description: Get a Fleet Server host by ID.
+      description: 'Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
         - in: path
@@ -24680,7 +24104,7 @@ paths:
       tags:
         - Fleet Server hosts
     put:
-      description: Update a Fleet Server host by ID.
+      description: 'Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-fleet-server-hosts-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24777,6 +24201,7 @@ paths:
         - Fleet Server hosts
   /api/fleet/health_check:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-health-check
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24850,6 +24275,7 @@ paths:
         - Fleet internals
   /api/fleet/kubernetes:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -24900,6 +24326,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/kubernetes/download:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -24960,6 +24387,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-logstash-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25002,6 +24430,7 @@ paths:
         - Fleet outputs
   /api/fleet/message_signing_service/rotate_key_pair:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25066,6 +24495,7 @@ paths:
         - Message Signing Service
   /api/fleet/outputs:
     get:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
       operationId: get-fleet-outputs
       parameters: []
       responses:
@@ -25790,6 +25220,7 @@ paths:
       tags:
         - Fleet outputs
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-outputs
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27195,7 +26626,7 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}:
     delete:
-      description: Delete output by ID.
+      description: 'Delete output by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27258,7 +26689,7 @@ paths:
       tags:
         - Fleet outputs
     get:
-      description: Get output by ID.
+      description: 'Get output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
       operationId: get-fleet-outputs-outputid
       parameters:
         - in: path
@@ -27977,7 +27408,7 @@ paths:
       tags:
         - Fleet outputs
     put:
-      description: Update output by ID.
+      description: 'Update output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-all OR fleet-agent-policies-all].'
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -29367,6 +28798,7 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}/health:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-outputs-outputid-health
       parameters:
         - in: path
@@ -31174,7 +30606,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
-      description: Delete a package policy by ID.
+      description: 'Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: delete-fleet-package-policies-packagepolicyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -32499,6 +31931,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/delete:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: post-fleet-package-policies-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -32627,7 +32060,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade:
     post:
-      description: Upgrade a package policy to a newer package version.
+      description: 'Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -32700,6 +32133,7 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade/dryrun:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, integrations-read].'
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33492,6 +32926,7 @@ paths:
         - Fleet package policies
   /api/fleet/proxies:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-proxies
       parameters: []
       responses:
@@ -33569,6 +33004,7 @@ paths:
       tags:
         - Fleet proxies
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-proxies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33679,7 +33115,7 @@ paths:
         - Fleet proxies
   /api/fleet/proxies/{itemId}:
     delete:
-      description: Delete a proxy by ID
+      description: 'Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: delete-fleet-proxies-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33726,7 +33162,7 @@ paths:
       tags:
         - Fleet proxies
     get:
-      description: Get a proxy by ID.
+      description: 'Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-proxies-itemid
       parameters:
         - in: path
@@ -33798,7 +33234,7 @@ paths:
       tags:
         - Fleet proxies
     put:
-      description: Update a proxy by ID.
+      description: 'Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-proxies-itemid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33911,6 +33347,7 @@ paths:
         - Fleet proxies
   /api/fleet/service_tokens:
     post:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-service-tokens
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -33967,6 +33404,7 @@ paths:
         - Fleet service tokens
   /api/fleet/settings:
     get:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-settings
       parameters: []
       responses:
@@ -34054,6 +33492,7 @@ paths:
       tags:
         - Fleet internals
     put:
+      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-settings
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -34180,6 +33619,7 @@ paths:
         - Fleet internals
   /api/fleet/setup:
     post:
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: post-fleet-setup
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -34249,7 +33689,7 @@ paths:
         - Fleet internals
   /api/fleet/uninstall_tokens:
     get:
-      description: List the metadata for the latest uninstall tokens per agent policy.
+      description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: get-fleet-uninstall-tokens
       parameters:
         - description: Partial match filtering for policy IDs
@@ -34341,7 +33781,7 @@ paths:
         - Fleet uninstall tokens
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
-      description: Get one decrypted uninstall token by its ID.
+      description: 'Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
         - in: path
@@ -36208,6 +35648,57 @@ paths:
       summary: Cleanup the Risk Engine
       tags:
         - Security Entity Analytics API
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -37977,7 +37468,7 @@ paths:
         - roles
   /api/spaces/_copy_saved_objects:
     post:
-      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -43931,13 +43422,6 @@ components:
         disabledFeatures: []
         imageUrl: ''
   parameters:
-    Alerting_kbn_xsrf:
-      description: Cross-site request forgery protection
-      in: header
-      name: kbn-xsrf
-      required: true
-      schema:
-        type: string
     APM_UI_elastic_api_version:
       description: The version of the API to use
       in: header
@@ -44291,89 +43775,6 @@ components:
           type: integer
       title: Unsuccessful rule API response
       type: object
-    Alerting_alert_response_properties:
-      title: Legacy alert response properties
-      type: object
-      properties:
-        actions:
-          items:
-            type: object
-          type: array
-        alertTypeId:
-          example: .index-threshold
-          type: string
-        apiKeyOwner:
-          example: elastic
-          nullable: true
-          type: string
-        createdAt:
-          description: The date and time that the alert was created.
-          example: '2022-12-05T23:36:58.284Z'
-          format: date-time
-          type: string
-        createdBy:
-          description: The identifier for the user that created the alert.
-          example: elastic
-          type: string
-        enabled:
-          description: Indicates whether the alert is currently enabled.
-          example: true
-          type: boolean
-        executionStatus:
-          type: object
-          properties:
-            lastExecutionDate:
-              example: '2022-12-06T00:13:43.890Z'
-              format: date-time
-              type: string
-            status:
-              example: ok
-              type: string
-        id:
-          description: The identifier for the alert.
-          example: b530fed0-74f5-11ed-9801-35303b735aef
-          type: string
-        muteAll:
-          example: false
-          type: boolean
-        mutedInstanceIds:
-          items:
-            type: string
-          nullable: true
-          type: array
-        name:
-          description: The name of the alert.
-          example: my alert
-          type: string
-        notifyWhen:
-          example: onActionGroupChange
-          type: string
-        params:
-          additionalProperties: true
-          type: object
-        schedule:
-          type: object
-          properties:
-            interval:
-              type: string
-        scheduledTaskId:
-          example: b530fed0-74f5-11ed-9801-35303b735aef
-          type: string
-        tags:
-          items:
-            type: string
-          type: array
-        throttle:
-          nullable: true
-          type: string
-        updatedAt:
-          example: '2022-12-05T23:36:58.284Z'
-          type: string
-        updatedBy:
-          description: The identifier for the user that updated this alert most recently.
-          example: elastic
-          nullable: true
-          type: string
     Alerting_fieldmap_properties:
       title: Field map objects in the get rule types response
       type: object
@@ -54063,10 +53464,12 @@ components:
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
+      description: The host agent type (optional). Defaults to endpoint.
       enum:
         - endpoint
         - sentinel_one
         - crowdstrike
+        - microsoft_defender_endpoint
       type: string
     Security_Endpoint_Management_API_AlertIds:
       description: A list of alerts ids.
@@ -54081,6 +53484,23 @@ components:
         type: string
       minItems: 1
       type: array
+    Security_Endpoint_Management_API_CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
     Security_Endpoint_Management_API_Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -54207,6 +53627,23 @@ components:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+    Security_Endpoint_Management_API_HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
     Security_Endpoint_Management_API_IsolateRouteRequestBody:
       $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
@@ -54360,6 +53797,34 @@ components:
       properties:
         note:
           type: string
+    Security_Endpoint_Management_API_RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
+    Security_Endpoint_Management_API_RunScriptRouteRequestBody:
+      type: object
+      properties:
+        parameters:
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
+          oneOf:
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
+      required:
+        - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -54560,6 +54025,20 @@ components:
               type: string
           required:
             - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
         user:
           type: object
           properties:
@@ -54609,6 +54088,27 @@ components:
           type: array
       required:
         - cleanup_successful
+        - errors
+    Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
         - errors
     Security_Entity_Analytics_API_CreateAssetCriticalityRecord:
       allOf:
@@ -54706,6 +54206,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -54788,6 +54289,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -54857,6 +54359,8 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
+        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -54927,6 +54431,42 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - '@timestamp'
+        - service
+        - entity
     Security_Entity_Analytics_API_StoreStatus:
       enum:
         - not_installed

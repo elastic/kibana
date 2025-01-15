@@ -14,6 +14,7 @@ export interface CommitAuthor {
 }
 
 export interface Commit {
+  oid: string;
   messageHeadline: string;
   authors: CommitAuthor[];
 }
@@ -21,4 +22,5 @@ export interface Commit {
 export interface PullRequest {
   number: string;
   commits: Commit[];
+  headRefName: string;
 }

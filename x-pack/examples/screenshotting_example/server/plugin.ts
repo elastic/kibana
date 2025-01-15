@@ -15,7 +15,7 @@ interface StartDeps {
   screenshotting: ScreenshottingStart;
 }
 
-export class ScreenshottingExamplePlugin implements Plugin<void, void> {
+export class ScreenshottingExamplePlugin implements Plugin<void, void, {}, StartDeps> {
   setup({ http, getStartServices }: CoreSetup<StartDeps>) {
     const router = http.createRouter();
 

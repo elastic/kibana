@@ -81,7 +81,7 @@ const App = ({
   }, [pages]);
 
   return (
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <Router basename={mountParams.appBasePath}>
         <EuiPageTemplate restrictWidth={true} offset={0}>
           <EuiPageTemplate.Sidebar sticky={true}>

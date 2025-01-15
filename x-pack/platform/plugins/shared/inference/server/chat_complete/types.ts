@@ -29,6 +29,8 @@ export interface InferenceConnectorAdapter {
       messages: Message[];
       system?: string;
       functionCalling?: FunctionCallingMode;
+      temperature?: number;
+      abortSignal?: AbortSignal;
       logger: Logger;
     } & ToolOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;

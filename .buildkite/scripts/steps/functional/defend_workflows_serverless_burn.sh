@@ -11,4 +11,4 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'fals
 
 echo "--- Defend Workflows Cypress tests, burning changed specs (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution cypress:dw:serverless:changed-specs-only
+yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:changed-specs-only

@@ -13,7 +13,7 @@
         "description": [
           "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
         ],
-        "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+        "path": "src/core/packages/deprecations/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,24 +28,12 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               ">[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -62,24 +50,12 @@
             ],
             "signature": [
               "(domainId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               ">[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -93,7 +69,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -112,24 +88,12 @@
             ],
             "signature": [
               "(details: ",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               ">) => boolean"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -141,24 +105,12 @@
                 "label": "details",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DomainDeprecationDetails",
-                    "text": "DomainDeprecationDetails"
-                  },
+                  "DomainDeprecationDetails",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DeprecationsDetails",
-                    "text": "DeprecationsDetails"
-                  },
+                  "DeprecationsDetails",
                   ">"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -177,32 +129,14 @@
             ],
             "signature": [
               "(details: ",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-public.ResolveDeprecationResponse",
-                "text": "ResolveDeprecationResponse"
-              },
+              "ResolveDeprecationResponse",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -214,24 +148,12 @@
                 "label": "details",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DomainDeprecationDetails",
-                    "text": "DomainDeprecationDetails"
-                  },
+                  "DomainDeprecationDetails",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DeprecationsDetails",
-                    "text": "DeprecationsDetails"
-                  },
+                  "DeprecationsDetails",
                   ">"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,7 +179,7 @@
         "signature": [
           "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
         ],
-        "path": "packages/core/deprecations/core-deprecations-browser/src/types.ts",
+        "path": "src/core/packages/deprecations/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
