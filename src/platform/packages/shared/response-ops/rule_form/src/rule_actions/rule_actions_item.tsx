@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiButtonIcon,
   useEuiTheme,
-  useEuiBackgroundColor,
   EuiIcon,
   EuiText,
   EuiTabs,
@@ -110,9 +109,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   } = useRuleFormState();
 
   const [tab, setTab] = useState<string>(MESSAGES_TAB);
-  const subdued = useEuiBackgroundColor('subdued');
-  const plain = useEuiBackgroundColor('plain');
   const { euiTheme } = useEuiTheme();
+  const subdued = euiTheme.colors.lightestShade;
+  const plain = euiTheme.colors.backgroundBasePlain;
 
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>(() => {
     if (!selectedRuleType.actionVariables) {
@@ -692,7 +691,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       }
       buttonContentClassName="eui-fullWidth"
       buttonContent={
-        <EuiPanel color="subdued" paddingSize="m">
+        <EuiPanel color="transparent" paddingSize="m">
           <EuiFlexGroup alignItems="center" responsive={false}>
             {accordionIcon}
             {connectorTitle}
