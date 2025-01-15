@@ -30,7 +30,7 @@ const mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initializ
 mockSessionIndexInitialize.mockResolvedValue();
 
 const mockSessionIndexCleanUp = jest.spyOn(SessionIndex.prototype, 'cleanUp');
-mockSessionIndexCleanUp.mockResolvedValue();
+mockSessionIndexCleanUp.mockResolvedValue(undefined);
 
 describe('SessionManagementService', () => {
   let service: SessionManagementService;
