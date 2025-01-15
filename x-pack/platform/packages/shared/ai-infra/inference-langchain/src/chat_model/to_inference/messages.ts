@@ -44,12 +44,11 @@ export const messagesToInference = (messages: BaseMessage[]) => {
         output.messages.push({
           role: MessageRole.Assistant,
           content: extractMessageTextContent(message),
-          toolCalls:
-            message.tool_calls && message.tool_calls.length > 0
-              ? message.tool_calls.map(toolCallToInference)
-              : message.additional_kwargs?.tool_calls
-              ? message.additional_kwargs.tool_calls.map(legacyToolCallToInference)
-              : [],
+          toolCalls: message.tool_calls?.length
+            ? message.tool_calls.map(toolCallToInference)
+            : message.additional_kwargs?.tool_calls?.length
+            ? message.additional_kwargs.tool_calls.map(legacyToolCallToInference)
+            : undefined,
         });
       }
       if (isToolMessage(message)) {
