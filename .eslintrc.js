@@ -2078,6 +2078,7 @@ module.exports = {
         '**/__mocks__/**/*',
         '**/*.stories.test.tsx',
         '**/*.stories.test.ts',
+        'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/mock/use_fetch_graph_data.mock.ts',
       ],
       rules: {
         // @storybook/addon-essentials contains many packages which are not defined in package.json
