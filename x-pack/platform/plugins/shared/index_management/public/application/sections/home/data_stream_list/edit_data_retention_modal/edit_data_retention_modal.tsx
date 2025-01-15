@@ -206,11 +206,18 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
-              defaultMessage="Edit data retention for {dataStreamCount} {dataStreamCount, plural, one {data stream} other {data streams}}"
-              values={{ dataStreamCount: dataStreams?.length }}
-            />
+            {isBulkEdit ? (
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.modalTitleText"
+                defaultMessage="Edit data retention for {dataStreamCount} {dataStreamCount, plural, one {data stream} other {data streams}}"
+                values={{ dataStreamCount: dataStreams?.length }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.modalTitleText"
+                defaultMessage="Edit data retention"
+              />
+            )}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -343,7 +350,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
           <EuiSpacer />
 
-          {isBulkEdit && affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
+          {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
             <EuiCallOut
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
@@ -355,16 +362,23 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               iconType="warning"
             >
               <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutText"
-                  defaultMessage="The retention period will be reduced for {affectedDataStreamCount} data streams. Data older than then new
+                {isBulkEdit ? (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.affectedDataStreamsCalloutText"
+                    defaultMessage="The retention period will be reduced for {affectedDataStreamCount} {affectedDataStreamCount, plural, one {data stream} other {data streams}}. Data older than then new
                 retention period will be permanently deleted."
-                  values={{
-                    affectedDataStreamCount: affectedDataStreams.length,
-                  }}
-                />
+                    values={{
+                      affectedDataStreamCount: affectedDataStreams.length,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.affectedDataStreamsSingleCalloutText"
+                    defaultMessage="The retention period will be reduced. Data older than then new retention period will be permanently deleted."
+                  />
+                )}
               </p>
-              {affectedDataStreams.length <= 10 && (
+              {isBulkEdit && affectedDataStreams.length <= 10 && (
                 <p>
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
