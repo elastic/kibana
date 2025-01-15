@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { testIntegration } from '../../__jest__/fixtures/build_integration';
-import { ensureDirSync, createSync } from '../util';
-import { configure } from 'nunjucks';
+import { configure, Environment } from 'nunjucks';
 import { join as joinPath } from 'path';
+import { testIntegration } from '../../__jest__/fixtures/build_integration';
+import { DataStream } from '../../common';
+import { createSync, ensureDirSync } from '../util';
 import { createReadme } from './readme_files';
 
 jest.mock('../util', () => ({
@@ -18,6 +19,7 @@ jest.mock('../util', () => ({
 }));
 
 describe('createReadme', () => {
+  const getTemplateSpy = jest.spyOn(Environment.prototype, 'getTemplate');
   const integrationPath = 'path';
 
   const templateDir = joinPath(__dirname, '../templates');
@@ -178,5 +180,107 @@ describe('createReadme', () => {
       `${integrationPath}/docs/README.md`,
       expect.stringContaining(firstDatastreamFieldsDisplayed)
     );
+  });
+
+  it('Should call input setup and troubleshooting templates', () => {
+    const dataStreams = [
+      {
+        name: 'example-datastream',
+        inputTypes: ['filestream', 'tcp', 'udp'],
+      },
+    ] as DataStream[];
+
+    createReadme(integrationPath, testIntegration.name, dataStreams, []);
+
+    const calledTemplateNames = getTemplateSpy.mock.calls.map((call) => call[0]);
+    expect(calledTemplateNames).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('./readme/setup/filestream.md.njk'),
+        expect.stringContaining('./readme/setup/tcp.md.njk'),
+        expect.stringContaining('./readme/setup/udp.md.njk'),
+        expect.stringContaining('./readme/troubleshooting/filestream.md.njk'),
+        expect.stringContaining('./readme/troubleshooting/tcp.md.njk'),
+        expect.stringContaining('./readme/troubleshooting/udp.md.njk'),
+      ])
+    );
+  });
+
+  it('Should not throw any error if input template does not exist', () => {
+    const dataStreams = [
+      {
+        name: 'example-datastream',
+        inputTypes: ['fake'],
+      },
+    ] as unknown as DataStream[];
+
+    expect(() =>
+      createReadme(integrationPath, testIntegration.name, dataStreams, [])
+    ).not.toThrow();
+
+    const calledTemplateNames = getTemplateSpy.mock.calls.map((call) => call[0]);
+    expect(calledTemplateNames).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('./readme/setup/fake.md.njk'),
+        expect.stringContaining('./readme/troubleshooting/fake.md.njk'),
+      ])
+    );
+  });
+
+  it('Should pass a list of unique input types to the readme', () => {
+    const dataStreams = [
+      {
+        name: 'datastream1',
+        inputTypes: ['filestream', 'tcp', 'udp'],
+      },
+      {
+        name: 'datastream2',
+        inputTypes: ['filestream', 'tcp', 'aws-s3'],
+      },
+    ] as DataStream[];
+
+    createReadme(integrationPath, testIntegration.name, dataStreams, []);
+
+    const calls = getTemplateSpy.mock.calls;
+    for (const input of ['filestream', 'tcp', 'udp', 'aws-s3']) {
+      const filteredCalls = calls.filter(
+        (call) =>
+          call.some(
+            (arg) => typeof arg === 'string' && arg.includes(`./readme/setup/${input}.md.njk`)
+          ) && call.some((arg) => typeof arg === 'string' && arg.includes('description_readme.njk'))
+      );
+
+      // Assert that there are exactly 2 calls for each input type (one for the build_readme and one for the package_readme)
+      expect(filteredCalls.length).toBe(2);
+    }
+  });
+
+  it('Should call ssl template if input can be configured with ssl', () => {
+    const dataStreams = [
+      {
+        name: 'example-datastream',
+        inputTypes: ['aws-s3'],
+      },
+    ] as DataStream[];
+
+    createReadme(integrationPath, testIntegration.name, dataStreams, []);
+
+    const calledTemplateNames = getTemplateSpy.mock.calls.map((call) => call[0]);
+    expect(calledTemplateNames).toEqual(
+      expect.arrayContaining([expect.stringContaining('./readme/setup/ssl-tls.md.njk')])
+    );
+  });
+
+  it('Should not call ssl template if input cannot be configured with ssl', () => {
+    const dataStreams = [
+      {
+        name: 'example-datastream',
+        inputTypes: ['journald'],
+      },
+    ] as DataStream[];
+
+    createReadme(integrationPath, testIntegration.name, dataStreams, []);
+
+    const calledTemplateNames = getTemplateSpy.mock.calls.map((call) => call[0]);
+    expect(calledTemplateNames).not.toContain('./readme/setup/ssl-tls.md.njk');
   });
 });
