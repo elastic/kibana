@@ -27,4 +27,8 @@ export class TelemetryConfigProvider {
   public get isOptedIn() {
     return this._isOptedIn;
   }
+
+  public getObservable() {
+    return this.isOptedIn$;
+  }
 }

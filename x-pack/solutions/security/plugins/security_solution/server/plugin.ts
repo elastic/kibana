@@ -131,6 +131,7 @@ import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_inte
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
+import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -152,6 +153,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private licensing$!: Observable<ILicense>;
   private policyWatcher?: PolicyWatcher;
   private telemetryConfigProvider: TelemetryConfigProvider;
+  private telemetryWatcher?: TelemetryConfigWatcher;
 
   private manifestTask: ManifestTask | undefined;
   private completeExternalResponseActionsTask: CompleteExternalResponseActionsTask;
@@ -671,6 +673,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger
       );
       this.policyWatcher.start(licenseService);
+
+      this.telemetryWatcher = new TelemetryConfigWatcher(
+        plugins.fleet.packagePolicyService,
+        core.savedObjects,
+        core.elasticsearch,
+        logger
+      );
+      this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
 
     if (plugins.taskManager) {
