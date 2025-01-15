@@ -46,10 +46,12 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   );
 
   const getGroupPanelTitle = () => {
-    if (bucket.resourceName?.buckets) {
+    const resourceId = bucket.resourceName?.buckets?.[0]?.key;
+
+    if (resourceId) {
       return (
         <>
-          <strong>{bucket.resourceName.buckets[0]?.key}</strong> - {bucket.key_as_string}
+          <strong>{resourceId}</strong> - {bucket.key_as_string}
         </>
       );
     }
