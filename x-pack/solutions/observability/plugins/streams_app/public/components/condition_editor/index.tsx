@@ -32,9 +32,6 @@ export function ConditionEditor(props: {
   readonly?: boolean;
   onConditionChange?: (condition: Condition) => void;
 }) {
-  if (!props.condition) {
-    return null;
-  }
   if (props.readonly) {
     return (
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
@@ -102,16 +99,15 @@ export function ConditionForm(props: {
             }
           }}
         />
+      ) : !props.condition || 'operator' in props.condition ? (
+        <FilterForm
+          condition={
+            (props.condition as FilterCondition) || { field: '', operator: 'eq', value: '' }
+          }
+          onConditionChange={props.onConditionChange}
+        />
       ) : (
-        props.condition &&
-        ('operator' in props.condition ? (
-          <FilterForm
-            condition={props.condition as FilterCondition}
-            onConditionChange={props.onConditionChange}
-          />
-        ) : (
-          <pre>{JSON.stringify(props.condition, null, 2)}</pre>
-        ))
+        <pre>{JSON.stringify(props.condition, null, 2)}</pre>
       )}
     </EuiFlexGroup>
   );
@@ -213,7 +209,13 @@ function FilterForm(props: {
 
 export function ConditionDisplay(props: { condition: Condition }) {
   if (!props.condition) {
-    return null;
+    return (
+      <>
+        {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
+          defaultMessage: 'No condition, no documents will be routed',
+        })}
+      </>
+    );
   }
   return (
     <>

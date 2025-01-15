@@ -839,7 +839,10 @@ function RoutingStreamEntry({
                 color="transparent"
                 paddingSize="s"
                 {...draggableProvided.dragHandleProps}
-                aria-label="Drag Handle"
+                aria-label={i18n.translate(
+                  'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
+                  { defaultMessage: 'Drag Handle' }
+                )}
               >
                 <EuiIcon type="grab" />
               </EuiPanel>
@@ -875,25 +878,16 @@ function RoutingStreamEntry({
           })}
         />
       </EuiFlexGroup>
-      {child.condition && (
-        <ConditionEditor
-          readonly={!edit}
-          condition={child.condition}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              condition,
-            });
-          }}
-        />
-      )}
-      {!child.condition && (
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-            defaultMessage: 'No condition, no documents will be routed',
-          })}
-        </EuiText>
-      )}
+      <ConditionEditor
+        readonly={!edit}
+        condition={child.condition}
+        onConditionChange={(condition) => {
+          onChildChange({
+            ...child,
+            condition,
+          });
+        }}
+      />
     </EuiPanel>
   );
 }
@@ -927,25 +921,16 @@ function NewRoutingStreamEntry({
             }}
           />
         </EuiFormRow>
-        {child.condition && (
-          <ConditionEditor
-            readonly={false}
-            condition={child.condition}
-            onConditionChange={(condition) => {
-              onChildChange({
-                ...child,
-                condition,
-              });
-            }}
-          />
-        )}
-        {!child.condition && (
-          <EuiText>
-            {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-              defaultMessage: 'No condition, no documents will be routed',
-            })}
-          </EuiText>
-        )}
+        <ConditionEditor
+          readonly={false}
+          condition={child.condition}
+          onConditionChange={(condition) => {
+            onChildChange({
+              ...child,
+              condition,
+            });
+          }}
+        />
       </EuiFlexGroup>
     </EuiPanel>
   );
