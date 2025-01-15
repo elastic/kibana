@@ -81,6 +81,7 @@ export interface ChatClient {
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
+  getConnectorId: () => string;
 }
 
 export class KibanaClient {
@@ -634,6 +635,7 @@ export class KibanaClient {
         onResultCallbacks.push({ callback, unregister });
         return unregister;
       },
+      getConnectorId: () => connectorId,
     };
   }
 

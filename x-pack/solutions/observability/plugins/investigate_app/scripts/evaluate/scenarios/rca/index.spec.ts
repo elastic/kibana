@@ -87,6 +87,7 @@ describe('Root cause analysis', () => {
 
   it('can accurately pinpoint the root cause of cartservice bad entrypoint failure', async () => {
     const alert = await rcaChatClient.getAlert(ALERT_FIXTURE_ID);
+    const connectorId = chatClient.getConnectorId();
     const { from, to } = await rcaChatClient.getTimeRange({
       fromOffset: 'now-15m',
       toOffset: 'now+15m',
@@ -103,7 +104,7 @@ describe('Root cause analysis', () => {
       from: new Date(from).toISOString(),
       to: new Date(to).toISOString(),
       alert,
-      connectorIdOverride: 'azure-gpt4',
+      connectorId,
     });
     const { report, entities, errors } = categorizeEvents(events);
     const prompt = `

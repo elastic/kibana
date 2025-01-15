@@ -97,13 +97,13 @@ export class RCAClient {
   }
 
   async rootCauseAnalysis({
-    connectorIdOverride,
+    connectorId,
     investigationId,
     from,
     to,
     alert,
   }: {
-    connectorIdOverride?: string;
+    connectorId: string;
     investigationId: string;
     from: string;
     to: string;
@@ -125,7 +125,7 @@ export class RCAClient {
     const context = getRCAContext(alert, serviceName);
     const body = {
       investigationId,
-      connectorId: connectorIdOverride,
+      connectorId,
       context,
       rangeFrom: from,
       rangeTo: to,
