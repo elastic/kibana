@@ -17,4 +17,3 @@ export type {
   FindGapsResponseBody as FindGapsResponseBodyV1,
   FindGapsResponse as FindGapsResponseV1,
 } from './types/v1';
-

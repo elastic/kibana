@@ -97,7 +97,8 @@ export const interceptGetRuleGaps = () => {
           filled_duration_ms: 86400000,
           unfilled_duration_ms: 0,
           in_progress_duration_ms: 0,
-        },        {
+        },
+        {
           _id: 'test-id-4',
           '@timestamp': '2024-01-02T00:00:00.000Z',
           range: {
