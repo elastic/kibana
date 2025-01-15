@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Query } from '@kbn/es-query';
+import { type Query, escapeQuotes } from '@kbn/es-query';
 
 const getFilterBySearchText = (query?: Query) => {
   if (!query) {
@@ -18,7 +18,11 @@ const getFilterBySearchText = (query?: Query) => {
     query.language === 'kuery' ? 'KQL' : query.language === 'lucene' ? 'QSTR' : '';
 
   if (searchTextFunc && query.query) {
-    return `${searchTextFunc}("""${query.query}""")`;
+    const escapedQuery =
+      typeof query.query === 'string' && query.language === 'lucene'
+        ? escapeQuotes(query.query)
+        : query.query;
+    return `${searchTextFunc}("""${escapedQuery}""")`;
   }
   return '';
 };
