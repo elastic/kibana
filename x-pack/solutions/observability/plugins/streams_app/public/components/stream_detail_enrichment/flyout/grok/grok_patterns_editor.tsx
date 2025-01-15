@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { useFormContext, useFieldArray, UseFormRegisterReturn } from 'react-hook-form';
+import {
+  useFormContext,
+  useFieldArray,
+  UseFormRegisterReturn,
+  FieldError,
+  FieldErrorsImpl,
+} from 'react-hook-form';
 import {
   DragDropContextProps,
   EuiFormRow,
@@ -24,9 +30,21 @@ import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
 
 export const GrokPatternsEditor = () => {
-  const { register } = useFormContext();
+  const {
+    formState: { errors },
+    register,
+  } = useFormContext();
   const { fields, append, remove, move } = useFieldArray<Pick<GrokFormState, 'patterns'>>({
     name: 'patterns',
+  });
+
+  const fieldsWithError = fields.map((field, id) => {
+    return {
+      ...field,
+      error: (errors.patterns as unknown as FieldErrorsImpl[])?.[id]?.value as
+        | FieldError
+        | undefined,
+    };
   });
 
   const handlerPatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -50,13 +68,18 @@ export const GrokPatternsEditor = () => {
     >
       <EuiPanel color="subdued" paddingSize="m">
         <SortableList onDragItem={handlerPatternDrag}>
-          {fields.map((field, idx) => (
+          {fieldsWithError.map((field, idx) => (
             <DraggablePatternInput
               key={field.id}
-              pattern={field}
+              field={field}
               idx={idx}
               onRemove={getRemovePatternHandler(idx)}
-              inputProps={register(`patterns.${idx}.value`)}
+              inputProps={register(`patterns.${idx}.value`, {
+                required: i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditorRequiredError',
+                  { defaultMessage: 'A pattern is required.' }
+                ),
+              })}
             />
           ))}
         </SortableList>
@@ -73,25 +96,28 @@ export const GrokPatternsEditor = () => {
 };
 
 interface DraggablePatternInputProps {
+  field: GrokFormState['patterns'][number] & { id: string; error?: FieldError };
   idx: number;
   inputProps: UseFormRegisterReturn<`patterns.${number}.value`>;
   onRemove: ((idx: number) => void) | null;
-  pattern: GrokFormState['patterns'][number] & { id: string };
 }
 
 const DraggablePatternInput = ({
+  field,
   idx,
   inputProps,
   onRemove,
-  pattern,
 }: DraggablePatternInputProps) => {
   const { ref, ...inputPropsWithoutRef } = inputProps;
+  const { error, id } = field;
+
+  const isInvalid = Boolean(error);
 
   return (
     <EuiDraggable
       index={idx}
       spacing="m"
-      draggableId={pattern.id}
+      draggableId={id}
       hasInteractiveChildren
       customDragHandle
       style={{
@@ -100,28 +126,35 @@ const DraggablePatternInput = ({
       }}
     >
       {(provided) => (
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          <EuiPanel
-            color="transparent"
-            paddingSize="xs"
-            {...provided.dragHandleProps}
-            aria-label="Drag Handle"
-          >
-            <EuiIcon type="grab" />
-          </EuiPanel>
-          <EuiFieldText {...inputPropsWithoutRef} inputRef={ref} compressed />
-          {onRemove && (
-            <EuiButtonIcon
-              iconType="minusInCircle"
-              color="danger"
-              onClick={() => onRemove(idx)}
-              aria-label={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.removePattern',
-                { defaultMessage: 'Remove grok pattern' }
-              )}
+        <EuiFormRow isInvalid={isInvalid} error={error?.message}>
+          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+            <EuiPanel
+              color="transparent"
+              paddingSize="xs"
+              {...provided.dragHandleProps}
+              aria-label="Drag Handle"
+            >
+              <EuiIcon type="grab" />
+            </EuiPanel>
+            <EuiFieldText
+              {...inputPropsWithoutRef}
+              inputRef={ref}
+              compressed
+              isInvalid={isInvalid}
             />
-          )}
-        </EuiFlexGroup>
+            {onRemove && (
+              <EuiButtonIcon
+                iconType="minusInCircle"
+                color="danger"
+                onClick={() => onRemove(idx)}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.removePattern',
+                  { defaultMessage: 'Remove grok pattern' }
+                )}
+              />
+            )}
+          </EuiFlexGroup>
+        </EuiFormRow>
       )}
     </EuiDraggable>
   );
