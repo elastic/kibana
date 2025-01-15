@@ -12,7 +12,7 @@ import { useSourcererDataView } from './use_sourcerer_data_view';
 /**
  * Custom hook to retrieve fields from the sourcerer data view.
  */
-export const useFields = (): FieldSpec[] => {
+export const useCurrentDataViewFields = (): FieldSpec[] => {
   const { sourcererDataView } = useSourcererDataView();
 
   return useMemo(() => Object.values(sourcererDataView.fields ?? {}), [sourcererDataView.fields]);

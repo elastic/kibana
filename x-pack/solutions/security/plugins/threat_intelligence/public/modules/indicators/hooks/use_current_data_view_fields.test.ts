@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useFields } from './use_fields';
+import { useCurrentDataViewFields } from './use_current_data_view_fields';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 
 jest.mock('./use_sourcerer_data_view');
@@ -18,7 +18,7 @@ describe('useFields', () => {
       sourcererDataView: { fields: mockFields },
     });
 
-    const { result } = renderHook(() => useFields());
+    const { result } = renderHook(() => useCurrentDataViewFields());
 
     expect(result.current).toEqual(Object.values(mockFields));
   });
@@ -28,7 +28,7 @@ describe('useFields', () => {
       sourcererDataView: { fields: undefined },
     });
 
-    const { result } = renderHook(() => useFields());
+    const { result } = renderHook(() => useCurrentDataViewFields());
 
     expect(result.current).toEqual([]);
   });

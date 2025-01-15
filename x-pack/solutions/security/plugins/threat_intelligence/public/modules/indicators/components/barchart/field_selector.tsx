@@ -13,7 +13,7 @@ import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 import { DROPDOWN_TEST_ID } from './test_ids';
 import { COMBOBOX_PREPEND_LABEL } from './translations';
-import { useFields } from '../../hooks/use_fields';
+import { useCurrentDataViewFields } from '../../hooks/use_current_data_view_fields';
 
 export interface IndicatorsFieldSelectorProps {
   valueChange: (value: EuiComboBoxOptionOption<string>) => void;
@@ -25,7 +25,7 @@ const COMBOBOX_SINGLE_SELECTION = { asPlainText: true };
 
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
   ({ valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
-    const rawFields = useFields();
+    const rawFields = useCurrentDataViewFields();
 
     const styles = useStyles();
     const defaultStackByValueInfo = rawFields.find(
