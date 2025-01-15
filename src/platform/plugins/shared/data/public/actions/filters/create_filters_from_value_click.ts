@@ -17,7 +17,6 @@ import {
   type AggregateQuery,
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
-import moment from 'moment';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
@@ -144,7 +143,8 @@ export const createFilterESQL = async (
     !table.columns ||
     !table.columns[columnIndex] ||
     !table.columns[columnIndex].meta ||
-    !table.columns[columnIndex].meta.sourceParams?.sourceField
+    !table.columns[columnIndex].meta.sourceParams?.sourceField ||
+    table.columns[columnIndex].meta.sourceParams?.sourceField === '___records___'
   ) {
     return;
   }
@@ -169,8 +169,8 @@ export const createFilterESQL = async (
       buildSimpleNumberRangeFilter(
         sourceField,
         {
-          gte: moment(value).toISOString(),
-          lt: moment(value).add(interval).toISOString(),
+          gte: value,
+          lt: value + interval,
           format: 'strict_date_optional_time',
         },
         indexPattern,
