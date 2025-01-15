@@ -19,7 +19,7 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { isClearableControl } from '../types';
 
-import { ACTION_CLEAR_CONTROL } from '.';
+import { ACTION_CLEAR_CONTROL } from './constants';
 
 export class ClearControlAction
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>

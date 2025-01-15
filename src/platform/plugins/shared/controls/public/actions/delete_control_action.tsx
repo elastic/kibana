@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { HasUniqueId, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { ACTION_DELETE_CONTROL } from '.';
+import { ACTION_DELETE_CONTROL } from './constants';
 import { coreServices } from '../services/kibana_services';
 
 export class DeleteControlAction implements Action<EmbeddableApiContext> {

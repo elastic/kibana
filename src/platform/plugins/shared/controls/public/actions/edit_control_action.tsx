@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext, HasUniqueId } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { ACTION_EDIT_CONTROL } from '.';
+import { ACTION_EDIT_CONTROL } from './constants';
 
 export class EditControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EDIT_CONTROL;
