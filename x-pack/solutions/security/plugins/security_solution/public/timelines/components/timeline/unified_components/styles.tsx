@@ -74,7 +74,19 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline [data-gridcell-column-id|='select'] {
     border-right: none;
   }
-  .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__contentByHeight {
+  .udtTimeline
+    [data-gridcell-column-id|='openDetails']
+    .euiDataGridRowCell__content--lineCountHeight {
+    margin-top: 9px;
+  }
+
+  .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__content--autoHeight {
+    margin-top: 9px;
+  }
+
+  .udtTimeline
+    [data-gridcell-column-id|='openDetails']
+    .euiDataGridRowCell__content--defaultHeight {
     margin-top: 3px;
   }
 
@@ -90,11 +102,20 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     overflow: visible;
   }
 
-  .udtTimeline [data-gridcell-column-id|='select'] .euiDataGridRowCell__contentByHeight {
-    margin-top: 5px;
+  .udtTimeline [data-gridcell-column-id|='select'] {
+    .euiDataGridRowCell__content--lineCountHeight,
+    .euiDataGridRowCell__content--autoHeight {
+      margin-top: 9px;
+    }
+
+    .euiDataGridRowCell__content--defaultHeight {
+      margin-top: 3px;
+    }
   }
 
   .udtTimeline
+    [data-gridcell-column-id|='select']
+    .udtTimeline
     .euiDataGridRow:hover
     .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
     ${({ theme }) => `background-color: ${theme.eui.colorLightShade};`};
