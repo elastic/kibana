@@ -71,28 +71,11 @@ export function SuggestionItem(props: Props) {
       onMouseEnter={onMouseEnter}
       onKeyDown={onKeyDown}
     >
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemIconFieldCss}
-        `}
-      >
+      <div css={[suggestionItemFieldCss, suggestionItemIconFieldCss]}>
         <EuiIcon type={getEuiIconType(suggestion.type)} />
       </div>
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemTextFieldCss}
-        `}
-      >
-        {suggestion.text}
-      </div>
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemDescriptionFieldCss}
-        `}
-      >
+      <div css={[suggestionItemFieldCss, suggestionItemTextFieldCss]}>{suggestion.text}</div>
+      <div css={[suggestionItemFieldCss, suggestionItemDescriptionFieldCss]}>
         {suggestion.description}
       </div>
     </div>
