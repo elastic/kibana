@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export class PermissionDenied extends Error {
+export class MalformedStream extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PermissionDenied';
+    this.name = 'MalformedStream';
   }
 }

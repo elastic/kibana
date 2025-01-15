@@ -11,7 +11,7 @@ import { inheritedFieldDefinitionSchema, lifecycleSchema } from '../common';
 
 export const wiredReadStreamDefinitonSchema = wiredStreamDefinitonSchema
   .extend({
-    inherited_fields: inheritedFieldDefinitionSchema.default({}),
+    inherited_fields: inheritedFieldDefinitionSchema,
     lifecycle: lifecycleSchema,
   })
   .strict();
