@@ -8,6 +8,7 @@
  */
 
 import compactStringify from 'json-stringify-pretty-compact';
+import { CoreTheme } from '@kbn/core/public';
 
 export class Utils {
   /**
@@ -38,4 +39,38 @@ export class Utils {
     }
     return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
   }
+}
+
+// These colors should be replaced with the respective tokens whenever available from EUI
+const VegaThemeColors = {
+  borealis: {
+    dark: {
+      grid: '#2B394F', // euiColorBorderBaseSubdued euiColorShade120
+      title: '#CAD3E2', // euiColorTextParagraph euiColorShade30
+      label: '#8E9FBC', // euiColorTextSubdued euiColorShade60
+    },
+    light: {
+      grid: '#E3E8F2', // euiColorBorderBaseSubdued euiColorShade20
+      title: '#1D2A3E', // textParagraph euiColorShade130
+      label: '#516381', // euiColorTextSubdued euiColorShade95
+    },
+  },
+  amsterdam: {
+    dark: {
+      grid: '#343741', // euiColorChartLines euiColorLightShade
+      title: '#D4DAE5', // euiColorDarkestShade
+      label: '#98A2B3', // euiColorDarkShade
+    },
+    light: {
+      grid: '#eef0f3', // euiColorChartLines shade($euiColorLightestShade, 3%)
+      title: '#343741', // euiColorDarkestShade
+      label: '#69707D', // euiColorDarkShade
+    },
+  },
+};
+
+export function getVegaThemeColors(theme: CoreTheme, colorToken: 'grid' | 'title' | 'label') {
+  const colorMode = theme.darkMode ? 'dark' : 'light';
+  const themeName = theme.name === 'borealis' ? 'borealis' : 'amsterdam';
+  return VegaThemeColors[themeName][colorMode][colorToken];
 }
