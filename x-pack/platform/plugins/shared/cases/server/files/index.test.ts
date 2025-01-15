@@ -138,23 +138,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                 },
@@ -181,23 +181,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                 },
@@ -224,23 +224,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                 },
@@ -269,23 +269,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "casesFilesCasesRead",
                     ],
                   },
                 },
@@ -310,23 +310,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "observabilityFilesCasesRead",
                     ],
                   },
                 },
@@ -351,23 +351,23 @@ describe('server files', () => {
                 ],
                 "http": Object {
                   "create": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesCreate",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesCreate",
                     ],
                   },
                   "download": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                   "getById": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                   "list": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesRead",
+                    "requiredPrivileges": Array [
+                      "securitySolutionFilesCasesRead",
                     ],
                   },
                 },
@@ -485,23 +485,23 @@ describe('server files', () => {
               ],
               "http": Object {
                 "create": Object {
-                  "tags": Array [
-                    "access:casesFilesCasesCreate",
+                  "requiredPrivileges": Array [
+                    "casesFilesCasesCreate",
                   ],
                 },
                 "download": Object {
-                  "tags": Array [
-                    "access:casesFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "casesFilesCasesRead",
                   ],
                 },
                 "getById": Object {
-                  "tags": Array [
-                    "access:casesFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "casesFilesCasesRead",
                   ],
                 },
                 "list": Object {
-                  "tags": Array [
-                    "access:casesFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "casesFilesCasesRead",
                   ],
                 },
               },
@@ -614,23 +614,23 @@ describe('server files', () => {
               ],
               "http": Object {
                 "create": Object {
-                  "tags": Array [
-                    "access:observabilityFilesCasesCreate",
+                  "requiredPrivileges": Array [
+                    "observabilityFilesCasesCreate",
                   ],
                 },
                 "download": Object {
-                  "tags": Array [
-                    "access:observabilityFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "observabilityFilesCasesRead",
                   ],
                 },
                 "getById": Object {
-                  "tags": Array [
-                    "access:observabilityFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "observabilityFilesCasesRead",
                   ],
                 },
                 "list": Object {
-                  "tags": Array [
-                    "access:observabilityFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "observabilityFilesCasesRead",
                   ],
                 },
               },
@@ -743,23 +743,23 @@ describe('server files', () => {
               ],
               "http": Object {
                 "create": Object {
-                  "tags": Array [
-                    "access:securitySolutionFilesCasesCreate",
+                  "requiredPrivileges": Array [
+                    "securitySolutionFilesCasesCreate",
                   ],
                 },
                 "download": Object {
-                  "tags": Array [
-                    "access:securitySolutionFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "securitySolutionFilesCasesRead",
                   ],
                 },
                 "getById": Object {
-                  "tags": Array [
-                    "access:securitySolutionFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "securitySolutionFilesCasesRead",
                   ],
                 },
                 "list": Object {
-                  "tags": Array [
-                    "access:securitySolutionFilesCasesRead",
+                  "requiredPrivileges": Array [
+                    "securitySolutionFilesCasesRead",
                   ],
                 },
               },
