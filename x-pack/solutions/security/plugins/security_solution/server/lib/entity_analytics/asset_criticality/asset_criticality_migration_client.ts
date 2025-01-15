@@ -96,7 +96,7 @@ export class AssetCriticalityMigrationClient {
     );
   };
 
-  public CopyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
+  public copyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
     return this.options.esClient.updateByQuery(
       {
         index: this.assetCriticalityDataClient.getIndex(),

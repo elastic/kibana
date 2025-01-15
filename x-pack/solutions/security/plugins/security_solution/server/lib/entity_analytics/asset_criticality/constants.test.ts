@@ -9,7 +9,7 @@ import { ASSET_CRITICALITY_MAPPINGS_VERSIONS, assetCriticalityFieldMap } from '.
 
 describe('asset criticality - constants', () => {
   it("please bump 'ASSET_CRITICALITY_MAPPINGS_VERSIONS' when mappings change", () => {
-    expect(ASSET_CRITICALITY_MAPPINGS_VERSIONS).toEqual(2);
+    expect(ASSET_CRITICALITY_MAPPINGS_VERSIONS).toEqual(3);
     expect(assetCriticalityFieldMap).toMatchInlineSnapshot(`
       Object {
         "@timestamp": Object {

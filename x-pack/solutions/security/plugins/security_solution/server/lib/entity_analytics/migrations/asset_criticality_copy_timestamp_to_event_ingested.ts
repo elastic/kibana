@@ -76,7 +76,7 @@ export const createMigrationTask =
         });
 
         const assetCriticalityResponse =
-          await assetCrticalityClient.CopyTimestampToEventIngestedForAssetCriticality(
+          await assetCrticalityClient.copyTimestampToEventIngestedForAssetCriticality(
             abortController.signal
           );
 

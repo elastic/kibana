@@ -43,7 +43,7 @@ describe('AssetCriticalityDataClient', () => {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
             _meta: {
-              version: 2,
+              version: 3,
             },
             dynamic: 'strict',
             properties: {
