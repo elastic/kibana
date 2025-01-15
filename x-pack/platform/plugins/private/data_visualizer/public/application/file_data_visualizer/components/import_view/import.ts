@@ -159,6 +159,7 @@ export async function importData(props: Props, config: Config, setState: (state:
       await autoDeploy.deploy();
       setState({
         initializeDeploymentStatus: IMPORT_STATUS.COMPLETE,
+        inferenceId,
       });
     } catch (error) {
       success = false;
@@ -249,7 +250,7 @@ export async function importData(props: Props, config: Config, setState: (state:
   });
 }
 
-async function createKibanaDataView(
+export async function createKibanaDataView(
   dataViewName: string,
   dataViewsContract: DataViewsServicePublic,
   timeFieldName?: string
@@ -276,7 +277,7 @@ function getSuccess(success: boolean) {
   return success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED;
 }
 
-function getInferenceId(mappings: MappingTypeMapping) {
+export function getInferenceId(mappings: MappingTypeMapping) {
   for (const value of Object.values(mappings.properties ?? {})) {
     if (value.type === 'semantic_text') {
       return value.inference_id;

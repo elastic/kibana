@@ -46,9 +46,21 @@ export const IngestionSelector: React.FC = () => {
     application: { navigateToApp },
     config,
     productFeatures,
+    uiActions,
   } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const crawlerDisabled = Boolean(errorConnectingMessage || !config.host);
+  const showFileUploadFlyout = React.useCallback(() => {
+    if (uiActions !== null) {
+      uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
+        autoAddSemanticTextField: true,
+        onUploadComplete: (results: unknown) => {
+          // eslint-disable-next-line no-console
+          console.log('results', results);
+        },
+      });
+    }
+  }, [uiActions]);
   return (
     <>
       <EuiFlexGroup>
@@ -187,7 +199,8 @@ export const IngestionSelector: React.FC = () => {
                 defaultMessage: 'Choose a file',
               }
             )}
-            onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+            onClick={() => showFileUploadFlyout()}
+            // onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
           />
         </EuiFlexItem>
         <EuiFlexItem>

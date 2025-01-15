@@ -45,6 +45,11 @@ export interface IImporter {
     mappings: MappingTypeMapping,
     pipeline: IngestPipeline | undefined
   ): Promise<ImportResponse>;
+  initializeWithoutCreate(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipeline: IngestPipeline | undefined
+  ): void;
   import(
     id: string,
     index: string,

@@ -83,6 +83,7 @@ export const renderApp = (
     share,
     ml,
     fleet,
+    uiActions,
   } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
@@ -131,6 +132,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    uiActions,
     uiSettings,
     updateSideNavDefinition,
   });

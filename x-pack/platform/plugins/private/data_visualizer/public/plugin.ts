@@ -21,6 +21,7 @@ import type {
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
+import { registerUiActions } from './register_ui_actions';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -59,6 +60,10 @@ export class DataVisualizerPlugin
     if (plugins.home) {
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
+    }
+
+    if (plugins.uiActions) {
+      registerUiActions(plugins.uiActions, core);
     }
 
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());

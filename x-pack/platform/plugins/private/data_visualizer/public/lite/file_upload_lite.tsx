@@ -8,26 +8,26 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { ResultLinks } from '../../../common/app';
-import { getCoreStart, getPluginsStart } from '../../kibana_services';
-
-// @ts-ignore
-import { FileDataVisualizerView } from './components/file_data_visualizer_view';
-import type { GetAdditionalLinks } from '../common/components/results_links';
-import type { FileUploadResults } from '../../lite/flyout/create_flyout';
+import type { ResultLinks } from '../../common/app';
+import type { GetAdditionalLinks } from '../application/common/components/results_links';
+import { getCoreStart, getPluginsStart } from '../kibana_services';
+import type { FileUploadResults } from './flyout/create_flyout';
+import { FileUploadLiteView } from './file_upload_lite_view';
 
 export interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
+  autoAddSemanticTextField?: boolean;
 }
 
-export type FileDataVisualizerSpec = typeof FileDataVisualizer;
+export type FileDataVisualizerLiteSpec = typeof FileDataVisualizerLite;
 
-export const FileDataVisualizer: FC<Props> = ({
+export const FileDataVisualizerLite: FC<Props> = ({
   getAdditionalLinks,
   resultLinks,
   setUploadResults,
+  autoAddSemanticTextField,
 }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
@@ -48,7 +48,7 @@ export const FileDataVisualizer: FC<Props> = ({
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
-          <FileDataVisualizerView
+          <FileUploadLiteView
             dataStart={data}
             http={coreStart.http}
             fileUpload={fileUpload}
@@ -56,6 +56,7 @@ export const FileDataVisualizer: FC<Props> = ({
             resultLinks={resultLinks}
             capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
+            autoAddSemanticTextField={autoAddSemanticTextField}
           />
         </CloudContext>
       </KibanaContextProvider>
@@ -65,4 +66,4 @@ export const FileDataVisualizer: FC<Props> = ({
 
 // exporting as default so it can be used with React.lazy
 // eslint-disable-next-line import/no-default-export
-export default FileDataVisualizer;
+export default FileDataVisualizerLite;

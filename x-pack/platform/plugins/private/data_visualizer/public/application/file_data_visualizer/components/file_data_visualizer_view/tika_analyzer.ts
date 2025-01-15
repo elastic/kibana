@@ -31,6 +31,7 @@ export async function analyzeTikaFile(
         need_client_timezone: false,
         num_lines_analyzed: numLinesAnalyzed,
         num_messages_analyzed: 0,
+        explanation: [],
         field_stats: {
           // @ts-expect-error semantic_text not supported
           'attachment.content': {},

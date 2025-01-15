@@ -32,6 +32,7 @@ const STRING_CHUNKS_MB = 100;
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
+  // constructor should take optional initial state!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   protected _docArray: ImportDoc[] = [];
   protected _chunkSize = CHUNK_SIZE;
   private _index: string | undefined;
@@ -118,13 +119,40 @@ export abstract class Importer implements IImporter {
     this._initialized = true;
 
     return await callImportRoute({
-      id: undefined,
+      id: undefined, // / id, index and pipelineId should be remembered locally and used when import is called!!!!!!!!!!!!!!!!!!!!!!
       index,
       data: [],
       settings,
       mappings,
       ingestPipeline,
     });
+  }
+
+  public async initializeWithoutCreate(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipeline: IngestPipeline | undefined
+  ) {
+    if (pipeline !== undefined) {
+      if (pipelineContainsSpecialProcessors(pipeline)) {
+        // pipeline contains processors which we know are slow
+        // so reduce the chunk size significantly to avoid timeouts
+        this._chunkSize = REDUCED_CHUNK_SIZE;
+      }
+    }
+
+    this._index = index;
+    this._pipeline = pipeline;
+
+    // if an @timestamp field has been added to the
+    // mappings, use this field as the time field.
+    // This relies on the field being populated by
+    // the ingest pipeline on ingest
+    this._timeFieldName = isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])
+      ? DEFAULT_TIME_FIELD
+      : undefined;
+
+    this._initialized = true;
   }
 
   public async import(
