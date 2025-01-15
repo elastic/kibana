@@ -58,18 +58,7 @@ export const renderApp = (
   },
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
-  const {
-    appSearch,
-    configuredLimits,
-    enterpriseSearchVersion,
-    errorConnectingMessage,
-    features,
-    kibanaVersion,
-    publicUrl,
-    readOnlyMode,
-    searchOAuth,
-    workplaceSearch,
-  } = data;
+  const { errorConnectingMessage, features, kibanaVersion } = data;
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
@@ -85,8 +74,9 @@ export const renderApp = (
     fleet,
   } = plugins;
 
+  // TODO: remove this
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
-  externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
+  externalUrl.enterpriseSearchUrl = entCloudHost || config.host || '';
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
@@ -141,7 +131,6 @@ export const renderApp = (
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
     http,
-    readOnlyMode,
   });
 
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
@@ -161,16 +150,7 @@ export const renderApp = (
               <CloudContext>
                 <Provider store={store}>
                   <Router history={params.history}>
-                    <App
-                      appSearch={appSearch}
-                      configuredLimits={configuredLimits}
-                      enterpriseSearchVersion={enterpriseSearchVersion}
-                      features={features}
-                      kibanaVersion={kibanaVersion}
-                      readOnlyMode={readOnlyMode}
-                      searchOAuth={searchOAuth}
-                      workplaceSearch={workplaceSearch}
-                    />
+                    <App features={features} kibanaVersion={kibanaVersion} />
                   </Router>
                 </Provider>
               </CloudContext>
