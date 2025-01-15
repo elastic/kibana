@@ -16,12 +16,6 @@ export {
 
 export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
 
-export {
-  ACTION_CLEAR_CONTROL,
-  ACTION_DELETE_CONTROL,
-  ACTION_EDIT_CONTROL,
-} from './actions/constants';
-
 export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
 
 export {
