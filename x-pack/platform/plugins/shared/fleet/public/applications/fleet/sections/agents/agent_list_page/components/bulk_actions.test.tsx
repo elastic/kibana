@@ -9,15 +9,13 @@ import React from 'react';
 
 import { fireEvent, act } from '@testing-library/react';
 
-import { useAuthz } from '../../../../../../hooks';
-
 import type { Agent } from '../../../../types';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
-
+import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
 
 import { AgentBulkActions } from './bulk_actions';
@@ -57,6 +55,7 @@ describe('AgentBulkActions', () => {
         allAgents: true,
         readAgents: true,
       },
+      integrations: {},
     } as any);
   });
 
