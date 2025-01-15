@@ -671,23 +671,8 @@ export const RuleForm = ({
         selectedRuleType.hasAlertsMappings
       : false;
 
-    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
-      // Use selectedConsumer when creating a new rule, existing rule consumer when editing
-      const ruleConsumer = initialSelectedConsumer ? selectedConsumer : rule.consumer;
-      return (
-        (validConsumers || VALID_CONSUMERS).includes(ruleConsumer as RuleCreationValidConsumer) &&
-        hasAlertHasData
-      );
-    }
     return hasAlertHasData;
-  }, [
-    rule?.ruleTypeId,
-    initialSelectedConsumer,
-    rule.consumer,
-    selectedConsumer,
-    selectedRuleType,
-    validConsumers,
-  ]);
+  }, [selectedRuleType]);
 
   const ruleTypeDetails = (
     <>
