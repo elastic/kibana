@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
 
   function getColorMapping(debugState: DebugState | null) {
     if (!debugState) return {};
@@ -52,7 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // create non-filtered xy chart
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboard.selectIndexPattern('log*');
+      await dataViews.switchTo('log*');
+      await header.waitUntilLoadingHasFinished();
       await lens.goToTimeRange();
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
