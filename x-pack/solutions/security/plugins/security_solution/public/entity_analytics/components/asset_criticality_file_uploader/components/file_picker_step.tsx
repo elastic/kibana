@@ -21,7 +21,6 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
@@ -39,11 +38,11 @@ interface AssetCriticalityFilePickerStepProps {
 }
 
 const listStyle = css`
-      list-style-type: disc;
-      margin-bottom: ${euiTheme.size.l};
-      margin-left: ${euiTheme.size.l};
-      line-height: ${useEuiFontSize('s').lineHeight};
-    `;
+  list-style-type: disc;
+  margin-bottom: ${euiTheme.size.l};
+  margin-left: ${euiTheme.size.l};
+  line-height: ${useEuiFontSize('s').lineHeight};
+`;
 
 const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
