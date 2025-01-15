@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -16,13 +17,9 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { firstValueFrom } from 'rxjs';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { builtInDefinitions } from './lib/entities/built_in';
-import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
 import { EntityClient } from './lib/entity_client';
-import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { entityManagerRouteRepository } from './routes';
 import { EntityManagerRouteDependencies } from './routes/types';
 import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
@@ -39,11 +36,20 @@ import {
   READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
+import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
+import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
+import { identityFieldsBySource } from './lib/v2/definitions/identity_fields_by_source';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+  v2: {
+    instanceAsFilter: typeof instanceAsFilter;
+    identityFieldsBySource: typeof identityFieldsBySource;
+  };
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -165,33 +171,32 @@ export class EntityManagerServerPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }
 
-    const esClient = core.elasticsearch.client.asInternalUser;
-
     // Setup v1 definitions index
-    installEntityManagerTemplates({ esClient, logger: this.logger })
-      .then(async () => {
-        // the api key validation requires a check against the cluster license
-        // which is lazily loaded. we ensure it gets loaded before the update
-        await firstValueFrom(plugins.licensing.license$);
-        const { success } = await upgradeBuiltInEntityDefinitions({
-          definitions: builtInDefinitions,
-          server: this.server!,
-        });
+    installEntityManagerTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((err) => this.logger.error(err));
 
-        if (success) {
-          this.logger.info('Builtin definitions were successfully upgraded');
-        }
-      })
-      .catch((err) => this.logger.error(err));
+    // Disable v1 built-in definitions.
+    // the api key invalidation requires a check against the cluster license
+    // which is lazily loaded. we ensure it gets loaded before the update
+    firstValueFrom(plugins.licensing.license$)
+      .then(() => disableManagedEntityDiscovery({ server: this.server! }))
+      .then(() => this.logger.info(`Disabled managed entity discovery`))
+      .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 
     // Setup v2 definitions index
-    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
-      this.logger.error(error);
-    });
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
+      .then(() => installBuiltInDefinitions(core.elasticsearch.client, this.logger))
+      .catch((err) => this.logger.error(err));
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
+      },
+      v2: {
+        instanceAsFilter,
+        identityFieldsBySource,
       },
     };
   }

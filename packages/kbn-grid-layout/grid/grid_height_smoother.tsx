@@ -9,8 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -19,57 +18,49 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
+    /**
+     * When the user is interacting with an element, the page can grow, but it cannot
+     * shrink. This is to stop a behaviour where the page would scroll up automatically
+     * making the panel shrink or grow unpredictably.
+     */
     const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
-      if (!smoothHeightRef.current) return;
-      if (gridLayoutStateManager.expandedPanelId$.getValue()) {
-        return;
-      }
+      if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
-      /**
-       * When the user is interacting with an element, the page can grow, but it cannot
-       * shrink. This is to stop a behaviour where the page would scroll up automatically
-       * making the panel shrink or grow unpredictably.
-       */
       smoothHeightRef.current.style.height = `${Math.max(
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
+      smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
-      (expandedPanelId) => {
-        if (!smoothHeightRef.current) return;
+    /**
+     * This subscription sets global CSS variables that can be used by all components contained within
+     * this wrapper; note that this is **currently** only used for the gutter size, but things like column
+     * count could be added here once we add the ability to change these values
+     */
+    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(
+        map(({ gutterSize }) => gutterSize),
+        distinctUntilChanged()
+      )
+      .subscribe((gutterSize) => {
+        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+      });
 
-        if (expandedPanelId) {
-          const smoothHeightRefY =
-            smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-          const gutterSize = parseFloat(euiThemeVars.euiSizeL);
-
-          // When panel is expanded, ensure the page occupies the full viewport height
-          // If the parent element is a flex container (preferred approach):
-          smoothHeightRef.current.style.flexBasis = `100%`;
-
-          // fallback in case parent is not a flex container (less reliable if shifts happen after the time we calculate smoothHeightRefY)
-          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px`;
-          smoothHeightRef.current.style.transition = 'none';
-        } else {
-          smoothHeightRef.current.style.flexBasis = '';
-          smoothHeightRef.current.style.height = '';
-          smoothHeightRef.current.style.transition = '';
-        }
-      }
-    );
     return () => {
       interactionStyleSubscription.unsubscribe();
-      expandedPanelSubscription.unsubscribe();
+      globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -77,9 +68,20 @@ export const GridHeightSmoother = ({
   return (
     <div
       ref={smoothHeightRef}
+      className={'kbnGridWrapper'}
       css={css`
+        margin: calc(var(--kbnGridGutterSize) * 1px);
         overflow-anchor: none;
         transition: height 500ms linear;
+
+        &:has(.kbnGridPanel--expanded) {
+          height: 100% !important;
+          position: relative;
+          transition: none;
+          // switch to padding so that the panel does not extend the height of the parent
+          margin: 0px;
+          padding: calc(var(--kbnGridGutterSize) * 1px);
+        }
       `}
     >
       {children}

@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   describe('update_alert_status', () => {
-    const defaultSignalsIndex = '.siem-signals-default-000001';
+    const defaultSignalsIndex = 'siem-signals-default-000001';
 
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');

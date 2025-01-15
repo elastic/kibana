@@ -11916,6 +11916,76 @@
       },
       {
         "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.InterceptResponseFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "InterceptResponseFactory",
+        "description": [],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.InterceptResponseFactory.fail",
+            "type": "Function",
+            "tags": [],
+            "label": "fail",
+            "description": [],
+            "signature": [
+              "() => [\"Fetch.failRequest\", ",
+              "Protocol",
+              ".Fetch.FailRequestRequest]"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.InterceptResponseFactory.fulfill",
+            "type": "Function",
+            "tags": [],
+            "label": "fulfill",
+            "description": [],
+            "signature": [
+              "(responseOptions: Omit<",
+              "Protocol",
+              ".Fetch.FulfillRequestRequest, \"requestId\">) => [\"Fetch.fulfillRequest\", ",
+              "Protocol",
+              ".Fetch.FulfillRequestRequest]"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.InterceptResponseFactory.fulfill.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "responseOptions",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  "Protocol",
+                  ".Fetch.FulfillRequestRequest, \"requestId\">"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
         "id": "def-common.NetworkOptions",
         "type": "Interface",
         "tags": [],

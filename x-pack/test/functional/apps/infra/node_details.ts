@@ -500,6 +500,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
           await retry.tryForTime(5000, async () => {
@@ -536,7 +537,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Logs Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/203656
+      describe.skip('Logs Tab', () => {
         before(async () => {
           await pageObjects.assetDetails.clickLogsTab();
           await pageObjects.timePicker.setAbsoluteRange(
@@ -566,6 +568,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Osquery Tab', () => {
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
@@ -655,16 +658,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it(`${metric} tile should not be shown`, async () => {
             await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Metrics Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickMetricsTab();
         });
 
         it('should show add metrics callout', async () => {

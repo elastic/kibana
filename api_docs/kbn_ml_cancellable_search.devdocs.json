@@ -53,7 +53,7 @@
           },
           "<any>>(requestBody: RequestBody, options?: {}) => Promise<ResponseType | null>; cancelRequest: () => void; isLoading: boolean; }"
         ],
-        "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+        "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,7 +73,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
         "tags": [],
         "label": "UseCancellableSearch",
         "description": [],
-        "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+        "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +121,7 @@
               },
               "<any>>(requestBody: RequestBody, options?: object | undefined) => Promise<ResponseType | null>"
             ],
-            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -135,7 +135,7 @@
                 "signature": [
                   "RequestBody"
                 ],
-                "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+                "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,7 +150,7 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+                "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -168,7 +168,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -181,7 +181,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }

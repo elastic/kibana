@@ -6,8 +6,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { IClusterClient, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
+import { InternalClusterClient } from '../types';
 
 const definitionsIndexTemplate = {
   name: `${DEFINITIONS_ALIAS}-template`,
@@ -21,6 +22,8 @@ const definitionsIndexTemplate = {
   template: {
     settings: {
       hidden: true,
+      number_of_shards: 1,
+      auto_expand_replicas: '0-1',
     },
     aliases: {
       [DEFINITIONS_ALIAS]: {
@@ -51,7 +54,10 @@ const definitionsIndexTemplate = {
 
 const CURRENT_INDEX = `${DEFINITIONS_ALIAS}-${TEMPLATE_VERSION}` as const;
 
-export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient, logger: Logger) {
+export async function setupEntityDefinitionsIndex(
+  clusterClient: InternalClusterClient,
+  logger: Logger
+) {
   const esClient = clusterClient.asInternalUser;
   try {
     logger.debug(`Installing entity definitions index template for version ${TEMPLATE_VERSION}`);

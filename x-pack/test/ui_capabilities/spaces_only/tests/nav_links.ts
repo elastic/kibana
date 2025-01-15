@@ -17,13 +17,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
-  const uiCapabilitiesExceptions = {
-    // appSearch and workplace Search are loaded but disabled because the ent-search application isn't running.
-    // That means the following capabilities are disabled:
-    feature: 'enterpriseSearch',
-    apps: ['appSearch', 'workplaceSearch'],
-  };
-
   describe('navLinks', () => {
     let navLinksBuilder: NavLinksBuilder;
     before(async () => {
@@ -38,9 +31,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except(uiCapabilitiesExceptions)
-            );
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
@@ -50,9 +41,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('foo', uiCapabilitiesExceptions)
-            );
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('foo'));
             break;
           default:
             throw new UnreachableError(scenario);

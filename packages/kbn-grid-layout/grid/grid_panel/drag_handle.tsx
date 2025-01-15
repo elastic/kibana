@@ -7,24 +7,113 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { PanelInteractionEvent } from '../types';
+import {
+  GridLayoutStateManager,
+  PanelInteractionEvent,
+  UserInteractionEvent,
+  UserMouseEvent,
+  UserTouchEvent,
+} from '../types';
+import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 
-export const DragHandle = ({
-  interactionStart,
-}: {
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
-}) => {
+export interface DragHandleApi {
+  setDragHandles: (refs: Array<HTMLElement | null>) => void;
+}
+
+export const DragHandle = React.forwardRef<
+  DragHandleApi,
+  {
+    gridLayoutStateManager: GridLayoutStateManager;
+    interactionStart: (
+      type: PanelInteractionEvent['type'] | 'drop',
+      e: UserInteractionEvent
+    ) => void;
+  }
+>(({ gridLayoutStateManager, interactionStart }, ref) => {
   const { euiTheme } = useEuiTheme();
-  return (
+
+  const removeEventListenersRef = useRef<(() => void) | null>(null);
+  const [dragHandleCount, setDragHandleCount] = useState<number>(0);
+  const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
+
+  /**
+   * We need to memoize the `onDragStart` and `onDragEnd` callbacks so that we don't assign a new event handler
+   * every time `setDragHandles` is called
+   */
+  const onDragStart = useCallback(
+    (e: UserMouseEvent | UserTouchEvent) => {
+      // ignore when not in edit mode
+      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') return;
+
+      // ignore anything but left clicks for mouse events
+      if (isMouseEvent(e) && e.button !== 0) {
+        return;
+      }
+      // ignore multi-touch events for touch events
+      if (isTouchEvent(e) && e.touches.length > 1) {
+        return;
+      }
+      e.stopPropagation();
+      interactionStart('drag', e);
+    },
+    [interactionStart, gridLayoutStateManager.accessMode$]
+  );
+
+  const onDragEnd = useCallback(
+    (e: UserTouchEvent | UserMouseEvent) => {
+      e.stopPropagation();
+      interactionStart('drop', e);
+    },
+    [interactionStart]
+  );
+
+  const setDragHandles = useCallback(
+    (dragHandles: Array<HTMLElement | null>) => {
+      setDragHandleCount(dragHandles.length);
+      dragHandleRefs.current = dragHandles;
+
+      for (const handle of dragHandles) {
+        if (handle === null) return;
+        handle.addEventListener('mousedown', onDragStart, { passive: true });
+        handle.addEventListener('touchstart', onDragStart, { passive: false });
+        handle.addEventListener('touchend', onDragEnd, { passive: true });
+      }
+
+      removeEventListenersRef.current = () => {
+        for (const handle of dragHandles) {
+          if (handle === null) return;
+          handle.removeEventListener('mousedown', onDragStart);
+          handle.removeEventListener('touchstart', onDragStart);
+          handle.removeEventListener('touchend', onDragEnd);
+        }
+      };
+    },
+    [onDragStart, onDragEnd]
+  );
+
+  useEffect(() => {
+    return () => {
+      // on unmount, remove all drag handle event listeners
+      if (removeEventListenersRef.current) {
+        removeEventListenersRef.current();
+      }
+    };
+  }, []);
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return { setDragHandles };
+    },
+    [setDragHandles]
+  );
+
+  return Boolean(dragHandleCount) ? null : (
     <button
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
@@ -37,17 +126,17 @@ export const DragHandle = ({
         position: absolute;
         align-items: center;
         justify-content: center;
-        top: -${euiThemeVars.euiSizeL};
-        width: ${euiThemeVars.euiSizeL};
-        height: ${euiThemeVars.euiSizeL};
-        z-index: ${euiThemeVars.euiZLevel3};
-        margin-left: ${euiThemeVars.euiSizeS};
+        top: -${euiTheme.size.l};
+        width: ${euiTheme.size.l};
+        height: ${euiTheme.size.l};
+        z-index: ${euiTheme.levels.modal};
+        margin-left: ${euiTheme.size.s};
         border: 1px solid ${euiTheme.border.color};
         border-bottom: none;
-        background-color: ${euiTheme.colors.emptyShade};
-        border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius} ${euiTheme.border.radius} 0 0;
         cursor: grab;
-        transition: ${euiThemeVars.euiAnimSpeedSlow} opacity;
+        transition: ${euiTheme.animation.slow} opacity;
         .kbnGridPanel:hover &,
         .kbnGridPanel:focus-within &,
         &:active,
@@ -57,18 +146,17 @@ export const DragHandle = ({
         &:active {
           cursor: grabbing;
         }
-        .kbnGrid--static & {
+        .kbnGrid--static &,
+        .kbnGridPanel--expanded & {
           display: none;
         }
       `}
-      onMouseDown={(e) => {
-        interactionStart('drag', e);
-      }}
-      onMouseUp={(e) => {
-        interactionStart('drop', e);
-      }}
+      onMouseDown={onDragStart}
+      onMouseUp={onDragEnd}
+      onTouchStart={onDragStart}
+      onTouchEnd={onDragEnd}
     >
       <EuiIcon type="grabOmnidirectional" />
     </button>
   );
-};
+});

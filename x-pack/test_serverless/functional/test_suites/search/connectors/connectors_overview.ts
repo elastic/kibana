@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('connectors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/203477
+  describe.skip('connectors', function () {
     before(async () => {
       await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
       await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -35,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
-    describe('create and configure connector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/203462
+    describe.skip('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');

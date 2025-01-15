@@ -20,9 +20,9 @@ import { indent } from './indent.mjs';
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
 const BAZEL_TARGETS = [
-  '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-  '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-  '//packages/kbn-monaco:target_workers',
+  '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
+  '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
+  '//src/platform/packages/shared/kbn-monaco:target_workers',
 ];
 
 async function getBazelRunner() {
@@ -83,7 +83,7 @@ async function runBazel(log, inputArgs, opts = undefined) {
 /**
  *
  * @param {import('./log.mjs').Log} log
- * @param {{ offline: boolean } | undefined} opts
+ * @param {{ offline: boolean, reactVersion?: string } | undefined} opts
  */
 export async function watch(log, opts = undefined) {
   const ibazel = (await getBazelRunner()).runIBazel;
@@ -97,10 +97,12 @@ export async function watch(log, opts = undefined) {
     ...BAZEL_TARGETS,
     '--show_result=1',
     ...(opts?.offline ? ['--config=offline'] : []),
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
   ];
   log.debug(`> ibazel ${args.join(' ')}`);
   await ibazel(args, {
     cwd: REPO_ROOT,
+    env: { ...process.env, REACT_18: opts?.reactVersion === '18' ? 'true' : 'false' },
     logPrefix: Color.info('[ibazel]'),
     onErrorExit(code, output) {
       throwBazelError(log, 'ibazel', code, output);
