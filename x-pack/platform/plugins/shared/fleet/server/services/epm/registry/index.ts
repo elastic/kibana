@@ -364,11 +364,11 @@ export async function getPackage(
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
-  let verificationResult: PackageVerificationResult | undefined = verifyPackage
-    ? getVerificationResult({ name, version })
-    : undefined;
+  let verificationResult: PackageVerificationResult | undefined = getVerificationResult({
+    name,
+    version,
+  });
   try {
     const {
       archiveBuffer,
@@ -378,7 +378,7 @@ export async function getPackage(
       fetchArchiveBuffer({
         pkgName: name,
         pkgVersion: version,
-        shouldVerify: verifyPackage,
+        shouldVerify: true,
         ignoreUnverified: options?.ignoreUnverified,
       })
     );

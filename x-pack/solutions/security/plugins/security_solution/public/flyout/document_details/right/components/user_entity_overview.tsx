@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -27,7 +28,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -106,7 +107,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     timerange,
   });
 
