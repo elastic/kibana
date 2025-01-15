@@ -120,8 +120,8 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
     const getRadialGradient = (position: string) => {
       return `radial-gradient(
                 circle at ${position},
-                ${euiTheme.colors.accentSecondary} 2px,
-                transparent 2px
+                ${euiTheme.colors.accentSecondary} 1px,
+                transparent 1px
               )`;
     };
 
