@@ -14,7 +14,7 @@ import { appContextService } from '..';
 
 export function validateRequiredVersions(
   name: string,
-  requiredVersions?: AgentTargetVersion[]
+  requiredVersions?: AgentTargetVersion[] | null
 ): void {
   if (!requiredVersions) {
     return;
