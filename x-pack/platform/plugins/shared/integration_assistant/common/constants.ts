@@ -49,3 +49,6 @@ export const CATEGORIZATION_RECURSION_LIMIT = 50;
 
 // Name regex pattern
 export const NAME_REGEX_PATTERN = /^[a-z0-9_]+$/;
+
+// Datastream name regex pattern. Same regex that for the name validation in elastic-package
+export const DATASTREAM_NAME_REGEX_PATTERN = /^([a-z0-9]{2}|[a-z0-9][a-z0-9_]+[a-z0-9])$/;
