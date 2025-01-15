@@ -6,99 +6,101 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamDefinition } from '@kbn/streams-schema';
-import { deleteStream, enableStreams, indexDocument } from './helpers/requests';
+import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { cleanUpRootStream } from './helpers/cleanup';
+import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
+import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
-const streams: StreamDefinition[] = [
+type StreamPutItem = ClientRequestParamsOf<
+  StreamsRouteRepository,
+  'PUT /api/streams/{id}'
+>['params']['body'] & { name: string };
+
+const streams: StreamPutItem[] = [
   {
     name: 'logs',
-    stream: {
-      ingest: {
-        processing: [],
-        wired: {
-          fields: {
-            '@timestamp': {
-              type: 'date',
-            },
-            message: {
-              type: 'match_only_text',
-            },
-            'host.name': {
-              type: 'keyword',
-            },
-            'log.level': {
-              type: 'keyword',
-            },
+    ingest: {
+      processing: [],
+      wired: {
+        fields: {
+          '@timestamp': {
+            type: 'date',
+          },
+          message: {
+            type: 'match_only_text',
+          },
+          'host.name': {
+            type: 'keyword',
+          },
+          'log.level': {
+            type: 'keyword',
           },
         },
-        routing: [
-          {
-            name: 'logs.test',
-            condition: {
-              and: [
-                {
-                  field: 'numberfield',
-                  operator: 'gt',
-                  value: 15,
-                },
-              ],
-            },
-          },
-          {
-            name: 'logs.test2',
-            condition: {
-              and: [
-                {
-                  field: 'field2',
-                  operator: 'eq',
-                  value: 'abc',
-                },
-              ],
-            },
-          },
-        ],
       },
+      routing: [
+        {
+          name: 'logs.test',
+          condition: {
+            and: [
+              {
+                field: 'numberfield',
+                operator: 'gt',
+                value: 15,
+              },
+            ],
+          },
+        },
+        {
+          name: 'logs.test2',
+          condition: {
+            and: [
+              {
+                field: 'field2',
+                operator: 'eq',
+                value: 'abc',
+              },
+            ],
+          },
+        },
+      ],
     },
   },
   {
     name: 'logs.test',
-    stream: {
-      ingest: {
-        processing: [],
-        wired: {
-          fields: {},
+    ingest: {
+      routing: [],
+      processing: [],
+      wired: {
+        fields: {
+          numberfield: {
+            type: 'long',
+          },
         },
-        routing: [],
       },
     },
   },
   {
     name: 'logs.test2',
-    stream: {
-      ingest: {
-        processing: [
-          {
-            config: {
-              grok: {
-                field: 'message',
-                patterns: ['%{NUMBER:numberfield}'],
-              },
-            },
-          },
-        ],
-        wired: {
-          fields: {
-            numberfield: {
-              type: 'long',
+    ingest: {
+      processing: [
+        {
+          config: {
+            grok: {
+              field: 'message',
+              patterns: ['%{NUMBER:numberfield}'],
             },
           },
         },
-        routing: [],
+      ],
+      wired: {
+        fields: {
+          field2: {
+            type: 'keyword',
+          },
+        },
       },
+      routing: [],
     },
   },
 ];
@@ -106,34 +108,65 @@ const streams: StreamDefinition[] = [
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const retryService = getService('retry');
-  const logger = getService('log');
+
+  const apiClient = createStreamsRepositorySupertestClient(supertest);
 
   // An anticipated use case is that a user will want to flush a tree of streams from a config file
   describe('Flush from config file', () => {
+    before(async () => {
+      await enableStreams(apiClient);
+      await createStreams();
+      await indexDocuments();
+    });
+
     after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
-      await cleanUpRootStream(esClient);
+      await disableStreams(apiClient);
     });
 
-    // Note: Each step is dependent on the previous
-    it('Enable streams', async () => {
-      await enableStreams(supertest);
+    it('puts the data in the right data streams', async () => {
+      const logsResponse = await esClient.search({
+        index: 'logs',
+        query: {
+          match: { 'log.level': 'info' },
+        },
+      });
+
+      expect(logsResponse.hits.total).to.eql({ value: 1, relation: 'eq' });
+
+      const logsTestResponse = await esClient.search({
+        index: 'logs.test',
+        query: {
+          match: { numberfield: 20 },
+        },
+      });
+
+      expect(logsTestResponse.hits.total).to.eql({ value: 1, relation: 'eq' });
+
+      const logsTest2Response = await esClient.search({
+        index: 'logs.test2',
+        query: {
+          match: { field2: 'abc' },
+        },
+      });
+
+      expect(logsTest2Response.hits.total).to.eql({ value: 1, relation: 'eq' });
     });
 
-    it('PUTs all streams one by one without errors', async () => {
-      for (const { name, stream } of streams) {
-        const response = await supertest
-          .put(`/api/streams/${name}`)
-          .set('kbn-xsrf', 'xxx')
-          .send(stream)
-          .expect(200);
-
-        expect(response.body).to.have.property('acknowledged', true);
+    async function createStreams() {
+      for (const { name: streamId, ...stream } of streams) {
+        await apiClient
+          .fetch('PUT /api/streams/{id}', {
+            params: {
+              body: stream,
+              path: { id: streamId },
+            },
+          })
+          .expect(200)
+          .then((response) => expect(response.body.acknowledged).to.eql(true));
       }
-    });
+    }
 
-    it('send data and it is handled properly', async () => {
+    async function indexDocuments() {
       // send data that stays in logs
       const doc = {
         '@timestamp': '2024-01-01T00:00:00.000Z',
@@ -142,7 +175,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response = await indexDocument(esClient, 'logs', doc);
       expect(response.result).to.eql('created');
-      await waitForDocumentInIndex({ esClient, indexName: 'logs', retryService, logger });
 
       // send data that lands in logs.test
       const doc2 = {
@@ -152,7 +184,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response2 = await indexDocument(esClient, 'logs', doc2);
       expect(response2.result).to.eql('created');
-      await waitForDocumentInIndex({ esClient, indexName: 'logs.test', retryService, logger });
 
       // send data that lands in logs.test2
       const doc3 = {
@@ -162,15 +193,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const response3 = await indexDocument(esClient, 'logs', doc3);
       expect(response3.result).to.eql('created');
-      await waitForDocumentInIndex({ esClient, indexName: 'logs.test2', retryService, logger });
-    });
-
-    it('makes data searchable as expected', async () => {
-      const query = {
-        match: { numberfield: 123 },
-      };
-      const response = await esClient.search({ index: 'logs.test2', query });
-      expect((response.hits.total as SearchTotalHits).value).to.eql(1);
-    });
+    }
   });
 }

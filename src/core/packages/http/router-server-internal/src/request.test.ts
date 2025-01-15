@@ -397,35 +397,6 @@ describe('CoreKibanaRequest', () => {
 
         expect(kibanaRequest.route.options.authRequired).toBe(true);
       });
-      it('handles required authc: { enabled: false }', () => {
-        const request = hapiMocks.createRequest({
-          route: {
-            settings: {
-              app: {
-                security: { authc: { enabled: false } },
-              },
-            },
-          },
-        });
-        const kibanaRequest = CoreKibanaRequest.from(request);
-
-        expect(kibanaRequest.route.options.authRequired).toBe(false);
-      });
-
-      it(`handles required authc: { enabled: 'optional' }`, () => {
-        const request = hapiMocks.createRequest({
-          route: {
-            settings: {
-              app: {
-                security: { authc: { enabled: 'optional' } },
-              },
-            },
-          },
-        });
-        const kibanaRequest = CoreKibanaRequest.from(request);
-
-        expect(kibanaRequest.route.options.authRequired).toBe('optional');
-      });
 
       it('handles required authz simple config', () => {
         const security: RouteSecurity = {

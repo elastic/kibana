@@ -118,6 +118,86 @@ describe('openAIAdapter', () => {
       ]);
     });
 
+    it('correctly formats messages with content parts', () => {
+      openAIAdapter.chatComplete({
+        executor: executorMock,
+        logger,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'text',
+                text: 'question',
+              },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: {
+                  data: 'aaaaaa',
+                  mimeType: 'image/png',
+                },
+              },
+              {
+                type: 'image',
+                source: {
+                  data: 'bbbbbb',
+                  mimeType: 'image/png',
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const {
+        body: { messages },
+      } = getRequest();
+
+      expect(messages).toEqual([
+        {
+          content: [
+            {
+              text: 'question',
+              type: 'text',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          content: 'answer',
+          role: 'assistant',
+        },
+        {
+          content: [
+            {
+              type: 'image_url',
+              image_url: {
+                url: 'aaaaaa',
+              },
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: 'bbbbbb',
+              },
+            },
+          ],
+          role: 'user',
+        },
+      ]);
+    });
+
     it('correctly formats tools and tool choice', () => {
       openAIAdapter.chatComplete({
         ...defaultArgs,
@@ -273,6 +353,18 @@ describe('openAIAdapter', () => {
           signal: abortController.signal,
         }),
       });
+    });
+
+    it('propagates the temperature', () => {
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.7,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(getRequest().body.temperature).toBe(0.7);
     });
   });
 
