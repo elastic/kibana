@@ -539,7 +539,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: entities_types
+          name: entity_types
           required: true
           schema:
             items:
@@ -981,6 +981,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1217,6 +1218,42 @@ components:
         - index
         - description
         - category
+    ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - '@timestamp'
+        - service
+        - entity
     StoreStatus:
       enum:
         - not_installed
