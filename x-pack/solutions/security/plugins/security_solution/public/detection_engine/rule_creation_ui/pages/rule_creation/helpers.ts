@@ -583,12 +583,7 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
     formatScheduleData.to = 'now';
   }
 
-  return {
-    ...formatScheduleData,
-    meta: {
-      from: scheduleData.from,
-    },
-  };
+  return formatScheduleData;
 };
 
 export const formatAboutStepData = (
