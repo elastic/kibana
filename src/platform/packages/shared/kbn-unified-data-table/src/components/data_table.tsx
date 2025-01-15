@@ -36,6 +36,7 @@ import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
+import { SerializedStyles, css } from '@emotion/react';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -652,6 +653,7 @@ export const UnifiedDataTable = ({
   ]);
 
   const [uiSearchTerm, setUISearchTerm] = useState<string>();
+  const [uiSearchTermCss, setUISearchTermCss] = useState<SerializedStyles>();
 
   const uiSearchControl = useMemo(() => {
     return (
@@ -661,14 +663,47 @@ export const UnifiedDataTable = ({
         rows={rows}
         dataView={dataView}
         fieldFormats={fieldFormats}
-        scrollToRow={(rowIndex) =>
-          // TODO: scroll to the column too?
-          dataGridRef.current?.scrollToItem?.({ rowIndex, columnIndex: 0, align: 'start' })
-        }
-        onChange={setUISearchTerm}
+        scrollToFoundMatch={({ rowIndex, fieldName, matchIndex, shouldJump }) => {
+          // TODO: use a named color token
+          setUISearchTermCss(css`
+            .euiDataGridRowCell[data-gridcell-visible-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
+              .unifiedDataTable__findMatch[data-match-index='${matchIndex}'] {
+              background-color: #ffc30e;
+            }
+          `);
+
+          if (shouldJump) {
+            const anyCellForFieldName = document.querySelector(
+              `.euiDataGridRowCell[data-gridcell-column-id='${fieldName}']`
+            );
+
+            // getting column index by column id
+            const columnIndex =
+              anyCellForFieldName?.getAttribute('data-gridcell-column-index') ?? 0;
+
+            dataGridRef.current?.scrollToItem?.({
+              rowIndex,
+              columnIndex: Number(columnIndex),
+              align: 'start',
+            });
+          }
+        }}
+        onChange={(searchTerm) => {
+          setUISearchTerm(searchTerm);
+          setUISearchTermCss(undefined);
+        }}
       />
     );
-  }, [uiSearchTerm, setUISearchTerm, rows, dataView, fieldFormats, visibleColumns, dataGridRef]);
+  }, [
+    uiSearchTerm,
+    setUISearchTerm,
+    setUISearchTermCss,
+    rows,
+    dataView,
+    fieldFormats,
+    visibleColumns,
+    dataGridRef,
+  ]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
@@ -1148,6 +1183,7 @@ export const UnifiedDataTable = ({
           data-description={searchDescription}
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
+          css={uiSearchTermCss}
         >
           {isCompareActive ? (
             <CompareDocuments

@@ -9,18 +9,9 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { useFindSearchMatches } from '../hooks/use_find_search_matches';
+import { useFindSearchMatches, UseFindSearchMatchesProps } from '../hooks/use_find_search_matches';
 
-export interface SearchControlProps {
-  uiSearchTerm: string | undefined;
-  visibleColumns: string[];
-  rows: DataTableRecord[];
-  dataView: DataView;
-  fieldFormats: FieldFormatsStart;
-  scrollToRow: (rowIndex: number) => void;
+export interface SearchControlProps extends UseFindSearchMatchesProps {
   onChange: (searchTerm: string | undefined) => void;
 }
 
@@ -30,7 +21,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
   rows,
   dataView,
   fieldFormats,
-  scrollToRow,
+  scrollToFoundMatch,
   onChange,
 }) => {
   const { matchesCount, activeMatchPosition, goToPrevMatch, goToNextMatch, isProcessing } =
@@ -40,7 +31,7 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       uiSearchTerm,
       dataView,
       fieldFormats,
-      scrollToRow,
+      scrollToFoundMatch,
     });
 
   // TODO: needs debouncing

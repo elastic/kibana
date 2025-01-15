@@ -14,6 +14,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 type MatchesMap = Record<number, Record<string, number>>; // per row index, per field name, number of matches
 const DEFAULT_MATCHES: MatchesMap = {};
+const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 
 export interface UseFindSearchMatchesProps {
   visibleColumns: string[];
@@ -21,7 +22,12 @@ export interface UseFindSearchMatchesProps {
   uiSearchTerm: string | undefined;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
-  scrollToRow: (rowIndex: number) => void;
+  scrollToFoundMatch: (params: {
+    rowIndex: number;
+    fieldName: string;
+    matchIndex: number;
+    shouldJump: boolean;
+  }) => void;
 }
 
 export interface UseFindSearchMatchesReturn {
@@ -38,18 +44,94 @@ export const useFindSearchMatches = ({
   uiSearchTerm,
   dataView,
   fieldFormats,
-  scrollToRow,
+  scrollToFoundMatch,
 }: UseFindSearchMatchesProps): UseFindSearchMatchesReturn => {
   const [matchesMap, setMatchesMap] = useState<MatchesMap>(DEFAULT_MATCHES);
   const [matchesCount, setMatchesCount] = useState<number>(0);
-  const [activeMatchPosition, setActiveMatchPosition] = useState<number>(1);
+  const [activeMatchPosition, setActiveMatchPosition] = useState<number>(
+    DEFAULT_ACTIVE_MATCH_POSITION
+  );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const scrollToMatch = useCallback(
+    ({
+      matchPosition,
+      activeMatchesMap,
+      activeColumns,
+      shouldJump,
+    }: {
+      matchPosition: number;
+      activeMatchesMap: MatchesMap;
+      activeColumns: string[];
+      shouldJump: boolean;
+    }) => {
+      const rowIndices = Object.keys(activeMatchesMap);
+      let traversedMatchesCount = 0;
+
+      for (const rowIndex of rowIndices) {
+        const matchesPerFieldName = activeMatchesMap[Number(rowIndex)];
+        const fieldNames = Object.keys(matchesPerFieldName);
+
+        for (const fieldName of fieldNames) {
+          const matchesCountForFieldName = matchesPerFieldName[fieldName];
+
+          if (
+            traversedMatchesCount < matchPosition &&
+            traversedMatchesCount + matchesCountForFieldName >= matchPosition
+          ) {
+            scrollToFoundMatch({
+              rowIndex: Number(rowIndex),
+              fieldName,
+              matchIndex: matchPosition - traversedMatchesCount - 1,
+              shouldJump,
+            });
+            return;
+          }
+
+          traversedMatchesCount += matchesCountForFieldName;
+        }
+      }
+    },
+    [scrollToFoundMatch]
+  );
+
+  const goToPrevMatch = useCallback(() => {
+    setActiveMatchPosition((prev) => {
+      if (prev - 1 < 1) {
+        return prev;
+      }
+      const nextMatchPosition = prev - 1;
+      scrollToMatch({
+        matchPosition: nextMatchPosition,
+        activeMatchesMap: matchesMap,
+        activeColumns: visibleColumns,
+        shouldJump: true,
+      });
+      return nextMatchPosition;
+    });
+  }, [setActiveMatchPosition, scrollToMatch, matchesMap, visibleColumns]);
+
+  const goToNextMatch = useCallback(() => {
+    setActiveMatchPosition((prev) => {
+      if (prev + 1 > matchesCount) {
+        return prev;
+      }
+      const nextMatchPosition = prev + 1;
+      scrollToMatch({
+        matchPosition: nextMatchPosition,
+        activeMatchesMap: matchesMap,
+        activeColumns: visibleColumns,
+        shouldJump: true,
+      });
+      return nextMatchPosition;
+    });
+  }, [setActiveMatchPosition, scrollToMatch, matchesMap, visibleColumns, matchesCount]);
 
   useEffect(() => {
     if (!rows?.length || !uiSearchTerm?.length) {
       setMatchesMap(DEFAULT_MATCHES);
       setMatchesCount(0);
-      setActiveMatchPosition(1);
+      setActiveMatchPosition(DEFAULT_ACTIVE_MATCH_POSITION);
       return;
     }
 
@@ -83,70 +165,33 @@ export const useFindSearchMatches = ({
       }
     });
 
-    setMatchesMap(totalMatchesCount > 0 ? result : DEFAULT_MATCHES);
+    const nextMatchesMap = totalMatchesCount > 0 ? result : DEFAULT_MATCHES;
+    const nextActiveMatchPosition = DEFAULT_ACTIVE_MATCH_POSITION;
+    setMatchesMap(nextMatchesMap);
     setMatchesCount(totalMatchesCount);
-    setActiveMatchPosition(1);
+    setActiveMatchPosition(nextActiveMatchPosition);
     setIsProcessing(false);
+
+    if (totalMatchesCount > 0) {
+      scrollToMatch({
+        matchPosition: nextActiveMatchPosition,
+        activeMatchesMap: nextMatchesMap,
+        activeColumns: visibleColumns,
+        shouldJump: false,
+      });
+    }
   }, [
     setMatchesMap,
     setMatchesCount,
     setActiveMatchPosition,
     setIsProcessing,
+    scrollToMatch,
     visibleColumns,
     rows,
     uiSearchTerm,
     dataView,
     fieldFormats,
   ]);
-
-  const scrollToMatch = useCallback(
-    (matchPosition: number) => {
-      const rowIndices = Object.keys(matchesMap);
-      let traversedMatchesCount = 0;
-
-      for (const rowIndex of rowIndices) {
-        const matchesPerFieldName = matchesMap[Number(rowIndex)];
-        const fieldNames = Object.keys(matchesPerFieldName);
-
-        for (const fieldName of fieldNames) {
-          const matchesCountForFieldName = matchesPerFieldName[fieldName];
-
-          if (
-            traversedMatchesCount < matchPosition &&
-            traversedMatchesCount + matchesCountForFieldName >= matchPosition
-          ) {
-            scrollToRow(Number(rowIndex));
-            return;
-          }
-
-          traversedMatchesCount += matchesCountForFieldName;
-        }
-      }
-    },
-    [matchesMap, scrollToRow]
-  );
-
-  const goToPrevMatch = useCallback(() => {
-    setActiveMatchPosition((prev) => {
-      if (prev - 1 < 1) {
-        return prev;
-      }
-      const nextMatchPosition = prev - 1;
-      scrollToMatch(nextMatchPosition);
-      return nextMatchPosition;
-    });
-  }, [setActiveMatchPosition, scrollToMatch]);
-
-  const goToNextMatch = useCallback(() => {
-    setActiveMatchPosition((prev) => {
-      if (prev + 1 > matchesCount) {
-        return prev;
-      }
-      const nextMatchPosition = prev + 1;
-      scrollToMatch(nextMatchPosition);
-      return nextMatchPosition;
-    });
-  }, [setActiveMatchPosition, scrollToMatch, matchesCount]);
 
   return {
     matchesCount,
