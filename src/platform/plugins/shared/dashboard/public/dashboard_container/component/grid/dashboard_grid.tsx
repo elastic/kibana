@@ -10,8 +10,6 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -25,11 +23,11 @@ import {
   DASHBOARD_MARGIN_SIZE,
 } from '../../../dashboard_constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { useLayoutStyles } from './use_layout_styles';
 
 export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
-  const { euiTheme } = useEuiTheme();
-
   const dashboardApi = useDashboardApi();
+  const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
@@ -117,62 +115,10 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
 
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
-    const getRadialGradient = (position: string) => {
-      return `radial-gradient(
-                circle at ${position},
-                ${euiTheme.colors.accentSecondary} 1px,
-                transparent 1px
-              )`;
-    };
 
     return (
       <GridLayout
-        css={css`
-          .kbnGridRow--targetted {
-            background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-              calc((var(--kbnGridGutterSize) / 2) * -1px);
-            background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-              calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-            background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
-              ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
-          }
-
-          .kbnGridPanel--dragPreview {
-            background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
-          }
-
-          .kbnGridPanel--resizeHandle {
-            // applying mask via ::after allows for focus borders to show
-            &:after {
-              display: block;
-              width: 100%;
-              height: 100%;
-              content: ' ';
-
-              mask-repeat: no-repeat;
-              mask-position: bottom ${euiTheme.size.s} right ${euiTheme.size.s};
-              mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cg clip-path='url(%23clip0_472_172810)'%3E%3Ccircle cx='7' cy='1' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip1_472_172810)'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='4' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip2_472_172810)'%3E%3Ccircle cx='1' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='4' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='7' r='1' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E");
-
-              background-color: ${euiTheme.colors.borderBaseFormsControl};
-            }
-            &:hover,
-            &:focus-visible {
-              &:after {
-                background-color: ${euiTheme.colors.vis.euiColorVis0};
-              }
-            }
-          }
-
-          .kbnGridPanel--active {
-            .embPanel {
-              outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
-            }
-            .embPanel__hoverActions {
-              border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
-              border-bottom: 0px solid !important;
-            }
-          }
-        `}
+        css={layoutStyles}
         layout={currentLayout}
         gridSettings={{
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
@@ -186,7 +132,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
       />
     );
   }, [
-    euiTheme,
+    layoutStyles,
     currentLayout,
     useMargins,
     renderPanelContents,

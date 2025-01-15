@@ -57,7 +57,7 @@ export const DragPreview = ({
   return (
     <div
       ref={dragPreviewRef}
-      className={'kbnGridPanel--dragPreview '}
+      className={'kbnGridPanel--dragPreview'}
       css={css`
         display: none;
         pointer-events: none;

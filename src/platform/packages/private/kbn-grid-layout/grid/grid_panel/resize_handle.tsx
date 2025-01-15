@@ -39,7 +39,6 @@ export const ResizeHandle = ({
         defaultMessage: 'Resize panel',
       })}
       css={css`
-        display: block;
         right: 0;
         bottom: 0;
         margin: -2px;
