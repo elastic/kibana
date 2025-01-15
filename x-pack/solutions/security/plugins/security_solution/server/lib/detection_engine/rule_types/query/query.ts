@@ -100,7 +100,7 @@ export const queryExecutor = async ({
               secondaryTimestamp: runOpts.secondaryTimestamp,
               isLoggedRequestsEnabled,
             })),
-            state: {},
+            state: { isLoggedRequestsEnabled },
           };
 
     scheduleNotificationResponseActionsService({

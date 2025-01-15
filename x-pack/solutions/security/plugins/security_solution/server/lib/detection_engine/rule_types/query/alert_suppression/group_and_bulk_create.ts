@@ -55,6 +55,7 @@ export interface GroupAndBulkCreateParams {
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
   state: {
     suppressionGroupHistory: BucketHistory[];
+    isLoggedRequestsEnabled?: boolean;
   };
 }
 
@@ -151,6 +152,7 @@ export const groupAndBulkCreate = async ({
       errors: [],
       warningMessages: [],
       state: {
+        isLoggedRequestsEnabled,
         suppressionGroupHistory: filteredBucketHistory,
       },
     };
