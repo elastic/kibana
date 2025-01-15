@@ -68,9 +68,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
-              rowRef.classList.add('kbnGridLayout--targettedRow');
+              rowRef.classList.add('kbnGridRow--targetted');
             } else {
-              rowRef.classList.remove('kbnGridLayout--targettedRow');
+              rowRef.classList.remove('kbnGridRow--targetted');
             }
           });
 

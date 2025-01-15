@@ -128,7 +128,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
     return (
       <GridLayout
         css={css`
-          .kbnGridLayout--targettedRow {
+          .kbnGridRow--targetted {
             background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
               calc((var(--kbnGridGutterSize) / 2) * -1px);
             background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
@@ -137,7 +137,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
               ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
           }
 
-          .kbnGridLayout--dragPreview {
+          .kbnGridPanel--dragPreview {
             background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
           }
 
@@ -152,7 +152,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
             }
           }
 
-          .kbnGridLayout--activePanel {
+          .kbnGridPanel--active {
             .embPanel {
               outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0} !important;
             }

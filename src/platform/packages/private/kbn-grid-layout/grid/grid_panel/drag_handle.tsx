@@ -118,7 +118,7 @@ export const DragHandle = React.forwardRef<
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
       })}
-      className="kbnGridPanel__dragHandle"
+      className="kbnGridPanel--dragHandle"
       css={css`
         opacity: 0;
         display: flex;

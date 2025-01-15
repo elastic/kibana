@@ -125,7 +125,7 @@ export const GridExample = ({
   const customLayoutCss = useMemo(() => {
     const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
     return css`
-      .kbnGridLayout--targettedRow {
+      .kbnGridRow--targetted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
@@ -135,7 +135,7 @@ export const GridExample = ({
         background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)};
       }
 
-      .kbnGridLayout--dragPreview {
+      .kbnGridPanel--dragPreview {
         border-radius: ${euiTheme.border.radius};
         background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)};
         transition: opacity 100ms linear;

@@ -102,7 +102,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
             if (panelId === activePanel?.id) {
-              ref.classList.add('kbnGridLayout--activePanel');
+              ref.classList.add('kbnGridPanel--active');
 
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
@@ -137,7 +137,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
-              ref.classList.remove('kbnGridLayout--activePanel');
+              ref.classList.remove('kbnGridPanel--active');
 
               const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
 
