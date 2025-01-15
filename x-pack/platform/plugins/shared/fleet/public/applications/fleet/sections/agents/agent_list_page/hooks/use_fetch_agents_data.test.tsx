@@ -106,9 +106,7 @@ describe('useFetchAgentsData', () => {
   const mockErrorToast = startServices.notifications.toasts.addError as jest.Mock;
 
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      displayAgentMetrics: true,
-    } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
   });
 
   beforeEach(() => {

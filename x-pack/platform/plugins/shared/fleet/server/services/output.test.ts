@@ -26,6 +26,7 @@ jest.mock('./app_context');
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
 jest.mock('./audit_logging');
+jest.mock('./secrets');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
