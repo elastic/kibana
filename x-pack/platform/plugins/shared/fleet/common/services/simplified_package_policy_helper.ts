@@ -202,10 +202,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       enabled === false
     ) {
       packagePolicyInput.enabled = false;
-      packagePolicyInput.keep_enabled = false;
     } else {
       packagePolicyInput.enabled = true;
-      packagePolicyInput.keep_enabled = true;
     }
 
     if (inputLevelVars) {

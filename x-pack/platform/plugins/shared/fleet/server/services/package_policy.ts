@@ -1917,10 +1917,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           const enabled = inputNotAllowedInAgentless(input, newPolicy?.supports_agentless)
             ? false
             : input.enabled;
+
           return {
             ...defaultInput,
             enabled,
-            keep_enabled: enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
@@ -1929,12 +1929,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             })),
           } as NewPackagePolicyInput;
         });
+
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
           namespace: newPolicy?.namespace ?? '',
           description: newPolicy.description ?? '',
-          enabled: newPolicy.enabled,
+          enabled: newPolicy.enabled ?? true,
           package: {
             ...newPP.package!,
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
