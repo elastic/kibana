@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MetricDatum } from '@elastic/charts';
+import type { MetricWTrend } from '@elastic/charts';
 import { MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
@@ -105,7 +105,7 @@ export function MobileLocationStats({
     [comparisonEnabled, previousPeriodLabel]
   );
 
-  const metrics: MetricDatum[] = [
+  const metrics: MetricWTrend[] = [
     {
       color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.http.requests.title', {
