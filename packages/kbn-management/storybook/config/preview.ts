@@ -16,12 +16,6 @@ declare global {
   }
 }
 
-/* eslint-enable */
-import jest from 'jest-mock';
-
-/* @ts-expect-error TS doesn't see jest as a property of window, and I don't want to edit our global config. */
-window.jest = jest;
-
 export const parameters = {
   backgrounds: {
     default: 'body',

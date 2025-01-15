@@ -8,15 +8,11 @@
  */
 
 import React from 'react';
-import * as jest from 'jest-mock';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 
 import { servicesContextDecorator } from './decorator';
 
 export const decorators = [servicesContextDecorator];
-
-// @ts-ignore
-window.jest = jest;
 
 export const parameters = {
   docs: {
