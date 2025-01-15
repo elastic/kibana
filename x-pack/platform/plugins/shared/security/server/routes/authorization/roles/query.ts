@@ -110,6 +110,7 @@ export function defineQueryRolesRoutes({
               wildcard: {
                 name: {
                   value: `*${query}*`,
+                  case_insensitive: true,
                 },
               },
             });
