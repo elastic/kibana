@@ -67,11 +67,11 @@ export const useFindSearchMatches = ({
           fieldName,
           dataView,
           fieldFormats,
+          uiSearchTerm,
         });
 
         const matchesCountForFieldName = row.findSearchMatchesInFormattedValue({
           formattedFieldValue,
-          uiSearchTerm,
         });
 
         if (matchesCountForFieldName) {

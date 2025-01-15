@@ -76,22 +76,20 @@ export function SourceDocument({
         if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
-            <EuiDescriptionListTitle
-              className="unifiedDataTable__descriptionListTitle"
-              dangerouslySetInnerHTML={{
-                __html: row.highlightSearchTermsInFormattedValue({
-                  formattedFieldValue: fieldDisplayName, // TODO: escape the dysplay name too
-                  uiSearchTerm,
-                }),
-              }}
-            />
+            <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+              {fieldDisplayName}
+            </EuiDescriptionListTitle>
             <EuiDescriptionListDescription
               className="unifiedDataTable__descriptionListDescription"
               dangerouslySetInnerHTML={{
-                __html: row.highlightSearchTermsInFormattedValue({
-                  formattedFieldValue: value,
-                  uiSearchTerm,
-                }),
+                __html: fieldName
+                  ? row.formatAndCacheFieldValue({
+                      dataView,
+                      fieldName,
+                      fieldFormats,
+                      uiSearchTerm,
+                    })
+                  : value,
               }}
             />
           </Fragment>

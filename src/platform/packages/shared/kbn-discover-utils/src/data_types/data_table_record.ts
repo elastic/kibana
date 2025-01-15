@@ -42,10 +42,17 @@ export class DataTableRecord {
   readonly isAnchor?: boolean;
 
   /**
-   * Cache for formatted field values per data view id and field name
+   * Cache for formatted field values per field name
    * @private
    */
-  private formattedFieldValuesCache: Record<string, Record<string, string>>;
+  private formattedFieldValuesCache: Record<
+    string,
+    {
+      formatted: string;
+      formattedAndHighlighted: string;
+      uiSearchTerm?: string;
+    }
+  >;
 
   constructor({
     id,
@@ -70,17 +77,22 @@ export class DataTableRecord {
     dataView,
     fieldName,
     fieldFormats,
+    uiSearchTerm,
   }: {
     dataView: DataView;
     fieldName: string;
     fieldFormats: FieldFormatsStart;
+    uiSearchTerm: string | undefined;
   }): string {
     if (!dataView?.id) {
       return '';
     }
 
-    const cachedFieldValue = this.formattedFieldValuesCache[dataView.id]?.[fieldName];
-    if (typeof cachedFieldValue !== 'undefined') {
+    const cachedFieldValue = this.formattedFieldValuesCache[fieldName]?.formattedAndHighlighted;
+    if (
+      typeof cachedFieldValue === 'string' &&
+      uiSearchTerm === this.formattedFieldValuesCache[fieldName].uiSearchTerm
+    ) {
       return cachedFieldValue;
     }
 
@@ -92,44 +104,33 @@ export class DataTableRecord {
       dataView.fields.getByName(fieldName)
     );
 
-    this.formattedFieldValuesCache[dataView.id] = {
-      ...this.formattedFieldValuesCache[dataView.id],
-      [fieldName]: newlyFormattedFieldValue,
+    this.formattedFieldValuesCache[fieldName] = {
+      formatted: newlyFormattedFieldValue,
+      formattedAndHighlighted: newlyFormattedFieldValue,
     };
 
-    return newlyFormattedFieldValue;
-  }
+    if (uiSearchTerm?.length) {
+      let matchIndex = 0;
+      const formattedAndHighlighted = newlyFormattedFieldValue.replace(
+        // TODO: implement better replacement to account for html tags
+        new RegExp(uiSearchTerm, 'gi'), // TODO: escape the input as it would be passed to html
+        (match) =>
+          `<mark class="unifiedDataTable__findMatch" data-match-index="${matchIndex++}">${match}</mark>`
+      );
+      this.formattedFieldValuesCache[fieldName].formattedAndHighlighted = formattedAndHighlighted;
+      this.formattedFieldValuesCache[fieldName].uiSearchTerm = uiSearchTerm;
+    }
 
-  // TODO: cache too?
-  highlightSearchTermsInFormattedValue({
-    formattedFieldValue,
-    uiSearchTerm,
-  }: {
-    formattedFieldValue: string;
-    uiSearchTerm: string | undefined;
-  }): string {
-    let matchIndex = 0;
-
-    return uiSearchTerm?.length
-      ? formattedFieldValue.replace(
-          // TODO: implement better replacement to account for html tags
-          new RegExp(uiSearchTerm, 'gi'), // TODO: escape the input as it would be passed to html
-          (match) =>
-            `<span class="unifiedDataTable__findMatch" data-match-index="${matchIndex++}">${match}</span>`
-        )
-      : formattedFieldValue;
+    return this.formattedFieldValuesCache[fieldName].formattedAndHighlighted || '';
   }
 
   findSearchMatchesInFormattedValue({
     formattedFieldValue,
-    uiSearchTerm,
   }: {
     formattedFieldValue: string;
-    uiSearchTerm: string | undefined;
   }): number {
-    return uiSearchTerm?.length
-      ? // TODO: implement better matching to account for html tags
-        (formattedFieldValue.match(new RegExp(uiSearchTerm, 'gi')) || []).length
-      : 0;
+    return (
+      formattedFieldValue.match(new RegExp('mark class="unifiedDataTable__findMatch"', 'gi')) || []
+    ).length;
   }
 }

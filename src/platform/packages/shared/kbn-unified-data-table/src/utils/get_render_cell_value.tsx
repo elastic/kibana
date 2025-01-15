@@ -144,19 +144,18 @@ export const getRenderCellValueFn = ({
       );
     }
 
-    const formattedFieldValue = row.formatAndCacheFieldValue({
-      dataView,
-      fieldName: columnId,
-      fieldFormats,
-    });
-
     return (
       <span
         className={CELL_CLASS}
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: row.highlightSearchTermsInFormattedValue({ formattedFieldValue, uiSearchTerm }),
+          __html: row.formatAndCacheFieldValue({
+            dataView,
+            fieldName: columnId,
+            fieldFormats,
+            uiSearchTerm,
+          }),
         }}
       />
     );
@@ -229,12 +228,10 @@ function renderPopoverContent({
             // formatFieldValue guarantees sanitized values
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
-              __html: row.highlightSearchTermsInFormattedValue({
-                formattedFieldValue: row.formatAndCacheFieldValue({
-                  dataView,
-                  fieldName: columnId,
-                  fieldFormats,
-                }),
+              __html: row.formatAndCacheFieldValue({
+                dataView,
+                fieldName: columnId,
+                fieldFormats,
                 uiSearchTerm,
               }),
             }}
