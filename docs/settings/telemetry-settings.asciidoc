@@ -33,4 +33,4 @@ set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>>
   when they are navigating through {kib}. *Default: `'server'`.*
 
 `xpack.apm.telemetryCollectionEnabled`::
-  Collects information about APM data and API performance. Set it to `fasle` to specifically disable APM's collector. *Default: `'true'`.*
+  Collects information about APM data and API performance. Set this to `false` to specifically disable APM's collector. *Default: `'true'`.*
