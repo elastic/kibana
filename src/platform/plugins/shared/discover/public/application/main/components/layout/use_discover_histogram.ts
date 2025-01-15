@@ -28,6 +28,7 @@ import {
   merge,
   Observable,
   pairwise,
+  skip,
   startWith,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -495,7 +496,10 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
     map((state) => state.currentSuggestionContext),
-    distinctUntilChanged(isEqual)
+    distinctUntilChanged(isEqual),
+    // Skip the first emission since it's the
+    // initial state and doesn't need a refetch
+    skip(1)
   );
 };
 
