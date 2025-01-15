@@ -10,6 +10,7 @@
 import React, { ChangeEvent, KeyboardEvent, useCallback } from 'react';
 import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import { i18n } from '@kbn/i18n';
 import { useFindSearchMatches, UseFindSearchMatchesProps } from '../hooks/use_find_search_matches';
 
 export interface SearchControlProps extends UseFindSearchMatchesProps {
@@ -60,30 +61,44 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       isClearable
       isLoading={isProcessing}
       append={
-        matchesCount ? (
+        Boolean(uiSearchTerm?.length) && !isProcessing ? (
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowUp"
-                aria-label="Previous match"
-                disabled={activeMatchPosition <= 1}
-                onClick={goToPrevMatch}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* TODO: i18n */}
-              <EuiButtonIcon
-                iconType="arrowDown"
-                aria-label="Next match"
-                disabled={activeMatchPosition >= matchesCount}
-                onClick={goToNextMatch}
-              />
-            </EuiFlexItem>
+            {matchesCount > 0 ? (
+              <>
+                <EuiFlexItem grow={false}>{`${activeMatchPosition} / ${matchesCount}`}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="arrowUp"
+                    aria-label={i18n.translate(
+                      'unifiedDataTable.searchControl.buttonPreviousMatch',
+                      {
+                        defaultMessage: 'Previous match',
+                      }
+                    )}
+                    disabled={activeMatchPosition <= 1}
+                    onClick={goToPrevMatch}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="arrowDown"
+                    aria-label={i18n.translate('unifiedDataTable.searchControl.buttonNextMatch', {
+                      defaultMessage: 'Next match',
+                    })}
+                    disabled={activeMatchPosition >= matchesCount}
+                    onClick={goToNextMatch}
+                  />
+                </EuiFlexItem>
+              </>
+            ) : (
+              <EuiFlexItem grow={false}>0</EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ) : undefined
       }
-      placeholder="Search in the table" // TODO: i18n
+      placeholder={i18n.translate('unifiedDataTable.searchControl.inputPlaceholder', {
+        defaultMessage: 'Find in the table',
+      })}
       value={inputValue}
       onChange={onInputChange}
       onKeyUp={onKeyUp}
