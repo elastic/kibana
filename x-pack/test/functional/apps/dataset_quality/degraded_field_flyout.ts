@@ -106,10 +106,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     describe('detecting root cause for ignored fields', () => {
       before(async () => {
         // Create custom component template
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(degradedDatasetWithLimitsName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(degradedDatasetWithLimitsName),
+        });
 
         // Create custom index template
         await esClient.indices.putIndexTemplate({
@@ -136,10 +136,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
 
         // Create custom component template for Nginx to avoid issues with LogsDB
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateNameNginx,
-          logsNginxMappings(nginxAccessDatasetName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameNginx,
+          mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
 
         await synthtrace.index([
           // Ingest Degraded Logs with 25 fields in degraded DataSet
