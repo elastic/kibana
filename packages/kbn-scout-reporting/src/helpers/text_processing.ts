@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutEventsReport, ScoutReportEventAction } from './events';
-export { ScoutFailureReport, type TestFailure } from './failed_test';
+import stripANSI from 'strip-ansi';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export const stripFilePath = (filePath: string): string =>
+  stripANSI(filePath.replaceAll(`${REPO_ROOT}/`, ''));
+
+export function parseStdout(stdout: Array<string | Buffer>): string {
+  const stdoutContent = stdout
+    .map((chunk) => (Buffer.isBuffer(chunk) ? chunk.toString() : chunk))
+    .join('');
+
+  // Escape special HTML characters
+  return stripANSI(stdoutContent);
+}

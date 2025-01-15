@@ -28,16 +28,10 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
-import { environmentMetadata } from '../datasources';
-
-/**
- * Configuration options for the Scout Playwright reporter
- */
-export interface ScoutPlaywrightReporterOptions {
-  name?: string;
-  outputPath?: string;
-}
+import { ScoutEventsReport, ScoutReportEventAction } from '../../report';
+import { environmentMetadata } from '../../../datasources';
+import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
+import { generateTestRunId, getTestIDForTitle } from '../../../helpers';
 
 /**
  * Scout Playwright reporter
@@ -46,7 +40,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   readonly log: ToolingLog;
   readonly name: string;
   readonly runId: string;
-  private report: ScoutReport;
+  private report: ScoutEventsReport;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -56,10 +50,10 @@ export class ScoutPlaywrightReporter implements Reporter {
     });
 
     this.name = this.reporterOptions.name || 'unknown';
-    this.runId = generateTestRunId();
+    this.runId = this.reporterOptions.runId || generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
-    this.report = new ScoutReport(this.log);
+    this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -290,6 +284,3 @@ export class ScoutPlaywrightReporter implements Reporter {
     });
   }
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ScoutPlaywrightReporter;
