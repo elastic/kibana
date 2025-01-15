@@ -34,7 +34,7 @@ const getKuery = (metrics: CustomThresholdExpressionMetric[], filter?: string) =
 
 export const getLogRateAnalysisEQQuery = (
   alert: CustomThresholdAlert,
-  config?: EsQueryConfig
+  config: EsQueryConfig
 ): QueryDslQueryContainer | undefined => {
   const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
   // We only show log rate analysis for one condition with one count aggregation
