@@ -73,6 +73,7 @@ describe('transformServiceMapResponses', () => {
         },
       ],
       anomalies,
+      tracesCount: 10,
     };
 
     const { elements } = transformServiceMapResponses({ response });
@@ -106,6 +107,7 @@ describe('transformServiceMapResponses', () => {
         },
       ],
       anomalies,
+      tracesCount: 10,
     };
 
     const { elements } = transformServiceMapResponses({ response });
@@ -165,6 +167,7 @@ describe('transformServiceMapResponses', () => {
         },
       ],
       anomalies,
+      tracesCount: 10,
     };
 
     const { elements } = transformServiceMapResponses({ response });
@@ -203,6 +206,7 @@ describe('transformServiceMapResponses', () => {
         },
       ],
       anomalies,
+      tracesCount: 10,
     };
 
     const { elements } = transformServiceMapResponses({ response });
@@ -228,6 +232,7 @@ describe('transformServiceMapResponses', () => {
         },
       ],
       anomalies,
+      tracesCount: 10,
     };
 
     const { elements } = transformServiceMapResponses({ response });

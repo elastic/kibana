@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
+import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
@@ -32,9 +33,15 @@ import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_preb
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  RuleTranslationResult,
+  SiemMigrationRetryFilter,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
+import type { FilterOptions } from './filters';
+import { MigrationRulesFilter } from './filters';
+import { convertFilterOptions } from './helpers';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -75,6 +82,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
+    // Filters
+    const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
+
     const { data: translationStats, isLoading: isStatsLoading } =
       useGetMigrationTranslationStats(migrationId);
 
@@ -91,6 +101,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       sortField,
       sortDirection,
       searchTerm,
+      ...convertFilterOptions(filterOptions),
     });
 
     const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
@@ -199,7 +210,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, { failed: true });
+      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
     }, [migrationId, retryRuleMigration]);
 
     const isLoading =
@@ -225,19 +236,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                disabled={!canMigrationRuleBeInstalled}
-                onClick={() => {
-                  installSingleRule(ruleMigration, true);
-                  closeRulePreview();
-                }}
-                fill
-                data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
-              >
-                {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
+            {isMigrationPrebuiltRule(ruleMigration.elastic_rule) && (
+              <EuiFlexItem>
+                <EuiButton
+                  disabled={!canMigrationRuleBeInstalled}
+                  onClick={() => {
+                    installSingleRule(ruleMigration, true);
+                    closeRulePreview();
+                  }}
+                  fill
+                  data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
+                >
+                  {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       },
@@ -309,6 +322,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
                   <EuiFlexItem>
                     <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <MigrationRulesFilter
+                      filterOptions={filterOptions}
+                      onFilterOptionsChanged={setFilterOptions}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <BulkActions
