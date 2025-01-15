@@ -566,65 +566,45 @@ describe('Editor actions provider', () => {
       /*
        * The editor has the text
        * "POST _search" on line 1
-       * { "test": "test" } on lines 2-4
-       *  and "GET kbn:test" on line 5
+       *  and "GET kbn:test" on line 2
        */
       mockGetParsedRequests.mockReturnValue([
         {
           startOffset: 0,
           method: 'POST',
           url: '_search',
-          endOffset: 35,
-          data: [
-            {
-              test: 'test',
-            },
-          ],
+          endOffset: 12,
         },
         {
-          startOffset: 36,
+          startOffset: 13,
           method: 'GET',
           url: 'kbn:test',
-          endOffset: 48,
+          endOffset: 25,
         },
       ]);
 
       editor.getModel.mockReturnValue({
-        getLineMaxColumn: (lineNumber: number) => {
-          // mock this function for line 4
-          return 2;
-        },
         getPositionAt: (offset: number) => {
-          // mock this function for start offsets of the mocked requests
+          // mock this function for start and end offsets of the mocked requests
           if (offset === 0) {
             return { lineNumber: 1, column: 1 };
           }
-          if (offset === 36) {
-            return { lineNumber: 5, column: 1 };
+          if (offset === 12) {
+            return { lineNumber: 1, column: 12 };
           }
-          // mock this function for end offsets of the mocked requests
-          if (offset === 35) {
-            return { lineNumber: 4, column: 2 };
+          if (offset === 13) {
+            return { lineNumber: 2, column: 1 };
           }
-          if (offset === 48) {
-            return { lineNumber: 5, column: 13 };
+          if (offset === 25) {
+            return { lineNumber: 2, column: 13 };
           }
         },
         getLineContent: (lineNumber: number) => {
-          // mock this functions for line 1 and line 2
+          // mock this function for line 1 and line 2
           if (lineNumber === 1) {
             return 'POST _search';
           }
           if (lineNumber === 2) {
-            return '{';
-          }
-          if (lineNumber === 3) {
-            return '  "test": "test"';
-          }
-          if (lineNumber === 4) {
-            return '}';
-          }
-          if (lineNumber === 5) {
             return 'GET kbn:test';
           }
         },
@@ -638,8 +618,8 @@ describe('Editor actions provider', () => {
 
     it('returns true if a Kibana request is selected', async () => {
       editor.getSelection.mockReturnValue({
-        startLineNumber: 5,
-        endLineNumber: 5,
+        startLineNumber: 2,
+        endLineNumber: 2,
       } as monaco.Selection);
 
       expect(await editorActionsProvider.isKbnRequestSelected()).toEqual(true);
@@ -648,16 +628,16 @@ describe('Editor actions provider', () => {
     it('returns false if a non-Kibana request is selected', async () => {
       editor.getSelection.mockReturnValue({
         startLineNumber: 1,
-        endLineNumber: 4,
+        endLineNumber: 1,
       } as monaco.Selection);
 
       expect(await editorActionsProvider.isKbnRequestSelected()).toEqual(false);
     });
 
-    it('returns true for if multiple requests are selected and one of them is a Kibana request', async () => {
+    it('returns true if multiple requests are selected and one of them is a Kibana request', async () => {
       editor.getSelection.mockReturnValue({
         startLineNumber: 1,
-        endLineNumber: 5,
+        endLineNumber: 2,
       } as monaco.Selection);
 
       expect(await editorActionsProvider.isKbnRequestSelected()).toEqual(true);
