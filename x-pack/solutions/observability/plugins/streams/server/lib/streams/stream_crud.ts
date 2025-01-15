@@ -249,37 +249,6 @@ async function findStreamManagedPipelineReference(
   };
 }
 
-// async function ensureStreamManagedPipelineReference(
-//   scopedClusterClient: IScopedClusterClient,
-//   pipelineName: string,
-//   definition: StreamDefinition,
-//   executionPlan: ExecutionPlanStep[]
-// ) {
-//   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
-//   const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
-//     await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, definition.name);
-//   if (!referencesStreamManagedPipeline) {
-//     const callStreamManagedPipelineProcessor: IngestProcessorContainer = {
-//       pipeline: {
-//         name: streamManagedPipelineName,
-//         if: `ctx._index == '${definition.name}'`,
-//         ignore_missing_pipeline: true,
-//         description:
-//           "Call the stream's managed pipeline - do not change this manually but instead use the streams UI or API",
-//       },
-//     };
-//     executionPlan.push({
-//       method: 'PUT',
-//       path: `/_ingest/pipeline/${targetPipelineName}`,
-//       body: set(
-//         { ...targetPipeline },
-//         'processors',
-//         (targetPipeline.processors || []).concat(callStreamManagedPipelineProcessor)
-//       ),
-//     });
-//   }
-// }
-
 async function tryGettingPipeline({ scopedClusterClient, id }: ReadStreamParams) {
   try {
     return (await scopedClusterClient.asCurrentUser.ingest.getPipeline({ id }))[id];
