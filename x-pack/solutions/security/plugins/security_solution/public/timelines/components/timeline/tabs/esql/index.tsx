@@ -28,6 +28,7 @@ import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_d
 import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
 import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineDefaults } from '../../../../store/defaults';
 import { savedSearchComparator } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
@@ -52,6 +53,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       savedSearch: savedSearchService,
     },
   } = useKibana();
+  const {
+    timelinePrivileges: { crud: canSaveTimeline },
+  } = useUserPrivileges();
 
   const dispatch = useDispatch();
 
@@ -119,7 +123,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   ]);
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
-
   useEffect(() => {
     if (isFetching) return;
     if (savedSearchByIdStatus === 'error' && savedSearchId) {
@@ -137,6 +140,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
+    if (!canSaveTimeline) return;
     updateSavedSearch(latestState, timelineId, function onUpdate() {
       combinedDiscoverSavedSearchStateRef.current = latestState;
     });
@@ -153,6 +157,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     dispatch,
     savedSearchId,
     savedSearchByIdStatus,
+    canSaveTimeline,
   ]);
 
   useEffect(() => {

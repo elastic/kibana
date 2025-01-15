@@ -24,13 +24,29 @@ const NOTES_ADD_TOOLTIP = i18n.translate(
     defaultMessage: 'Add note',
   }
 );
-const NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
+const NO_NOTES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
+  {
+    defaultMessage: 'No notes available',
+  }
+);
+const ADD_NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
   i18n.translate(
     'xpack.securitySolution.timeline.body.notes.addNote.multipleNotesAvailableTooltip',
     {
       values: { notesCount },
       defaultMessage:
         '{notesCount} {notesCount, plural, one {note} other {notes}  } available. Click to view {notesCount, plural, one {it} other {them}} and add more.',
+    }
+  );
+
+const VIEW_NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
+  i18n.translate(
+    'xpack.securitySolution.timeline.body.notes.addNote.multipleNotesAvailableTooltip',
+    {
+      values: { notesCount },
+      defaultMessage:
+        '{notesCount} {notesCount, plural, one {note} other {notes}  } available. Click to view {notesCount, plural, one {it} other {them}}.',
     }
   );
 
@@ -52,22 +68,36 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   eventId,
   notesCount,
 }) => {
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const {
+    notesPrivileges: { crud: canAddNotes, read: canViewNotes },
+  } = useUserPrivileges();
 
-  const NOTES_TOOLTIP = useMemo(
-    () => (notesCount > 0 ? NOTES_COUNT_TOOLTIP({ notesCount }) : NOTES_ADD_TOOLTIP),
-    [notesCount]
-  );
+  const tooltip = useMemo(() => {
+    if (timelineType === TimelineTypeEnum.template) {
+      return NOTES_DISABLE_TOOLTIP;
+    }
+    if (canAddNotes) {
+      return notesCount > 0 ? ADD_NOTES_COUNT_TOOLTIP({ notesCount }) : NOTES_ADD_TOOLTIP;
+    }
+    if (canViewNotes) {
+      return notesCount > 0 ? VIEW_NOTES_COUNT_TOOLTIP({ notesCount }) : NO_NOTES_TOOLTIP;
+    }
+
+    // we can return an empty string for tooltip because the icon is actually no shown at all
+    return '';
+  }, [canAddNotes, canViewNotes, notesCount, timelineType]);
+
+  const disabled = useMemo(() => !canAddNotes && notesCount === 0, [canAddNotes, notesCount]);
 
   return (
     <ActionIconItem>
       <NotesButton
         ariaLabel={ariaLabel}
         data-test-subj="add-note"
-        isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+        isDisabled={disabled}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
-        toolTip={timelineType === TimelineTypeEnum.template ? NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP}
+        toolTip={tooltip}
         eventId={eventId}
         notesCount={notesCount}
       />

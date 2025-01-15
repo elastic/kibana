@@ -25,8 +25,7 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/197151
-describe.skip('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let packId: string;
   let packName: string;

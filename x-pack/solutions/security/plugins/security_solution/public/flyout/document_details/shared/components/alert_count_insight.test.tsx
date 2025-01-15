@@ -12,8 +12,16 @@ import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import {
+  INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
+} from './test_ids';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../../common/components/user_privileges');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -66,15 +74,42 @@ const renderAlertCountInsight = () => {
 };
 
 describe('AlertCountInsight', () => {
+  beforeEach(() => {
+    (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+  });
+
   it('renders', () => {
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
-    const { getByTestId } = renderAlertCountInsight();
+
+    const { getByTestId, queryByTestId } = renderAlertCountInsight();
+
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
     expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
+    expect(
+      getByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
+    ).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the count as text instead of button', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      isLoading: false,
+      items: mockAlertData,
+    });
+
+    const { getByTestId, queryByTestId } = renderAlertCountInsight();
+
+    expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
+    expect(getByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(
+      queryByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
   it('renders loading spinner if data is being fetched', () => {

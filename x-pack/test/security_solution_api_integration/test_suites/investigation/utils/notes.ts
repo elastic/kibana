@@ -58,3 +58,15 @@ export const createNote = async (
         note: note.text,
       },
     } as PersistNoteRouteRequestBody);
+
+export const getNote = (supertest: SuperTest.Agent, noteId: string) =>
+  supertest
+    .get(`${NOTE_URL}?noteId=${noteId}`)
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31');
+
+export const deleteNote = (supertest: SuperTest.Agent, noteId: string) =>
+  supertest.delete(NOTE_URL).set('kbn-xsrf', 'true').set('elastic-api-version', '2023-10-31').send({
+    noteId,
+    noteIds: null,
+  });

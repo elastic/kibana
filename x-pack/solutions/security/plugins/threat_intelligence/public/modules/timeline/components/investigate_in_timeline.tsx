@@ -9,6 +9,7 @@ import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
+import { useSecurityContext } from '../../../hooks/use_security_context';
 import { Indicator } from '../../../../common/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
 
@@ -41,7 +42,9 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  if (!investigateInTimelineFn) {
+  const securitySolutionContext = useSecurityContext();
+
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
@@ -77,7 +80,9 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  if (!investigateInTimelineFn) {
+  const securitySolutionContext = useSecurityContext();
+
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 

@@ -163,8 +163,26 @@ describe('createAddToTimelineLensAction', () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
     });
 
-    it('should return true if everything is okay', async () => {
-      expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
+    it('should return false when the user does not have access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = false;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return true when the user has read access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = true;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
     });
   });
 
