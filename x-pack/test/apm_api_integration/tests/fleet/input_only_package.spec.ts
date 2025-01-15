@@ -34,6 +34,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const config = getService('config');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const retry = getService('retry');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -165,12 +166,15 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
 
         it('the events can be seen on the Service Inventory Page', async () => {
-          const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
-          expect(apmServices[0].serviceName).to.be('opbeans-java');
-          expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
-          expect(apmServices[0].latency).to.be(2550000);
-          expect(apmServices[0].throughput).to.be(2);
-          expect(apmServices[0].transactionErrorRate).to.be(0.5);
+          // Retry logic added to handle delays in data ingestion and indexing (the test shows some flakiness without this)
+          await retry.try(async () => {
+            const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
+            expect(apmServices[0].serviceName).to.be('opbeans-java');
+            expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
+            expect(apmServices[0].latency).to.be(2550000);
+            expect(apmServices[0].throughput).to.be(2);
+            expect(apmServices[0].transactionErrorRate).to.be(0.5);
+          });
         });
       });
     });
