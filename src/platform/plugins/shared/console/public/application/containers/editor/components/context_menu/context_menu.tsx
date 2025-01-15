@@ -40,7 +40,7 @@ interface Props {
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: NotificationsSetup;
   /* A function that returns true if any of the selected requests is an internal Kibana request
-   * (starting witht the kbn: prefix). This is needed here as we display only the curl language
+   * (starting with the kbn: prefix). This is needed here as we display only the curl language
    * for internal Kibana requests since the other languages are not supported yet. */
   getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
