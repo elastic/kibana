@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
@@ -128,7 +128,7 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(value);
 
-      expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
+      expect(packagePolicySvcMock.bulkUpdate).not.toHaveBeenCalled();
     }
   );
 
@@ -137,9 +137,10 @@ describe('Telemetry config watcher', () => {
 
     await telemetryWatcher.watch(value);
 
-    expect(packagePolicySvcMock.update).toHaveBeenCalled();
-    const updatedPolicy: PolicyConfig =
-      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value;
-    expect(updatedPolicy.global_telemetry_enabled).toBe(value);
+    expect(packagePolicySvcMock.bulkUpdate).toHaveBeenCalled();
+    const policyUpdates: UpdatePackagePolicy[] = packagePolicySvcMock.bulkUpdate.mock.calls[0][2];
+    expect(policyUpdates.length).toBe(1);
+    const updatedPolicyConfigs: PolicyConfig = policyUpdates[0].inputs[0].config?.policy.value;
+    expect(updatedPolicyConfigs.global_telemetry_enabled).toBe(value);
   });
 });

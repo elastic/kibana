@@ -15,7 +15,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -87,7 +87,7 @@ export class TelemetryConfigWatcher {
       try {
         response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
           page: page++,
-          perPage: 2,
+          perPage: 100,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         });
       } catch (e) {
@@ -97,41 +97,41 @@ export class TelemetryConfigWatcher {
         return;
       }
 
+      const updates: UpdatePackagePolicy[] = [];
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
-        try {
-          if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
-            policyConfig.global_telemetry_enabled = isTelemetryEnabled;
+        if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
+          policyConfig.global_telemetry_enabled = isTelemetryEnabled;
 
-            try {
-              await this.policyService.update(
-                this.makeInternalSOClient(this.soStart),
-                this.esClient,
-                policy.id,
-                updatePolicy
-              );
-            } catch (e) {
-              // try again for transient issues
-              try {
-                await this.policyService.update(
-                  this.makeInternalSOClient(this.soStart),
-                  this.esClient,
-                  policy.id,
-                  updatePolicy
-                );
-              } catch (ee) {
-                this.logger.warn(`Unable to update telemetry config state in policy ${policy.id}`);
-                this.logger.warn(ee);
-              }
-            }
-          }
-        } catch (error) {
-          this.logger.warn(
-            `Failure while attempting to verify telemetry config state for policy [${policy.id}]`
+          updates.push({ ...updatePolicy, id: policy.id });
+        }
+      }
+
+      if (updates.length) {
+        try {
+          await this.policyService.bulkUpdate(
+            this.makeInternalSOClient(this.soStart),
+            this.esClient,
+            updates
           );
-          this.logger.warn(error);
+        } catch (e) {
+          // try again for transient issues
+          try {
+            await this.policyService.bulkUpdate(
+              this.makeInternalSOClient(this.soStart),
+              this.esClient,
+              updates
+            );
+          } catch (ee) {
+            this.logger.warn(
+              `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
+                (update) => update.id
+              )}`
+            );
+            this.logger.warn(ee);
+          }
         }
       }
     } while (response.page * response.perPage < response.total);
