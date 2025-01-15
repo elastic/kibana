@@ -324,15 +324,17 @@ export const RulesList = ({
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      ruleEditBasePath
-        ? navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(ruleItem.id)}`)
-        : navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-            state: {
-              returnApp: 'management',
-              returnPath: `insightsAndAlerting/triggersActions/rules`,
-            },
-          });
+      if (ruleEditBasePath) {
+        navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(ruleItem.id)}`);
+      } else {
+        navigateToApp('management', {
+          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+          state: {
+            returnApp: 'management',
+            returnPath: `insightsAndAlerting/triggersActions/rules`,
+          },
+        });
+      }
     } else {
       setEditFlyoutVisibility(true);
       setCurrentRuleToEdit(ruleItem);

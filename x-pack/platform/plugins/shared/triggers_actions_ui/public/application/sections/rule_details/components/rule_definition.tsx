@@ -112,15 +112,17 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const onEditRuleClick = () => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      ruleEditBasePath
-        ? navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(rule.id)}`)
-        : navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-            state: {
-              returnApp: 'management',
-              returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-            },
-          });
+      if (ruleEditBasePath) {
+        navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(rule.id)}`);
+      } else {
+        navigateToApp('management', {
+          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+          state: {
+            returnApp: 'management',
+            returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+          },
+        });
+      }
     } else {
       setEditFlyoutVisible(true);
     }

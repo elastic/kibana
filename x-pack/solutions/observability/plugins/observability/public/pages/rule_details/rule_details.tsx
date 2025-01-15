@@ -157,15 +157,12 @@ export function RuleDetailsPage() {
   };
 
   const handleEditRule = () => {
-    // setEditRuleFlyoutVisible(true);
-    console.log('rule_details', { rule });
     const editRuleLink = http.basePath.prepend(paths.observability.editRule(rule?.id ?? ''));
     return application.navigateToUrl(editRuleLink);
   };
 
   const handleDeleteRule = () => {
     setRuleToDelete(rule?.id);
-    // setEditRuleFlyoutVisible(false);
   };
 
   const handleIsDeletingRule = () => {

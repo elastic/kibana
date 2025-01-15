@@ -121,7 +121,6 @@ export function HeaderActions({
   };
 
   const handleEditRuleDetails = () => {
-    console.log('header_actions_alert_details', { rule });
     setIsPopoverOpen(false);
     const editRuleLink = http.basePath.prepend(paths.observability.editRule(rule?.id ?? ''));
     return navigateToUrl(editRuleLink);
