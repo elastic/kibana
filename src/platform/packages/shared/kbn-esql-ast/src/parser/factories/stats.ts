@@ -7,16 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggFieldContext, StatsCommandContext } from '../../antlr/esql_parser';
+import { AggFieldContext, FieldContext, StatsCommandContext } from '../../antlr/esql_parser';
+import { Builder } from '../../builder';
 import { ESQLCommand } from '../../types';
+import { firstItem, resolveItem } from '../../visitor/utils';
 import { createCommand } from '../factories';
-import { createField, visitByOption } from '../walkers';
+import { collectBooleanExpression, visitByOption, visitField } from '../walkers';
 
-const createAggField = (ctx: AggFieldContext, src: string): ESQLField => {
+const createField = (ctx: FieldContext) => visitField(ctx)[0];
+
+const createAggField = (ctx: AggFieldContext) => {
   const fieldCtx = ctx.field();
-  const field = createField(fieldCtx, src);
+  const field = createField(fieldCtx);
 
-  return field;
+  const booleanExpression = ctx.booleanExpression();
+
+  if (!booleanExpression) {
+    return field;
+  }
+
+  const condition = collectBooleanExpression(booleanExpression)[0];
+  const aggField = Builder.expression.where(
+    [field, condition],
+    {},
+    {
+      location: {
+        min: firstItem([resolveItem(field)])?.location?.min ?? 0,
+        max: firstItem([resolveItem(condition)])?.location?.max ?? 0,
+      },
+    }
+  );
+
+  return aggField;
 };
 
 export const createStatsCommand = (ctx: StatsCommandContext, src: string): ESQLCommand<'stats'> => {
@@ -26,7 +48,7 @@ export const createStatsCommand = (ctx: StatsCommandContext, src: string): ESQLC
     const fields = ctx.aggFields();
 
     for (const fieldCtx of fields.aggField_list()) {
-      const node = createAggField(fieldCtx, src);
+      const node = createAggField(fieldCtx);
 
       command.args.push(node);
     }

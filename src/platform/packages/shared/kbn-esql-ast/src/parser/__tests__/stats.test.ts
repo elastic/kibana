@@ -8,6 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
+import { Walker } from '../../walker';
 
 describe('STATS', () => {
   describe('correctly formatted', () => {
@@ -27,20 +28,8 @@ describe('STATS', () => {
           name: 'stats',
           args: [
             {
-              type: 'field',
-              column: {
-                type: 'column',
-                args: [
-                  {
-                    type: 'identifier',
-                    name: '123',
-                  },
-                ],
-              },
-              value: {
-                type: 'literal',
-                value: 123,
-              },
+              type: 'literal',
+              name: '123',
             },
           ],
         },
@@ -64,36 +53,12 @@ describe('STATS', () => {
           name: 'stats',
           args: [
             {
-              type: 'field',
-              column: {
-                type: 'column',
-                args: [
-                  {
-                    type: 'identifier',
-                    name: '123',
-                  },
-                ],
-              },
-              value: {
-                type: 'literal',
-                value: 123,
-              },
+              type: 'literal',
+              value: 123,
             },
             {
-              type: 'field',
-              column: {
-                type: 'column',
-                args: [
-                  {
-                    type: 'identifier',
-                    name: 'agg("salary")',
-                  },
-                ],
-              },
-              value: {
-                type: 'function',
-                name: 'agg',
-              },
+              type: 'function',
+              name: 'agg',
             },
           ],
         },
@@ -117,20 +82,31 @@ describe('STATS', () => {
           name: 'stats',
           args: [
             {
-              type: 'field',
-              column: {
-                type: 'column',
-                args: [
+              type: 'function',
+              name: '=',
+              args: [
+                {
+                  type: 'column',
+                  args: [
+                    {
+                      type: 'identifier',
+                      name: 'my_field',
+                    },
+                  ],
+                },
+                [
                   {
-                    type: 'identifier',
-                    name: 'my_field',
+                    type: 'function',
+                    name: 'agg',
+                    args: [
+                      {
+                        type: 'literal',
+                        valueUnquoted: 'salary',
+                      },
+                    ],
                   },
                 ],
-              },
-              value: {
-                type: 'function',
-                name: 'agg',
-              },
+              ],
             },
           ],
         },
@@ -162,6 +138,182 @@ describe('STATS', () => {
         },
         {},
       ]);
+    });
+
+    describe('WHERE clause', () => {
+      it('boolean expression wrapped in WHERE clause', () => {
+        const src = `
+          FROM employees
+            | STATS 123 WHERE still_hired == true
+            | LIMIT 1
+            `;
+        const query = EsqlQuery.fromSrc(src);
+
+        // console.log(JSON.stringify(query.ast.commands, null, 2));
+
+        expect(query.errors.length).toBe(0);
+        expect(query.ast.commands).toMatchObject([
+          {},
+          {
+            type: 'command',
+            name: 'stats',
+            args: [
+              {
+                type: 'function',
+                subtype: 'binary-expression',
+                name: 'where',
+                args: [
+                  {
+                    type: 'literal',
+                    name: '123',
+                  },
+                  {
+                    type: 'function',
+                    name: '==',
+                    args: [
+                      {
+                        type: 'column',
+                        args: [
+                          {
+                            type: 'identifier',
+                            name: 'still_hired',
+                          },
+                        ],
+                      },
+                      {
+                        type: 'literal',
+                        value: 'true',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {},
+        ]);
+      });
+
+      it('extracts WHERE position', () => {
+        const src = `
+          FROM employees
+            | STATS 123 WHERE still_hired == true
+            | LIMIT 1
+            `;
+        const query = EsqlQuery.fromSrc(src);
+        const where = Walker.match(query.ast, {
+          type: 'function',
+          name: 'where',
+        })!;
+        const text = src.substring(where.location.min, where.location.max + 1);
+
+        expect(text.trim()).toBe('123 WHERE still_hired == true');
+      });
+
+      it('WHERE clause around "agg" function', () => {
+        const src = `
+        FROM employees
+          | STATS 123, agg("salary") WHERE 456, 789 
+          | LIMIT 10
+          `;
+        const query = EsqlQuery.fromSrc(src);
+
+        expect(query.errors.length).toBe(0);
+        expect(query.ast.commands).toMatchObject([
+          {},
+          {
+            type: 'command',
+            name: 'stats',
+            args: [
+              {
+                type: 'literal',
+                value: 123,
+              },
+              {
+                type: 'function',
+                name: 'where',
+                args: [
+                  {
+                    type: 'function',
+                    name: 'agg',
+                  },
+                  {
+                    type: 'literal',
+                    value: 456,
+                  },
+                ],
+              },
+              {
+                type: 'literal',
+                value: 789,
+              },
+            ],
+          },
+          {},
+        ]);
+      });
+
+      it('WHERE for field definition', () => {
+        const src = `
+          FROM employees
+            | STATS my_field = agg("salary") WHERE 123, 456
+            | WHERE still_hired == true
+            `;
+        const query = EsqlQuery.fromSrc(src);
+
+        expect(query.errors.length).toBe(0);
+        expect(query.ast.commands).toMatchObject([
+          {},
+          {
+            type: 'command',
+            name: 'stats',
+            args: [
+              {
+                type: 'function',
+                name: 'where',
+                args: [
+                  {
+                    type: 'function',
+                    name: '=',
+                    args: [
+                      {
+                        type: 'column',
+                        args: [
+                          {
+                            type: 'identifier',
+                            name: 'my_field',
+                          },
+                        ],
+                      },
+                      [
+                        {
+                          type: 'function',
+                          name: 'agg',
+                          args: [
+                            {
+                              type: 'literal',
+                              valueUnquoted: 'salary',
+                            },
+                          ],
+                        },
+                      ],
+                    ],
+                  },
+                  {
+                    type: 'literal',
+                    value: 123,
+                  },
+                ],
+              },
+              {
+                type: 'literal',
+                value: 456,
+              },
+            ],
+          },
+          {},
+        ]);
+      });
     });
   });
 });
