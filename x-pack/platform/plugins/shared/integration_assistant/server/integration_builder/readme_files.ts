@@ -8,8 +8,9 @@
 import { Environment, FileSystemLoader } from 'nunjucks';
 
 import { join as joinPath } from 'path';
-import { DataStream } from '../../common';
+import { DataStream, InputType } from '../../common';
 import { createSync, ensureDirSync } from '../util';
+import { INPUTS_INCLUDE_SSL_CONFIG } from './constants';
 
 export function createReadme(
   packageDir: string,
@@ -58,12 +59,23 @@ function createReadmeFile(
   });
 
   const template = env.getTemplate(templateName);
+  const uniqueInputs = getUniqueInputs(datastreams);
 
   const renderedTemplate = template.render({
     package_name: integrationName,
     datastreams,
     fields,
+    inputs: uniqueInputs,
+    include_ssl: shouldIncludeSSLDocumentation(uniqueInputs),
   });
 
   createSync(joinPath(targetDir, 'README.md'), renderedTemplate);
+}
+
+function getUniqueInputs(datastreams: DataStream[]): InputType[] {
+  return [...new Set(datastreams.flatMap((d) => d.inputTypes))];
+}
+
+function shouldIncludeSSLDocumentation(inputs: InputType[]): boolean {
+  return inputs.some((item) => INPUTS_INCLUDE_SSL_CONFIG.includes(item));
 }
