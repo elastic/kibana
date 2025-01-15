@@ -112,11 +112,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {
-      agentTamperProtectionEnabled: true,
-      diagnosticFileUploadEnabled: true,
-      enableReusableIntegrationPolicies: true,
-    } as ExperimentalFeatures,
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },

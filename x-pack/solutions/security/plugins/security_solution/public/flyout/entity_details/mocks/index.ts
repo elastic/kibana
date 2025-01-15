@@ -11,7 +11,7 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import type {
   HostItem,
   HostRiskScore,
-  RiskScoreEntity,
+  EntityType,
   UserRiskScore,
 } from '../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
@@ -86,7 +86,7 @@ const hostRiskScore: HostRiskScore = {
   oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
 };
 
-export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
+export const mockUserRiskScoreState: RiskScoreState<EntityType.user> = {
   data: [userRiskScore],
   inspect: {
     dsl: [],
@@ -101,7 +101,7 @@ export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   error: undefined,
 };
 
-export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
+export const mockHostRiskScoreState: RiskScoreState<EntityType.host> = {
   data: [hostRiskScore],
   inspect: {
     dsl: [],
