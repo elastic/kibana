@@ -48,11 +48,16 @@ export const SearchControl: React.FC<SearchControlProps> = ({
 
   const onKeyUp = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === keys.ENTER) {
+      if (isProcessing) {
+        return;
+      }
+      if (event.key === keys.ENTER && event.shiftKey) {
+        goToPrevMatch();
+      } else if (event.key === keys.ENTER) {
         goToNextMatch();
       }
     },
-    [goToNextMatch]
+    [goToPrevMatch, goToNextMatch, isProcessing]
   );
 
   return (
