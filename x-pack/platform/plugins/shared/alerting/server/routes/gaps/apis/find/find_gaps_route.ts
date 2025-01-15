@@ -7,7 +7,7 @@
 import { IRouter } from '@kbn/core/server';
 import {
   findGapsBodySchemaV1,
-  FindGapsRequestQueryV1,
+  FindGapsRequestBodyV1,
   FindGapsResponseV1,
 } from '../../../../../common/routes/gaps/apis/find';
 import { ILicenseState } from '../../../../lib';
@@ -36,7 +36,7 @@ export const findGapsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const query: FindGapsRequestQueryV1 = req.body;
+        const query: FindGapsRequestBodyV1 = req.body;
         const result = await rulesClient.findGaps(transformRequestV1(query));
         const response: FindGapsResponseV1 = {
           body: transformResponseV1(result),

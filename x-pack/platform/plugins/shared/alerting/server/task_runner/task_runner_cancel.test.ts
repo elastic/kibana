@@ -66,6 +66,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -157,6 +158,7 @@ describe('Task Runner Cancel', () => {
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
+    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
   };
 
   beforeEach(() => {

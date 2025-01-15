@@ -92,7 +92,11 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
         if (!item) return null;
         const value = Math.ceil((item.filled_duration_ms * 100) / item.total_gap_duration_ms);
         return (
-          <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+          <EuiFlexGroup
+            alignItems="center"
+            data-test-subj="rule-gaps-progress-bar"
+            justifyContent="flexEnd"
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <p>
@@ -240,6 +244,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
             <EuiFlexItem grow={false}>
               <DatePickerEuiFlexItem>
                 <EuiSuperDatePicker
+                  data-test-subj="rule-gaps-date-picker"
                   start={dateRange.start}
                   end={dateRange.end}
                   onTimeChange={onTimeChangeCallback}

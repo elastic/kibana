@@ -51,12 +51,14 @@ export const FillGap = ({
         position="top"
         content={isRuleEnabled ? '' : i18n.GAP_FILL_DISABLED_MESSAGE}
         display="block"
+        data-test-subj="rule-gaps-fill-gap-tooltip"
       >
         <EuiButtonEmpty
           isLoading={fillGapMutation.isLoading}
           isDisabled={fillGapMutation.isLoading || !isRuleEnabled}
           size="s"
           color="primary"
+          data-test-subj="rule-gaps-fill-gap-button"
           onClick={() =>
             fillGapMutation.mutate({
               ruleId,

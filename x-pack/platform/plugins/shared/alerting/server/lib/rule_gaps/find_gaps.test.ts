@@ -186,30 +186,6 @@ describe('findAllGaps', () => {
   });
 
   it('should stop fetching when no more data', async () => {
-    const createMockGapEvent = () => ({
-      _id: 'test-id',
-      _index: 'test-index',
-      _seq_no: 1,
-      _primary_term: 1,
-      '@timestamp': '2024-01-01T00:00:00.000Z',
-      event: {
-        start: '2024-01-01',
-        end: '2024-01-02',
-        action: 'gap',
-      },
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: { gte: '2024-01-01', lte: '2024-01-02' },
-              filled_intervals: [],
-              in_progress_intervals: [],
-            },
-          },
-        },
-      },
-    });
-
     mockEventLogClient.findEventsBySavedObjectIds.mockResolvedValue({
       total: 50,
       data: Array(50).fill(createMockGapEvent()),
@@ -232,30 +208,6 @@ describe('findAllGaps', () => {
   });
 
   it('should handle errors during pagination', async () => {
-    const createMockGapEvent = () => ({
-      _id: 'test-id',
-      _index: 'test-index',
-      _seq_no: 1,
-      _primary_term: 1,
-      '@timestamp': '2024-01-01T00:00:00.000Z',
-      event: {
-        start: '2024-01-01',
-        end: '2024-01-02',
-        action: 'gap',
-      },
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: { gte: '2024-01-01', lte: '2024-01-02' },
-              filled_intervals: [],
-              in_progress_intervals: [],
-            },
-          },
-        },
-      },
-    });
-
     mockEventLogClient.findEventsBySavedObjectIds
       .mockResolvedValueOnce({
         total: 15000,

@@ -6,10 +6,10 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { findQuerySchemaV1, findResponseSchemaV1 } from '..';
+import { findGapsBodySchemaV1, findGapsResponseSchemaV1 } from '..';
 
-export type FindGapsRequestQuery = TypeOf<typeof findQuerySchemaV1>;
-export type FindGapsResponseBody = TypeOf<typeof findResponseSchemaV1>;
+export type FindGapsRequestBody = TypeOf<typeof findGapsBodySchemaV1>;
+export type FindGapsResponseBody = TypeOf<typeof findGapsResponseSchemaV1>;
 
 export interface FindGapsResponse {
   body: FindGapsResponseBody;

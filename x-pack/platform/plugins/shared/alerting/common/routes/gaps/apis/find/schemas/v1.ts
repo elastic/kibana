@@ -12,7 +12,7 @@ export const findGapsBodySchema = schema.object(
     end: schema.maybe(schema.string()),
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 10, min: 0 }),
-    rule_id: schema.maybe(schema.string()),
+    rule_id: schema.string(),
     start: schema.maybe(schema.string()),
     sort_field: schema.maybe(
       schema.oneOf([

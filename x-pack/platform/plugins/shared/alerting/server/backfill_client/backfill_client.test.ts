@@ -1407,9 +1407,9 @@ describe('BackfillClient', () => {
       const mockStart = new Date('2024-01-01T00:00:00.000Z');
       const mockEnd = new Date('2024-01-02T00:00:00.000Z');
 
-      mockSavedObjectsRepository.createPointInTimeFinder.mockResolvedValue({
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
         close: jest.fn(),
-        *find() {
+        find: function* asyncGenerator() {
           throw new Error('Failed to find');
         },
       });

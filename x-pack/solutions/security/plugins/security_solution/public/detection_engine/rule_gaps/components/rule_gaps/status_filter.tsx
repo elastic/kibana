@@ -35,7 +35,7 @@ export const GapStatusFilter = ({ selectedItems, onChange }: GapStatusFilterComp
   return (
     <EuiFilterGroup>
       <MultiselectFilter<GapStatus>
-        data-test-subj="GapStatusTypeFilter"
+        data-test-subj="rule-gaps-status-filter"
         title={i18n.GAP_STATUS_FILTER_TITLE}
         items={items}
         selectedItems={selectedItems}

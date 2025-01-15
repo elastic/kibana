@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { FindGapsRequestQueryV1 } from '../../../../../../../common/routes/gaps/apis/find';
+import { FindGapsRequestBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
 import { FindGapsParams } from '../../../../../../lib/rule_gaps/types';
 
 export const transformRequest = ({
@@ -18,7 +18,7 @@ export const transformRequest = ({
   sort_field,
   sort_order,
   statuses,
-}: FindGapsRequestQueryV1): FindGapsParams => ({
+}: FindGapsRequestBodyV1): FindGapsParams => ({
   ruleId: rule_id,
   end,
   page,
