@@ -139,7 +139,7 @@ describe('classicNavigationFactory', function () {
         deepLink: {
           link: 'enterpriseSearchContent:connectors',
         },
-        name: 'Connectors',
+        name: 'Date connectors',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
@@ -148,7 +148,7 @@ describe('classicNavigationFactory', function () {
         href: '/app/elasticsearch/content/connectors',
         id: 'searchConnectors',
         isSelected: false,
-        name: 'Connectors',
+        name: 'Date connectors',
         onClick: expect.any(Function),
       },
     ]);
