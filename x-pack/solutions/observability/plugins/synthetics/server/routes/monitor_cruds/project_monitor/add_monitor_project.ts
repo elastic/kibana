@@ -40,10 +40,17 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const lightWeightMonitors = monitors.filter((monitor) => monitor.type !== 'browser');
     const browserMonitors = monitors.filter((monitor) => monitor.type === 'browser');
 
-    if (browserMonitors.length > 250 || lightWeightMonitors.length > 1500) {
+    if (browserMonitors.length > 250) {
       return response.badRequest({
         body: {
           message: REQUEST_TOO_LARGE,
+        },
+      });
+    }
+    if (lightWeightMonitors.length > 1500) {
+      return response.badRequest({
+        body: {
+          message: REQUEST_TOO_LARGE_LIGHTWEIGHT,
         },
       });
     }
@@ -88,8 +95,16 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
 export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
   defaultMessage:
-    'Delete request payload is too large. Please send a max of 250 browser monitors per request.',
+    'Request payload is too large. Please send a max of 250 browser monitors per request.',
 });
+
+export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
+  'xpack.synthetics.server.project.delete.request.lightweight',
+  {
+    defaultMessage:
+      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
+  }
+);
 
 export const validatePermissions = async (
   { server, response, request }: RouteContext,
