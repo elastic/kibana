@@ -210,7 +210,9 @@ export class StreamsClient {
     });
 
     if (parentDefinition) {
-      const isRoutingToChild = parentDefinition.stream.ingest.routing.find((item) => item.name);
+      const isRoutingToChild = parentDefinition.stream.ingest.routing.find(
+        (item) => item.name === definition.name
+      );
 
       if (!isRoutingToChild) {
         /**
