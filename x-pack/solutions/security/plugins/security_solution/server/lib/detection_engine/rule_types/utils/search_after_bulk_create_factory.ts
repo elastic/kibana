@@ -29,6 +29,19 @@ import type { GenericBulkCreateResponse } from '../factories';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import * as i18n from '../translations';
+
+const createLoggedRequestsDescription = (
+  isLoggedRequestsEnabled: boolean | undefined,
+  sortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (!isLoggedRequestsEnabled) {
+    return undefined;
+  }
+  return sortIds
+    ? i18n.FIND_EVENTS_AFTER_CURSOR_DESCRIPTION(JSON.stringify(sortIds))
+    : i18n.FIND_EVENTS_DESCRIPTION;
+};
 
 export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBulkCreateParams {
   bulkCreateExecutor: (params: {
@@ -112,11 +125,10 @@ export const searchAfterAndBulkCreateFactory = async ({
             trackTotalHits,
             sortOrder,
             additionalFilters,
-            loggedRequestDescription: isLoggedRequestsEnabled
-              ? sortIds
-                ? `Find events after cursor ${sortIds}`
-                : 'Find events'
-              : undefined,
+            loggedRequestDescription: createLoggedRequestsDescription(
+              isLoggedRequestsEnabled,
+              sortIds
+            ),
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
@@ -225,6 +237,11 @@ export const searchAfterAndBulkCreateFactory = async ({
       }
     }
     ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);
-    return { ...toReturn, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+
+    if (isLoggedRequestsEnabled) {
+      toReturn.loggedRequests = loggedRequests;
+    }
+
+    return toReturn;
   });
 };

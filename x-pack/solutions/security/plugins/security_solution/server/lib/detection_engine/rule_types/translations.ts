@@ -50,3 +50,19 @@ export const ML_SEARCH_ANOMALIES_DESCRIPTION = i18n.translate(
     defaultMessage: 'Find all anomalies',
   }
 );
+
+export const FIND_EVENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryRuleType.findEventsDescription',
+  {
+    defaultMessage: 'Find events',
+  }
+);
+
+export const FIND_EVENTS_AFTER_CURSOR_DESCRIPTION = (cursor?: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.queryRuleType.findEventsAfterCursorDescription',
+    {
+      defaultMessage: 'Find events after cursor {cursor}',
+      values: { cursor },
+    }
+  );
