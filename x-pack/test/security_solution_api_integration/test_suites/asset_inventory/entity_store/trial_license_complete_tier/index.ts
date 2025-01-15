@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function (providerContext: FtrProviderContext) {
-  const { loadTestFile } = providerContext;
-
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Asset Inventory - Entity Store', function () {
-    loadTestFile(require.resolve('./keyword_builder_ingest_pipeline.ts'));
+    loadTestFile(require.resolve('./keyword_builder_ingest_pipeline'));
   });
 }

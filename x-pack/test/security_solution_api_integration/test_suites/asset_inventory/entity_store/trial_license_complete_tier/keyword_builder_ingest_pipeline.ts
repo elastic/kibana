@@ -8,10 +8,9 @@
 import expect from '@kbn/expect';
 
 import { buildIngestPipeline } from '@kbn/security-solution-plugin/server/lib/asset_inventory/ingest_pipelines';
-import { applyIngestProcessorToDoc } from './utils/ingest';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { applyIngestProcessorToDoc } from '../utils/ingest';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
@@ -22,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
     return applyIngestProcessorToDoc(steps, docSource, es, log);
   };
 
-  describe('Asset Inventory - Entity store - Keyword builder pipeline', () => {
+  describe('@ess @skipInServerlessMKI Asset Inventory - Entity store - Keyword builder pipeline', () => {
     it('should build entities.keyword when entities.metadata is provided ', async () => {
       const doc = {
         related: {
