@@ -11,6 +11,9 @@ import {
   type BaseChatModelCallOptions,
   type BindToolsInput,
 } from '@langchain/core/language_models/chat_models';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import {
   ChatCompleteAPI,
   ChatCompleteOptions,
@@ -19,9 +22,6 @@ import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { type BaseMessage, AIMessage } from '@langchain/core/messages';
-import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import type { ToolChoice } from './types';
 import { toAsyncIterator } from './utils/observable_to_generator';
 import {
@@ -29,7 +29,11 @@ import {
   toolDefinitionToInference,
   toolChoiceToInference,
 } from './to_inference';
-import { completionChunkToLangchain, tokenCountChunkToLangchain } from './from_inference';
+import {
+  completionChunkToLangchain,
+  tokenCountChunkToLangchain,
+  responseToLangchainMessage,
+} from './from_inference';
 
 export interface InferenceChatModelParams
   extends BaseChatModelParams,
@@ -147,18 +151,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const generations: ChatGeneration[] = [];
     generations.push({
       text: response.content,
-      // TODO: extract
-      message: new AIMessage({
-        content: response.content,
-        tool_calls: response.toolCalls.map((toolCall) => {
-          return {
-            id: toolCall.toolCallId,
-            name: toolCall.function.name,
-            args: toolCall.function.arguments,
-            type: 'tool_call',
-          };
-        }),
-      }),
+      message: responseToLangchainMessage(response),
     });
 
     return {
