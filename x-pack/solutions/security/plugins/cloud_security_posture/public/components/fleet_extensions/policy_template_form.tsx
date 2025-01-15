@@ -669,6 +669,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     packageInfo,
     handleSetupTechnologyChange,
     isAgentlessEnabled,
+    defaultSetupTechnology,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -687,6 +688,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isAgentlessEnabled,
       handleSetupTechnologyChange,
       isEditPage,
+      defaultSetupTechnology,
     });
 
     const shouldRenderAgentlessSelector =
@@ -804,6 +806,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // reset the setup technology when the integration option changes if it was set to agentless for CSPM
       if (isParentSecurityPosture && input.policy_template !== 'cspm') {
         updateSetupTechnology(SetupTechnology.AGENT_BASED);
+      } else if (
+        isParentSecurityPosture &&
+        input.policy_template === 'cspm' &&
+        defaultSetupTechnology
+      ) {
+        updateSetupTechnology(defaultSetupTechnology);
       }
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps

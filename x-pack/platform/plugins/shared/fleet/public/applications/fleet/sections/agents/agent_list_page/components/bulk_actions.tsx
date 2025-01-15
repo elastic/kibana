@@ -25,7 +25,6 @@ import {
 } from '../../components';
 import { useAuthz, useLicense } from '../../../../hooks';
 import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
 
@@ -106,9 +105,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
 
-  const { generateReportingJobCSV } = useExportCSV(enableExportCSV);
+  const { generateReportingJobCSV } = useExportCSV();
 
   const menuItems = [
     {
@@ -195,28 +193,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
     },
-    ...(diagnosticFileUploadEnabled
-      ? [
-          {
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.requestDiagnostics"
-                data-test-subj="agentBulkActionsRequestDiagnostics"
-                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
-                values={{
-                  agentCount,
-                }}
-              />
-            ),
-            disabled: !authz.fleet.readAgents,
-            icon: <EuiIcon type="download" size="m" />,
-            onClick: () => {
-              closeMenu();
-              setIsRequestDiagnosticsModalOpen(true);
-            },
-          },
-        ]
-      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.requestDiagnostics"
+          data-test-subj="agentBulkActionsRequestDiagnostics"
+          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      disabled: !authz.fleet.readAgents,
+      icon: <EuiIcon type="download" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsRequestDiagnosticsModalOpen(true);
+      },
+    },
     {
       name: (
         <FormattedMessage
@@ -235,28 +229,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setIsUnenrollModalOpen(true);
       },
     },
-    ...(enableExportCSV
-      ? [
-          {
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.exportAgents"
-                data-test-subj="bulkAgentExportBtn"
-                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-                values={{
-                  agentCount,
-                }}
-              />
-            ),
-            disabled: !authz.fleet.readAgents,
-            icon: <EuiIcon type="exportAction" size="m" />,
-            onClick: () => {
-              closeMenu();
-              setIsExportCSVModalOpen(true);
-            },
-          },
-        ]
-      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          data-test-subj="bulkAgentExportBtn"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      disabled: !authz.fleet.readAgents,
+      icon: <EuiIcon type="exportAction" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsExportCSVModalOpen(true);
+      },
+    },
   ];
 
   const panels = [
