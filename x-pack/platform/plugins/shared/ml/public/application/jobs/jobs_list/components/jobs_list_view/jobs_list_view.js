@@ -39,6 +39,7 @@ import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_moda
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -338,10 +339,10 @@ export class JobsListViewUI extends Component {
         }
         if (
           jobsSpaces &&
-          jobsSpaces['anomaly-detector'] &&
-          jobsSpaces['anomaly-detector'][job.id]
+          jobsSpaces[ANOMALY_DETECTOR_SAVED_OBJECT_TYPE] &&
+          jobsSpaces[ANOMALY_DETECTOR_SAVED_OBJECT_TYPE][job.id]
         ) {
-          job.spaces = jobsSpaces['anomaly-detector'][job.id];
+          job.spaces = jobsSpaces[ANOMALY_DETECTOR_SAVED_OBJECT_TYPE][job.id];
         }
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
 
