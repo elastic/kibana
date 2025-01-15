@@ -55,17 +55,29 @@ Check the [setup guidelines](https://www.elastic.co/guide/en/integrations-develo
 
 ### Install the integration
 1. In Kibana, go to **Management** > **Integrations**.
-2. In **Search for integrations* search bar, type {{ package_name }}.
+2. In **Search for integrations** search bar, type {{ package_name }}.
 3. Click the **{{ package_name }}** integration from the search results.
 4. Click the **Add {{ package_name }}** button to add the integration.
 5. Add all the required integration configuration parameters.
 6. Click **Save and continue** to save the integration.
+
+{% for input in inputs %}
+{% include "./readme/setup/" + input + ".md.njk" ignore missing %}
+{% endfor %}
+
+{% if include_ssl %}
+{% include "./readme/setup/ssl-tls.md.njk" %}
+{% endif %}
 
 ## Troubleshooting (optional)
 
 - If some fields appear conflicted under the ``logs-*`` or ``metrics-*`` data views, this issue can be resolved by [reindexing](https://www.elastic.co/guide/en/elasticsearch/reference/current/use-a-data-stream.html#reindex-with-a-data-stream) the impacted data stream.
 
 Provide information about special cases and exceptions that aren’t necessary for getting started or won’t be applicable to all users. Check the [troubleshooting guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-troubleshooting) for more information.
+
+{% for input in inputs %}
+{% include "./readme/troubleshooting/" + input + ".md.njk" ignore missing %}
+{% endfor %}
 
 ## Reference
 

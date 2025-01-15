@@ -67,7 +67,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -94,7 +95,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -868,13 +869,13 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "groupName": "@elastic/kibana-visualizations Test dependencies",
       "matchDepNames": [
         "@types/faker",
         "faker"
       ],
       "reviewers": [
-        "team:visualizations"
+        "team:kibana-visualizations"
       ],
       "matchBaseBranches": [
         "main"
@@ -893,7 +894,7 @@
         "@elastic/charts"
       ],
       "reviewers": [
-        "team:visualizations",
+        "team:kibana-visualizations",
         "markov00",
         "nickofthyme"
       ],
@@ -901,9 +902,9 @@
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -1848,13 +1849,14 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
-      "groupName": "kibana-visualization color related modules",
+      "groupName": "@elastic/kibana-visualizations Color related modules",
       "matchDepNames": [
         "chroma-js",
         "color",
@@ -1873,7 +1875,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1899,7 +1902,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1935,7 +1939,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3213,7 +3218,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -4175,15 +4180,15 @@
         "@types/react-is"
       ],
       "reviewers": [
-        "team:visualizations"
+        "team:kibana-visualizations"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -4193,16 +4198,16 @@
         "re2js"
       ],
       "reviewers": [
-        "team:visualizations",
+        "team:kibana-visualizations",
         "dej611"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
