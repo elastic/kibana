@@ -98,6 +98,7 @@ export function fetchAll(
         services,
         sort: getAppState().sort as SortOrder[],
         customFilters: getInternalState().customFilters,
+        inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -118,6 +119,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
+          timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
