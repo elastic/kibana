@@ -6,11 +6,11 @@
  */
 
 import type { SearchIndices, SearchStart } from '@kbn/deeplinks-search/deep_links';
-import { SEARCH_INDICES_INDICES_APP_ID, SEARCH_INDICES_START_APP_ID } from '@kbn/deeplinks-search';
+import { SEARCH_INDICES, SEARCH_INDICES_START } from '@kbn/deeplinks-search';
 
 export const PLUGIN_ID = 'searchIndices';
 export const PLUGIN_NAME = 'searchIndices';
-export const START_APP_ID: SearchStart = SEARCH_INDICES_START_APP_ID;
-export const INDICES_APP_ID: SearchIndices = SEARCH_INDICES_INDICES_APP_ID;
+export const START_APP_ID: SearchStart = SEARCH_INDICES_START;
+export const INDICES_APP_ID: SearchIndices = SEARCH_INDICES;
 
 export type { IndicesStatusResponse, UserStartPrivilegesResponse } from './types';
