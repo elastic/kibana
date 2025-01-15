@@ -174,6 +174,11 @@ export function useOnSubmit({
   // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
 
+  // only used to save the initial value of the package policy
+  const [initialPackagePolicy, setInitialPackagePolicy] = useState<NewPackagePolicy>({
+    ...DEFAULT_PACKAGE_POLICY,
+  });
+
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
@@ -270,20 +275,27 @@ export function useOnSubmit({
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
       isInitializedRef.current = true;
-      updatePackagePolicy(
-        packageToPackagePolicy(
-          packageInfo,
-          agentPolicies.map((policy) => policy.id),
-          '',
-          DEFAULT_PACKAGE_POLICY.name || incrementedName,
-          DEFAULT_PACKAGE_POLICY.description,
-          integrationToEnable
-        )
+      const basePackagePolicy = packageToPackagePolicy(
+        packageInfo,
+        agentPolicies.map((policy) => policy.id),
+        '',
+        DEFAULT_PACKAGE_POLICY.name || incrementedName,
+        DEFAULT_PACKAGE_POLICY.description,
+        integrationToEnable
       );
+      setInitialPackagePolicy(basePackagePolicy);
+      updatePackagePolicy(basePackagePolicy);
       setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [
+    packageInfo,
+    agentPolicies,
+    updatePackagePolicy,
+    integrationToEnable,
+    isInitialized,
+    initialPackagePolicy,
+  ]);
 
   useEffect(() => {
     if (
@@ -318,19 +330,16 @@ export function useOnSubmit({
     isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
-    return packagePolicy.inputs.map((input) => {
+    return packagePolicy.inputs.map((input, i) => {
       if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
-        return { ...input, enabled: false, keep_enabled: false };
+        return { ...input, enabled: false };
       }
-      return input;
+      return initialPackagePolicy.inputs[i];
     });
-  }, [isAgentlessSelected, packagePolicy.inputs]);
+  }, [initialPackagePolicy?.inputs, isAgentlessSelected, packagePolicy.inputs]);
 
   useEffect(() => {
-    if (
-      prevSetupTechnology !== selectedSetupTechnology &&
-      selectedSetupTechnology === SetupTechnology.AGENTLESS
-    ) {
+    if (prevSetupTechnology !== selectedSetupTechnology) {
       updatePackagePolicy({
         inputs: newInputs,
       });
