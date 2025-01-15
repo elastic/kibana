@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiLink, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
-import { QualityPercentageIndicator } from '../../quality_indicator';
+import React from 'react';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { TimeRangeConfig } from '../../../../common/types';
+import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
+import { QualityPercentageIndicator } from '../../quality_indicator';
 
 export const FailedDocsPercentageLink = ({
   isLoading,
@@ -36,6 +37,7 @@ export const FailedDocsPercentageLink = ({
     query: { language: 'kuery', query: '' },
     sendTelemetry,
     timeRangeConfig: timeRange,
+    selector: FAILURE_STORE_SELECTOR,
   });
 
   const tooltip = (failedDocsCount: number) =>

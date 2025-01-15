@@ -26,12 +26,15 @@ export class SingleDatasetLocatorDefinition
 
   public readonly getLocation = (params: SingleDatasetLocatorParams) => {
     const { useHash } = this.deps;
-    const { integration, dataset } = params;
+    const { integration, dataset, selector = '' } = params;
+
+    const datasetPattern = this.composeIndexPattern(dataset, selector);
 
     const unresolvedDatasetSelection = UnresolvedDatasetSelection.fromSelection({
       name: integration,
       dataset: {
-        name: this.composeIndexPattern(dataset),
+        name: datasetPattern,
+        title: selector !== '' ? `${datasetPattern.split('-')[1]}${selector}` : undefined,
       },
     });
 
@@ -42,7 +45,10 @@ export class SingleDatasetLocatorDefinition
     });
   };
 
-  private composeIndexPattern(datasetName: SingleDatasetLocatorParams['dataset']) {
-    return `logs-${datasetName}-*` as IndexPattern;
+  private composeIndexPattern(
+    datasetName: SingleDatasetLocatorParams['dataset'],
+    selector: string
+  ) {
+    return `logs-${datasetName}-*${selector}` as IndexPattern;
   }
 }

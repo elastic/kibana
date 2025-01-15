@@ -25,7 +25,7 @@ enum DatasetQualityLensColumn {
 }
 
 const MAX_BREAKDOWN_SERIES = 5;
-const FAILED_DOCS_QUERY = `_index: "${FAILURE_STORE_SELECTOR}"`;
+const FAILED_DOCS_QUERY = `_index: "*${FAILURE_STORE_SELECTOR}"`;
 
 interface GetLensAttributesParams {
   color: string;

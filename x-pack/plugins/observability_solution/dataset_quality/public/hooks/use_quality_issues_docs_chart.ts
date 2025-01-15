@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
+import { DEFAULT_LOGS_DATA_VIEW, FAILURE_STORE_SELECTOR } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
@@ -20,7 +20,6 @@ import { getLensAttributes as getFailedLensAttributes } from '../components/data
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
   defaultMessage: 'Open in Lens',
@@ -60,7 +59,9 @@ export const useQualityIssuesDocsChart = () => {
   const query = docsTrendChart === 'degraded' ? DEGRADED_DOCS_KUERY : '';
 
   const { dataView } = useCreateDataView({
-    indexPatternString: getDataViewIndexPattern(dataStream),
+    indexPatternString: getDataViewIndexPattern(
+      docsTrendChart === 'degraded' ? dataStream : `${dataStream}${FAILURE_STORE_SELECTOR}`
+    ),
   });
 
   const breakdownDataViewField = useMemo(
@@ -83,7 +84,7 @@ export const useQualityIssuesDocsChart = () => {
   );
 
   const handleDocsTrendChartChange = useCallback(
-    (qualityIssuesChart: string) => {
+    (qualityIssuesChart: 'degraded' | 'failed') => {
       service.send({
         type: 'QUALITY_ISSUES_CHART_CHANGE',
         qualityIssuesChart,
@@ -97,7 +98,6 @@ export const useQualityIssuesDocsChart = () => {
   }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
 
   useEffect(() => {
-    // TODO: Fix dataStreamName for accesing failure store (::failures)
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
     const datasetTitle =
       integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
@@ -176,6 +176,7 @@ export const useQualityIssuesDocsChart = () => {
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
+    selector: docsTrendChart === 'failed' ? FAILURE_STORE_SELECTOR : undefined,
   });
 
   const extraActions: Action[] = [getOpenInLensAction];
@@ -204,7 +205,6 @@ export const useQualityIssuesDocsChart = () => {
   };
 };
 
-// TODO: Fix dataView for accesing failure store (::failures)
 function getDataViewIndexPattern(dataStream: string | undefined) {
   return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }

@@ -22,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { NavigationSource } from '../../../services/telemetry';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -74,8 +75,18 @@ export default function QualityIssueFlyout() {
   const redirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
-    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    query: {
+      language: 'kuery',
+      query:
+        expandedDegradedField && expandedDegradedField.type === 'degraded'
+          ? `${_IGNORED}: ${expandedDegradedField?.name}`
+          : '',
+    },
     sendTelemetry,
+    selector:
+      expandedDegradedField && expandedDegradedField.type === 'failed'
+        ? FAILURE_STORE_SELECTOR
+        : undefined,
   });
 
   return (

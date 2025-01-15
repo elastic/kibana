@@ -15,7 +15,7 @@ import {
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { Query, AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -30,12 +30,14 @@ export const useRedirectLink = <T extends BasicDataStream>({
   timeRangeConfig,
   breakdownField,
   sendTelemetry,
+  selector = '',
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
   timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
   sendTelemetry: SendTelemetryFn;
+  selector?: string;
 }) => {
   const {
     services: { share, application },
@@ -76,6 +78,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
           from,
           to,
           breakdownField,
+          selector,
         })
       : buildDiscoverConfig({
           locatorClient: share.url.locators,
@@ -84,6 +87,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
           from,
           to,
           breakdownField,
+          selector,
         });
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
@@ -107,15 +111,16 @@ export const useRedirectLink = <T extends BasicDataStream>({
       isLogsExplorerAvailable,
     };
   }, [
-    breakdownField,
+    isLogsExplorerAppAccessible,
+    logsExplorerLocator,
     dataStreamStat,
+    query,
     from,
     to,
-    logsExplorerLocator,
-    query,
-    sendTelemetry,
+    breakdownField,
+    selector,
     share.url.locators,
-    isLogsExplorerAppAccessible,
+    sendTelemetry,
   ]);
 };
 
@@ -126,6 +131,7 @@ const buildLogsExplorerConfig = <T extends BasicDataStream>({
   from,
   to,
   breakdownField,
+  selector,
 }: {
   locator: LocatorPublic<SingleDatasetLocatorParams>;
   dataStreamStat: T;
@@ -133,6 +139,7 @@ const buildLogsExplorerConfig = <T extends BasicDataStream>({
   from: string;
   to: string;
   breakdownField?: string;
+  selector?: string;
 }): {
   navigate: () => void;
   routerLinkProps: RouterLinkProps;
@@ -152,6 +159,7 @@ const buildLogsExplorerConfig = <T extends BasicDataStream>({
       },
     },
     breakdownField,
+    selector,
   };
 
   const urlToLogsExplorer = locator.getRedirectUrl(params);
@@ -175,6 +183,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   from,
   to,
   breakdownField,
+  selector,
 }: {
   locatorClient: LocatorClient;
   dataStreamStat: T;
@@ -182,14 +191,12 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   from: string;
   to: string;
   breakdownField?: string;
+  selector?: string;
 }): {
   navigate: () => void;
   routerLinkProps: RouterLinkProps;
 } => {
-  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-*`;
-  const dataViewTitle = dataStreamStat.integration
-    ? `[${dataStreamStat.integration.title}] ${dataStreamStat.name}`
-    : `${dataViewId}`;
+  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-${dataStreamStat.namespace}${selector}`;
 
   const params: DiscoverAppLocatorParams = {
     timeRange: {
@@ -209,19 +216,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     query,
     breakdownField,
     columns: [],
-    filters: [
-      buildPhraseFilter(
-        {
-          name: 'data_stream.namespace',
-          type: 'string',
-        },
-        dataStreamStat.namespace,
-        {
-          id: dataViewId,
-          title: dataViewTitle,
-        }
-      ),
-    ],
+    filters: [],
     interval: 'auto',
     sort: [['@timestamp', 'desc']],
   };

@@ -38,6 +38,11 @@ export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
    * ex: system.syslog
    */
   dataset: string;
+  /**
+   * Selector to be added to the dataset.
+   * ex: ::failures
+   */
+  selector?: string;
 }
 
 // Data view locator
