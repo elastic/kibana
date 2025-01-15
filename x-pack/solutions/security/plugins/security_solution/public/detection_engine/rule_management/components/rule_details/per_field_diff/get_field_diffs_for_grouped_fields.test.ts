@@ -9,7 +9,7 @@ import type { RuleSchedule } from '../../../../../../common/api/detection_engine
 import type { ThreeWayDiff } from '../../../../../../common/api/detection_engine';
 import { getFieldDiffsForRuleSchedule } from './get_field_diffs_for_grouped_fields';
 
-describe('getFieldDiffsForRulSchedule', () => {
+describe('getFieldDiffsForRuleSchedule', () => {
   describe('full rule schedule', () => {
     it('returns interval diff', () => {
       const result = getFieldDiffsForRuleSchedule({
