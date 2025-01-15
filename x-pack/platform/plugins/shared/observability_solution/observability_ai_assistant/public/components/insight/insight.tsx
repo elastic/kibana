@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import dedent from 'dedent';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { CONTEXT_INSTRUCTION } from '../../../common/context_instruction';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -42,10 +43,6 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
-
-// defined and used in x-pack/solutions/observability/plugins/observability/public/pages/alert_details/alert_details_contextual_insights.tsx
-const CONTEXT_INSTRUCTION =
-  'The following contextual information is available to help you understand the alert';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));

@@ -9,13 +9,10 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
+import { CONTEXT_INSTRUCTION } from '@kbn/observability-ai-assistant-plugin/common';
 import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
-
-// used in x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/insight/insight.tsx
-const CONTEXT_INSTRUCTION =
-  'The following contextual information is available to help you understand the alert';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
