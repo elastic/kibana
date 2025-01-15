@@ -80,6 +80,7 @@ export async function setupConversationAndKbIndexAssets({
           number_of_shards: 1,
           auto_expand_replicas: '0-1',
           hidden: true,
+          'index.mapping.semantic_text.use_legacy_format': false,
         },
       },
     });
