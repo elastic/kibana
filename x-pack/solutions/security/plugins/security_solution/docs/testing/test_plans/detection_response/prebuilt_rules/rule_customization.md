@@ -49,7 +49,6 @@ And the rule is non-customized
 When user changes any rule field value (so it differs from the base version) in rule edit form
 Then the rule is successfully updated
 And the "Modified" badge should appear on the rule's detail page
-And the "Modified" badge should appear in the rule management table
 ```
 
 #### **Scenario: User can edit a customized prebuilt rule from the rule edit page**
@@ -249,7 +248,6 @@ Then the Modified badge should NOT be present in the custom rule's table row
 Given a space with at least one customized prebuilt rule
 And that rules have upgrades
 When a user navigates to the rule updates table
-Then the customized rule's `is_customized` value should be true
 And the Modified badge should be present in the table row
 ```
 
@@ -261,7 +259,6 @@ And the Modified badge should be present in the table row
 Given a space with at least one non-customized prebuilt rule
 And that rules have upgrades
 When a user navigates to the rule updates table
-Then the non-customized rule's `is_customized` value should be false
 And the Modified badge should NOT be present in the table row
 ```
 
