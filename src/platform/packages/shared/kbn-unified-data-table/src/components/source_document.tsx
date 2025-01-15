@@ -39,7 +39,6 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  uiSearchTerm,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -52,7 +51,6 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  uiSearchTerm?: string;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -60,8 +58,6 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
-
-  // TODO: what if the match is cut off by the cell height configuration?
 
   return (
     <EuiDescriptionList
@@ -81,16 +77,7 @@ export function SourceDocument({
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription
               className="unifiedDataTable__descriptionListDescription"
-              dangerouslySetInnerHTML={{
-                __html: fieldName
-                  ? row.formatAndCacheFieldValue({
-                      dataView,
-                      fieldName,
-                      fieldFormats,
-                      uiSearchTerm,
-                    })
-                  : value,
-              }}
+              dangerouslySetInnerHTML={{ __html: value }}
             />
           </Fragment>
         );

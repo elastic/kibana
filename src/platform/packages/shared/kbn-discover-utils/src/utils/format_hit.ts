@@ -16,6 +16,7 @@ import type {
   FormattedHit,
   EsHitRecord,
 } from '../types';
+import { formatFieldValue } from './format_value';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
@@ -101,11 +102,13 @@ export function formatHit(
     const key = pair[2]!;
 
     // Format the raw value using the regular field formatters for that field
-    pair[1] = hit.formatAndCacheFieldValue({
-      dataView,
-      fieldName: key,
+    pair[1] = formatFieldValue(
+      flattened[key],
+      hit.raw,
       fieldFormats,
-    });
+      dataView,
+      dataView.getFieldByName(key)
+    );
   }
 
   // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut

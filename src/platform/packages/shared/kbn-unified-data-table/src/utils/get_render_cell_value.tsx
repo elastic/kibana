@@ -139,7 +139,6 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          uiSearchTerm={uiSearchTerm}
         />
       );
     }

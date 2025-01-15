@@ -70,7 +70,10 @@ export const useFindSearchMatches = ({
 
       for (const rowIndex of rowIndices) {
         const matchesPerFieldName = activeMatchesMap[Number(rowIndex)];
-        const fieldNames = Object.keys(matchesPerFieldName);
+        // TODO: figure out what to do with Summary column
+        const fieldNames = activeColumns.filter(
+          (fieldName) => fieldName !== '_source' && fieldName in matchesPerFieldName
+        );
 
         for (const fieldName of fieldNames) {
           const matchesCountForFieldName = matchesPerFieldName[fieldName];
@@ -140,9 +143,8 @@ export const useFindSearchMatches = ({
     let totalMatchesCount = 0;
     rows.forEach((row, rowIndex) => {
       const matchesPerFieldName: Record<string, number> = {};
-      const columns = visibleColumns.includes('_source')
-        ? Object.keys(row.flattened)
-        : visibleColumns;
+      // TODO: figure out what to do with Summary column
+      const columns = visibleColumns.filter((fieldName) => fieldName !== '_source');
 
       columns.forEach((fieldName) => {
         const formattedFieldValue = row.formatAndCacheFieldValue({
