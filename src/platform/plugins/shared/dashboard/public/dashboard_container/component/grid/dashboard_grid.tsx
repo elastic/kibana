@@ -117,6 +117,14 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
 
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
+    const getRadialGradient = (position: string) => {
+      return `radial-gradient(
+                circle at ${position},
+                ${euiTheme.colors.accentSecondary} 2px,
+                transparent 2px
+              )`;
+    };
+
     return (
       <GridLayout
         css={css`
@@ -125,11 +133,8 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
               calc((var(--kbnGridGutterSize) / 2) * -1px);
             background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
               calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-            background-image: radial-gradient(
-              at top left,
-              ${euiTheme.colors.accentSecondary} 2px,
-              transparent 2px
-            );
+            background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+              ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
           }
 
           .kbnGridLayout--dragPreview {
