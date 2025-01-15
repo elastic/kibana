@@ -6,12 +6,13 @@
  */
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
+import { EntityType } from '../../../../../common/search_strategy';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import { UserPanelKey } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { UserPanelKey } from '../../shared/constants';
 
 interface UseNavigateToUserDetailsParams {
   userName: string;
@@ -57,7 +58,9 @@ export const useNavigateToUserDetails = ({
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, { entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: EntityType.user,
+      });
 
       const left = {
         id: UserDetailsPanelKey,
