@@ -9,6 +9,8 @@ import React from 'react';
 
 import { fireEvent, act } from '@testing-library/react';
 
+import { useAuthz } from '../../../../../../hooks';
+
 import type { Agent } from '../../../../types';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -24,6 +26,7 @@ jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../../../hooks/use_authz');
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 
 jest.mock('../../components/agent_reassign_policy_modal');
@@ -50,6 +53,12 @@ describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       diagnosticFileUploadEnabled: true,
+    } as any);
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+        readAgents: true,
+      },
     } as any);
   });
 
