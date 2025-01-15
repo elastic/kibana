@@ -76,7 +76,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   private chatComplete: ChatCompleteAPI;
   private connectorId: string;
   protected streaming: boolean;
-  // TODO: add as parameter to inference API and use
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
 
@@ -122,6 +121,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     return {
       connectorId: this.connectorId,
       functionCalling: options.functionCallingMode,
+      temperature: options.temperature,
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal,
