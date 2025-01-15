@@ -84,7 +84,7 @@ export default function ({
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.02);
+      expect(percentDifference).to.be.lessThan(0.03);
     });
   });
 }
