@@ -32,6 +32,10 @@ export class TimeDuration {
    *  - days (e.g. 9d)
    */
   static parse(input: string): TimeDuration | undefined {
+    if (typeof input !== 'string') {
+      return undefined;
+    }
+
     const matchArray = input.match(TIME_DURATION_REGEX);
 
     if (!matchArray) {

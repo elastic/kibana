@@ -6,3 +6,4 @@
  */
 
 export * from './calc_date_math_diff';
+export * from './normalize_date_math';

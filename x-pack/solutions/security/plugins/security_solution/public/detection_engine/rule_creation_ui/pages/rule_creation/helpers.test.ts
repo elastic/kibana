@@ -591,9 +591,6 @@ describe('helpers', () => {
         from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
@@ -609,9 +606,6 @@ describe('helpers', () => {
         from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
@@ -627,9 +621,6 @@ describe('helpers', () => {
         from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
