@@ -84,6 +84,7 @@
     "@kbn/std",
     "@kbn/core-rendering-browser",
     "@kbn/esql-variables"
+    "@kbn/grid-layout"
   ],
   "exclude": ["target/**/*"]
 }

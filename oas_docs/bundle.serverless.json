@@ -15406,10 +15406,16 @@
                         "online": {
                           "type": "number"
                         },
+                        "orphaned": {
+                          "type": "number"
+                        },
                         "other": {
                           "type": "number"
                         },
                         "unenrolled": {
+                          "type": "number"
+                        },
+                        "uninstalled": {
                           "type": "number"
                         },
                         "updating": {
@@ -15946,7 +15952,9 @@
                               "unenrolling",
                               "unenrolled",
                               "updating",
-                              "degraded"
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
                             ],
                             "type": "string"
                           },
@@ -17959,7 +17967,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
@@ -18439,7 +18449,9 @@
                             "unenrolling",
                             "unenrolled",
                             "updating",
-                            "degraded"
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
