@@ -19,7 +19,7 @@ import {
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../dashboard_container/types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 
 export async function loadDashboardApi({
   getCreationOptions,
