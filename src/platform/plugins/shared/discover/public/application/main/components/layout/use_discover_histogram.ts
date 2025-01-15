@@ -33,9 +33,10 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -241,6 +242,7 @@ export const useDiscoverHistogram = ({
     dataView: esqlDataView,
     query: esqlQuery,
     columns: esqlColumns,
+    table,
   } = useObservable(esqlFetchComplete$, initialEsqlProps);
 
   useEffect(() => {
@@ -398,6 +400,7 @@ export const useDiscoverHistogram = ({
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,
+    table: isEsqlMode ? table : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -511,11 +514,23 @@ function getUnifiedHistogramPropsForEsql({
   savedSearch: SavedSearch;
 }) {
   const columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const query = savedSearch.searchSource.getField('query');
+  const isEsqlMode = isOfAggregateQueryType(query);
+  const table: Datatable | undefined =
+    isEsqlMode && documentsValue?.result
+      ? {
+          type: 'datatable',
+          rows: documentsValue.result.map((r) => r.raw),
+          columns,
+          meta: { type: ESQL_TABLE_TYPE },
+        }
+      : undefined;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
     columns,
+    table,
   };
 
   addLog('[UnifiedHistogram] delayed next props for ES|QL', nextProps);
