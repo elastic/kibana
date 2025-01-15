@@ -99,7 +99,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   if (headlessBrowser === '1') {
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    options.addArguments('headless=old');
+    options.addArguments('headless=new');
     options.addArguments('disable-gpu');
   }
 
@@ -109,7 +109,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (remoteDebug === '1') {
     // Visit chrome://inspect in chrome to remotely view/debug
-    options.addArguments('headless=old');
+    options.addArguments('headless=new');
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
 
