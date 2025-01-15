@@ -55,6 +55,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/object-utils",
     "@kbn/deeplinks-analytics",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/react-kibana-mount"
   ]
 }
