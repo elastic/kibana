@@ -7,7 +7,7 @@
 
 // embedded map v2
 
-import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -106,6 +106,7 @@ export const EmbeddedMapComponent = ({
   setQuery,
   startDate,
 }: EmbeddedMapProps) => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { storage } = services;
 
@@ -136,7 +137,7 @@ export const EmbeddedMapComponent = ({
         // ensures only index patterns with maps fields are passed
         const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
         if (!canceled) {
-          setLayerList(getLayerList(goodDataViews));
+          setLayerList(getLayerList({ euiTheme }, goodDataViews));
         }
       } catch (e) {
         if (!canceled) {
@@ -152,7 +153,7 @@ export const EmbeddedMapComponent = ({
     return () => {
       canceled = true;
     };
-  }, [addError, availableDataViews, isFieldInIndexPattern]);
+  }, [addError, availableDataViews, euiTheme, isFieldInIndexPattern]);
 
   useEffect(() => {
     const dataViews = kibanaDataViews.filter((dataView) =>

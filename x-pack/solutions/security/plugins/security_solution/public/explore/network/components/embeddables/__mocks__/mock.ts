@@ -8,6 +8,7 @@
 import type { IndexPatternMapping } from '../types';
 import type { IndexPatternSavedObject } from '../../../../../common/hooks/types';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -530,3 +531,11 @@ export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject
     title: 'filebeat-*,-filebeat-7.6.0*',
   },
 };
+
+export const mockEuiTheme: EuiThemeComputed<{}> = {
+  colors: {
+    vis: {
+      euiColorVisNeutral0: '#FFFFFF',
+    },
+  },
+} as unknown as EuiThemeComputed<{}>;

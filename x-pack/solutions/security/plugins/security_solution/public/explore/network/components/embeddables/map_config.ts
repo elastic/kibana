@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { type EuiThemeComputed, euiPaletteColorBlind } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type {
@@ -107,13 +107,21 @@ export const getRequiredMapsFields = (title: string): string[] => {
   ];
 };
 
+export interface LayerProviderDependencies {
+  euiTheme: EuiThemeComputed;
+}
+
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
  *
+ * @param dependencies dependencies, such as theme, necessary to configure layers
  * @param indexPatternIds array of indexPatterns' title and id
  */
-export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
+export const getLayerList = (
+  dependencies: LayerProviderDependencies,
+  indexPatternIds: IndexPatternMapping[]
+) => {
   return [
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
@@ -127,12 +135,14 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
         ...acc,
         getLineLayer(title, id, layerGroupDescriptor.id, lmc[title] ?? lmc.default),
         getDestinationLayer(
+          dependencies,
           title,
           id,
           layerGroupDescriptor.id,
           lmc[title]?.destination ?? lmc.default.destination
         ),
         getSourceLayer(
+          dependencies,
           title,
           id,
           layerGroupDescriptor.id,
@@ -154,6 +164,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
  * @param layerDetails layer-specific field details
  */
 export const getSourceLayer = (
+  dependencies: LayerProviderDependencies,
   indexPatternTitle: string,
   indexPatternId: string,
   parentId: string,
@@ -183,7 +194,7 @@ export const getSourceLayer = (
         },
         lineColor: {
           type: 'STATIC',
-          options: { color: '#FFFFFF' },
+          options: { color: dependencies.euiTheme.colors.vis.euiColorVisNeutral0 },
         },
         lineWidth: { type: 'STATIC', options: { size: 2 } },
         iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -224,6 +235,7 @@ export const getSourceLayer = (
  *
  */
 export const getDestinationLayer = (
+  dependencies: LayerProviderDependencies,
   indexPatternTitle: string,
   indexPatternId: string,
   parentId: string,
@@ -254,7 +266,7 @@ export const getDestinationLayer = (
         },
         lineColor: {
           type: 'STATIC',
-          options: { color: '#FFFFFF' },
+          options: { color: dependencies.euiTheme.colors.vis.euiColorVisNeutral0 },
         },
         lineWidth: { type: 'STATIC', options: { size: 2 } },
         iconSize: { type: 'STATIC', options: { size: 8 } },

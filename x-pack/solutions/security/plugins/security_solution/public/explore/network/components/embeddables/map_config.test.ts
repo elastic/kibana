@@ -19,6 +19,7 @@ import {
   mockLineLayer,
   mockServerLayer,
   mockSourceLayer,
+  mockEuiTheme,
 } from './__mocks__/mock';
 
 jest.mock('uuid', () => {
@@ -28,20 +29,28 @@ jest.mock('uuid', () => {
   };
 });
 
+const layerProviderDependencies = { euiTheme: mockEuiTheme };
+
 describe('map_config', () => {
   describe('#getLayerList', () => {
     test('it returns the complete layerList with a source, destination, and line layer', () => {
-      const layerList = getLayerList(mockIndexPatternIds);
+      const layerList = getLayerList(layerProviderDependencies, mockIndexPatternIds);
       expect(layerList).toStrictEqual(mockLayerList);
     });
 
     test('it returns the complete layerList for multiple indices', () => {
-      const layerList = getLayerList([...mockIndexPatternIds, ...mockIndexPatternIds]);
+      const layerList = getLayerList(layerProviderDependencies, [
+        ...mockIndexPatternIds,
+        ...mockIndexPatternIds,
+      ]);
       expect(layerList).toStrictEqual(mockLayerListDouble);
     });
 
     test('it returns the complete layerList for multiple indices with custom layer mapping', () => {
-      const layerList = getLayerList([...mockIndexPatternIds, ...mockAPMIndexPatternIds]);
+      const layerList = getLayerList(layerProviderDependencies, [
+        ...mockIndexPatternIds,
+        ...mockAPMIndexPatternIds,
+      ]);
       expect(layerList).toStrictEqual(mockLayerListMixed);
     });
   });
@@ -49,6 +58,7 @@ describe('map_config', () => {
   describe('#getSourceLayer', () => {
     test('it returns a source layer', () => {
       const layerList = getSourceLayer(
+        layerProviderDependencies,
         mockIndexPatternIds[0].title,
         mockIndexPatternIds[0].id,
         mockLayerGroup.id,
@@ -59,6 +69,7 @@ describe('map_config', () => {
 
     test('it returns a source layer for custom layer mapping', () => {
       const layerList = getSourceLayer(
+        layerProviderDependencies,
         mockAPMIndexPatternIds[0].title,
         mockAPMIndexPatternIds[0].id,
         mockLayerGroup.id,
@@ -71,6 +82,7 @@ describe('map_config', () => {
   describe('#getDestinationLayer', () => {
     test('it returns a destination layer', () => {
       const layerList = getDestinationLayer(
+        layerProviderDependencies,
         mockIndexPatternIds[0].title,
         mockIndexPatternIds[0].id,
         mockLayerGroup.id,
@@ -81,6 +93,7 @@ describe('map_config', () => {
 
     test('it returns a destination layer for custom layer mapping', () => {
       const layerList = getDestinationLayer(
+        layerProviderDependencies,
         mockAPMIndexPatternIds[0].title,
         mockAPMIndexPatternIds[0].id,
         mockLayerGroup.id,
