@@ -2204,7 +2204,9 @@
     },
     {
       "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
-      "error": [],
+      "error": [
+        "[t] index is not a valid JOIN index. Please use a \"lookup\" mode index JOIN commands."
+      ],
       "warning": []
     },
     {

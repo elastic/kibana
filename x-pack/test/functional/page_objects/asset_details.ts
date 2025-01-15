@@ -342,6 +342,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('infraAssetDetailsDashboardsTab');
     },
 
+    async dashboardsTabExistsOrFail() {
+      return testSubjects.existOrFail('infraAssetDetailsDashboardsTab');
+    },
+
     async addDashboardExists() {
       await testSubjects.existOrFail('infraAddDashboard');
     },
