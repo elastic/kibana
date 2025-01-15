@@ -477,8 +477,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/192891
-      describe.skip('Processes Tab', () => {
+      describe('Processes Tab', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -501,6 +500,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
           await retry.tryForTime(5000, async () => {
@@ -568,6 +568,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Osquery Tab', () => {
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 

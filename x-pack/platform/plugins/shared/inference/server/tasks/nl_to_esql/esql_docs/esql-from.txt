@@ -4,7 +4,7 @@ The `FROM` command retrieves a table of data from a specified data stream, index
 
 ## Syntax
 
-`FROM index_pattern [METADATA fields]`
+`FROM index_pattern METADATA fields`
 
 ### Parameters
 
