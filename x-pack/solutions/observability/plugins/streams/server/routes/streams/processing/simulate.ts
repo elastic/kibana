@@ -13,6 +13,8 @@ import {
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isEmpty } from 'lodash';
+import { NonAdditiveProcessor } from '../../../lib/streams/errors/non_additive_processor';
 import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { createServerRoute } from '../../create_server_route';
@@ -62,8 +64,17 @@ export const simulateProcessorRoute = createServerRoute({
         throw new SimulationFailed(error);
       }
 
+      const simulationDiffs = computeSimulationDiffs(simulationResult, docs);
+
+      const updatedFields = computeUpdatedFields(simulationDiffs);
+      if (!isEmpty(updatedFields)) {
+        throw new NonAdditiveProcessor(
+          `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
+        );
+      }
+
       const documents = computeSimulationDocuments(simulationResult, docs);
-      const detectedFields = computeDetectedFields(simulationResult, docs);
+      const detectedFields = computeDetectedFields(simulationDiffs);
       const successRate = computeSuccessRate(simulationResult);
       const failureRate = 1 - successRate;
 
@@ -78,7 +89,7 @@ export const simulateProcessorRoute = createServerRoute({
         throw notFound(error);
       }
 
-      if (error instanceof SimulationFailed) {
+      if (error instanceof SimulationFailed || error instanceof NonAdditiveProcessor) {
         throw badRequest(error);
       }
 
@@ -86,6 +97,35 @@ export const simulateProcessorRoute = createServerRoute({
     }
   },
 });
+
+const computeSimulationDiffs = (
+  simulation: IngestSimulateResponse,
+  sampleDocs: Array<{ _source: Record<string, unknown> }>
+) => {
+  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
+  const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
+
+  const diffs = simulation.docs.filter(isSuccessfulDocument).map((doc) => {
+    const sample = samplesToSimulationMap.get(doc);
+    if (sample) {
+      return calculateObjectDiff(sample._source, doc.processor_results.at(-1)?.doc?._source);
+    }
+
+    return calculateObjectDiff({});
+  });
+
+  return diffs;
+};
+
+const computeUpdatedFields = (simulationDiff: ReturnType<typeof computeSimulationDiffs>) => {
+  const diffs = simulationDiff
+    .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
+    .flatMap(Object.keys);
+
+  const uniqueFields = [...new Set(diffs)];
+
+  return uniqueFields;
+};
 
 const computeSimulationDocuments = (
   simulation: IngestSimulateResponse,
@@ -108,31 +148,14 @@ const computeSimulationDocuments = (
 };
 
 const computeDetectedFields = (
-  simulation: IngestSimulateResponse,
-  sampleDocs: Array<{ _source: Record<string, unknown> }>
+  simulationDiff: ReturnType<typeof computeSimulationDiffs>
 ): Array<{
   name: string;
   type: FieldDefinitionConfig['type'] | 'unmapped';
 }> => {
-  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
-
-  const diffs = simulation.docs
-    .filter(isSuccessfulDocument)
-    .map((doc) => {
-      const sample = samplesToSimulationMap.get(doc);
-      if (sample) {
-        const { added } = calculateObjectDiff(
-          sample._source,
-          doc.processor_results.at(-1)?.doc?._source
-        );
-        return flattenObject(added);
-      }
-
-      return {};
-    })
-    .map(Object.keys)
-    .flat();
+  const diffs = simulationDiff
+    .map((simulatedDoc) => flattenObject(simulatedDoc.added))
+    .flatMap(Object.keys);
 
   const uniqueFields = [...new Set(diffs)];
 
