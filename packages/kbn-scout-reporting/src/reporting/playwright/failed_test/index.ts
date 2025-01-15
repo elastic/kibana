@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutEventsReport, ScoutReportEventAction } from './events';
-export { ScoutFailureReport, type TestFailure } from './failed_test';
+import { ScoutFailedTestReporter } from './failed_test_reporter';
+// eslint-disable-next-line import/no-default-export
+export default ScoutFailedTestReporter;
