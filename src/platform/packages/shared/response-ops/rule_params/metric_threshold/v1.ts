@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 
 import {
   LEGACY_COMPARATORS,
@@ -17,6 +16,7 @@ import {
   validateIsStringElasticsearchJSONFilter,
   validateKQLStringFilter,
 } from '../common/utils';
+import { dataViewSpecSchema } from '../common';
 
 const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
