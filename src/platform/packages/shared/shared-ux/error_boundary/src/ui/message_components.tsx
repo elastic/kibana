@@ -34,6 +34,57 @@ interface FatalPromptProps {
   onClickRefresh: () => void;
 }
 
+const CodePanel: React.FC<CodePanelProps> = (props) => {
+  const { error, errorInfo, name: errorComponentName, onClose } = props;
+  const simpleFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'simpleFlyoutTitle',
+  });
+
+  const errorName = errorComponentName && strings.details.componentName(errorComponentName);
+  const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
+
+  return (
+    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
+      <EuiFlyoutHeader hasBorder>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiTitle size="m">
+            <h2>{strings.details.title()}</h2>
+          </EuiTitle>
+        </EuiPanel>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
+          <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
+          <p>
+            {errorName}
+            {errorTrace}
+          </p>
+        </EuiCodeBlock>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} flush="left">
+                {strings.details.closeButton()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
+                {(copy) => (
+                  <EuiButton onClick={copy} fill iconType="copyClipboard">
+                    {strings.details.copyToClipboardButton()}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};
+
 export const FatalPrompt = withErrorDetails(
   ({ showErrorDetails, onClickRefresh }: FatalPromptProps): JSX.Element => (
     <EuiEmptyPrompt
@@ -214,54 +265,3 @@ interface CodePanelProps {
   name: string | null;
   onClose: () => void;
 }
-
-const CodePanel: React.FC<CodePanelProps> = (props) => {
-  const { error, errorInfo, name: errorComponentName, onClose } = props;
-  const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'simpleFlyoutTitle',
-  });
-
-  const errorName = errorComponentName && strings.details.componentName(errorComponentName);
-  const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
-
-  return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiTitle size="m">
-            <h2>{strings.details.title()}</h2>
-          </EuiTitle>
-        </EuiPanel>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
-          <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
-          <p>
-            {errorName}
-            {errorTrace}
-          </p>
-        </EuiCodeBlock>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} flush="left">
-                {strings.details.closeButton()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
-                {(copy) => (
-                  <EuiButton onClick={copy} fill iconType="copyClipboard">
-                    {strings.details.copyToClipboardButton()}
-                  </EuiButton>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
-};
