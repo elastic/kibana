@@ -268,12 +268,11 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
-
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
     await waitFor(() => {
+      expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
@@ -312,13 +311,12 @@ describe('useSetupTechnology', () => {
       initialProps,
     });
 
-    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
-
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
     expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       inactivity_timeout: 3600,
@@ -472,6 +470,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -491,6 +490,11 @@ describe('useSetupTechnology', () => {
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
         inactivity_timeout: 3600,
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
       });
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     });
@@ -661,7 +665,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -693,6 +697,34 @@ describe('useSetupTechnology', () => {
       },
     });
 
+    const packageInfoWithoutGlobalDataTags = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          title: 'Template 1',
+          description: '',
+          deployment_modes: {
+            default: {
+              enabled: true,
+            },
+            agentless: {
+              enabled: true,
+            },
+          },
+        },
+        {
+          name: 'not-cspm',
+          title: 'Template 2',
+          description: '',
+          deployment_modes: {
+            default: {
+              enabled: true,
+            },
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -700,16 +732,13 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: packageInfoWithoutGlobalDataTags,
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(
-        SetupTechnology.AGENTLESS,
-        'never-gonna-give-you-up'
-      );
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -743,6 +772,34 @@ describe('useSetupTechnology', () => {
       },
     });
 
+    const packageInfoWithoutGlobalDataTags = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          title: 'Template 1',
+          description: '',
+          deployment_modes: {
+            default: {
+              enabled: true,
+            },
+            agentless: {
+              enabled: true,
+            },
+          },
+        },
+        {
+          name: 'not-cspm',
+          title: 'Template 2',
+          description: '',
+          deployment_modes: {
+            default: {
+              enabled: true,
+            },
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -750,7 +807,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: packageInfoWithoutGlobalDataTags,
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -802,7 +859,7 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
@@ -849,10 +906,11 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
           supports_agentless: true,
@@ -870,6 +928,7 @@ describe('useSetupTechnology', () => {
     });
 
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
       expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
         global_data_tags: [
