@@ -18,6 +18,8 @@ const commonEntityFields: EntityInstance = {
   } as EntityInstance['entity'],
 };
 
+type Entity = { [key: string]: any } & { entityIdentityFields: { [key: string]: string[] } };
+
 describe('EntityClient', () => {
   let entityClient: EntityClient;
 
@@ -27,127 +29,103 @@ describe('EntityClient', () => {
 
   describe('asKqlFilter', () => {
     it('should return the kql filter', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['service.name', 'service.environment'],
-          type: 'service',
-        },
-        service: {
-          name: 'my-service',
-        },
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['service.name', 'service.environment'] },
+        type: 'service',
+        ['service.name']: 'my-service',
       };
 
-      const result = entityClient.asKqlFilter(entityLatest);
+      const result = entityClient.asKqlFilter({ entity });
       expect(result).toEqual('service.name: "my-service"');
     });
 
-    it('should return the kql filter when an indentity field value contain special characters', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['host.name', 'foo.bar'],
-        },
-        host: {
-          name: 'my-host:some-value:some-other-value',
-        },
+    it('should return the kql filter when an identity field value contain special characters', () => {
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['host.name', 'foo.bar'] },
+        type: 'service',
+        ['host.name']: 'my-host:some-value:some-other-value',
       };
 
-      const result = entityClient.asKqlFilter(entityLatest);
+      const result = entityClient.asKqlFilter({ entity });
       expect(result).toEqual('host.name: "my-host:some-value:some-other-value"');
     });
 
-    it('should return the kql filter when indentity_fields is composed by multiple fields', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['service.name', 'service.environment'],
-          type: 'service',
-        },
-        service: {
-          name: 'my-service',
-          environment: 'staging',
-        },
+    it('should return the kql filter when identity_fields is composed by multiple fields', () => {
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['service.name', 'service.environment'] },
+        type: 'service',
+        ['service.name']: 'my-service',
+        ['service.environment']: 'staging',
       };
 
-      const result = entityClient.asKqlFilter(entityLatest);
+      const result = entityClient.asKqlFilter({ entity });
       expect(result).toEqual('(service.name: "my-service" AND service.environment: "staging")');
     });
 
     it('should ignore fields that are not present in the entity', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['host.name', 'foo.bar'],
-        },
-        host: {
-          name: 'my-host',
-        },
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['host.name', 'foo.bar'] },
+        ['host.name']: 'my-host',
       };
 
-      const result = entityClient.asKqlFilter(entityLatest);
+      const result = entityClient.asKqlFilter({ entity });
       expect(result).toEqual('host.name: "my-host"');
     });
   });
 
   describe('getIdentityFieldsValue', () => {
     it('should return identity fields values', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['service.name', 'service.environment'],
-          type: 'service',
-        },
-        service: {
-          name: 'my-service',
-        },
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['service.name', 'service.environment'] },
+        type: 'service',
+        ['service.name']: 'my-service',
       };
 
-      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
+      expect(entityClient.getIdentityFieldsValue({ entity })).toEqual({
         'service.name': 'my-service',
       });
     });
 
-    it('should return identity fields values when indentity_fields is composed by multiple fields', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['service.name', 'service.environment'],
-          type: 'service',
-        },
-        service: {
-          name: 'my-service',
-          environment: 'staging',
-        },
+    it('should return identity fields values when identity_fields is composed by multiple fields', () => {
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['service.name', 'service.environment'] },
+        type: 'service',
+        ['service.name']: 'my-service',
+        ['service.environment']: 'staging',
       };
 
-      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
+      expect(entityClient.getIdentityFieldsValue({ entity })).toEqual({
         'service.name': 'my-service',
         'service.environment': 'staging',
       });
     });
 
     it('should return identity fields when field is in the root', () => {
-      const entityLatest: EntityInstance = {
-        entity: {
-          ...commonEntityFields.entity,
-          identity_fields: ['name'],
-          type: 'service',
-        },
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: { source1: ['name'] },
+        type: 'service',
         name: 'foo',
       };
 
-      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
+      expect(entityClient.getIdentityFieldsValue({ entity })).toEqual({
         name: 'foo',
       });
     });
 
     it('should throw an error when identity fields are missing', () => {
-      const entityLatest: EntityInstance = {
-        ...commonEntityFields,
+      const entity: Entity = {
+        ...commonEntityFields.entity,
+        entityIdentityFields: {},
       };
 
-      expect(() => entityClient.getIdentityFieldsValue(entityLatest)).toThrow(
+      expect(() => entityClient.getIdentityFieldsValue({ entity })).toThrow(
         'Identity fields are missing'
       );
     });

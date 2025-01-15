@@ -12,9 +12,10 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
@@ -24,6 +25,7 @@ import type {
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
@@ -37,8 +39,9 @@ import {
   getMissingResources,
   upsertMigrationResources,
   retryRuleMigration,
+  getIntegrations,
 } from '../api';
-import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
+import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -143,7 +146,7 @@ export class SiemRulesMigrationsService {
 
   public async retryRuleMigration(
     migrationId: string,
-    filter?: RetryRuleMigrationFilter
+    filter?: SiemMigrationRetryFilter
   ): Promise<RetryRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
@@ -163,7 +166,7 @@ export class SiemRulesMigrationsService {
       migrationId,
       connectorId,
       langSmithOptions,
-      ...filter,
+      filter,
     });
     this.startPolling();
     return result;
@@ -185,7 +188,7 @@ export class SiemRulesMigrationsService {
     return results;
   }
 
-  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceData[]> {
+  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceBase[]> {
     return getMissingResources({ migrationId });
   }
 
@@ -209,6 +212,10 @@ export class SiemRulesMigrationsService {
       }
       return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
+  }
+
+  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
+    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {

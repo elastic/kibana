@@ -18,6 +18,26 @@ export const conditions = {
   isNotFullyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: conditions.isFullyTranslated() } };
   },
+  isPartiallyTranslated(): QueryDslQueryContainer {
+    return { term: { translation_result: RuleTranslationResult.PARTIAL } };
+  },
+  isNotPartiallyTranslated(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isPartiallyTranslated() } };
+  },
+  isUntranslatable(): QueryDslQueryContainer {
+    return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
+  },
+  isNotUntranslatable(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isUntranslatable() } };
+  },
+  isInstalled(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { exists: { field: 'elastic_rule.id' } },
+      },
+    };
+  },
   isNotInstalled(): QueryDslQueryContainer {
     return {
       nested: {
@@ -34,6 +54,14 @@ export const conditions = {
       },
     };
   },
+  isCustom(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
+      },
+    };
+  },
   matchTitle(title: string): QueryDslQueryContainer {
     return {
       nested: {
@@ -45,7 +73,13 @@ export const conditions = {
   isInstallable(): QueryDslQueryContainer[] {
     return [this.isFullyTranslated(), this.isNotInstalled()];
   },
+  isNotInstallable(): QueryDslQueryContainer[] {
+    return [this.isNotFullyTranslated(), this.isInstalled()];
+  },
   isFailed(): QueryDslQueryContainer {
     return { term: { status: SiemMigrationStatus.FAILED } };
+  },
+  isNotFailed(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isFailed() } };
   },
 };

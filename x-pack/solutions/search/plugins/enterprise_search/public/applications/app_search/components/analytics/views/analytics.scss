@@ -1,5 +1,0 @@
-.analyticsOverviewTables {
-  @include euiBreakpoint('xs', 's', 'm', 'l') {
-    flex-direction: column; // Force full width on table panels earlier to ensure content stays legible
-  }
-}

@@ -9,13 +9,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
-import * as i18n from './translations';
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
@@ -27,6 +27,8 @@ import { MigrationReadyPanel } from '../components/migration_status_panels/migra
 import { MigrationProgressPanel } from '../components/migration_status_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
+import { useGetIntegrations } from '../service/hooks/use_get_integrations';
+import { PageTitle } from './page_title';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -38,6 +40,16 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   }) => {
     const { navigateTo } = useNavigation();
     const { data: ruleMigrationsStats, isLoading, refreshStats } = useLatestStats();
+
+    const [integrations, setIntegrations] = React.useState<
+      Record<string, RelatedIntegration> | undefined
+    >();
+    const { getIntegrations, isLoading: isIntegrationsLoading } =
+      useGetIntegrations(setIntegrations);
+
+    useEffect(() => {
+      getIntegrations();
+    }, [getIntegrations]);
 
     useEffect(() => {
       if (isLoading) {
@@ -79,13 +91,22 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       refreshStats,
     ]);
 
+    const pageTitle = useMemo(() => <PageTitle />, []);
+
     const content = useMemo(() => {
       const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
       if (migrationStats.status === SiemMigrationTaskStatus.FINISHED) {
-        return <MigrationRulesTable migrationId={migrationId} refetchData={refetchData} />;
+        return (
+          <MigrationRulesTable
+            migrationId={migrationId}
+            refetchData={refetchData}
+            integrations={integrations}
+            isIntegrationsLoading={isIntegrationsLoading}
+          />
+        );
       }
       return (
         <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
@@ -99,7 +120,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
           </>
         </RuleMigrationDataInputWrapper>
       );
-    }, [migrationId, refetchData, ruleMigrationsStats]);
+    }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
       <>
@@ -107,7 +128,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <MissingPrivilegesCallOut />
 
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
+          <HeaderPage title={pageTitle}>
             <HeaderButtons
               ruleMigrationsStats={ruleMigrationsStats}
               selectedMigrationId={migrationId}
