@@ -652,7 +652,7 @@ export const UnifiedDataTable = ({
     onUpdatePageIndex,
   ]);
 
-  const [uiSearchTerm, setUISearchTerm] = useState<string>();
+  const [uiSearchTerm, setUISearchTerm] = useState<string>('');
   const [uiSearchTermCss, setUISearchTermCss] = useState<SerializedStyles>();
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(

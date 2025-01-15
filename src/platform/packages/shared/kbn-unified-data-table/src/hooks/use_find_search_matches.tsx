@@ -19,7 +19,7 @@ const DEFAULT_ACTIVE_MATCH_POSITION = 1;
 
 export interface UseFindSearchMatchesProps {
   visibleColumns: string[];
-  rows: DataTableRecord[];
+  rows: DataTableRecord[] | undefined;
   uiSearchTerm: string | undefined;
   renderCellValue: (props: EuiDataGridCellValueElementProps) => ReactNode;
   scrollToFoundMatch: (params: {

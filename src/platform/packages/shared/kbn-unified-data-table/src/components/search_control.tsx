@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
-import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { ChangeEvent, KeyboardEvent, useCallback } from 'react';
+import { EuiFieldSearch, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useFindSearchMatches, UseFindSearchMatchesProps } from '../hooks/use_find_search_matches';
 
 export interface SearchControlProps extends UseFindSearchMatchesProps {
@@ -32,13 +33,25 @@ export const SearchControl: React.FC<SearchControlProps> = ({
       scrollToFoundMatch,
     });
 
-  // TODO: needs debouncing
-  const onChangeUiSearchTerm = useCallback(
-    (event) => {
-      const nextUiSearchTerm = event.target.value.toLowerCase();
-      onChange(nextUiSearchTerm);
+  const { inputValue, handleInputChange } = useDebouncedValue({
+    onChange,
+    value: uiSearchTerm,
+  });
+
+  const onInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      handleInputChange(event.target.value);
     },
-    [onChange]
+    [handleInputChange]
+  );
+
+  const onKeyUp = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === keys.ENTER) {
+        goToNextMatch();
+      }
+    },
+    [goToNextMatch]
   );
 
   return (
@@ -71,8 +84,9 @@ export const SearchControl: React.FC<SearchControlProps> = ({
         ) : undefined
       }
       placeholder="Search in the table" // TODO: i18n
-      value={uiSearchTerm}
-      onChange={onChangeUiSearchTerm}
+      value={inputValue}
+      onChange={onInputChange}
+      onKeyUp={onKeyUp}
     />
   );
 };
