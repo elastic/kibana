@@ -76,6 +76,12 @@ const buildIngestPipeline = ({
       },
     },
     {
+      set: {
+        field: 'debug._source',
+        value: '{{_source}}',
+      },
+    },
+    {
       enrich: {
         policy_name: enrichPolicyName,
         field: description.identityField,
