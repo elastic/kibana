@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const CONTEXT_INSTRUCTION =
+export const ALERT_CONTEXT_INSTRUCTION =
   'The following contextual information is available to help you understand the alert';

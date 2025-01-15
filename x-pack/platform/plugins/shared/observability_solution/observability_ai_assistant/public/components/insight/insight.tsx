@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import dedent from 'dedent';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import { CONTEXT_INSTRUCTION } from '../../../common/context_instruction';
+import { ALERT_CONTEXT_INSTRUCTION } from '../../../common/alert_context_instruction';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -302,10 +302,15 @@ export function Insight({
     try {
       const { instructions = '' } = JSON.parse(lastUserPrompt);
 
-      // instructions is a large multiline string with contextual information appended to it.
-      // We'll split at CONTEXT_INSTRUCTION so that we can extract the instructions the user needs to edit
-      const [beforeContextInstruction] = instructions.split(CONTEXT_INSTRUCTION);
-      return beforeContextInstruction.trim();
+      // For alerts - instructions is a large multiline string with contextual information appended to it.
+      // We'll split at ALERT_CONTEXT_INSTRUCTION so that we can extract the instructions the user needs to edit
+      if (instructions.includes(ALERT_CONTEXT_INSTRUCTION)) {
+        const [beforeContextInstruction] = instructions.split(ALERT_CONTEXT_INSTRUCTION);
+        return beforeContextInstruction.trim();
+      }
+
+      // in all other cases
+      return instructions.trim();
     } catch (e) {
       return '';
     }
@@ -323,15 +328,20 @@ export function Insight({
         return false;
       }
 
-      const [_beforeContextInstruction, afterContextInstruction] =
-        parsedContent.instructions.split(CONTEXT_INSTRUCTION);
+      // Rebuild instructions with the new prompt
+      let updatedInstructions;
+      if (parsedContent.instructions.includes(ALERT_CONTEXT_INSTRUCTION)) {
+        const [_beforeContextInstruction, afterContextInstruction] =
+          parsedContent.instructions.split(ALERT_CONTEXT_INSTRUCTION);
 
-      // Rebuild instructions with the new prompt, preserving everything after the delimiter
-      const updatedInstructions = dedent(
-        `${newPrompt}
-      ${CONTEXT_INSTRUCTION}
-      ${afterContextInstruction}`
-      );
+        updatedInstructions = dedent(
+          `${newPrompt}
+        ${ALERT_CONTEXT_INSTRUCTION}
+        ${afterContextInstruction}`
+        );
+      } else {
+        updatedInstructions = newPrompt;
+      }
 
       // Assign the updated instructions
       parsedContent.instructions = updatedInstructions;

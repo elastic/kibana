@@ -51,4 +51,4 @@ export { ShortIdTable } from './utils/short_id_table';
 
 export { KnowledgeBaseType } from './types';
 
-export { CONTEXT_INSTRUCTION } from './context_instruction';
+export { ALERT_CONTEXT_INSTRUCTION } from './alert_context_instruction';
