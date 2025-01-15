@@ -524,6 +524,16 @@ export const UnifiedDataTable = ({
   } = selectedDocsState;
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const currentPageIndexRef = useRef<number>(0);
+
+  const changeCurrentPageIndex = useCallback(
+    (value: number) => {
+      setCurrentPageIndex(value);
+      onUpdatePageIndex?.(value);
+      currentPageIndexRef.current = value;
+    },
+    [setCurrentPageIndex, onUpdatePageIndex]
+  );
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -619,6 +629,7 @@ export const UnifiedDataTable = ({
       const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
       if (calculatedPageIndex !== previousPageIndex) {
         onUpdatePageIndex?.(calculatedPageIndex);
+        currentPageIndexRef.current = calculatedPageIndex;
       }
       return calculatedPageIndex;
     });
@@ -629,15 +640,10 @@ export const UnifiedDataTable = ({
       onUpdateRowsPerPage?.(pageSize);
     };
 
-    const onChangePage = (newPageIndex: number) => {
-      setCurrentPageIndex(newPageIndex);
-      onUpdatePageIndex?.(newPageIndex);
-    };
-
     return isPaginationEnabled
       ? {
           onChangeItemsPerPage,
-          onChangePage,
+          onChangePage: changeCurrentPageIndex,
           pageIndex: currentPageIndex,
           pageSize: currentPageSize,
           pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
@@ -649,7 +655,7 @@ export const UnifiedDataTable = ({
     onUpdateRowsPerPage,
     currentPageSize,
     currentPageIndex,
-    onUpdatePageIndex,
+    changeCurrentPageIndex,
   ]);
 
   const [uiSearchTerm, setUISearchTerm] = useState<string>('');
@@ -682,7 +688,8 @@ export const UnifiedDataTable = ({
       onFilter,
       setExpandedDoc,
       selectedDocsState,
-      paginationObj,
+      paginationObj?.pageIndex,
+      paginationObj?.pageSize,
       valueToStringConverter,
       uiSearchTerm,
     ]
@@ -743,12 +750,18 @@ export const UnifiedDataTable = ({
       <SearchControl
         uiSearchTerm={uiSearchTerm}
         visibleColumns={visibleColumns}
-        rows={rows}
+        rows={displayedRows}
         renderCellValue={renderCellValue}
         scrollToFoundMatch={({ rowIndex, fieldName, matchIndex, shouldJump }) => {
+          const expectedPageIndex = Math.floor(rowIndex / currentPageSize);
+
+          if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
+            changeCurrentPageIndex(expectedPageIndex);
+          }
+
           // TODO: use a named color token
           setUISearchTermCss(css`
-            .euiDataGridRowCell[data-gridcell-visible-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
+            .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${fieldName}']
               .unifiedDataTable__findMatch[data-match-index='${matchIndex}'] {
               background-color: #ffc30e;
             }
@@ -763,15 +776,17 @@ export const UnifiedDataTable = ({
             const columnIndex =
               anyCellForFieldName?.getAttribute('data-gridcell-column-index') ?? 0;
 
+            const visibleRowIndex = isPaginationEnabled ? rowIndex % currentPageSize : rowIndex;
+
             dataGridRef.current?.scrollToItem?.({
-              rowIndex,
+              rowIndex: visibleRowIndex,
               columnIndex: Number(columnIndex),
               align: 'start',
             });
           }
         }}
         onChange={(searchTerm) => {
-          setUISearchTerm(searchTerm);
+          setUISearchTerm(searchTerm || '');
           setUISearchTermCss(undefined);
         }}
       />
@@ -780,10 +795,13 @@ export const UnifiedDataTable = ({
     uiSearchTerm,
     setUISearchTerm,
     setUISearchTermCss,
-    rows,
+    displayedRows,
     renderCellValue,
     visibleColumns,
     dataGridRef,
+    currentPageSize,
+    changeCurrentPageIndex,
+    isPaginationEnabled,
   ]);
 
   const renderCustomPopover = useMemo(
