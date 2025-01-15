@@ -45,7 +45,11 @@ import { AggsService } from './aggs';
 
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
-import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import {
+  DataPluginSetupDependencies,
+  DataPluginStart,
+  DataPluginStartDependencies,
+} from '../plugin';
 import { usageProvider } from './collectors/search/usage';
 import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
 import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
@@ -142,7 +146,10 @@ export class SearchService {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    {
+      expressions,
+      usageCollection,
+    }: Pick<DataPluginSetupDependencies, 'expressions' | 'usageCollection'>
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;

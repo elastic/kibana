@@ -12,7 +12,7 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-interface GenAiStreamingResponseExamplePluginStart {
+export interface GenAiStreamingResponseExamplePluginStart {
   actions: ActionsPluginStart;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { castArray, sortBy, uniq } from 'lodash';
-import type { DocumentAnalysis } from './document_analysis';
+import type { DocumentAnalysis } from './types';
 
 export function mergeSampleDocumentsWithFieldCaps({
   total,

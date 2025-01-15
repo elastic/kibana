@@ -25,6 +25,7 @@ import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_c
 import { SharedProviders } from '../../utils/shared_providers';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
+import { useScreenshotScreenContext } from '../../hooks/use_screenshot_screen_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 
 interface NavControlWithProviderDeps {
@@ -70,6 +71,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   useNavControlScreenContext();
   useNavControlScope();
+  useScreenshotScreenContext();
 
   const [flyoutSettings, setFlyoutSettings] = useLocalStorage(
     'observabilityAIAssistant.flyoutSettings',

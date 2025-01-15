@@ -43,13 +43,16 @@ export class UnifiedSearchServerPlugin
   public setup(
     core: CoreSetup<UnifiedSearchServerPluginStartDependencies, UnifiedSearchServerPluginStart>,
     {}: UnifiedSearchServerPluginSetupDependencies
-  ) {
+  ): UnifiedSearchServerPluginSetup {
     return {
       autocomplete: this.autocompleteService.setup(core),
     };
   }
 
-  public start(core: CoreStart, {}: UnifiedSearchServerPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    {}: UnifiedSearchServerPluginStartDependencies
+  ): UnifiedSearchServerPluginStart {
     return {};
   }
 

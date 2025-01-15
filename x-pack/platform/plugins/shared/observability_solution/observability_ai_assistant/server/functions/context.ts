@@ -49,7 +49,8 @@ export function registerContextFunction({
         );
 
         const content = {
-          screen_description: screenDescription,
+          textual_screen_description: screenDescription,
+          visual_screen_description: 'not_requested',
           learnings: [],
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
@@ -76,7 +77,11 @@ export function registerContextFunction({
         });
 
         return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+          content: {
+            ...content,
+            learnings: relevantDocuments as unknown as Serializable,
+            instructions: `This context does not include a visual description of the page`,
+          },
           data: {
             scores,
             suggestions,

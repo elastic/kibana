@@ -7,7 +7,7 @@
 
 import { partition, shuffle } from 'lodash';
 import { truncateList } from '@kbn/inference-common';
-import type { DocumentAnalysis, TruncatedDocumentAnalysis } from './document_analysis';
+import type { DocumentAnalysis, TruncatedDocumentAnalysis } from './types';
 
 export function sortAndTruncateAnalyzedFields(
   analysis: DocumentAnalysis

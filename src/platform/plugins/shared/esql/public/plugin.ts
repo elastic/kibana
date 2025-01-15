@@ -22,6 +22,7 @@ import {
   UPDATE_ESQL_QUERY_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
+import type { DataDefinitionRegistryPublicStart } from '../../../../../../x-pack/plugins/data_definition_registry/public';
 
 interface EsqlPluginStart {
   dataViews: DataViewsPublicPluginStart;
@@ -30,6 +31,7 @@ interface EsqlPluginStart {
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryPublicStart;
 }
 
 interface EsqlPluginSetup {
@@ -50,7 +52,15 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
+    {
+      dataViews,
+      expressions,
+      data,
+      uiActions,
+      fieldsMetadata,
+      usageCollection,
+      dataDefinitionRegistry,
+    }: EsqlPluginStart
   ): void {
     const storage = new Storage(localStorage);
     const appendESQLAction = new UpdateESQLQueryAction(data);
@@ -62,7 +72,8 @@ export class EsqlPlugin implements Plugin<{}, void> {
       storage,
       this.indexManagement,
       fieldsMetadata,
-      usageCollection
+      usageCollection,
+      dataDefinitionRegistry
     );
   }
 

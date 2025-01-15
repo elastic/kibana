@@ -17,6 +17,7 @@ import {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  getKqlFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -271,6 +272,92 @@ describe('esql query helpers', () => {
         'field',
         'fieldb',
       ]);
+    });
+  });
+
+  describe('getKqlFromESQLQuery', () => {
+    function expectKql(kql: string, ...clauses: string[]) {
+      const query = [`FROM * `, ...clauses.map((clause) => `WHERE ${clause}`)].join('\n\t| ');
+      expect(getKqlFromESQLQuery(query)).toEqual(kql);
+    }
+
+    it('extracts simple eq/neq etc conditions', () => {
+      expectKql(`(agent.name:"foo")`, `agent.name == "foo"`);
+      expectKql(`(NOT (agent.name:"foo"))`, `agent.name != "foo"`);
+    });
+
+    it('handles and groupings correctly', () => {
+      expectKql(
+        `((agent.name:"java") AND (service.name:"opbeans-go"))`,
+        `agent.name == "java" AND service.name == "opbeans-go"`
+      );
+
+      expectKql(
+        `(agent.name:"java") AND (service.name:"opbeans-go")`,
+        `agent.name == "java"`,
+        `service.name == "opbeans-go"`
+      );
+    });
+
+    it('handles or groupings correctly', () => {
+      expectKql(
+        `((agent.name:"java") OR (service.name:"opbeans-go"))`,
+        `agent.name == "java" OR service.name == "opbeans-go"`
+      );
+    });
+
+    it('handles mixed groupings correctly', () => {
+      expectKql(
+        `(((agent.name:"java") AND (service.name:"opbeans-go")) OR (service.name:"opbeans-java"))`,
+        `agent.name == "java" AND service.name == "opbeans-go" OR service.name == "opbeans-java"`
+      );
+    });
+
+    it('ignores mathematical expressions', () => {
+      expectKql('', 'transaction.duration.us - 1000 > 0');
+    });
+
+    it('ignores OR groups where not everything can be extracted', () => {
+      expectKql('', 'agent.name == "foo" OR transaction.duration - 1000 > 0');
+    });
+
+    it('extracts queries for OR groupings if not everything can be extracted', () => {
+      expectKql('((agent.name:"foo"))', 'agent.name == "foo" AND transaction.duration - 1000 > 0');
+    });
+
+    it('handles is not null', () => {
+      expectKql('(agent.name:*)', 'agent.name IS NOT NULL');
+    });
+
+    it('handles is null', () => {
+      expectKql('(NOT (agent.name:*))', 'agent.name IS NULL');
+    });
+
+    it('handles not', () => {
+      expectKql('(NOT (agent.name:"foo"))', 'NOT agent.name == "foo"');
+    });
+
+    it('handles ranges', () => {
+      expectKql(
+        `((transaction.duration.us <= 10000) AND (transaction.duration.us > 0))`,
+        `transaction.duration.us <= 10000 AND transaction.duration.us > 0`
+      );
+    });
+
+    it('handles in', () => {
+      expectKql(
+        `(agent.name:("opbeans-java" OR "opbeans-go"))`,
+        `agent.name IN ("opbeans-java", "opbeans-go")`
+      );
+    });
+
+    it('handles complex queries', () => {
+      expectKql(
+        `(agent.name:"java") AND ((service.name:*) AND (NOT (service.name:"opbeans-java"))) AND (transaction.duration.us >= 10000)`,
+        `agent.name == "java"`,
+        `service.name IS NOT NULL AND NOT service.name == "opbeans-java"`,
+        `transaction.duration.us >= 10000`
+      );
     });
   });
 });
