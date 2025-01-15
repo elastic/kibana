@@ -56,6 +56,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
     const [celConfig, setCelConfig] = useState<CelInput | undefined>(undefined);
 
     const [showValidation, setShowValidation] = useState<boolean>(false);
+    const [needsGeneration, setNeedsGeneration] = useState<boolean>(true);
     const [isValid, setIsValid] = useState<boolean>(false);
 
     const [isUploadStepExpanded, setIsUploadStepExpanded] = useState<boolean>(true);
@@ -84,7 +85,9 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
     const onAnalyzeApiGenerationComplete = useCallback(
       (paths: string[]) => {
         setSuggestedPaths(paths);
+        // reset validation and show next step
         setShowValidation(false);
+        setNeedsGeneration(true);
         setIsUploadStepExpanded(false);
         setIsConfirmStepExpanded(true);
       },
@@ -111,6 +114,10 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
 
     const onShowValidation = useCallback(() => {
       setShowValidation(true);
+    }, []);
+
+    const onUpdateNeedsGeneration = useCallback((updatedNeedsGeneration: boolean) => {
+      setNeedsGeneration(updatedNeedsGeneration);
     }, []);
 
     return (
@@ -153,6 +160,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                   showValidation={showValidation}
                   onShowValidation={onShowValidation}
                   onUpdateValidation={onUpdateValidation}
+                  onUpdateNeedsGeneration={onUpdateNeedsGeneration}
                   onAnalyzeApiGenerationComplete={onAnalyzeApiGenerationComplete}
                 />
               </EuiAccordion>
@@ -192,10 +200,11 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                       integrationSettings={integrationSettings}
                       connector={connector}
                       isFlyoutGenerating={isFlyoutGenerating}
+                      suggestedPaths={suggestedPaths}
                       showValidation={showValidation}
                       onShowValidation={onShowValidation}
                       onUpdateValidation={onUpdateValidation}
-                      suggestedPaths={suggestedPaths}
+                      onUpdateNeedsGeneration={onUpdateNeedsGeneration}
                       onCelInputGenerationComplete={onCelInputGenerationComplete}
                     />
                   </>
@@ -209,6 +218,10 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
             isFlyoutGenerating={isFlyoutGenerating}
             isValid={!showValidation || (isValid && completedCelGeneration)}
             isGenerationComplete={completedCelGeneration}
+            showNeedsGeneration={showValidation && needsGeneration}
+            needsGenerationHint={
+              isAnalyzeApiGenerationComplete ? i18n.GENERATE_BUTTON_HINT : i18n.ANALYZE_BUTTON_HINT
+            }
             onCancel={onCancel}
             onSave={onSaveConfig}
           />

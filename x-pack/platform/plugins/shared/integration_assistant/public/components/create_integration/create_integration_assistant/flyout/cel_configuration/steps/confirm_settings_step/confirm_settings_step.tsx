@@ -56,6 +56,7 @@ interface ConfirmSettingsStepProps {
   showValidation: boolean;
   onShowValidation: () => void;
   onUpdateValidation: (updatedIsValid: boolean) => void;
+  onUpdateNeedsGeneration: (updatedNeedsGeneration: boolean) => void;
   onCelInputGenerationComplete: (path: string, auth: CelAuthType, celInputResult: CelInput) => void;
 }
 
@@ -68,6 +69,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     showValidation,
     onShowValidation,
     onUpdateValidation,
+    onUpdateNeedsGeneration,
     onCelInputGenerationComplete,
   }) => {
     const { setIsFlyoutGenerating } = useActions();
@@ -182,6 +184,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       }
 
       setError(null);
+      onUpdateNeedsGeneration(false);
 
       const generationStartedAt = Date.now();
       const abortController = new AbortController();
@@ -276,22 +279,25 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
         abortController.abort();
       };
     }, [
-      fieldValidationErrors,
+      fieldValidationErrors.path,
+      fieldValidationErrors.auth,
       http,
       connector,
       integrationSettings,
       notifications?.toasts,
       coalescedSelectedPath,
       selectedAuth,
+      onUpdateNeedsGeneration,
+      onShowValidation,
       setIsFlyoutGenerating,
       reportCelGenerationComplete,
       onCelInputGenerationComplete,
-      onShowValidation,
     ]);
 
     const onCancel = useCallback(() => {
       setIsFlyoutGenerating(false); // aborts generation
-    }, [setIsFlyoutGenerating]);
+      onUpdateNeedsGeneration(true);
+    }, [onUpdateNeedsGeneration, setIsFlyoutGenerating]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">

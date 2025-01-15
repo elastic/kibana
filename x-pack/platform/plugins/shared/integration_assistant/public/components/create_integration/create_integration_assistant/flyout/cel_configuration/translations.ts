@@ -41,6 +41,18 @@ export const SAVE_CONFIG = i18n.translate(
 export const CANCEL = i18n.translate('xpack.integrationAssistant.celFlyout.footer.cancel', {
   defaultMessage: 'Cancel',
 });
+export const ANALYZE_BUTTON_HINT = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.footer.analyzeHint',
+  {
+    defaultMessage: 'Analyze your OpenAPI spec file before saving',
+  }
+);
+export const GENERATE_BUTTON_HINT = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.footer.generateHint',
+  {
+    defaultMessage: 'Generate your CEL input configuration before saving',
+  }
+);
 
 /**
  * generation error

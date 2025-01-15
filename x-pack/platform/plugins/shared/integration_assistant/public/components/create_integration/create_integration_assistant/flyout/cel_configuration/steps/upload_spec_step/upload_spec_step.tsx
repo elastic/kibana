@@ -36,6 +36,7 @@ interface UploadSpecStepProps {
   showValidation: boolean;
   onShowValidation: () => void;
   onUpdateValidation: (updatedIsValid: boolean) => void;
+  onUpdateNeedsGeneration: (updatedNeedsGeneration: boolean) => void;
   onAnalyzeApiGenerationComplete: (paths: string[]) => void;
 }
 
@@ -47,6 +48,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
     showValidation,
     onShowValidation,
     onUpdateValidation,
+    onUpdateNeedsGeneration,
     onAnalyzeApiGenerationComplete,
   }) => {
     const { setIntegrationSettings, setIsFlyoutGenerating } = useActions();
@@ -101,6 +103,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
       }
 
       setError(null);
+      onUpdateNeedsGeneration(false);
 
       const abortController = new AbortController();
       const deps = { http, abortSignal: abortController.signal };
@@ -138,11 +141,13 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
         abortController.abort();
       };
     }, [
-      fieldValidationErrors,
+      fieldValidationErrors.title,
+      fieldValidationErrors.specFile,
       http,
       connector,
       integrationSettings,
       notifications?.toasts,
+      onUpdateNeedsGeneration,
       onShowValidation,
       setIsFlyoutGenerating,
       dataStreamTitle,
@@ -151,7 +156,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
 
     const onCancel = useCallback(() => {
       setIsFlyoutGenerating(false); // aborts generation
-    }, [setIsFlyoutGenerating]);
+      onUpdateNeedsGeneration(true);
+    }, [onUpdateNeedsGeneration, setIsFlyoutGenerating]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="uploadSpecStep">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { type State } from '../../state';
 import * as i18n from './translations';
@@ -14,14 +14,24 @@ interface FooterProps {
   isFlyoutGenerating: State['isFlyoutGenerating'];
   isValid: boolean;
   isGenerationComplete: boolean;
+  showNeedsGeneration: boolean;
+  needsGenerationHint: string;
   onCancel: () => void;
   onSave: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ isFlyoutGenerating, isValid, isGenerationComplete, onSave, onCancel }) => {
+  ({
+    isFlyoutGenerating,
+    isValid,
+    isGenerationComplete,
+    showNeedsGeneration,
+    needsGenerationHint,
+    onSave,
+    onCancel,
+  }) => {
     return (
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             onClick={onCancel}
@@ -31,7 +41,8 @@ export const Footer = React.memo<FooterProps>(
             {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          {showNeedsGeneration && <EuiText size="s">{needsGenerationHint}</EuiText>}
           <EuiButton
             fill={isGenerationComplete ? true : false}
             color="primary"
@@ -41,7 +52,7 @@ export const Footer = React.memo<FooterProps>(
           >
             {i18n.SAVE_CONFIG}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     );
   }
