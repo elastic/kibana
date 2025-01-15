@@ -61,7 +61,7 @@ export const OtelKubernetesPanel: React.FC = () => {
     ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
-  --from-literal=elastic_endpoint='http://host.docker.internal:9200' \\
+  --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
