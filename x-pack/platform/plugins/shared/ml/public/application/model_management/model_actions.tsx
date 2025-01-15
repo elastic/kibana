@@ -276,6 +276,22 @@ export function useModelActions({
                   })
                 );
               },
+              next: () => {
+                displaySuccessToast({
+                  title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
+                    defaultMessage: 'Deployment started',
+                  }),
+                  text: i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startSuccessDescription',
+                    {
+                      defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
+                      values: {
+                        modelId: item.model_id,
+                      },
+                    }
+                  ),
+                });
+              },
             });
         },
       },
