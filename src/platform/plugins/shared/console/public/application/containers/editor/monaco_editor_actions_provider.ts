@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isQuotaExceededError } from '../../../services/history';
-import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
 import { Actions } from '../../stores/request';
@@ -835,6 +835,6 @@ export class MonacoEditorActionsProvider {
     if (requests.length < 1) {
       return false;
     }
-    return requests.some((request) => request.url.startsWith('kbn:'));
+    return requests.some((request) => request.url.startsWith(KIBANA_API_PREFIX));
   }
 }
