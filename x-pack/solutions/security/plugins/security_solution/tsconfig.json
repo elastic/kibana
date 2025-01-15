@@ -233,6 +233,7 @@
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/security-solution-plugin"
   ]
 }
