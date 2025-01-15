@@ -9,6 +9,13 @@ date: 2023-10-03
 
 ## Description
 
+This package exports `KibanaErrorBoundary` and `KibanaSectionErrorBoundary` components.
+
+- `KibanaErrorBoundary` is designed to capture rendering errors by blocking the main part of the UI.
+- `KibanaSectionErrorBoundary` is designed to capture errors at a more granular level.
+
+In general, it's best to use `KibanaErrorBoundary` and block the whole page. If it is acceptable to assume the risk of allowing users to interact with a UI that has an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative, but this must be judged on a case-by-case basis.
+
 ## API
 
 ## EUI Promotion Status
