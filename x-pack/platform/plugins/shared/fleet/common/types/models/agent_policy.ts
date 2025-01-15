@@ -64,9 +64,7 @@ export interface NewAgentPolicy {
       max_dur?: string;
     };
   };
-  fleet_ui?: {
-    required_versions?: AgentTargetVersion[];
-  };
+  required_versions?: AgentTargetVersion[];
 }
 
 export interface AgentTargetVersion {

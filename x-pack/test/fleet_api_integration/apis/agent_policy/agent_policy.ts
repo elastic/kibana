@@ -1560,14 +1560,12 @@ export default function (providerContext: FtrProviderContext) {
             name: originalPolicy.name,
             description: originalPolicy.description,
             namespace: 'default',
-            fleet_ui: {
-              required_versions: [
-                {
-                  version: '9.0.0',
-                  percentage: 10,
-                },
-              ],
-            },
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 10,
+              },
+            ],
           })
           .expect(200);
 
@@ -1587,14 +1585,12 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: [],
-          fleet_ui: {
-            required_versions: [
-              {
-                version: '9.0.0',
-                percentage: 10,
-              },
-            ],
-          },
+          required_versions: [
+            {
+              version: '9.0.0',
+              percentage: 10,
+            },
+          ],
         });
       });
 
@@ -1619,18 +1615,16 @@ export default function (providerContext: FtrProviderContext) {
             name: `Override Test ${Date.now()}`,
             description: 'Updated description',
             namespace: 'default',
-            fleet_ui: {
-              required_versions: [
-                {
-                  version: '9.0.0',
-                  percentage: 50,
-                },
-                {
-                  version: '9.1.0',
-                  percentage: 60,
-                },
-              ],
-            },
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 50,
+              },
+              {
+                version: '9.1.0',
+                percentage: 60,
+              },
+            ],
           })
           .expect(400);
       });
