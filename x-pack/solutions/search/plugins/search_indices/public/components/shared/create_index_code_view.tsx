@@ -17,7 +17,7 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { useCreateIndexCodingExamples } from './hooks/use_create_index_coding_examples';
+import { useIndexExampleWorkflow } from './hooks/use_create_index_coding_examples';
 import { LanguageSelector } from './language_selector';
 
 export interface CreateIndexCodeViewProps {
@@ -41,7 +41,11 @@ export const CreateIndexCodeView = ({
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const selectedCodeExamples = useCreateIndexCodingExamples();
+  const {
+    createIndexExamples: selectedCodeExamples,
+    selectedWorkflowId,
+    setSelectedWorkflowId,
+  } = useIndexExampleWorkflow();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -70,6 +74,7 @@ export const CreateIndexCodeView = ({
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}
             onSelectLanguage={changeCodingLanguage}
+            showLabel
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

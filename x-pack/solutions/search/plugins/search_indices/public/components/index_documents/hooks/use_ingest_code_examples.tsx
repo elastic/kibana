@@ -9,5 +9,5 @@ import * as IngestCodeExamples from '../../../code_examples/ingest_data';
 
 export const useIngestCodeExamples = () => {
   // TODO: Choose code examples based on onboarding token, stack vs es3, or project type
-  return IngestCodeExamples.DenseVectorServerlessCodeExamples;
+  return IngestCodeExamples.DenseVectorIngestDataCodeExamples;
 };

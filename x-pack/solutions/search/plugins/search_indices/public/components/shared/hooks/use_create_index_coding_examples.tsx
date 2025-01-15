@@ -5,11 +5,50 @@
  * 2.0.
  */
 
-import { CreateIndexCodeExamples } from '../../../types';
-import { DenseVectorSeverlessCodeExamples } from '../../../code_examples/create_index';
+import { useState } from 'react';
+import {
+  DenseVectorIngestDataCodeExamples,
+  SemanticIngestDataCodeExamples,
+  DefaultIngestDataCodeExamples,
+} from '../../../code_examples/ingest_data';
+import { WorkflowId, workflows } from '../../../code_examples/workflows';
+import {
+  DefaultCodeExamples,
+  DenseVectorCodeExamples,
+  SemanticCodeExamples,
+} from '../../../code_examples/create_index';
 
-export const useCreateIndexCodingExamples = (): CreateIndexCodeExamples => {
+const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
+  switch (type) {
+    case 'vector':
+      return DenseVectorCodeExamples;
+    case 'semantic':
+      return SemanticCodeExamples;
+    default:
+      return DefaultCodeExamples;
+  }
+};
+
+const workflowIdToIngestDataExamples = (type: WorkflowId) => {
+  switch (type) {
+    case 'vector':
+      return DenseVectorIngestDataCodeExamples;
+    case 'semantic':
+      return SemanticIngestDataCodeExamples;
+    default:
+      return DefaultIngestDataCodeExamples;
+  }
+};
+
+export const useIndexExampleWorkflow = () => {
   // TODO: in the future this will be dynamic based on the onboarding token
   // or project sub-type
-  return DenseVectorSeverlessCodeExamples;
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>('semantic');
+  return {
+    selectedWorkflowId,
+    setSelectedWorkflowId,
+    workflow: workflows.find((workflow) => workflow.id === selectedWorkflowId),
+    createIndexExamples: workflowIdToCreateIndexExamples(selectedWorkflowId),
+    ingestExamples: workflowIdToIngestDataExamples(selectedWorkflowId),
+  };
 };

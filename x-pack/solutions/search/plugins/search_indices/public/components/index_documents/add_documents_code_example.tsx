@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { MappingDenseVectorProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { isEqual } from 'lodash';
@@ -16,7 +16,6 @@ import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
 import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
-import { useIngestCodeExamples } from './hooks/use_ingest_code_examples';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AvailableLanguages, LanguageOptions, Languages } from '../../code_examples';
@@ -24,6 +23,8 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
+import { GuideSelector } from '../shared/guide_selector';
+import { useIndexExampleWorkflow } from '../shared/hooks/use_create_index_coding_examples';
 
 export const basicExampleTexts = [
   'Yellowstone National Park',
@@ -42,17 +43,16 @@ export const AddDocumentsCodeExample = ({
   mappingProperties,
 }: AddDocumentsCodeExampleProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
-  const ingestCodeExamples = useIngestCodeExamples();
   const elasticsearchUrl = useElasticsearchUrl();
   const usageTracker = useUsageTracker();
   const indexHasMappings = Object.keys(mappingProperties).length > 0;
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
-  const selectedCodeExamples = ingestCodeExamples[selectedLanguage];
-  const codeSampleMappings = indexHasMappings
-    ? mappingProperties
-    : ingestCodeExamples.defaultMapping;
+  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples, workflow } =
+    useIndexExampleWorkflow();
+  const selectedCodeExamples = ingestExamples[selectedLanguage];
+  const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
     (value: AvailableLanguages) => {
       setSelectedLanguage(value);
@@ -72,11 +72,11 @@ export const AddDocumentsCodeExample = ({
         dims: (codeSampleMappings.vector as MappingDenseVectorProperty)?.dims,
       },
     };
-    const isDefaultMapping = isEqual(copyCodeSampleMappings, ingestCodeExamples.defaultMapping);
+    const isDefaultMapping = isEqual(copyCodeSampleMappings, ingestExamples.defaultMapping);
     const sampleTexts = isDefaultMapping ? basicExampleTexts : exampleTextsWithCustomMapping;
 
     return sampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
-  }, [codeSampleMappings, ingestCodeExamples.defaultMapping]);
+  }, [codeSampleMappings, ingestExamples.defaultMapping]);
   const { apiKey } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
@@ -98,34 +98,56 @@ export const AddDocumentsCodeExample = ({
     >
       <EuiFlexGroup direction="column">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem css={{ maxWidth: '300px' }}>
-            <LanguageSelector
-              options={LanguageOptions}
-              selectedLanguage={selectedLanguage}
-              onSelectLanguage={onSelectLanguage}
+          <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+            <GuideSelector
+              selectedWorkflowId={selectedWorkflowId}
+              onChange={setSelectedWorkflowId}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={
-                !indexHasMappings
-                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                      codeParams
-                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                  : ingestCodeExamples.sense.ingestCommand(codeParams)
-              }
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+                <LanguageSelector
+                  options={LanguageOptions}
+                  selectedLanguage={selectedLanguage}
+                  onSelectLanguage={onSelectLanguage}
+                  showLabel
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TryInConsoleButton
+                  request={
+                    !indexHasMappings
+                      ? `${ingestExamples.sense.updateMappingsCommand(
+                          codeParams
+                        )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                      : ingestExamples.sense.ingestCommand(codeParams)
+                  }
+                  application={application}
+                  sharePlugin={share}
+                  consolePlugin={consolePlugin}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {!!workflow && (
+          <EuiFlexItem>
+            <EuiTitle>
+              <h3>{workflow.title}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>{workflow.summary}</p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
               id="installCodeExample"
-              title={ingestCodeExamples.installTitle}
-              description={ingestCodeExamples.installDescription}
+              title={ingestExamples.installTitle}
+              description={ingestExamples.installDescription}
               language="shell"
               code={selectedCodeExamples.installCommand}
               onCodeCopyClick={() => {
@@ -141,8 +163,8 @@ export const AddDocumentsCodeExample = ({
           <EuiFlexItem>
             <CodeSample
               id="addMappingsCodeExample"
-              title={ingestCodeExamples.addMappingsTitle}
-              description={ingestCodeExamples.addMappingsDescription}
+              title={ingestExamples.addMappingsTitle}
+              description={ingestExamples.addMappingsDescription}
               language={Languages[selectedLanguage].codeBlockLanguage}
               code={selectedCodeExamples.updateMappingsCommand(codeParams)}
               onCodeCopyClick={() => {
