@@ -20,7 +20,8 @@ import {
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
-import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
 import {

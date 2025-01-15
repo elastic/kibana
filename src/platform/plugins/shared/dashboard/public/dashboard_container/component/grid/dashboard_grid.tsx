@@ -15,13 +15,10 @@ import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-} from '../../../dashboard_constants';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 
 export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
